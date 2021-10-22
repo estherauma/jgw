@@ -23,6 +23,6 @@ urlpatterns = [
     # admin site
     path('admin/', admin.site.urls),
 
-    # dashboar
-    path('dashboard', include('dashboard.urls'))
+    # dashboard
+    path('', include('dashboard.urls'))
 ]
