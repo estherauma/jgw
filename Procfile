@@ -1,1 +1,1 @@
-web: gunicorn jgwpandas.wsgi --log-file - 
+web: gunicorn jgwpandas.wsgi --log-file -
