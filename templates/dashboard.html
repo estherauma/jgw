@@ -1,9 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="row">
-    <div class="col">
+    <div class="col-12">
         <div class="card">
-            <canvas id="age">
+            <canvas id="_ages">
+
+            </canvas>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <canvas id="_genders">
 
             </canvas>
         </div>
@@ -16,51 +23,51 @@
 fetch('/analytics/preferences')
 .then(response => response.json())
 .then(response => {
-    console.log(response);
-    const {ages, genders} = response;
-    const labels = [];
-    const data = []
-    Object.entries(ages).forEach((element) => {
-        labels.push(element[0]);
-        data.push(element[1])
-    });
-    
-    const ageCtx = document.getElementById('age').getContext('2d');
-    const age = new Chart(ageCtx, {
-    type: 'bar',
-    data: {
-        labels: labels,
-        datasets: [{
-            label: 'Age',
-            data: data,
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
+    Object.entries(response).forEach((entry) => {
+        const eName = entry[0];
+        const labels = [];
+        const data = []
+        Object.entries(entry[1]).forEach((element) => {
+            labels.push(element[0]);
+            data.push(element[1])
+        })
+        const ctx = document.getElementById("_"+eName).getContext('2d');
+        const age = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: entry[0].toUpperCase(),
+                    data: data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             }
-        }
-    }
-});
-
+        })
+        
+    })
 })
 
 </script>
