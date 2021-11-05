@@ -8,6 +8,9 @@ class Preferences:
     def __init__(self) -> None:
         preferences = api.get_preferences()
         self.df = pd.DataFrame.from_records(preferences)
+        self.genders = self.gender_count()
+        self.ages = self.ages_count()
+        # self.channels = self.channels_count()
 
     
     def get_dataframe(self):
@@ -20,13 +23,18 @@ class Preferences:
         return len(self.df)
 
     def gender_count(self):
-        genders = self.df['gender'].value_counts()
-        return genders
+        return self.df['gender'].value_counts().to_dict()
     
-    def ages(self):
-        ages = self.df['age'].value_counts()
-        return ages
+    def ages_count(self):
+        return self.df['age'].value_counts().to_dict()
     
-    def channels(self):
-        channels = self.df['hearAboutUs'].value_counts()
-        return channels
+    def channels_count(self):
+        return  self.df['hearAboutUs'].value_counts().to_dict()
+
+    def get_data_object(self):
+        data = {
+            'ages': self.ages,
+            # 'channels': self.channels,
+            'genders': self.genders
+        }
+        return data

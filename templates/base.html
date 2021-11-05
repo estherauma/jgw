@@ -32,14 +32,10 @@
 
         <!-- Page Content  -->
         <div id="content" class="p-4 p-md-5 pt-5">
-            <div class="container">
-                <div class="row">
-                    <div class="col">
-                        <div class="card">
-                            <h1>Sample card</h1>
-                        </div>
-                    </div>
-                </div>
+            <div class="container-fluid">
+                    <!-- In the extended pages, start out with columns -->
+                    {% block content %}{% endblock content %}
+                
             </div>
         </div>
     </div>
@@ -47,7 +43,10 @@
     <script src="static/themes/colorlib/js/jquery.min.js"></script>
     <script src="static/themes/colorlib/js/popper.js"></script>
     <script src="static/themes/colorlib/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js" integrity="sha512-GMGzUEevhWh8Tc/njS0bDpwgxdCJLQBWG3Z2Ct+JGOpVnEmjvNx6ts4v6A2XJf1HOrtOsfhv3hBKpK9kE5z8AQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="static/themes/colorlib/js/main.js"></script>
+
+    {% block scripts %}{% endblock scripts %}
 </body>
 
 </html>
