@@ -5,3 +5,7 @@ body {
     font-family: 'Noto Serif Display', serif;
     font-weight: 600;
 }
+
+.row {
+    margin-bottom: 30px;
+}
