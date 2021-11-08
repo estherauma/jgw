@@ -1,4 +1,4 @@
-from django.http import response
+from django.http import response, HttpResponse
 from django.shortcuts import render
 import os
 
@@ -31,6 +31,24 @@ def preferences_stats(request):
     preference = Preferences()
     data = preference.get_data_object()
     return Response(data)
+
+def export_preferences(request):
+    preference = Preferences()
+    results = preference.get_dataframe()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=preferences_export.csv'
+
+    results.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+    return response
+
+def export_inline(request):
+    inline = Inline()
+    results = inline.get_dataframe()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=inline_export.csv'
+
+    results.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+    return response
 
 
 @api_view(('GET',))
