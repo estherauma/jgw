@@ -27,7 +27,7 @@ class JGWApi:
             print('Error fetching preferences')
     
     def get_inline_question_responses(self):
-        url = self.build_url('/api/v2/inline-questions')
+        url = self.build_url('/api/v2/inlinequestions')
         response = self._get(url, {})
         if response.status_code == requests.codes.ok:
             result = response.json()
