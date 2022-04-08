@@ -1,0 +1,9 @@
+<h2>LogIn</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{form.email}}
+    {{form.email.errors}}
+    {{form.password}}
+    {{form.password.errors}}
+    <input type="submit" value="Log In" />
+</form>
