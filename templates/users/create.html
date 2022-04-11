@@ -1,15 +1,42 @@
-<!DOCTYPE html>
-<h2>Register</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{form.email.label}}
-    {{form.email}}
-    {{form.email.errors}}
-    {{form.password1.label}}
-    {{form.password1}}
-    {{form.password1.errors}}
-    {{form.password2.label}}
-    {{form.password2}}
-    {{form.password2.errors}}
-    <input type="submit" value="Create Account">
-</form>
+{% extends "layouts/base.html" %}
+
+<!-- title -->
+{% block title %} New Account {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+<div class="row">
+  <div class="col"></div>
+  <div class="col">
+    <h3 class="text-center">Create user account</h3>
+    <form method="POST" class="d-flex flex-column align-items-center">
+      {% csrf_token %}
+      <div class="mb-3 row">
+        <label for="email" class="col-form-label">{{form.email.label}}</label>
+        {{form.email}}
+        <span>{{form.email.errors}}</span>
+      </div>
+      <div class="mb-3 row">
+        <label for="email" class="col-form-label"
+          >{{form.password1.label}}</label
+        >
+        {{form.password1}}
+        <span>{{form.password1.errors}}</span>
+      </div>
+      <div class="mb-3 row">
+        <label for="email" class="col-form-label"
+          >{{form.password2.label}}</label
+        >
+        {{form.password2}}
+        <span>{{form.password2.errors}}</span>
+      </div>
+      <div class="row mb-3 text-center">
+        <div class="form-group col">
+          <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock content %}

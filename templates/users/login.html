@@ -1,9 +1,40 @@
-<h2>LogIn</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{form.email}}
-    {{form.email.errors}}
-    {{form.password}}
-    {{form.password.errors}}
-    <input type="submit" value="Log In" />
-</form>
+{% extends "layouts/base.html" %}
+
+<!-- title -->
+{% block title %} Log In {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+<div class="row">
+  <div class="col"></div>
+  <div class="col-6">
+    <h3 class="text-center">Log In</h3>
+    <form method="POST" class="d-flex flex-column align-items-center">
+      {% csrf_token %}
+      <div class="mb-3 row">
+        <div class="form-group col">
+          <label for="email" class="col-form-label">
+            {{form.email.label}}
+          </label>
+          {{form.email}}
+          <span>{{form.email.errors}}</span>
+        </div>
+      </div>
+      <div class="mb-3 row">
+        <div class="form-group col">
+          <label for="password" class="col-form-label">
+            {{form.password.label}}
+          </label>
+          {{form.password}}
+          <span>{{form.password.errors}}</span>
+        </div>
+      </div>
+      <div class="mb-3 row text-center">
+        <div class="form-group col">
+          <input type="submit" value="Submit" class="btn btn-primary" />
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock content %}
