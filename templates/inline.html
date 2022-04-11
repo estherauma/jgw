@@ -1,51 +1,52 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
+
+<!-- page content -->
 {% block content %}
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex align-items-center">
-                  <h3 class="mr-auto p-3">In-Line Question Response</h3>
-                  <div class="btn-group" role="group">
-                    <a class="btn btn-primary" href="/inline-questions/export" target="_blank" >Export</a>
-                  </div>
-                </div>
-              </div>
-            <div class="card-body">
-                <h5 id="total-responses">{{response_count}}</h5>
-            </div>
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex align-items-center">
+          <h3 class="mr-auto p-3">In-Line Question Response</h3>
+          <div class="btn-group" role="group">
+            <a
+              class="btn btn-primary"
+              href="/inline-questions/export"
+              target="_blank"
+              >Export</a
+            >
+          </div>
         </div>
+      </div>
+      <div class="card-body">
+        <h5 id="total-responses">{{response_count}}</h5>
+      </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <canvas id="_language">
-
-            </canvas>
-        </div>
-    </div>
-    
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <canvas id="_locale">
-
-            </canvas>
-        </div>
+  <div class="col-12">
+    <div class="card">
+      <canvas id="_language"> </canvas>
     </div>
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <canvas id="_route">
-
-            </canvas>
-        </div>
+  <div class="col-12">
+    <div class="card">
+      <canvas id="_locale"> </canvas>
     </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <canvas id="_route"> </canvas>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
