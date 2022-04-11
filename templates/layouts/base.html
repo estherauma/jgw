@@ -21,19 +21,22 @@
       href='{% static "/themes/colorlib/css/template.css" %}'
     />
     <link rel="stylesheet" href='{% static "/jgwpandas.css" %}' />
+
+    <!-- Specific CSS goes HERE -->
+    {% block stylesheets %}{% endblock stylesheets %}
   </head>
 
-  <body>
-    <div class="wrapper d-flex align-items-stretch">
-      {% if request.user.is_authenticated %}
-        {% include "includes/sidebar.html" %}
-      {% endif %}
-      <div id="content" class="p-4 p-md-5 pt-5">
-        <div class="container-fluid">
-          {% block content %} {% endblock content %}
-        </div>
-      </div>
-    </div>
+  <body class="container-fluid justify-content-center p-1 m-0">
+    {% if request.user.is_authenticated %}
+    <!-- show side bar only for logged-in users -->
+    {% include "includes/sidebar.html" %}
+    <!--  -->
+    {% endif %}
+
+    <!-- page content  -->
+    {% block content %} {% endblock content %}
+
+    <!-- scripts - consider refactoring to include -->
     {% block scripts %} {% load static %}
     <script src='{% static "themes/colorlib/js/jquery.min.js" %}'></script>
     <script src='{% static "themes/colorlib/js/popper.js" %}'></script>
