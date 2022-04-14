@@ -1,93 +1,83 @@
 {% extends "base.html" %}
+
+<!-- page content  -->
 {% block content %}
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex align-items-center">
-                  <h3 class="mr-auto p-3">User Preferences Data</h3>
-                  <div class="btn-group" role="group">
-                    <a class="btn btn-primary" href="/preferences/export" target="_blank" >Export</a>
-                  </div>
-                </div>
-              </div>
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex align-items-center">
+          <h3 class="mr-auto p-3">User Preferences Data</h3>
+          <div class="btn-group" role="group">
+            <a
+              class="btn btn-primary"
+              href="/preferences/export"
+              target="_blank"
+              >Export</a
+            >
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <canvas id="_ages">
-
-            </canvas>
-        </div>
+  <div class="col-12">
+    <div class="card">
+      <canvas id="_ages"> </canvas>
     </div>
-    
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <canvas id="_genders">
-
-            </canvas>
-        </div>
+  <div class="col-12">
+    <div class="card">
+      <canvas id="_genders"> </canvas>
     </div>
+  </div>
 </div>
 {% endblock %}
 
+<!-- ChartJS script  -->
 {% block scripts %}
 <script>
-fetch('/analytics/preferences')
-.then(response => response.json())
-.then(response => {
-    Object.entries(response).forEach((entry) => {
-        const eName = entry[0];
-        const labels = [];
-        const data = []
-        Object.entries(entry[1]).forEach((element) => {
-            labels.push(element[0]);
-            data.push(element[1])
-        })
-        const ctx = document.getElementById("_"+eName).getContext('2d');
-        const age = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: entry[0].toUpperCase(),
-                    data: data,
+  {% for key, values in data.items %}
+    new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
+        type: "bar",
+        data: {
+            labels: {{ values.labels|safe }},
+            datasets: [
+                {
+                    label: "{{ key }}".toUpperCase(),
+                    data: {{ values.data }},
                     backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
+                        "rgba(255, 99, 132, 0.2)",
+                        "rgba(54, 162, 235, 0.2)",
+                        "rgba(255, 206, 86, 0.2)",
+                        "rgba(75, 192, 192, 0.2)",
+                        "rgba(153, 102, 255, 0.2)",
+                        "rgba(255, 159, 64, 0.2)",
                     ],
                     borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
+                        "rgba(255, 99, 132, 1)",
+                        "rgba(54, 162, 235, 1)",
+                        "rgba(255, 206, 86, 1)",
+                        "rgba(75, 192, 192, 1)",
+                        "rgba(153, 102, 255, 1)",
+                        "rgba(255, 159, 64, 1)",
                     ],
-                    borderWidth: 1
-                }]
+                    borderWidth: 1,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
             },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        })
-        
-    })
-})
-
+        },
+    });
+  {% endfor %}
 </script>
-
 {% endblock %}
