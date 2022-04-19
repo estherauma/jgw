@@ -11,8 +11,8 @@ from .models import User
 class AuthTests(TestCase):
     def setUp(self) -> None:
         self.test_email = "test@test.local"
-        self.test_password = "12t32thome"
-        user = User.objects.create_user(self.test_email, self.test_password)
+        self.test_pword = "12t32thome"
+        user = User.objects.create_user(self.test_email, self.test_pword)
         self.test_user = user
         self.client.force_login(user=self.test_user)
 
@@ -23,19 +23,29 @@ class AuthTests(TestCase):
         response = self.client.get(reverse("dashboard:index"))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/?next=/")
+        response = self.client.get(reverse("dashboard:inline_question_stats"))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, "/accounts/login/?next=/inline-questions")
 
-    def test_account_creation(self):
+    def test_account_creation_and_login(self):
         """
-        Test account creation and sign up form validation
+        Test sign up and login, form validation
         """
+        # test create user and login user
         response = self.client.post(
             reverse("users:create_user"),
-            {"email": "test2@test.local", "password1": self.test_password, "password2": self.test_password},
+            {"email": "test2@test.local", "password1": self.test_pword, "password2": self.test_pword},
         )
+        # redirects to login if signup ok.
         self.assertRedirects(response, reverse("users:login_user"))
         response = self.client.post(
+            reverse("users:login_user"), {"email": "test2@test.local", "password1": self.test_pword}
+        )
+        self.assertEqual(response.status_code, 200)
+        # test form validation and errors
+        response = self.client.post(
             reverse("users:create_user"),
-            {"email": "test2@test.local", "password1": self.test_password, "password2": ""},
+            {"email": "test2@test.local", "password1": self.test_pword, "password2": ""},
         )
         self.assertIsNotNone(response.context["form"].errors)
         self.assertTrue(isinstance(response.context["form"].errors, ErrorDict))
