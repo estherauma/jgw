@@ -19,13 +19,13 @@ def form_chart_data(data: Dict) -> Dict:
     }
 
 
-def index(request):
+def preferences_stats(request):
     _data = Preferences().get_data_object()
     chart_data = form_chart_data(_data)
     return render(request, "dashboard.html", context={"data": chart_data})
 
 
-def inline(request):
+def inline_question_stats(request):
     response_count, _data = itemgetter("totalResponses", "data")(
         Inline().get_data_object()
     )

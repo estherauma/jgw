@@ -3,8 +3,8 @@ from . import views
 
 urlpatterns = [
     # Views
-    path('', views.index ),
-    path('inline-questions', views.inline),
+    path('', views.preferences_stats ),
+    path('inline-questions', views.inline_question_stats),
     path('inline-questions/export', views.export_inline),
     path('preferences/export', views.export_preferences),
     # Data for Display
