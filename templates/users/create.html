@@ -5,19 +5,17 @@
 
 <!-- stylesheets -->
 {% block stylesheets %} {% load static %}
-<style>
-  #stock {
-    background-image: url("{% static 'stock-bg.jpg' %}");
-  }
-</style>
+
 {% endblock stylesheets %}
 
 <!-- page content -->
 {% block content %}
 <div class="row justify-content-center m-0">
-  <div class="col-6 mx-1" id="stock"></div>
-  <div class="col-4 mx-1">
-    <h3 class="text-center">Create New Account</h3>
+  <div class="col-4 mx-1" id="stock"></div>
+  <div class="col-5 mx-1">
+    <div class="card mt-5">
+      <div class="card-body">
+        <h3 class="text-center">Create New Account</h3>
     <form method="POST" class="d-flex flex-column align-items-center">
       {% csrf_token %}
       <div class="mb-3 form-group col">
@@ -47,6 +45,8 @@
       <a class="text-center" href="{% url 'users:login_user' %}">
         Already have an account? Log In.
       </a>
+    </div>
+      </div>
     </div>
   </div>
 </div>
