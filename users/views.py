@@ -30,7 +30,8 @@ def create_user_account(request):
             form.save(commit=True)
             messages.info(request, "Your account was created and will be activated shortly.")
             return redirect("users:login_user")
-        messages.error(request, "Error validating form!")
+        else:
+            messages.error(request, "Error validating form!")
     return render(request, "users/create.html", context={"form": form})
 
 
@@ -48,5 +49,6 @@ def login_user(request):
                 return redirect("dashboard:index")
             else:
                 messages.error(request, "Can not log in with provided credentials!")
-        messages.error(request, "Error validating form!")
+        else:
+            messages.error(request, "Error validating form!")
     return render(request, "users/login.html", {"form": form})

@@ -9,7 +9,6 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 
-@login_required()
 def form_chart_data(data: Dict) -> Dict:
     """
     reshapes data to shape expected by chart library
