@@ -1,0 +1,55 @@
+{% extends "layouts/base.html" %}
+
+<!-- title -->
+{% block title %} Log In {% endblock title %}
+
+<!-- stylesheets -->
+{% block stylesheets %} {% endblock stylesheets %}
+
+<!-- page content -->
+{% block content %}
+
+<div class="row h-75 justify-content-center align-items-center mt-5">
+  <div class="card">
+    <!-- messages -->
+    {% if messages %} {% for message in messages %}
+
+    <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">
+      {{ message }}
+    </p>
+    {% endfor %} {% endif %}
+    <div class="card-body">
+      <div class="card-header">
+        <div class="d-flex align-items-center">
+          <h4 class="mr-auto p-3">JGW Pandas - Log In</h4>
+        </div>
+      </div>
+      <form method="POST" class="d-flex flex-column align-items-center">
+        {% csrf_token %}
+        <div class="mb-3 form-group col">
+          <label for="email" class="col-form-label">
+            {{form.email.label}}
+          </label>
+          {{form.email}}
+          <span>{{form.email.errors}}</span>
+        </div>
+        <div class="mb-3 form-group col">
+          <label for="password" class="col-form-label">
+            {{form.password.label}}
+          </label>
+          {{form.password}}
+          <span>{{form.password.errors}}</span>
+        </div>
+        <div class="mb-3 form-group col text-center">
+          <input type="submit" value="Submit" class="btn btn-primary" />
+        </div>
+      </form>
+      <p class="text-center">
+        <a href="{% url 'users:create_user' %}">
+          New here? Create a user account.
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock content %}
