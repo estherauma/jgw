@@ -1,0 +1,61 @@
+{% extends "layouts/base.html" %}
+
+<!-- title -->
+{% block title %} New Account {% endblock title %}
+
+<!-- stylesheets -->
+{% block stylesheets %} {% endblock stylesheets %}
+
+<!-- page content -->
+{% block content %}
+<div class="row h-75 justify-content-center align-items-center mt-5">
+  <div class="card">
+    <!-- messages -->
+    {% if messages %} {% for message in messages %}
+    <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">
+      {{ message }}
+    </p>
+    {% endfor %} {% endif %}
+    <div class="card-body">
+      <div class="card-header">
+        <div class="d-flex align-items-center">
+          <h4 class="mr-auto p-3">JGW Pandas - Create Account</h4>
+        </div>
+      </div>
+      <form method="POST" class="d-flex flex-column align-items-center">
+        {% csrf_token %}
+        <div class="mb-3 form-group col">
+          <label for="email" class="col-form-label">
+            {{form.email.label}}
+          </label>
+          {{form.email}}
+          <span>{{form.email.errors}}</span>
+        </div>
+        <div class="mb-3 form-group col">
+          <label for="email" class="col-form-label">
+            {{form.password1.label}}
+          </label>
+          {{form.password1}}
+          <span>{{form.password1.errors}}</span>
+        </div>
+        <div class="mb-3 form-group col">
+          <label for="email" class="col-form-label">
+            {{form.password2.label}}
+          </label>
+          {{form.password2}}
+          <span>{{form.password2.errors}}</span>
+        </div>
+        <div class="mb-3 d-flex justify-content-center form-group col">
+          <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
+      </form>
+      <p class="text-center">
+        <a href="{% url 'users:login_user' %}">
+          Already have an account? Log In.
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

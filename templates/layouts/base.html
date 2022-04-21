@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{% block title %} {% endblock %} | JGW Data Dashboards</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    {% load static %}
+    <link
+      rel="stylesheet"
+      href='{% static "/themes/colorlib/css/template.css" %}'
+    />
+    <link rel="stylesheet" href='{% static "/jgwpandas.css" %}' />
+
+    <!-- Specific CSS goes HERE -->
+    {% block stylesheets %}{% endblock stylesheets %}
+  </head>
+
+  <body>
+    <div class="wrapper d-flex align-items-stretch" style="min-height: 100vh">
+      {% if request.user.is_authenticated %}
+      <!-- show side bar only for logged-in users -->
+      {% include "includes/sidebar.html" %}
+      <!--  -->
+      {% endif %}
+
+      <!-- page content  -->
+      <div class="container-fluid p-1 m-0">
+        {% block content %} {% endblock content %}
+      </div>
+    </div>
+
+    <script src='{% static "themes/colorlib/js/jquery.min.js" %}'></script>
+    <script src='{% static "themes/colorlib/js/popper.js" %}'></script>
+    <script src='{% static "themes/colorlib/js/bootstrap.min.js" %}'></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"
+      integrity="sha512-GMGzUEevhWh8Tc/njS0bDpwgxdCJLQBWG3Z2Ct+JGOpVnEmjvNx6ts4v6A2XJf1HOrtOsfhv3hBKpK9kE5z8AQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src='{% static "themes/colorlib/js/main.js" %}'></script>
+    {% block scripts %}{% endblock scripts %}
+  </body>
+</html>
