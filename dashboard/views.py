@@ -6,7 +6,11 @@ from common.preferences import Preferences
 from common.retrievedata import JGWApi
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils.http import urlencode
+
+from .forms import FilterForm
 
 
 def form_chart_data(data: Dict) -> Dict:
@@ -18,15 +22,27 @@ def form_chart_data(data: Dict) -> Dict:
 
 @login_required()
 def preferences_stats(request):
+    if request.method == "POST":
+        form = FilterForm(request.POST)
+        if form.is_valid():
+            return redirect(reverse("dashboard:index") + "?" + urlencode(form.cleaned_data))
+
+    form = FilterForm()
     filters = None or request.GET
     pref = Preferences()
     _data = pref.get_stats_object(filters=filters)
     chart_data = form_chart_data(_data)
-    return render(request, "dashboard.html", context={"data": chart_data})
+    return render(request, "dashboard.html", context={"data": chart_data, "form": form})
 
 
 @login_required()
 def inline_question_stats(request):
+    if request.method == "POST":
+        form = FilterForm(request.POST)
+        if form.is_valid():
+            return redirect(reverse("dashboard:inline_question_stats") + "?" + urlencode(form.cleaned_data))
+
+    form = FilterForm()
     filters = None or request.GET
     inline_responses = Inline()
     _data = inline_responses.get_stats_object(filters=filters)
@@ -36,7 +52,7 @@ def inline_question_stats(request):
     return render(
         request,
         "inline.html",
-        context={"data": chart_data, "response_count": response_count},
+        context={"data": chart_data, "form": form, "response_count": response_count},
     )
 
 
