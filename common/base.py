@@ -33,3 +33,7 @@ class BaseAnalytics:
                 if filter is not None:
                     _df = filter(value, _df)
         return _df
+    
+    def get_count(self, field: str, df=None):
+        _df = df.copy() if df is not None else self.df.copy()
+        return _df[field].value_counts().to_dict()

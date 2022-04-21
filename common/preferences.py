@@ -1,40 +1,24 @@
-import time
-import pandas as pd
-import numpy as np
-from common.retrievedata import JGWApi
-api = JGWApi()
+from typing import Dict
 
-class Preferences:
+import pandas as pd
+
+from common.base import BaseAnalytics
+from common.retrievedata import JGWApi
+
+api = JGWApi()
+FilterList = Dict[str, list[str]]
+
+
+class Preferences(BaseAnalytics):
     def __init__(self) -> None:
         preferences = api.get_preferences()
         self.df = pd.DataFrame.from_records(preferences)
-        self.genders = self.gender_count()
-        self.ages = self.ages_count()
-        # self.channels = self.channels_count()
+        self.export_csv_name = "preferences.csv"
 
-    
-    def get_dataframe(self):
-        return self.df
-    
-    def get_columns(self):
-        return list(self.df.columns)
-
-    def total_preferences(self):
-        return len(self.df)
-
-    def gender_count(self):
-        return self.df['gender'].value_counts().to_dict()
-    
-    def ages_count(self):
-        return self.df['age'].value_counts().to_dict()
-    
-    def channels_count(self):
-        return  self.df['hearAboutUs'].value_counts().to_dict()
-
-    def get_data_object(self):
-        data = {
-            'ages': self.ages,
-            # 'channels': self.channels,
-            'genders': self.genders
-        }
-        return data
+    def get_stats_object(
+        self, fields: list[str] = None, filters: FilterList = None, df=None
+    ):
+        return_fields = fields or ["age", "gender"]
+        _df = df.copy() if df is not None else self.filter_data(filters)
+        _stats = {field: self.get_count(field, _df) for field in return_fields}
+        return _stats
