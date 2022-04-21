@@ -18,14 +18,19 @@ def form_chart_data(data: Dict) -> Dict:
 
 @login_required()
 def preferences_stats(request):
-    _data = Preferences().get_data_object()
+    filters = None or request.GET
+    pref = Preferences()
+    _data = pref.get_stats_object(filters=filters)
     chart_data = form_chart_data(_data)
     return render(request, "dashboard.html", context={"data": chart_data})
 
 
 @login_required()
 def inline_question_stats(request):
-    response_count, _data = itemgetter("totalResponses", "data")(Inline().get_data_object())
+    filters = None or request.GET
+    inline_responses = Inline()
+    _data = inline_responses.get_stats_object(filters=filters)
+    response_count, _data = itemgetter("response_count", "data")(_data)
     chart_data = form_chart_data(_data)
 
     return render(
