@@ -15,12 +15,12 @@
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
     />
-    {% load static %}
+  
     <link
       rel="stylesheet"
-      href='{% static "/themes/colorlib/css/template.css" %}'
+      href='static/themes/colorlib/css/template.css'
     />
-    <link rel="stylesheet" href='{% static "/jgwpandas.css" %}' />
+    <link rel="stylesheet" href='static/jgwpandas.css' />
 
     <!-- Specific CSS goes HERE -->
     {% block stylesheets %}{% endblock stylesheets %}
@@ -40,16 +40,16 @@
       </div>
     </div>
 
-    <script src='{% static "themes/colorlib/js/jquery.min.js" %}'></script>
-    <script src='{% static "themes/colorlib/js/popper.js" %}'></script>
-    <script src='{% static "themes/colorlib/js/bootstrap.min.js" %}'></script>
+    <script src='/static/themes/colorlib/js/jquery.min.js'></script>
+    <script src='/static/themes/colorlib/js/popper.js'></script>
+    <script src='/static/themes/colorlib/js/bootstrap.min.js'></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"
       integrity="sha512-GMGzUEevhWh8Tc/njS0bDpwgxdCJLQBWG3Z2Ct+JGOpVnEmjvNx6ts4v6A2XJf1HOrtOsfhv3hBKpK9kE5z8AQ=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <script src='{% static "themes/colorlib/js/main.js" %}'></script>
+    <script src='/static/themes/colorlib/js/main.js'></script>
     {% block scripts %}{% endblock scripts %}
   </body>
 </html>
