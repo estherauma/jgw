@@ -4,6 +4,7 @@ from typing import Dict
 from common.inline import Inline
 from common.preferences import Preferences
 from common.retrievedata import JGWApi
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -34,6 +35,8 @@ def preferences_stats(request):
     pref = Preferences()
     _data = pref.get_stats_object(filters=filters)
     chart_data = form_chart_data(_data)
+    if not any(bool(i) for i in _data.values()):
+        messages.error(request, "No data matches this search!")
     return render(request, "dashboard.html", context={"data": chart_data, "form": form})
 
 
@@ -52,6 +55,8 @@ def inline_question_stats(request):
     _data = inline_responses.get_stats_object(filters=filters)
     response_count, _data = itemgetter("response_count", "data")(_data)
     chart_data = form_chart_data(_data)
+    if not any(bool(i) for i in _data.values()):
+        messages.error(request, "No data matches this search!")
 
     return render(
         request,
