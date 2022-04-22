@@ -13,4 +13,5 @@ class FilterForm(forms.Form):
     )
 
     def clean_destination(self):
+        # convert from string enclosed list to list literal
         return ast.literal_eval(self.cleaned_data["destination"])

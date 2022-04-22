@@ -25,7 +25,9 @@ def preferences_stats(request):
     if request.method == "POST":
         form = FilterForm(request.POST)
         if form.is_valid():
-            return redirect(reverse("dashboard:index") + "?" + urlencode(form.cleaned_data))
+            filters = form.cleaned_data.copy()
+            filters["destination"] = ",".join(filters["destination"])
+            return redirect(reverse("dashboard:index") + "?" + urlencode(filters))
 
     form = FilterForm()
     filters = None or request.GET
@@ -40,7 +42,9 @@ def inline_question_stats(request):
     if request.method == "POST":
         form = FilterForm(request.POST)
         if form.is_valid():
-            return redirect(reverse("dashboard:inline_question_stats") + "?" + urlencode(form.cleaned_data))
+            filters = form.cleaned_data.copy()
+            filters["destination"] = ",".join(filters["destination"])
+            return redirect(reverse("dashboard:inline_question_stats") + "?" + urlencode(filters))
 
     form = FilterForm()
     filters = None or request.GET
