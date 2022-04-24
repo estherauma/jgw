@@ -27,11 +27,11 @@ def preferences_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            filters["destination"] = ",".join(filters["destination"])
+            # filters["destination"] = ",".join(filters["destination"])
             return redirect(reverse("dashboard:index") + "?" + urlencode(filters))
 
-    form = FilterForm()
     filters = None or request.GET
+    form = FilterForm(initial=filters)
     pref = Preferences()
     _data = pref.get_stats_object(filters=filters)
     chart_data = form_chart_data(_data)
@@ -46,11 +46,11 @@ def inline_question_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            filters["destination"] = ",".join(filters["destination"])
+            # filters["destination"] = ",".join(filters["destination"])
             return redirect(reverse("dashboard:inline_question_stats") + "?" + urlencode(filters))
 
-    form = FilterForm()
     filters = None or request.GET
+    form = FilterForm(initial=filters)
     inline_responses = Inline()
     _data = inline_responses.get_stats_object(filters=filters)
     response_count, _data = itemgetter("response_count", "data")(_data)

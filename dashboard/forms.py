@@ -3,15 +3,15 @@ import ast
 from django import forms
 from pytz import country_names
 
+DEST_COUNTRIES = {"": "Select a country"}
+DEST_COUNTRIES.update({k: country_names[k] for k in ("MY", "QA", "SA", "AE", "GB")})
+
 
 class FilterForm(forms.Form):
-    destination = forms.CharField(
-        required=False,
-        widget=forms.SelectMultiple(
-            choices=country_names.items(), attrs={"class": "form-select", "size": "3"}
-        ),
+    destination = forms.ChoiceField(
+        choices=DEST_COUNTRIES.items(), required=False, widget=forms.Select(attrs={"class": "form-select mx-2"})
     )
 
-    def clean_destination(self):
-        # convert from string enclosed list to list literal
-        return ast.literal_eval(self.cleaned_data["destination"])
+    # def clean_destination(self):
+    #     # convert from string enclosed list to list literal when using SelectMultiple
+    #     return ast.literal_eval(self.cleaned_data["destination"])

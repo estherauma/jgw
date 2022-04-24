@@ -23,7 +23,9 @@ class BaseAnalytics:
 
     def filter_by_destination(self, destination: list[str], df=None):
         _df = df if df is not None else self.get_dataframe()
-        destination = [country_names.get(i).lower() for i in destination.split(",")]
+        destination = destination.split(",")
+        destination = [i for i in destination if bool(i)]
+        destination = [country_names.get(i).lower() for i in destination]
         _routes = _df["route"].astype("str").str.lower()
         mask = _routes.str.endswith(tuple(destination))
         return _df.loc[mask]
