@@ -1,47 +1,27 @@
-import time
+from typing import Dict
+
 import pandas as pd
-import numpy as np
+
 from common.base import BaseAnalytics
 from common.retrievedata import JGWApi
+
 api = JGWApi()
+FilterList = Dict[str, list[str]]
 
 
 class Inline(BaseAnalytics):
     def __init__(self) -> None:
         inline_data = api.get_inline_question_responses()
         self.df = pd.DataFrame.from_records(inline_data)
-        self.route = self.get_route_stats()
-        self.locale = self.get_locale_stats()
-        self.language = self.get_language_stats()
-        self.researched_employer = self.get_researched_employer_stats()
-    
-    def get_dataframe(self):
-        return self.df
-    
-    def export_csv(self):
-        self.df.to_csv('inline-question-response.csv')
-    
-    def get_data_object(self):
-        data = {
-            'totalResponses': self.total_items(),
-            'data': {
-                'route': self.route,
-                'locale': self.locale,
-                'language': self.language,
-            }
-            
-            
+        self.export_csv_name = "inline-responses.csv"
+
+    def get_stats_object(
+        self, fields: list[str] = None, filters: FilterList = None, df=None
+    ):
+        return_fields = fields or ["route", "locale", "language"]
+        _df = df.copy() if df is not None else self.filter_data(filters)
+        _stats = {
+            "data": {field: self.get_count(field, _df) for field in return_fields}
         }
-        return data
-
-    def get_locale_stats(self):
-        return self.df['locale'].value_counts().to_dict()
-
-    def get_route_stats(self):
-        return self.df['route'].value_counts().to_dict()
-
-    def get_language_stats(self):
-        return self.df['language'].value_counts().to_dict()
-
-    def get_researched_employer_stats(self):
-        return self.df['researchedEmployer'].value_counts().to_dict()
+        _stats["response_count"] = len(_df)
+        return _stats

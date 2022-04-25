@@ -4,9 +4,14 @@ from typing import Dict
 from common.inline import Inline
 from common.preferences import Preferences
 from common.retrievedata import JGWApi
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils.http import urlencode
+
+from .forms import FilterForm
 
 
 def form_chart_data(data: Dict) -> Dict:
@@ -18,20 +23,45 @@ def form_chart_data(data: Dict) -> Dict:
 
 @login_required()
 def preferences_stats(request):
-    _data = Preferences().get_data_object()
+    if request.method == "POST":
+        form = FilterForm(request.POST)
+        if form.is_valid():
+            filters = form.cleaned_data.copy()
+            # filters["destination"] = ",".join(filters["destination"])
+            return redirect(reverse("dashboard:index") + "?" + urlencode(filters))
+
+    filters = None or request.GET
+    form = FilterForm(initial=filters)
+    pref = Preferences()
+    _data = pref.get_stats_object(filters=filters)
     chart_data = form_chart_data(_data)
-    return render(request, "dashboard.html", context={"data": chart_data})
+    if not any(bool(i) for i in _data.values()):
+        messages.error(request, "No data matches this search!")
+    return render(request, "dashboard.html", context={"data": chart_data, "form": form})
 
 
 @login_required()
 def inline_question_stats(request):
-    response_count, _data = itemgetter("totalResponses", "data")(Inline().get_data_object())
+    if request.method == "POST":
+        form = FilterForm(request.POST)
+        if form.is_valid():
+            filters = form.cleaned_data.copy()
+            # filters["destination"] = ",".join(filters["destination"])
+            return redirect(reverse("dashboard:inline_question_stats") + "?" + urlencode(filters))
+
+    filters = None or request.GET
+    form = FilterForm(initial=filters)
+    inline_responses = Inline()
+    _data = inline_responses.get_stats_object(filters=filters)
+    response_count, _data = itemgetter("response_count", "data")(_data)
     chart_data = form_chart_data(_data)
+    if not any(bool(i) for i in _data.values()):
+        messages.error(request, "No data matches this search!")
 
     return render(
         request,
         "inline.html",
-        context={"data": chart_data, "response_count": response_count},
+        context={"data": chart_data, "form": form, "response_count": response_count},
     )
 
 

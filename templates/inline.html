@@ -8,22 +8,36 @@
 <div class="row">
   <div class="col-12">
     <div class="card">
-      <div class="card-header">
-        <div class="d-flex align-items-center">
-          <h3 class="mr-auto p-3">In-Line Question Response</h3>
-          <div class="btn-group" role="group">
-            <a
-              class="btn btn-primary"
-              href="/inline-questions/export"
-              target="_blank"
-              >Export</a
-            >
-          </div>
+      <!-- messages -->
+      {% if messages %} {% for message in messages %}
+      <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">
+        {{ message }}
+      </p>
+      {% endfor %} {% endif %}
+      <div class="card-header d-flex align-items-center">
+        <span class="mr-auto p-3">
+          <h3>In-Line Questions</h3>
+          <h5>Total Responses: {{response_count}}</h5>
+        </span>
+        <div class="btn-group">
+          <a
+            class="btn btn-primary"
+            href="/inline-questions/export"
+            target="_blank"
+            >Export</a
+          >
         </div>
       </div>
-      <div class="card-body">
-        <h5 id="total-responses">{{response_count}}</h5>
-      </div>
+      <form class="form-inline p-2" method="POST">
+        {% csrf_token %}
+        <label class="form-label" for="destination">
+          {{form.destination.label}}
+        </label>
+        {{form.destination}} {{form.destination.errors}}
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{% url 'dashboard:inline_question_stats' %}" class="mx-2">Reset</a>
+
+      </form>
     </div>
   </div>
 </div>
