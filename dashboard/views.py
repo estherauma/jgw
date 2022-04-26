@@ -4,7 +4,7 @@ from typing import Dict
 from common.inline import Inline
 from common.messaging import Messaging
 from common.preferences import Preferences
-from common.retrievedata import JGWApi
+from common.retrieve_data import JGWApi
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse

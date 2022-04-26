@@ -3,7 +3,7 @@ from typing import Dict
 import pandas as pd
 
 from common.base import BaseAnalytics
-from common.retrievedata import JGWApi
+from common.retrieve_data import JGWApi
 
 api = JGWApi()
 FilterList = Dict[str, list[str]]
