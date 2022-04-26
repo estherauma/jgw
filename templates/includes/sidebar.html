@@ -8,27 +8,31 @@
   </div>
   <div class="p-4">
     <h1>
-      <a href="/" class="logo">JGW <span>Data Dashboards</span></a>
+      <a href="{% url 'dashboard:index' %}" class="logo">JGW <span>Data Dashboards</span></a>
     </h1>
     <ul class="list-unstyled components mb-5">
       <li class="">
-        <a href="/"><span class="fa fa-home mr-3"></span> Preferences</a>
+        <a href="{% url 'dashboard:index' %}"><span class="fa fa-home mr-3"></span>Preferences</a>
       </li>
       <li class="">
-        <a href="{% url 'dashboard:inline_question_stats' %}"
-          ><span class="fa fa-question-circle mr-3"></span> Inline Questions</a
-        >
+        <a href="{% url 'dashboard:inline_question_stats' %}">
+          <span class="fa fa-question-circle mr-3"></span> Inline Questions
+        </a>
       </li>
       <li class="">
-        <a href="{% url 'users:list_users' %}">
-          <span class="fa fa-users mr-3"></span> User Accounts
+        <a href="{% url 'dashboard:messaging_question_stats' %}">
+          <span class="fa fa-question-circle mr-3"></span> Messaging Questions
+        </a>
+      </li>
+      <li class="">
+        <a href="{% url 'users:list_users' %}"> <span class="fa fa-users mr-3"></span> User Accounts</a>
+      </li>
+      <li class="">
+        <a class="text-white" href="{% url 'users:logout_user' %}">
+          <span class="fa fa-sign-out m-3"></span> Sign Out
         </a>
       </li>
     </ul>
-    <a class="text-white" href="{% url 'users:logout_user' %}">
-      Sign Out
-      <span class="fa fa-sign-out m-3"></span>
-    </a>
   </div>
 </nav>
 {% endblock content %}
