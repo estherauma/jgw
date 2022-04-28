@@ -3,7 +3,7 @@ from typing import Dict
 import pandas as pd
 
 from common.base import BaseAnalytics
-from common.retrievedata import JGWApi
+from common.retrieve_data import JGWApi
 
 api = JGWApi()
 FilterList = Dict[str, list[str]]
@@ -13,7 +13,7 @@ class Inline(BaseAnalytics):
     def __init__(self) -> None:
         inline_data = api.get_inline_question_responses()
         self.df = pd.DataFrame.from_records(inline_data)
-        self.export_csv_name = "inline-responses.csv"
+        self.export_csv_name = "inline_qn_responses.csv"
 
     def get_stats_object(
         self, fields: list[str] = None, filters: FilterList = None, df=None

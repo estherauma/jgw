@@ -2,8 +2,9 @@ from operator import itemgetter
 from typing import Dict
 
 from common.inline import Inline
+from common.messaging import Messaging
 from common.preferences import Preferences
-from common.retrievedata import JGWApi
+from common.retrieve_data import JGWApi
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -63,6 +64,26 @@ def inline_question_stats(request):
         "inline.html",
         context={"data": chart_data, "form": form, "response_count": response_count},
     )
+
+
+@login_required()
+def messaging_question_stats(request):
+    if request.method == "POST":
+        form = FilterForm(request.POST)
+        if form.is_valid():
+            filters = form.cleaned_data.copy()
+            # filters["destination"] = ",".join(filters["destination"])
+            return redirect(reverse("dashboard:messaging_question_stats") + "?" + urlencode(filters))
+
+    filters = None or request.GET
+    form = FilterForm(initial=filters)
+    msg_responses = Messaging()
+    _data = msg_responses.get_stats_object(filters=filters)
+    chart_data = form_chart_data(_data)
+    if not any(bool(i) for i in _data.values()):
+        messages.error(request, "No data matches this search!")
+
+    return render(request, "messaging.html", context={"data": chart_data, "form": form})
 
 
 @login_required()
