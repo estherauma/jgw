@@ -11,7 +11,7 @@ FilterList = Dict[str, list[str]]
 
 class Messaging(BaseAnalytics):
     def __init__(self) -> None:
-        messaging_data = api.get_messaging_question_responses()
+        messaging_data = api.get_data(key="messaging")
         self.df = pd.DataFrame.from_records(messaging_data)
         self.export_csv_name = "messaging_qn_responses.csv"
 

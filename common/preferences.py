@@ -11,7 +11,7 @@ FilterList = Dict[str, list[str]]
 
 class Preferences(BaseAnalytics):
     def __init__(self) -> None:
-        preferences = api.get_preferences()
+        preferences = api.get_data(key='preferences')
         self.df = pd.DataFrame.from_records(preferences)
         self.export_csv_name = "preferences.csv"
 
