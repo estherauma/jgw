@@ -1,5 +1,4 @@
-"""
-    JGW API helpers
+"""JGW API helpers
 """
 import json
 import os
@@ -14,9 +13,9 @@ FILENAMES = {
     "messaging": "messaging-questions.json",
 }
 URLS = {
-    "preferences": "/api/v2/preferences",
-    "inline": "/api/v2/inlinequestions",
-    "messaging": "/api/v2/messaging-questions",
+    "preferences": "/preferences",
+    "inline": "/inlinequestions",
+    "messaging": "/messaging-questions",
 }
 
 
@@ -55,7 +54,6 @@ class JGWApi:
         filename = FILENAMES.get(key)
         with open(filename, "w") as f:
             json.dump(stats, f)
-        
 
     def get_stats_from_file(self, key) -> Dict:
         filename = FILENAMES.get(key)
