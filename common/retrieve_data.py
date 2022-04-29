@@ -40,8 +40,9 @@ class JGWApi:
         if key not in FILENAMES.keys():
             return None
         data = None
-        data = self.get_stats_from_file(key=key)
-        if data is None:
+        try:
+            data = self.get_stats_from_file(key=key)
+        except FileNotFoundError:
             url = f"{self.base_url}{URLS.get(key)}"
             response = self._get(url, {})
             if response and response.status_code == requests.codes.ok:
@@ -54,14 +55,11 @@ class JGWApi:
         filename = FILENAMES.get(key)
         with open(filename, "w") as f:
             json.dump(stats, f)
+        
 
     def get_stats_from_file(self, key) -> Dict:
         filename = FILENAMES.get(key)
         stats = None
-        try:
-            with open(filename, "r") as f:
-                stats = json.load(f)
-        except FileNotFoundError as e:
-            # sentry? logging? throw error to caller?
-            print("File not found!")
+        with open(filename, "r") as f:
+            stats = json.load(f)
         return stats
