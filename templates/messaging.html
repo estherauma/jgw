@@ -12,7 +12,7 @@
       {% if messages %} {% for message in messages %}
       <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
       {% endfor %} {% endif %}
-      
+
       <div class="card-header d-flex align-items-center">
         <span class="mr-auto p-3">
           <h3>Messaging/Spot Questions</h3>
@@ -23,8 +23,12 @@
       </div>
       <form class="form-inline p-2" method="POST">
         {% csrf_token %}
-        <label class="form-label" for="destination"> {{form.destination.label}} </label>
-        {{form.destination}} {{form.destination.errors}}
+        <label class="form-label" for="destination">{{form.destination.label}}</label>
+        {{form.destination}}
+        {{form.destination.errors}}
+        <label class="form-label" for="origin">{{form.origin.label}}</label>
+        {{form.origin}}
+        {{form.origin.errors}}
         <button type="submit" class="btn btn-primary">Filter</button>
         <a href="{% url 'dashboard:messaging_question_stats' %}" class="mx-2">Reset</a>
       </form>
