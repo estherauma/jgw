@@ -10,24 +10,22 @@
     <div class="card">
       <!-- messages -->
       {% if messages %} {% for message in messages %}
-      <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">
-        {{ message }}
-      </p>
+      <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
       {% endfor %} {% endif %}
       <div class="card-header d-flex align-items-center">
         <h3 class="mr-auto p-3">User Preferences</h3>
         <div class="btn-group">
-          <a class="btn btn-primary" href="/preferences/export" target="_blank">
-            Export
-          </a>
+          <a class="btn btn-primary" href="/preferences/export" target="_blank">Export</a>
         </div>
       </div>
       <form class="form-inline p-2" method="POST">
         {% csrf_token %}
-        <label class="form-label" for="destination">
-          {{form.destination.label}}
-        </label>
-        {{form.destination}} {{form.destination.errors}}
+        <label class="form-label" for="destination">{{form.destination.label}}</label>
+        {{form.destination}}
+        {{form.destination.errors}}
+        <label class="form-label" for="origin">{{form.origin.label}}</label>
+        {{form.origin}}
+        {{form.origin.errors}}
         <button type="submit" class="btn btn-primary">Filter</button>
         <a href="{% url 'dashboard:index' %}" class="mx-2">Reset</a>
       </form>
