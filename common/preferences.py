@@ -15,9 +15,7 @@ class Preferences(BaseAnalytics):
         self.df = pd.DataFrame.from_records(preferences)
         self.export_csv_name = "preferences.csv"
 
-    def get_stats_object(
-        self, fields: list[str] = None, filters: FilterList = None, df=None
-    ):
+    def get_stats_object(self, fields: list[str] = None, filters: FilterList = None, df=None):
         return_fields = fields or ["age", "gender"]
         _df = df.copy() if df is not None else self.filter_data(filters)
         _stats = {field: self.get_count(field, _df) for field in return_fields}

@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import urlencode
+from requests.exceptions import HTTPError
 
 from .forms import FilterForm
 
@@ -33,11 +34,15 @@ def preferences_stats(request):
 
     filters = None or request.GET
     form = FilterForm(initial=filters)
-    pref = Preferences()
-    _data = pref.get_stats_object(filters=filters)
-    chart_data = form_chart_data(_data)
-    if not any(bool(i) for i in _data.values()):
-        messages.error(request, "No data matches this search!")
+    try:
+        pref = Preferences()
+        _data = pref.get_stats_object(filters=filters)
+        chart_data = form_chart_data(_data)
+        if not any(bool(i) for i in _data.values()):
+            messages.error(request, "No data matches this search!")
+    except HTTPError as err:
+        messages.error(request, "Error fetching data!")
+        return render(request, "dashboard.html")
     return render(request, "dashboard.html", context={"data": chart_data, "form": form})
 
 
@@ -52,13 +57,16 @@ def inline_question_stats(request):
 
     filters = None or request.GET
     form = FilterForm(initial=filters)
-    inline_responses = Inline()
-    _data = inline_responses.get_stats_object(filters=filters)
-    response_count, _data = itemgetter("response_count", "data")(_data)
-    chart_data = form_chart_data(_data)
-    if not any(bool(i) for i in _data.values()):
-        messages.error(request, "No data matches this search!")
-
+    try:
+        inline_responses = Inline()
+        _data = inline_responses.get_stats_object(filters=filters)
+        response_count, _data = itemgetter("response_count", "data")(_data)
+        chart_data = form_chart_data(_data)
+        if not any(bool(i) for i in _data.values()):
+            messages.error(request, "No data matches this search!")
+    except HTTPError as err:
+        messages.error(request, "Error fetching data!")
+        return render(request, "inline.html")
     return render(
         request,
         "inline.html",
@@ -77,12 +85,15 @@ def messaging_question_stats(request):
 
     filters = None or request.GET
     form = FilterForm(initial=filters)
-    msg_responses = Messaging()
-    _data = msg_responses.get_stats_object(filters=filters)
-    chart_data = form_chart_data(_data)
-    if not any(bool(i) for i in _data.values()):
-        messages.error(request, "No data matches this search!")
-
+    try:
+        msg_responses = Messaging()
+        _data = msg_responses.get_stats_object(filters=filters)
+        chart_data = form_chart_data(_data)
+        if not any(bool(i) for i in _data.values()):
+            messages.error(request, "No data matches this search!")
+    except HTTPError:
+        messages.error(request, "Error fetching data!")
+        return render(request, "messaging.html")
     return render(request, "messaging.html", context={"data": chart_data, "form": form})
 
 

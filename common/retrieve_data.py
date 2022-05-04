@@ -26,12 +26,8 @@ class JGWApi:
 
     def _get(self, url, params) -> requests.Response:
         _response = None
-        try:
-            _response = self.session.get(url, params=params)
-            _response.raise_for_status()
-        except HTTPError as err:
-            # sentry? logging? throw error to caller?
-            print("Error fetching data", err)
+        _response = self.session.get(url, params=params)
+        _response.raise_for_status()
         return _response
 
     def get_data(self, key: str) -> list:
