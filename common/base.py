@@ -30,8 +30,17 @@ class BaseAnalytics:
         mask = _routes.str.endswith(tuple(destination))
         return _df.loc[mask]
 
+    def filter_by_origin(self, origin: list[str], df=None):
+        _df = df if df is not None else self.get_dataframe()
+        origin = origin.split(",")
+        origin = [i for i in origin if bool(i)]
+        origin = [country_names.get(i).lower() for i in origin]
+        _routes = _df["route"].astype("str").str.lower()
+        mask = _routes.str.startswith(tuple(origin))
+        return _df.loc[mask]
+
     def filter_data(self, filters: FilterList = None):
-        filter_map = {"destination": self.filter_by_destination}
+        filter_map = {"destination": self.filter_by_destination, "origin": self.filter_by_origin}
         _df = None or self.df.copy()
         if bool(filters):
             for field, value in filters.items():
