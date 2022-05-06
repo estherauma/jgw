@@ -156,5 +156,6 @@ logfile
 jgwpandas/static/*
 .vscode/*
 dump.rdb
-celerybeat-schedule.db
-/*.json
+celery/
+static/assets/data/
+staticfiles/

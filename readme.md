@@ -43,9 +43,18 @@ python manage.py migrate
 
 ```bash
 # run celery worker and beat scheduler in background
-celery -A jgwpandas beat -l info --logfile=celery.beat.log --detach
-celery -A jgwpandas worker -l info --logfile=celery.log --detach
+celery -A jgwpandas beat -l info --logfile=./celery/celery.beat.log --detach
+celery -A jgwpandas worker -l info --logfile=./celery/celery.log --detach
 
 # run django development server
 python manage.py runserver
 ```
+
+5. Use `CTRL+C` to terminate the django server. 
+
+   To stop the background celery services started in the step above, run the following command
+
+```bash
+kill -9 $(ps aux | grep celery | grep -v grep | awk '{print $2}' | tr '\n'  ' ') > /dev/null 2>&1
+````
+

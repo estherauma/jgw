@@ -5,12 +5,12 @@ import os
 from typing import Dict
 
 import requests
+from jgwpandas.settings import PROJECT_ROOT
 from requests.exceptions import HTTPError
 
 FILENAMES = {
-    "preferences": "preferences.json",
-    "inline": "inlinequestions.json",
-    "messaging": "messaging-questions.json",
+    k: os.path.join(PROJECT_ROOT, f"static/assets/data/{k}.json")
+    for k in ["preferences", "inline", "messaging"]
 }
 URLS = {
     "preferences": "/preferences",
@@ -52,7 +52,7 @@ class JGWApi:
 
     def write_stats_to_file(self, stats: list, key):
         filename = FILENAMES.get(key)
-        with open(filename, "w") as f:
+        with open(filename, "w+") as f:
             json.dump(stats, f)
 
     def get_stats_from_file(self, key) -> Dict:
