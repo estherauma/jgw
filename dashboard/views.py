@@ -7,13 +7,14 @@ from common.preferences import Preferences
 from common.retrieve_data import JGWApi
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import urlencode
+from pytz import country_names
 from requests.exceptions import HTTPError
 
-from .forms import FilterForm
+from .forms import ORIGIN_COUNTRIES, FilterForm
 
 
 def form_chart_data(data: Dict) -> Dict:
@@ -29,10 +30,11 @@ def preferences_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            # filters["destination"] = ",".join(filters["destination"])
             return redirect(reverse("dashboard:index") + "?" + urlencode(filters))
-
+        return render(request, "dashboard.html", context={"form": form})
     filters = None or request.GET
+    if filters is not None:
+        filters = {k: v for k, v in filters.items() if bool(v)}
     form = FilterForm(initial=filters)
     try:
         pref = Preferences()
@@ -42,7 +44,7 @@ def preferences_stats(request):
             messages.error(request, "No data matches this search!")
     except HTTPError as err:
         messages.error(request, "Error fetching data!")
-        return render(request, "dashboard.html")
+        return render(request, "dashboard.html", context={"form": form})
     return render(request, "dashboard.html", context={"data": chart_data, "form": form})
 
 
@@ -52,10 +54,11 @@ def inline_question_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            # filters["destination"] = ",".join(filters["destination"])
             return redirect(reverse("dashboard:inline_question_stats") + "?" + urlencode(filters))
-
+        return render(request, "inline.html", context={"form": form})
     filters = None or request.GET
+    if filters is not None:
+        filters = {k: v for k, v in filters.items() if bool(v)}
     form = FilterForm(initial=filters)
     try:
         inline_responses = Inline()
@@ -66,7 +69,7 @@ def inline_question_stats(request):
             messages.error(request, "No data matches this search!")
     except HTTPError as err:
         messages.error(request, "Error fetching data!")
-        return render(request, "inline.html")
+        return render(request, "inline.html", context={"form": form})
     return render(
         request,
         "inline.html",
@@ -80,10 +83,11 @@ def messaging_question_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            # filters["destination"] = ",".join(filters["destination"])
             return redirect(reverse("dashboard:messaging_question_stats") + "?" + urlencode(filters))
-
+        return render(request, "messaging.html", context={"form": form})
     filters = None or request.GET
+    if filters is not None:
+        filters = {k: v for k, v in filters.items() if bool(v)}
     form = FilterForm(initial=filters)
     try:
         msg_responses = Messaging()
@@ -93,8 +97,20 @@ def messaging_question_stats(request):
             messages.error(request, "No data matches this search!")
     except HTTPError:
         messages.error(request, "Error fetching data!")
-        return render(request, "messaging.html")
+        return render(request, "messaging.html", context={"form": form})
     return render(request, "messaging.html", context={"data": chart_data, "form": form})
+
+
+@login_required()
+def process_filter_options(request):
+    filters = request.GET
+    filters = {k: v for k, v in filters.items() if bool(v)}
+    pref = Preferences()
+    df = pref.get_df(filters)
+    origins = set([i.split(" -> ")[0] for i in df["route"].tolist()])
+    _country_names = {v.lower(): k for k, v in country_names.items()}
+    ORIGIN_COUNTRIES.update({_country_names.get(k): k for k in origins})
+    return JsonResponse(ORIGIN_COUNTRIES)
 
 
 @login_required()
