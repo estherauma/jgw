@@ -1,6 +1,7 @@
 from operator import itemgetter
 from typing import Dict
 
+from common.help_contacts import HelpContacts
 from common.inline import Inline
 from common.messaging import Messaging
 from common.preferences import Preferences
@@ -99,6 +100,30 @@ def messaging_question_stats(request):
         messages.error(request, "Error fetching data!")
         return render(request, "messaging.html", context={"form": form})
     return render(request, "messaging.html", context={"data": chart_data, "form": form})
+
+
+@login_required()
+def help_contacts_stats(request):
+    if request.method == "POST":
+        form = FilterForm(request.POST)
+        if form.is_valid():
+            filters = form.cleaned_data.copy()
+            return redirect(reverse("dashboard:help_contacts_stats") + "?" + urlencode(filters))
+        return render(request, "help_contacts.html", context={"form": form})
+    filters = None or request.GET
+    if filters is not None:
+        filters = {k: v for k, v in filters.items() if bool(v)}
+    form = FilterForm(initial=filters)
+    try:
+        help_contacts_stats = HelpContacts()
+        _data = help_contacts_stats.get_stats_object(filters=filters)
+        chart_data = form_chart_data(_data)
+        if not any(bool(i) for i in _data.values()):
+            messages.error(request, "No data matches this search!")
+    except HTTPError:
+        messages.error(request, "Error fetching data!")
+        return render(request, "help_contacts.html", context={"form": form})
+    return render(request, "help_contacts.html", context={"data": chart_data, "form": form})
 
 
 @login_required()

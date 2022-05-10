@@ -6,16 +6,16 @@ from typing import Dict
 
 import requests
 from jgwpandas.settings import PROJECT_ROOT
-from requests.exceptions import HTTPError
 
 FILENAMES = {
     k: os.path.join(PROJECT_ROOT, f"static/assets/data/{k}.json")
-    for k in ["preferences", "inline", "messaging"]
+    for k in ["preferences", "inline", "messaging", "help-contacts"]
 }
 URLS = {
     "preferences": "/preferences",
     "inline": "/inlinequestions",
     "messaging": "/messaging-questions",
+    "help-contacts":"/help-contacts"
 }
 
 
@@ -31,7 +31,7 @@ class JGWApi:
         return _response
 
     def get_data(self, key: str) -> list:
-        """`key` is one of: `preferences, inline, messaging`"""
+        """`key` is one of: `preferences, inline, messaging, help-contacts`"""
         if key not in FILENAMES.keys():
             return None
         data = None
