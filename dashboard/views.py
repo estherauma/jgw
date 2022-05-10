@@ -5,10 +5,10 @@ from common.help_contacts import HelpContacts
 from common.inline import Inline
 from common.messaging import Messaging
 from common.preferences import Preferences
-from common.retrieve_data import JGWApi
+from common.retrieve_data import FILENAMES, JGWApi
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import urlencode
@@ -31,8 +31,8 @@ def preferences_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            return redirect(reverse("dashboard:index") + "?" + urlencode(filters))
-        return render(request, "dashboard.html", context={"form": form})
+            return redirect(reverse("dashboard:preferences") + "?" + urlencode(filters))
+        return render(request, "preferences.html", context={"form": form})
     filters = None or request.GET
     if filters is not None:
         filters = {k: v for k, v in filters.items() if bool(v)}
@@ -45,8 +45,8 @@ def preferences_stats(request):
             messages.error(request, "No data matches this search!")
     except HTTPError as err:
         messages.error(request, "Error fetching data!")
-        return render(request, "dashboard.html", context={"form": form})
-    return render(request, "dashboard.html", context={"data": chart_data, "form": form})
+        return render(request, "preferences.html", context={"form": form})
+    return render(request, "preferences.html", context={"data": chart_data, "form": form})
 
 
 @login_required()
@@ -55,7 +55,7 @@ def inline_question_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            return redirect(reverse("dashboard:inline_question_stats") + "?" + urlencode(filters))
+            return redirect(reverse("dashboard:inline") + "?" + urlencode(filters))
         return render(request, "inline.html", context={"form": form})
     filters = None or request.GET
     if filters is not None:
@@ -84,7 +84,7 @@ def messaging_question_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            return redirect(reverse("dashboard:messaging_question_stats") + "?" + urlencode(filters))
+            return redirect(reverse("dashboard:messaging") + "?" + urlencode(filters))
         return render(request, "messaging.html", context={"form": form})
     filters = None or request.GET
     if filters is not None:
@@ -108,7 +108,7 @@ def help_contacts_stats(request):
         form = FilterForm(request.POST)
         if form.is_valid():
             filters = form.cleaned_data.copy()
-            return redirect(reverse("dashboard:help_contacts_stats") + "?" + urlencode(filters))
+            return redirect(reverse("dashboard:help_contacts") + "?" + urlencode(filters))
         return render(request, "help_contacts.html", context={"form": form})
     filters = None or request.GET
     if filters is not None:
@@ -139,28 +139,12 @@ def process_filter_options(request):
 
 
 @login_required()
-def retrieve_preferences(request):
-    api = JGWApi()
-    api.get_preferences()
-
-
-@login_required()
-def export_preferences(request):
-    preference = Preferences()
-    results = preference.get_dataframe()
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = "attachment; filename=preferences_export.csv"
-    results.to_csv(path_or_buf=response, sep=";", float_format="%.2f", index=False, decimal=",")
-    return response
-
-
-@login_required()
-def export_inline(request):
-    inline = Inline()
-    results = inline.get_dataframe()
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = "attachment; filename=inline_export.csv"
-    results.to_csv(path_or_buf=response, sep=";", float_format="%.2f", index=False, decimal=",")
+def export_to_excel_file(request, key):
+    filename = FILENAMES.get(key)
+    if filename is None:
+        messages.error(request, "Failed to export!")
+        return redirect(reverse(f"dashboard:{key}"))
+    response = FileResponse(open(filename, "rb"))
     return response
 
 
