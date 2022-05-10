@@ -11,7 +11,7 @@ FilterList = Dict[str, list[str]]
 
 class Inline(BaseAnalytics):
     def __init__(self) -> None:
-        inline_data = api.get_inline_question_responses()
+        inline_data = api.get_data(key='inline')
         self.df = pd.DataFrame.from_records(inline_data)
         self.export_csv_name = "inline_qn_responses.csv"
 

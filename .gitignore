@@ -155,3 +155,7 @@ dmypy.json
 logfile
 jgwpandas/static/*
 .vscode/*
+dump.rdb
+celery/
+static/assets/data/
+staticfiles/
