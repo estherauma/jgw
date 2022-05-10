@@ -8,24 +8,24 @@
   </div>
   <div class="p-4">
     <h1>
-      <a href="{% url 'dashboard:index' %}" class="logo">JGW <span>Data Dashboards</span></a>
+      <a href="{% url 'dashboard:preferences' %}" class="logo">JGW <span>Data Dashboards</span></a>
     </h1>
     <ul class="list-unstyled components mb-5">
       <li class="">
-        <a href="{% url 'dashboard:index' %}"><span class="fa fa-home mr-3"></span>Preferences</a>
+        <a href="{% url 'dashboard:preferences' %}"><span class="fa fa-home mr-3"></span>Preferences</a>
       </li>
       <li class="">
-        <a href="{% url 'dashboard:inline_question_stats' %}">
+        <a href="{% url 'dashboard:inline' %}">
           <span class="fa fa-question-circle mr-3"></span> Inline Questions
         </a>
       </li>
       <li class="">
-        <a href="{% url 'dashboard:messaging_question_stats' %}">
+        <a href="{% url 'dashboard:messaging' %}">
           <span class="fa fa-question-circle mr-3"></span> Messaging Questions
         </a>
       </li>
       <li class="">
-        <a href="{% url 'dashboard:help_contacts_stats' %}">
+        <a href="{% url 'dashboard:help_contacts' %}">
           <span class="fa fa-question-circle mr-3"></span> Help Contacts
         </a>
       </li>
