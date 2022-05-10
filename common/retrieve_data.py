@@ -4,18 +4,19 @@ import json
 import os
 from typing import Dict
 
+import pandas as pd
 import requests
 from jgwpandas.settings import PROJECT_ROOT
 
 FILENAMES = {
-    k: os.path.join(PROJECT_ROOT, f"static/assets/data/{k}.json")
-    for k in ["preferences", "inline", "messaging", "help-contacts"]
+    k: os.path.join(PROJECT_ROOT, f"static/assets/data/{k}.xlsx")
+    for k in ["preferences", "inline", "messaging", "help_contacts"]
 }
 URLS = {
     "preferences": "/preferences",
     "inline": "/inlinequestions",
     "messaging": "/messaging-questions",
-    "help-contacts":"/help-contacts"
+    "help_contacts": "/help-contacts",
 }
 
 
@@ -31,7 +32,7 @@ class JGWApi:
         return _response
 
     def get_data(self, key: str) -> list:
-        """`key` is one of: `preferences, inline, messaging, help-contacts`"""
+        """`key` is one of: `preferences, inline, messaging, help_contacts`"""
         if key not in FILENAMES.keys():
             return None
         data = None
@@ -43,17 +44,16 @@ class JGWApi:
             if response and response.status_code == requests.codes.ok:
                 result = response.json()
                 data = result["data"]
-                self.write_stats_to_file(stats=data, key=key)
+                self.write_data_to_file(stats=data, key=key)
         return data
 
-    def write_stats_to_file(self, stats: list, key):
+    def write_data_to_file(self, stats: list, key):
         filename = FILENAMES.get(key)
-        with open(filename, "w+") as f:
-            json.dump(stats, f)
+        df = pd.DataFrame.from_records(stats)
+        df.to_excel(filename, index=False)
 
     def get_stats_from_file(self, key) -> Dict:
         filename = FILENAMES.get(key)
-        stats = None
-        with open(filename, "r") as f:
-            stats = json.load(f)
+        df = pd.read_excel(filename)
+        stats = df.to_dict(orient="records")
         return stats
