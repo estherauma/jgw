@@ -1,15 +1,14 @@
 """JGW API helpers
 """
-import json
 import os
 from typing import Dict
 
 import pandas as pd
 import requests
-from jgwpandas.settings import PROJECT_ROOT
+from jgwpandas.settings import CACHE_DIR
 
 FILENAMES = {
-    k: os.path.join(PROJECT_ROOT, f"static/assets/data/{k}.xlsx")
+    k: os.path.join(CACHE_DIR, f"{k}.xlsx")
     for k in ["preferences", "inline", "messaging", "help_contacts"]
 }
 URLS = {

@@ -1,12 +1,11 @@
-from os.path import join
+import os
 from typing import Dict
 
 import pandas as pd
-from jgwpandas.settings import PROJECT_ROOT
+from jgwpandas.settings import CACHE_DIR
 from pytz import country_names
 
 QueryMap = Dict[str, str]
-PICKLE_FILE_ROOT = join(PROJECT_ROOT, "static/assets/data/")
 
 
 class BaseAnalytics:
@@ -18,7 +17,7 @@ class BaseAnalytics:
 
     def get_df_path(self, query: Dict):
         kvString_list = [f"{k}_{v}" for k, v in query.items()]
-        return join(PICKLE_FILE_ROOT, f"{type(self).__name__}_{'-'.join(kvString_list)}.pkl")
+        return os.path.join(CACHE_DIR, f"{type(self).__name__}_{'-'.join(kvString_list)}.pkl")
 
     def get_count(self, field: str, df=None):
         _df = df.copy() if df is not None else self.df.copy()
