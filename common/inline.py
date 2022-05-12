@@ -6,7 +6,7 @@ from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
 
 api = JGWApi()
-FilterList = Dict[str, list[str]]
+QueryMap = Dict[str, list[str]]
 
 
 class Inline(BaseAnalytics):
@@ -16,10 +16,10 @@ class Inline(BaseAnalytics):
         self.export_csv_name = "inline_qn_responses.csv"
 
     def get_stats_object(
-        self, fields: list[str] = None, filters: FilterList = None, df=None
+        self, fields: list[str] = None, filters: QueryMap = None, df=None
     ):
         return_fields = fields or ["route", "locale", "language"]
-        _df = df.copy() if df is not None else self.filter_data(filters)
+        _df = self.get_df(filters)
         _stats = {
             "data": {field: self.get_count(field, _df) for field in return_fields}
         }

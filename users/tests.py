@@ -20,10 +20,10 @@ class AuthTests(TestCase):
         """
         Test dashboard views require email/pword login to access
         """
-        response = self.client.get(reverse("dashboard:index"))
+        response = self.client.get(reverse("dashboard:preferences"))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/?next=/")
-        response = self.client.get(reverse("dashboard:inline_question_stats"))
+        response = self.client.get(reverse("dashboard:inline"))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/?next=/inline-questions")
 

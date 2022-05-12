@@ -10,9 +10,7 @@
     <div class="card">
       <!-- messages -->
       {% if messages %} {% for message in messages %}
-      <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">
-        {{ message }}
-      </p>
+      <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
       {% endfor %} {% endif %}
       <div class="card-header d-flex align-items-center">
         <span class="mr-auto p-3">
@@ -20,23 +18,19 @@
           <h5>Total Responses: {{response_count}}</h5>
         </span>
         <div class="btn-group">
-          <a
-            class="btn btn-primary"
-            href="/inline-questions/export"
-            target="_blank"
-            >Export</a
-          >
+          <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='inline' %}"
+            target="_blank">Export</a>
         </div>
       </div>
-      <form class="form-inline p-2" method="POST">
+      <form id="filter_form" class="form-inline p-2" method="POST"
+        data-filter-url="{% url 'dashboard:process_filter_options' %}">
         {% csrf_token %}
-        <label class="form-label" for="destination">
-          {{form.destination.label}}
-        </label>
+        <label class="form-label" for="destination">{{form.destination.label}}</label>
         {{form.destination}} {{form.destination.errors}}
+        <label class="form-label" for="origin">{{form.origin.label}}</label>
+        {{form.origin}} {{form.origin.errors}}
         <button type="submit" class="btn btn-primary">Filter</button>
-        <a href="{% url 'dashboard:inline_question_stats' %}" class="mx-2">Reset</a>
-
+        <a href="{% url 'dashboard:inline' %}" class="mx-2">Reset</a>
       </form>
     </div>
   </div>
@@ -70,42 +64,77 @@
 <!-- ChartJS script  -->
 {% block scripts %}
 <script>
+  const destination_input = document.querySelector('#destination')
+  const origin_input = document.querySelector('#origin')
+  const filter_form = document.querySelector('#filter_form')
+
+  function getOptions() {
+    const url = filter_form.attributes.getNamedItem("data-filter-url").value;
+    console.log(url)
+    const country_code = destination_input.value;
+    if (country_code) {
+      fetch(url + '?' + new URLSearchParams({ 'destination': country_code }), { method: 'GET' })
+        .then(response => {
+          result = response.json()
+          status_code = response.status;
+          if (status_code != 200) {
+            console.log('Error processing next field options')
+            return false;
+          }
+          return result
+        })
+        .then(data => {
+          console.log(data);
+          options = ``
+          Object.entries(data).map(function ([k, v]) {
+            console.log(k, v)
+            options += `<option value="${k}">${v}</option>`
+          })
+          origin_input.innerHTML = options;
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    }
+  }
+  destination_input.addEventListener('change', getOptions);
+  window.addEventListener('DOMContentLoaded', getOptions);
   {% for key, values in data.items %}
-    new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
-        type: "bar",
-        data: {
-            labels: {{ values.labels|safe }},
-            datasets: [
-                {
-                    label: "{{ key }}".toUpperCase(),
-                    data: {{ values.data }},
-                    backgroundColor: [
-                        "rgba(255, 99, 132, 0.2)",
-                        "rgba(54, 162, 235, 0.2)",
-                        "rgba(255, 206, 86, 0.2)",
-                        "rgba(75, 192, 192, 0.2)",
-                        "rgba(153, 102, 255, 0.2)",
-                        "rgba(255, 159, 64, 0.2)",
-                    ],
-                    borderColor: [
-                        "rgba(255, 99, 132, 1)",
-                        "rgba(54, 162, 235, 1)",
-                        "rgba(255, 206, 86, 1)",
-                        "rgba(75, 192, 192, 1)",
-                        "rgba(153, 102, 255, 1)",
-                        "rgba(255, 159, 64, 1)",
-                    ],
-                    borderWidth: 1,
+  new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: {{ values.labels | safe }},
+    datasets: [
+    {
+      label: "{{ key }}".toUpperCase(),
+      data: {{ values.data }},
+    backgroundColor: [
+      "rgba(255, 99, 132, 0.2)",
+      "rgba(54, 162, 235, 0.2)",
+      "rgba(255, 206, 86, 0.2)",
+      "rgba(75, 192, 192, 0.2)",
+      "rgba(153, 102, 255, 0.2)",
+      "rgba(255, 159, 64, 0.2)",
+    ],
+    borderColor: [
+      "rgba(255, 99, 132, 1)",
+      "rgba(54, 162, 235, 1)",
+      "rgba(255, 206, 86, 1)",
+      "rgba(75, 192, 192, 1)",
+      "rgba(153, 102, 255, 1)",
+      "rgba(255, 159, 64, 1)",
+    ],
+    borderWidth: 1,
                 },
-            ],
+  ],
         },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                },
-            },
-        },
+    options: {
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  },
     });
   {% endfor %}
 </script>

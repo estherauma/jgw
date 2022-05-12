@@ -143,6 +143,13 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+CACHE_DIR = os.path.join(PROJECT_ROOT, "static/assets/data/")
+CELERY_DIR = os.path.abspath(os.path.join( PROJECT_ROOT, os.pardir, "celery/"))
+
+for i in [CACHE_DIR, CELERY_DIR]:
+    if not os.path.exists(i):
+        os.makedirs(i)
+
 
 # Configure Django App for Heroku.
 django_heroku.settings(locals())
@@ -161,8 +168,8 @@ sentry_sdk.init(
 )
 
 #  Celery Broker - Redis
-CELERY_BROKER_URL = os.getenv('REDIS_URL')
-CELERY_RESULT_BACKEND = os.getenv('REDIS_URL')
+CELERY_BROKER_URL = os.getenv("REDIS_URL")
+CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
