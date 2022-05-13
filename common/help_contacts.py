@@ -12,7 +12,7 @@ QueryMap = Dict[str, list[str]]
 class HelpContacts(BaseAnalytics):
     def __init__(self) -> None:
         help_contacts_data = api.get_data(key="help_contacts")
-        self.df = pd.DataFrame.from_records(help_contacts_data)
+        self.raw_df = pd.DataFrame.from_records(help_contacts_data)
         self.export_csv_name = "help_contacts_data.csv"
 
     def get_stats_object(self, fields: list[str] = None, filters: QueryMap = None, df=None):
