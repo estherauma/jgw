@@ -6,6 +6,7 @@ async-timeout==4.0.2
 backcall==0.2.0
 billiard==3.6.4.0
 black==22.3.0
+cachetools==4.2.4
 celery==5.2.6
 certifi==2021.10.8
 chardet==3.0.4
@@ -24,7 +25,12 @@ django-heroku==0.3.1
 djangorestframework==3.12.4
 et-xmlfile==1.1.0
 executing==0.8.3
-googletrans==4.0.0rc1
+google-api-core==1.31.5
+google-auth==1.35.0
+google-cloud-core==1.7.2
+google-cloud-translate==2.0.1
+googleapis-common-protos==1.56.1
+grpcio==1.46.1
 gunicorn==20.1.0
 h11==0.9.0
 h2==3.2.0
@@ -50,9 +56,12 @@ pexpect==4.8.0
 pickleshare==0.7.5
 platformdirs==2.5.1
 prompt-toolkit==3.0.29
+protobuf==3.20.1
 psycopg2==2.9.1
 ptyprocess==0.7.0
 pure-eval==0.2.2
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
 Pygments==2.11.2
 pyparsing==3.0.8
 python-dateutil==2.8.2
@@ -61,6 +70,7 @@ pytz==2021.3
 redis==4.2.2
 requests==2.26.0
 rfc3986==1.5.0
+rsa==4.8
 sentry-sdk==1.4.3
 six==1.16.0
 sniffio==1.2.0
