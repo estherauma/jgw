@@ -1,9 +1,7 @@
-import ast
 import os
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
-from googletrans import Translator
 from jgwpandas.settings import CACHE_DIR
 from pytz import country_names
 
