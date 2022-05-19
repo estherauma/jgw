@@ -115,126 +115,6 @@ class JGWApi:
             df[key] = df[key].apply(get_country_code)
         return df
 
-    def standardise_lang_to_eng(self, df):
-        """Translate text values to English."""
-
-        def translate_responses(responses):
-            def translate_response(text):
-                query = TranslatedResponseText.objects.filter(original_text=text)
-                if query.exists():
-                    result = query.first()
-                    return result.translation
-                translation = get_eng_translation(text)
-                TranslatedResponseText.objects.create(original_text=text, translation=translation)
-                return translation
-
-            _translations = []
-            if not isinstance(responses, list):
-                return translate_response(responses)
-            for response in responses:
-                _translations.append(translate_response(response))
-            return _translations
-
-        def translate_hearAboutUs(hearAboutUs):
-            def translate_item(text):
-                query = TranslatedHearAboutUsText.objects.filter(original_text=text)
-                if query.exists():
-                    result = query.first()
-                    return result.translation
-                translation = get_eng_translation(text)
-                TranslatedHearAboutUsText.objects.create(original_text=text, translation=translation)
-                return translation
-
-            _translations = []
-            if not isinstance(hearAboutUs, list):
-                return translate_item(hearAboutUs)
-            for item in hearAboutUs:
-                _translations.append(translate_item(item))
-            return _translations
-
-        def translate_sectorOfWork(sectorOfWork):
-            def translate_item(text):
-                query = TranslatedSectorOfWorkText.objects.filter(original_text=text)
-                if query.exists():
-                    result = query.first()
-                    return result.translation
-                translation = get_eng_translation(text)
-                TranslatedSectorOfWorkText.objects.create(original_text=text, translation=translation)
-                return translation
-
-            _translations = []
-            if not isinstance(sectorOfWork, list):
-                return translate_item(sectorOfWork)
-            for item in sectorOfWork:
-                _translations.append(translate_item(item))
-            return _translations
-
-        def translate_question(id, text):
-            query = TranslatedQuestionText.objects.filter(prismic_id=id)
-            if query.exists():
-                result = query.first()
-                return result.question_text
-            translation = get_eng_translation(text)
-            TranslatedQuestionText.objects.create(prismic_id=id, question_text=translation)
-            return translation
-
-        def translate_age_text(text):
-            query = TranslatedAgeText.objects.filter(original_text=text)
-            if query.exists():
-                result = query.first()
-                return result.translation
-            translation = get_eng_translation(text)
-            TranslatedAgeText.objects.create(original_text=text, translation=translation)
-            return translation
-
-        def translate_gender_text(text):
-            query = TranslatedGenderText.objects.filter(original_text=text)
-            if query.exists():
-                result = query.first()
-                return result.translation
-            translation = get_eng_translation(text)
-            TranslatedGenderText.objects.create(original_text=text, translation=translation)
-            return translation
-
-        def translate_lang_text(text):
-            query = TranslatedLanguageText.objects.filter(original_text=text)
-            if query.exists():
-                result = query.first()
-                return result.translation
-            translation = get_eng_translation(text)
-            TranslatedLanguageText.objects.create(original_text=text, translation=translation)
-            return translation
-
-        df = df.fillna("")
-        if "age" in df.columns:
-            df["age"] = df["age"].apply(translate_age_text)
-
-        if "gender" in df.columns:
-            df["gender"] = df["gender"].apply(translate_gender_text)
-
-        if "language" in df.columns:
-            df["language"] = df["language"].apply(translate_lang_text)
-
-        if "hearAboutUs" in df.columns:
-            df["hearAboutUs"] = df["hearAboutUs"].apply(translate_hearAboutUs)
-
-        if "sectorOfWork" in df.columns:
-            df["sectorOfWork"] = df["sectorOfWork"].apply(translate_sectorOfWork)
-
-        if "questionText" in df.columns:
-            translated_qn_df = df[["questionId", "questionText"]].copy()
-            translated_qn_df["questionText"] = translated_qn_df.apply(
-                lambda x: translate_question(x["questionId"], x["questionText"]), axis=1
-            )
-            translated_qn_df.rename(
-                columns={"questionId": "prismic_id", "questionText": "question_text"}, inplace=True
-            )
-
-        if "questionResponse" in df.columns:
-            df["questionResponse"] = df["questionResponse"].apply(translate_responses)
-
-        return df
-
     def normalise_questions_and_responses(self, df):
         def cast_to_native(value):
             if "[{" in value or "[" in value:
@@ -262,4 +142,54 @@ class JGWApi:
         if "questionResponse" in df.columns:
             df["questionResponse"] = df["questionResponse"].apply(cast_to_native)
             df["questionResponse"] = df["questionResponse"].apply(get_true_responses)
+        return df
+
+    def standardise_lang_to_eng(self, df):
+        """Translate text values to English."""
+
+        def translate_question(id, text):
+            query = TranslatedQuestionText.objects.filter(prismic_id=id)
+            if query.exists():
+                result = query.first()
+                return result.question_text
+            translation = get_eng_translation(text)
+            TranslatedQuestionText.objects.create(prismic_id=id, question_text=translation)
+            return translation
+
+        def translate_field(text, field):
+            models = {
+                "age": TranslatedAgeText,
+                "hearAboutUs": TranslatedHearAboutUsText,
+                "gender": TranslatedGenderText,
+                "language": TranslatedLanguageText,
+                "sectorOfWork": TranslatedSectorOfWorkText,
+                "questionResponse": TranslatedResponseText,
+            }
+            TranslatedModel = models[field]
+            query = TranslatedModel.objects.filter(original_text=text)
+            if query.exists():
+                result = query.first()
+                return result.translation
+            translation = get_eng_translation(text)
+            TranslatedModel.objects.create(original_text=text, translation=translation)
+            return translation
+
+        def translate_list_field(text_list, field):
+            if not isinstance(text_list, list):
+                return translate_field(text=text_list, field=field)
+            return [translate_field(text=item, field=field) for item in text_list]
+
+        scalar_fields = ["age", "gender", "language"]
+        list_fields = ["hearAboutUs", "sectorOfWork", "questionResponse"]
+
+        df = df.fillna("")
+        if "questionText" in df.columns:
+            df["questionText"] = df.apply(
+                lambda x: translate_question(x["questionId"], x["questionText"]), axis=1
+            )
+        for field in df.columns:
+            if field in scalar_fields:
+                df[field] = df[field].apply(lambda x: translate_field(x, field=field))
+            elif field in list_fields:
+                df[field] = df[field].apply(lambda x: translate_list_field(text_list=x, field=field))
         return df
