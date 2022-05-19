@@ -6,10 +6,19 @@ from typing import Dict, List
 
 import pandas as pd
 import requests
-from googletrans import Translator
+import six
+from dashboard.models import (
+    TranslatedAgeText,
+    TranslatedGenderText,
+    TranslatedHearAboutUsText,
+    TranslatedLanguageText,
+    TranslatedQuestionText,
+    TranslatedResponseText,
+    TranslatedSectorOfWorkText,
+)
+from google.cloud import translate_v2 as translate
 from jgwpandas.settings import CACHE_DIR
 from pytz import country_names
-from dashboard.models import TranslatedQuestionText
 
 FILENAMES = {
     k: os.path.join(CACHE_DIR, f"{k}.xlsx") for k in ["preferences", "inline", "messaging", "help_contacts"]
@@ -21,19 +30,13 @@ URLS = {
     "help_contacts": "/help-contacts",
 }
 
-translator = Translator()
-
 
 def get_eng_translation(text):
-    t = translator.translate(text)
-    return t.text
-
-
-def get_qn_translation(id, text):
-    if TranslatedQuestionText.objects.filter(question_id=id).first().exists():
-        return TranslatedQuestionText.objects.get(question_id=id).text
-    return get_eng_translation(text)
-
+    client = translate.Client()
+    if isinstance(text, six.binary_type):
+        text = text.decode("utf-8")
+    result = client.translate(text, target_language="en")
+    return result["translatedText"]
 
 
 def store_translations(df):
@@ -67,6 +70,7 @@ class JGWApi:
                 result = response.json()
                 data = result["data"]
                 self.write_data_to_file(stats=data, key=key)
+                data = self.get_stats_from_file(key=key)
         return data
 
     def write_data_to_file(self, stats: list, key):
@@ -113,37 +117,121 @@ class JGWApi:
 
     def standardise_lang_to_eng(self, df):
         """Translate text values to English."""
-        fields_to_translate = [
-            "wantToLive",
-            "hearAboutUs",
-            "sectorOfWork",
-            "gender",
-            "age",
-            "language",
-        ]
 
-        def translate_responses(responses: List):
+        def translate_responses(responses):
+            def translate_response(text):
+                query = TranslatedResponseText.objects.filter(original_text=text)
+                if query.exists():
+                    result = query.first()
+                    return result.translation
+                translation = get_eng_translation(text)
+                TranslatedResponseText.objects.create(original_text=text, translation=translation)
+                return translation
+
             _translations = []
             if not isinstance(responses, list):
-                return get_eng_translation(responses)
+                return translate_response(responses)
             for response in responses:
-                _translations.append(get_eng_translation(response))
+                _translations.append(translate_response(response))
             return _translations
+
+        def translate_hearAboutUs(hearAboutUs):
+            def translate_item(text):
+                query = TranslatedHearAboutUsText.objects.filter(original_text=text)
+                if query.exists():
+                    result = query.first()
+                    return result.translation
+                translation = get_eng_translation(text)
+                TranslatedHearAboutUsText.objects.create(original_text=text, translation=translation)
+                return translation
+
+            _translations = []
+            if not isinstance(hearAboutUs, list):
+                return translate_item(hearAboutUs)
+            for item in hearAboutUs:
+                _translations.append(translate_item(item))
+            return _translations
+
+        def translate_sectorOfWork(sectorOfWork):
+            def translate_item(text):
+                query = TranslatedSectorOfWorkText.objects.filter(original_text=text)
+                if query.exists():
+                    result = query.first()
+                    return result.translation
+                translation = get_eng_translation(text)
+                TranslatedSectorOfWorkText.objects.create(original_text=text, translation=translation)
+                return translation
+
+            _translations = []
+            if not isinstance(sectorOfWork, list):
+                return translate_item(sectorOfWork)
+            for item in sectorOfWork:
+                _translations.append(translate_item(item))
+            return _translations
+
+        def translate_question(id, text):
+            query = TranslatedQuestionText.objects.filter(prismic_id=id)
+            if query.exists():
+                result = query.first()
+                return result.question_text
+            translation = get_eng_translation(text)
+            TranslatedQuestionText.objects.create(prismic_id=id, question_text=translation)
+            return translation
+
+        def translate_age_text(text):
+            query = TranslatedAgeText.objects.filter(original_text=text)
+            if query.exists():
+                result = query.first()
+                return result.translation
+            translation = get_eng_translation(text)
+            TranslatedAgeText.objects.create(original_text=text, translation=translation)
+            return translation
+
+        def translate_gender_text(text):
+            query = TranslatedGenderText.objects.filter(original_text=text)
+            if query.exists():
+                result = query.first()
+                return result.translation
+            translation = get_eng_translation(text)
+            TranslatedGenderText.objects.create(original_text=text, translation=translation)
+            return translation
+
+        def translate_lang_text(text):
+            query = TranslatedLanguageText.objects.filter(original_text=text)
+            if query.exists():
+                result = query.first()
+                return result.translation
+            translation = get_eng_translation(text)
+            TranslatedLanguageText.objects.create(original_text=text, translation=translation)
+            return translation
+
+        df = df.fillna("")
+        if "age" in df.columns:
+            df["age"] = df["age"].apply(translate_age_text)
+
+        if "gender" in df.columns:
+            df["gender"] = df["gender"].apply(translate_gender_text)
+
+        if "language" in df.columns:
+            df["language"] = df["language"].apply(translate_lang_text)
+
+        if "hearAboutUs" in df.columns:
+            df["hearAboutUs"] = df["hearAboutUs"].apply(translate_hearAboutUs)
+
+        if "sectorOfWork" in df.columns:
+            df["sectorOfWork"] = df["sectorOfWork"].apply(translate_sectorOfWork)
 
         if "questionText" in df.columns:
             translated_qn_df = df[["questionId", "questionText"]].copy()
-            translated_qn_df["questionText"] = translated_qn_df.apply(lambda x: get_qn_translation(x["questionId"], x["questionText"]))
+            translated_qn_df["questionText"] = translated_qn_df.apply(
+                lambda x: translate_question(x["questionId"], x["questionText"]), axis=1
+            )
             translated_qn_df.rename(
                 columns={"questionId": "prismic_id", "questionText": "question_text"}, inplace=True
             )
-            store_translations(translated_qn_df)
 
         if "questionResponse" in df.columns:
             df["questionResponse"] = df["questionResponse"].apply(translate_responses)
-
-        for field in fields_to_translate:
-            if field in df.columns:
-                df[field] = df[field].apply(get_eng_translation)
 
         return df
 
