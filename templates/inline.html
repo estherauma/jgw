@@ -18,7 +18,7 @@
           <h5>Total Responses: {{response_count}}</h5>
         </span>
         <div class="btn-group">
-          <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='inline' %}"
+          <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='inline' %}?{{filter_string}}"
             target="_blank">Export</a>
         </div>
       </div>
