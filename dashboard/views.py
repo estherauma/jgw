@@ -46,7 +46,7 @@ def preferences_stats(request):
     except HTTPError as err:
         messages.error(request, "Error fetching data!")
         return render(request, "preferences.html", context={"form": form})
-    return render(request, "preferences.html", context={"data": chart_data, "form": form})
+    return render(request, "preferences.html", context={"data": chart_data, "form": form, "filter_string": urlencode(filters)})
 
 
 @login_required()
@@ -68,13 +68,13 @@ def inline_question_stats(request):
         chart_data = form_chart_data(_data)
         if not any(bool(i) for i in _data.values()):
             messages.error(request, "No data matches this search!")
-    except HTTPError as err:
+    except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, "inline.html", context={"form": form})
     return render(
         request,
         "inline.html",
-        context={"data": chart_data, "form": form, "response_count": response_count},
+        context={"data": chart_data, "form": form, "response_count": response_count, "filter_string": urlencode(filters)},
     )
 
 
@@ -99,7 +99,7 @@ def messaging_question_stats(request):
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, "messaging.html", context={"form": form})
-    return render(request, "messaging.html", context={"data": chart_data, "form": form})
+    return render(request, "messaging.html", context={"data": chart_data, "form": form, "filter_string": urlencode(filters)})
 
 
 @login_required()
@@ -123,7 +123,7 @@ def help_contacts_stats(request):
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, "help_contacts.html", context={"form": form})
-    return render(request, "help_contacts.html", context={"data": chart_data, "form": form})
+    return render(request, "help_contacts.html", context={"data": chart_data, "form": form, "filter_string": urlencode(filters)})
 
 
 @login_required()
@@ -140,7 +140,20 @@ def process_filter_options(request):
 
 @login_required()
 def export_to_excel_file(request, key):
-    filename = FILENAMES.get(key)
+    helpers = {
+        "inline": Inline(),
+        "preferences": Preferences(),
+        "help_contacts": HelpContacts(),
+        "messaging": Messaging(),
+    }
+    filters = request.GET
+    filters = {k: v for k, v in filters.items() if bool(v)}
+    print(filters, key)
+    helper = helpers[key]
+    df = helper.get_df(filters)
+    filename = helper.get_df_path(filters, extension="xlsx")
+    df.to_excel(filename, index=False)
+
     if filename is None:
         messages.error(request, "Failed to export!")
         return redirect(reverse(f"dashboard:{key}"))
