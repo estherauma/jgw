@@ -15,9 +15,9 @@ class BaseAnalytics:
     def export_csv(self):
         self.raw_df.to_csv(self.export_csv_name)
 
-    def get_df_path(self, query: Dict):
+    def get_df_path(self, query: Dict, extension="pkl"):
         kvString_list = [f"{k}_{v}" for k, v in query.items()]
-        return os.path.join(CACHE_DIR, f"{type(self).__name__}_{'-'.join(kvString_list)}.pkl")
+        return os.path.join(CACHE_DIR, f"{type(self).__name__}_{'-'.join(kvString_list)}.{extension}")
 
     def get_count(self, field: str, df=None):
         _df = df.copy() if df is not None else self.raw_df.copy()
