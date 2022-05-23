@@ -12,7 +12,7 @@ QueryMap = Dict[str, list[str]]
 class Inline(BaseAnalytics):
     def __init__(self) -> None:
         inline_data = api.get_data(key='inline')
-        self.df = pd.DataFrame.from_records(inline_data)
+        self.raw_df = pd.DataFrame.from_records(inline_data)
         self.export_csv_name = "inline_qn_responses.csv"
 
     def get_stats_object(

@@ -159,3 +159,4 @@ dump.rdb
 celery/
 static/assets/data/
 staticfiles/
+google_cred.json
