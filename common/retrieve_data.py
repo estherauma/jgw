@@ -7,15 +7,7 @@ from typing import Dict, List
 import pandas as pd
 import requests
 import six
-from dashboard.models import (
-    TranslatedAgeText,
-    TranslatedGenderText,
-    TranslatedHearAboutUsText,
-    TranslatedLanguageText,
-    TranslatedQuestionText,
-    TranslatedResponseText,
-    TranslatedSectorOfWorkText,
-)
+from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from google.cloud import translate_v2 as translate
 from jgwpandas.settings import CACHE_DIR
 from pytz import country_names
@@ -37,12 +29,6 @@ def get_eng_translation(text):
         text = text.decode("utf-8")
     result = client.translate(text, target_language="en")
     return result["translatedText"]
-
-
-def store_translations(df):
-    data_list = df.to_dict(orient="records")
-    object_list = [TranslatedQuestionText(**entry) for entry in data_list]
-    TranslatedQuestionText.objects.bulk_create(object_list)
 
 
 class JGWApi:
@@ -158,11 +144,11 @@ class JGWApi:
 
         def translate_field(text, field):
             models = {
-                "age": TranslatedAgeText,
-                "hearAboutUs": TranslatedHearAboutUsText,
-                "gender": TranslatedGenderText,
-                "language": TranslatedLanguageText,
-                "sectorOfWork": TranslatedSectorOfWorkText,
+                "age": TranslatedText,
+                "hearAboutUs": TranslatedText,
+                "gender": TranslatedText,
+                "language": TranslatedText,
+                "sectorOfWork": TranslatedText,
                 "questionResponse": TranslatedResponseText,
             }
             TranslatedModel = models[field]
