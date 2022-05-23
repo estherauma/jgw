@@ -17,7 +17,9 @@ This repository contains code for running analytics on data collected by the JGW
 
 1. Set up your local database
 
-   Use [env.example](./env.example) as a template for your .env file where you can update any env variables such as db credentials.
+   Use [env.example](./env.example) as a template for your `.env` file where you can update any env variables such as db credentials.
+   
+   You can get an API key for the google service account from this [link](https://console.cloud.google.com/iam-admin/serviceaccounts/details/102058899159157121490/keys?project=pandas50eight). Download the json file to the project root and rename it to `google_cred.json`
 
 ```bash
 psql -U postgres -h 127.0.0.1 -f create_dev_db.sql
