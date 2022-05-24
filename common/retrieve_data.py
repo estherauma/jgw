@@ -13,13 +13,27 @@ from jgwpandas.settings import CACHE_DIR
 from pytz import country_names
 
 FILENAMES = {
-    k: os.path.join(CACHE_DIR, f"{k}.xlsx") for k in ["preferences", "inline", "messaging", "help_contacts"]
+    k: os.path.join(CACHE_DIR, f"{k}.xlsx")
+    for k in [
+        "preferences",
+        "inline",
+        "messaging",
+        "help_contacts",
+        "contract_checklists",
+        "visa_checklists",
+        "joboffer_checklists",
+        "beforeyougo_checklists",
+    ]
 }
 URLS = {
     "preferences": "/preferences",
     "inline": "/inlinequestions",
     "messaging": "/messaging-questions",
     "help_contacts": "/help-contacts",
+    "beforeyougo": "beforeyougo-checklists",
+    "contract": "contract-checklists",
+    "visa": "visa-checklists",
+    "joboffer": "joboffer-checklists",
 }
 
 
