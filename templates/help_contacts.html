@@ -18,7 +18,7 @@
           <h3>Help Contacts</h3>
         </span>
         <div class="btn-group">
-          <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='help_contacts' %}"
+          <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='help_contacts' %}?{{filter_string}}"
             target="_blank">Export</a>
         </div>
       </div>
@@ -63,7 +63,6 @@
 
   function getOptions() {
     const url = filter_form.attributes.getNamedItem("data-filter-url").value;
-    console.log(url)
     const country_code = destination_input.value;
     if (country_code) {
       fetch(url + '?' + new URLSearchParams({ 'destination': country_code }), { method: 'GET' })
@@ -77,10 +76,8 @@
           return result
         })
         .then(data => {
-          console.log(data);
           options = ``
           Object.entries(data).map(function ([k, v]) {
-            console.log(k, v)
             options += `<option value="${k}">${v}</option>`
           })
           origin_input.innerHTML = options;

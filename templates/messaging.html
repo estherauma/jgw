@@ -18,7 +18,7 @@
           <h3>Messaging/Spot Questions</h3>
         </span>
         <div class="btn-group">
-          <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='messaging' %}"
+          <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='messaging' %}?{{filter_string}}"
             target="_blank">Export</a>
         </div>
       </div>
@@ -63,7 +63,6 @@
 
   function getOptions() {
     const url = filter_form.attributes.getNamedItem("data-filter-url").value;
-    console.log(url)
     const country_code = destination_input.value;
     if (country_code) {
       fetch(url + '?' + new URLSearchParams({ 'destination': country_code }), { method: 'GET' })
