@@ -148,7 +148,6 @@ def export_to_excel_file(request, key):
     }
     filters = request.GET
     filters = {k: v for k, v in filters.items() if bool(v)}
-    print(filters, key)
     helper = helpers[key]
     df = helper.get_df(filters)
     filename = helper.get_df_path(filters, extension="xlsx")
