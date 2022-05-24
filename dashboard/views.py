@@ -1,6 +1,7 @@
 from operator import itemgetter
 from typing import Dict
 
+from common.checklists import CheckLists
 from common.help_contacts import HelpContacts
 from common.inline import Inline
 from common.messaging import Messaging
@@ -32,13 +33,12 @@ def redirect_to_filtered_data(request, url_name, template_name):
     return render(request, template_name, context={"form": form})
 
 
-def render_data(request, template_name, helper_class):
+def render_data(request, template_name, helper):
     filters = None or request.GET
     if filters is not None:
         filters = {k: v for k, v in filters.items() if bool(v)}
     form = FilterForm(initial=filters)
     try:
-        helper = helper_class()
         _data = helper.get_stats_object(filters=filters)
         chart_data = form_chart_data(_data)
         if not any(bool(i) for i in _data.values()):
@@ -59,8 +59,7 @@ def preferences_stats(request):
         return redirect_to_filtered_data(
             request, url_name="dashboard:preferences", template_name="preferences.html"
         )
-    return render_data(request, template_name="preferences.html", helper_class=Preferences)
-
+    return render_data(request, template_name="preferences.html", helper=Preferences())
 
 
 @login_required()
@@ -69,7 +68,7 @@ def messaging_question_stats(request):
         return redirect_to_filtered_data(
             request, url_name="dashboard:messaging", template_name="messaging.html"
         )
-    return render_data(request, template_name="messaging.html", helper_class=Messaging)
+    return render_data(request, template_name="messaging.html", helper=Messaging())
 
 
 @login_required()
@@ -78,7 +77,16 @@ def help_contacts_stats(request):
         return redirect_to_filtered_data(
             request, url_name="dashboard:help_contacts", template_name="help_contacts.html"
         )
-    return render_data(request, template_name="help_contacts.html", helper_class=HelpContacts)
+    return render_data(request, template_name="help_contacts.html", helper=HelpContacts())
+
+
+@login_required()
+def checklists_stats(request, key):
+    if request.method == "POST":
+        return redirect_to_filtered_data(
+            request, url_name=f"dashboard:{key}_checklists", template_name=f"{key}_checklists.html"
+        )
+    return render_data(request, template_name=f"{key}_checklists.html", helper=CheckLists(key=key))
 
 
 @login_required()
@@ -109,6 +117,7 @@ def inline_question_stats(request):
             "filter_string": urlencode(filters),
         },
     )
+
 
 @login_required()
 def process_filter_options(request):
