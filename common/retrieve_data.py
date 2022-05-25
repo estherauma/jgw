@@ -19,10 +19,10 @@ FILENAMES = {
         "inline",
         "messaging",
         "help_contacts",
-        "contract_checklists",
-        "visa_checklists",
-        "joboffer_checklists",
-        "beforeyougo_checklists",
+        "contract",
+        "visa",
+        "joboffer",
+        "beforeyougo",
     ]
 }
 URLS = {
@@ -30,19 +30,23 @@ URLS = {
     "inline": "/inlinequestions",
     "messaging": "/messaging-questions",
     "help_contacts": "/help-contacts",
-    "beforeyougo": "beforeyougo-checklists",
-    "contract": "contract-checklists",
-    "visa": "visa-checklists",
-    "joboffer": "joboffer-checklists",
+    "beforeyougo": "/beforeyougo-checklists",
+    "contract": "/contract-checklists",
+    "visa": "/visa-checklists",
+    "joboffer": "/joboffer-checklists",
 }
 
 
-def get_eng_translation(text):
-    client = translate.Client()
+client = translate.Client()
+
+
+def get_eng_translation(text, client=client):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
-    result = client.translate(text, target_language="en")
-    return result["translatedText"]
+    if isinstance(text, str):
+        result = client.translate(text, target_language="en")
+        return result["translatedText"]
+    return text
 
 
 class JGWApi:
@@ -57,7 +61,7 @@ class JGWApi:
         return _response
 
     def get_data(self, key: str) -> list:
-        """`key` is one of: `preferences, inline, messaging, help_contacts`"""
+        """`key` is one of: `preferences, inline, messaging, help_contacts, visa, contract, joboffer, beforeyougo`"""
         if key not in FILENAMES.keys():
             return None
         data = None
