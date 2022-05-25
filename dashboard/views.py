@@ -25,11 +25,11 @@ def form_chart_data(data: Dict) -> Dict:
     return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
 
 
-def redirect_to_filtered_data(request, url_name, template_name):
+def redirect_to_filtered_data(request, url, template_name):
     form = FilterForm(request.POST)
     if form.is_valid():
         filters = form.cleaned_data.copy()
-        return redirect(reverse(url_name) + "?" + urlencode(filters))
+        return redirect(f"{url}?{urlencode(filters)}")
     return render(request, template_name, context={"form": form})
 
 
@@ -57,7 +57,7 @@ def render_data(request, template_name, helper):
 def preferences_stats(request):
     if request.method == "POST":
         return redirect_to_filtered_data(
-            request, url_name="dashboard:preferences", template_name="preferences.html"
+            request, url=reverse("dashboard:preferences"), template_name="preferences.html"
         )
     return render_data(request, template_name="preferences.html", helper=Preferences())
 
@@ -66,7 +66,7 @@ def preferences_stats(request):
 def messaging_question_stats(request):
     if request.method == "POST":
         return redirect_to_filtered_data(
-            request, url_name="dashboard:messaging", template_name="messaging.html"
+            request, url=reverse("dashboard:messaging"), template_name="messaging.html"
         )
     return render_data(request, template_name="messaging.html", helper=Messaging())
 
@@ -75,7 +75,7 @@ def messaging_question_stats(request):
 def help_contacts_stats(request):
     if request.method == "POST":
         return redirect_to_filtered_data(
-            request, url_name="dashboard:help_contacts", template_name="help_contacts.html"
+            request, url=reverse("dashboard:help_contacts"), template_name="help_contacts.html"
         )
     return render_data(request, template_name="help_contacts.html", helper=HelpContacts())
 
@@ -84,7 +84,7 @@ def help_contacts_stats(request):
 def checklists_stats(request, key):
     if request.method == "POST":
         return redirect_to_filtered_data(
-            request, url_name=f"dashboard:{key}_checklists", template_name=f"{key}_checklists.html"
+            request, url=reverse("dashboard:checklists", args=(key,)), template_name=f"{key}_checklists.html"
         )
     return render_data(request, template_name=f"{key}_checklists.html", helper=CheckLists(key=key))
 
@@ -92,7 +92,9 @@ def checklists_stats(request, key):
 @login_required()
 def inline_question_stats(request):
     if request.method == "POST":
-        return redirect_to_filtered_data(request, url_name="dashboard:inline", template_name="inline.html")
+        return redirect_to_filtered_data(
+            request, url=reverse("dashboard:inline"), template_name="inline.html"
+        )
     filters = None or request.GET
     if filters is not None:
         filters = {k: v for k, v in filters.items() if bool(v)}
