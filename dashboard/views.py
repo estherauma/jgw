@@ -140,6 +140,10 @@ def export_to_excel_file(request, key):
         "preferences": Preferences(),
         "help_contacts": HelpContacts(),
         "messaging": Messaging(),
+        "visa": CheckLists(key="visa"),
+        "joboffer": CheckLists(key="joboffer"),
+        "contract": CheckLists(key="contract"),
+        "beforeyougo": CheckLists(key="beforeyougo"),
     }
     filters = request.GET
     filters = {k: v for k, v in filters.items() if bool(v)}
