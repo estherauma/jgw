@@ -58,8 +58,22 @@ class BaseAnalytics:
         mask = _routes.str.startswith(tuple(origin))
         return df.loc[mask]
 
+    def filter_by_schemeName(self, scheme_name: str, df):
+        _scheme_names = df["schemeName"].astype("str").str.lower()
+        mask = _scheme_names.str.contains(scheme_name)
+        return df.loc[mask]
+
+    def filter_by_factoryFarm(self, factory_farm: str, df):
+        _factory_farms = df["factoryFarm"].astype("str").str.lower()
+        mask = _factory_farms.str.contains(factory_farm)
+        return df.loc[mask]
+
     def filter_data(self, df, query: Dict):
-        filter_map = {"destination": self.filter_by_destination, "origin": self.filter_by_origin}
+        filter_map = {
+            "destination": self.filter_by_destination,
+            "origin": self.filter_by_origin,
+            "schemeName": self.filter_by_schemeName,
+        }
         for field, value in query.items():
             filter_func = filter_map.get(field)
             if filter_func is not None:
