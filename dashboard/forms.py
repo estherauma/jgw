@@ -1,10 +1,10 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from pytz import country_names
 
 DEST_COUNTRIES = {"": "Select a country"}
 ORIGIN_COUNTRIES = {"": "Select a Country"}
 DEST_COUNTRIES.update({k: country_names[k] for k in ("MY", "QA", "SA", "AE", "GB")})
+
 
 class DependentChoiceField(forms.ChoiceField):
     def valid_value(self, value) -> bool:
@@ -33,3 +33,8 @@ class FilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "origin"}),
     )
+    scheme_name = forms.CharField(required=False)
+    # factory_farm = DependentChoiceField(
+    #     required=False,
+    #     widget=forms.Select(attrs={"class": "form-select mx-2", "id": "origin"}),
+    # )
