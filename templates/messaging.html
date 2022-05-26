@@ -30,6 +30,8 @@
         {{form.destination}} {{form.destination.errors}}
         <label class="form-label" for="origin">{{form.origin.label}}</label>
         {{form.origin}} {{form.origin.errors}}
+        <label class="form-label" for="scheme_name">{{form.scheme_name.label}}</label>
+        {{form.scheme_name}} {{form.scheme_name.errors}}
         <button type="submit" class="btn btn-primary">Filter</button>
         <a href="{% url 'dashboard:messaging' %}" class="mx-2">Reset</a>
       </form>
