@@ -59,9 +59,11 @@ class BaseAnalytics:
         return df.loc[mask]
 
     def filter_by_schemeName(self, scheme_name: str, df):
-        _scheme_names = df["schemeName"].astype("str").str.lower()
-        mask = _scheme_names.str.contains(scheme_name)
-        return df.loc[mask]
+        if "schemeName" in df.columns:
+            _scheme_names = df["schemeName"].astype("str").str.lower()
+            mask = _scheme_names == scheme_name
+            return df.loc[mask]
+        return pd.DataFrame()
 
     def filter_by_factoryFarm(self, factory_farm: str, df):
         _factory_farms = df["factoryFarm"].astype("str").str.lower()
@@ -72,7 +74,7 @@ class BaseAnalytics:
         filter_map = {
             "destination": self.filter_by_destination,
             "origin": self.filter_by_origin,
-            "schemeName": self.filter_by_schemeName,
+            "scheme_name": self.filter_by_schemeName,
         }
         for field, value in query.items():
             filter_func = filter_map.get(field)
