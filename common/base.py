@@ -59,9 +59,9 @@ class BaseAnalytics:
         return df.loc[mask]
 
     def filter_by_schemeName(self, scheme_name: str, df):
-        if "schemeName" in df.columns:
-            _scheme_names = df["schemeName"].astype("str").str.lower()
-            mask = _scheme_names == scheme_name
+        if "organisation" in df.columns:
+            _scheme_names = df["organisation"].astype("str").str.lower()
+            mask = _scheme_names == scheme_name.lower()
             return df.loc[mask]
         return pd.DataFrame()
 
