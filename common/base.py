@@ -66,15 +66,19 @@ class BaseAnalytics:
         return pd.DataFrame()
 
     def filter_by_factoryFarm(self, factory_farm: str, df):
-        _factory_farms = df["factoryFarm"].astype("str").str.lower()
-        mask = _factory_farms.str.contains(factory_farm)
-        return df.loc[mask]
+        if "factoryFarm" in df.columns:
+            _factory_farms = df["factoryFarm"].astype("str").str.lower()
+            mask = _factory_farms == factory_farm.lower()
+            return df.loc[mask]
+        return pd.DataFrame()
+
 
     def filter_data(self, df, query: Dict):
         filter_map = {
             "destination": self.filter_by_destination,
             "origin": self.filter_by_origin,
             "scheme_name": self.filter_by_schemeName,
+            "factory_farm": self.filter_by_factoryFarm,
         }
         for field, value in query.items():
             filter_func = filter_map.get(field)
