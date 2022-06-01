@@ -15,7 +15,7 @@ from django.utils.http import urlencode
 from pytz import country_names
 from requests.exceptions import HTTPError
 
-from .forms import ORIGIN_COUNTRIES, FilterForm
+from .forms import FACTORIES, ORIGIN_COUNTRIES, FilterForm
 
 
 def form_chart_data(data: Dict) -> Dict:
@@ -151,10 +151,9 @@ def process_factory_options(request, key):
     }
     helper = helpers.get(key)
     df = helper.get_df(filters)
-    factories = {"": "Select a factory or farm"}
     if "factoryFarm" in df.columns:
-        factories.update({k: k for k in set(df["factoryFarm"].tolist())})
-    return JsonResponse(factories)
+        FACTORIES.update({k: k for k in set(df["factoryFarm"].tolist())})
+    return JsonResponse(FACTORIES)
 
 
 @login_required()
