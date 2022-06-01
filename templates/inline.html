@@ -23,7 +23,7 @@
         </div>
       </div>
       <form id="filter_form" class="form-inline p-2" method="POST"
-        data-filter-url="{% url 'dashboard:process_filter_options' %}">
+        data-filter-url="{% url 'dashboard:process_origin_options' %}">
         {% csrf_token %}
         <label class="form-label" for="destination">{{form.destination.label}}</label>
         {{form.destination}} {{form.destination.errors}}

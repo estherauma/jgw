@@ -33,8 +33,10 @@ class FilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "origin"}),
     )
-    scheme_name = forms.CharField(required=False)
-    # factory_farm = DependentChoiceField(
-    #     required=False,
-    #     widget=forms.Select(attrs={"class": "form-select mx-2", "id": "origin"}),
-    # )
+    scheme_name = forms.CharField(
+        required=False, widget=forms.TextInput(attrs={"class": "form-select mx-2", "id": "scheme_name"})
+    )
+    factory_farm = DependentChoiceField(
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "factory_farm"}),
+    )
