@@ -2,6 +2,8 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
+ROLES = ["FACTORY/FIRM", "SCHEME", "STAFF"]
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
@@ -31,8 +33,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
     USERNAME_FIELD = "email"
+    ROLE = models.TextChoices("Role", " ".join(ROLES))
 
     password = models.CharField(blank=True, max_length=128)
+    role = models.CharField(blank=False, null=True, choices=ROLE.choices, max_length=16)
+    scheme = models.CharField(blank=False, null=True, max_length=16)
+    factory_or_firm = models.CharField(blank=False, null=True, max_length=16)
     email = models.EmailField(null=False, blank=False, max_length=128, unique=True)
     is_staff = models.BooleanField(
         default=False,
