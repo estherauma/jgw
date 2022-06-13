@@ -9,7 +9,8 @@ urlpatterns = [
     path("messaging-questions", views.messaging_question_stats, name="messaging"),
     path("help-contacts", views.help_contacts_stats, name="help_contacts"),
     path("checklists/<str:key>", views.checklists_stats, name="checklists"),
-    path("process-filter-options", views.process_filter_options, name="process_filter_options"),
+    path("process-origin-options/<str:key>", views.process_origin_options, name="process_origin_options"),
+    path("process-factory-options/<str:key>", views.process_factory_options, name="process_factory_options"),
     path("export/<str:key>", views.export_to_excel_file, name="export_to_excel"),
     path("trigger-sentry", views.test_sentry),
 ]
