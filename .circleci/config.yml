@@ -56,14 +56,14 @@ jobs:
       - *cmd_add_google_creds
       - *cmd_attach_workspace
       - *cmd_install_packages
-      - *cmd_save_cache
+      # - *cmd_save_cache
   test:
     <<: *defaults
     steps:
       - checkout
       - *cmd_attach_workspace
       - *cmd_install_packages
-      - *cmd_restore_cache
+      # - *cmd_restore_cache
       - run: 
           name: Running and generating report
           command: |
