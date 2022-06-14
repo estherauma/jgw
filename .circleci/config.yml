@@ -46,8 +46,7 @@ cmd_add_google_creds: &cmd_add_google_creds
   run:
     command: |
       echo $GOOGLE_CRED | base64 --decode > google_cred.json
-      pwd
-      ls
+      cat google_cred.json
 
 jobs: 
   build:
@@ -70,7 +69,7 @@ jobs:
           name: Running and generating report
           command: |
             . venv/bin/activate
-            printenv
+            echo $GOOGLE_APPLICATION_CREDENTIALS
             coverage run manage.py test
             coverage report
             coverage xml
