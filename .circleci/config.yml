@@ -45,7 +45,7 @@ cmd_restore_cache: &cmd_restore_cache
 cmd_add_google_creds: &cmd_add_google_creds
   run:
     command: |
-      echo $GOOGLE_CRED | base64 --decode > ~/project/google_cred.json
+      echo $GOOGLE_CRED | base64 --decode > /home/circleci/project/google_cred.json
       pwd
       ls
 
