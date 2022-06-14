@@ -45,7 +45,7 @@ cmd_restore_cache: &cmd_restore_cache
 cmd_add_google_creds: &cmd_add_google_creds
   run:
     command: |
-      echo GOOGLE_CRED | base64 --decode > filePath
+      echo $GOOGLE_CRED | base64 --decode > google_cred.json
 
 jobs: 
   build:
