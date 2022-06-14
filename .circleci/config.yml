@@ -31,7 +31,6 @@ cmd_install_packages: &cmd_install_packages
       python3 -m venv venv
       . venv/bin/activate
       pip install -r requirements.txt
-      ls
 
 cmd_save_cache: &cmd_save_cache
   save_cache:
@@ -47,7 +46,6 @@ cmd_add_google_creds: &cmd_add_google_creds
   run:
     command: |
       echo $GOOGLE_CRED | base64 --decode > google_cred.json
-      cat ./google_cred.json
 
 jobs: 
   build:
