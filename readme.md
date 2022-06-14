@@ -7,7 +7,7 @@ This repository contains code for running analytics on data collected by the JGW
 
 ## SetUp
 
-#### Pre-requisites
+#### Pre-requisites 
 
 - [python](https://www.python.org/downloads/)
 - [postgresql](https://www.postgresql.org/download/)
