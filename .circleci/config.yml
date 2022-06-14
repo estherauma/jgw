@@ -46,6 +46,8 @@ cmd_add_google_creds: &cmd_add_google_creds
   run:
     command: |
       echo $GOOGLE_CRED | base64 --decode > google_cred.json
+      pwd
+      ls
 
 jobs: 
   build:
