@@ -17,6 +17,17 @@ from requests.exceptions import HTTPError
 
 from .forms import FACTORIES, ORIGIN_COUNTRIES, FilterForm
 
+HELPERS = {
+    "inline": Inline(),
+    "preferences": Preferences(),
+    "help_contacts": HelpContacts(),
+    "messaging": Messaging(),
+    "visa": CheckLists(key="visa"),
+    "joboffer": CheckLists(key="joboffer"),
+    "contract": CheckLists(key="contract"),
+    "beforeyougo": CheckLists(key="beforeyougo"),
+}
+
 
 def form_chart_data(data: Dict) -> Dict:
     """
@@ -125,13 +136,7 @@ def inline_question_stats(request):
 def process_origin_options(request, key):
     filters = request.GET
     filters = {k: v for k, v in filters.items() if bool(v)}
-    helpers = {
-        "inline": Inline(),
-        "preferences": Preferences(),
-        "help_contacts": HelpContacts(),
-        "messaging": Messaging(),
-    }
-    helper = helpers.get(key)
+    helper = HELPERS.get(key)
     df = helper.get_df(filters)
     origins = set([i.split(" -> ")[0] for i in df["route"].tolist()])
     _country_names = {v.lower(): k for k, v in country_names.items()}
@@ -143,13 +148,7 @@ def process_origin_options(request, key):
 def process_factory_options(request, key):
     filters = request.GET
     filters = {k: v for k, v in filters.items() if bool(v)}
-    helpers = {
-        "inline": Inline(),
-        "preferences": Preferences(),
-        "help_contacts": HelpContacts(),
-        "messaging": Messaging(),
-    }
-    helper = helpers.get(key)
+    helper = HELPERS.get(key)
     df = helper.get_df(filters)
     if "factoryFarm" in df.columns:
         FACTORIES.update({k: k for k in set(df["factoryFarm"].tolist())})
@@ -158,19 +157,9 @@ def process_factory_options(request, key):
 
 @login_required()
 def export_to_excel_file(request, key):
-    helpers = {
-        "inline": Inline(),
-        "preferences": Preferences(),
-        "help_contacts": HelpContacts(),
-        "messaging": Messaging(),
-        "visa": CheckLists(key="visa"),
-        "joboffer": CheckLists(key="joboffer"),
-        "contract": CheckLists(key="contract"),
-        "beforeyougo": CheckLists(key="beforeyougo"),
-    }
     filters = request.GET
     filters = {k: v for k, v in filters.items() if bool(v)}
-    helper = helpers[key]
+    helper = HELPERS[key]
     df = helper.get_df(filters)
     filename = helper.get_df_path(filters, extension="xlsx")
     df.to_excel(filename, index=False)
