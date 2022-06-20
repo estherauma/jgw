@@ -68,7 +68,7 @@
         const url = filter_form.attributes.getNamedItem("data-origins-url").value;
         const dest_country = destination_input.value;
         const origin_country = origin_input.value;
-        if (dest_country && !origin_country) {
+        if (dest_country) {
             const filters = new URLSearchParams({ 'destination': dest_country })
             fetch(`${url}?${filters}`, { method: 'GET' })
                 .then(response => {
@@ -133,7 +133,7 @@
     schemeName_input.addEventListener('change', getFactoryOptions);
     window.addEventListener('DOMContentLoaded', getOriginOptions)
     window.addEventListener('DOMContentLoaded', getFactoryOptions)
-    
+
     {% for key, values in data.items %}
     new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
         type: "bar",
