@@ -4,8 +4,8 @@ from . import views
 app_name = "dashboard"
 urlpatterns = [
     # Views
-    path("", views.preferences_stats, name="preferences"),
-    path("inline-questions", views.inline_question_stats, name="inline"),
+    path("preferences", views.preferences_stats, name="preferences"),
+    path("", views.inline_question_stats, name="inline"),
     path("messaging-questions", views.messaging_question_stats, name="messaging"),
     path("help-contacts", views.help_contacts_stats, name="help_contacts"),
     path("checklists/<str:key>", views.checklists_stats, name="checklists"),
