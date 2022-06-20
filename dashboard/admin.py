@@ -1,3 +1,10 @@
 from django.contrib import admin
+from .models import (
+    TranslatedQuestionText,
+    TranslatedResponseText,
+    TranslatedText
+)
 
-# Register your models here.
+admin.site.register(TranslatedQuestionText)
+admin.site.register(TranslatedResponseText)
+admin.site.register(TranslatedText)
