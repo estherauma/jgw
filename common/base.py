@@ -45,18 +45,14 @@ class BaseAnalytics:
         return _df
 
     def filter_by_destination(self, destination: str, df):
-        destination = destination.split(",")
-        destination = [country_names.get(i).lower() for i in destination if bool(i)]
-        _routes = df["route"].astype("str").str.lower()
-        mask = _routes.str.endswith(tuple(destination))
-        return df.loc[mask]
+        destinations = df["destination"].astype("str")
+        mask = destinations == destination
+        return df[mask]
 
     def filter_by_origin(self, origin: str, df):
-        origin = origin.split(",")
-        origin = [country_names.get(i).lower() for i in origin if bool(i)]
-        _routes = df["route"].astype("str").str.lower()
-        mask = _routes.str.startswith(tuple(origin))
-        return df.loc[mask]
+        origins = df["origin"].astype("str")
+        mask = origins == origin
+        return df[mask]
 
     def filter_by_schemeName(self, scheme_name: str, df):
         if "organisation" in df.columns:
@@ -71,7 +67,6 @@ class BaseAnalytics:
             mask = _factory_farms == factory_farm.lower()
             return df.loc[mask]
         return pd.DataFrame()
-
 
     def filter_data(self, df, query: Dict):
         filter_map = {

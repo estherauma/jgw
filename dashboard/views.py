@@ -138,10 +138,11 @@ def process_origin_options(request, key):
     filters = {k: v for k, v in filters.items() if bool(v)}
     helper = HELPERS.get(key)
     df = helper.get_df(filters)
-    origins = set([i.split(" -> ")[0] for i in df["route"].tolist()])
-    _country_names = {v.lower(): k for k, v in country_names.items()}
-    ORIGIN_COUNTRIES.update({_country_names.get(k): k for k in origins})
-    return JsonResponse(ORIGIN_COUNTRIES)
+    origins = df["origin"][df["origin"].notna()]
+    origins = set(origins.tolist())
+    origin_countries = ORIGIN_COUNTRIES.copy()
+    origin_countries.update({k: country_names.get(k) for k in origins})
+    return JsonResponse(origin_countries)
 
 
 @login_required()
@@ -151,8 +152,9 @@ def process_factory_options(request, key):
     helper = HELPERS.get(key)
     df = helper.get_df(filters)
     if "factoryFarm" in df.columns:
-        FACTORIES.update({k: k for k in set(df["factoryFarm"].tolist())})
-    return JsonResponse(FACTORIES)
+        factories = FACTORIES.copy()
+        factories.update({k: k for k in set(df["factoryFarm"].tolist())})
+    return JsonResponse(factories)
 
 
 @login_required()

@@ -36,6 +36,8 @@ URLS = {
     "joboffer": "/joboffer-checklists",
 }
 
+reversed_country_names = {v.lower(): k for k, v in country_names.items()}
+
 
 client = translate.Client()
 
@@ -105,17 +107,20 @@ class JGWApi:
             return None
 
         country_from_route = {
-            "origin": lambda i: get_origin_country(i),
-            "destination": lambda i: get_dest_country(i),
+            "origin": get_origin_country,
+            "destination": get_dest_country,
         }
-        _ = {v.lower(): k for k, v in country_names.items()}
 
         def get_country_code(name):
-            results = [_[key] for key in _ if name is not None and name in key]
-            return results[0] if len(results) else None
+            if name is not None:
+                return reversed_country_names.get(name)
+            return None
 
+        patterns_to_replace = ["uk", "united kingdom"]
         for key in ["origin", "destination"]:
             df[key] = df["route"].apply(country_from_route[key])
+            for pat in patterns_to_replace:
+                df[key] = df[key].str.lower().replace(pat, country_names["GB"])
             df[key] = df[key].apply(get_country_code)
         return df
 
