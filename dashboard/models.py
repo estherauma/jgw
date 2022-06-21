@@ -14,4 +14,13 @@ class TranslatedResponseText(models.Model):
 
 class TranslatedText(models.Model):
     original_text = models.TextField(null=False)
-    translation = models.TextField(null=True)
+    translation = models.TextField(null=False)
+
+
+class Scheme(models.Model):
+    name = models.CharField(max_length=128, null=False, blank=False)
+
+
+
+class Factory(models.Model):
+    name = models.CharField(max_length=128, null=False, blank=False)
