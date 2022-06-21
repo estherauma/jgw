@@ -22,7 +22,7 @@ class AuthTests(TestCase):
         """
         response = self.client.get(reverse("dashboard:preferences"))
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, "/accounts/login/?next=/")
+        self.assertRedirects(response, "/accounts/login/?next=/preferences")
         response = self.client.get(reverse("dashboard:inline"))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/?next=/")
