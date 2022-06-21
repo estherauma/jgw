@@ -1,11 +1,10 @@
-from pydoc import resolve
-
+from operator import itemgetter
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from .forms import CreateUserForm, LoginForm
+from .forms import CreateUserForm, LoginForm, UserMgtForm
 from .models import User
 
 
@@ -52,3 +51,16 @@ def login_user(request):
         else:
             messages.error(request, "Error validating form!")
     return render(request, "users/login.html", {"form": form})
+
+
+@login_required()
+def manage_account(request, id):
+    # get list of inactive accounts and list of schemes and factories
+    # assign scheme/factory and activate account. (checkbox)
+    user = User.objects.get(id=id)
+    form = UserMgtForm(instance=user)
+    if request.method == "POST":
+        form = UserMgtForm(data=request.POST, instance=user)
+        if form.is_valid:
+            form.save()
+    return render(request, "users/manage.html", context={"form": form, "user": user})
