@@ -1,0 +1,42 @@
+{% extends "layouts/base.html" %}
+{% block title %} Manage Account {% endblock title %}
+{% block content %}
+<div class="justify-content-center align-items-center d-flex flex-column h-75">
+    <div class="d-flex align-items-center">
+        <h4 class="mr-auto p-3">Manage User Account</h4>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-body">
+                <form class="d-flex flex-column align-items-center" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3 form-group col">
+                        <label class="form-label" for="is_active">
+                            {{form.is_active.label}}
+                        </label>
+                        {{form.is_active}}
+                        <span>{{form.is_active.errors}}</span>
+                    </div>
+                    <div class="mb-3 form-group col">
+                        <label class="form-label" for="scheme">
+                            {{form.scheme.label}}
+                        </label>
+                        {{form.scheme}}
+                        <span>{{form.scheme.errors}}</span>
+                    </div>
+                    <div class="mb-3 form-group col">
+                        <label class="form-label" for="factory">
+                            {{form.factory.label}}
+                        </label>
+                        {{form.factory}}
+                        <span>{{form.factory.errors}}</span>
+                    </div>
+                    <div class="mb-3 form-group col text-center">
+                        <input type="submit" class="btn btn-primary" value="Update" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

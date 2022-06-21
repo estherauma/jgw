@@ -25,3 +25,15 @@ class CreateUserForm(UserCreationForm):
         super(CreateUserForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control"
+
+
+class UserMgtForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("is_active", "scheme", "factory")
+
+    def __init__(self, *args, **kwargs):
+        super(UserMgtForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control"
+            self.fields[field].required = False
