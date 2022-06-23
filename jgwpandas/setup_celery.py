@@ -20,5 +20,9 @@ celery_app.conf.beat_schedule = {
     "fetch-API-data": {
         "task": "get_jgw_data",
         "schedule": crontab(minute=0, hour=0),
+    },
+    "translate-API-data": {
+        "task": "translate_to_eng",
+        "schedule": crontab(minute='*/10'),
     }
 }
