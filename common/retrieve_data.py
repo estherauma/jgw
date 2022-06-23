@@ -160,7 +160,7 @@ class JGWApi:
             query = TranslatedQuestionText.objects.filter(prismic_id=id)
             if query.exists():
                 result = query.first()
-                return result.question_text
+                return result.translation
             TranslatedQuestionText.objects.create(prismic_id=id, original_text=text)
             return text
 
