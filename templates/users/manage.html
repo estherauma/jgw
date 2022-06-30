@@ -11,6 +11,13 @@
                 <form class="d-flex flex-column align-items-center" method="POST">
                     {% csrf_token %}
                     <div class="mb-3 form-group col">
+                        <label class="form-label" for="role">
+                            {{form.role.label}}
+                        </label>
+                        {{form.role}}
+                        <span>{{form.role.errors}}</span>
+                    </div>
+                    <div class="mb-3 form-group col">
                         <label class="form-label" for="is_active">
                             {{form.is_active.label}}
                         </label>

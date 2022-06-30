@@ -55,8 +55,6 @@ def login_user(request):
 
 @login_required()
 def manage_account(request, id):
-    # get list of inactive accounts and list of schemes and factories
-    # assign scheme/factory and activate account. (checkbox)
     user = User.objects.get(id=id)
     form = UserMgtForm(instance=user)
     if request.method == "POST":

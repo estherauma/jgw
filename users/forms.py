@@ -30,7 +30,7 @@ class CreateUserForm(UserCreationForm):
 class UserMgtForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ("is_active", "scheme", "factory")
+        fields = ("is_active", "scheme", "factory", "role")
 
     def __init__(self, *args, **kwargs):
         super(UserMgtForm, self).__init__(*args, **kwargs)
