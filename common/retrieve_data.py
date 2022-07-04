@@ -42,7 +42,7 @@ reversed_country_names = {v.lower(): k for k, v in country_names.items()}
 client = translate.Client()
 
 
-def get_eng_translation(text, client=client):
+def translate_to_eng(text, client=client):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
     if isinstance(text, str):
@@ -160,12 +160,11 @@ class JGWApi:
             query = TranslatedQuestionText.objects.filter(prismic_id=id)
             if query.exists():
                 result = query.first()
-                return result.question_text
-            translation = get_eng_translation(text)
-            TranslatedQuestionText.objects.create(prismic_id=id, question_text=translation)
-            return translation
+                return result.translation
+            TranslatedQuestionText.objects.create(prismic_id=id, original_text=text)
+            return text
 
-        def translate_field(text, field):
+        def translate_field_or_mark(text, field):
             models = {
                 "age": TranslatedText,
                 "hearAboutUs": TranslatedText,
@@ -179,14 +178,13 @@ class JGWApi:
             if query.exists():
                 result = query.first()
                 return result.translation
-            translation = get_eng_translation(text)
-            TranslatedModel.objects.create(original_text=text, translation=translation)
-            return translation
+            TranslatedModel.objects.create(original_text=text)
+            return text
 
         def translate_list_field(text_list, field):
             if not isinstance(text_list, list):
-                return translate_field(text=text_list, field=field)
-            return [translate_field(text=item, field=field) for item in text_list]
+                return translate_field_or_mark(text=text_list, field=field)
+            return [translate_field_or_mark(text=item, field=field) for item in text_list]
 
         scalar_fields = ["age", "gender", "language"]
         list_fields = ["hearAboutUs", "sectorOfWork", "questionResponse"]
@@ -198,7 +196,7 @@ class JGWApi:
             )
         for field in df.columns:
             if field in scalar_fields:
-                df[field] = df[field].apply(lambda x: translate_field(x, field=field))
+                df[field] = df[field].apply(lambda x: translate_field_or_mark(x, field=field))
             elif field in list_fields:
                 df[field] = df[field].apply(lambda x: translate_list_field(text_list=x, field=field))
         return df
