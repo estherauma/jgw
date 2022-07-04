@@ -37,6 +37,7 @@ URLS = {
 }
 
 reversed_country_names = {v.lower(): k for k, v in country_names.items()}
+reversed_country_names.update({"republic of kosovo": "XK"})
 
 
 client = translate.Client()
@@ -113,14 +114,26 @@ class JGWApi:
 
         def get_country_code(name):
             if name is not None:
-                return reversed_country_names.get(name)
+                code = reversed_country_names.get(name)
+                return name if code is None else code
             return None
 
-        patterns_to_replace = ["uk", "united kingdom"]
+        patterns_to_replace = {
+            "republic of kosovo": ["kosovo"],
+            country_names["AE"].lower(): ["uae"],
+            country_names["BA"].lower(): ["bosnia and herzegovina"],
+            country_names["CZ"].lower(): ["czechia"],
+            country_names["GB"].lower(): ["uk", "united kingdom"],
+            country_names["LK"].lower(): ["sri-lanka"],
+            country_names["MM"].lower(): ["myanmar", "burma"],
+            country_names["PH"].lower(): ["phillippines"],
+            country_names["SA"].lower(): ["saudi"],
+        }
         for key in ["origin", "destination"]:
             df[key] = df["route"].apply(country_from_route[key])
-            for pat in patterns_to_replace:
-                df[key] = df[key].str.lower().replace(pat, country_names["GB"])
+            df[key] = df[key].str.lower()
+            for k, v in patterns_to_replace.items():
+                df[key] = df[key].replace(v, k)
             df[key] = df[key].apply(get_country_code)
         return df
 
