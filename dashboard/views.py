@@ -36,18 +36,32 @@ def form_chart_data(data: Dict) -> Dict:
     return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
 
 
+def process_filters(request):
+    user = request.user
+    filters = {} or request.GET
+    role_filters = {
+        "Scheme": {"scheme_name": user.scheme},
+        "Factory": {"factory_farm": user.factory},
+    }
+    filters.update(role_filters.get(user.role, {}))
+    if bool(filters):
+        filters = {k: v for k, v in filters.items() if bool(v)}
+    return filters
+
+
 def redirect_to_filtered_data(request, url, template_name):
     form = FilterForm(request.POST)
     if form.is_valid():
         filters = form.cleaned_data.copy()
+        # url encode does not support NoneType values
+        filters = {k: ("" if v is None else v) for k, v in filters.items()}
         return redirect(f"{url}?{urlencode(filters)}")
     return render(request, template_name, context={"form": form})
 
 
 def render_data(request, template_name, helper):
-    filters = None or request.GET
-    if filters is not None:
-        filters = {k: v for k, v in filters.items() if bool(v)}
+    filters = process_filters(request)
+
     form = FilterForm(initial=filters)
     try:
         _data = helper.get_stats_object(filters=filters)
@@ -106,9 +120,7 @@ def inline_question_stats(request):
         return redirect_to_filtered_data(
             request, url=reverse("dashboard:inline"), template_name="inline.html"
         )
-    filters = None or request.GET
-    if filters is not None:
-        filters = {k: v for k, v in filters.items() if bool(v)}
+    filters = process_filters(request)
     form = FilterForm(initial=filters)
     try:
         inline_responses = Inline()

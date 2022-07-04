@@ -1,6 +1,8 @@
 from django import forms
 from pytz import country_names
 
+from .models import Factory, Scheme
+
 DEST_COUNTRIES = {"": "Select a Country"}
 ORIGIN_COUNTRIES = {"": "Select a Country"}
 FACTORIES = {"": "Select a factory or farm"}
@@ -35,14 +37,15 @@ class FilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "origin"}),
     )
-    scheme_name = forms.CharField(
+    scheme_name = forms.ModelChoiceField(
         label="Scheme",
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-select mx-2", "id": "scheme_name"}),
+        queryset=Scheme.objects.all(),
+        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "scheme_name"}),
     )
-    factory_farm = DependentChoiceField(
+    factory_farm = forms.ModelChoiceField(
         label="Factory/Farm",
-        choices=FACTORIES.items(),
+        queryset=Factory.objects.all(),
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "factory_farm"}),
     )
