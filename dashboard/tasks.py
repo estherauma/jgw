@@ -9,14 +9,23 @@ jgw_api = APIHelper()
 
 @shared_task(name="get_jgw_data")
 def fetch_API_data():
-    for key in ["inline", "preferences", "messaging"]:
+    for key in [
+        "inline",
+        "preferences",
+        "messaging",
+        "help_contacts",
+        "visa",
+        "joboffer",
+        "contract",
+        "beforeyougo",
+    ]:
         jgw_api.get_data(key=key)
 
 
 @shared_task(name="translate_to_eng")
 def translate_API_data():
     def _doer(model, limit=50):
-        untranslated_text = model.objects.filter(translation__is_null=True)
+        untranslated_text = model.objects.filter(translation__isnull=True)
         if untranslated_text.exists():
             objs = []
             for obj in untranslated_text[:limit]:
@@ -24,5 +33,6 @@ def translate_API_data():
                 objs.append(obj)
             model.objects.bulk_update(objs, ["translation"])
 
+    print("running translations")
     for model in [TranslatedQuestionText, TranslatedResponseText, TranslatedText]:
         _doer(model)

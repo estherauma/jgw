@@ -18,14 +18,14 @@ from requests.exceptions import HTTPError
 from .forms import FACTORIES, ORIGIN_COUNTRIES, FilterForm
 
 HELPERS = {
-    "inline": lambda _: Inline(),
-    "preferences": lambda _: Preferences(),
-    "help_contacts": lambda _: HelpContacts(),
-    "messaging": lambda _: Messaging(),
-    "visa": lambda _: CheckLists(key="visa"),
-    "joboffer": lambda _:  CheckLists(key="joboffer"),
-    "contract": lambda _: CheckLists(key="contract"),
-    "beforeyougo": lambda _: CheckLists(key="beforeyougo"),
+    "inline": lambda: Inline(),
+    "preferences": lambda: Preferences(),
+    "help_contacts": lambda: HelpContacts(),
+    "messaging": lambda: Messaging(),
+    "visa": lambda: CheckLists(key="visa"),
+    "joboffer": lambda: CheckLists(key="joboffer"),
+    "contract": lambda: CheckLists(key="contract"),
+    "beforeyougo": lambda: CheckLists(key="beforeyougo"),
 }
 
 
@@ -74,8 +74,7 @@ def render_data(request, template_name, helper):
     return render(
         request,
         template_name,
-        context={"data": chart_data, "form": form,
-                 "filter_string": urlencode(filters)},
+        context={"data": chart_data, "form": form, "filter_string": urlencode(filters)},
     )
 
 
@@ -150,7 +149,8 @@ def process_origin_options(request, key):
     filters = request.GET
     filters = {k: v for k, v in filters.items() if bool(v)}
     helper = HELPERS.get(key)
-    df = helper().get_df(filters)
+    helper = helper()
+    df = helper.get_df(filters)
     origins = df["origin"][df["origin"].notna()]
     origins = set(origins.tolist())
     origin_countries = ORIGIN_COUNTRIES.copy()
@@ -163,7 +163,8 @@ def process_factory_options(request, key):
     filters = request.GET
     filters = {k: v for k, v in filters.items() if bool(v)}
     helper = HELPERS.get(key)
-    df = helper().get_df(filters)
+    helper = helper()
+    df = helper.get_df(filters)
     if "factoryFarm" in df.columns:
         factories = FACTORIES.copy()
         factories.update({k: k for k in set(df["factoryFarm"].tolist())})
@@ -175,7 +176,8 @@ def export_to_excel_file(request, key):
     filters = request.GET
     filters = {k: v for k, v in filters.items() if bool(v)}
     helper = HELPERS[key]
-    df = helper().get_df(filters)
+    helper = helper()
+    df = helper.get_df(filters)
     filename = helper.get_df_path(filters, extension="xlsx")
     df.to_excel(filename, index=False)
 
