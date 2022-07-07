@@ -1,8 +1,10 @@
 """JGW API helpers
 """
 import ast
+from cmath import e
 import os
 from typing import Dict, List
+from langcodes import Language, LanguageTagError
 
 import pandas as pd
 import requests
@@ -84,6 +86,7 @@ class JGWApi:
         filename = FILENAMES.get(key)
         df = pd.DataFrame.from_records(stats)
         df = self.swap_country_names_with_codes(df)
+        df = self.standardise_language_codes(df)
         df = self.normalise_questions_and_responses(df)
         df = self.standardise_lang_to_eng(df)
         df.to_excel(filename, index=False)
@@ -93,6 +96,23 @@ class JGWApi:
         df = pd.read_excel(filename)
         stats = df.to_dict(orient="records")
         return stats
+
+    def standardise_language_codes(self, df):
+        def get_language_code(entry):
+            try:
+                code = str(Language.get(entry))
+            except LanguageTagError as e:
+                try:
+                    code = str(Language.find(entry))
+                except (LookupError, AttributeError) as e:
+                    code = entry
+            except AttributeError:
+                code = entry
+            return code
+
+        df["language"] = df["language"].str.lower()
+        df["language"] = df["language"].apply(get_language_code)
+        return df
 
     def swap_country_names_with_codes(self, df):
         """Replace country name with ISO-3166-1-alpha-3 code."""
@@ -131,6 +151,7 @@ class JGWApi:
         }
         for key in ["origin", "destination"]:
             df[key] = df["route"].apply(country_from_route[key])
+        for key in ["origin", "destination", "locale"]:
             df[key] = df[key].str.lower()
             for k, v in patterns_to_replace.items():
                 df[key] = df[key].replace(v, k)
