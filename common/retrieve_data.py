@@ -116,7 +116,7 @@ class JGWApi:
         return df
 
     def normalise_age_bands(self, df):
-        groups = ["1-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100"]
+        groups = ["11-20", "21-30", "31-40", "41-50", "51-60", "61-70"]
 
         def range_str_to_int(arg):
             if isinstance(arg, str):
