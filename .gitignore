@@ -160,3 +160,4 @@ celery/
 static/assets/data/
 staticfiles/
 google_cred.json
+celerybeat-schedule.db

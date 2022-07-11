@@ -1,8 +1,10 @@
 """JGW API helpers
 """
 import ast
+from cmath import e
 import os
 from typing import Dict, List
+from langcodes import Language, LanguageTagError
 
 import pandas as pd
 import requests
@@ -85,6 +87,8 @@ class JGWApi:
         df = pd.DataFrame.from_records(stats)
         df = self.swap_country_names_with_codes(df)
         df = self.normalise_questions_and_responses(df)
+        df = self.normalise_age_bands(df)
+        df = self.standardise_language_codes(df)
         df = self.standardise_lang_to_eng(df)
         df.to_excel(filename, index=False)
 
@@ -93,6 +97,62 @@ class JGWApi:
         df = pd.read_excel(filename)
         stats = df.to_dict(orient="records")
         return stats
+
+    def standardise_language_codes(self, df):
+        def get_language_code(entry):
+            try:
+                code = str(Language.get(entry))
+            except LanguageTagError as e:
+                try:
+                    code = str(Language.find(entry))
+                except (LookupError, AttributeError) as e:
+                    code = entry
+            except AttributeError:
+                code = entry
+            return code
+
+        df["language"] = df["language"].str.lower()
+        df["language"] = df["language"].apply(get_language_code)
+        return df
+
+    def normalise_age_bands(self, df):
+        groups = ["11-20", "21-30", "31-40", "41-50", "51-60", "61-70"]
+
+        def range_str_to_int(arg):
+            if isinstance(arg, str):
+                temp = [i.replace("+", "") for i in arg.split("-")]
+                temp = [int(i) for i in temp if i]
+                return temp
+            return arg
+
+        def get_range_values(arg):
+            try:
+                a, b = list(range_str_to_int(arg))
+            except TypeError:
+                return None
+            except ValueError:
+                temp = list(range_str_to_int(arg))
+                if len(temp) == 0:
+                    return None
+                elif len(temp) == 1:
+                    a, b = temp[0] + 1, temp[0] + 10
+            return a, b
+
+        def doer(arg):
+            values = get_range_values(arg)
+            if values:
+                arg_min, arg_max = values
+                for group in groups:
+                    group_min, group_max = get_range_values(group)
+                    if arg_min - group_min <= 5 and arg_max == group_max:  # arg: 35-40, group: 31-40
+                        return group
+                    elif arg_min == group_min and group_max - arg_max <= 5:  # arg: 31-35, group: 31-40
+                        return group
+            return arg
+
+        if "age" in df.columns:
+            df["age"] = df["age"].apply(doer)
+        return df
 
     def swap_country_names_with_codes(self, df):
         """Replace country name with ISO-3166-1-alpha-3 code."""
@@ -131,6 +191,7 @@ class JGWApi:
         }
         for key in ["origin", "destination"]:
             df[key] = df["route"].apply(country_from_route[key])
+        for key in ["origin", "destination", "locale"]:
             df[key] = df[key].str.lower()
             for k, v in patterns_to_replace.items():
                 df[key] = df[key].replace(v, k)
