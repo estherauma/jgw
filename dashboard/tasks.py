@@ -1,8 +1,12 @@
+from datetime import datetime
+from nis import cat
+
 from celery import shared_task
 from common.retrieve_data import JGWApi as APIHelper
 from common.retrieve_data import translate_to_eng
 
 from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
+from dashboard.views import get_report
 
 jgw_api = APIHelper()
 
@@ -36,3 +40,12 @@ def translate_API_data():
     print("running translations")
     for model in [TranslatedQuestionText, TranslatedResponseText, TranslatedText]:
         _doer(model)
+
+
+@shared_task(name="generate_report")
+def generate_report():
+    today = datetime.today().strftime("%Y-%m-%d")
+    week_number = int(datetime.today().strftime("%U"))
+    if week_number % 2 == 0:
+        return
+    filename = get_report(start="2022-06-01", end=today, category="preferences")
