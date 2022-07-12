@@ -9,7 +9,7 @@ ORIGIN_COUNTRIES = {"": "Select a Country"}
 FACTORIES = {"": "Select a factory or farm"}
 
 DEST_COUNTRIES.update({k: country_names[k] for k in ("MY", "QA", "SA", "AE", "GB")})
-CATEGORIES = ["preferences", "inline", "messaging", "help_contacts"]
+CATEGORIES = ["preferences"] #, "inline", "messaging", "help_contacts"]
 
 
 class DependentChoiceField(forms.ChoiceField):
@@ -55,6 +55,6 @@ class FilterForm(forms.Form):
 
 class ExportReportForm(forms.Form):
     CATEGORY = models.TextChoices("Category", " ".join(CATEGORIES))
-    start_data = forms.DateField()
-    end_data = forms.DateField()
+    start_date = forms.DateField()
+    end_date = forms.DateField()
     category = forms.ChoiceField(choices=CATEGORY.choices)
