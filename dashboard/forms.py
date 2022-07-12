@@ -53,7 +53,7 @@ class FilterForm(forms.Form):
     )
 
 
-class BatchExportForm(forms.Form):
+class ExportReportForm(forms.Form):
     CATEGORY = models.TextChoices("Category", " ".join(CATEGORIES))
     start_data = forms.DateField()
     end_data = forms.DateField()

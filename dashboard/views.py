@@ -2,6 +2,7 @@ from operator import itemgetter
 from typing import Dict
 from unicodedata import category
 
+import pandas as pd
 from common.checklists import CheckLists
 from common.help_contacts import HelpContacts
 from common.inline import Inline
@@ -16,7 +17,7 @@ from django.utils.http import urlencode
 from pytz import country_names
 from requests.exceptions import HTTPError
 
-from .forms import FACTORIES, ORIGIN_COUNTRIES, FilterForm, BatchExportForm
+from .forms import FACTORIES, ORIGIN_COUNTRIES, ExportReportForm, FilterForm
 
 HELPERS = {
     "inline": lambda: Inline(),
@@ -27,6 +28,13 @@ HELPERS = {
     "joboffer": lambda: CheckLists(key="joboffer"),
     "contract": lambda: CheckLists(key="contract"),
     "beforeyougo": lambda: CheckLists(key="beforeyougo"),
+}
+KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
+OPERATORS = {
+    "concordia": "Seasonal  Worker Scheme - Concordia",
+    "ag_recruitment": "Seasonal  Worker Scheme - AG Recruitment",
+    "generic": "Seasonal  Worker Scheme - Generic",
+    "pro_force": "Seasonal  Worker Scheme - Pro-Force",
 }
 
 
@@ -79,8 +87,29 @@ def render_data(request, template_name, helper):
     )
 
 
-def handle_batch_export(start, end, category):
-    pass
+def get_count_series(df: pd.DataFrame, key: str) -> pd.Series:
+    return df[key].value_counts()
+
+
+def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
+    with pd.ExcelWriter(filename, mode="a", if_sheet_exists="overlay") as writer:
+        startrow = 0
+        for key in KEYS:
+            count = get_count_series(df, key)
+            count.to_excel(writer, sheet_name=sheet_name, startcol=0, startrow=startrow)
+            startrow += count.size + 1
+
+
+def get_report(start, end, category):
+    filename = f"jgwpandas/static/assets/data/{category}.xlsx"
+    df = pd.read_excel(filename)
+    df = df.loc[df["createdAt"].between(start, end, inclusive=True)]
+    write_to_xls_sheet(df, sheet_name="Pref-All", filename=f"{category}.xlsx")
+    for k, operator_name in OPERATORS.items():
+        new_df = df.loc[df["organisation"] == operator_name]
+        new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
+        write_to_xls_sheet(new_df, sheet_name=f"pref-{k}", filename=f"{category}.xlsx")
+    return f"category.xlsx"
 
 
 @login_required()
@@ -183,23 +212,24 @@ def export_to_excel_file(request, key):
     helper = HELPERS[key]
     helper = helper()
     df = helper.get_df(filters)
-    filename = helper.get_df_path(filters, extension="xlsx")
-    df.to_excel(filename, index=False)
-
     if filename is None:
         messages.error(request, "Failed to export!")
         return redirect(reverse(f"dashboard:{key}"))
+    filename = helper.get_df_path(filters, extension="xlsx")
+    df.to_excel(filename, index=False)
     response = FileResponse(open(filename, "rb"))
     return response
 
 
-def batch_export(request):
-    form = BatchExportForm()
-    if request.method == 'POST':
-        form = BatchExportForm(request.POST)
+def export_report(request):
+    form = ExportReportForm()
+    if request.method == "POST":
+        form = ExportReportForm(request.POST)
         if form.is_valid():
             start, end, category = itemgetter("start_date", "end_date", "category")(form.cleaned_data)
-            return handle_batch_export(start, end, category)
+            filename = get_report(start, end, category)
+            response = FileResponse(open(filename, "rb"))
+            return response
         else:
             messages.error(request, "Error validating form!")
     return render(request, "batch_export.html", context={"form": form})
