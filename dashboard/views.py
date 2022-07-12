@@ -1,5 +1,6 @@
 from operator import itemgetter
 from typing import Dict
+from unicodedata import category
 
 from common.checklists import CheckLists
 from common.help_contacts import HelpContacts
@@ -15,7 +16,7 @@ from django.utils.http import urlencode
 from pytz import country_names
 from requests.exceptions import HTTPError
 
-from .forms import FACTORIES, ORIGIN_COUNTRIES, FilterForm
+from .forms import FACTORIES, ORIGIN_COUNTRIES, FilterForm, BatchExportForm
 
 HELPERS = {
     "inline": lambda: Inline(),
@@ -76,6 +77,10 @@ def render_data(request, template_name, helper):
         template_name,
         context={"data": chart_data, "form": form, "filter_string": urlencode(filters)},
     )
+
+
+def handle_batch_export(start, end, category):
+    pass
 
 
 @login_required()
@@ -186,6 +191,18 @@ def export_to_excel_file(request, key):
         return redirect(reverse(f"dashboard:{key}"))
     response = FileResponse(open(filename, "rb"))
     return response
+
+
+def batch_export(request):
+    form = BatchExportForm()
+    if request.method == 'POST':
+        form = BatchExportForm(request.POST)
+        if form.is_valid():
+            start, end, category = itemgetter("start_date", "end_date", "category")(form.cleaned_data)
+            return handle_batch_export(start, end, category)
+        else:
+            messages.error(request, "Error validating form!")
+    return render(request, "batch_export.html", context={"form": form})
 
 
 def test_sentry(request):
