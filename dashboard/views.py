@@ -32,9 +32,9 @@ HELPERS = {
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
 OPERATORS = {
     "concordia": "Seasonal  Worker Scheme - Concordia",
-    "ag_recruitment": "Seasonal  Worker Scheme - AG Recruitment",
-    "generic": "Seasonal  Worker Scheme - Generic",
-    "pro_force": "Seasonal  Worker Scheme - Pro-Force",
+    "ag_recruitment": "Seasonal Worker Scheme - AG Recruitment",
+    "generic": "Seasonal Worker Scheme - Generic",
+    "pro_force": "Seasonal Worker Scheme - Pro-Force",
 }
 
 
@@ -103,13 +103,13 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
 def get_report(start, end, category):
     filename = f"jgwpandas/static/assets/data/{category}.xlsx"
     df = pd.read_excel(filename)
-    df = df.loc[df["createdAt"].between(start, end, inclusive=True)]
+    df = df.loc[df["createdAt"].between(start, end, inclusive='both')]
     write_to_xls_sheet(df, sheet_name="Pref-All", filename=f"{category}.xlsx")
     for k, operator_name in OPERATORS.items():
         new_df = df.loc[df["organisation"] == operator_name]
         new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
         write_to_xls_sheet(new_df, sheet_name=f"pref-{k}", filename=f"{category}.xlsx")
-    return f"category.xlsx"
+    return f"{category}.xlsx"
 
 
 @login_required()
@@ -227,6 +227,7 @@ def export_report(request):
         form = ExportReportForm(request.POST)
         if form.is_valid():
             start, end, category = itemgetter("start_date", "end_date", "category")(form.cleaned_data)
+            start, end = start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
             filename = get_report(start, end, category)
             response = FileResponse(open(filename, "rb"))
             return response

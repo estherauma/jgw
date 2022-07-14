@@ -3,27 +3,43 @@
 <!-- title -->
 {% block title %} Batch Export {% endblock title %}
 
+<!-- stylesheets -->
+{% block stylesheets %} {% endblock stylesheets %}
+
 <!-- page content -->
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <!-- messages -->
-            {% if messages %} {% for message in messages %}
-            <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
-            {% endfor %} {% endif %}
-            <div class="card-header d-flex align-items-center">
-                <h3 class="mr-auto p-3">Batch Export</h3>
+<div class="row h-50 justify-content-center align-items-center mt-5">
+    <div class="card">
+        <!-- messages -->
+        {% if messages %} {% for message in messages %}
+        <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
+        {% endfor %} {% endif %}
+        <div class="card-body">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h3 class="mr-auto p-3">Batch Export</h3>
+                </div>
             </div>
             <form class="form-inline p-2" method="POST">
                 {% csrf_token %}
-                <label class="form-label" for="start_date">{{form.start_date.label}}</label>
-                {{form.start_date}} {{form.start_date.errors}}
-                <label class="form-label" for="end_date">{{form.end_date.label}}</label>
-                {{form.end_date}} {{form.end_date.errors}}
-                <label class="form-label" for="category">{{form.category.label}}</label>
-                {{form.category}} {{form.category.errors}}
-                <button type="submit" class="btn btn-primary">Export</button>
+                <div class="mb-3 form-group col">
+                    <label class="col-form-label" for="category">{{form.category.label}}</label>
+                    {{form.category}}
+                    <span>{{form.category.errors}}</span>
+                </div>
+                <div class="mb-3 form-group col">
+                    <label class="col-form-label" for="start_date">{{form.start_date.label}}</label>
+                    {{form.start_date}}
+                    <span>{{form.start_date.errors}}</span>
+                </div>
+                <div class="mb-3 form-group col">
+                    <label class="col-form-label" for="end_date">{{form.end_date.label}}</label>
+                    {{form.end_date}}
+                    <span>{{form.end_date.errors}}</span>
+                </div>
+                <div class="mb-3 form-group col text-center">
+                    <button type="submit" class="btn btn-primary">Export</button>
+                </div>
             </form>
         </div>
     </div>
