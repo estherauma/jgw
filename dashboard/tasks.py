@@ -37,7 +37,7 @@ def translate_API_data():
                 objs.append(obj)
             model.objects.bulk_update(objs, ["translation"])
 
-    print("running translations")
+   
     for model in [TranslatedQuestionText, TranslatedResponseText, TranslatedText]:
         _doer(model)
 
