@@ -53,7 +53,7 @@ def redirect_to_filtered_data(request, url, template_name):
     form = FilterForm(request.POST)
     if form.is_valid():
         filters = form.cleaned_data.copy()
-        # url encode does not support NoneType values
+        # urlencode does not support NoneType values
         filters = {k: ("" if v is None else v) for k, v in filters.items()}
         return redirect(f"{url}?{urlencode(filters)}")
     return render(request, template_name, context={"form": form})
