@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django import forms
 from django.db import models
 from pytz import country_names
@@ -57,9 +59,27 @@ class ExportReportForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control"
+            self.fields[field].widget.attrs["class"] = "form-control mx-2"
 
     CATEGORY = models.TextChoices("Category", " ".join(CATEGORIES))
     category = forms.ChoiceField(choices=CATEGORY.choices)
-    start_date = forms.DateField()
-    end_date = forms.DateField()
+    start_date = forms.DateField(
+        widget=forms.DateInput(
+            format=("%Y-%m-%d"),
+            attrs={
+                "placeholder": "Select a date",
+                "type": "date",
+                "value": "2022-06-01",
+            },
+        )
+    )
+    end_date = forms.DateField(
+        widget=forms.DateInput(
+            format=("%Y-%m-%d"),
+            attrs={
+                "placeholder": "Select a date",
+                "type": "date",
+                "value": datetime.now().strftime("%Y-%m-%d"),
+            },
+        )
+    )

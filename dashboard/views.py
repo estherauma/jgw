@@ -92,7 +92,7 @@ def get_count_series(df: pd.DataFrame, key: str) -> pd.Series:
 
 
 def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
-    with pd.ExcelWriter(filename, mode="a", if_sheet_exists="overlay") as writer:
+    with pd.ExcelWriter(filename, mode="a", if_sheet_exists="replace") as writer:
         startrow = 0
         for key in KEYS:
             count = get_count_series(df, key)
