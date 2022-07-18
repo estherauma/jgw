@@ -1,6 +1,6 @@
+import shutil
 from operator import itemgetter
 from typing import Dict
-from unicodedata import category
 
 import pandas as pd
 from common.checklists import CheckLists
@@ -103,8 +103,12 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
 def get_report(start, end, category):
     filename = f"jgwpandas/static/assets/data/{category}.xlsx"
     df = pd.read_excel(filename)
-    df = df.loc[df["createdAt"].between(start, end, inclusive='both')]
-    write_to_xls_sheet(df, sheet_name="Pref-All", filename=f"{category}.xlsx")
+    df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
+    try:
+        write_to_xls_sheet(df, sheet_name="Pref-All", filename=f"{category}.xlsx")
+    except FileNotFoundError:
+        shutil.copy("./temp/preferences.xlsx", "./preferences.xlsx")
+        write_to_xls_sheet(df, sheet_name="Pref-All", filename=f"{category}.xlsx")
     for k, operator_name in OPERATORS.items():
         new_df = df.loc[df["organisation"] == operator_name]
         new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
@@ -212,10 +216,10 @@ def export_to_excel_file(request, key):
     helper = HELPERS[key]
     helper = helper()
     df = helper.get_df(filters)
+    filename = helper.get_df_path(filters, extension="xlsx")
     if filename is None:
         messages.error(request, "Failed to export!")
         return redirect(reverse(f"dashboard:{key}"))
-    filename = helper.get_df_path(filters, extension="xlsx")
     df.to_excel(filename, index=False)
     response = FileResponse(open(filename, "rb"))
     return response
