@@ -113,9 +113,9 @@ class JGWApi:
             except AttributeError:
                 code = entry
             return code
-
-        df["language"] = df["language"].str.lower()
-        df["language"] = df["language"].apply(get_language_code)
+        if "language" in df.columns:
+            df["language"] = df["language"].str.lower()
+            df["language"] = df["language"].apply(get_language_code)
         return df
 
     def normalise_age_bands(self, df):
