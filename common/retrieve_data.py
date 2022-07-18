@@ -90,11 +90,14 @@ class JGWApi:
         df = self.normalise_age_bands(df)
         df = self.standardise_language_codes(df)
         df = self.standardise_lang_to_eng(df)
+        df = self.clean_gender_data(df)
         df.to_excel(filename, index=False)
 
     def get_stats_from_file(self, key) -> Dict:
         filename = FILENAMES.get(key)
         df = pd.read_excel(filename)
+        df = self.standardise_lang_to_eng(df)
+        df = self.clean_gender_data(df)
         stats = df.to_dict(orient="records")
         return stats
 
@@ -152,6 +155,28 @@ class JGWApi:
 
         if "age" in df.columns:
             df["age"] = df["age"].apply(doer)
+        return df
+
+    def clean_gender_data(self, df):
+        patterns_to_replace = {
+            "male": ["man", "male", "men", "male gender"],
+            "female": ["woman", "women", "feminine"],
+            "prefer not to answer": [
+                "better not answer",
+                "i prefer not to answer",
+                "i do not want to answer",
+                "i do not want to answer.",
+                "likes to answer",
+                "no answer",
+                "i don&#39;t want to answer",
+                "",
+                None,
+            ],
+        }
+        if "gender" in df.columns:
+            df["gender"] = df["gender"].str.lower()
+            for k, v in patterns_to_replace.items():
+                df["gender"] = df["gender"].replace(v, k)
         return df
 
     def swap_country_names_with_codes(self, df):
