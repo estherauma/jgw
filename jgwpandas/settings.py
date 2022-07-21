@@ -144,7 +144,6 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 CACHE_DIR = os.path.join(PROJECT_ROOT, "static/assets/data/")
-RAW_DIR = os.path.join(PROJECT_ROOT, "static/assets/data/raw/")
 CELERY_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, os.pardir, "celery/"))
 
 for i in [CACHE_DIR, CELERY_DIR]:
@@ -208,3 +207,10 @@ LOGGING = {
         }
     },
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")

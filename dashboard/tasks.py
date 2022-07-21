@@ -5,6 +5,8 @@ import pandas as pd
 import six
 from celery import shared_task
 from google.cloud import translate_v2 as translate
+from django.core.mail import EmailMessage
+from jgwpandas.settings import EMAIL_HOST_USER
 
 from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from dashboard.views import get_report
@@ -84,3 +86,9 @@ def clean_data(filename):
 @shared_task(name="test_task")
 def test_task():
     debug_logger.debug("Celery is working!")
+
+@shared_task(name="send_email_notification")
+def send_email_notification(subject, recipients, message, attachment_path):
+    mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
+    mail.attach_file(attachment_path)
+    mail.send()
