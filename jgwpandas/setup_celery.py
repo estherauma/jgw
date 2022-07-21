@@ -19,10 +19,14 @@ def debug_task(self):
 celery_app.conf.beat_schedule = {
     "fetch-API-data": {
         "task": "get_jgw_data",
-        "schedule": crontab(minute=0, hour=0),
+        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
     },
     "translate-API-data": {
         "task": "translate_to_eng",
-        "schedule": crontab(minute='*/10'),
-    }
+        "schedule": crontab(minute="*/10"),  # every ten minutes
+    },
+    "generate-report": {
+        "task": "generate_report",
+        "schedule": crontab(minute="0", hour="0", day_of_week="friday"),
+    },
 }

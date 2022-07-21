@@ -1,6 +1,8 @@
+import shutil
 from operator import itemgetter
 from typing import Dict
 
+import pandas as pd
 from common.checklists import CheckLists
 from common.help_contacts import HelpContacts
 from common.inline import Inline
@@ -15,7 +17,7 @@ from django.utils.http import urlencode
 from pytz import country_names
 from requests.exceptions import HTTPError
 
-from .forms import FACTORIES, ORIGIN_COUNTRIES, FilterForm
+from .forms import FACTORIES, ORIGIN_COUNTRIES, ExportReportForm, FilterForm
 
 HELPERS = {
     "inline": lambda: Inline(),
@@ -26,6 +28,13 @@ HELPERS = {
     "joboffer": lambda: CheckLists(key="joboffer"),
     "contract": lambda: CheckLists(key="contract"),
     "beforeyougo": lambda: CheckLists(key="beforeyougo"),
+}
+KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
+OPERATORS = {
+    "concordia": "Seasonal  Worker Scheme - Concordia",
+    "ag_recruitment": "Seasonal Worker Scheme - AG Recruitment",
+    "generic": "Seasonal Worker Scheme - Generic",
+    "pro_force": "Seasonal Worker Scheme - Pro-Force",
 }
 
 
@@ -64,7 +73,7 @@ def render_data(request, template_name, helper):
 
     form = FilterForm(initial=filters)
     try:
-        _data = helper.get_stats_object(filters=filters)
+        _data = helper.compute_stats(filters=filters)
         chart_data = form_chart_data(_data)
         if not any(bool(i) for i in _data.values()):
             messages.error(request, "No data matches this search!")
@@ -124,7 +133,7 @@ def inline_question_stats(request):
     form = FilterForm(initial=filters)
     try:
         inline_responses = Inline()
-        _data = inline_responses.get_stats_object(filters=filters)
+        _data = inline_responses.compute_stats(filters=filters)
         response_count, _data = itemgetter("response_count", "data")(_data)
         chart_data = form_chart_data(_data)
         if not any(bool(i) for i in _data.values()):
@@ -179,13 +188,57 @@ def export_to_excel_file(request, key):
     helper = helper()
     df = helper.get_df(filters)
     filename = helper.get_df_path(filters, extension="xlsx")
-    df.to_excel(filename, index=False)
-
     if filename is None:
         messages.error(request, "Failed to export!")
         return redirect(reverse(f"dashboard:{key}"))
+    df.to_excel(filename, index=False)
     response = FileResponse(open(filename, "rb"))
     return response
+
+
+def get_count_series(df: pd.DataFrame, key: str) -> pd.Series:
+    return df[key].value_counts()
+
+
+def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
+    with pd.ExcelWriter(filename, mode="a", if_sheet_exists="overlay") as writer:
+        startrow = 0
+        for key in KEYS:
+            count = get_count_series(df, key)
+            count.to_excel(writer, sheet_name=sheet_name, startcol=0, startrow=startrow)
+            startrow += count.size + 1
+
+
+def get_report(start, end, category):
+    filename = f"jgwpandas/static/assets/data/{category}.xlsx"
+    output_filename = f"{category}.xlsx"
+    df = pd.read_excel(filename)
+    df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
+    try:
+        write_to_xls_sheet(df, sheet_name="Pref-All", filename=output_filename)
+    except FileNotFoundError:
+        shutil.copy("./temp/preferences.xlsx", "./preferences.xlsx")
+        write_to_xls_sheet(df, sheet_name="Pref-All", filename=output_filename)
+    for k, operator_name in OPERATORS.items():
+        new_df = df.loc[df["organisation"] == operator_name]
+        new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
+        write_to_xls_sheet(new_df, sheet_name=f"pref-{k}", filename=output_filename)
+    return output_filename
+
+
+def export_report(request):
+    form = ExportReportForm()
+    if request.method == "POST":
+        form = ExportReportForm(request.POST)
+        if form.is_valid():
+            start, end, category = itemgetter("start_date", "end_date", "category")(form.cleaned_data)
+            start, end = start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
+            filename = get_report(start, end, category)
+            response = FileResponse(open(filename, "rb"))
+            return response
+        else:
+            messages.error(request, "Error validating form!")
+    return render(request, "batch_export.html", context={"form": form})
 
 
 def test_sentry(request):

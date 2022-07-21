@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from django import forms
+from django.db import models
 from pytz import country_names
 
 from .models import Factory, Scheme
@@ -8,6 +11,7 @@ ORIGIN_COUNTRIES = {"": "Select a Country"}
 FACTORIES = {"": "Select a factory or farm"}
 
 DEST_COUNTRIES.update({k: country_names[k] for k in ("MY", "QA", "SA", "AE", "GB")})
+CATEGORIES = ["preferences"]  # , "inline", "messaging", "help_contacts"]
 
 
 class DependentChoiceField(forms.ChoiceField):
@@ -48,4 +52,34 @@ class FilterForm(forms.Form):
         queryset=Factory.objects.all(),
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "factory_farm"}),
+    )
+
+
+class ExportReportForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(forms.Form, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+
+    CATEGORY = models.TextChoices("Category", " ".join(CATEGORIES))
+    category = forms.ChoiceField(choices=CATEGORY.choices)
+    start_date = forms.DateField(
+        widget=forms.DateInput(
+            format=("%Y-%m-%d"),
+            attrs={
+                "placeholder": "Select a date",
+                "type": "date",
+                "value": "2022-06-01",
+            },
+        )
+    )
+    end_date = forms.DateField(
+        widget=forms.DateInput(
+            format=("%Y-%m-%d"),
+            attrs={
+                "placeholder": "Select a date",
+                "type": "date",
+                "value": datetime.now().strftime("%Y-%m-%d"),
+            },
+        )
     )
