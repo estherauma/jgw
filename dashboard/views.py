@@ -205,7 +205,6 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
         startrow = 0
         for key in KEYS:
             count = get_count_series(df, key)
-            print(key)
             count.to_excel(writer, sheet_name=sheet_name, startcol=0, startrow=startrow)
             startrow += count.size + 1
 
