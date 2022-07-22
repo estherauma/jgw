@@ -1,8 +1,6 @@
 from datetime import datetime
-from logging import getLogger
-import glob, os
-import pandas as pd
-import six
+from nis import cat
+
 from celery import shared_task
 from google.cloud import translate_v2 as translate
 from django.core.mail import EmailMessage
@@ -58,6 +56,13 @@ def translate_API_data():
         _doer(model)
 
 
+@shared_task(name="send_email_notification")
+def send_email_notification(subject, message, attachment_path, recipients):
+    mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
+    mail.attach_file(attachment_path)
+    mail.send()
+
+
 @shared_task(name="generate_report")
 def generate_report():
     today = datetime.today().strftime("%Y-%m-%d")
@@ -65,8 +70,12 @@ def generate_report():
     if week_number % 2 == 0:
         return
     filename = get_report(start="2022-06-01", end=today, category="preferences")
-    return filename
-
+    send_email_notification.delay(
+        subject=f"{today}-SWS Report",
+        message=f"Hello, \nPlease find attached the SWS Report for {datetime.today() - timedelta(weeks=2)} to {today}.\nJGW.Pandas",
+        attachment_path=filename,
+        recipients=[],
+    )
 
 
 @shared_task(name="_clean_data")
@@ -86,7 +95,7 @@ def clean_data(filename):
 @shared_task(name="test_task")
 def test_task():
     debug_logger.debug("Celery is working!")
-
+    
 @shared_task(name="send_email_notification")
 def send_email_notification(subject, recipients, message, attachment_path):
     mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
