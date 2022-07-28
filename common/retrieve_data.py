@@ -1,8 +1,8 @@
 """JGW API helpers
 """
 import ast
+import logging
 import os
-from cmath import e
 from typing import Dict, List
 
 import pandas as pd
@@ -14,6 +14,7 @@ from jgwpandas.settings import CACHE_DIR
 from langcodes import Language, LanguageTagError
 from pytz import country_names
 
+debug_logger = logging.getLogger("djangoDebug")
 FILENAMES = {
     k: os.path.join(CACHE_DIR, f"{k}.xlsx")
     for k in [
@@ -76,6 +77,7 @@ class JGWApi:
             url = f"{self.base_url}{URLS.get(key)}"
             response = self._get(url, {})
             if response and response.status_code == requests.codes.ok:
+                debug_logger.info(f"No file for: {key}. Fetched from JGW ok.")
                 result = response.json()
                 data = result["data"]
                 self.write_data_to_file(stats=data, key=key)
@@ -92,10 +94,12 @@ class JGWApi:
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
         df.to_excel(filename, index=False)
+        debug_logger.info(f"Wrote cleaned df to: {filename}.\n df sample:{df.head(29)}")
 
     def get_stats_from_file(self, key) -> Dict:
         filename = FILENAMES.get(key)
         df = pd.read_excel(filename)
+        debug_logger.info(f"Read df from: {filename}.\n df sample:{df.head(29)}")
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
         stats = df.to_dict(orient="records")
@@ -113,6 +117,7 @@ class JGWApi:
             except AttributeError:
                 code = entry
             return code
+
         if "language" in df.columns:
             df["language"] = df["language"].str.lower()
             df["language"] = df["language"].apply(get_language_code)

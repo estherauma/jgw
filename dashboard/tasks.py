@@ -1,5 +1,5 @@
 from datetime import datetime
-from nis import cat
+from logging import getLogger
 
 from celery import shared_task
 from common.retrieve_data import JGWApi as APIHelper
@@ -9,6 +9,7 @@ from dashboard.models import TranslatedQuestionText, TranslatedResponseText, Tra
 from dashboard.views import get_report
 
 jgw_api = APIHelper()
+debug_logger = getLogger("djangoDebug")
 
 
 @shared_task(name="get_jgw_data")
@@ -37,7 +38,6 @@ def translate_API_data():
                 objs.append(obj)
             model.objects.bulk_update(objs, ["translation"])
 
-   
     for model in [TranslatedQuestionText, TranslatedResponseText, TranslatedText]:
         _doer(model)
 
@@ -49,3 +49,4 @@ def generate_report():
     if week_number % 2 == 0:
         return
     filename = get_report(start="2022-06-01", end=today, category="preferences")
+    return filename
