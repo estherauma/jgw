@@ -83,23 +83,26 @@ class JGWApi:
                 self.write_data_to_file(stats=data, key=key)
                 data = self.get_stats_from_file(key=key)
         return data
-
-    def write_data_to_file(self, stats: list, key):
-        filename = FILENAMES.get(key)
-        df = pd.DataFrame.from_records(stats)
+    
+    def clean_data(self, df):
         df = self.swap_country_names_with_codes(df)
         df = self.normalise_questions_and_responses(df)
         df = self.normalise_age_bands(df)
         df = self.standardise_language_codes(df)
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
+        return df
+
+    def write_data_to_file(self, stats: list, key):
+        filename = FILENAMES.get(key)
+        df = pd.DataFrame.from_records(stats)
         df.to_excel(filename, index=False)
-        debug_logger.info(f"Wrote cleaned df to: {filename}.\n df sample:{df.head(29)}")
+        debug_logger.info(f"\nWrote raw df to: {filename}.")
 
     def get_stats_from_file(self, key) -> Dict:
         filename = FILENAMES.get(key)
         df = pd.read_excel(filename)
-        debug_logger.info(f"Read df from: {filename}.\n df sample:{df.head(29)}")
+        debug_logger.info(f"\nRead df from: {filename}.")
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
         stats = df.to_dict(orient="records")
