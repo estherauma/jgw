@@ -1,15 +1,29 @@
 from datetime import datetime
 from logging import getLogger
 
+import pandas as pd
+import six
 from celery import shared_task
 from common.retrieve_data import JGWApi as APIHelper
 from common.retrieve_data import translate_to_eng
+from google.cloud import translate_v2 as translate
 
 from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from dashboard.views import get_report
 
-jgw_api = APIHelper()
+
+client = translate.Client()
 debug_logger = getLogger("djangoDebug")
+jgw_api = APIHelper()
+
+
+def translate_to_eng(text, client=client):
+    if isinstance(text, six.binary_type):
+        text = text.decode("utf-8")
+    if isinstance(text, str):
+        result = client.translate(text, target_language="en")
+        return result["translatedText"]
+    return text
 
 
 @shared_task(name="get_jgw_data")
@@ -50,3 +64,14 @@ def generate_report():
         return
     filename = get_report(start="2022-06-01", end=today, category="preferences")
     return filename
+
+
+@shared_task(name="chunk_and_clean_data")
+def chunk_and_clean_data(filename):
+    df = pd.read_csv(filename, chunksize=100)
+
+
+@shared_task(name="_clean_data")
+def _clean_data(filename):
+    df = jgw_api.clean_data(df)
+    jgw_api.write_data_to_file()

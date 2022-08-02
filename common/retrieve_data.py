@@ -107,9 +107,13 @@ class JGWApi:
                 code = entry
             return code
 
+        tic = perf_counter()
         if "language" in df.columns:
             df["language"] = df["language"].str.lower()
             df["language"] = df["language"].apply(get_language_code)
+        toc = perf_counter()
+        debug_logger.debug(f"time elapsed: {toc-tic}")
+
         return df
 
     def normalise_age_bands(self, df):
@@ -147,8 +151,12 @@ class JGWApi:
                         return group
             return arg
 
+        tic = perf_counter()
+
         if "age" in df.columns:
             df["age"] = df["age"].apply(doer)
+        toc = perf_counter()
+        debug_logger.debug(f"time elapsed: {toc-tic}")
         return df
 
     def clean_gender_data(self, df):
@@ -169,9 +177,12 @@ class JGWApi:
             "": "prefer not to answer",
             None: "prefer not to answer",
         }
+        tic = perf_counter()
         if "gender" in df.columns:
             df["gender"] = df["gender"].str.lower()
             df["gender"] = df["gender"].replace(patterns_to_replace)
+        toc = perf_counter()
+        debug_logger.debug(f"time elapsed: {toc-tic}")
         return df
 
     def swap_country_names_with_codes(self, df):
@@ -215,6 +226,8 @@ class JGWApi:
             "phillippines": country_names["PH"].lower(),
             "saudi": country_names["SA"].lower(),
         }
+        tic = perf_counter()
+
         for key in ["origin", "destination"]:
             df[key] = df["route"].apply(country_from_route[key])
         df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].apply(
@@ -226,6 +239,8 @@ class JGWApi:
         df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].apply(
             get_country_code
         )
+        toc = perf_counter()
+        debug_logger.debug(f"time elapsed: {toc-tic}")
         return df
 
     def normalise_questions_and_responses(self, df):
@@ -248,6 +263,7 @@ class JGWApi:
                     _responses.append(response["value"])
             return _responses
 
+        tic = perf_counter()
         if "questionText" in df.columns:
             df["questionText"] = df["questionText"].apply(cast_to_native)
             df["questionText"] = df["questionText"].apply(unpack_question_list)
@@ -255,6 +271,8 @@ class JGWApi:
         if "questionResponse" in df.columns:
             df["questionResponse"] = df["questionResponse"].apply(cast_to_native)
             df["questionResponse"] = df["questionResponse"].apply(get_true_responses)
+        toc = perf_counter()
+        debug_logger.debug(f"time elapsed: {toc-tic}")
         return df
 
     def standardise_lang_to_eng(self, df):
@@ -293,15 +311,19 @@ class JGWApi:
 
         scalar_fields = ["age", "gender", "language"]
         list_fields = ["hearAboutUs", "sectorOfWork", "questionResponse"]
+        tic = perf_counter()
 
         df = df.fillna("")
         if "questionText" in df.columns:
             df["questionText"] = df.apply(
                 lambda x: translate_question(x["questionId"], x["questionText"]), axis=1
             )
-        for field in df.columns:
-            if field in scalar_fields:
-                df[field] = df[field].apply(lambda x: translate_field_or_mark(x, field=field))
-            elif field in list_fields:
-                df[field] = df[field].apply(lambda x: translate_list_field(text_list=x, field=field))
+        df[["age", "gender", "language"]] = df[["age", "gender", "language"]].apply(
+            lambda x: translate_field_or_mark(x, field=x.name)
+        )
+        df[["hearAboutUs", "sectorOfWork", "questionResponse"]] = df[
+            ["hearAboutUs", "sectorOfWork", "questionResponse"]
+        ].apply(lambda x: translate_list_field(text_list=x, field=x.name))
+        toc = perf_counter()
+        debug_logger.debug(f"time elapsed: {toc-tic}")
         return df
