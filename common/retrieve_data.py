@@ -3,31 +3,26 @@
 import ast
 import logging
 import os
+from time import perf_counter
 from typing import Dict, List
 
 import pandas as pd
 import requests
-import six
 from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
-from google.cloud import translate_v2 as translate
-from jgwpandas.settings import CACHE_DIR
+from jgwpandas.settings import CACHE_DIR, RAW_DIR
 from langcodes import Language, LanguageTagError
 from pytz import country_names
 
-debug_logger = logging.getLogger("djangoDebug")
-FILENAMES = {
-    k: os.path.join(CACHE_DIR, f"{k}.xlsx")
-    for k in [
-        "preferences",
-        "inline",
-        "messaging",
-        "help_contacts",
-        "contract",
-        "visa",
-        "joboffer",
-        "beforeyougo",
-    ]
-}
+data_categories = [
+    "preferences",
+    "inline",
+    "messaging",
+    "help_contacts",
+    "contract",
+    "visa",
+    "joboffer",
+    "beforeyougo",
+]
 URLS = {
     "preferences": "/preferences",
     "inline": "/inlinequestions",
@@ -38,21 +33,11 @@ URLS = {
     "visa": "/visa-checklists",
     "joboffer": "/joboffer-checklists",
 }
-
+debug_logger = logging.getLogger("djangoDebug")
+CACHE_FILENAMES = {k: os.path.join(CACHE_DIR, f"{k}.csv") for k in data_categories}
+RAW_FILENAMES = {k: os.path.join(RAW_DIR, f"{k}.csv") for k in data_categories}
 reversed_country_names = {v.lower(): k for k, v in country_names.items()}
 reversed_country_names.update({"republic of kosovo": "XK"})
-
-
-client = translate.Client()
-
-
-def translate_to_eng(text, client=client):
-    if isinstance(text, six.binary_type):
-        text = text.decode("utf-8")
-    if isinstance(text, str):
-        result = client.translate(text, target_language="en")
-        return result["translatedText"]
-    return text
 
 
 class JGWApi:
@@ -68,54 +53,55 @@ class JGWApi:
 
     def get_data(self, key: str) -> list:
         """`key` is one of: `preferences, inline, messaging, help_contacts, visa, contract, joboffer, beforeyougo`"""
-        if key not in FILENAMES.keys():
-            return None
         data = None
+        filename = CACHE_FILENAMES.get(key)
+        if key not in data_categories:
+            return data
         try:
-            data = self.get_stats_from_file(key=key)
+            data = self.get_data_from_file(filename)
         except FileNotFoundError:
             url = f"{self.base_url}{URLS.get(key)}"
             response = self._get(url, {})
             if response and response.status_code == requests.codes.ok:
-                debug_logger.info(f"No file for: {key}. Fetched from JGW ok.")
                 result = response.json()
                 data = result["data"]
-                self.write_data_to_file(stats=data, key=key)
-                data = self.get_stats_from_file(key=key)
+                self.write_data_to_file(data, filename)
+                data = self.get_data_from_file(filename)
         return data
-    
+
     def clean_data(self, df):
-        df = self.swap_country_names_with_codes(df)
+        debug_logger.info(f"\Started cleaning functions.")
+        tic = perf_counter()
         df = self.normalise_questions_and_responses(df)
+        df = self.standardise_lang_to_eng(df)
+        df = self.clean_gender_data(df)
         df = self.normalise_age_bands(df)
         df = self.standardise_language_codes(df)
-        df = self.standardise_lang_to_eng(df)
-        df = self.clean_gender_data(df)
+        df = self.swap_country_names_with_codes(df)
+        toc = perf_counter()
+        debug_logger.debug(f"clean_data: time elapsed: {toc-tic}")
         return df
 
-    def write_data_to_file(self, stats: list, key):
-        filename = FILENAMES.get(key)
-        df = pd.DataFrame.from_records(stats)
-        df.to_excel(filename, index=False)
-        debug_logger.info(f"\nWrote raw df to: {filename}.")
+    def write_data_to_file(self, data: list, filename: str):
+        df = pd.DataFrame.from_records(data)
+        df = self.clean_data(df)
+        df.to_csv(filename, index=False)
+        debug_logger.info(f"\nWrote df to: {filename}.")
 
-    def get_stats_from_file(self, key) -> Dict:
-        filename = FILENAMES.get(key)
-        df = pd.read_excel(filename)
+    def get_data_from_file(self, filename) -> Dict:
+        df = pd.read_csv(filename)
+        data = df.to_dict(orient="records")
         debug_logger.info(f"\nRead df from: {filename}.")
-        df = self.standardise_lang_to_eng(df)
-        df = self.clean_gender_data(df)
-        stats = df.to_dict(orient="records")
-        return stats
+        return data
 
     def standardise_language_codes(self, df):
         def get_language_code(entry):
             try:
                 code = str(Language.get(entry))
-            except LanguageTagError as e:
+            except LanguageTagError:
                 try:
                     code = str(Language.find(entry))
-                except (LookupError, AttributeError) as e:
+                except (LookupError, AttributeError):
                     code = entry
             except AttributeError:
                 code = entry
@@ -167,24 +153,25 @@ class JGWApi:
 
     def clean_gender_data(self, df):
         patterns_to_replace = {
-            "male": ["man", "male", "men", "male gender"],
-            "female": ["woman", "women", "feminine"],
-            "prefer not to answer": [
-                "better not answer",
-                "i prefer not to answer",
-                "i do not want to answer",
-                "i do not want to answer.",
-                "likes to answer",
-                "no answer",
-                "i don&#39;t want to answer",
-                "",
-                None,
-            ],
+            "man": "male",
+            "men": "male",
+            "male gender": "male",
+            "woman": "female",
+            "women": "female",
+            "feminine": "female",
+            "better not answer": "prefer not to answer",
+            "i prefer not to answer": "prefer not to answer",
+            "i do not want to answer": "prefer not to answer",
+            "i do not want to answer.": "prefer not to answer",
+            "likes to answer": "prefer not to answer",
+            "no answer": "prefer not to answer",
+            "i don&#39;t want to answer": "prefer not to answer",
+            "": "prefer not to answer",
+            None: "prefer not to answer",
         }
         if "gender" in df.columns:
             df["gender"] = df["gender"].str.lower()
-            for k, v in patterns_to_replace.items():
-                df["gender"] = df["gender"].replace(v, k)
+            df["gender"] = df["gender"].replace(patterns_to_replace)
         return df
 
     def swap_country_names_with_codes(self, df):
@@ -196,7 +183,7 @@ class JGWApi:
             return None
 
         def get_dest_country(i):
-            if isinstance(i, str):
+            if isinstance(i, str) and i:
                 return i.split(" -> ")[1]
             return None
 
@@ -205,30 +192,40 @@ class JGWApi:
             "destination": get_dest_country,
         }
 
-        def get_country_code(name):
-            if name is not None:
-                code = reversed_country_names.get(name)
-                return name if code is None else code
-            return None
+        def get_country_code(column):
+            def _get_country_code(name):
+                if name is not None:
+                    code = reversed_country_names.get(name)
+                    return name if code is None else code
+                return None
+
+            column = column.apply(_get_country_code)
+            return column
 
         patterns_to_replace = {
-            "republic of kosovo": ["kosovo"],
-            country_names["AE"].lower(): ["uae"],
-            country_names["BA"].lower(): ["bosnia and herzegovina"],
-            country_names["CZ"].lower(): ["czechia"],
-            country_names["GB"].lower(): ["uk", "united kingdom"],
-            country_names["LK"].lower(): ["sri-lanka"],
-            country_names["MM"].lower(): ["myanmar", "burma"],
-            country_names["PH"].lower(): ["phillippines"],
-            country_names["SA"].lower(): ["saudi"],
+            "kosovo": "republic of kosovo",
+            "uae": country_names["AE"].lower(),
+            "bosnia and herzegovina": country_names["BA"].lower(),
+            "czechia": country_names["CZ"].lower(),
+            "uk": country_names["GB"].lower(),
+            "united kingdom": country_names["GB"].lower(),
+            "sri-lanka": country_names["LK"].lower(),
+            "myanmar": country_names["MM"].lower(),
+            "burma": country_names["MM"].lower(),
+            "phillippines": country_names["PH"].lower(),
+            "saudi": country_names["SA"].lower(),
         }
         for key in ["origin", "destination"]:
             df[key] = df["route"].apply(country_from_route[key])
-        for key in ["origin", "destination", "locale"]:
-            df[key] = df[key].str.lower()
-            for k, v in patterns_to_replace.items():
-                df[key] = df[key].replace(v, k)
-            df[key] = df[key].apply(get_country_code)
+        df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].apply(
+            lambda x: x.str.lower()
+        )
+        df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].replace(
+            patterns_to_replace
+        )
+        df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].apply(
+            get_country_code
+        )
         return df
 
     def normalise_questions_and_responses(self, df):
@@ -267,7 +264,8 @@ class JGWApi:
             query = TranslatedQuestionText.objects.filter(prismic_id=id)
             if query.exists():
                 result = query.first()
-                return result.translation
+                if result.translation is not None:
+                    return result.translation
             TranslatedQuestionText.objects.create(prismic_id=id, original_text=text)
             return text
 

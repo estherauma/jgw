@@ -210,9 +210,9 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
 
 
 def get_report(start, end, category):
-    filename = f"jgwpandas/static/assets/data/{category}.xlsx"
+    filename = f"jgwpandas/static/assets/data/{category}.csv"
     output_filename = f"{category}.xlsx"
-    df = pd.read_excel(filename)
+    df = pd.read_csv(filename)
     df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
     try:
         write_to_xls_sheet(df, sheet_name="Pref-All", filename=output_filename)

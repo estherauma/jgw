@@ -144,6 +144,7 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 CACHE_DIR = os.path.join(PROJECT_ROOT, "static/assets/data/")
+RAW_DIR = os.path.join(PROJECT_ROOT, "static/assets/data/raw/")
 CELERY_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, os.pardir, "celery/"))
 
 for i in [CACHE_DIR, CELERY_DIR]:
@@ -175,34 +176,35 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': ('%(asctime)s [%(process)d] [%(levelname)s] ' +
-                       'pathname=%(pathname)s lineno=%(lineno)s ' +
-                       'funcname=%(funcName)s %(message)s'),
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": (
+                "%(asctime)s [%(process)d] [%(levelname)s] "
+                + "pathname=%(pathname)s lineno=%(lineno)s "
+                + "funcname=%(funcName)s %(message)s"
+            ),
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
+        "simple": {"format": "%(levelname)s %(message)s"},
+    },
+    "handlers": {
+        "null": {
+            "level": "DEBUG",
+            "class": "logging.NullHandler",
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            # "stream": "sys.stdout",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "djangoDebug": {
+            "handlers": ["console"],
+            "level": "DEBUG",
         }
     },
-    'handlers': {
-        'null': {
-            'level': 'DEBUG',
-            'class': 'logging.NullHandler',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        }
-    },
-    'loggers': {
-        'djangoDebug': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        }
-    }
 }
