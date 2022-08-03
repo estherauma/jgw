@@ -3,6 +3,7 @@
 import ast
 import logging
 import os
+from functools import reduce
 from time import perf_counter
 from typing import Dict, List
 
@@ -168,14 +169,18 @@ class JGWApi:
             "women": "female",
             "feminine": "female",
             "better not answer": "prefer not to answer",
+            "better not to answer": "prefer not to answer",
             "i prefer not to answer": "prefer not to answer",
             "i do not want to answer": "prefer not to answer",
             "i do not want to answer.": "prefer not to answer",
             "likes to answer": "prefer not to answer",
             "no answer": "prefer not to answer",
             "i don&#39;t want to answer": "prefer not to answer",
+            "i don&#39;t want to answer.": "prefer not to answer",
+            "prefer to answer": "prefer not to answer",
             "": "prefer not to answer",
             None: "prefer not to answer",
+            "another": "other",
         }
         tic = perf_counter()
         if "gender" in df.columns:
@@ -284,33 +289,48 @@ class JGWApi:
                 result = query.first()
                 if result.translation is not None:
                     return result.translation
-            TranslatedQuestionText.objects.create(prismic_id=id, original_text=text)
+            else:
+                TranslatedQuestionText.objects.create(prismic_id=id, original_text=text)
             return text
 
-        def translate_field_or_mark(text, field):
-            models = {
-                "age": TranslatedText,
-                "hearAboutUs": TranslatedText,
-                "gender": TranslatedText,
-                "language": TranslatedText,
-                "sectorOfWork": TranslatedText,
-                "questionResponse": TranslatedResponseText,
-            }
-            TranslatedModel = models[field]
+        def handle_translate(text, field):
+            TranslatedModel = TranslatedResponseText if field == "questionResponse" else TranslatedText
             query = TranslatedModel.objects.filter(original_text=text)
             if query.exists():
                 result = query.first()
-                return result.translation
-            TranslatedModel.objects.create(original_text=text)
+                if result.translation is not None:
+                    return result.translation
+            else:
+                TranslatedModel.objects.create(original_text=text)
             return text
 
-        def translate_list_field(text_list, field):
-            if not isinstance(text_list, list):
-                return translate_field_or_mark(text=text_list, field=field)
-            return [translate_field_or_mark(text=item, field=field) for item in text_list]
+        def translate_field_or_mark(column):
+            merge_dicts = lambda x: reduce(lambda a, b: {**a, **b}, x)
+            TranslatedModel = TranslatedResponseText if column.name == "questionResponse" else TranslatedText
+            queryset = TranslatedModel.objects.filter(
+                original_text__in=column.to_list(), translation__isnull=False
+            ).values("original_text", "translation")
+            result_list = [{i["original_text"]: i["translation"]} for i in list(queryset)]
+            result_list = merge_dicts(result_list)
+            column = column.replace(result_list)
+            return column
 
-        scalar_fields = ["age", "gender", "language"]
-        list_fields = ["hearAboutUs", "sectorOfWork", "questionResponse"]
+        def translate_list_field(column):
+            def _do_translate_listfield(text_list, field):
+                if not isinstance(text_list, list):
+                    return handle_translate(text=text_list, field=field)
+                TranslatedModel = TranslatedResponseText if field == "questionResponse" else TranslatedText
+                queryset = TranslatedModel.objects.filter(
+                    original_text__in=text_list, translation__isnull=False
+                ).values("translation")
+                result_list = [i["translation"] for i in list(queryset)]
+                return result_list
+
+            column = column.apply(lambda x: _do_translate_listfield(text_list=x, field=column.name))
+            return column
+
+        scalar_cols = [i for i in df.columns if i in ["age", "gender", "language"]]
+        list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "questionResponse"]]
         tic = perf_counter()
 
         df = df.fillna("")
@@ -318,12 +338,10 @@ class JGWApi:
             df["questionText"] = df.apply(
                 lambda x: translate_question(x["questionId"], x["questionText"]), axis=1
             )
-        df[["age", "gender", "language"]] = df[["age", "gender", "language"]].apply(
-            lambda x: translate_field_or_mark(x, field=x.name)
-        )
-        df[["hearAboutUs", "sectorOfWork", "questionResponse"]] = df[
-            ["hearAboutUs", "sectorOfWork", "questionResponse"]
-        ].apply(lambda x: translate_list_field(text_list=x, field=x.name))
+        if scalar_cols:
+            df[scalar_cols] = df[scalar_cols].apply(translate_field_or_mark)
+        if list_cols:
+            df[list_cols] = df[list_cols].apply(translate_list_field)
         toc = perf_counter()
         debug_logger.debug(f"time elapsed: {toc-tic}")
         return df

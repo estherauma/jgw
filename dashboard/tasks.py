@@ -5,7 +5,6 @@ import pandas as pd
 import six
 from celery import shared_task
 from common.retrieve_data import JGWApi as APIHelper
-from common.retrieve_data import translate_to_eng
 from google.cloud import translate_v2 as translate
 
 from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
@@ -75,3 +74,7 @@ def chunk_and_clean_data(filename):
 def _clean_data(filename):
     df = jgw_api.clean_data(df)
     jgw_api.write_data_to_file()
+
+@shared_task(name='test_task')
+def test_task():
+    debug_logger.debug('Celery is working!')
