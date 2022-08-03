@@ -71,7 +71,7 @@ class JGWApi:
         return data
 
     def clean_data(self, df):
-        debug_logger.info(f"\Started cleaning functions.")
+        debug_logger.info(f"\nStarted cleaning functions.")
         tic = perf_counter()
         df = self.normalise_questions_and_responses(df)
         df = self.standardise_lang_to_eng(df)
@@ -310,9 +310,10 @@ class JGWApi:
             queryset = TranslatedModel.objects.filter(
                 original_text__in=column.to_list(), translation__isnull=False
             ).values("original_text", "translation")
-            result_list = [{i["original_text"]: i["translation"]} for i in list(queryset)]
-            result_list = merge_dicts(result_list)
-            column = column.replace(result_list)
+            if queryset:
+                result_list = [{i["original_text"]: i["translation"]} for i in list(queryset)]
+                result_list = merge_dicts(result_list)
+                column = column.replace(result_list)
             return column
 
         def translate_list_field(column):
@@ -323,8 +324,10 @@ class JGWApi:
                 queryset = TranslatedModel.objects.filter(
                     original_text__in=text_list, translation__isnull=False
                 ).values("translation")
-                result_list = [i["translation"] for i in list(queryset)]
-                return result_list
+                if queryset:
+                    result_list = [i["translation"] for i in list(queryset)]
+                    return result_list
+                return text_list
 
             column = column.apply(lambda x: _do_translate_listfield(text_list=x, field=column.name))
             return column
