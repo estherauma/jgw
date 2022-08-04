@@ -11,7 +11,8 @@ QueryMap = Dict[str, list[str]]
 
 class Messaging(BaseAnalytics):
     def __init__(self) -> None:
-        messaging_data = api.get_data(key="messaging")
+        messaging_data, clean = api.get_data(key="messaging")
+        self.cleaned = clean
         self.raw_df = pd.DataFrame.from_records(messaging_data)
         self.export_csv_name = "messaging_qn_responses.csv"
 

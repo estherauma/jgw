@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django import forms
 from django.db import models
@@ -6,12 +6,25 @@ from pytz import country_names
 
 from .models import Factory, Scheme
 
+
+def get_start_date(days):
+    target_date = datetime.today() - timedelta(days=days)
+    return target_date.strftime("%Y-%m-%d")
+
+
 DEST_COUNTRIES = {"": "Select a Country"}
 ORIGIN_COUNTRIES = {"": "Select a Country"}
 FACTORIES = {"": "Select a factory or farm"}
 
+
 DEST_COUNTRIES.update({k: country_names[k] for k in ("MY", "QA", "SA", "AE", "GB")})
 CATEGORIES = ["preferences"]  # , "inline", "messaging", "help_contacts"]
+TIME_RANGE = {
+    get_start_date(days=30): "30 Days",
+    get_start_date(days=60): "60 Days",
+    get_start_date(days=90): "90 Days",
+    "all_time": "All Time",
+}
 
 
 class DependentChoiceField(forms.ChoiceField):
@@ -52,6 +65,11 @@ class FilterForm(forms.Form):
         queryset=Factory.objects.all(),
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "factory_farm"}),
+    )
+    time_range = forms.ChoiceField(
+        choices=TIME_RANGE.items(),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "time_range"}),
     )
 
 

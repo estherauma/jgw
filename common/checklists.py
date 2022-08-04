@@ -11,7 +11,8 @@ QueryMap = Dict[str, list[str]]
 
 class CheckLists(BaseAnalytics):
     def __init__(self, key) -> None:
-        checklists_data = api.get_data(key=key)
+        checklists_data, clean = api.get_data(key=key)
+        self.cleaned = clean
         self.raw_df = pd.DataFrame.from_records(checklists_data)
         self.export_csv_name = f"{key}-checklists.csv"
 

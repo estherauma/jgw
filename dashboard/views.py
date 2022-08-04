@@ -17,8 +17,9 @@ from django.utils.http import urlencode
 from pytz import country_names
 from requests.exceptions import HTTPError
 
-from .forms import FACTORIES, ORIGIN_COUNTRIES, ExportReportForm, FilterForm
+from .forms import FACTORIES, ORIGIN_COUNTRIES, ExportReportForm, FilterForm, get_start_date
 
+KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
 HELPERS = {
     "inline": lambda: Inline(),
     "preferences": lambda: Preferences(),
@@ -29,7 +30,6 @@ HELPERS = {
     "contract": lambda: CheckLists(key="contract"),
     "beforeyougo": lambda: CheckLists(key="beforeyougo"),
 }
-KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
 OPERATORS = {
     "concordia": "Seasonal  Worker Scheme - Concordia",
     "ag_recruitment": "Seasonal Worker Scheme - AG Recruitment",
@@ -40,21 +40,25 @@ OPERATORS = {
 
 def form_chart_data(data: Dict) -> Dict:
     """
-    reshapes data to shape expected by chart library
+    reshapes data as expected by chart library
     """
     return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
 
 
 def process_filters(request):
     user = request.user
-    filters = {} or request.GET
     role_filters = {
         "Scheme": {"scheme_name": user.scheme},
         "Factory": {"factory_farm": user.factory},
     }
+    filters = request.GET.dict()
     filters.update(role_filters.get(user.role, {}))
     if bool(filters):
         filters = {k: v for k, v in filters.items() if bool(v)}
+        if "time_range" not in filters:
+            filters["time_range"] = get_start_date(days=30)
+    else:
+        filters["time_range"] = get_start_date(days=30)
     return filters
 
 
@@ -70,8 +74,8 @@ def redirect_to_filtered_data(request, url, template_name):
 
 def render_data(request, template_name, helper):
     filters = process_filters(request)
-
     form = FilterForm(initial=filters)
+    context_data = {"form": form}
     try:
         _data = helper.compute_stats(filters=filters)
         chart_data = form_chart_data(_data)
@@ -80,11 +84,16 @@ def render_data(request, template_name, helper):
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, template_name, context={"form": form})
-    return render(
-        request,
-        template_name,
-        context={"data": chart_data, "form": form, "filter_string": urlencode(filters)},
-    )
+    context_data.update({"data": chart_data, "filter_string": urlencode(filters)})
+    if helper.cleaned is False:
+        messages.info(
+            request,
+            (
+                "Raw data is shown while we finish processing your results."
+                "\nRefresh after a few minutes to view the completed stats."
+            ),
+        )
+    return render(request, template_name, context=context_data)
 
 
 @login_required()
@@ -125,12 +134,14 @@ def checklists_stats(request, key):
 
 @login_required()
 def inline_question_stats(request):
+    filters = process_filters(request)
+    form = FilterForm(initial=filters)
+    context_data = {"form": form}
+    chart_data = None
     if request.method == "POST":
         return redirect_to_filtered_data(
             request, url=reverse("dashboard:inline"), template_name="inline.html"
         )
-    filters = process_filters(request)
-    form = FilterForm(initial=filters)
     try:
         inline_responses = Inline()
         _data = inline_responses.compute_stats(filters=filters)
@@ -141,16 +152,18 @@ def inline_question_stats(request):
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, "inline.html", context={"form": form})
-    return render(
-        request,
-        "inline.html",
-        context={
-            "data": chart_data,
-            "form": form,
-            "response_count": response_count,
-            "filter_string": urlencode(filters),
-        },
+    context_data.update(
+        {"data": chart_data, "response_count": response_count, "filter_string": urlencode(filters)}
     )
+    if inline_responses.cleaned is False:
+        messages.info(
+            request,
+            (
+                "Raw data is shown while we finish processing your results."
+                "\nRefresh after a few minutes to view the completed stats."
+            ),
+        )
+    return render(request, "inline.html", context=context_data)
 
 
 @login_required()
@@ -182,8 +195,7 @@ def process_factory_options(request, key):
 
 @login_required()
 def export_to_excel_file(request, key):
-    filters = request.GET
-    filters = {k: v for k, v in filters.items() if bool(v)}
+    filters = process_filters(request)
     helper = HELPERS[key]
     helper = helper()
     df = helper.get_df(filters)
@@ -226,6 +238,7 @@ def get_report(start, end, category):
     return output_filename
 
 
+@login_required()
 def export_report(request):
     form = ExportReportForm()
     if request.method == "POST":

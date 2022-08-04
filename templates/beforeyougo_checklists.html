@@ -36,6 +36,8 @@
                 {{form.scheme_name}} {{form.scheme_name.errors}}
                 <label class="form-label" for="factory_farm">{{form.factory_farm.label}}</label>
                 {{form.factory_farm}} {{form.factory_farm.errors}}
+                <label class="form-label" for="time_range">{{form.time_range.label}}</label>
+                {{form.time_range}} {{form.time_range.errors}}
                 <button type="submit" class="btn btn-primary">Filter</button>
                 <a href="{% url 'dashboard:checklists' key='beforeyougo' %}" class="mx-2">Reset</a>
             </form>

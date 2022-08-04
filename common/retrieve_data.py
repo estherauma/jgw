@@ -4,8 +4,7 @@ import ast
 import logging
 import os
 from functools import reduce
-from time import perf_counter
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import pandas as pd
 import requests
@@ -52,47 +51,45 @@ class JGWApi:
         _response.raise_for_status()
         return _response
 
-    def get_data(self, key: str) -> list:
+    def get_data(self, key: str) -> Tuple[list, bool]:
         """`key` is one of: `preferences, inline, messaging, help_contacts, visa, contract, joboffer, beforeyougo`"""
+        from dashboard.tasks import clean_data as schedule_clean_data
+
         data = None
+        clean = False
         filename = CACHE_FILENAMES.get(key)
         if key not in data_categories:
-            return data
+            return data, clean
         try:
             data = self.get_data_from_file(filename)
+            clean = True
         except FileNotFoundError:
             url = f"{self.base_url}{URLS.get(key)}"
             response = self._get(url, {})
             if response and response.status_code == requests.codes.ok:
                 result = response.json()
                 data = result["data"]
+                clean = False
                 self.write_data_to_file(data, filename)
-                data = self.get_data_from_file(filename)
-        return data
+                schedule_clean_data.delay(filename=filename)
+        return data, clean
 
     def clean_data(self, df):
-        debug_logger.info(f"\nStarted cleaning functions.")
-        tic = perf_counter()
         df = self.normalise_questions_and_responses(df)
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
         df = self.normalise_age_bands(df)
         df = self.standardise_language_codes(df)
         df = self.swap_country_names_with_codes(df)
-        toc = perf_counter()
-        debug_logger.debug(f"clean_data: time elapsed: {toc-tic}")
         return df
 
     def write_data_to_file(self, data: list, filename: str):
         df = pd.DataFrame.from_records(data)
-        df = self.clean_data(df)
         df.to_csv(filename, index=False)
-        debug_logger.info(f"\nWrote df to: {filename}.")
 
     def get_data_from_file(self, filename) -> Dict:
         df = pd.read_csv(filename)
         data = df.to_dict(orient="records")
-        debug_logger.info(f"\nRead df from: {filename}.")
         return data
 
     def standardise_language_codes(self, df):
@@ -108,13 +105,9 @@ class JGWApi:
                 code = entry
             return code
 
-        tic = perf_counter()
         if "language" in df.columns:
             df["language"] = df["language"].str.lower()
             df["language"] = df["language"].apply(get_language_code)
-        toc = perf_counter()
-        debug_logger.debug(f"time elapsed: {toc-tic}")
-
         return df
 
     def normalise_age_bands(self, df):
@@ -152,12 +145,8 @@ class JGWApi:
                         return group
             return arg
 
-        tic = perf_counter()
-
         if "age" in df.columns:
             df["age"] = df["age"].apply(doer)
-        toc = perf_counter()
-        debug_logger.debug(f"time elapsed: {toc-tic}")
         return df
 
     def clean_gender_data(self, df):
@@ -182,12 +171,11 @@ class JGWApi:
             None: "prefer not to answer",
             "another": "other",
         }
-        tic = perf_counter()
+
         if "gender" in df.columns:
             df["gender"] = df["gender"].str.lower()
             df["gender"] = df["gender"].replace(patterns_to_replace)
-        toc = perf_counter()
-        debug_logger.debug(f"time elapsed: {toc-tic}")
+
         return df
 
     def swap_country_names_with_codes(self, df):
@@ -208,15 +196,11 @@ class JGWApi:
             "destination": get_dest_country,
         }
 
-        def get_country_code(column):
-            def _get_country_code(name):
-                if name is not None:
-                    code = reversed_country_names.get(name)
-                    return name if code is None else code
-                return None
-
-            column = column.apply(_get_country_code)
-            return column
+        def get_country_code(name):
+            if name is not None:
+                code = reversed_country_names.get(name)
+                return name if code is None else code
+            return None
 
         patterns_to_replace = {
             "kosovo": "republic of kosovo",
@@ -231,7 +215,6 @@ class JGWApi:
             "phillippines": country_names["PH"].lower(),
             "saudi": country_names["SA"].lower(),
         }
-        tic = perf_counter()
 
         for key in ["origin", "destination"]:
             df[key] = df["route"].apply(country_from_route[key])
@@ -241,11 +224,10 @@ class JGWApi:
         df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].replace(
             patterns_to_replace
         )
-        df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].apply(
+        df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].applymap(
             get_country_code
         )
-        toc = perf_counter()
-        debug_logger.debug(f"time elapsed: {toc-tic}")
+
         return df
 
     def normalise_questions_and_responses(self, df):
@@ -268,7 +250,6 @@ class JGWApi:
                     _responses.append(response["value"])
             return _responses
 
-        tic = perf_counter()
         if "questionText" in df.columns:
             df["questionText"] = df["questionText"].apply(cast_to_native)
             df["questionText"] = df["questionText"].apply(unpack_question_list)
@@ -276,8 +257,6 @@ class JGWApi:
         if "questionResponse" in df.columns:
             df["questionResponse"] = df["questionResponse"].apply(cast_to_native)
             df["questionResponse"] = df["questionResponse"].apply(get_true_responses)
-        toc = perf_counter()
-        debug_logger.debug(f"time elapsed: {toc-tic}")
         return df
 
     def standardise_lang_to_eng(self, df):
@@ -334,8 +313,6 @@ class JGWApi:
 
         scalar_cols = [i for i in df.columns if i in ["age", "gender", "language"]]
         list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "questionResponse"]]
-        tic = perf_counter()
-
         df = df.fillna("")
         if "questionText" in df.columns:
             df["questionText"] = df.apply(
@@ -345,6 +322,4 @@ class JGWApi:
             df[scalar_cols] = df[scalar_cols].apply(translate_field_or_mark)
         if list_cols:
             df[list_cols] = df[list_cols].apply(translate_list_field)
-        toc = perf_counter()
-        debug_logger.debug(f"time elapsed: {toc-tic}")
         return df

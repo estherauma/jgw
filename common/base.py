@@ -1,6 +1,6 @@
 import os
 from typing import Dict
-
+from datetime import datetime
 import pandas as pd
 from jgwpandas.settings import CACHE_DIR
 from pytz import country_names
@@ -12,12 +12,11 @@ class BaseAnalytics:
     def __init__(self) -> None:
         self.export_csv_name = "export.csv"
 
-    def export_csv(self):
-        self.raw_df.to_csv(self.export_csv_name)
-
-    def get_df_path(self, query: Dict, extension="pkl"):
-        kvString_list = [f"{k}_{v}" for k, v in query.items()]
-        return os.path.join(CACHE_DIR, f"{type(self).__name__}_{'-'.join(kvString_list)}.{extension}")
+    def get_df_path(self, query: Dict, extension="csv"):
+        searchParam_list = [f"{k}_{v}" for k, v in query.items()]
+        data_category = f"{type(self).__name__}"
+        searchParam_list = f"_{'-'.join(searchParam_list)}" if searchParam_list else ""
+        return os.path.join(CACHE_DIR, f"{data_category.lower()}{searchParam_list}.{extension}")
 
     def get_count(self, field: str, df=None):
         _df = df.copy() if df is not None else self.raw_df.copy()
@@ -30,18 +29,18 @@ class BaseAnalytics:
             _df = self.raw_df.copy()
 
         if filters is not None:
-            all_filters_path = self.get_df_path(filters)
+            cachedResults_path = self.get_df_path(filters)
             try:
-                _df = pd.read_pickle(all_filters_path)
+                _df = pd.read_csv(cachedResults_path)
             except FileNotFoundError:
                 for k in filters:
                     query = {k: filters[k]}
                     filter_path = self.get_df_path(query)
                     try:
-                        _df = pd.read_pickle(filter_path)
+                        _df = pd.read_csv(filter_path)
                     except FileNotFoundError:
                         _df = self.filter_data(_df, query)
-                _df.to_pickle(all_filters_path)
+                _df.to_csv(cachedResults_path)
         return _df
 
     def filter_by_destination(self, destination: str, df):
@@ -68,12 +67,20 @@ class BaseAnalytics:
             return df.loc[mask]
         return pd.DataFrame()
 
+    def filter_by_timeRange(self, start_date: str, df):
+        if start_date == "all_time":
+            return df
+        today = datetime.today().strftime("%Y-%m-%d")
+        df = df.loc[df["createdAt"].between(start_date, today, inclusive="both")]
+        return df
+
     def filter_data(self, df, query: Dict):
         filter_map = {
             "destination": self.filter_by_destination,
             "origin": self.filter_by_origin,
             "scheme_name": self.filter_by_schemeName,
             "factory_farm": self.filter_by_factoryFarm,
+            "time_range": self.filter_by_timeRange,
         }
         for field, value in query.items():
             filter_func = filter_map.get(field)

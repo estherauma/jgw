@@ -1,3 +1,4 @@
+from distutils.command.clean import clean
 from typing import Dict
 
 import pandas as pd
@@ -11,7 +12,8 @@ QueryMap = Dict[str, list[str]]
 
 class Preferences(BaseAnalytics):
     def __init__(self) -> None:
-        preferences = api.get_data(key="preferences")
+        preferences, clean = api.get_data(key="preferences")
+        self.cleaned = clean
         self.raw_df = pd.DataFrame.from_records(preferences)
         self.export_csv_name = "preferences.csv"
 

@@ -1,10 +1,9 @@
 from datetime import datetime
 from logging import getLogger
-
+import glob, os
 import pandas as pd
 import six
 from celery import shared_task
-from common.retrieve_data import JGWApi as APIHelper
 from google.cloud import translate_v2 as translate
 
 from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
@@ -13,7 +12,6 @@ from dashboard.views import get_report
 
 client = translate.Client()
 debug_logger = getLogger("djangoDebug")
-jgw_api = APIHelper()
 
 
 def translate_to_eng(text, client=client):
@@ -27,6 +25,9 @@ def translate_to_eng(text, client=client):
 
 @shared_task(name="get_jgw_data")
 def fetch_API_data():
+    from common.retrieve_data import JGWApi as APIHelper
+
+    jgw_api = APIHelper()
     for key in [
         "inline",
         "preferences",
@@ -71,10 +72,19 @@ def chunk_and_clean_data(filename):
 
 
 @shared_task(name="_clean_data")
-def _clean_data(filename):
-    df = jgw_api.clean_data(df)
-    jgw_api.write_data_to_file()
+def clean_data(filename):
+    from common.retrieve_data import JGWApi as APIHelper
 
-@shared_task(name='test_task')
+    api_helper = APIHelper()
+    others_path = filename.split(".csv")[0]
+    df = pd.read_csv(filename)
+    df = api_helper.clean_data(df)
+    data = df.to_dict(orient="records")
+    for f in glob.glob(f"{others_path}*.csv"):
+        os.remove(f)
+    api_helper.write_data_to_file(data, filename)
+
+
+@shared_task(name="test_task")
 def test_task():
-    debug_logger.debug('Celery is working!')
+    debug_logger.debug("Celery is working!")
