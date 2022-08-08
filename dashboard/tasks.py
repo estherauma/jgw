@@ -66,10 +66,6 @@ def generate_report():
     return filename
 
 
-@shared_task(name="chunk_and_clean_data")
-def chunk_and_clean_data(filename):
-    df = pd.read_csv(filename, chunksize=100)
-
 
 @shared_task(name="_clean_data")
 def clean_data(filename):
