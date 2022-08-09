@@ -11,11 +11,6 @@ celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 celery_app.autodiscover_tasks()
 
 
-@celery_app.task(bind=True)
-def debug_task(self):
-    print("Request: {0!r}".format(self.request))
-
-
 celery_app.conf.beat_schedule = {
     "fetch-API-data": {
         "task": "get_jgw_data",
@@ -23,7 +18,7 @@ celery_app.conf.beat_schedule = {
     },
     "translate-API-data": {
         "task": "translate_to_eng",
-        "schedule": crontab(minute="*/10"),  # every ten minutes
+        "schedule": crontab(minute="*/5"),  # every five minutes
     },
     "generate-report": {
         "task": "generate_report",
