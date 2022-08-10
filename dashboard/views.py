@@ -35,6 +35,7 @@ OPERATORS = {
     "ag_recruitment": "Seasonal Worker Scheme - AG Recruitment",
     "generic": "Seasonal Worker Scheme - Generic",
     "pro_force": "Seasonal Worker Scheme - Pro-Force",
+    "fruitful": "Seasonal Worker Scheme - Fruitful Jobs"
 }
 
 

@@ -311,7 +311,7 @@ class JGWApi:
             column = column.apply(lambda x: _do_translate_listfield(text_list=x, field=column.name))
             return column
 
-        scalar_cols = [i for i in df.columns if i in ["age", "gender", "language"]]
+        scalar_cols = [i for i in df.columns if i in ["age", "gender", "language", "phoneNumber"]]
         list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "questionResponse"]]
         df = df.fillna("")
         if "questionText" in df.columns:
