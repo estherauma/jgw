@@ -62,23 +62,22 @@ def translate_API_data():
 @shared_task(name="send_email_notification")
 def send_email_notification(subject, message, attachment_path, recipients):
     mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
-    mail.attach_file(attachment_path)
+    if attachment_path:
+        mail.attach_file(attachment_path)
     mail.send()
 
 
 @shared_task(name="generate_report")
 def generate_report():
     today = datetime.today().strftime("%Y-%m-%d")
-    week_number = int(datetime.today().strftime("%U"))
-    if week_number % 2 == 0:
-        return
     filename = get_report(start="2022-06-01", end=today, category="preferences")
-    send_email_notification.delay(
-        subject=f"{today}-SWS Report",
-        message=f"Hello, \nPlease find attached the SWS Report for {datetime.today() - timedelta(weeks=2)} to {today}.\nJGW.Pandas",
-        attachment_path=filename,
-        recipients=[],
-    )
+    subject = f"{today}-SWS Report"
+    message = f"Hello, \nPlease find attached the SWS Report for {datetime.today() - timedelta(weeks=2)} to {today}.\nJGW.Pandas"
+    attachment_path = filename
+    recipients = ["david.mwebaza@50eight.com"]
+    mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
+    mail.attach_file(attachment_path)
+    mail.send()
 
 
 @shared_task(name="_clean_data")
@@ -98,10 +97,3 @@ def clean_data(filename):
 @shared_task(name="test_task")
 def test_task():
     debug_logger.debug("Celery is working!")
-
-
-@shared_task(name="send_email_notification")
-def send_email_notification(subject, recipients, message, attachment_path):
-    mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
-    mail.attach_file(attachment_path)
-    mail.send()

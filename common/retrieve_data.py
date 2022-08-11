@@ -9,7 +9,7 @@ from typing import Dict, List, Tuple
 import pandas as pd
 import requests
 from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
-from jgwpandas.settings import CACHE_DIR, RAW_DIR
+from jgwpandas.settings import CACHE_DIR
 from langcodes import Language, LanguageTagError
 from pytz import country_names
 
@@ -35,7 +35,6 @@ URLS = {
 }
 debug_logger = logging.getLogger("djangoDebug")
 CACHE_FILENAMES = {k: os.path.join(CACHE_DIR, f"{k}.csv") for k in data_categories}
-RAW_FILENAMES = {k: os.path.join(RAW_DIR, f"{k}.csv") for k in data_categories}
 reversed_country_names = {v.lower(): k for k, v in country_names.items()}
 reversed_country_names.update({"republic of kosovo": "XK"})
 
