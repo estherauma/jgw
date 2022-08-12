@@ -70,14 +70,15 @@ def send_email_notification(subject, message, attachment_path, recipients):
 @shared_task(name="generate_report")
 def generate_report():
     today = datetime.today().strftime("%Y-%m-%d")
-    filename = get_report(start="2022-06-01", end=today, category="preferences")
     subject = f"{today}-SWS Report"
     message = f"Hello, \nPlease find attached the SWS Report for {datetime.today() - timedelta(weeks=2)} to {today}.\nJGW.Pandas"
-    attachment_path = filename
-    recipients = ["david.mwebaza@50eight.com"]
-    mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
-    mail.attach_file(attachment_path)
-    mail.send()
+    recipients = os.getenv("RECIPIENTS").split(" ")
+    if recipients:
+        filename = get_report(start="2022-06-01", end=today, category="preferences")
+        attachment_path = filename
+        mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
+        mail.attach_file(attachment_path)
+        mail.send()
 
 
 @shared_task(name="_clean_data")
