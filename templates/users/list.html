@@ -30,8 +30,9 @@
                                     <i class="fa fa-ellipsis-v text-dark"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                    <a class="dropdown-item" href="{% url 'users:manage_user' id=user.id %}">Manage</a>
                                     <a class="dropdown-item"
-                                        href="{% url 'users:manage_user' id=user.id %}">Manage</a>
+                                        href="{% url 'users:activate_account' id=user.id %}">Activate</a>
                                 </div>
                             </div>
                         </td>
