@@ -24,4 +24,8 @@ celery_app.conf.beat_schedule = {
         "task": "generate_report",
         "schedule": crontab(minute="0", hour="0", day_of_week="friday"),
     },
+    "notify_admins_inactive_users": {
+        "task": "notify_admins_inactive_users",
+        "schedule": crontab(minute="0", hour="0", day_of_week="sunday"),
+    },
 }
