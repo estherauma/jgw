@@ -1,8 +1,9 @@
 from logging import getLogger
 
 from celery import shared_task
+from django.core.mail import EmailMessage, send_mail
+
 from users.models import User
-from django.core.mail import send_mail
 
 debug_logger = getLogger("djangoDebug")
 
@@ -26,3 +27,11 @@ def notify_admins_inactive_users():
     send_mail(
         subject=subject, message=body, from_email="alerts@jgwpandas.herokuapp.com", recipient_list=recipients
     )
+
+
+@shared_task(name="send_email_notification")
+def send_email_notification(subject, message, recipients, attachment_path=None):
+    mail = EmailMessage(subject, message, "alerts@jgwpandas.herokuapp.com", recipients)
+    if attachment_path:
+        mail.attach_file(attachment_path)
+    mail.send()
