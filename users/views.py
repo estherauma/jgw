@@ -1,4 +1,3 @@
-from operator import itemgetter
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,6 +5,7 @@ from django.shortcuts import redirect, render
 
 from .forms import CreateUserForm, LoginForm, UserMgtForm
 from .models import User
+from users.tasks import send_email_notification
 
 
 @login_required()
@@ -62,3 +62,38 @@ def manage_account(request, id):
         if form.is_valid:
             form.save()
     return render(request, "users/manage.html", context={"form": form, "user": user})
+
+
+@login_required()
+def activate_account(request, id):
+    user = User.objects.get(id=id)
+    subject = "Your account at JGWPandas."
+    deactivation_message = (
+        f"Hello\n, Your account at JGW Pandas has been deactivated.\n"
+        f"\nPlease reach out to the administrator if this action was not initiated by you."
+        f"\n\nJGWPandas"
+    )
+    activation_message = (
+        f"Hello\n, Your account at JGW Pandas has been activated.\n"
+        f"\n Please reach out to the administrator if this account was not created by you."
+        f"\nJGWPandas"
+    )
+    if user.is_active:
+        user.is_active = False
+        user.save()
+        messages.info(request, f"The user account: {user.email} was deactivated successfully.")
+        send_email_notification.delay(
+            subject=subject,
+            message=deactivation_message,
+            recipients=[user.email],
+        )
+    elif user.is_active == False:
+        user.is_active = True
+        user.save()
+        messages.info(request, f"The user account: {user.email} was activated and will be notified shortly.")
+        send_email_notification.delay(
+            subject=subject,
+            message=activation_message,
+            recipients=[user.email],
+        )
+    return redirect("users:list_users")
