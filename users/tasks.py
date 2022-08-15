@@ -17,7 +17,6 @@ def notify_admins_inactive_users():
     inactive_users = "\n".join(inactive_users)
     recipients = User.objects.filter(is_superuser=True).values_list("email")
     recipients = [i[0] for i in recipients]
-    debug_logger.debug(f"recipients:{recipients}")
     subject = "Inactive User Accounts"
     body = (
         f"The following user accounts have been created and need to be activated:\n"
