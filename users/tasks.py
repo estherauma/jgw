@@ -24,13 +24,13 @@ def notify_admins_inactive_users():
         f"\n\n JGWPandas"
     )
     send_mail(
-        subject=subject, message=body, from_email="alerts@jgwpandas.herokuapp.com", recipient_list=recipients
+        subject=subject, message=body, from_email="JGW Pandas <alerts@jgwpandas.com>", recipient_list=recipients
     )
 
 
 @shared_task(name="send_email_notification")
 def send_email_notification(subject, message, recipients, attachment_path=None):
-    mail = EmailMessage(subject, message, "alerts@jgwpandas.herokuapp.com", recipients)
+    mail = EmailMessage(subject, message, "JGW Pandas <alerts@jgwpandas.com>", recipients)
     if attachment_path:
         mail.attach_file(attachment_path)
     mail.send()

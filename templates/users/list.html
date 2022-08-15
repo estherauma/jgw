@@ -31,8 +31,13 @@
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                     <a class="dropdown-item" href="{% url 'users:manage_user' id=user.id %}">Manage</a>
-                                    <a class="dropdown-item"
-                                        href="{% url 'users:activate_account' id=user.id %}">Activate</a>
+                                    <a class="dropdown-item" href="{% url 'users:activate_account' id=user.id %}">
+                                        {% if user.is_active == True %}
+                                            Deactivate
+                                        {% elif user.is_active == False %}
+                                            Activate
+                                        {% endif %}
+                                    </a>
                                 </div>
                             </div>
                         </td>
