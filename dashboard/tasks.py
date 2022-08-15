@@ -1,7 +1,6 @@
 import glob
 import os
 from datetime import datetime, timedelta
-from logging import getLogger
 
 import pandas as pd
 import six
@@ -14,7 +13,6 @@ from dashboard.models import TranslatedQuestionText, TranslatedResponseText, Tra
 from dashboard.views import get_report
 
 client = translate.Client()
-debug_logger = getLogger("djangoDebug")
 
 
 def translate_to_eng(text, client=client):
@@ -93,8 +91,3 @@ def clean_data(filename):
     for f in glob.glob(f"{others_path}*.csv"):
         os.remove(f)
     api_helper.write_data_to_file(data, filename)
-
-
-@shared_task(name="test_task")
-def test_task():
-    debug_logger.debug("Celery is working!")

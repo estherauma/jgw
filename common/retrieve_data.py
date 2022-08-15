@@ -33,7 +33,6 @@ URLS = {
     "visa": "/visa-checklists",
     "joboffer": "/joboffer-checklists",
 }
-debug_logger = logging.getLogger("djangoDebug")
 CACHE_FILENAMES = {k: os.path.join(CACHE_DIR, f"{k}.csv") for k in data_categories}
 reversed_country_names = {v.lower(): k for k, v in country_names.items()}
 reversed_country_names.update({"republic of kosovo": "XK"})
