@@ -1,4 +1,3 @@
-import glob
 import os
 from datetime import datetime, timedelta
 
@@ -9,7 +8,7 @@ from django.core.mail import EmailMessage
 from google.cloud import translate_v2 as translate
 from jgwpandas.settings import EMAIL_HOST_USER
 
-from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
+from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from dashboard.views import get_report
 
 client = translate.Client()
@@ -84,14 +83,13 @@ def generate_report():
 
 
 @shared_task(name="_clean_data")
-def clean_data(filename):
+def clean_data(category):
     from common.retrieve_data import JGWApi as APIHelper
 
     api_helper = APIHelper()
-    others_path = filename.split(".csv")[0]
-    df = pd.read_csv(filename)
+    result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
+    df = pd.read_json(result.data, orient="records")
     df = api_helper.clean_data(df)
-    data = df.to_dict(orient="records")
-    for f in glob.glob(f"{others_path}*.csv"):
-        os.remove(f)
-    api_helper.write_data_to_file(data, filename)
+    data = df.to_json(orient="records")
+    result.data = data
+    result.save()

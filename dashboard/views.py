@@ -1,4 +1,5 @@
 import shutil
+from datetime import datetime
 from operator import itemgetter
 from typing import Dict
 
@@ -18,6 +19,7 @@ from pytz import country_names
 from requests.exceptions import HTTPError
 
 from .forms import FACTORIES, ORIGIN_COUNTRIES, ExportReportForm, FilterForm, get_start_date
+from .models import JGWCache
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
 HELPERS = {
@@ -35,7 +37,7 @@ OPERATORS = {
     "ag_recruitment": "Seasonal Worker Scheme - AG Recruitment",
     "generic": "Seasonal Worker Scheme - Generic",
     "pro_force": "Seasonal Worker Scheme - Pro-Force",
-    "fruitful": "Seasonal Worker Scheme - Fruitful Jobs"
+    "fruitful": "Seasonal Worker Scheme - Fruitful Jobs",
 }
 
 
@@ -223,9 +225,9 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
 
 
 def get_report(start, end, category):
-    filename = f"jgwpandas/static/assets/data/{category}.csv"
     output_filename = f"{category}.xlsx"
-    df = pd.read_csv(filename)
+    result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
+    df = pd.read_json(result.data, orient="records")
     df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
     try:
         write_to_xls_sheet(df, sheet_name="Pref-All", filename=output_filename)

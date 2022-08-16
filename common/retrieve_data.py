@@ -1,14 +1,14 @@
 """JGW API helpers
 """
 import ast
-import logging
 import os
+from datetime import datetime
 from functools import reduce
 from typing import Dict, List, Tuple
 
 import pandas as pd
 import requests
-from dashboard.models import TranslatedQuestionText, TranslatedResponseText, TranslatedText
+from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from jgwpandas.settings import CACHE_DIR
 from langcodes import Language, LanguageTagError
 from pytz import country_names
@@ -34,8 +34,8 @@ URLS = {
     "joboffer": "/joboffer-checklists",
 }
 CACHE_FILENAMES = {k: os.path.join(CACHE_DIR, f"{k}.csv") for k in data_categories}
-reversed_country_names = {v.lower(): k for k, v in country_names.items()}
-reversed_country_names.update({"republic of kosovo": "XK"})
+vk_country_names = {v.lower(): k for k, v in country_names.items()}
+vk_country_names.update({"republic of kosovo": "XK"})
 
 
 class JGWApi:
@@ -55,12 +55,12 @@ class JGWApi:
 
         data = None
         clean = False
-        filename = CACHE_FILENAMES.get(key)
         if key not in data_categories:
             return data, clean
         try:
-            data = self.get_data_from_file(filename)
-            clean = True
+            result = JGWCache.objects.filter(category=key, date_created=datetime.today().date()).first()
+            clean = result.is_cleaned
+            data = result.data
         except FileNotFoundError:
             url = f"{self.base_url}{URLS.get(key)}"
             response = self._get(url, {})
@@ -68,8 +68,8 @@ class JGWApi:
                 result = response.json()
                 data = result["data"]
                 clean = False
-                self.write_data_to_file(data, filename)
-                schedule_clean_data.delay(filename=filename)
+                JGWCache.objects.create(category=key, data=data)
+                schedule_clean_data.delay(category=key)
         return data, clean
 
     def clean_data(self, df):
@@ -196,7 +196,7 @@ class JGWApi:
 
         def get_country_code(name):
             if name is not None:
-                code = reversed_country_names.get(name)
+                code = vk_country_names.get(name)
                 return name if code is None else code
             return None
 

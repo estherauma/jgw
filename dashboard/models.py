@@ -21,6 +21,16 @@ class Scheme(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
 
 
-
 class Factory(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
+
+
+class JGWCache(models.Model):
+    class Meta:
+        ordering = "-date_created"
+
+    category = models.CharField(max_length=128, null=False, blank=False)
+    is_cleaned = models.BooleanField(default=False, null=False, blank=False)
+    data = models.JSONField()
+    date_created = models.Date()
+    date_modified = models.Date()
