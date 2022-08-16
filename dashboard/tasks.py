@@ -25,10 +25,14 @@ def translate_to_eng(text, client=client):
 
 
 @shared_task(name="get_jgw_data")
-def fetch_API_data():
+def fetch_API_data(category=None):
     from common.retrieve_data import JGWApi as APIHelper
 
     jgw_api = APIHelper()
+    if category is not None:
+        jgw_api.get_data(key=category)
+        return
+
     for key in [
         "inline",
         "preferences",
