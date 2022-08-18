@@ -70,10 +70,10 @@ class JGWApi:
                 result = response.json()
                 data = result["data"]
                 clean = False
-                JGWCache.objects.create(category=key, data=json.dumps(data))
-                schedule_clean_data.delay(category=key)
                 for f in glob.glob(os.path.join(CACHE_DIR, f"{key}*.csv")):
                     os.remove(f)
+                JGWCache.objects.create(category=key, data=json.dumps(data))
+                schedule_clean_data.delay(category=key)
         return data, clean
 
     def clean_data(self, df):
@@ -118,11 +118,7 @@ class JGWApi:
         def range_str_to_int(arg):
             if isinstance(arg, str):
                 temp = [i.replace("+", "") for i in arg.split("-")]
-                for i in temp:
-                    if i and i != "Prefer not to answer":
-                        temp.append(int(i))
-                    else:
-                        temp.append(i)
+                temp = [int(i) if (i and i != "Prefer not to answer") else i for i in temp]
                 return temp
             return arg
 
@@ -135,20 +131,25 @@ class JGWApi:
                 temp = list(range_str_to_int(arg))
                 if len(temp) == 0:
                     return None
-                elif len(temp) == 1:
+                elif len(temp) == 1 and isinstance(temp[0], int):
                     a, b = temp[0] + 1, temp[0] + 10
+                elif len(temp) == 1 and isinstance(temp[0], str):
+                    return temp[0], None
             return a, b
 
         def doer(arg):
             values = get_range_values(arg)
             if values:
-                arg_min, arg_max = values
-                for group in groups:
-                    group_min, group_max = get_range_values(group)
-                    if arg_min - group_min <= 5 and arg_max == group_max:  # arg: 35-40, group: 31-40
-                        return group
-                    elif arg_min == group_min and group_max - arg_max <= 5:  # arg: 31-35, group: 31-40
-                        return group
+                if isinstance(values[0], int):
+                    arg_min, arg_max = values
+                    for group in groups:
+                        group_min, group_max = get_range_values(group)
+                        if arg_min - group_min <= 5 and arg_max == group_max:  # arg: 35-40, group: 31-40
+                            return group
+                        elif arg_min == group_min and group_max - arg_max <= 5:  # arg: 31-35, group: 31-40
+                            return group
+                elif isinstance(values[0], str):
+                    return values[0]
             return arg
 
         if "age" in df.columns:

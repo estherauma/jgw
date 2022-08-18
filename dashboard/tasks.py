@@ -94,3 +94,4 @@ def clean_data(category):
     result.data = data
     result.is_cleaned = True
     result.save()
+    return
