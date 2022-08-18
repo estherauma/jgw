@@ -27,10 +27,10 @@ class Factory(models.Model):
 
 class JGWCache(models.Model):
     class Meta:
-        ordering = "-date_created"
+        ordering = ("-date_created",)
 
     category = models.CharField(max_length=128, null=False, blank=False)
     is_cleaned = models.BooleanField(default=False, null=False, blank=False)
-    data = models.JSONField()
-    date_created = models.Date()
-    date_modified = models.Date()
+    data = models.JSONField(null=False)
+    date_created = models.DateField(auto_now_add=True)
+    date_modified = models.DateField(auto_now=True)
