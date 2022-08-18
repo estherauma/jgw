@@ -92,4 +92,5 @@ def clean_data(category):
     df = api_helper.clean_data(df)
     data = df.to_json(orient="records")
     result.data = data
+    result.is_cleaned = True
     result.save()

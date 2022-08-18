@@ -1,6 +1,8 @@
 """JGW API helpers
 """
 import ast
+import glob
+import json
 import os
 from datetime import datetime
 from functools import reduce
@@ -57,19 +59,21 @@ class JGWApi:
         clean = False
         if key not in data_categories:
             return data, clean
-        try:
-            result = JGWCache.objects.filter(category=key, date_created=datetime.today().date()).first()
+        result = JGWCache.objects.filter(category=key, date_created=datetime.today().date()).first()
+        if result is not None:
             clean = result.is_cleaned
-            data = result.data
-        except FileNotFoundError:
+            data = json.loads(result.data)
+        else:
             url = f"{self.base_url}{URLS.get(key)}"
             response = self._get(url, {})
             if response and response.status_code == requests.codes.ok:
                 result = response.json()
                 data = result["data"]
                 clean = False
-                JGWCache.objects.create(category=key, data=data)
+                JGWCache.objects.create(category=key, data=json.dumps(data))
                 schedule_clean_data.delay(category=key)
+                for f in glob.glob(os.path.join(CACHE_DIR, f"{key}*.csv")):
+                    os.remove(f)
         return data, clean
 
     def clean_data(self, df):
@@ -114,7 +118,11 @@ class JGWApi:
         def range_str_to_int(arg):
             if isinstance(arg, str):
                 temp = [i.replace("+", "") for i in arg.split("-")]
-                temp = [int(i) for i in temp if i]
+                for i in temp:
+                    if i and i != "Prefer not to answer":
+                        temp.append(int(i))
+                    else:
+                        temp.append(i)
                 return temp
             return arg
 
