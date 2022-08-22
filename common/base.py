@@ -1,9 +1,9 @@
 import os
-from typing import Dict
 from datetime import datetime
+from typing import Dict
+
 import pandas as pd
 from jgwpandas.settings import CACHE_DIR
-from pytz import country_names
 
 QueryMap = Dict[str, str]
 
@@ -28,30 +28,34 @@ class BaseAnalytics:
         if self.raw_df is not None:
             _df = self.raw_df.copy()
 
-        if filters is not None:
-            cachedResults_path = self.get_df_path(filters)
-            try:
-                _df = pd.read_csv(cachedResults_path)
-            except FileNotFoundError:
-                for k in filters:
-                    query = {k: filters[k]}
-                    filter_path = self.get_df_path(query)
-                    try:
-                        _df = pd.read_csv(filter_path)
-                    except FileNotFoundError:
-                        _df = self.filter_data(_df, query)
-                _df.to_csv(cachedResults_path)
+            if filters is not None:
+                cachedResults_path = self.get_df_path(filters)
+                try:
+                    _df = pd.read_csv(cachedResults_path)
+                except FileNotFoundError:
+                    for k in filters:
+                        query = {k: filters[k]}
+                        filter_path = self.get_df_path(query)
+                        try:
+                            _df = pd.read_csv(filter_path)
+                        except FileNotFoundError:
+                            _df = self.filter_data(_df, query)
+                    _df.to_csv(cachedResults_path)
         return _df
 
     def filter_by_destination(self, destination: str, df):
-        destinations = df["destination"].astype("str")
-        mask = destinations == destination
-        return df[mask]
+        if "destination" in df.columns:
+            destinations = df["destination"].astype("str")
+            mask = destinations == destination
+            return df[mask]
+        return pd.DataFrame()
 
     def filter_by_origin(self, origin: str, df):
-        origins = df["origin"].astype("str")
-        mask = origins == origin
-        return df[mask]
+        if "origin" in df.columns:
+            origins = df["origin"].astype("str")
+            mask = origins == origin
+            return df[mask]
+        return pd.DataFrame()
 
     def filter_by_schemeName(self, scheme_name: str, df):
         if "organisation" in df.columns:
@@ -86,5 +90,5 @@ class BaseAnalytics:
             filter_func = filter_map.get(field)
             if filter_func is not None:
                 df = filter_func(value, df)
-                df.to_pickle(self.get_df_path(query))
+                df.to_csv(self.get_df_path(query))
         return df

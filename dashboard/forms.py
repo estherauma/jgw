@@ -17,7 +17,7 @@ ORIGIN_COUNTRIES = {"": "Select a Country"}
 FACTORIES = {"": "Select a factory or farm"}
 
 
-DEST_COUNTRIES.update({k: country_names[k] for k in ("MY", "QA", "SA", "AE", "GB")})
+DEST_COUNTRIES.update({k: country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")})
 CATEGORIES = ["preferences"]  # , "inline", "messaging", "help_contacts"]
 TIME_RANGE = {
     get_start_date(days=30): "30 Days",
@@ -67,6 +67,7 @@ class FilterForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "factory_farm"}),
     )
     time_range = forms.ChoiceField(
+        label="Time Range",
         choices=TIME_RANGE.items(),
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "time_range"}),
