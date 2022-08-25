@@ -27,6 +27,8 @@
                 data-origins-url="{% url 'dashboard:process_origin_options' key='inline'%}"
                 data-factories-url="{% url 'dashboard:process_factory_options' key='inline'%}">
                 {% csrf_token %}
+                <label class="form-label" for="question">{{form.question.label}}</label>
+                {{form.question}} {{form.question.errors}}
                 <label class="form-label" for="destination">{{form.destination.label}}</label>
                 {{form.destination}} {{form.destination.errors}}
                 <label class="form-label" for="origin">{{form.origin.label}}</label>
