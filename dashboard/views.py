@@ -18,7 +18,7 @@ from django.utils.http import urlencode
 from pytz import country_names
 from requests.exceptions import HTTPError
 
-from .forms import FACTORIES, ORIGIN_COUNTRIES, ExportReportForm, FilterForm, get_start_date
+from .forms import FACTORIES, ORIGIN_COUNTRIES, ExportReportForm, FilterForm, InlineQnsForm, get_start_date
 from .models import JGWCache
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
@@ -138,7 +138,7 @@ def checklists_stats(request, key):
 @login_required()
 def inline_question_stats(request):
     filters = process_filters(request)
-    form = FilterForm(initial=filters)
+    form = InlineQnsForm(initial=filters)
     context_data = {"form": form}
     chart_data = None
     if request.method == "POST":

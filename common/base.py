@@ -75,8 +75,29 @@ class BaseAnalytics:
         if start_date == "all_time":
             return df
         today = datetime.today().strftime("%Y-%m-%d")
-        df = df.loc[df["createdAt"].between(start_date, today, inclusive="both")]
+        mask = df["createdAt"].between(start_date, today, inclusive="both")
+        df = df.loc[mask]
         return df
+
+    def filter_by_question(self, question: str, df):
+        target_columns = [
+            "_id",
+            "deviceId",
+            "appId",
+            "locale",
+            "route",
+            "language",
+            "organisation",
+            "factoryFarm",
+            "createdAt",
+            "updatedAt",
+        ]
+        if question in df.columns:
+            target_columns.append(question)
+            mask = df[question].notna()
+            df = df.loc[mask]
+            return df[target_columns]
+        return pd.DataFrame()
 
     def filter_data(self, df, query: Dict):
         filter_map = {

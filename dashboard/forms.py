@@ -102,3 +102,11 @@ class ExportReportForm(forms.Form):
             },
         )
     )
+
+
+class InlineQnsForm(FilterForm):
+    question = forms.ChoiceField(
+        choices=DEST_COUNTRIES.items(),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "destination"}),
+    )
