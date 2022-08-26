@@ -65,12 +65,12 @@ def process_filters(request):
     return filters
 
 
-def redirect_to_filtered_data(request, url, template_name):
-    form = FilterForm(request.POST)
+def redirect_to_filtered_data(request, url, template_name, form=None):
+    form = form if form is not None else FilterForm(request.POST)
     if form.is_valid():
         filters = form.cleaned_data.copy()
         # urlencode does not support NoneType values
-        filters = {k: ("" if v is None else v) for k, v in filters.items()}
+        filters = {k: v for k, v in filters.items() if v is not None}
         return redirect(f"{url}?{urlencode(filters)}")
     return render(request, template_name, context={"form": form})
 
@@ -97,6 +97,43 @@ def render_data(request, template_name, helper):
             ),
         )
     return render(request, template_name, context=context_data)
+
+
+@login_required()
+def inline_question_stats(request):
+    filters = process_filters(request)
+    form = InlineQnsForm(initial=filters)
+    context_data = {"form": form}
+    chart_data = None
+    if request.method == "POST":
+        return redirect_to_filtered_data(
+            request,
+            url=reverse("dashboard:inline"),
+            template_name="inline.html",
+            form=InlineQnsForm(request.POST),
+        )
+    try:
+        inline_responses = Inline()
+        _data = inline_responses.compute_stats(filters=filters)
+        response_count, _data = itemgetter("response_count", "data")(_data)
+        chart_data = form_chart_data(_data)
+        if not any(bool(i) for i in _data.values()):
+            messages.error(request, "No data matches this search!")
+    except HTTPError:
+        messages.error(request, "Error fetching data!")
+        return render(request, "inline.html", context={"form": form})
+    context_data.update(
+        {"data": chart_data, "response_count": response_count, "filter_string": urlencode(filters)}
+    )
+    if inline_responses.cleaned is False:
+        messages.info(
+            request,
+            (
+                "Raw data is shown while we finish processing your results."
+                "\nRefresh after a few minutes to view the completed stats."
+            ),
+        )
+    return render(request, "inline.html", context=context_data)
 
 
 @login_required()
@@ -133,40 +170,6 @@ def checklists_stats(request, key):
             request, url=reverse("dashboard:checklists", args=(key,)), template_name=f"{key}_checklists.html"
         )
     return render_data(request, template_name=f"{key}_checklists.html", helper=CheckLists(key=key))
-
-
-@login_required()
-def inline_question_stats(request):
-    filters = process_filters(request)
-    form = InlineQnsForm(initial=filters)
-    context_data = {"form": form}
-    chart_data = None
-    if request.method == "POST":
-        return redirect_to_filtered_data(
-            request, url=reverse("dashboard:inline"), template_name="inline.html"
-        )
-    try:
-        inline_responses = Inline()
-        _data = inline_responses.compute_stats(filters=filters)
-        response_count, _data = itemgetter("response_count", "data")(_data)
-        chart_data = form_chart_data(_data)
-        if not any(bool(i) for i in _data.values()):
-            messages.error(request, "No data matches this search!")
-    except HTTPError:
-        messages.error(request, "Error fetching data!")
-        return render(request, "inline.html", context={"form": form})
-    context_data.update(
-        {"data": chart_data, "response_count": response_count, "filter_string": urlencode(filters)}
-    )
-    if inline_responses.cleaned is False:
-        messages.info(
-            request,
-            (
-                "Raw data is shown while we finish processing your results."
-                "\nRefresh after a few minutes to view the completed stats."
-            ),
-        )
-    return render(request, "inline.html", context=context_data)
 
 
 @login_required()

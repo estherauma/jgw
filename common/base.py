@@ -21,6 +21,7 @@ demographic_cols = [
     "updatedAt",
 ]
 
+
 class BaseAnalytics:
     def __init__(self) -> None:
         self.export_csv_name = "export.csv"
@@ -93,10 +94,9 @@ class BaseAnalytics:
         return df
 
     def filter_by_question(self, question: str, df):
-
         if question in df.columns:
             demographic_cols.append(question)
-            mask = df[question].notna()
+            mask = df[question].notnull()
             df = df.loc[mask]
             return df[demographic_cols]
         return pd.DataFrame()
@@ -108,6 +108,7 @@ class BaseAnalytics:
             "scheme_name": self.filter_by_schemeName,
             "factory_farm": self.filter_by_factoryFarm,
             "time_range": self.filter_by_timeRange,
+            "question": self.filter_by_question,
         }
         for field, value in query.items():
             filter_func = filter_map.get(field)
