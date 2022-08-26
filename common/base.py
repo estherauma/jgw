@@ -7,6 +7,19 @@ from jgwpandas.settings import CACHE_DIR
 
 QueryMap = Dict[str, str]
 
+unwanted_cols = ["", "deviceId", "undefined", "__v", "_id"]
+demographic_cols = [
+    "appId",
+    "locale",
+    "route",
+    "language",
+    "origin",
+    "destination",
+    "organisation",
+    "factoryFarm",
+    "createdAt",
+    "updatedAt",
+]
 
 class BaseAnalytics:
     def __init__(self) -> None:
@@ -80,23 +93,12 @@ class BaseAnalytics:
         return df
 
     def filter_by_question(self, question: str, df):
-        target_columns = [
-            "_id",
-            "deviceId",
-            "appId",
-            "locale",
-            "route",
-            "language",
-            "organisation",
-            "factoryFarm",
-            "createdAt",
-            "updatedAt",
-        ]
+
         if question in df.columns:
-            target_columns.append(question)
+            demographic_cols.append(question)
             mask = df[question].notna()
             df = df.loc[mask]
-            return df[target_columns]
+            return df[demographic_cols]
         return pd.DataFrame()
 
     def filter_data(self, df, query: Dict):

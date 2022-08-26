@@ -1,15 +1,36 @@
+import re
 from datetime import datetime, timedelta
 
+import pandas as pd
 from django import forms
 from django.db import models
 from pytz import country_names
 
-from .models import Factory, Scheme
+from .models import Factory, JGWCache, Scheme
 
 
 def get_start_date(days):
     target_date = datetime.today() - timedelta(days=days)
     return target_date.strftime("%Y-%m-%d")
+
+
+unwanted_cols = ["", "deviceId", "undefined", "__v", "_id"]
+demographic_cols = [
+    "appId",
+    "locale",
+    "route",
+    "language",
+    "origin",
+    "destination",
+    "organisation",
+    "factoryFarm",
+    "createdAt",
+    "updatedAt",
+]
+
+
+def camelCase_to_spaceDelimited(text: str):
+    return re.sub(r"((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))", r" \1", text)
 
 
 DEST_COUNTRIES = {"": "Select a Country"}
@@ -105,8 +126,19 @@ class ExportReportForm(forms.Form):
 
 
 class InlineQnsForm(FilterForm):
+    def __init__(self, *args, **kwargs):
+        super(FilterForm, self).__init__(*args, **kwargs)
+        inline_cache = JGWCache.objects.filter(category="inline").first()
+        if inline_cache is not None:
+            df = pd.read_json(inline_cache.data, orient="records")
+            exclude_cols = [*demographic_cols, *unwanted_cols]
+            question_list = [i for i in df.columns if i not in exclude_cols]
+            question_choices = [(i, camelCase_to_spaceDelimited(i)) for i in question_list]
+            question_choices = [("", "Select a question key"), *question_choices]
+            self.fields["question"].choices = question_choices
+
     question = forms.ChoiceField(
-        choices=DEST_COUNTRIES.items(),
+        label="Question Key",
         required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "destination"}),
+        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "question"}),
     )
