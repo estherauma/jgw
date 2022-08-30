@@ -17,7 +17,7 @@ class Inline(BaseAnalytics):
         self.export_csv_name = "inline_qn_responses.csv"
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
-        return_fields = fields or ["route", "locale", "language"]
+        return_fields = fields or ["origin", "language"]
         _df = self.get_df(filters)
         _stats = {"data": {field: self.get_count(field, _df) for field in return_fields}}
         _stats["response_count"] = len(_df)

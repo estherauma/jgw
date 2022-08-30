@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from functools import reduce
 from typing import Dict
 
 import pandas as pd
@@ -38,22 +39,14 @@ class BaseAnalytics:
 
     def get_df(self, filters: QueryMap = None):
         _df = None
-
         if self.raw_df is not None:
             _df = self.raw_df.copy()
-
             if filters is not None:
                 cachedResults_path = self.get_df_path(filters)
                 try:
                     _df = pd.read_csv(cachedResults_path)
                 except FileNotFoundError:
-                    for k in filters:
-                        query = {k: filters[k]}
-                        filter_path = self.get_df_path(query)
-                        try:
-                            _df = pd.read_csv(filter_path)
-                        except FileNotFoundError:
-                            _df = self.filter_data(_df, query)
+                    _df = reduce(self.filter_data, filters.items(), _df)
                     _df.to_csv(cachedResults_path)
         return _df
 
@@ -101,7 +94,7 @@ class BaseAnalytics:
             return df[demographic_cols]
         return pd.DataFrame()
 
-    def filter_data(self, df, query: Dict):
+    def filter_data(self, df, query):
         filter_map = {
             "destination": self.filter_by_destination,
             "origin": self.filter_by_origin,
@@ -110,9 +103,8 @@ class BaseAnalytics:
             "time_range": self.filter_by_timeRange,
             "question": self.filter_by_question,
         }
-        for field, value in query.items():
-            filter_func = filter_map.get(field)
-            if filter_func is not None:
-                df = filter_func(value, df)
-                df.to_csv(self.get_df_path(query))
+        field, value = query
+        filter_func = filter_map.get(field)
+        if filter_func is not None:
+            df = filter_func(value, df)
         return df
