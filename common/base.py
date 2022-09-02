@@ -21,7 +21,7 @@ demographic_cols = [
     "createdAt",
     "updatedAt",
 ]
-
+exclude_cols = [*unwanted_cols, *demographic_cols]
 
 class BaseAnalytics:
     def __init__(self) -> None:
@@ -33,7 +33,7 @@ class BaseAnalytics:
         searchParam_list = f"_{'-'.join(searchParam_list)}" if searchParam_list else ""
         return os.path.join(CACHE_DIR, f"{data_category.lower()}{searchParam_list}.{extension}")
 
-    def get_count(self, field: str, df=None):
+    def count_unique(self, field: str, df=None) -> Dict:
         _df = df.copy() if df is not None else self.raw_df.copy()
         return _df[field].value_counts().to_dict()
 

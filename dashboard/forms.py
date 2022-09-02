@@ -2,6 +2,7 @@ import re
 from datetime import datetime, timedelta
 
 import pandas as pd
+from common.base import exclude_cols
 from django import forms
 from django.db import models
 from pytz import country_names
@@ -12,21 +13,6 @@ from .models import Factory, JGWCache, Scheme
 def get_start_date(days):
     target_date = datetime.today() - timedelta(days=days)
     return target_date.strftime("%Y-%m-%d")
-
-
-unwanted_cols = ["", "deviceId", "undefined", "__v", "_id"]
-demographic_cols = [
-    "appId",
-    "locale",
-    "route",
-    "language",
-    "origin",
-    "destination",
-    "organisation",
-    "factoryFarm",
-    "createdAt",
-    "updatedAt",
-]
 
 
 def camelCase_to_spaceDelimited(text: str):
@@ -131,7 +117,6 @@ class InlineQnsForm(FilterForm):
         inline_cache = JGWCache.objects.filter(category="inline").first()
         if inline_cache is not None:
             df = pd.read_json(inline_cache.data, orient="records")
-            exclude_cols = [*demographic_cols, *unwanted_cols]
             question_list = [i for i in df.columns if i not in exclude_cols]
             question_choices = [(i, camelCase_to_spaceDelimited(i)) for i in question_list]
             question_choices = [("", "Select a question key"), *question_choices]

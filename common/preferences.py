@@ -20,5 +20,5 @@ class Preferences(BaseAnalytics):
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         return_fields = fields or ["age", "gender"]
         _df = self.get_df(filters)
-        _stats = {field: self.get_count(field, _df) for field in return_fields if field in _df.columns}
+        _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
         return _stats

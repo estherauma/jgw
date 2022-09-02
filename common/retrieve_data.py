@@ -203,7 +203,7 @@ class JGWApi:
             "destination": get_dest_country,
         }
 
-        def get_country_code(name):
+        def count_uniquery_code(name):
             if name is not None:
                 code = vk_country_names.get(name)
                 return name if code is None else code
@@ -232,7 +232,7 @@ class JGWApi:
             patterns_to_replace
         )
         df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].applymap(
-            get_country_code
+            count_uniquery_code
         )
 
         return df

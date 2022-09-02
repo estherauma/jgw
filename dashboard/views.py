@@ -70,7 +70,7 @@ def redirect_to_filtered_data(request, url, template_name, form=None):
     if form.is_valid():
         filters = form.cleaned_data.copy()
         # urlencode does not support NoneType values
-        filters = {k: v for k, v in filters.items() if v is not None}
+        filters = {k: v for k, v in filters.items() if v not in [None, ""]}
         return redirect(f"{url}?{urlencode(filters)}")
     return render(request, template_name, context={"form": form})
 
@@ -214,7 +214,7 @@ def export_to_excel_file(request, key):
     return response
 
 
-def get_count_series(df: pd.DataFrame, key: str) -> pd.Series:
+def count_unique_series(df: pd.DataFrame, key: str) -> pd.Series:
     return df[key].value_counts()
 
 
@@ -222,7 +222,7 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
     with pd.ExcelWriter(filename, mode="a", if_sheet_exists="overlay") as writer:
         startrow = 0
         for key in KEYS:
-            count = get_count_series(df, key)
+            count = count_unique_series(df, key)
             count.to_excel(writer, sheet_name=sheet_name, startcol=0, startrow=startrow)
             startrow += count.size + 1
 

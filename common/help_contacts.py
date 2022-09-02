@@ -19,4 +19,4 @@ class HelpContacts(BaseAnalytics):
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
         return_fields = fields or ["route", "locale", "language", "phoneNumber"]
         _df = self.get_df(filters)
-        return {field: self.get_count(field, _df) for field in return_fields}
+        return {field: self.count_unique(field, _df) for field in return_fields}
