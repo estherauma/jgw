@@ -1,3 +1,4 @@
+from itertools import count
 import re
 from datetime import datetime, timedelta
 
@@ -6,6 +7,8 @@ from common.base import exclude_cols
 from django import forms
 from django.db import models
 from pytz import country_names
+
+from common.inline import Inline
 
 from .models import Factory, JGWCache, Scheme
 
@@ -24,7 +27,9 @@ ORIGIN_COUNTRIES = {"": "Select a Country"}
 FACTORIES = {"": "Select a factory or farm"}
 
 
-DEST_COUNTRIES.update({k: country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")})
+DEST_COUNTRIES.update(
+    {country_names[k].lower(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
+)
 CATEGORIES = ["preferences"]  # , "inline", "messaging", "help_contacts"]
 TIME_RANGE = {
     get_start_date(days=30): "30 Days",
@@ -38,7 +43,9 @@ class DependentChoiceField(forms.ChoiceField):
     def valid_value(self, value) -> bool:
         """Check to see if the provided value is a valid choice."""
         text_value = str(value)
-        for k, v in country_names.items():
+        lower_names = [i.lower() for i in country_names.values()]
+        possible_origins = {i: i for i in lower_names}
+        for k, v in possible_origins.items():
             if isinstance(v, (list, tuple)):
                 # This is an optgroup, so look inside the group for options
                 for k2, v2 in v:
