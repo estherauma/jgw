@@ -94,13 +94,13 @@ class JGWApi:
         data = df.to_dict(orient="records")
         return data
 
-    def standardise_language_codes(self, df):
-        def get_language_code(entry):
+    def standardise_language_names(self, df):
+        def get_language_name(entry):
             try:
-                code = str(Language.get(entry))
+                code = Language.get(entry).language_name()
             except LanguageTagError:
                 try:
-                    code = str(Language.find(entry))
+                    code = Language.find(entry).language_name()
                 except (LookupError, AttributeError):
                     code = entry
             except AttributeError:
@@ -109,7 +109,7 @@ class JGWApi:
 
         if "language" in df.columns:
             df["language"] = df["language"].str.lower()
-            df["language"] = df["language"].apply(get_language_code)
+            df["language"] = df["language"].apply(get_language_name)
         return df
 
     def normalise_age_bands(self, df):
