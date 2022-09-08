@@ -82,7 +82,7 @@ class JGWApi:
         df = self.clean_gender_data(df)
         df = self.normalise_age_bands(df)
         df = self.standardise_language_codes(df)
-        df = self.swap_country_names_with_codes(df)
+        df = self.standardise_locations(df)
         return df
 
     def write_data_to_file(self, data: list, filename: str):
@@ -94,13 +94,13 @@ class JGWApi:
         data = df.to_dict(orient="records")
         return data
 
-    def standardise_language_codes(self, df):
-        def get_language_code(entry):
+    def standardise_language_names(self, df):
+        def get_language_name(entry):
             try:
-                code = str(Language.get(entry))
+                code = Language.get(entry).language_name()
             except LanguageTagError:
                 try:
-                    code = str(Language.find(entry))
+                    code = Language.find(entry).language_name()
                 except (LookupError, AttributeError):
                     code = entry
             except AttributeError:
@@ -109,7 +109,7 @@ class JGWApi:
 
         if "language" in df.columns:
             df["language"] = df["language"].str.lower()
-            df["language"] = df["language"].apply(get_language_code)
+            df["language"] = df["language"].apply(get_language_name)
         return df
 
     def normalise_age_bands(self, df):
@@ -185,7 +185,7 @@ class JGWApi:
 
         return df
 
-    def swap_country_names_with_codes(self, df):
+    def standardise_locations(self, df):
         """Replace country name with ISO-3166-1-alpha-3 code."""
 
         def get_origin_country(i):
@@ -203,7 +203,7 @@ class JGWApi:
             "destination": get_dest_country,
         }
 
-        def count_uniquery_code(name):
+        def get_country_code(name):
             if name is not None:
                 code = vk_country_names.get(name)
                 return name if code is None else code
@@ -231,9 +231,9 @@ class JGWApi:
         df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].replace(
             patterns_to_replace
         )
-        df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].applymap(
-            count_uniquery_code
-        )
+        # df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].applymap(
+        #     get_country_code
+        # )
 
         return df
 
