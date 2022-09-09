@@ -47,7 +47,8 @@ class BaseAnalytics:
                     _df = pd.read_csv(cachedResults_path)
                 except FileNotFoundError:
                     _df = reduce(self.filter_data, filters.items(), _df)
-                    _df.to_csv(cachedResults_path)
+                    if self.cleaned:
+                        _df.to_csv(cachedResults_path)
         return _df
 
     def filter_by_destination(self, destination: str, df):
