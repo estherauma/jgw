@@ -34,7 +34,7 @@ class BaseAnalytics:
         return os.path.join(CACHE_DIR, f"{data_category.lower()}{searchParam_list}.{extension}")
 
     def count_unique(self, field: str, df=None) -> Dict:
-        _df = df.copy() if df is not None else self.raw_df.copy()
+        _df = df if df is not None else self.raw_df
         return _df[field].value_counts().to_dict()
 
     def get_df(self, filters: QueryMap = None):

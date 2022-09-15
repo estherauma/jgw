@@ -52,7 +52,11 @@ class JGWApi:
         return _response
 
     def get_data(self, key: str) -> Tuple[list, bool]:
-        """`key` is one of: `preferences, inline, messaging, help_contacts, visa, contract, joboffer, beforeyougo`"""
+        """
+        `key` is one of:
+        `preferences, inline, messaging, help_contacts,
+        visa, contract, joboffer, beforeyougo, app_events`
+        """
         from dashboard.tasks import clean_data as schedule_clean_data
 
         data = None
@@ -71,7 +75,8 @@ class JGWApi:
                 data = result["data"]
                 clean = False
                 JGWCache.objects.create(category=key, data=json.dumps(data))
-                schedule_clean_data.delay(category=key)
+        if data and not clean:
+            schedule_clean_data.delay(category=key)
         return data, clean
 
     def clean_data(self, df):
@@ -220,19 +225,12 @@ class JGWApi:
             "phillippines": country_names["PH"].lower(),
             "saudi": country_names["SA"].lower(),
         }
+        columns_to_replace = ["origin", "destination", "locale"]
 
         for key in ["origin", "destination"]:
             df[key] = df["route"].apply(country_from_route[key])
-        df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].apply(
-            lambda x: x.str.lower()
-        )
-        df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].replace(
-            patterns_to_replace
-        )
-        # df[["origin", "destination", "locale"]] = df[["origin", "destination", "locale"]].applymap(
-        #     get_country_code
-        # )
-
+        df[columns_to_replace] = df[columns_to_replace].apply(lambda x: x.str.lower())
+        df[columns_to_replace] = df[columns_to_replace].replace(patterns_to_replace)
         return df
 
     def normalise_questions_and_responses(self, df):
