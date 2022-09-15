@@ -52,13 +52,14 @@ class AppEvents(BaseAnalytics):
         self.export_csv_name = "app_events.csv"
 
     def replace_chapter_names(self, df) -> pd.DataFrame:
-        df = df.rename({"Event Names": "chapters"})
+        df = df.rename(columns={"Event Name": "chapters"})
         df["chapters"] = df["chapters"].replace(event_to_title)
         return df
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         _df = self.get_df(filters)
+        _df = self.replace_chapter_names(df=_df)
         df = _df.set_index("chapters")
-        df = df.drop("Mark as Conversion")
-        _stats = df.to_dict(orient="index")
+        df = df.drop(columns=["Mark as conversion"])
+        _stats = {"chapters": df.to_dict(orient="index")}
         return _stats

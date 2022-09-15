@@ -1,0 +1,59 @@
+{% extends "layouts/base.html" %}
+
+<!-- title -->
+{% block title %} App Events {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <!-- messages -->
+            {% if messages %} {% for message in messages %}
+            <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
+            {% endfor %} {% endif %}
+            <div class="card-header d-flex align-items-center">
+                <h3 class="mr-auto p-3">User Preferences</h3>
+                <div class="btn-group">
+                    <a class="btn btn-primary"
+                        href="{% url 'dashboard:export_to_excel' key='app_events' %}"
+                        target="_blank">Export</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <h5 class="mr-auto p-3">Chapters Opened</h5>
+            <canvas id="_chapters"> </canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- ChartJS script  -->
+{% block scripts %}
+<script>
+
+    {% for key, values in data.items %}
+        new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
+            type: "bar",
+            data: {
+                labels: {{ values.labels | safe }},
+                datasets: {{ values.data | safe  }},
+            },
+            options: {
+                barValueSpacing: 50,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+    {% endfor %}
+</script>
+{% endblock %}

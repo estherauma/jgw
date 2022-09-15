@@ -4,6 +4,7 @@ from operator import itemgetter
 from typing import Dict
 
 import pandas as pd
+from common.app_events import AppEvents
 from common.checklists import CheckLists
 from common.help_contacts import HelpContacts
 from common.inline import Inline
@@ -134,6 +135,41 @@ def inline_question_stats(request):
             ),
         )
     return render(request, "inline.html", context=context_data)
+
+
+@login_required()
+def app_events_stats(request):
+    helper = AppEvents()
+    context_data = {}
+    template_name = "app_events.html"
+
+    def reformat_grouped_data(data):
+        counts = [i["Count"] for i in data]
+        users = [i["Users"] for i in data]
+        return [
+            {"label": "Counts", "backgroundColor": "blue", "data": counts},
+            {"label": "Users", "backgroundColor": "red", "data": users},
+        ]
+
+    try:
+        _data = helper.compute_stats()
+        chart_data = form_chart_data(_data)
+        chart_data["chapters"]["data"] = reformat_grouped_data(chart_data["chapters"]["data"])
+        if not any(bool(i) for i in _data.values()):
+            messages.error(request, "No data matches this search!")
+    except HTTPError:
+        messages.error(request, "Error fetching data!")
+        return render(request, template_name)
+    context_data.update({"data": chart_data})
+    if helper.cleaned is False:
+        messages.info(
+            request,
+            (
+                "Raw data is shown while we finish processing your results."
+                "\nRefresh after a few minutes to view the completed stats."
+            ),
+        )
+    return render(request, template_name, context=context_data)
 
 
 @login_required()
