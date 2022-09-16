@@ -81,10 +81,10 @@ class JGWApi:
 
     def clean_data(self, df):
         df = self.normalise_questions_and_responses(df)
+        df = self.standardise_language_names(df)
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
         df = self.normalise_age_bands(df)
-        df = self.standardise_language_names(df)
         df = self.standardise_locations(df)
         return df
 
@@ -231,6 +231,7 @@ class JGWApi:
             df[key] = df["route"].apply(country_from_route[key])
         df[columns_to_replace] = df[columns_to_replace].apply(lambda x: x.str.lower())
         df[columns_to_replace] = df[columns_to_replace].replace(patterns_to_replace)
+        df[columns_to_replace] = df[columns_to_replace].apply(lambda x: x.str.title())
         return df
 
     def normalise_questions_and_responses(self, df):
@@ -314,7 +315,7 @@ class JGWApi:
             column = column.apply(lambda x: _do_translate_listfield(text_list=x, field=column.name))
             return column
 
-        scalar_cols = [i for i in df.columns if i in ["age", "gender", "language", "phoneNumber"]]
+        scalar_cols = [i for i in df.columns if i in ["age", "gender", "phoneNumber"]]
         list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "questionResponse"]]
         df = df.fillna("")
         if "questionText" in df.columns:

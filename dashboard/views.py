@@ -219,7 +219,6 @@ def process_origin_options(request, key):
     origins = set(origins.tolist())
     origin_countries = ORIGIN_COUNTRIES.copy()
     origin_countries.update({k: k.title() for k in origins})
-    print(origin_countries, origins)
     return JsonResponse(origin_countries)
 
 

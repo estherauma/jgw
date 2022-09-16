@@ -23,6 +23,7 @@ demographic_cols = [
 ]
 exclude_cols = [*unwanted_cols, *demographic_cols]
 
+
 class BaseAnalytics:
     def __init__(self) -> None:
         self.export_csv_name = "export.csv"
