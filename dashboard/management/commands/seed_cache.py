@@ -1,4 +1,3 @@
-from unicodedata import category
 from dashboard.tasks import fetch_API_data
 from django.core.management.base import BaseCommand
 

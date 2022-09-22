@@ -70,8 +70,6 @@ class JGWApi:
                 result = response.json()
                 data = result["data"]
                 clean = False
-                for f in glob.glob(os.path.join(CACHE_DIR, f"{key}*.csv")):
-                    os.remove(f)
                 JGWCache.objects.create(category=key, data=json.dumps(data))
                 schedule_clean_data.delay(category=key)
         return data, clean
@@ -81,7 +79,7 @@ class JGWApi:
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
         df = self.normalise_age_bands(df)
-        df = self.standardise_language_codes(df)
+        df = self.standardise_language_names(df)
         df = self.standardise_locations(df)
         return df
 
