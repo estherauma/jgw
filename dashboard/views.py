@@ -142,6 +142,9 @@ def app_events_stats(request):
     helper = AppEvents()
     context_data = {}
     template_name = "app_events.html"
+    filters = request.GET.dict() or {}
+    if "time_range" not in filters:
+        filters["time_range"] = "7 Days"
 
     def reformat_grouped_data(data):
         counts = [i["Count"] for i in data]

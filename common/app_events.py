@@ -1,12 +1,18 @@
+from datetime import datetime
 from typing import Dict
 
 import pandas as pd
+from dashboard.forms import get_start_date
+from google.cloud import bigquery
 
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
 
 api = JGWApi()
+client = bigquery.Client()
 QueryMap = Dict[str, list[str]]
+TIME_RANGE = {f"{n} Days": get_start_date(days=n, format="%Y%m%d") for n in [7, 30, 60, 90]}
+
 
 event_to_title = {
     "ChapterOpened_1_1": "Thinking about it",
@@ -44,22 +50,40 @@ event_to_title = {
 
 
 class AppEvents(BaseAnalytics):
-    def __init__(self) -> None:
-        # mock events data fetching pending firebase config
-        app_events, clean = pd.read_csv("./events.csv"), True
-        self.cleaned = clean
-        self.raw_df = pd.DataFrame.from_records(app_events)
+    def __init__(self, date_range="7 Days") -> None:
+        self.raw_df, self.cleaned = self.get_data(date_range=date_range), True
         self.export_csv_name = "app_events.csv"
 
+    def get_data(self, date_range="7 Days"):
+        def generate_query(date_range="7 Days", event_name=None):
+            end_date = datetime.today().strftime("%Y%m%d")
+            start_date = TIME_RANGE.get(date_range) or end_date
+            return (
+                f"SELECT event_name as chapters, COUNT(event_timestamp) as total_users FROM "
+                f"(SELECT * FROM `just-good-work.analytics_191478110.events_*` WHERE _table_suffix BETWEEN {start_date} AND {end_date})"
+                f"WHERE event_name LIKE {event_name or 'ChapterOpened%'} "
+                f"GROUP BY event_name"
+            )
+
+        query = generate_query(date_range=date_range)
+        df = client.query(query).to_dataframe()
+        df = self.replace_chapter_names(df)
+        df = df.set_index("chapters")
+        if "Mark as conversion" in df.columns:
+            df = df.drop(columns=["Mark as conversion"])
+        return df
+
     def replace_chapter_names(self, df) -> pd.DataFrame:
-        df = df.rename(columns={"Event Name": "chapters"})
+        if "Event Name" in df.columns:
+            df = df.rename(columns={"Event Name": "chapters"})
         df["chapters"] = df["chapters"].replace(event_to_title)
         return df
 
+    def get_df(self, filters: QueryMap = None):
+        df = self.get_data(date_range=filters["time_range"])
+        return df
+
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
-        _df = self.get_df(filters)
-        _df = self.replace_chapter_names(df=_df)
-        df = _df.set_index("chapters")
-        df = df.drop(columns=["Mark as conversion"])
-        _stats = {"chapters": df.to_dict(orient="index")}
+        _df = self.get_df(filters)        
+        _stats = {"chapters": _df.to_dict(orient="index")}
         return _stats

@@ -1,4 +1,3 @@
-from itertools import count
 import re
 from datetime import datetime, timedelta
 
@@ -8,14 +7,12 @@ from django import forms
 from django.db import models
 from pytz import country_names
 
-from common.inline import Inline
-
 from .models import Factory, JGWCache, Scheme
 
 
-def get_start_date(days):
+def get_start_date(days, format="%Y-%m-%d"):
     target_date = datetime.today() - timedelta(days=days)
-    return target_date.strftime("%Y-%m-%d")
+    return target_date.strftime(format)
 
 
 def camelCase_to_spaceDelimited(text: str):
