@@ -15,11 +15,17 @@
             <div class="card-header d-flex align-items-center">
                 <h3 class="mr-auto p-3">User Preferences</h3>
                 <div class="btn-group">
-                    <a class="btn btn-primary"
-                        href="{% url 'dashboard:export_to_excel' key='app_events' %}"
+                    <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='app_events' %}"
                         target="_blank">Export</a>
                 </div>
             </div>
+            <form id="filter_form" class="form-inline p-2" method="POST">
+                {% csrf_token %}
+                <label class="form-label" for="time_range">{{form.time_range.label}}</label>
+                {{form.time_range}} {{form.time_range.errors}}
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'dashboard:app_events' %}" class="mx-2">Reset</a>
+            </form>
         </div>
     </div>
 </div>
@@ -39,20 +45,20 @@
 <script>
 
     {% for key, values in data.items %}
-        new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
-            type: "bar",
-            data: {
-                labels: {{ values.labels | safe }},
-                datasets: {{ values.data | safe  }},
+    new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
+        type: "bar",
+        data: {
+            labels: {{ values.labels | safe }},
+        datasets: {{ values.data | safe }},
             },
-            options: {
-                barValueSpacing: 50,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                    },
-                },
+        options: {
+        barValueSpacing: 50,
+        scales: {
+            y: {
+                beginAtZero: true,
             },
+        },
+    },
         });
     {% endfor %}
 </script>

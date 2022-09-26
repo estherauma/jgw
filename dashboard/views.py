@@ -16,10 +16,17 @@ from django.http import FileResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import urlencode
-from pytz import country_names
 from requests.exceptions import HTTPError
 
-from .forms import FACTORIES, ORIGIN_COUNTRIES, ExportReportForm, FilterForm, InlineQnsForm, get_start_date
+from .forms import (
+    FACTORIES,
+    ORIGIN_COUNTRIES,
+    AppEventsForm,
+    ExportReportForm,
+    FilterForm,
+    InlineQnsForm,
+    get_start_date,
+)
 from .models import JGWCache
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
@@ -154,6 +161,13 @@ def app_events_stats(request):
             {"label": "Users", "backgroundColor": "red", "data": users},
         ]
 
+    if request.method == "POST":
+        return redirect_to_filtered_data(
+            request,
+            url=reverse("dashboard:app_events"),
+            template_name="app_events.html",
+            form=AppEventsForm(request.POST),
+        )
     try:
         _data = helper.compute_stats()
         chart_data = form_chart_data(_data)
