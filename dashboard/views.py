@@ -147,7 +147,7 @@ def inline_question_stats(request):
 @login_required()
 def app_events_stats(request):
     helper = AppEvents()
-    context_data = {}
+    context_data = {"form": AppEventsForm()}
     template_name = "app_events.html"
     filters = request.GET.dict() or {}
     if "time_range" not in filters:
@@ -169,14 +169,14 @@ def app_events_stats(request):
             form=AppEventsForm(request.POST),
         )
     try:
-        _data = helper.compute_stats()
+        _data = helper.compute_stats(filters=filters)
         chart_data = form_chart_data(_data)
         chart_data["chapters"]["data"] = reformat_grouped_data(chart_data["chapters"]["data"])
         if not any(bool(i) for i in _data.values()):
             messages.error(request, "No data matches this search!")
     except HTTPError:
         messages.error(request, "Error fetching data!")
-        return render(request, template_name)
+        return render(request, template_name, context=context_data)
     context_data.update({"data": chart_data})
     if helper.cleaned is False:
         messages.info(

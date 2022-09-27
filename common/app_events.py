@@ -58,11 +58,14 @@ class AppEvents(BaseAnalytics):
         def generate_query(date_range="7 Days", event_name=None):
             end_date = datetime.today().strftime("%Y%m%d")
             start_date = TIME_RANGE.get(date_range) or end_date
-            return (
-                f"SELECT event_name as chapters, COUNT(event_timestamp) as total_users FROM "
-                f"(SELECT * FROM `just-good-work.analytics_191478110.events_*` WHERE _table_suffix BETWEEN {start_date} AND {end_date})"
-                f"WHERE event_name LIKE {event_name or 'ChapterOpened%'} "
-                f"GROUP BY event_name"
+            return """
+                SELECT event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users, COUNT(event_timestamp) as Count,
+                FROM (SELECT * FROM `just-good-work.analytics_191478110.events_*`
+                    WHERE _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING))
+                WHERE event_name LIKE 'ChapterOpened%'
+                GROUP BY event_name
+                """.format(
+                start_date=start_date, end_date=end_date
             )
 
         query = generate_query(date_range=date_range)
@@ -84,6 +87,6 @@ class AppEvents(BaseAnalytics):
         return df
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
-        _df = self.get_df(filters)        
+        _df = self.get_df(filters)
         _stats = {"chapters": _df.to_dict(orient="index")}
         return _stats
