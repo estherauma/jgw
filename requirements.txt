@@ -16,6 +16,7 @@ click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.2.0
 coverage==6.0.2
+db-dtypes==1.0.3
 decorator==5.1.1
 Deprecated==1.2.13
 dj-database-url==0.5.0
@@ -27,11 +28,15 @@ et-xmlfile==1.1.0
 executing==0.8.3
 google-api-core==1.31.5
 google-auth==1.35.0
+google-cloud-bigquery==3.3.2
+google-cloud-bigquery-storage==2.13.2
 google-cloud-core==1.7.2
 google-cloud-translate==2.0.1
+google-crc32c==1.5.0
+google-resumable-media==2.3.3
 googleapis-common-protos==1.56.1
 googletrans==4.0.0rc1
-grpcio==1.46.1
+grpcio==1.48.1
 gunicorn==20.1.0
 h11==0.9.0
 h2==3.2.0
@@ -60,10 +65,12 @@ pexpect==4.8.0
 pickleshare==0.7.5
 platformdirs==2.5.1
 prompt-toolkit==3.0.29
+proto-plus==1.22.1
 protobuf==3.20.1
 psycopg2==2.9.1
 ptyprocess==0.7.0
 pure-eval==0.2.2
+pyarrow==9.0.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 Pygments==2.11.2
