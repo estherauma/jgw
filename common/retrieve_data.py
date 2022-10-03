@@ -267,11 +267,9 @@ class JGWApi:
         """Translate text values to English."""
 
         def translate_question(id, text):
-            query = TranslatedQuestionText.objects.filter(prismic_id=id)
-            if query.exists():
-                result = query.first()
-                if result.translation is not None:
-                    return result.translation
+            query = TranslatedQuestionText.objects.filter(prismic_id=id, translation__isnull=False).first()
+            if query:
+                return query.translation
             else:
                 TranslatedQuestionText.objects.create(prismic_id=id, original_text=text)
             return text
