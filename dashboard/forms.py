@@ -34,6 +34,13 @@ TIME_RANGE = {
     get_start_date(days=90): "90 Days",
     "all_time": "All Time",
 }
+OPERATORS = {
+    "concordia": "Seasonal  Worker Scheme - Concordia",
+    "ag_recruitment": "Seasonal Worker Scheme - AG Recruitment",
+    "generic": "Seasonal Worker Scheme - Generic",
+    "pro_force": "Seasonal Worker Scheme - Pro-Force",
+    "fruitful": "Seasonal Worker Scheme - Fruitful Jobs",
+}
 
 
 class DependentChoiceField(forms.ChoiceField):
@@ -82,6 +89,12 @@ class FilterForm(forms.Form):
         choices=TIME_RANGE.items(),
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "time_range"}),
+    )
+    organisation = forms.ModelChoiceField(
+        label="Organisation",
+        queryset=OPERATORS,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "organisation"}),
     )
 
 
@@ -139,7 +152,7 @@ class AppEventsForm(forms.Form):
         # "30 Days": "30 Days",
         # "60 Days": "60 Days",
         # "90 Days": "90 Days",
-}
+    }
     time_range = forms.ChoiceField(
         label="Time Range",
         choices=TIME_RANGE.items(),
