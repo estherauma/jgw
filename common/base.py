@@ -96,6 +96,11 @@ class BaseAnalytics:
             return df[demographic_cols]
         return pd.DataFrame()
 
+    def filter_by_organisation(self, org_name: str, df):
+        if "organisation" in df.columns:
+            return df.loc[df["organisation"] == org_name]
+        return pd.DataFrame()
+
     def filter_data(self, df, query):
         filter_map = {
             "destination": self.filter_by_destination,
@@ -104,6 +109,7 @@ class BaseAnalytics:
             "factory_farm": self.filter_by_factoryFarm,
             "time_range": self.filter_by_timeRange,
             "question": self.filter_by_question,
+            "organisation": self.filter_by_organisation,
         }
         field, value = query
         filter_func = filter_map.get(field)
