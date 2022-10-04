@@ -13,7 +13,7 @@
             <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
             {% endfor %} {% endif %}
             <div class="card-header d-flex align-items-center">
-                <h3 class="mr-auto p-3">User Preferences</h3>
+                <h3 class="mr-auto p-3">App Events</h3>
                 <div class="btn-group">
                     <a class="btn btn-primary" href="{% url 'dashboard:export_to_excel' key='app_events' %}"
                         target="_blank">Export</a>
@@ -26,6 +26,7 @@
                 <button type="submit" class="btn btn-primary">Filter</button>
                 <a href="{% url 'dashboard:app_events' %}" class="mx-2">Reset</a>
             </form>
+            <h5 class="mr-auto p-3">Total Installs: {{total_installs}}</h5>
         </div>
     </div>
 </div>
