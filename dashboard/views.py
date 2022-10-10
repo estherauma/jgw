@@ -18,15 +18,9 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from requests.exceptions import HTTPError
 
-from .forms import (
-    FACTORIES,
-    ORIGIN_COUNTRIES,
-    AppEventsForm,
-    ExportReportForm,
-    FilterForm,
-    InlineQnsForm,
-    get_start_date,
-)
+from .forms import (FACTORIES, OPERATORS, ORIGIN_COUNTRIES, AppEventsForm,
+                    ExportReportForm, FilterForm, InlineQnsForm,
+                    get_start_date)
 from .models import JGWCache
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
@@ -39,13 +33,6 @@ HELPERS = {
     "joboffer": lambda: CheckLists(key="joboffer"),
     "contract": lambda: CheckLists(key="contract"),
     "beforeyougo": lambda: CheckLists(key="beforeyougo"),
-}
-OPERATORS = {
-    "concordia": "Seasonal  Worker Scheme - Concordia",
-    "ag_recruitment": "Seasonal Worker Scheme - AG Recruitment",
-    "generic": "Seasonal Worker Scheme - Generic",
-    "pro_force": "Seasonal Worker Scheme - Pro-Force",
-    "fruitful": "Seasonal Worker Scheme - Fruitful Jobs",
 }
 
 

@@ -21,7 +21,8 @@ def camelCase_to_spaceDelimited(text: str):
 
 DEST_COUNTRIES = {"": "Select a Country"}
 ORIGIN_COUNTRIES = {"": "Select a Country"}
-FACTORIES = {"": "Select a factory or farm"}
+FACTORIES = {"": "Select a Factory or Farm"}
+OPERATORS = {"": "Select an Organisation"}
 
 
 DEST_COUNTRIES.update(
@@ -34,6 +35,15 @@ TIME_RANGE = {
     get_start_date(days=90): "90 Days",
     "all_time": "All Time",
 }
+OPERATORS.update(
+    {
+        "Seasonal  Worker Scheme - Concordia": "Concordia",
+        "Seasonal Worker Scheme - AG Recruitment": "AG Recruitment",
+        "Seasonal Worker Scheme - Generic": "Generic",
+        "Seasonal Worker Scheme - Pro-Force": "Pro-Force",
+        "Seasonal Worker Scheme - Fruitful Jobs": "Fruitful Jobs",
+    }
+)
 
 
 class DependentChoiceField(forms.ChoiceField):
@@ -82,6 +92,12 @@ class FilterForm(forms.Form):
         choices=TIME_RANGE.items(),
         required=False,
         widget=forms.Select(attrs={"class": "form-select mx-2", "id": "time_range"}),
+    )
+    organisation = forms.ChoiceField(
+        label="Organisation",
+        choices=OPERATORS.items(),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "organisation"}),
     )
 
 
@@ -139,7 +155,7 @@ class AppEventsForm(forms.Form):
         # "30 Days": "30 Days",
         # "60 Days": "60 Days",
         # "90 Days": "90 Days",
-}
+    }
     time_range = forms.ChoiceField(
         label="Time Range",
         choices=TIME_RANGE.items(),
