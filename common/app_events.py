@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 import pandas as pd
 from dashboard.forms import get_start_date
@@ -50,31 +50,41 @@ event_to_title = {
 
 
 class AppEvents(BaseAnalytics):
-    def __init__(self, date_range="7 Days") -> None:
-        self.raw_df, self.cleaned = self.get_data(date_range=date_range), True
+    def __init__(self, filters: QueryMap = None) -> None:
+        self.raw_df, self.cleaned = self.get_data(filters=filters), True
         self.export_csv_name = "app_events.csv"
 
-    def get_data(self, date_range="7 Days"):
-        def generate_query(date_range="7 Days", event_name=None):
-            end_date = datetime.today().strftime("%Y%m%d")
-            start_date = TIME_RANGE.get(date_range) or end_date
-            return """
-                SELECT event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users, COUNT(event_timestamp) as Count,
-                FROM (SELECT * FROM `just-good-work.analytics_191478110.events_*`
-                    WHERE _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING))
-                WHERE event_name LIKE 'ChapterOpened%'
-                GROUP BY event_name
-                """.format(
-                start_date=start_date, end_date=end_date
-            )
+    def get_data(self, filters: QueryMap = None):
+        date_range = filters.get("time_range", "7 Days") if filters else "7 Days"
+        end_date = datetime.today().strftime("%Y%m%d")
+        start_date = TIME_RANGE.get(date_range) or end_date
+        chapters_query = """
+            SELECT event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users, COUNT(event_timestamp) as Count,
+            FROM (SELECT * FROM `just-good-work.analytics_191478110.events_*`
+                WHERE _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING))
+            WHERE event_name LIKE 'ChapterOpened%'
+            GROUP BY event_name
+            """.format(
+            start_date=start_date, end_date=end_date
+        )
 
-        query = generate_query(date_range=date_range)
-        df = client.query(query).to_dataframe()
-        df = self.replace_chapter_names(df)
-        df = df.set_index("chapters")
-        if "Mark as conversion" in df.columns:
-            df = df.drop(columns=["Mark as conversion"])
-        return df
+        installs_query = """
+            SELECT COUNT(DISTINCT user_pseudo_id) as total_installs
+            FROM `just-good-work.analytics_191478110.events_*`
+            WHERE event_name = 'first_open'
+            AND _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING)
+            """.format(
+            start_date=start_date, end_date=end_date
+        )
+
+        chapters_df = client.query(chapters_query).to_dataframe()
+        chapters_df = self.replace_chapter_names(chapters_df)
+        chapters_df = chapters_df.set_index("chapters")
+        if "Mark as conversion" in chapters_df.columns:
+            chapters_df = chapters_df.drop(columns=["Mark as conversion"])
+
+        installs = client.query(installs_query).to_dataframe()
+        return {"chapters": chapters_df, "total_installs": installs}
 
     def replace_chapter_names(self, df) -> pd.DataFrame:
         if "Event Name" in df.columns:
@@ -82,11 +92,12 @@ class AppEvents(BaseAnalytics):
         df["chapters"] = df["chapters"].replace(event_to_title)
         return df
 
-    def get_df(self, filters: QueryMap = None):
-        df = self.get_data(date_range=filters["time_range"])
-        return df
+    def get_df(self, filters: QueryMap = None) -> Dict:
+        return self.get_data(filters=filters)
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
-        _df = self.get_df(filters)
-        _stats = {"chapters": _df.to_dict(orient="index")}
+        data = self.get_df(filters)
+        _stats = {"chapters": data["chapters"].to_dict(orient="index")}
+        total_installs = data["total_installs"].to_dict(orient="records")[0]
+        _stats.update(total_installs)
         return _stats
