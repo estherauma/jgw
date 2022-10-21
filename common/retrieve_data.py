@@ -1,7 +1,6 @@
 """JGW API helpers
 """
 import ast
-import glob
 import json
 import os
 from datetime import datetime
@@ -267,22 +266,20 @@ class JGWApi:
         """Translate text values to English."""
 
         def translate_question(id, text):
-            query = TranslatedQuestionText.objects.filter(prismic_id=id)
-            if query.exists():
-                result = query.first()
-                if result.translation is not None:
-                    return result.translation
+            query = TranslatedQuestionText.objects.filter(prismic_id=id).first()
+            if query:
+                if query.translation:
+                    return query.translation
             else:
                 TranslatedQuestionText.objects.create(prismic_id=id, original_text=text)
             return text
 
         def handle_translate(text, field):
             TranslatedModel = TranslatedResponseText if field == "questionResponse" else TranslatedText
-            query = TranslatedModel.objects.filter(original_text=text)
-            if query.exists():
-                result = query.first()
-                if result.translation is not None:
-                    return result.translation
+            query = TranslatedModel.objects.filter(original_text=text).first()
+            if query:
+                if query.translation:
+                    return query.translation
             else:
                 TranslatedModel.objects.create(original_text=text)
             return text
@@ -315,7 +312,7 @@ class JGWApi:
             column = column.apply(lambda x: _do_translate_listfield(text_list=x, field=column.name))
             return column
 
-        scalar_cols = [i for i in df.columns if i in ["age", "gender", "phoneNumber"]]
+        scalar_cols = [i for i in df.columns if i in ["age", "gender", "phoneNumber", "language"]]
         list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "questionResponse"]]
         df = df.fillna("")
         if "questionText" in df.columns:
