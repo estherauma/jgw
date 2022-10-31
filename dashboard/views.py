@@ -18,7 +18,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from requests.exceptions import HTTPError
 
-from .forms import (FACTORIES, OPERATORS, ORIGIN_COUNTRIES, AppEventsForm,
+from .forms import (FACTORIES, ORIGIN_COUNTRIES, AppEventsForm,
                     ExportReportForm, FilterForm, InlineQnsForm,
                     get_start_date)
 from .models import JGWCache
@@ -33,6 +33,13 @@ HELPERS = {
     "joboffer": lambda: CheckLists(key="joboffer"),
     "contract": lambda: CheckLists(key="contract"),
     "beforeyougo": lambda: CheckLists(key="beforeyougo"),
+}
+OPERATORS = {
+    "Concordia": "Seasonal  Worker Scheme - Concordia",
+    "AG Recruitment": "Seasonal Worker Scheme - AG Recruitment",
+    "Generic": "Seasonal Worker Scheme - Generic",
+    "Pro-Force": "Seasonal Worker Scheme - Pro-Force",
+    "Fruitful Jobs": "Seasonal Worker Scheme - Fruitful Jobs",
 }
 
 
@@ -160,8 +167,8 @@ def app_events_stats(request):
         if not any(bool(i) for i in _data.values()):
             messages.error(request, "No data matches this search!")
             return render(request, template_name, context=context_data)
-        context_data['total_installs'] = _data['total_installs']
-        chart_data = form_chart_data({"chapters":_data["chapters"]})
+        context_data["total_installs"] = _data["total_installs"]
+        chart_data = form_chart_data({"chapters": _data["chapters"]})
         chart_data["chapters"]["data"] = reformat_grouped_data(chart_data["chapters"]["data"])
     except HTTPError:
         messages.error(request, "Error fetching data!")
