@@ -14,6 +14,8 @@ from jgwpandas.settings import CACHE_DIR
 from langcodes import Language, LanguageTagError
 from pytz import country_names
 
+from .reports import exclude_cols
+
 data_categories = [
     "preferences",
     "inline",
@@ -312,7 +314,10 @@ class JGWApi:
             column = column.apply(lambda x: _do_translate_listfield(text_list=x, field=column.name))
             return column
 
-        scalar_cols = [i for i in df.columns if i in ["age", "gender", "phoneNumber", "language"]]
+        question_cols = [i for i in df.columns if i not in exclude_cols]
+        scalar_cols = [
+            i for i in df.columns if i in ["age", "gender", "phoneNumber", "language", *question_cols]
+        ]
         list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "questionResponse"]]
         df = df.fillna("")
         if "questionText" in df.columns:
@@ -323,4 +328,10 @@ class JGWApi:
             df[scalar_cols] = df[scalar_cols].apply(translate_field_or_mark)
         if list_cols:
             df[list_cols] = df[list_cols].apply(translate_list_field)
+        columns_to_replace = [i for i in df.columns if i in question_cols]
+        patterns_to_replace = {"not": "no", "it is": "yes", "are not": "no", "have": "yes"}
+        if columns_to_replace:
+            df[columns_to_replace] = df[columns_to_replace].apply(lambda x: x.str.lower())
+            df[columns_to_replace] = df[columns_to_replace].replace(patterns_to_replace)
+
         return df
