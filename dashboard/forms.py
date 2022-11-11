@@ -150,8 +150,8 @@ class InlineQnsForm(FilterForm):
 class AppEventsForm(forms.Form):
     TIME_RANGE = {
         "7 Days": "7 Days",
-        # "30 Days": "30 Days",
-        # "60 Days": "60 Days",
+        "30 Days": "30 Days",
+        "55 Days": "55 Days",
         # "90 Days": "90 Days",
     }
     time_range = forms.ChoiceField(

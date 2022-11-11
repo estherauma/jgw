@@ -11,7 +11,7 @@ from common.retrieve_data import JGWApi
 api = JGWApi()
 client = bigquery.Client()
 QueryMap = Dict[str, list[str]]
-TIME_RANGE = {f"{n} Days": get_start_date(days=n, format="%Y%m%d") for n in [7, 30, 60, 90]}
+TIME_RANGE = {f"{n} Days": get_start_date(days=n, format="%Y%m%d") for n in [7, 30, 55]}
 
 
 event_to_title = {
