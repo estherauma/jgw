@@ -3,8 +3,8 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from common.base import BaseAnalytics, exclude_cols
-from common.retrieve_data import JGWApi
+from common.base import BaseAnalytics
+from common.retrieve_data import JGWApi, exclude_cols
 
 api = JGWApi()
 QueryMap = Dict[str, list[str]]

@@ -10,6 +10,7 @@ from common.help_contacts import HelpContacts
 from common.inline import Inline
 from common.messaging import Messaging
 from common.preferences import Preferences
+from common.reports import get_demographics_report, get_start_date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, JsonResponse
@@ -19,8 +20,7 @@ from django.utils.http import urlencode
 from requests.exceptions import HTTPError
 
 from .forms import (FACTORIES, ORIGIN_COUNTRIES, AppEventsForm,
-                    ExportReportForm, FilterForm, InlineQnsForm,
-                    get_start_date)
+                    ExportReportForm, FilterForm, InlineQnsForm)
 from .models import JGWCache
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
@@ -276,23 +276,6 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
             startrow += count.size + 1
 
 
-def get_report(start, end, category):
-    output_filename = f"{category}.xlsx"
-    result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
-    df = pd.read_json(result.data, orient="records")
-    df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
-    try:
-        write_to_xls_sheet(df, sheet_name="Pref-All", filename=output_filename)
-    except FileNotFoundError:
-        shutil.copy("./temp/preferences.xlsx", "./preferences.xlsx")
-        write_to_xls_sheet(df, sheet_name="Pref-All", filename=output_filename)
-    for k, operator_name in OPERATORS.items():
-        new_df = df.loc[df["organisation"] == operator_name]
-        new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
-        write_to_xls_sheet(new_df, sheet_name=f"pref-{k}", filename=output_filename)
-    return output_filename
-
-
 @login_required()
 def export_report(request):
     form = ExportReportForm()
@@ -301,7 +284,7 @@ def export_report(request):
         if form.is_valid():
             start, end, category = itemgetter("start_date", "end_date", "category")(form.cleaned_data)
             start, end = start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
-            filename = get_report(start, end, category)
+            filename = get_demographics_report(start, end)
             response = FileResponse(open(filename, "rb"))
             return response
         else:

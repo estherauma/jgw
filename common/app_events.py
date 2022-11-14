@@ -2,11 +2,11 @@ from datetime import datetime
 from typing import Dict, List
 
 import pandas as pd
-from dashboard.forms import get_start_date
 from google.cloud import bigquery
 
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
+from common.reports import get_start_date
 
 api = JGWApi()
 client = bigquery.Client()

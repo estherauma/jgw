@@ -14,8 +14,6 @@ from jgwpandas.settings import CACHE_DIR
 from langcodes import Language, LanguageTagError
 from pytz import country_names
 
-from .reports import exclude_cols
-
 data_categories = [
     "preferences",
     "inline",
@@ -39,7 +37,20 @@ URLS = {
 CACHE_FILENAMES = {k: os.path.join(CACHE_DIR, f"{k}.csv") for k in data_categories}
 vk_country_names = {v.lower(): k for k, v in country_names.items()}
 vk_country_names.update({"republic of kosovo": "XK"})
-
+unwanted_cols = ["", "deviceId", "undefined", "__v", "_id"]
+demographic_cols = [
+    "appId",
+    "locale",
+    "route",
+    "language",
+    "origin",
+    "destination",
+    "organisation",
+    "factoryFarm",
+    "createdAt",
+    "updatedAt",
+]
+exclude_cols = [*unwanted_cols, *demographic_cols]
 
 class JGWApi:
     def __init__(self) -> None:
