@@ -31,10 +31,10 @@ DEST_COUNTRIES.update(
     {country_names[k].lower(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
 )
 CATEGORIES = {
-    "preferences": "Demographics",
+    "demographics": "Demographics",
     "chapters": "Chapters",
-    "inline_totals": "InlineQuestions Participation",
-    "inline_qn_breakdown": "InlineQuestions Response Breakdown",
+    "inlineQNs_participation": "InlineQuestions Participation",
+    "inlineQNs_responses": "InlineQuestions Response Breakdown",
 }
 TIME_RANGE = {
     get_start_date(days=30): "30 Days",
