@@ -9,7 +9,12 @@ from google.cloud import translate_v2 as translate
 from jgwpandas.settings import EMAIL_HOST_USER
 
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
-from dashboard.views import get_report
+from common.reports import (
+    get_demographics_report,
+    get_chapters_report,
+    get_inlineqns_report,
+    get_inlinetotals_report,
+)
 
 client = translate.Client()
 
@@ -70,15 +75,16 @@ def send_email_notification(subject, message, attachment_path, recipients):
 
 @shared_task(name="generate_report")
 def generate_report():
-    today = datetime.today().strftime("%Y-%m-%d")
-    subject = f"{today}-SWS Report"
-    message = f"Hello, \nPlease find attached the SWS Report for {datetime.today() - timedelta(weeks=2)} to {today}.\nJGW.Pandas"
+    reports = (get_demographics_report, get_chapters_report, get_inlinetotals_report, get_inlineqns_report)
+    end = datetime.today().strftime("%Y-%m-%d")
+    subject = f"{end}-SWS Report"
+    message = f"Hello, \nPlease find attached the SWS Report for {datetime.today() - timedelta(weeks=2)} to {end}.\nJGW.Pandas"
     recipients = os.getenv("RECIPIENTS").split(" ")
     if recipients:
-        filename = get_report(start="2022-06-01", end=today, category="preferences")
-        attachment_path = filename
+        attachments = [f(start="2022-06-01", end=end) for f in reports]
         mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
-        mail.attach_file(attachment_path)
+        for filename in attachments:
+            mail.attach_file(filename)
         mail.send()
 
 
