@@ -1,13 +1,14 @@
 import re
 from datetime import datetime
 
-import pandas as pd
+from common.inline import Inline
 from common.reports import get_start_date
 from common.retrieve_data import exclude_cols
 from django import forms
+from django.utils.safestring import mark_safe
 from pytz import country_names
 
-from .models import Factory, JGWCache, Scheme
+from .models import Factory, Scheme
 
 
 def camelCase_to_spaceDelimited(text: str):
@@ -28,7 +29,7 @@ OPERATORS = {
 
 
 DEST_COUNTRIES.update(
-    {country_names[k].lower(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
+    {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
 )
 CATEGORIES = {
     "demographics": "Demographics",
@@ -48,8 +49,8 @@ class DependentChoiceField(forms.ChoiceField):
     def valid_value(self, value) -> bool:
         """Check to see if the provided value is a valid choice."""
         text_value = str(value)
-        lower_names = [i.lower() for i in country_names.values()]
-        possible_origins = {i: i for i in lower_names}
+        _names = [i.title() for i in country_names.values()]
+        possible_origins = {i: i for i in _names}
         for k, v in possible_origins.items():
             if isinstance(v, (list, tuple)):
                 # This is an optgroup, so look inside the group for options
@@ -63,6 +64,15 @@ class DependentChoiceField(forms.ChoiceField):
 
 
 class FilterForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(forms.Form, self).__init__(*args, **kwargs)
+        qn_mark = mark_safe("'")
+        form_name = f"{qn_mark}filter_form{qn_mark}"
+        for f in self.fields:
+            self.fields[f].widget.attrs[
+                "onChange"
+            ] = f"const filterForm = document.getElementById({form_name}).submit();"
+
     destination = forms.ChoiceField(
         choices=DEST_COUNTRIES.items(),
         required=False,
@@ -127,13 +137,12 @@ class ExportReportForm(forms.Form):
 class InlineQnsForm(FilterForm):
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
-        inline_cache = JGWCache.objects.filter(category="inline").first()
-        if inline_cache is not None:
-            df = pd.read_json(inline_cache.data, orient="records")
-            question_list = [i for i in df.columns if i not in exclude_cols]
-            question_choices = [(i, camelCase_to_spaceDelimited(i)) for i in question_list]
-            question_choices = [("", "Select a question key"), *question_choices]
-            self.fields["question"].choices = question_choices
+        helper = Inline()
+        df = helper.get_df()
+        question_list = [i for i in df.columns if i not in exclude_cols]
+        question_choices = [(i, camelCase_to_spaceDelimited(i)) for i in question_list]
+        question_choices = [("", "Select a question key"), *question_choices]
+        self.fields["question"].choices = question_choices
 
     question = forms.ChoiceField(
         label="Question Key",

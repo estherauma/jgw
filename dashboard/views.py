@@ -226,9 +226,9 @@ def process_origin_options(request, key):
     helper = helper()
     df = helper.get_df(filters)
     origins = df["origin"][df["origin"].notna()]
-    origins = set(origins.tolist())
+    origins = sorted(origins.unique())
     origin_countries = ORIGIN_COUNTRIES.copy()
-    origin_countries.update({k: k.title() for k in origins})
+    origin_countries.update({k: k for k in origins})
     return JsonResponse(origin_countries)
 
 
@@ -241,7 +241,7 @@ def process_factory_options(request, key):
     df = helper.get_df(filters)
     if "factoryFarm" in df.columns:
         factories = FACTORIES.copy()
-        factories.update({k: k for k in set(df["factoryFarm"].tolist())})
+        factories.update({k: k for k in sorted(df["factoryFarm"].unique())})
     return JsonResponse(factories)
 
 
