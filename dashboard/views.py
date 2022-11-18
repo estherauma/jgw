@@ -17,8 +17,8 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from requests.exceptions import HTTPError
 
-from .forms import FACTORIES, ORIGIN_COUNTRIES, AppEventsForm, ExportReportForm, FilterForm, InlineQnsForm
-from .models import JGWCache
+from .forms import (FACTORIES, AppEventsForm, ExportReportForm, FilterForm,
+                    InlineQnsForm, ORIGIN_COUNTRIES_template, get_start_date)
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
 HELPERS = {
@@ -227,7 +227,7 @@ def process_origin_options(request, key):
     df = helper.get_df(filters)
     origins = df["origin"][df["origin"].notna()]
     origins = sorted(origins.unique())
-    origin_countries = ORIGIN_COUNTRIES.copy()
+    origin_countries = ORIGIN_COUNTRIES_template.copy()
     origin_countries.update({k: k for k in origins})
     return JsonResponse(origin_countries)
 
@@ -275,14 +275,14 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
 
 @login_required()
 def export_report(request):
-    
+
     form = ExportReportForm()
     if request.method == "POST":
         form = ExportReportForm(request.POST)
         if form.is_valid():
             start, end, category = itemgetter("start_date", "end_date", "category")(form.cleaned_data)
             start, end = start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
-            filename = get_SWS_report(start, end,category)
+            filename = get_SWS_report(start, end, category)
             response = FileResponse(open(filename, "rb"))
             return response
         else:

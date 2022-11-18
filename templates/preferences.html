@@ -94,6 +94,9 @@
                 .then(data => {
                     options = ``
                     Object.entries(data).map(function ([k, v]) {
+                        if (k === origin_country) {
+                            options += `<option value="${k}" selected>${v}</option>`
+                        }
                         options += `<option value="${k}">${v}</option>`
                     })
                     origin_input.innerHTML = options;
@@ -130,6 +133,9 @@
                 .then(data => {
                     options = ``
                     Object.entries(data).map(function ([k, v]) {
+                        if (k === factoryFarm) {
+                            options += `<option value="${k}" selected>${v}</option>`
+                        }
                         options += `<option value="${k}">${v}</option>`
                     })
                     factoryFarm_input.innerHTML = options;

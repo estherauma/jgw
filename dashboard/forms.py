@@ -15,8 +15,15 @@ def camelCase_to_spaceDelimited(text: str):
     return re.sub(r"((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))", r" \1", text)
 
 
+ORIGIN_COUNTRIES_template = {"": "Select a Country"}
+ORIGIN_COUNTRIES = ORIGIN_COUNTRIES_template.copy()
+ORIGIN_COUNTRIES.update({country_names[i].title(): country_names[i].title() for i in country_names})
+
 DEST_COUNTRIES = {"": "Select a Country"}
-ORIGIN_COUNTRIES = {"": "Select a Country"}
+DEST_COUNTRIES.update(
+    {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
+)
+
 FACTORIES = {"": "Select a Factory or Farm"}
 OPERATORS = {
     "": "Select an Organisation",
