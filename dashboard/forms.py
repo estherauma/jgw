@@ -1,15 +1,13 @@
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pandas as pd
-from common.retrieve_data import exclude_cols
 from common.reports import get_start_date
+from common.retrieve_data import exclude_cols
 from django import forms
-from django.db import models
 from pytz import country_names
 
 from .models import Factory, JGWCache, Scheme
-
 
 
 def camelCase_to_spaceDelimited(text: str):
@@ -32,7 +30,12 @@ OPERATORS = {
 DEST_COUNTRIES.update(
     {country_names[k].lower(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
 )
-CATEGORIES = ["preferences"]  # , "inline", "messaging", "help_contacts"]
+CATEGORIES = {
+    "demographics": "Demographics",
+    "chapters": "Chapters",
+    "inlineQNs_participation": "InlineQuestions Participation",
+    "inlineQNs_responses": "InlineQuestions Response Breakdown",
+}
 TIME_RANGE = {
     get_start_date(days=30): "30 Days",
     get_start_date(days=60): "60 Days",
@@ -102,16 +105,11 @@ class ExportReportForm(forms.Form):
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control mx-2"
 
-    CATEGORY = models.TextChoices("Category", " ".join(CATEGORIES))
-    category = forms.ChoiceField(choices=CATEGORY.choices)
+    category = CATEGORIES.items()
     start_date = forms.DateField(
         widget=forms.DateInput(
             format=("%Y-%m-%d"),
-            attrs={
-                "placeholder": "Select a date",
-                "type": "date",
-                "value": "2022-06-01",
-            },
+            attrs={"placeholder": "Select a date", "type": "date", "value": "2022-06-01"},
         )
     )
     end_date = forms.DateField(

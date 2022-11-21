@@ -54,10 +54,10 @@ class AppEvents(BaseAnalytics):
         self.raw_df, self.cleaned = self.get_data(filters=filters), True
         self.export_csv_name = "app_events.csv"
 
-    def get_data(self, filters: QueryMap = None):
-        date_range = filters.get("time_range", "7 Days") if filters else "7 Days"
-        end_date = datetime.today().strftime("%Y%m%d")
-        start_date = TIME_RANGE.get(date_range) or end_date
+    def get_data(self, filters: QueryMap = None, start=None, end=None):
+        date_range = filters.get("time_range")
+        end_date = end.replace("-", "") or datetime.today().strftime("%Y%m%d")
+        start_date = start.replace("-", "") or TIME_RANGE.get(date_range) or end_date
         chapters_query = """
             SELECT event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users, COUNT(event_timestamp) as Count,
             FROM (SELECT * FROM `just-good-work.analytics_191478110.events_*`
