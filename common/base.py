@@ -71,9 +71,11 @@ class BaseAnalytics:
         if start_date == "all_time":
             return df
         today = datetime.today().strftime("%Y-%m-%d")
-        mask = df["createdAt"].between(start_date, today, inclusive="both")
-        df = df.loc[mask]
-        return df
+        if "createdAt" in df.columns:
+            mask = df["createdAt"].between(start_date, today, inclusive="both")
+            df = df.loc[mask]
+            return df
+        return pd.DataFrame()
 
     def filter_by_question(self, question: str, df):
         if question in df.columns:
