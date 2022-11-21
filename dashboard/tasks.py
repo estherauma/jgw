@@ -70,7 +70,7 @@ def send_email_notification(subject, message, attachment_path, recipients):
 
 @shared_task(name="generate_report")
 def generate_report():
-    reports = ("demographics", "chapters", "inlineQNs_participation", "inlineQNs_responses")
+    reports = ("preferences", "chapters", "inlineQNs_participation", "inlineQNs_responses")
     end = datetime.today().strftime("%Y-%m-%d")
     subject = f"{end}-SWS Report"
     message = f"Hello, \nPlease find attached the SWS Report for {datetime.today() - timedelta(weeks=2)} to {end}.\nJGW.Pandas"

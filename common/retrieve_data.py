@@ -131,9 +131,10 @@ class JGWApi:
         groups = ["11-20", "21-30", "31-40", "41-50", "51-60", "61-70"]
 
         def range_str_to_int(arg):
+            _ = ["Prefer not to answer", "prefer not to answer"]
             if isinstance(arg, str):
                 temp = [i.replace("+", "") for i in arg.split("-")]
-                temp = [int(i) if (i and i != "Prefer not to answer") else i for i in temp]
+                temp = [int(i) if (i and i not in _) else i for i in temp]
                 return temp
             return arg
 

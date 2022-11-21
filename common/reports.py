@@ -39,10 +39,10 @@ def count_unique_series(df: pd.DataFrame, key: str) -> pd.Series:
 
 def get_SWS_report(start, end, category):
     filenames = {
-        "demographics": f"demographics",
-        "chapters": f"chapters",
-        "inlineQNs_participation": f"inlineQNs_participation",
-        "inlineQNs_responses": f"inlineQNs_responses",
+        "preferences": "demographics",
+        "chapters": "chapters",
+        "inlineQNs_participation": "inlineQNs_participation",
+        "inlineQNs_responses": "inlineQNs_responses",
     }
     if category == "inlineQNs_responses":
         return get_inlineQNs_responses_report(start, end)
