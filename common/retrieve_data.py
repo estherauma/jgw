@@ -37,7 +37,20 @@ URLS = {
 CACHE_FILENAMES = {k: os.path.join(CACHE_DIR, f"{k}.csv") for k in data_categories}
 vk_country_names = {v.lower(): k for k, v in country_names.items()}
 vk_country_names.update({"republic of kosovo": "XK"})
-
+unwanted_cols = ["", "deviceId", "undefined", "__v", "_id"]
+demographic_cols = [
+    "appId",
+    "locale",
+    "route",
+    "language",
+    "origin",
+    "destination",
+    "organisation",
+    "factoryFarm",
+    "createdAt",
+    "updatedAt",
+]
+exclude_cols = [*unwanted_cols, *demographic_cols]
 
 class JGWApi:
     def __init__(self) -> None:
@@ -312,7 +325,10 @@ class JGWApi:
             column = column.apply(lambda x: _do_translate_listfield(text_list=x, field=column.name))
             return column
 
-        scalar_cols = [i for i in df.columns if i in ["age", "gender", "phoneNumber", "language"]]
+        question_cols = [i for i in df.columns if i not in exclude_cols]
+        scalar_cols = [
+            i for i in df.columns if i in ["age", "gender", "phoneNumber", "language", *question_cols]
+        ]
         list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "questionResponse"]]
         df = df.fillna("")
         if "questionText" in df.columns:
@@ -323,4 +339,10 @@ class JGWApi:
             df[scalar_cols] = df[scalar_cols].apply(translate_field_or_mark)
         if list_cols:
             df[list_cols] = df[list_cols].apply(translate_list_field)
+        columns_to_replace = [i for i in df.columns if i in question_cols]
+        patterns_to_replace = {"not": "no", "it is": "yes", "are not": "no", "have": "yes"}
+        if columns_to_replace:
+            df[columns_to_replace] = df[columns_to_replace].apply(lambda x: x.str.lower())
+            df[columns_to_replace] = df[columns_to_replace].replace(patterns_to_replace)
+
         return df

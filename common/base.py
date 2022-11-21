@@ -6,22 +6,9 @@ from typing import Dict
 import pandas as pd
 from jgwpandas.settings import CACHE_DIR
 
-QueryMap = Dict[str, str]
+from .retrieve_data import demographic_cols
 
-unwanted_cols = ["", "deviceId", "undefined", "__v", "_id"]
-demographic_cols = [
-    "appId",
-    "locale",
-    "route",
-    "language",
-    "origin",
-    "destination",
-    "organisation",
-    "factoryFarm",
-    "createdAt",
-    "updatedAt",
-]
-exclude_cols = [*unwanted_cols, *demographic_cols]
+QueryMap = Dict[str, str]
 
 
 class BaseAnalytics:

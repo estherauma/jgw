@@ -2,16 +2,16 @@ from datetime import datetime
 from typing import Dict, List
 
 import pandas as pd
-from dashboard.forms import get_start_date
 from google.cloud import bigquery
 
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
+from common.reports import get_start_date
 
 api = JGWApi()
 client = bigquery.Client()
 QueryMap = Dict[str, list[str]]
-TIME_RANGE = {f"{n} Days": get_start_date(days=n, format="%Y%m%d") for n in [7, 30, 60, 90]}
+TIME_RANGE = {f"{n} Days": get_start_date(days=n, format="%Y%m%d") for n in [7, 30, 55]}
 
 
 event_to_title = {

@@ -2,17 +2,14 @@ import re
 from datetime import datetime, timedelta
 
 import pandas as pd
-from common.base import exclude_cols
+from common.retrieve_data import exclude_cols
+from common.reports import get_start_date
 from django import forms
 from django.db import models
 from pytz import country_names
 
 from .models import Factory, JGWCache, Scheme
 
-
-def get_start_date(days, format="%Y-%m-%d"):
-    target_date = datetime.today() - timedelta(days=days)
-    return target_date.strftime(format)
 
 
 def camelCase_to_spaceDelimited(text: str):
@@ -150,8 +147,8 @@ class InlineQnsForm(FilterForm):
 class AppEventsForm(forms.Form):
     TIME_RANGE = {
         "7 Days": "7 Days",
-        # "30 Days": "30 Days",
-        # "60 Days": "60 Days",
+        "30 Days": "30 Days",
+        "55 Days": "55 Days",
         # "90 Days": "90 Days",
     }
     time_range = forms.ChoiceField(
