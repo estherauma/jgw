@@ -46,6 +46,8 @@ def get_SWS_report(start, end, category):
     }
     if category == "inlineQNs_responses":
         return get_inlineQNs_responses_report(start, end)
+    elif category == "chapters":
+        return get_chapters_report(start, end)
     output_filename = f"{filenames[category]}_{start}_{end}.xlsx"
     result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
     df = pd.read_json(result.data, orient="records")
