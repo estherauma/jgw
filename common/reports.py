@@ -37,7 +37,7 @@ def count_unique_series(df: pd.DataFrame, key: str) -> pd.Series:
     return
 
 
-def get_SWS_report(start, end, category):
+def get_SWS_report(start, end, category, df=None):
     filenames = {
         "preferences": "demographics",
         "chapters": "chapters",
@@ -49,9 +49,10 @@ def get_SWS_report(start, end, category):
     elif category == "chapters":
         return get_chapters_report(start, end)
     output_filename = f"{filenames[category]}_{start}_{end}.xlsx"
-    result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
-    df = pd.read_json(result.data, orient="records")
-    df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
+    if df is None:
+        result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
+        df = pd.read_json(result.data, orient="records")
+        df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
 
     try:
         write_to_xls_sheet(df, sheet_name=f"{category[:8]}-All", filename=output_filename)
