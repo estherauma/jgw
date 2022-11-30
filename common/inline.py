@@ -21,13 +21,13 @@ class Inline(BaseAnalytics):
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
         _df = self.get_df(filters)
         _stats = {}
-        _df.columns
-        return_fields = fields or [i for i in ["origin", "language"] if i in _df.columns]
-        _stats["response_count"] = len(_df)
-        _stats["data"] = {field: self.count_unique(field, _df) for field in return_fields}
-        questions_df = _df[[i for i in _df.columns if i not in exclude_cols]]
-        if "question" in filters:
-            _stats["data"]["question"] = self.count_unique(filters["question"], _df)
-        else:
-            _stats["data"]["question"] = questions_df.count().to_dict()
+        if not _df.empty:
+            return_fields = fields or [i for i in ["origin", "language"] if i in _df.columns]
+            _stats["response_count"] = len(_df)
+            _stats["data"] = {field: self.count_unique(field, _df) for field in return_fields}
+            questions_df = _df[[i for i in _df.columns if i not in exclude_cols]]
+            if "question" in filters:
+                _stats["data"]["question"] = self.count_unique(filters["question"], _df)
+            else:
+                _stats["data"]["question"] = questions_df.count().to_dict()
         return _stats
