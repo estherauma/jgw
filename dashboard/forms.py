@@ -150,6 +150,13 @@ class InlineQnsForm(FilterForm):
         question_choices = [(i, camelCase_to_spaceDelimited(i)) for i in question_list]
         question_choices = [("", "Select a question key"), *question_choices]
         self.fields["question"].choices = question_choices
+        qn_mark = mark_safe("'")
+        form_name = f"{qn_mark}filter_form{qn_mark}"
+        for f in self.fields:
+            self.fields[f].widget.attrs[
+                "onChange"
+            ] = f"const filterForm = document.getElementById({form_name}).submit();"
+
 
     question = forms.ChoiceField(
         label="Question Key",

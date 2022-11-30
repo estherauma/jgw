@@ -1,14 +1,7 @@
+from datetime import datetime
 from operator import itemgetter
 from typing import Dict
 
-import pandas as pd
-from common.app_events import AppEvents
-from common.checklists import CheckLists
-from common.help_contacts import HelpContacts
-from common.inline import Inline
-from common.messaging import Messaging
-from common.preferences import Preferences
-from common.reports import get_start_date, get_SWS_report
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, JsonResponse
@@ -16,6 +9,14 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import urlencode
 from requests.exceptions import HTTPError
+
+from common.app_events import AppEvents
+from common.checklists import CheckLists
+from common.help_contacts import HelpContacts
+from common.inline import Inline
+from common.messaging import Messaging
+from common.preferences import Preferences
+from common.reports import get_start_date, get_SWS_report
 
 from .forms import (FACTORIES, AppEventsForm, ExportReportForm, FilterForm,
                     InlineQnsForm, ORIGIN_COUNTRIES_template, get_start_date)
@@ -225,6 +226,8 @@ def process_origin_options(request, key):
     helper = HELPERS.get(key)
     helper = helper()
     df = helper.get_df(filters)
+    if "origin" not in df.columns:
+        return JsonResponse({})
     origins = df["origin"][df["origin"].notna()]
     origins = sorted(origins.unique())
     origin_countries = ORIGIN_COUNTRIES_template.copy()
@@ -247,30 +250,27 @@ def process_factory_options(request, key):
 
 @login_required()
 def export_to_excel_file(request, key):
+    if key not in ("preferences", "chapters", "inlineQNs_participation", "inlineQNs_responses"):
+        messages.error(request, "Report not yet available!")
+        if key.startswith("inlineQNs"):
+            return redirect(reverse("dashboard:inline"))
+        return redirect(reverse(f"dashboard:{key}"))
+
+    if key.startswith("inlineQNs"):
+        helper = HELPERS["inline"]()
+    else:
+        helper = HELPERS[key]()
+
     filters = process_filters(request)
-    helper = HELPERS[key]
-    helper = helper()
     df = helper.get_df(filters)
-    filename = helper.get_df_path(filters, extension="xlsx")
+    filename = get_SWS_report(
+        start=filters["time_range"], end=datetime.today().strftime("%Y-%m-%d"), category=key, df=df
+    )
     if filename is None:
         messages.error(request, "Failed to export!")
         return redirect(reverse(f"dashboard:{key}"))
-    df.to_excel(filename, index=False)
     response = FileResponse(open(filename, "rb"))
     return response
-
-
-def count_unique_series(df: pd.DataFrame, key: str) -> pd.Series:
-    return df[key].value_counts()
-
-
-def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str):
-    with pd.ExcelWriter(filename, mode="a", if_sheet_exists="overlay") as writer:
-        startrow = 0
-        for key in KEYS:
-            count = count_unique_series(df, key)
-            count.to_excel(writer, sheet_name=sheet_name, startcol=0, startrow=startrow)
-            startrow += count.size + 1
 
 
 @login_required()
