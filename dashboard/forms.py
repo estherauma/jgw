@@ -39,7 +39,7 @@ DEST_COUNTRIES.update(
     {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
 )
 CATEGORIES = {
-    "demographics": "Demographics",
+    "preferences": "Demographics",
     "chapters": "Chapters",
     "inlineQNs_participation": "InlineQuestions Participation",
     "inlineQNs_responses": "InlineQuestions Response Breakdown",
@@ -122,7 +122,7 @@ class ExportReportForm(forms.Form):
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control mx-2"
 
-    category = CATEGORIES.items()
+    category = forms.ChoiceField(choices=CATEGORIES.items())
     start_date = forms.DateField(
         widget=forms.DateInput(
             format=("%Y-%m-%d"),
