@@ -226,12 +226,11 @@ def process_origin_options(request, key):
     helper = HELPERS.get(key)
     helper = helper()
     df = helper.get_df(filters)
-    if "origin" not in df.columns:
-        return JsonResponse({})
-    origins = df["origin"][df["origin"].notna()]
-    origins = sorted(origins.unique())
     origin_countries = ORIGIN_COUNTRIES_template.copy()
-    origin_countries.update({k: k for k in origins})
+    if "origin" in df.columns:
+        origins = df["origin"][df["origin"].notna()]
+        origins = sorted(origins.unique())
+        origin_countries.update({k: k for k in origins})
     return JsonResponse(origin_countries)
 
 
@@ -242,8 +241,8 @@ def process_factory_options(request, key):
     helper = HELPERS.get(key)
     helper = helper()
     df = helper.get_df(filters)
+    factories = FACTORIES.copy()
     if "factoryFarm" in df.columns:
-        factories = FACTORIES.copy()
         factories.update({k: k for k in sorted(df["factoryFarm"].unique())})
     return JsonResponse(factories)
 
