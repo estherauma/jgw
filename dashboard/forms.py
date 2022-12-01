@@ -33,11 +33,6 @@ OPERATORS = {
     "Seasonal Worker Scheme - Pro-Force": "Pro-Force",
     "Seasonal Worker Scheme - Fruitful Jobs": "Fruitful Jobs",
 }
-
-
-DEST_COUNTRIES.update(
-    {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
-)
 CATEGORIES = {
     "preferences": "Demographics",
     "chapters": "Chapters",
