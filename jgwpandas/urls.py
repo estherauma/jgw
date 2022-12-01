@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.db.utils import OperationalError
 from django.db import connection
 from django.http import JsonResponse
@@ -17,8 +18,7 @@ def health(request):
         heath_params["database"] = "active"
     except OperationalError:
         heath_params["database"] = "down"
-
-    return JsonResponse(heath_params)
+    return Response(heath_params)
 
 
 urlpatterns = [
@@ -28,4 +28,5 @@ urlpatterns = [
     path("", include("dashboard.urls")),
     # accounts
     path("accounts/", include("users.urls")),
+    path("health/", health),
 ]
