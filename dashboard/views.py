@@ -39,6 +39,7 @@ OPERATORS = {
     "Pro-Force": "Seasonal Worker Scheme - Pro-Force",
     "Fruitful Jobs": "Seasonal Worker Scheme - Fruitful Jobs",
 }
+TODAY = datetime.today().strftime("%Y-%m-%d")
 
 
 def form_chart_data(data: Dict) -> Dict:
@@ -58,10 +59,6 @@ def process_filters(request):
     filters.update(role_filters.get(user.role, {}))
     if bool(filters):
         filters = {k: v for k, v in filters.items() if bool(v)}
-        if "time_range" not in filters:
-            filters["time_range"] = get_start_date(days=30)
-    else:
-        filters["time_range"] = get_start_date(days=30)
     return filters
 
 
@@ -69,8 +66,7 @@ def redirect_to_filtered_data(request, url, template_name, form=None):
     form = form if form is not None else FilterForm(request.POST)
     if form.is_valid():
         filters = form.cleaned_data.copy()
-        # urlencode does not support NoneType values
-        filters = {k: v for k, v in filters.items() if v not in [None, ""]}
+        filters = {k: v for k, v in filters.items() if bool(v)}  # urlencode does not support NoneType values
         return redirect(f"{url}?{urlencode(filters)}")
     return render(request, template_name, context={"form": form})
 
@@ -79,8 +75,20 @@ def render_data(request, template_name, helper):
     filters = process_filters(request)
     form = FilterForm(initial=filters)
     context_data = {"form": form}
+
+    _filters = filters.copy()
+    if "time_range" not in filters.keys() and "start_date" not in filters.keys():
+        _filters["time_range"] = f"{get_start_date(days=30)},{TODAY}"  # set time-range/date to 30 if null
+        messages.info(request, "Showing the last 30 days of data! Use time-range filter for more data.")
+    elif "time_range" in _filters.keys():
+        _filters["time_range"] = f"{_filters['time_range']},{TODAY}"
+    elif (
+        "end_date" in filters.keys() or "start_date" in filters.keys()
+    ) and "time_range" not in filters.keys():
+        _filters["time_range"] = f"{_filters['start_date']},{_filters['end_date']}"
+
     try:
-        _data = helper.compute_stats(filters=filters)
+        _data = helper.compute_stats(filters=_filters)
         chart_data = form_chart_data(_data)
         if not any(bool(i) for i in _data.values()):
             messages.error(request, "No data matches this search!")
@@ -90,11 +98,7 @@ def render_data(request, template_name, helper):
     context_data.update({"data": chart_data, "filter_string": urlencode(filters)})
     if helper.cleaned is False:
         messages.info(
-            request,
-            (
-                "Raw data is shown while we finish processing your results."
-                "\nRefresh after a few minutes to view the completed stats."
-            ),
+            request, "Raw data is shown here. Refresh after a few minutes to view the processed stats."
         )
     return render(request, template_name, context=context_data)
 
@@ -105,6 +109,18 @@ def inline_question_stats(request):
     form = InlineQnsForm(initial=filters)
     context_data = {"form": form}
     chart_data = None
+    _filters = filters.copy()
+
+    if "time_range" not in filters.keys() and "start_date" not in filters.keys():
+        _filters["time_range"] = f"{get_start_date(days=30)},{TODAY}"  # set time-range/date to 30 if null
+        messages.info(request, "Showing the last 30 days of data! Use time-range filter for more data.")
+    elif "time_range" in _filters.keys():
+        _filters["time_range"] = f"{_filters['time_range']},{TODAY}"
+    elif (
+        "end_date" in filters.keys() or "start_date" in filters.keys()
+    ) and "time_range" not in filters.keys():
+        _filters["time_range"] = f"{_filters['start_date']},{_filters['end_date']}"
+
     if request.method == "POST":
         return redirect_to_filtered_data(
             request,
@@ -114,7 +130,7 @@ def inline_question_stats(request):
         )
     try:
         inline_responses = Inline()
-        _data = inline_responses.compute_stats(filters=filters)
+        _data = inline_responses.compute_stats(filters=_filters)
         response_count, _data = itemgetter("response_count", "data")(_data)
         chart_data = form_chart_data(_data)
         if not any(bool(i) for i in _data.values()):
@@ -127,11 +143,7 @@ def inline_question_stats(request):
     )
     if inline_responses.cleaned is False:
         messages.info(
-            request,
-            (
-                "Raw data is shown while we finish processing your results."
-                "\nRefresh after a few minutes to view the completed stats."
-            ),
+            request, "Raw data is shown here. Refresh after a few minutes to view the processed stats."
         )
     return render(request, "inline.html", context=context_data)
 
