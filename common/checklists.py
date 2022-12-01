@@ -19,5 +19,7 @@ class CheckLists(BaseAnalytics):
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
         return_fields = fields or ["route", "locale"]
         _df = self.get_df(filters)
+        if _df.empty:
+            return {}
         _stats = {field: self.count_unique(field, _df) for field in return_fields}
         return _stats
