@@ -3,9 +3,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from .forms import CreateUserForm, LoginForm, UserMgtForm
-from .models import User
 from users.tasks import send_email_notification
+
+from .forms import CreateUserForm, InviteUserForm, LoginForm, UserMgtForm
+from .models import User
 
 
 @login_required()
@@ -97,3 +98,9 @@ def activate_account(request, id):
             recipients=[user.email],
         )
     return redirect("users:list_users")
+
+
+@login_required()
+def invite_user(request):
+    form = InviteUserForm()
+    return render(request, "users/invite_user.html", {"form": form})
