@@ -11,6 +11,11 @@
             <div class="card-header">
                 <div class="d-flex align-items-center">
                     <h3 class="mr-auto p-3">User Accounts</h3>
+                    <div class="btn-group">
+                        <a class="btn btn-primary" href="{% url 'users:invite_user' %}" target="_blank">
+                            Invite User
+                        </a>
+                    </div>
                 </div>
             </div>
             <table class="table table-striped m-2">
@@ -33,9 +38,9 @@
                                     <a class="dropdown-item" href="{% url 'users:manage_user' id=user.id %}">Manage</a>
                                     <a class="dropdown-item" href="{% url 'users:activate_account' id=user.id %}">
                                         {% if user.is_active == True %}
-                                            Deactivate
+                                        Deactivate
                                         {% elif user.is_active == False %}
-                                            Activate
+                                        Activate
                                         {% endif %}
                                     </a>
                                 </div>
