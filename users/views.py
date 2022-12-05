@@ -9,13 +9,13 @@ from .forms import CreateUserForm, InviteUserForm, LoginForm, UserMgtForm
 from .models import User
 
 
-@login_required()
+@login_required
 def list_users(request):
     queryset = User.objects.all()
-    return render(request, "users/list.html", context={"users": queryset})
+    return render(request, "users/list_users.html", context={"users": queryset})
 
 
-@login_required()
+@login_required
 def logout_user(request):
     logout(request)
     return redirect("users:login_user")
@@ -32,7 +32,7 @@ def create_user_account(request):
             return redirect("users:login_user")
         else:
             messages.error(request, "Error validating form!")
-    return render(request, "users/create.html", context={"form": form})
+    return render(request, "users/create_user.html", context={"form": form})
 
 
 def login_user(request):
@@ -54,7 +54,7 @@ def login_user(request):
     return render(request, "users/login.html", {"form": form})
 
 
-@login_required()
+@login_required
 def manage_account(request, id):
     user = User.objects.get(id=id)
     form = UserMgtForm(instance=user)
@@ -62,10 +62,10 @@ def manage_account(request, id):
         form = UserMgtForm(data=request.POST, instance=user)
         if form.is_valid:
             form.save()
-    return render(request, "users/manage.html", context={"form": form, "user": user})
+    return render(request, "users/manage_user.html", context={"form": form, "user": user})
 
 
-@login_required()
+@login_required
 def activate_account(request, id):
     user = User.objects.get(id=id)
     subject = "Your account at JGWPandas."
@@ -100,7 +100,7 @@ def activate_account(request, id):
     return redirect("users:list_users")
 
 
-@login_required()
+@login_required
 def invite_user(request):
     form = InviteUserForm()
-    return render(request, "users/invite_user.html", {"form": form})
+    return render(request, "users/invite_user.html", context={"form": form})
