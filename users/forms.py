@@ -41,10 +41,11 @@ class UserMgtForm(forms.ModelForm):
 class InviteUserForm(forms.ModelForm):
     class Meta:
         model = UserInvitations
-        fields = ("email", "role", "scheme", "factory", "organisation", "status")
+        fields = ("email", "role", "scheme", "factory", "organisation")
 
     def __init__(self, *args, **kwargs):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control mx-2"
             self.fields["email"].label = "Email Address"
+            self.fields["factory"].label = "Factory/Farm"
