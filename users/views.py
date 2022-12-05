@@ -103,4 +103,12 @@ def activate_account(request, id):
 @login_required
 def invite_user(request):
     form = InviteUserForm()
+    if request.method == "POST":
+        form = InviteUserForm(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            messages.info(request, "The invitation email will be sent out shortly.")
+            return redirect("users:list_users")
+        else:
+            messages.error(request, "Error validating form!")
     return render(request, "users/invite_user.html", context={"form": form})

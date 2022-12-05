@@ -10,6 +10,7 @@ urlpatterns = [
     path("logout/", logout_user, name="logout_user"),
     path("register/", create_user_account, name="create_user"),
     path("manage/<int:id>", manage_account, name="manage_user"),
+    path("invite/", invite_user, name="invite_user"),
     path("activate/<int:id>", activate_account, name="activate_account"),
     path("invite/", invite_user, name="invite_user"),
 ]

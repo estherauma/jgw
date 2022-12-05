@@ -1,10 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
-from dashboard.forms import OPERATORS
-from dashboard.models import Factory, Scheme
-
-from .models import User
+from .models import User, UserInvitations
 
 
 class LoginForm(forms.Form):
@@ -35,20 +32,19 @@ class UserMgtForm(forms.ModelForm):
         fields = ("is_active", "scheme", "factory", "role")
 
     def __init__(self, *args, **kwargs):
-        super(UserMgtForm, self).__init__(*args, **kwargs)
+        super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control mx-2"
             self.fields[field].required = False
 
 
-class InviteUserForm(forms.Form):
+class InviteUserForm(forms.ModelForm):
+    class Meta:
+        model = UserInvitations
+        fields = ("email", "role", "scheme", "factory", "organisation", "status")
+
     def __init__(self, *args, **kwargs):
-        super(forms.Form, self).__init__(*args, **kwargs)
+        super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control mx-2"
-
-    email = forms.EmailField(label="Email Address", required=True)
-    role = forms.ChoiceField(required=True, choices=User.ROLE.choices)
-    scheme = forms.ChoiceField(required=False, choices=Scheme.objects.all())
-    factory_farm = forms.ChoiceField(label="Factory/Farm", choices=Factory.objects.all(), required=False)
-    organisation = forms.ChoiceField(required=False, choices=OPERATORS.items())
+            self.fields["email"].label = "Email Address"
