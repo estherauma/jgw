@@ -1,8 +1,10 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from dashboard.forms import OPERATORS
 
 ROLES = ["SCHEME", "FACTORY", "STAFF", "ADMIN"]
+STATUS = ["PENDING", "ACCEPTED", "SENT"]
 
 
 class UserManager(BaseUserManager):
@@ -51,3 +53,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str___(self):
         return f"{self.email}"
+
+
+class UserInvitations(models.Model):
+    STATUS = models.TextChoices("Status", " ".join(STATUS))
+    email = models.EmailField(null=False, blank=False, max_length=128, unique=True)
+    role = models.CharField(blank=False, null=True, choices=User.ROLE.choices, max_length=16)
+    scheme = models.ForeignKey(to="dashboard.Scheme", on_delete=models.DO_NOTHING, null=True, max_length=16)
+    factory = models.ForeignKey(to="dashboard.Factory", on_delete=models.DO_NOTHING, null=True, max_length=16)
+    organisation = models.CharField(max_length=64, null=True, blank=False, choices=OPERATORS.items())
+    status = models.CharField(
+        blank=False, null=False, max_length=16, choices=STATUS.choices, default="PEDNING"
+    )
