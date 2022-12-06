@@ -6,13 +6,14 @@ from django.shortcuts import redirect, render
 from users.tasks import send_email_notification
 
 from .forms import CreateUserForm, InviteUserForm, LoginForm, UserMgtForm
-from .models import User
+from .models import User, UserInvitations
 
 
 @login_required
 def list_users(request):
-    queryset = User.objects.all()
-    return render(request, "users/list_users.html", context={"users": queryset})
+    users = User.objects.all()
+    invitations = UserInvitations.objects.all()
+    return render(request, "users/list_users.html", context={"users": users, "invitations": invitations})
 
 
 @login_required
