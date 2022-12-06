@@ -63,5 +63,5 @@ class UserInvitations(models.Model):
     factory = models.ForeignKey(to="dashboard.Factory", on_delete=models.DO_NOTHING, null=True, max_length=16)
     organisation = models.CharField(max_length=64, null=True, blank=False, choices=OPERATORS.items())
     status = models.CharField(
-        blank=False, null=False, max_length=16, choices=STATUS.choices, default="PEDNING"
+        blank=False, null=False, max_length=16, choices=STATUS.choices, default="PENDING"
     )
