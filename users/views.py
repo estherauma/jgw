@@ -1,12 +1,18 @@
+from datetime import datetime, timedelta, timezone
+
+import jwt
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from users.tasks import send_email_notification
 
 from .forms import CreateUserForm, InviteUserForm, LoginForm, UserMgtForm
 from .models import User, UserInvitations
+from .tasks import send_email_notification
 
 
 @login_required
@@ -107,8 +113,25 @@ def invite_user(request):
     if request.method == "POST":
         form = InviteUserForm(request.POST)
         if form.is_valid():
-            form.save(commit=True)
+            invitation = form.save(commit=True)
+            email_address = form.cleaned_data.get("email")
+
+            payload = {
+                "exp": datetime.now(tz=timezone.utc) + timedelta(days=3),
+                "invitation_id": invitation.id,
+            }
+            token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
+
             messages.info(request, "The invitation email will be sent out shortly.")
+            send_email_notification.delay(
+                subject="Set up your account on JGWPandas",
+                message=f"""
+                    Please follow this link to set up your new account on JGW Pandas:
+                    {reverse("users:accept_invite", args=(token,))}. 
+                    Please note that this link expires in 3 days.
+                """,
+                recipients=[email_address],
+            )
             return redirect("users:list_users")
         else:
             messages.error(request, "Error validating form!")
