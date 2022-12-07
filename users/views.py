@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from users.tasks import send_email_notification
 
-from .forms import CreateUserForm, InviteUserForm, LoginForm, UserMgtForm
+from .forms import CreateUserForm, InviteUserForm, LoginForm, UserMgtForm, SetPasswordForm
 from .models import User, UserInvitations
 from .tasks import send_email_notification
 
@@ -136,3 +136,51 @@ def invite_user(request):
         else:
             messages.error(request, "Error validating form!")
     return render(request, "users/invite_user.html", context={"form": form})
+
+
+def handle_invite(request, token):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY)
+        invitation = UserInvitations.objects.values(
+            "email",
+            "role",
+            "scheme",
+            "factory",
+            "organisation",
+        ).get(id=payload.get("invitation_id"))
+        new_account = User.objects.create(**invitation, password=None)
+        invitation.status = "Accepted"
+        invitation.save()
+        payload = {
+            "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
+            "user_id": new_account.id,
+        }
+        token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
+        return redirect("users:set_password", args=(token,))
+    except jwt.ExpiredSignatureError:
+        messages.error(request, "This link is expired!")
+    except UserInvitations.DoesNotExist:
+        messages.error(request, "Invitation not found!")
+    return render(request, "users/handle_invite")
+
+
+def set_password(request, token):
+    logout(request)
+    form = SetPasswordForm()
+    if request.method == "POST":
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY)
+            user_account = User.objects.get(id=payload.get("user_id"))
+            form = SetPasswordForm(request.POST)
+            if form.is_valid():
+                password = form.cleaned_data.get("password")
+                user_account.set_password(password)
+                user_account.save()
+                return redirect("users:login")
+            else:
+                messages.error(request, "Error validating form!")
+        except jwt.ExpiredSignatureError:
+            messages.error(request, "This link is expired!")
+        except User.DoesNotExist:
+            messages.error(request, "User account not found!")
+    return render(request, "users/set_password", {'form': form})
