@@ -62,13 +62,13 @@ class SetPasswordForm(forms.Form):
     error_messages = {
         "password_mismatch": "The two password fields didn’t match.",
     }
-    new_password1 = forms.CharField(
+    new_password = forms.CharField(
         label="New password",
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
         strip=False,
         help_text=password_validation.password_validators_help_text_html(),
     )
-    new_password2 = forms.CharField(
+    confirm_password = forms.CharField(
         label="Confirm new password",
         strip=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
@@ -79,15 +79,14 @@ class SetPasswordForm(forms.Form):
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control mx-2"
 
-    def clean_new_password2(self):
-        password1 = self.cleaned_data.get("new_password1")
-        password2 = self.cleaned_data.get("new_password2")
-        if password1 and password2:
-            if password1 != password2:
+    def clean_confirm_password(self):
+        password = self.cleaned_data.get("new_password")
+        confirm_password = self.cleaned_data.get("confirm_password")
+        if password and confirm_password:
+            if password != confirm_password:
                 raise ValidationError(
                     self.error_messages["password_mismatch"],
                     code="password_mismatch",
                 )
-        password_validation.validate_password(password2, self.user)
-        return password2
-
+        password_validation.validate_password(confirm_password)
+        return confirm_password

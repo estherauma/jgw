@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from users.tasks import send_email_notification
 
-from .forms import CreateUserForm, InviteUserForm, LoginForm, UserMgtForm, SetPasswordForm
+from .forms import CreateUserForm, InviteUserForm, LoginForm, SetPasswordForm, UserMgtForm
 from .models import User, UserInvitations
 from .tasks import send_email_notification
 
@@ -113,25 +113,28 @@ def invite_user(request):
     if request.method == "POST":
         form = InviteUserForm(request.POST)
         if form.is_valid():
-            invitation = form.save(commit=True)
             email_address = form.cleaned_data.get("email")
+            account_exists = User.objects.filter(email=email_address).exists()
+            if account_exists:
+                messages.error(request, "An account with this email address already exists!")
+                return render(request, "users/invite_user.html", context={"form": form})
 
+            invitation = form.save(commit=True)
             payload = {
                 "exp": datetime.now(tz=timezone.utc) + timedelta(days=3),
                 "invitation_id": invitation.id,
             }
-            token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
-
-            messages.info(request, "The invitation email will be sent out shortly.")
+            token = jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
             send_email_notification.delay(
                 subject="Set up your account on JGWPandas",
                 message=f"""
-                    Please follow this link to set up your new account on JGW Pandas:
-                    {reverse("users:accept_invite", args=(token,))}. 
-                    Please note that this link expires in 3 days.
+                Please follow this link to set up your new account on JGW Pandas:
+                https://jgwpandas.herokuapp.com{reverse("users:handle_invite", args=(token,))}
+                \nPlease note that this link expires in 3 days.
                 """,
                 recipients=[email_address],
             )
+            messages.info(request, "The invitation email will be sent out shortly.")
             return redirect("users:list_users")
         else:
             messages.error(request, "Error validating form!")
@@ -139,29 +142,29 @@ def invite_user(request):
 
 
 def handle_invite(request, token):
+    logout(request)
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY)
-        invitation = UserInvitations.objects.values(
-            "email",
-            "role",
-            "scheme",
-            "factory",
-            "organisation",
-        ).get(id=payload.get("invitation_id"))
-        new_account = User.objects.create(**invitation, password=None)
-        invitation.status = "Accepted"
-        invitation.save()
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        instance = UserInvitations.objects.get(id=payload.get("invitation_id"))
+        invitation = UserInvitations.objects.values("email", "role", "scheme", "factory", "organisation").get(
+            id=payload.get("invitation_id")
+        )
+        invitation["scheme_id"] = invitation.pop("scheme")
+        invitation["factory_id"] = invitation.pop("factory")
+        new_account = User.objects.create(**invitation, password='')
+        instance.status = "ACCEPTED"
+        instance.save()
         payload = {
             "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
             "user_id": new_account.id,
         }
         token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
-        return redirect("users:set_password", args=(token,))
+        return redirect(reverse("users:set_password", args=(token,)))
     except jwt.ExpiredSignatureError:
         messages.error(request, "This link is expired!")
     except UserInvitations.DoesNotExist:
         messages.error(request, "Invitation not found!")
-    return render(request, "users/handle_invite")
+    return render(request, "users/handle_invite.html")
 
 
 def set_password(request, token):
@@ -169,18 +172,19 @@ def set_password(request, token):
     form = SetPasswordForm()
     if request.method == "POST":
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY)
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             user_account = User.objects.get(id=payload.get("user_id"))
             form = SetPasswordForm(request.POST)
             if form.is_valid():
                 password = form.cleaned_data.get("password")
                 user_account.set_password(password)
+                user_account.is_active = True
                 user_account.save()
-                return redirect("users:login")
+                return redirect("users:login_user")
             else:
                 messages.error(request, "Error validating form!")
         except jwt.ExpiredSignatureError:
             messages.error(request, "This link is expired!")
         except User.DoesNotExist:
             messages.error(request, "User account not found!")
-    return render(request, "users/set_password", {'form': form})
+    return render(request, "users/set_password.html", {"form": form})
