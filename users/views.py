@@ -146,17 +146,11 @@ def handle_invite(request, token):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         instance = UserInvitations.objects.get(id=payload.get("invitation_id"))
-        invitation = UserInvitations.objects.values("email", "role", "scheme", "factory", "organisation").get(
-            id=payload.get("invitation_id")
-        )
-        invitation["scheme_id"] = invitation.pop("scheme")
-        invitation["factory_id"] = invitation.pop("factory")
-        new_account = User.objects.create(**invitation, password='')
         instance.status = "ACCEPTED"
         instance.save()
         payload = {
             "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
-            "user_id": new_account.id,
+            "invite_id": instance.id,
         }
         token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
         return redirect(reverse("users:set_password", args=(token,)))
@@ -171,15 +165,24 @@ def set_password(request, token):
     logout(request)
     form = SetPasswordForm()
     if request.method == "POST":
+        form = SetPasswordForm(request.POST)
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            user_account = User.objects.get(id=payload.get("user_id"))
-            form = SetPasswordForm(request.POST)
+            user_id, invite_id = payload.get("user_id"), payload.get("invite_id")
             if form.is_valid():
-                password = form.cleaned_data.get("password")
-                user_account.set_password(password)
-                user_account.is_active = True
-                user_account.save()
+                password = form.cleaned_data.get("confirm_password")
+                if user_id:
+                    user = User.objects.get(id=user_id)
+                    user.set_password(password)
+                    user.save()
+                elif invite_id:
+                    invite = UserInvitations.objects.values(
+                        "email", "role", "scheme", "factory", "organisation"
+                    ).get(id=invite_id)
+                    invite["scheme_id"], invite["factory_id"] = invite.pop("scheme"), invite.pop("factory")
+                    User.objects.create_user(**invite, password=password, is_active=True)
+                else:
+                    messages.error(request, "Invalid token!")
                 return redirect("users:login_user")
             else:
                 messages.error(request, "Error validating form!")
