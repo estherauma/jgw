@@ -1,0 +1,20 @@
+{% extends "layouts/base.html" %}
+
+<!-- title -->
+{% block title %} Set New Password {% endblock title %}
+
+<!-- stylesheets -->
+{% block stylesheets %} {% endblock stylesheets %}
+
+<!-- page content -->
+{% block content %}
+<div class="row justify-content-center align-items-center mt-5">
+    <!-- messages -->
+    {% if messages %} {% for message in messages %}
+
+    <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">
+        {{ message }}
+    </p>
+    {% endfor %} {% endif %}
+</div>
+{% endblock content %}

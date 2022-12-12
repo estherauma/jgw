@@ -1,6 +1,8 @@
 from django.urls import path
 
-from .views import create_user_account, list_users, login_user, logout_user, manage_account, activate_account
+from .views import (activate_account, create_user_account, handle_invite,
+                    invite_user, list_users, login_user, logout_user,
+                    manage_account, set_password)
 
 app_name = "users"
 urlpatterns = [
@@ -9,5 +11,8 @@ urlpatterns = [
     path("logout/", logout_user, name="logout_user"),
     path("register/", create_user_account, name="create_user"),
     path("manage/<int:id>", manage_account, name="manage_user"),
+    path("invite/", invite_user, name="invite_user"),
     path("activate/<int:id>", activate_account, name="activate_account"),
+    path("handle_invite/<str:token>", handle_invite, name="handle_invite"),
+    path("set_password/<str:token>", set_password, name="set_password"),
 ]

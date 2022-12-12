@@ -32,6 +32,12 @@ cmd_install_packages: &cmd_install_packages
       . venv/bin/activate
       pip install -r requirements.txt
 
+cmd_run_db_migrations: &cmd_run_db_migrations
+  run:
+    command: |
+      . venv/bin/activate
+      python manage.py migrate
+
 cmd_save_cache: &cmd_save_cache
   save_cache:
     key: api-dependencies-{{ checksum "Pipfile.lock" }}
@@ -63,6 +69,7 @@ jobs:
       - *cmd_add_google_creds
       - *cmd_attach_workspace
       - *cmd_install_packages
+      - *cmd_run_db_migrations
       # - *cmd_restore_cache
       - run: 
           name: Running and generating report

@@ -1,8 +1,9 @@
 from django import forms
-from django.conf import settings
+from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
 
-from .models import User
+from .models import User, UserInvitations
 
 
 class LoginForm(forms.Form):
@@ -13,7 +14,7 @@ class LoginForm(forms.Form):
         super(LoginForm, self).__init__(*args, **kwargs)
         self.fields["password"].widget = forms.PasswordInput(attrs={"autocomplete": "new-password"})
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control"
+            self.fields[field].widget.attrs["class"] = "form-control mx-2"
 
 
 class CreateUserForm(UserCreationForm):
@@ -24,7 +25,7 @@ class CreateUserForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control"
+            self.fields[field].widget.attrs["class"] = "form-control mx-2"
 
 
 class UserMgtForm(forms.ModelForm):
@@ -33,7 +34,59 @@ class UserMgtForm(forms.ModelForm):
         fields = ("is_active", "scheme", "factory", "role")
 
     def __init__(self, *args, **kwargs):
-        super(UserMgtForm, self).__init__(*args, **kwargs)
+        super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control"
+            self.fields[field].widget.attrs["class"] = "form-control mx-2"
             self.fields[field].required = False
+
+
+class InviteUserForm(forms.ModelForm):
+    class Meta:
+        model = UserInvitations
+        fields = ("email", "role", "scheme", "factory", "organisation")
+
+    def __init__(self, *args, **kwargs):
+        super(forms.ModelForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+            self.fields["email"].label = "Email Address"
+            self.fields["factory"].label = "Factory/Farm"
+
+
+class SetPasswordForm(forms.Form):
+    """
+    A form that lets a user change set their password without entering the old
+    password
+    """
+
+    error_messages = {
+        "password_mismatch": "The two password fields didn’t match.",
+    }
+    new_password = forms.CharField(
+        label="New password",
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+        strip=False,
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    confirm_password = forms.CharField(
+        label="Confirm new password",
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+
+    def clean_confirm_password(self):
+        password = self.cleaned_data.get("new_password")
+        confirm_password = self.cleaned_data.get("confirm_password")
+        if password and confirm_password:
+            if password != confirm_password:
+                raise ValidationError(
+                    self.error_messages["password_mismatch"],
+                    code="password_mismatch",
+                )
+        password_validation.validate_password(confirm_password)
+        return confirm_password
