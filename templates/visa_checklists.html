@@ -37,6 +37,12 @@
                 {{form.factory_farm}} {{form.factory_farm.errors}}
                 <label class="form-label" for="time_range">{{form.time_range.label}}</label>
                 {{form.time_range}} {{form.time_range.errors}}
+                <span class="mx-2"> OR </span>
+                <label class="form-label" for="start_date">{{form.start_date.label}}</label>
+                {{form.start_date}} {{form.start_date.errors}}
+                <label class="form-label" for="end_date">{{form.end_date.label}}</label>
+                {{form.end_date}} {{form.end_date.errors}}
+                {{form.non_field_errors}}
                 <button type="submit" class="btn btn-primary">Filter</button>
                 <a href="{% url 'dashboard:checklists' key='visa' %}" class="mx-2">Reset</a>
             </form>
@@ -65,14 +71,20 @@
 {% block scripts %}
 <script>
     const destination_input = document.querySelector('#destination')
-    const origin_input = document.querySelector('#origin')
+    const end_date = document.querySelector('#end_date')
+    const factoryFarm_input = document.querySelector('#factory_farm')
     const filter_form = document.querySelector('#filter_form')
+    const origin_input = document.querySelector('#origin')
+    const start_date = document.querySelector('#start_date')
+    const schemeName_input = document.querySelector('#scheme_name')
 
-    function getOptions() {
-        const url = filter_form.attributes.getNamedItem("data-filter-url").value;
-        const country_code = destination_input.value;
-        if (country_code) {
-            fetch(url + '?' + new URLSearchParams({ 'destination': country_code }), { method: 'GET' })
+    function getOriginOptions() {
+        const url = filter_form.attributes.getNamedItem("data-origins-url").value;
+        const dest_country = destination_input.value;
+        const origin_country = origin_input.value;
+        if (dest_country) {
+            const filters = new URLSearchParams({ 'destination': dest_country })
+            fetch(`${url}?${filters}`, { method: 'GET' })
                 .then(response => {
                     result = response.json()
                     status_code = response.status;
@@ -83,10 +95,11 @@
                     return result
                 })
                 .then(data => {
-                    console.log(data);
                     options = ``
                     Object.entries(data).map(function ([k, v]) {
-                        console.log(k, v)
+                        if (k === origin_country) {
+                            options += `<option value="${k}" selected>${v}</option>`
+                        }
                         options += `<option value="${k}">${v}</option>`
                     })
                     origin_input.innerHTML = options;
@@ -97,8 +110,67 @@
         }
     }
 
-    destination_input.addEventListener('change', getOptions);
-    window.addEventListener('DOMContentLoaded', getOptions);
+    function getFactoryOptions() {
+        const url = filter_form.attributes.getNamedItem("data-factories-url").value;
+        const schemeName = schemeName_input.value;
+        const factoryFarm = factoryFarm_input.value;
+        const dest_country = destination_input.value;
+        const origin_country = origin_input.value;
+
+        if (dest_country && origin_country && schemeName && !factoryFarm) {
+            const filters = new URLSearchParams({
+                'destination': dest_country,
+                'origin': origin_country,
+                'scheme_name': schemeName
+            })
+            fetch(`${url}?${filters}`, { method: 'GET' })
+                .then(response => {
+                    result = response.json()
+                    status_code = response.status;
+                    if (status_code != 200) {
+                        console.log('Error processing next field options')
+                        return false;
+                    }
+                    return result
+                })
+                .then(data => {
+                    options = ``
+                    Object.entries(data).map(function ([k, v]) {
+                        if (k === factoryFarm) {
+                            options += `<option value="${k}" selected>${v}</option>`
+                        }
+                        options += `<option value="${k}">${v}</option>`
+                    })
+                    factoryFarm_input.innerHTML = options;
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        }
+    }
+
+    function autosubmit() {
+        document.getElementById('time_range').value = '';
+        document.getElementById('filter_form').submit();
+    }
+
+    function debounce(cb, delay) {
+        let timer;
+        return function () {
+            let context = this;
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                cb.apply(context, arguments);
+            }, delay);
+        };
+    };
+
+    destination_input.addEventListener('change', getOriginOptions);
+    end_date.addEventListener('change', debounce(autosubmit, 1000));
+    start_date.addEventListener('change', debounce(autosubmit, 1000));
+    schemeName_input.addEventListener('change', getFactoryOptions);
+    window.addEventListener('DOMContentLoaded', getOriginOptions)
+    window.addEventListener('DOMContentLoaded', getFactoryOptions)
 
     {% for key, values in data.items %}
     new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {

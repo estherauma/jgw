@@ -67,12 +67,12 @@ class BaseAnalytics:
             return df.loc[mask]
         return pd.DataFrame()
 
-    def filter_by_timeRange(self, start_date: str, df):
+    def filter_by_timeRange(self, time_range: str, df):
+        start_date, end_date = time_range.split(',')
         if start_date == "all_time":
             return df
-        today = datetime.today().strftime("%Y-%m-%d")
         if "createdAt" in df.columns:
-            mask = df["createdAt"].between(start_date, today, inclusive="both")
+            mask = df["createdAt"].between(start_date, end_date, inclusive="both")
             df = df.loc[mask]
             return df
         return pd.DataFrame()

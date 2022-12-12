@@ -1,12 +1,14 @@
 import re
 from datetime import datetime
+from operator import itemgetter
+
+from django import forms
+from django.utils.safestring import mark_safe
+from pytz import country_names
 
 from common.inline import Inline
 from common.reports import get_start_date
 from common.retrieve_data import exclude_cols
-from django import forms
-from django.utils.safestring import mark_safe
-from pytz import country_names
 
 from .models import Factory, Scheme
 
@@ -40,6 +42,7 @@ CATEGORIES = {
     "inlineQNs_responses": "InlineQuestions Response Breakdown",
 }
 TIME_RANGE = {
+    "": "Select a time range.",
     get_start_date(days=30): "30 Days",
     get_start_date(days=60): "60 Days",
     get_start_date(days=90): "90 Days",
@@ -68,46 +71,75 @@ class DependentChoiceField(forms.ChoiceField):
 class FilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
-        qn_mark = mark_safe("'")
-        form_name = f"{qn_mark}filter_form{qn_mark}"
         for f in self.fields:
-            self.fields[f].widget.attrs[
-                "onChange"
-            ] = f"const filterForm = document.getElementById({form_name}).submit();"
+            if f not in ("start_date", "end_date", "time_range"):
+                self.fields[f].widget.attrs = {
+                    "onChange": mark_safe("document.getElementById('filter_form').submit();"),
+                    "class": "form-select mx-2",
+                    "id": f,
+                }
 
-    destination = forms.ChoiceField(
-        choices=DEST_COUNTRIES.items(),
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "destination"}),
-    )
-    origin = DependentChoiceField(
-        choices=ORIGIN_COUNTRIES.items(),
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "origin"}),
-    )
-    scheme_name = forms.ModelChoiceField(
-        label="Scheme",
-        required=False,
-        queryset=Scheme.objects.all(),
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "scheme_name"}),
-    )
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date, end_date, time_range = itemgetter("start_date", "end_date", "time_range")(cleaned_data)
+
+        if (start_date or end_date) and time_range:
+            raise forms.ValidationError("Please fill either start/end date or time range, but not both!")
+
+        if all((start_date, end_date)) and start_date > end_date:
+            raise forms.ValidationError("Start date must be earlier than end date!")
+
+        return cleaned_data
+
+    destination = forms.ChoiceField(choices=DEST_COUNTRIES.items(), required=False)
+    origin = DependentChoiceField(choices=ORIGIN_COUNTRIES.items(), required=False)
+    scheme_name = forms.ModelChoiceField(label="Scheme", required=False, queryset=Scheme.objects.all())
+    organisation = forms.ChoiceField(label="Organisation", choices=OPERATORS.items(), required=False)
     factory_farm = forms.ModelChoiceField(
-        label="Factory/Farm",
-        queryset=Factory.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "factory_farm"}),
+        label="Factory/Farm", required=False, queryset=Factory.objects.all()
     )
     time_range = forms.ChoiceField(
         label="Time Range",
         choices=TIME_RANGE.items(),
         required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "time_range"}),
+        widget=forms.Select(
+            attrs={
+                "class": "form-select mx-2",
+                "id": "time_range",
+                "onChange": mark_safe(
+                    """
+                    document.getElementById('start_date').value = '';
+                    document.getElementById('end_date').value = '';
+                    document.getElementById('filter_form').submit();
+                """
+                ),
+            }
+        ),
     )
-    organisation = forms.ChoiceField(
-        label="Organisation",
-        choices=OPERATORS.items(),
+    start_date = forms.DateField(
         required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "organisation"}),
+        widget=forms.DateInput(
+            format=("%Y-%m-%d"),
+            attrs={
+                "class": "form-control mx-2",
+                "id": "start_date",
+                "placeholder": "Select a date",
+                "type": "date",
+            },
+        ),
+    )
+    end_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            format=("%Y-%m-%d"),
+            attrs={
+                "class": "form-control mx-2",
+                "id": "end_date",
+                "placeholder": "Select a date",
+                "type": "date",
+                "value": datetime.now().strftime("%Y-%m-%d"),
+            },
+        ),
     )
 
 
@@ -148,10 +180,12 @@ class InlineQnsForm(FilterForm):
         qn_mark = mark_safe("'")
         form_name = f"{qn_mark}filter_form{qn_mark}"
         for f in self.fields:
-            self.fields[f].widget.attrs[
-                "onChange"
-            ] = f"const filterForm = document.getElementById({form_name}).submit();"
-
+            if f not in ("start_date", "end_date", "time_range"):
+                self.fields[f].widget.attrs = {
+                    "onChange": mark_safe("document.getElementById('filter_form').submit();"),
+                    "class": "form-select mx-2",
+                    "id": f,
+                }
 
     question = forms.ChoiceField(
         label="Question Key",
@@ -164,7 +198,7 @@ class AppEventsForm(forms.Form):
     TIME_RANGE = {
         "7 Days": "7 Days",
         "30 Days": "30 Days",
-        "55 Days": "55 Days",
+        "60 Days": "60 Days",
         # "90 Days": "90 Days",
     }
     time_range = forms.ChoiceField(
