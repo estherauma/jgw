@@ -114,10 +114,10 @@ def invite_user(request):
         form = InviteUserForm(request.POST)
         if form.is_valid():
             email_address = form.cleaned_data.get("email")
-            invitation = form.save(commit=True)
+            invite = form.save(commit=True)
             payload = {
                 "exp": datetime.now(tz=timezone.utc) + timedelta(days=3),
-                "invitation_id": invitation.id,
+                "invite_id": invite.id,
             }
             token = jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
             send_email_notification.delay(
@@ -140,12 +140,12 @@ def handle_invite(request, token):
     logout(request)
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        instance = UserInvitations.objects.get(id=payload.get("invitation_id"))
-        instance.status = "ACCEPTED"
-        instance.save()
+        invite = UserInvitations.objects.get(id=payload.get("invite_id"))
+        invite.status = "ACCEPTED"
+        invite.save()
         payload = {
             "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
-            "invite_id": instance.id,
+            "invite_id": invite.id,
         }
         token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
         return redirect(reverse("users:set_password", args=(token,)))
@@ -159,11 +159,11 @@ def handle_invite(request, token):
 def set_password(request, token):
     logout(request)
     form = SetPasswordForm()
-    if request.method == "POST":
-        form = SetPasswordForm(request.POST)
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            user_id, invite_id = payload.get("user_id"), payload.get("invite_id")
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        user_id, invite_id = payload.get("user_id"), payload.get("invite_id")
+        if request.method == "POST":
+            form = SetPasswordForm(request.POST)
             if form.is_valid():
                 password = form.cleaned_data.get("confirm_password")
                 if user_id:
@@ -181,8 +181,8 @@ def set_password(request, token):
                 return redirect("users:login_user")
             else:
                 messages.error(request, "Error validating form!")
-        except jwt.ExpiredSignatureError:
-            messages.error(request, "This link is expired!")
-        except User.DoesNotExist:
-            messages.error(request, "User account not found!")
+    except jwt.ExpiredSignatureError:
+        messages.error(request, "This link is expired!")
+    except User.DoesNotExist:
+        messages.error(request, "User account not found!")
     return render(request, "users/set_password.html", {"form": form})
