@@ -114,11 +114,6 @@ def invite_user(request):
         form = InviteUserForm(request.POST)
         if form.is_valid():
             email_address = form.cleaned_data.get("email")
-            account_exists = User.objects.filter(email=email_address).exists()
-            if account_exists:
-                messages.error(request, "An account with this email address already exists!")
-                return render(request, "users/invite_user.html", context={"form": form})
-
             invitation = form.save(commit=True)
             payload = {
                 "exp": datetime.now(tz=timezone.utc) + timedelta(days=3),
