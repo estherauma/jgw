@@ -18,7 +18,7 @@ default: &defaults
         POSTGRES_USER: example
         POSTGRES_PASSWORD: example
         POSTGRES_DB: example
-    - image: "cimg/redis"
+    - image: "circleci/redis"
       environment:
         REDIS_URL: redis://localhost:6379
 
