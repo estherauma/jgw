@@ -18,7 +18,10 @@ default: &defaults
         POSTGRES_USER: example
         POSTGRES_PASSWORD: example
         POSTGRES_DB: example
-        
+    - image: "cimg/redis"
+      environment:
+      REDIS_URL: redis://localhost:6379
+
   working_directory: ~/project
 
 cmd_attach_workspace: &cmd_attach_workspace
@@ -53,7 +56,7 @@ cmd_add_google_creds: &cmd_add_google_creds
     command: |
       echo $GOOGLE_CRED | base64 --decode > google_cred.json
 
-jobs: 
+jobs:
   build:
     docker:
       - image: cimg/python:3.9.1
@@ -71,7 +74,7 @@ jobs:
       - *cmd_install_packages
       - *cmd_run_db_migrations
       # - *cmd_restore_cache
-      - run: 
+      - run:
           name: Running and generating report
           command: |
             . venv/bin/activate
@@ -92,7 +95,6 @@ jobs:
     steps:
       - checkout
       - heroku/deploy-via-git
-
 
 workflows:
   version: 2
