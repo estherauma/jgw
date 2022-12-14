@@ -13,14 +13,13 @@ default: &defaults
         DB_PASSWORD: example
         DB_HOST: localhost
         DB_PORT: 5432
+        REDIS_URL: redis://redis:6379/0
     - image: "circleci/postgres:9.6.5-alpine-ram"
       environment:
         POSTGRES_USER: example
         POSTGRES_PASSWORD: example
         POSTGRES_DB: example
     - image: "circleci/redis"
-      environment:
-        REDIS_URL: redis://localhost:6379
 
   working_directory: ~/project
 
