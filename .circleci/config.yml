@@ -20,7 +20,7 @@ default: &defaults
         POSTGRES_DB: example
     - image: "cimg/redis"
       environment:
-      REDIS_URL: redis://localhost:6379
+        REDIS_URL: redis://localhost:6379
 
   working_directory: ~/project
 
