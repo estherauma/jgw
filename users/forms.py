@@ -52,6 +52,13 @@ class InviteUserForm(forms.ModelForm):
             self.fields["email"].label = "Email Address"
             self.fields["factory"].label = "Factory/Farm"
 
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("email")
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("An account with this email address already exists!")
+        return cleaned_data
+
 
 class SetPasswordForm(forms.Form):
     """
