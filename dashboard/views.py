@@ -63,6 +63,7 @@ def process_filters(request):
 
 
 def redirect_to_filtered_data(request, url, template_name, form=None):
+    """Turns filter form values into query args for view at base url to filter data"""
     form = form if form is not None else FilterForm(request.POST)
     if form.is_valid():
         filters = form.cleaned_data.copy()
@@ -92,14 +93,14 @@ def render_data(request, template_name, helper):
         chart_data = form_chart_data(_data)
         if not any(bool(i) for i in _data.values()):
             messages.error(request, "No data matches this search!")
+        elif helper.cleaned is False:
+            messages.info(
+                request, "Raw data is shown here. Refresh after a few minutes to view the processed stats."
+            )
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, template_name, context={"form": form})
     context_data.update({"data": chart_data, "filter_string": urlencode(filters)})
-    if helper.cleaned is False:
-        messages.info(
-            request, "Raw data is shown here. Refresh after a few minutes to view the processed stats."
-        )
     return render(request, template_name, context=context_data)
 
 
