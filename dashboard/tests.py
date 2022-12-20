@@ -96,15 +96,9 @@ class DashboardTests(TestCase):
         filters = {"destination": "Qatar"}
         expected_json = {
             "": "Select a Country",
-            "Britain (Uk)": "Britain (Uk)",
-            "India": "India",
-            "Indonesia": "Indonesia",
             "Kenya": "Kenya",
-            "Kyrgyzstan": "Kyrgyzstan",
-            "Nepal": "Nepal",
             "Other - The Rest Of The World": "Other - The Rest Of The World",
             "Uganda": "Uganda",
-            "Uzbekistan": "Uzbekistan",
         }
         response = self.client.get(f"{url}?{urlencode(filters)}")
         self.assertEqual(response.json(), expected_json)
@@ -134,25 +128,25 @@ class DashboardTests(TestCase):
         response = self.client.get(f"{url}?{urlencode(filters)}")
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("dashboard:preferences"))
-    
+
     def test_demographics_renders_correctly(self):
         url = reverse("dashboard:preferences")
         response = self.client.get(url)
         self.assertTemplateUsed(response, "preferences.html")
         self.assertIsInstance(response.context["form"], FilterForm)
-    
+
     def test_inline_qns_renders_correctly(self):
         url = reverse("dashboard:inline")
         response = self.client.get(url)
         self.assertTemplateUsed(response, "inline.html")
         self.assertIsInstance(response.context["form"], InlineQnsForm)
-    
+
     def test_messaging_qns_renders_correctly(self):
         url = reverse("dashboard:messaging")
         response = self.client.get(url)
         self.assertTemplateUsed(response, "messaging.html")
         self.assertIsInstance(response.context["form"], FilterForm)
-    
+
     def test_help_contacts_renders_correctly(self):
         url = reverse("dashboard:help_contacts")
         response = self.client.get(url)
@@ -160,10 +154,10 @@ class DashboardTests(TestCase):
         self.assertIsInstance(response.context["form"], FilterForm)
 
     def test_checklists_stats_renders_correctly(self):
-        url = reverse("dashboard:checklists", args=('visa',))
+        url = reverse("dashboard:checklists", args=("visa",))
         response = self.client.get(url)
         self.assertTemplateUsed(response, "visa_checklists.html")
-        self.assertIsInstance(response.context["form"], FilterForm) 
+        self.assertIsInstance(response.context["form"], FilterForm)
 
     def test_batch_sws_report_export_renders_correctly(self):
         url = reverse("dashboard:export_report")
