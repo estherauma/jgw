@@ -266,8 +266,7 @@ def export_to_excel_file(request, key):
         messages.error(request, "Report not yet available!")
         if key.startswith("inlineQNs"):
             return redirect(reverse("dashboard:inline"))
-        return redirect(reverse(f"dashboard:{key}"))
-
+        return redirect(reverse("dashboard:preferences"))
     if key.startswith("inlineQNs"):
         helper = HELPERS["inline"]()
     else:
@@ -278,16 +277,12 @@ def export_to_excel_file(request, key):
     filename = get_SWS_report(
         start=filters["time_range"], end=datetime.today().strftime("%Y-%m-%d"), category=key, df=df
     )
-    if filename is None:
-        messages.error(request, "Failed to export!")
-        return redirect(reverse(f"dashboard:{key}"))
     response = FileResponse(open(filename, "rb"))
     return response
 
 
 @login_required()
 def export_report(request):
-
     form = ExportReportForm()
     if request.method == "POST":
         form = ExportReportForm(request.POST)
