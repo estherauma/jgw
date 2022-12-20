@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from django.conf import settings
-from django.forms.utils import ErrorDict
 from django.test import TestCase
 from django.urls import reverse
 
