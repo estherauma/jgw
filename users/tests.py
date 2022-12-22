@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from django.conf import settings
-from django.forms.utils import ErrorDict
 from django.test import TestCase
 from django.urls import reverse
 
@@ -41,28 +40,51 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/?next=/")
 
-    def test_account_creation_and_login(self):
-        """
-        Test sign up and login, form validation
-        """
-        # test create user and login user
+    def test_signup_OK(self):
         response = self.client.post(
             reverse("users:create_user"),
             {"email": "test2@test.local", "password1": self.test_pword, "password2": self.test_pword},
         )
-        # redirects to login if signup ok.
+        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("users:login_user"))
-        response = self.client.post(
-            reverse("users:login_user"), {"email": "test2@test.local", "password1": self.test_pword}
-        )
-        self.assertEqual(response.status_code, 200)
-        # test form validation and errors
+
+    def test_signup_form_validation(self):
+        """
+        Test sign up form validation
+        """
         response = self.client.post(
             reverse("users:create_user"),
-            {"email": "test2@test.local", "password1": self.test_pword, "password2": ""},
+            {"email": self.test_email, "password1": self.test_pword, "password2": ""},
         )
-        self.assertIsNotNone(response.context["form"].errors)
-        self.assertIsInstance(response.context["form"].errors, ErrorDict)
+        form_errors = dict(response.context["form"].errors)
+        self.assertTrue(bool(form_errors))
+        self.assertEqual(
+            form_errors,
+            {"password2": ["This field is required."], "email": ["User with this Email already exists."]},
+        )
+
+    def test_login_OK(self):
+        response = self.client.post(
+            reverse("users:login_user"), {"email": self.test_email, "password": self.test_pword}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("dashboard:inline"))
+
+    def test_login_form_validation(self):
+        """
+        Test login form validation
+        """
+        response = self.client.post(
+            reverse("users:login_user"), {"email": "test2@test.local", "password": self.test_pword}
+        )
+        messages = [str(i) for i in response.context["messages"]]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(messages, ["Can not log in with provided credentials!"])
+        response = self.client.post(
+            reverse("users:login_user"), {"email": "test@fakeemail.", "password": self.test_pword}
+        )
+        form_errors = dict(response.context["form"].errors)
+        self.assertEqual(form_errors, {"email": ["Enter a valid email address."]})
 
     def test_invite_user_view_renders_correctly(self):
         response = self.client.get(reverse("users:invite_user"))
@@ -108,6 +130,23 @@ class AuthTests(TestCase):
         self.assertTemplateUsed(response, "users/manage_user.html")
         self.assertIsInstance(response.context["form"], UserMgtForm)
 
+    def test_manage_user_OK(self):
+        new_user = User.objects.create_user(email="test2@test.local", password=self.test_pword)
+        response = self.client.post(reverse("users:manage_user", args=(new_user.id,)), {"is_active": True})
+        form_errors = dict(response.context["form"].errors)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(form_errors, {})
+        new_user = User.objects.get(email="test2@test.local")
+        self.assertTrue(new_user.is_active)
+
+    def test_activate_user_OK(self):
+        new_user = User.objects.create_user(email="test2@test.local", password=self.test_pword)
+        response = self.client.get(reverse("users:activate_account", args=(new_user.id,)))
+        self.assertEqual(response.status_code, 302)
+        new_user = User.objects.get(email="test2@test.local")
+        self.assertTrue(new_user.is_active)
+        self.assertRedirects(response, "/accounts/")
+    
     def test_create_user_view_renders_correctly(self):
         response = self.client.get(reverse("users:create_user"))
         self.assertEqual(response.status_code, 200)
@@ -184,7 +223,7 @@ class AuthTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/")
-    
+
     def test_set_password_new_account_OK(self):
         invite_data = {
             "email": "test_invite@test.local",
@@ -245,3 +284,8 @@ class AuthTests(TestCase):
             dict(response.context["form"].errors),
             {"confirm_password": ["The two password fields didn’t match."]},
         )
+
+    def test_logout(self):
+        response = self.client.get(reverse("users:logout_user"))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("users:login_user"))

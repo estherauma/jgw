@@ -23,6 +23,9 @@ class Scheme(models.Model):
 
 class Factory(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
+    scheme = models.ForeignKey(
+        to="Scheme", related_name="factories", on_delete=models.CASCADE, null=True, blank=True, default=None
+    )
 
 
 class JGWCache(models.Model):

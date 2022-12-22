@@ -63,6 +63,7 @@ def process_filters(request):
 
 
 def redirect_to_filtered_data(request, url, template_name, form=None):
+    """Turns filter form values into query args for view at base url to filter data"""
     form = form if form is not None else FilterForm(request.POST)
     if form.is_valid():
         filters = form.cleaned_data.copy()
@@ -92,14 +93,14 @@ def render_data(request, template_name, helper):
         chart_data = form_chart_data(_data)
         if not any(bool(i) for i in _data.values()):
             messages.error(request, "No data matches this search!")
+        elif helper.cleaned is False:
+            messages.info(
+                request, "Raw data is shown here. Refresh after a few minutes to view the processed stats."
+            )
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, template_name, context={"form": form})
     context_data.update({"data": chart_data, "filter_string": urlencode(filters)})
-    if helper.cleaned is False:
-        messages.info(
-            request, "Raw data is shown here. Refresh after a few minutes to view the processed stats."
-        )
     return render(request, template_name, context=context_data)
 
 
@@ -265,8 +266,7 @@ def export_to_excel_file(request, key):
         messages.error(request, "Report not yet available!")
         if key.startswith("inlineQNs"):
             return redirect(reverse("dashboard:inline"))
-        return redirect(reverse(f"dashboard:{key}"))
-
+        return redirect(reverse("dashboard:preferences"))
     if key.startswith("inlineQNs"):
         helper = HELPERS["inline"]()
     else:
@@ -277,16 +277,12 @@ def export_to_excel_file(request, key):
     filename = get_SWS_report(
         start=filters["time_range"], end=datetime.today().strftime("%Y-%m-%d"), category=key, df=df
     )
-    if filename is None:
-        messages.error(request, "Failed to export!")
-        return redirect(reverse(f"dashboard:{key}"))
     response = FileResponse(open(filename, "rb"))
     return response
 
 
 @login_required()
 def export_report(request):
-
     form = ExportReportForm()
     if request.method == "POST":
         form = ExportReportForm(request.POST)

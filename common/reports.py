@@ -44,6 +44,8 @@ def get_SWS_report(start, end, category, df=None):
         "inlineQNs_participation": "inlineQNs_participation",
         "inlineQNs_responses": "inlineQNs_responses",
     }
+    if filenames.get(category) is None:
+        return None
     if category == "inlineQNs_responses":
         return get_inlineQNs_responses_report(start, end)
     elif category == "chapters":
