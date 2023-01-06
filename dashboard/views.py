@@ -72,6 +72,49 @@ def redirect_to_filtered_data(request, url, template_name, form=None):
     return render(request, template_name, context={"form": form})
 
 
+def format_time_range(filters):
+    fields = filters.keys()
+    if "time_range" not in fields and "start_date" not in fields:
+        # set time-range to 30 if no time-range/date
+        filters["time_range"] = f"{get_start_date(days=30)},{TODAY}"
+    elif "time_range" in fields:
+        filters["time_range"] = f"{filters['time_range']},{TODAY}"
+    elif ("end_date" in fields or "start_date" in fields) and "time_range" not in fields:
+        filters["time_range"] = f"{filters['start_date']},{filters.get('end_date', TODAY)}"
+    return filters
+
+
+def get_filters_from_form(form):
+    if form.is_valid():
+        form_data = form.cleaned_data.copy()
+        filters = {k: v for k, v in form_data.items() if bool(v)}
+    else:
+        print(form.errors, "\n", dict(form.errors))
+    return filters
+
+
+def get_user_role(user):
+    role_filters = {
+        "Scheme": {"scheme_name": user.scheme},
+        "Factory": {"factory_farm": user.factory},
+    }
+    return role_filters.get(user.role, {})
+
+
+def filter_data(request, category):
+    form = FilterForm(request.POST)
+    helper = HELPERS[category]()
+
+    filters = get_filters_from_form(form)
+    filters.update(get_user_role(request.user))
+    filters = format_time_range(filters)
+
+    data = helper.compute_stats(filters=filters)
+    chart_data = form_chart_data(data)
+
+    return JsonResponse(chart_data)
+
+
 def render_data(request, template_name, helper):
     filters = process_filters(request)
     form = FilterForm(initial=filters)
@@ -198,11 +241,8 @@ def app_events_stats(request):
 
 @login_required()
 def preferences_stats(request):
-    if request.method == "POST":
-        return redirect_to_filtered_data(
-            request, url=reverse("dashboard:preferences"), template_name="preferences.html"
-        )
-    return render_data(request, template_name="preferences.html", helper=Preferences())
+    form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
+    return render(request, "preferences.html", {"form": form})
 
 
 @login_required()
@@ -266,12 +306,9 @@ def export_to_excel_file(request, key):
         messages.error(request, "Report not yet available!")
         if key.startswith("inlineQNs"):
             return redirect(reverse("dashboard:inline"))
-        return redirect(reverse("dashboard:preferences"))
-    if key.startswith("inlineQNs"):
-        helper = HELPERS["inline"]()
-    else:
-        helper = HELPERS[key]()
+        return redirect(reverse(f"dashboard:{key}"))
 
+    helper = HELPERS[key]()
     filters = process_filters(request)
     df = helper.get_df(filters)
     filename = get_SWS_report(
