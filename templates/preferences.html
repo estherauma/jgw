@@ -26,23 +26,31 @@
                 submit-url="{% url 'dashboard:filter_data' category='preferences' %}">
                 {% csrf_token %}
                 <label class="form-label" for="destination">{{form.destination.label}}</label>
-                {{form.destination}} {{form.destination.errors}}
+                {{form.destination}}
+                <span id='destination-errors' class='text-danger'></span>
                 <label class="form-label" for="origin">{{form.origin.label}}</label>
-                {{form.origin}} {{form.origin.errors}}
+                {{form.origin}}
+                <span class='text-danger'></span>
                 <label class="form-label" for="organisation">{{form.organisation.label}}</label>
-                {{form.organisation}} {{form.organisation.errors}}
+                {{form.organisation}}
+                <span id='organisation-errors' class='text-danger'></span>
                 <label class="form-label" for="scheme_name">{{form.scheme_name.label}}</label>
-                {{form.scheme_name}} {{form.scheme_name.errors}}
+                {{form.scheme_name}}
+                <span id='scheme_name-errors' class='text-danger'></span>
                 <label class="form-label" for="factory_farm">{{form.factory_farm.label}}</label>
-                {{form.factory_farm}} {{form.factory_farm.errors}}
+                {{form.factory_farm}}
+                <span id='factory_farm_errors' class='text-danger'></span>
                 <label class="form-label" for="time_range">{{form.time_range.label}}</label>
-                {{form.time_range}} {{form.time_range.errors}}
+                {{form.time_range}}
+                <span id='time_range-errors' class='text-danger'></span>
                 <span class="mx-2"> OR </span>
                 <label class="form-label" for="start_date">{{form.start_date.label}}</label>
-                {{form.start_date}} {{form.start_date.errors}}
+                {{form.start_date}}
+                <span id='start_date-errors' class='text-danger'></span>
                 <label class="form-label" for="end_date">{{form.end_date.label}}</label>
-                {{form.end_date}} {{form.end_date.errors}}
-                {{form.non_field_errors}}
+                {{form.end_date}}
+                <span id='end_date-errors' class='text-danger'></span>
+                <span id="__all__-errors" class="text-danger"></span>
                 <a href="{% url 'dashboard:preferences' %}" class="mx-2">Reset</a>
             </form>
         </div>
@@ -89,6 +97,20 @@
             element.style.display = 'block'
         } else if (flag === false) {
             element.style.display = 'none'
+        }
+    }
+
+    function setFormErrors(errorObject) {
+        for (const [key, value] of Object.entries(errorObject)) {
+            const element = document.querySelector(`#${key}-errors`)
+            element.textContent = value[0]
+        }
+    }
+
+    function clearFormErrors() {
+        const errorMessages = document.querySelectorAll('[id$="-errors"]')
+        for (i in errorMessages) {
+            i.textContent = ''
         }
     }
 
@@ -193,20 +215,16 @@
         let chartData = {};
         toggleElementDisplay(false, '#chart-area')
         toggleElementDisplay(true, '#loader')
+        clearFormErrors()
         fetch(url, { method: 'POST', body: formData })
-            .then(response => {
-                result = response.json()
-                status_code = response.status;
-                if (status_code != 200) {
-                    console.log('Error processing form!')
-                    toggleElementDisplay(false, '#loader')
-                    return false;
-                }
-                return result
-            })
+            .then(response => response.json())
             .then(data => {
-                chartData = data
-                plotCharts(chartData)
+                if ('form_errors' in data) {
+                    setFormErrors(data.form_errors)
+                }
+                else {
+                    return data
+                }
             })
             .catch(error => {
                 console.log(error)
