@@ -72,9 +72,9 @@ class FilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
         for f in self.fields:
-            if f not in ("start_date", "end_date", "time_range"):
+            if f not in ("start_date", "end_date", "time_range", "destination", "scheme_name"):
                 self.fields[f].widget.attrs = {
-                    "onChange": mark_safe("document.getElementById('filter_form').submit();"),
+                    "onChange": mark_safe("chartData = filterData(); plotCharts(chartData);"),
                     "class": "form-select mx-2",
                     "id": f,
                 }
@@ -91,9 +91,22 @@ class FilterForm(forms.Form):
 
         return cleaned_data
 
-    destination = forms.ChoiceField(choices=DEST_COUNTRIES.items(), required=False)
+    destination = forms.ChoiceField(
+        choices=DEST_COUNTRIES.items(),
+        required=False,
+        widget=forms.Select(
+            attrs={"class": "form-select mx-2", "id": "destination", "onChange": "getOriginOptions();"}
+        ),
+    )
     origin = DependentChoiceField(choices=ORIGIN_COUNTRIES.items(), required=False)
-    scheme_name = forms.ModelChoiceField(label="Scheme", required=False, queryset=Scheme.objects.all())
+    scheme_name = forms.ModelChoiceField(
+        label="Scheme",
+        required=False,
+        queryset=Scheme.objects.all(),
+        widget=forms.Select(
+            attrs={"class": "form-select mx-2", "id": "scheme_name", "onChange": "getFactoryOptions();"}
+        ),
+    )
     organisation = forms.ChoiceField(label="Organisation", choices=OPERATORS.items(), required=False)
     factory_farm = forms.ModelChoiceField(
         label="Factory/Farm", required=False, queryset=Factory.objects.all()
@@ -110,7 +123,8 @@ class FilterForm(forms.Form):
                     """
                     document.getElementById('start_date').value = '';
                     document.getElementById('end_date').value = '';
-                    document.getElementById('filter_form').submit();
+                    chartData = filterData()
+                    plotCharts(chartData)
                 """
                 ),
             }
@@ -137,7 +151,7 @@ class FilterForm(forms.Form):
                 "id": "end_date",
                 "placeholder": "Select a date",
                 "type": "date",
-                "value": datetime.now().strftime("%Y-%m-%d"),
+                "max": datetime.now().strftime("%Y-%m-%d"),
             },
         ),
     )
