@@ -25,44 +25,53 @@
             </div>
             <form id="filter_form" class="form-inline p-2" method="POST"
                 data-origins-url="{% url 'dashboard:process_origin_options' key='beforeyougo'%}"
-                data-factories-url="{% url 'dashboard:process_factory_options' key='beforeyougo'%}">
-
+                data-factories-url="{% url 'dashboard:process_factory_options' key='beforeyougo'%}"
+                submit-url="{% url 'dashboard:filter_data' category='beforeyougo' %}">
                 {% csrf_token %}
                 <label class="form-label" for="destination">{{form.destination.label}}</label>
-                {{form.destination}} {{form.destination.errors}}
+                {{form.destination}}
+                <span id='destination-errors' class='text-danger'></span>
                 <label class="form-label" for="origin">{{form.origin.label}}</label>
-                {{form.origin}} {{form.origin.errors}}
+                {{form.origin}}
+                <span class='text-danger'></span>
                 <label class="form-label" for="scheme_name">{{form.scheme_name.label}}</label>
-                {{form.scheme_name}} {{form.scheme_name.errors}}
+                {{form.scheme_name}}
+                <span id='scheme_name-errors' class='text-danger'></span>
                 <label class="form-label" for="factory_farm">{{form.factory_farm.label}}</label>
-                {{form.factory_farm}} {{form.factory_farm.errors}}
+                {{form.factory_farm}}
+                <span id='factory_farm_errors' class='text-danger'></span>
                 <label class="form-label" for="time_range">{{form.time_range.label}}</label>
-                {{form.time_range}} {{form.time_range.errors}}
+                {{form.time_range}}
+                <span id='time_range-errors' class='text-danger'></span>
                 <span class="mx-2"> OR </span>
                 <label class="form-label" for="start_date">{{form.start_date.label}}</label>
-                {{form.start_date}} {{form.start_date.errors}}
+                {{form.start_date}}
+                <span id='start_date-errors' class='text-danger'></span>
                 <label class="form-label" for="end_date">{{form.end_date.label}}</label>
-                {{form.end_date}} {{form.end_date.errors}}
-                {{form.non_field_errors}}
-                <button type="submit" class="btn btn-primary">Filter</button>
+                {{form.end_date}}
+                <span id='end_date-errors' class='text-danger'></span>
+                <span id="__all__-errors" class="text-danger"></span>
                 <a href="{% url 'dashboard:checklists' key='beforeyougo' %}" class="mx-2">Reset</a>
             </form>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <canvas id="_locale"> </canvas>
+<div>
+    <div class="text-center" id="loader">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <canvas id="_route"> </canvas>
+    <div class="row" id="chart-area">
+        <div class="col-12">
+            <div class="card" id="locale_graphcard">
+                <canvas id="_locale"></canvas>
+            </div>
+            <div class="card" id="route_graphcard">
+                <canvas id="_route"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -71,15 +80,37 @@
 <!-- ChartJS script  -->
 {% block scripts %}
 <script>
-    const destination_input = document.querySelector('#destination')
     const end_date = document.querySelector('#end_date')
     const factoryFarm_input = document.querySelector('#factory_farm')
     const filter_form = document.querySelector('#filter_form')
     const origin_input = document.querySelector('#origin')
     const start_date = document.querySelector('#start_date')
-    const schemeName_input = document.querySelector('#scheme_name')
+
+    function toggleElementDisplay(flag, selector) {
+        const element = document.querySelector(selector)
+        if (flag === true) {
+            element.style.display = 'block'
+        } else if (flag === false) {
+            element.style.display = 'none'
+        }
+    }
+
+    function setFormErrors(errorObject) {
+        for (const [key, value] of Object.entries(errorObject)) {
+            const element = document.querySelector(`#${key}-errors`)
+            element.textContent = value[0]
+        }
+    }
+
+    function clearFormErrors() {
+        const errorMessages = document.querySelectorAll('[id$="-errors"]')
+        for (i in errorMessages) {
+            i.textContent = ''
+        }
+    }
 
     function getOriginOptions() {
+        const destination_input = document.querySelector('#destination')
         const url = filter_form.attributes.getNamedItem("data-origins-url").value;
         const dest_country = destination_input.value;
         const origin_country = origin_input.value;
@@ -104,6 +135,8 @@
                         options += `<option value="${k}">${v}</option>`
                     })
                     origin_input.innerHTML = options;
+                    chartData = filterData()
+                    plotCharts(chartData)
                 })
                 .catch(error => {
                     console.log(error)
@@ -113,6 +146,8 @@
 
     function getFactoryOptions() {
         const url = filter_form.attributes.getNamedItem("data-factories-url").value;
+        const destination_input = document.querySelector('#destination')
+        const schemeName_input = document.querySelector('#scheme_name')
         const schemeName = schemeName_input.value;
         const factoryFarm = factoryFarm_input.value;
         const dest_country = destination_input.value;
@@ -143,6 +178,8 @@
                         options += `<option value="${k}">${v}</option>`
                     })
                     factoryFarm_input.innerHTML = options;
+                    chartData = filterData()
+                    plotCharts(chartData)
                 })
                 .catch(error => {
                     console.log(error)
@@ -152,7 +189,8 @@
 
     function autosubmit() {
         document.getElementById('time_range').value = '';
-        document.getElementById('filter_form').submit();
+        chartData = filterData()
+        plotCharts(chartData)
     }
 
     function debounce(cb, delay) {
@@ -166,50 +204,82 @@
         };
     };
 
-    destination_input.addEventListener('change', getOriginOptions);
+    function filterData() {
+        const url = filter_form.attributes.getNamedItem("submit-url").value;
+        const formData = new FormData(filter_form);
+        let chartData = {};
+        toggleElementDisplay(false, '#chart-area')
+        toggleElementDisplay(true, '#loader')
+        clearFormErrors()
+        fetch(url, { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if ('form_errors' in data) {
+                    setFormErrors(data.form_errors)
+                }
+                else {
+                    return data
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        toggleElementDisplay(true, '#chart-area')
+        toggleElementDisplay(false, '#loader')
+    }
+
+    function plotCharts(chartData) {
+        if (chartData) {
+            for (const [key, values] of Object.entries(chartData)) {
+                document.getElementById("_" + key).remove()
+                graphDiv = document.getElementById(`${key}_graphcard`)
+                let canvas = document.createElement('canvas')
+                canvas.setAttribute('id', `_${key}`)
+                graphDiv.appendChild(canvas)
+                new Chart(canvas.getContext("2d"), {
+                    type: "bar",
+                    data: {
+                        labels: values.labels,
+                        datasets: [
+                            {
+                                label: key,
+                                data: values.data,
+                                backgroundColor: [
+                                    "rgba(255, 99, 132, 0.2)",
+                                    "rgba(54, 162, 235, 0.2)",
+                                    "rgba(255, 206, 86, 0.2)",
+                                    "rgba(75, 192, 192, 0.2)",
+                                    "rgba(153, 102, 255, 0.2)",
+                                    "rgba(255, 159, 64, 0.2)",
+                                ],
+                                borderColor: [
+                                    "rgba(255, 99, 132, 1)",
+                                    "rgba(54, 162, 235, 1)",
+                                    "rgba(255, 206, 86, 1)",
+                                    "rgba(75, 192, 192, 1)",
+                                    "rgba(153, 102, 255, 1)",
+                                    "rgba(255, 159, 64, 1)",
+                                ],
+                                borderWidth: 1,
+                            },
+                        ],
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    },
+                });
+            }
+        }
+    }
+
     end_date.addEventListener('change', debounce(autosubmit, 1000));
     start_date.addEventListener('change', debounce(autosubmit, 1000));
-    schemeName_input.addEventListener('change', getFactoryOptions);
     window.addEventListener('DOMContentLoaded', getOriginOptions)
     window.addEventListener('DOMContentLoaded', getFactoryOptions)
-
-    {% for key, values in data.items %}
-    new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
-        type: "bar",
-        data: {
-            labels: {{ values.labels | safe }},
-        datasets: [
-        {
-            label: "{{ key }}".toUpperCase(),
-            data: {{ values.data | safe }},
-        backgroundColor: [
-            "rgba(255, 99, 132, 0.2)",
-            "rgba(54, 162, 235, 0.2)",
-            "rgba(255, 206, 86, 0.2)",
-            "rgba(75, 192, 192, 0.2)",
-            "rgba(153, 102, 255, 0.2)",
-            "rgba(255, 159, 64, 0.2)",
-        ],
-        borderColor: [
-            "rgba(255, 99, 132, 1)",
-            "rgba(54, 162, 235, 1)",
-            "rgba(255, 206, 86, 1)",
-            "rgba(75, 192, 192, 1)",
-            "rgba(153, 102, 255, 1)",
-            "rgba(255, 159, 64, 1)",
-        ],
-        borderWidth: 1,
-                },
-    ],
-        },
-        options: {
-        scales: {
-            y: {
-                beginAtZero: true,
-            },
-        },
-    },
-    });
-    {% endfor %}
+    window.addEventListener('DOMContentLoaded', () => { chartData = filterData(); plotCharts(chartData); })
 </script>
 {% endblock %}
