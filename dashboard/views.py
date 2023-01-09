@@ -1,9 +1,11 @@
 from datetime import datetime
+from http import HTTPStatus
 from operator import itemgetter
 from typing import Dict
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.http import FileResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -89,7 +91,7 @@ def get_filters_from_form(form):
         form_data = form.cleaned_data.copy()
         filters = {k: v for k, v in form_data.items() if bool(v)}
     else:
-        print(form.errors, "\n", dict(form.errors))
+        raise ValidationError(message=dict(form.errors))
     return filters
 
 
@@ -104,14 +106,15 @@ def get_user_role(user):
 def filter_data(request, category):
     form = FilterForm(request.POST)
     helper = HELPERS[category]()
+    try:
+        filters = get_filters_from_form(form)
+        filters.update(get_user_role(request.user))
+        filters = format_time_range(filters)
 
-    filters = get_filters_from_form(form)
-    filters.update(get_user_role(request.user))
-    filters = format_time_range(filters)
-
-    data = helper.compute_stats(filters=filters)
-    chart_data = form_chart_data(data)
-
+        data = helper.compute_stats(filters=filters)
+        chart_data = form_chart_data(data)
+    except ValidationError as e:
+        return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     return JsonResponse(chart_data)
 
 
