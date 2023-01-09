@@ -16,7 +16,7 @@ from .models import Factory, Scheme
 def camelCase_to_spaceDelimited(text: str):
     return re.sub(r"((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))", r" \1", text)
 
-
+TODAY = datetime.today().date()
 ORIGIN_COUNTRIES_template = {"": "Select a Country"}
 ORIGIN_COUNTRIES = ORIGIN_COUNTRIES_template.copy()
 ORIGIN_COUNTRIES.update({country_names[i].title(): country_names[i].title() for i in country_names})
@@ -82,6 +82,8 @@ class FilterForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         start_date, end_date, time_range = itemgetter("start_date", "end_date", "time_range")(cleaned_data)
+        if end_date is None:
+            end_date = TODAY
 
         if (start_date or end_date) and time_range:
             raise forms.ValidationError("Please fill either start/end date or time range, but not both!")
@@ -139,6 +141,7 @@ class FilterForm(forms.Form):
                 "id": "start_date",
                 "placeholder": "Select a date",
                 "type": "date",
+                "max": TODAY,
             },
         ),
     )
@@ -151,7 +154,7 @@ class FilterForm(forms.Form):
                 "id": "end_date",
                 "placeholder": "Select a date",
                 "type": "date",
-                "max": datetime.now().strftime("%Y-%m-%d"),
+                "max": TODAY,
             },
         ),
     )
@@ -176,7 +179,7 @@ class ExportReportForm(forms.Form):
             attrs={
                 "placeholder": "Select a date",
                 "type": "date",
-                "value": datetime.now().strftime("%Y-%m-%d"),
+                "value": TODAY,
             },
         )
     )
