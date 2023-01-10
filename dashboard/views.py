@@ -104,7 +104,7 @@ def get_user_role(user):
 
 
 def filter_data(request, category):
-    form = FilterForm(request.POST)
+    form = InlineQnsForm(request.POST) if category == "inline" else FilterForm(request.POST)
     helper = HELPERS[category]()
     try:
         filters = get_filters_from_form(form)
@@ -113,86 +113,13 @@ def filter_data(request, category):
 
         data = helper.compute_stats(filters=filters)
         chart_data = form_chart_data(data)
+        if category == "inline":
+            response_count, raw_chart_data = itemgetter("response_count", "data")(data)
+            chart_data = form_chart_data(raw_chart_data)
+            return JsonResponse({"chart_data": chart_data, "response_count": response_count})
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     return JsonResponse(chart_data)
-
-
-def render_data(request, template_name, helper):
-    filters = process_filters(request)
-    form = FilterForm(initial=filters)
-    context_data = {"form": form}
-
-    _filters = filters.copy()
-    if "time_range" not in filters.keys() and "start_date" not in filters.keys():
-        _filters["time_range"] = f"{get_start_date(days=30)},{TODAY}"  # set time-range/date to 30 if null
-        messages.info(request, "Showing the last 30 days of data! Use time-range filter for more data.")
-    elif "time_range" in _filters.keys():
-        _filters["time_range"] = f"{_filters['time_range']},{TODAY}"
-    elif (
-        "end_date" in filters.keys() or "start_date" in filters.keys()
-    ) and "time_range" not in filters.keys():
-        _filters["time_range"] = f"{_filters['start_date']},{_filters['end_date']}"
-
-    try:
-        _data = helper.compute_stats(filters=_filters)
-        chart_data = form_chart_data(_data)
-        if not any(bool(i) for i in _data.values()):
-            messages.error(request, "No data matches this search!")
-        elif helper.cleaned is False:
-            messages.info(
-                request, "Raw data is shown here. Refresh after a few minutes to view the processed stats."
-            )
-    except HTTPError:
-        messages.error(request, "Error fetching data!")
-        return render(request, template_name, context={"form": form})
-    context_data.update({"data": chart_data, "filter_string": urlencode(filters)})
-    return render(request, template_name, context=context_data)
-
-
-@login_required()
-def inline_question_stats(request):
-    filters = process_filters(request)
-    form = InlineQnsForm(initial=filters)
-    context_data = {"form": form}
-    chart_data = None
-    _filters = filters.copy()
-
-    if "time_range" not in filters.keys() and "start_date" not in filters.keys():
-        _filters["time_range"] = f"{get_start_date(days=30)},{TODAY}"  # set time-range/date to 30 if null
-        messages.info(request, "Showing the last 30 days of data! Use time-range filter for more data.")
-    elif "time_range" in _filters.keys():
-        _filters["time_range"] = f"{_filters['time_range']},{TODAY}"
-    elif (
-        "end_date" in filters.keys() or "start_date" in filters.keys()
-    ) and "time_range" not in filters.keys():
-        _filters["time_range"] = f"{_filters['start_date']},{_filters['end_date']}"
-
-    if request.method == "POST":
-        return redirect_to_filtered_data(
-            request,
-            url=reverse("dashboard:inline"),
-            template_name="inline.html",
-            form=InlineQnsForm(request.POST),
-        )
-    try:
-        inline_responses = Inline()
-        _data = inline_responses.compute_stats(filters=_filters)
-        response_count, _data = itemgetter("response_count", "data")(_data)
-        chart_data = form_chart_data(_data)
-        if not any(bool(i) for i in _data.values()):
-            messages.error(request, "No data matches this search!")
-    except HTTPError:
-        messages.error(request, "Error fetching data!")
-        return render(request, "inline.html", context={"form": form})
-    context_data.update(
-        {"data": chart_data, "response_count": response_count, "filter_string": urlencode(filters)}
-    )
-    if inline_responses.cleaned is False:
-        messages.info(
-            request, "Raw data is shown here. Refresh after a few minutes to view the processed stats."
-        )
-    return render(request, "inline.html", context=context_data)
 
 
 @login_required()
@@ -243,6 +170,12 @@ def app_events_stats(request):
 
 
 @login_required()
+def inline_question_stats(request):
+    form = InlineQnsForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
+    return render(request, "inline.html", {"form": form})
+
+
+@login_required()
 def preferences_stats(request):
     form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
     return render(request, "preferences.html", {"form": form})
@@ -250,29 +183,20 @@ def preferences_stats(request):
 
 @login_required()
 def messaging_question_stats(request):
-    if request.method == "POST":
-        return redirect_to_filtered_data(
-            request, url=reverse("dashboard:messaging"), template_name="messaging.html"
-        )
-    return render_data(request, template_name="messaging.html", helper=Messaging())
+    form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
+    return render(request, "messaging.html", {"form": form})
 
 
 @login_required()
 def help_contacts_stats(request):
-    if request.method == "POST":
-        return redirect_to_filtered_data(
-            request, url=reverse("dashboard:help_contacts"), template_name="help_contacts.html"
-        )
-    return render_data(request, template_name="help_contacts.html", helper=HelpContacts())
+    form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
+    return render(request, "help_contacts.html", {"form": form})
 
 
 @login_required()
 def checklists_stats(request, key):
-    if request.method == "POST":
-        return redirect_to_filtered_data(
-            request, url=reverse("dashboard:checklists", args=(key,)), template_name=f"{key}_checklists.html"
-        )
-    return render_data(request, template_name=f"{key}_checklists.html", helper=CheckLists(key=key))
+    form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
+    return render(request, f"{key}_checklists.html", {"form": form})
 
 
 @login_required()
@@ -309,7 +233,7 @@ def export_to_excel_file(request, key):
         messages.error(request, "Report not yet available!")
         if key.startswith("inlineQNs"):
             return redirect(reverse("dashboard:inline"))
-        return redirect(reverse(f"dashboard:{key}"))
+        return redirect(reverse(f"dashboard:preferences"))
 
     helper = HELPERS[key]()
     filters = process_filters(request)

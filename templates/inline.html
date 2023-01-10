@@ -15,7 +15,7 @@
             <div class="card-header d-flex align-items-center justify-content-around">
                 <span class="mr-auto p-3">
                     <h3>In-Line Questions</h3>
-                    <h5>Total Responses: {{response_count}}</h5>
+                    <h5 id="response-count">Total Responses:</h5>
                 </span>
                 <div class="dropdown">
                     <a class="btn btn-primary dropdown-toggle text-center" href="#" role="button" id="exportInline"
@@ -236,7 +236,11 @@
                     setFormErrors(data.form_errors)
                 }
                 else {
-                    return data
+                    chartData = data['chart_data']
+                    response_count = data['response_count']
+                    const responseCount = document.querySelector('#response-count')
+                    responseCount.textContent = `Total Responses: ${responseCount}`
+                    return chartData
                 }
             })
             .catch(error => {
