@@ -8,6 +8,7 @@ urlpatterns = [
     path("preferences", views.preferences_stats, name="preferences"),
     path("", views.inline_question_stats, name="inline"),
     path("messaging-questions", views.messaging_question_stats, name="messaging"),
+    path("filter-data/<str:category>", views.filter_data, name="filter_data"),
     path("help-contacts", views.help_contacts_stats, name="help_contacts"),
     path("export-report", views.export_report, name="export_report"),
     path("checklists/<str:key>", views.checklists_stats, name="checklists"),

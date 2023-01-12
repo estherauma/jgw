@@ -16,7 +16,7 @@ from .models import Factory, Scheme
 def camelCase_to_spaceDelimited(text: str):
     return re.sub(r"((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))", r" \1", text)
 
-
+TODAY = datetime.today().date()
 ORIGIN_COUNTRIES_template = {"": "Select a Country"}
 ORIGIN_COUNTRIES = ORIGIN_COUNTRIES_template.copy()
 ORIGIN_COUNTRIES.update({country_names[i].title(): country_names[i].title() for i in country_names})
@@ -72,9 +72,9 @@ class FilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
         for f in self.fields:
-            if f not in ("start_date", "end_date", "time_range"):
+            if f not in ("start_date", "end_date", "time_range", "destination", "scheme_name"):
                 self.fields[f].widget.attrs = {
-                    "onChange": mark_safe("document.getElementById('filter_form').submit();"),
+                    "onChange": mark_safe("chartData = filterData(); plotCharts(chartData);"),
                     "class": "form-select mx-2",
                     "id": f,
                 }
@@ -82,6 +82,8 @@ class FilterForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         start_date, end_date, time_range = itemgetter("start_date", "end_date", "time_range")(cleaned_data)
+        if end_date is None:
+            end_date = TODAY
 
         if (start_date or end_date) and time_range:
             raise forms.ValidationError("Please fill either start/end date or time range, but not both!")
@@ -91,9 +93,22 @@ class FilterForm(forms.Form):
 
         return cleaned_data
 
-    destination = forms.ChoiceField(choices=DEST_COUNTRIES.items(), required=False)
+    destination = forms.ChoiceField(
+        choices=DEST_COUNTRIES.items(),
+        required=False,
+        widget=forms.Select(
+            attrs={"class": "form-select mx-2", "id": "destination", "onChange": "getOriginOptions();"}
+        ),
+    )
     origin = DependentChoiceField(choices=ORIGIN_COUNTRIES.items(), required=False)
-    scheme_name = forms.ModelChoiceField(label="Scheme", required=False, queryset=Scheme.objects.all())
+    scheme_name = forms.ModelChoiceField(
+        label="Scheme",
+        required=False,
+        queryset=Scheme.objects.all(),
+        widget=forms.Select(
+            attrs={"class": "form-select mx-2", "id": "scheme_name", "onChange": "getFactoryOptions();"}
+        ),
+    )
     organisation = forms.ChoiceField(label="Organisation", choices=OPERATORS.items(), required=False)
     factory_farm = forms.ModelChoiceField(
         label="Factory/Farm", required=False, queryset=Factory.objects.all()
@@ -110,7 +125,8 @@ class FilterForm(forms.Form):
                     """
                     document.getElementById('start_date').value = '';
                     document.getElementById('end_date').value = '';
-                    document.getElementById('filter_form').submit();
+                    chartData = filterData()
+                    plotCharts(chartData)
                 """
                 ),
             }
@@ -125,6 +141,7 @@ class FilterForm(forms.Form):
                 "id": "start_date",
                 "placeholder": "Select a date",
                 "type": "date",
+                "max": TODAY,
             },
         ),
     )
@@ -137,7 +154,7 @@ class FilterForm(forms.Form):
                 "id": "end_date",
                 "placeholder": "Select a date",
                 "type": "date",
-                "value": datetime.now().strftime("%Y-%m-%d"),
+                "max": TODAY,
             },
         ),
     )
@@ -162,7 +179,7 @@ class ExportReportForm(forms.Form):
             attrs={
                 "placeholder": "Select a date",
                 "type": "date",
-                "value": datetime.now().strftime("%Y-%m-%d"),
+                "value": TODAY,
             },
         )
     )
