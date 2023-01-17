@@ -7,7 +7,7 @@ from dashboard.models import JGWCache
 
 from .retrieve_data import exclude_cols
 
-KEYS = ["locale", "origin", "destination", "organisation", "language"]
+KEYS = ["locale", "origin", "destination", "organisation", "language", "age", "gender"]
 OPERATORS = {
     "Concordia": "Seasonal  Worker Scheme - Concordia",
     "AG Recruitment": "Seasonal Worker Scheme - AG Recruitment",
@@ -26,9 +26,10 @@ def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str, fields:
     with pd.ExcelWriter(filename, mode="a", if_sheet_exists="overlay") as writer:
         startrow = 0
         for key in fields:
-            count = count_unique_series(df, key)
-            count.to_excel(writer, sheet_name=sheet_name, startcol=0, startrow=startrow)
-            startrow += count.size + 1
+            if key in df.columns:
+                count = count_unique_series(df, key)
+                count.to_excel(writer, sheet_name=sheet_name, startcol=0, startrow=startrow)
+                startrow += count.size + 1
 
 
 def count_unique_series(df: pd.DataFrame, key: str) -> pd.Series:
@@ -52,7 +53,10 @@ def get_SWS_report(start, end, category, df=None):
         return get_chapters_report(start, end)
     output_filename = f"{filenames[category]}_{start}_{end}.xlsx"
     if df is None:
-        result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
+        if category == "inlineQNs_participation":
+            result = JGWCache.objects.filter(category="inline", date_created=datetime.today().date()).first()
+        else:
+            result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
         df = pd.read_json(result.data, orient="records")
         df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
 
