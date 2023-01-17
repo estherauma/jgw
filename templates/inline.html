@@ -80,13 +80,13 @@
 
     <div class="row" id="chart-area">
         <div class="col-12">
-            <div class="card" id="age_graphcard">
-                <canvas id="_language"></canvas>
-            </div>
-            <div class="card" id="gender_graphcard">
+            <div class="card" id="origin_graphcard">
                 <canvas id="_origin"></canvas>
             </div>
-            <div class="card" id="organisation_graphcard">
+            <div class="card" id="language_graphcard">
+                <canvas id="_language"></canvas>
+            </div>
+            <div class="card" id="question_graphcard">
                 <canvas id="_question"></canvas>
             </div>
         </div>
@@ -153,8 +153,7 @@
                         options += `<option value="${k}">${v}</option>`
                     })
                     origin_input.innerHTML = options;
-                    chartData = filterData()
-                    plotCharts(chartData)
+                    filterData()
                 })
                 .catch(error => {
                     console.log(error)
@@ -196,8 +195,7 @@
                         options += `<option value="${k}">${v}</option>`
                     })
                     factoryFarm_input.innerHTML = options;
-                    chartData = filterData()
-                    plotCharts(chartData)
+                    filterData()
                 })
                 .catch(error => {
                     console.log(error)
@@ -207,8 +205,7 @@
 
     function autosubmit() {
         document.getElementById('time_range').value = '';
-        chartData = filterData()
-        plotCharts(chartData)
+        filterData()
     }
 
     function debounce(cb, delay) {
@@ -237,10 +234,10 @@
                 }
                 else {
                     chartData = data['chart_data']
-                    response_count = data['response_count']
-                    const responseCount = document.querySelector('#response-count')
-                    responseCount.textContent = `Total Responses: ${responseCount}`
-                    return chartData
+                    responseCountValue = data['response_count']
+                    const responseCountElement = document.querySelector('#response-count')
+                    responseCountElement.textContent = `Total Responses: ${responseCountValue}`
+                    plotCharts(chartData)
                 }
             })
             .catch(error => {
@@ -302,6 +299,6 @@
     start_date.addEventListener('change', debounce(autosubmit, 1000));
     window.addEventListener('DOMContentLoaded', getOriginOptions)
     window.addEventListener('DOMContentLoaded', getFactoryOptions)
-    window.addEventListener('DOMContentLoaded', () => { chartData = filterData(); plotCharts(chartData); })
+    window.addEventListener('DOMContentLoaded', filterData)
 </script>
 {% endblock %}

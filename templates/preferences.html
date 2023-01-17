@@ -140,8 +140,7 @@
                         options += `<option value="${k}">${v}</option>`
                     })
                     origin_input.innerHTML = options;
-                    chartData = filterData()
-                    plotCharts(chartData)
+                    filterData()
                 })
                 .catch(error => {
                     console.log(error)
@@ -183,8 +182,7 @@
                         options += `<option value="${k}">${v}</option>`
                     })
                     factoryFarm_input.innerHTML = options;
-                    chartData = filterData()
-                    plotCharts(chartData)
+                    filterData()
                 })
                 .catch(error => {
                     console.log(error)
@@ -194,8 +192,7 @@
 
     function autosubmit() {
         document.getElementById('time_range').value = '';
-        chartData = filterData()
-        plotCharts(chartData)
+        filterData()
     }
 
     function debounce(cb, delay) {
@@ -223,7 +220,7 @@
                     setFormErrors(data.form_errors)
                 }
                 else {
-                    return data
+                    plotCharts(data)
                 }
             })
             .catch(error => {
@@ -285,6 +282,6 @@
     start_date.addEventListener('change', debounce(autosubmit, 1000));
     window.addEventListener('DOMContentLoaded', getOriginOptions)
     window.addEventListener('DOMContentLoaded', getFactoryOptions)
-    window.addEventListener('DOMContentLoaded', () => { chartData = filterData(); plotCharts(chartData); })
+    window.addEventListener('DOMContentLoaded', filterData)
 </script>
 {% endblock %}
