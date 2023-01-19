@@ -108,6 +108,11 @@
         }
     }
 
+    function clearCharts() {
+        const canvases = document.querySelectorAll("canvas")
+        canvases.forEach(element => element.remove());
+    }
+
     function getOriginOptions() {
         const destination_input = document.querySelector('#destination')
         const url = filter_form.attributes.getNamedItem("data-origins-url").value;
@@ -207,6 +212,7 @@
         toggleElementDisplay(false, '#chart-area')
         toggleElementDisplay(true, '#loader')
         clearFormErrors()
+        clearCharts()
         fetch(url, { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
@@ -214,7 +220,11 @@
                     setFormErrors(data.form_errors)
                 }
                 else {
-                    plotCharts(data)
+                    if (Object.keys(data).length === 0) {
+                        alert('No data matches this search!')
+                    } else {
+                        plotCharts(data)
+                    }
                 }
             })
             .catch(error => {
@@ -227,7 +237,6 @@
     function plotCharts(chartData) {
         if (chartData) {
             for (const [key, values] of Object.entries(chartData)) {
-                document.getElementById("_" + key).remove()
                 graphDiv = document.getElementById(`${key}_graphcard`)
                 let canvas = document.createElement('canvas')
                 canvas.setAttribute('id', `_${key}`)
