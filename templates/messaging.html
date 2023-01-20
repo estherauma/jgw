@@ -63,6 +63,10 @@
         </div>
     </div>
 
+    <div class="row text-danger text-center" id="no-results" style="display: none;">
+        No data matches this search!
+    </div>
+
     <div class="row" id="chart-area">
         <div class="col-12">
             <div class="card" id="locale_graphcard">
@@ -211,31 +215,32 @@
         let chartData = {};
         toggleElementDisplay(false, '#chart-area')
         toggleElementDisplay(true, '#loader')
+        toggleElementDisplay(false, '#no-results')
         clearFormErrors()
-        clearCharts()
         fetch(url, { method: 'POST', body: formData })
-            .then(response => response.json())
-            .then(data => {
-                if ('form_errors' in data) {
-                    setFormErrors(data.form_errors)
+        .then(response => response.json())
+        .then(data => {
+            if ('form_errors' in data) {
+                setFormErrors(data.form_errors)
+            }
+            else {
+                if (Object.keys(data).length === 0) {
+                    toggleElementDisplay(true, '#no-results')
+                } else {
+                    plotCharts(data)
+                    toggleElementDisplay(true, '#chart-area')
                 }
-                else {
-                    if (Object.keys(data).length === 0) {
-                        alert('No data matches this search!')
-                    } else {
-                        plotCharts(data)
-                    }
-                }
-            })
-            .catch(error => {
-                console.log(error)
-            })
-        toggleElementDisplay(true, '#chart-area')
-        toggleElementDisplay(false, '#loader')
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
+        .finally(() => toggleElementDisplay(false, '#loader'))
     }
-
+    
     function plotCharts(chartData) {
         if (chartData) {
+            clearCharts()
             for (const [key, values] of Object.entries(chartData)) {
                 graphDiv = document.getElementById(`${key}_graphcard`)
                 let canvas = document.createElement('canvas')

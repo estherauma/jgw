@@ -1,5 +1,0 @@
-# Ignore everything in this directory except this file
-*
-# Temp cache files are stored here so the folder structure is needed in version control -
-# but not the files themselves.
-!.gitignore
