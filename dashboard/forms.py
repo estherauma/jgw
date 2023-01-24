@@ -74,7 +74,7 @@ class FilterForm(forms.Form):
         for f in self.fields:
             if f not in ("start_date", "end_date", "time_range", "destination", "scheme_name"):
                 self.fields[f].widget.attrs = {
-                    "onChange": mark_safe("chartData = filterData(); plotCharts(chartData);"),
+                    "onChange": mark_safe("filterData();"),
                     "class": "form-select mx-2",
                     "id": f,
                 }
@@ -82,8 +82,6 @@ class FilterForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         start_date, end_date, time_range = itemgetter("start_date", "end_date", "time_range")(cleaned_data)
-        if end_date is None:
-            end_date = TODAY
 
         if (start_date or end_date) and time_range:
             raise forms.ValidationError("Please fill either start/end date or time range, but not both!")
@@ -125,8 +123,7 @@ class FilterForm(forms.Form):
                     """
                     document.getElementById('start_date').value = '';
                     document.getElementById('end_date').value = '';
-                    chartData = filterData()
-                    plotCharts(chartData)
+                    filterData()
                 """
                 ),
             }

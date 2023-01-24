@@ -4,6 +4,7 @@ from functools import reduce
 from typing import Dict
 
 import pandas as pd
+
 from jgwpandas.settings import CACHE_DIR
 
 from .retrieve_data import demographic_cols
@@ -26,17 +27,11 @@ class BaseAnalytics:
         return _df[field].value_counts().to_dict()
 
     def get_df(self, filters: QueryMap = None):
-        _df = None
-        if self.raw_df is not None:
+        _df = pd.DataFrame()
+        if not self.raw_df.empty:
             _df = self.raw_df.copy()
             if filters is not None:
-                cachedResults_path = self.get_df_path(filters)
-                try:
-                    _df = pd.read_csv(cachedResults_path)
-                except FileNotFoundError:
-                    _df = reduce(self.filter_data, filters.items(), _df)
-                    if self.cleaned:
-                        _df.to_csv(cachedResults_path)
+                _df = reduce(self.filter_data, filters.items(), _df)
         return _df
 
     def filter_by_destination(self, destination: str, df):
@@ -68,7 +63,7 @@ class BaseAnalytics:
         return pd.DataFrame()
 
     def filter_by_timeRange(self, time_range: str, df):
-        start_date, end_date = time_range.split(',')
+        start_date, end_date = time_range.split(",")
         if start_date == "all_time":
             return df
         if "createdAt" in df.columns:

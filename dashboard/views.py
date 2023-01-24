@@ -112,11 +112,11 @@ def filter_data(request, category):
         filters = format_time_range(filters)
 
         data = helper.compute_stats(filters=filters)
-        chart_data = form_chart_data(data)
         if category == "inline":
             response_count, raw_chart_data = itemgetter("response_count", "data")(data)
             chart_data = form_chart_data(raw_chart_data)
             return JsonResponse({"chart_data": chart_data, "response_count": response_count})
+        chart_data = form_chart_data(data)
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     return JsonResponse(chart_data)
