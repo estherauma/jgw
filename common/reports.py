@@ -22,13 +22,17 @@ def get_start_date(days, format="%Y-%m-%d"):
     return target_date.strftime(format)
 
 
-def write_to_xls_sheet(df: pd.DataFrame, sheet_name: str, filename: str, fields: List = KEYS):
+def write_to_xls_sheet(
+    df: pd.DataFrame, sheet_name: str, filename: str, fields: List = KEYS
+):
     with pd.ExcelWriter(filename, mode="a", if_sheet_exists="overlay") as writer:
         startrow = 0
         for key in fields:
             if key in df.columns:
                 count = count_unique_series(df, key)
-                count.to_excel(writer, sheet_name=sheet_name, startcol=0, startrow=startrow)
+                count.to_excel(
+                    writer, sheet_name=sheet_name, startcol=0, startrow=startrow
+                )
                 startrow += count.size + 1
 
 
@@ -48,17 +52,21 @@ def get_SWS_report(start, end, category, df=None):
     if filenames.get(category) is None:
         return None
     if category == "inlineQNs_responses":
-        return get_inlineQNs_responses_report(start, end)
+        return get_inlineQNs_responses_report(start, end, df=df)
     elif category == "chapters":
         return get_chapters_report(start, end)
     output_filename = f"{filenames[category]}_{start}_{end}.xlsx"
     if df is None:
         if category == "inlineQNs_participation":
-            result = JGWCache.objects.filter(category="inline", date_created=datetime.today().date()).first()
+            result = JGWCache.objects.filter(
+                category="inline", date_created=datetime.today().date()
+            ).first()
         else:
-            result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
+            result = JGWCache.objects.filter(
+                category=category, date_created=datetime.today().date()
+            ).first()
         df = pd.read_json(result.data, orient="records")
-        df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
+    df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
 
     try:
         write_to_xls_sheet(df, sheet_name=f"{category[:8]}-All", filename=output_filename)
@@ -68,25 +76,39 @@ def get_SWS_report(start, end, category, df=None):
     for k, operator_name in OPERATORS.items():
         new_df = df.loc[df["organisation"] == operator_name]
         new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
-        write_to_xls_sheet(new_df, sheet_name=f"{category[:8]}-{k}", filename=output_filename)
+        write_to_xls_sheet(
+            new_df, sheet_name=f"{category[:8]}-{k}", filename=output_filename
+        )
     return output_filename
 
 
-def get_inlineQNs_responses_report(start, end):
+def get_inlineQNs_responses_report(start, end, df=None):
     output_filename = f"./inlineQNs_responses_{start}_{end}.xlsx"
-    result = JGWCache.objects.filter(category="inline", date_created=datetime.today().date()).first()
-    df = pd.read_json(result.data, orient="records")
+    result = JGWCache.objects.filter(
+        category="inline", date_created=datetime.today().date()
+    ).first()
+    if df is None:
+        df = pd.read_json(result.data, orient="records")
     df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
     question_cols = [i for i in df.columns if i not in exclude_cols]
     try:
-        write_to_xls_sheet(df, sheet_name="Inline-All", filename=output_filename, fields=question_cols)
+        write_to_xls_sheet(
+            df, sheet_name="Inline-All", filename=output_filename, fields=question_cols
+        )
     except FileNotFoundError:
         shutil.copy("./temp/preferences.xlsx", output_filename)
-        write_to_xls_sheet(df, sheet_name="Inline-All", filename=output_filename, fields=question_cols)
+        write_to_xls_sheet(
+            df, sheet_name="Inline-All", filename=output_filename, fields=question_cols
+        )
     for k, operator_name in OPERATORS.items():
         new_df = df.loc[df["organisation"] == operator_name]
         new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
-        write_to_xls_sheet(new_df, sheet_name=f"inline-{k}", filename=output_filename, fields=question_cols)
+        write_to_xls_sheet(
+            new_df,
+            sheet_name=f"inline-{k}",
+            filename=output_filename,
+            fields=question_cols,
+        )
     return output_filename
 
 
