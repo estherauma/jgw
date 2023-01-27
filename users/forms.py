@@ -14,7 +14,7 @@ class LoginForm(forms.Form):
         super(LoginForm, self).__init__(*args, **kwargs)
         self.fields["password"].widget = forms.PasswordInput(attrs={"autocomplete": "new-password"})
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+            self.fields[field].widget.attrs["class"] = "form-control"
 
 
 class CreateUserForm(UserCreationForm):
