@@ -150,7 +150,7 @@ class AuthTests(TestCase):
     def test_create_user_view_renders_correctly(self):
         response = self.client.get(reverse("users:create_user"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/create_user.html")
+        self.assertTemplateUsed(response, "users/sign_up.html")
         self.assertIsInstance(response.context["form"], CreateUserForm)
 
     def test_list_users_view_renders_correctly(self):
