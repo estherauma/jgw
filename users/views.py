@@ -39,7 +39,7 @@ def create_user_account(request):
             return redirect("users:login_user")
         else:
             messages.error(request, "Error validating form!")
-    return render(request, "users/create_user.html", context={"form": form})
+    return render(request, "users/sign_up.html", context={"form": form})
 
 
 def login_user(request):
@@ -58,7 +58,7 @@ def login_user(request):
                 messages.error(request, "Can not log in with provided credentials!")
         else:
             messages.error(request, "Error validating form!")
-    return render(request, "users/login.html", {"form": form})
+    return render(request, "users/sign_in.html", {"form": form})
 
 
 @login_required
