@@ -5,12 +5,20 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from users.tasks import send_email_notification
 
-from .forms import CreateUserForm, InviteUserForm, LoginForm, SetPasswordForm, UserMgtForm
+from .forms import (
+    CreateUserForm,
+    InviteUserForm,
+    LoginForm,
+    RequestPasswordResetForm,
+    SetPasswordForm,
+    UserMgtForm,
+)
 from .models import User, UserInvitations
 from .tasks import send_email_notification
 
@@ -103,6 +111,23 @@ def activate_account(request, id):
     return redirect("users:list_users")
 
 
+def generate_token(payload_data=None, days_to_expiry=1):
+    """Returns a jwt token that expires in `days_to_expiry` days
+
+    Args:
+        payload_data: any extra data apart from the exp claimset to encode in the token.
+        days_to_expiry: number of days after creation token expires.
+
+    Returns:
+        token: jwt token string encoded with settings.SECRET_KEY
+    """
+    payload = {"exp": datetime.now(tz=timezone.utc) + timedelta(days=days_to_expiry)}
+    if payload_data:
+        payload.update(payload_data)
+    token = jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
+    return token
+
+
 @login_required
 def invite_user(request):
     form = InviteUserForm()
@@ -111,11 +136,7 @@ def invite_user(request):
         if form.is_valid():
             email_address = form.cleaned_data.get("email")
             invite = form.save(commit=True)
-            payload = {
-                "exp": datetime.now(tz=timezone.utc) + timedelta(days=3),
-                "invite_id": invite.id,
-            }
-            token = jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
+            token = generate_token(payload_data={"invite_id": invite.id}, days_to_expiry=3)
             send_email_notification.delay(
                 subject="Set up your account on JGWPandas",
                 message=f"""
@@ -140,17 +161,45 @@ def handle_invite(request, token):
         invite = UserInvitations.objects.get(id=payload.get("invite_id"))
         invite.status = "ACCEPTED"
         invite.save()
-        payload = {
-            "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
-            "invite_id": invite.id,
-        }
-        token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
+        token = generate_token(payload_data={"invite_id": invite.id}, days_to_expiry=1)
         return redirect(reverse("users:set_password", args=(token,)))
     except jwt.ExpiredSignatureError:
         messages.error(request, "This link is expired!")
     except UserInvitations.DoesNotExist:
         messages.error(request, "Invitation not found!")
     return render(request, "users/handle_invite.html")
+
+
+def request_password_reset(request):
+    form = RequestPasswordResetForm()
+    if request.method == "POST":
+        form = RequestPasswordResetForm(request.POST)
+        if form.is_valid():
+            email_address = form.cleaned_data.get("email")
+            try:
+                user = User.objects.get(email=email_address)
+                token = generate_token(payload_data={"user_id": user.id}, days_to_expiry=1)
+                send_email_notification.delay(
+                    subject="Reset your password on JGWPandas",
+                    message=f"""
+                    Follow this link to reset the password for your account on JGW Pandas:
+                    \n https://jgwpandas.herokuapp.com{reverse("users:set_password", args=(token,))}
+                    \n This link expires in 1 day.
+                    """,
+                    recipients=[email_address],
+                    attachment_path=None,
+                )
+                success_text = f"""
+                    An email has been sent to {email_address}.
+                    Please check for an email from JGWPandas and click on the included link to reset your password.
+                    """
+                return render(
+                    request, template_name="users/email_sent.html", context={"success_text": success_text}
+                )
+            except User.DoesNotExist:
+                form.full_clean()
+                messages.error(request, "No user account matches this email address!")
+    return render(request, template_name="users/request_password_reset.html", context={"form": form})
 
 
 def set_password(request, token):
