@@ -60,6 +60,15 @@ class InviteUserForm(forms.ModelForm):
         return cleaned_data
 
 
+class RequestPasswordResetForm(forms.Form):
+    email = forms.EmailField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+
+
 class SetPasswordForm(forms.Form):
     """
     A form that lets a user change set their password without entering the old
