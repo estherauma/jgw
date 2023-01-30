@@ -146,7 +146,7 @@ class AuthTests(TestCase):
         new_user = User.objects.get(email="test2@test.local")
         self.assertTrue(new_user.is_active)
         self.assertRedirects(response, "/accounts/")
-    
+
     def test_create_user_view_renders_correctly(self):
         response = self.client.get(reverse("users:create_user"))
         self.assertEqual(response.status_code, 200)
@@ -223,6 +223,19 @@ class AuthTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/")
+
+    def test_request_password_reset_OK(self):
+        response = self.client.post(reverse("users:request_password_reset"), {"email": self.test_email})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/email_sent.html")
+
+    def test_request_password_reset_wrong_email(self):
+        response = self.client.post(reverse("users:request_password_reset"), {"email": "fake@email.com"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/request_password_reset.html")
+        self.assertEqual(
+            list(response.context["messages"])[0].message, "No user account matches this email address!"
+        )
 
     def test_set_password_new_account_OK(self):
         invite_data = {
