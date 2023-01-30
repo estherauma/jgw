@@ -23,7 +23,6 @@
 {% endfor %}
 {% endif %}
 
-<!-- messages -->
 <form method="POST">
   {% csrf_token %}
   <div class="mb-3">
@@ -59,10 +58,9 @@
 
 <!-- footer -->
 {% block footer %}
-  <p class="text-muted text-center">
-    <a href="{% url 'users:login_user' %}">
-      Already have an account? Log In.
-    </a>
-  </p>
-</footer>
+<p class="text-muted text-center">
+  <a href="{% url 'users:login_user' %}">
+    Already have an account? Sign In.
+  </a>
+</p>
 {% endblock footer %}
