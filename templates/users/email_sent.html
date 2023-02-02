@@ -3,6 +3,10 @@
 <!-- title -->
 {% block title %} Email Sent {% endblock title %}
 
+<!-- custom css -->
+{% block stylesheets %}
+<link rel="stylesheet" href='/static/email_sent.css' />
+{% endblock stylesheets %}
 
 <!-- page content -->
 {% block form %}
@@ -10,30 +14,6 @@
     <svg version="1.1" xmlns:x="&ns_extend;" xmlns:i="&ns_ai;" xmlns:graph="&ns_graphs;"
         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
         viewBox="0 0 98 98" style="height: 120px;" xml:space="preserve">
-        <style type="text/css">
-            .st0 {
-                fill: #FFFFFF;
-            }
-
-            .st1 {
-                fill: #1abc9c;
-            }
-
-            .st2 {
-                fill: #FFFFFF;
-                stroke: #1abc9c;
-                stroke-width: 2;
-                stroke-miterlimit: 10;
-            }
-
-            .st3 {
-                fill: none;
-                stroke: #FFFFFF;
-                stroke-width: 2;
-                stroke-linecap: round;
-                stroke-miterlimit: 10;
-            }
-        </style>
         <g i:extraneous="self">
             <circle id="XMLID_50_" class="st0" cx="49" cy="49" r="49" />
             <g id="XMLID_4_">
@@ -62,7 +42,7 @@
 
     <h3>Success !</h3>
     <p class="text-muted font-14 mt-2">{{success_text}}</p>
-    <a href="{% url 'users:login_user' %}" class="btn w-100 btn-primary waves-effect waves-light mt-3">Back to Home</a>
+    <a href="{% url 'users:login_user' %}" class="btn w-100 btn-primary waves-effect waves-light mt-3">Back to Sign In</a>
 </div>
 
 {% endblock form %}
