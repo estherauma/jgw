@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>{% block title %} {% endblock %} | JGW Data Dashboards</title>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <!-- favicon -->
+  <link rel="shortcut icon" href="/static/themes/ubold/images/favicon.ico">
+
+  <!-- custom CSS goes here -->
+  {% block stylesheets %}{% endblock stylesheets %}
+</head>
+
+<body data-layout-mode="default" data-theme="light" data-layout-width="fluid" data-topbar-color="dark"
+  data-menu-position="fixed" data-leftbar-color="light" data-leftbar-size='default' data-sidebar-user='false'>
+  <div id="wrapper">
+    {% if request.user.is_authenticated %}
+    <!-- show side bar and top menu only for logged-in users -->
+    {% include "includes/topbar.html" %}
+    {% include "includes/new_sidebar.html" %}
+    <!--  -->
+    {% endif %}
+    <div class="content-page">
+      <div class="content">
+        <!-- page content-->
+        <div class="container-fluid">
+          {% block page_title %}{% endblock page_title %}
+        </div>
+      </div>
+    </div>
+    {% if request.user.is_authenticated %}
+    <!-- show footer only for logged-in users -->
+    {% include "includes/footer.html" %}
+    <!--  -->
+    {% endif %}
+  </div>
+  <!-- vendor js -->
+  <script src="/static/themes/ubold/js/vendor.min.js"></script>
+
+  <!-- Plugins js-->
+  <script src="/static/themes/ubold/libs/jquery-sparkline/jquery.sparkline.min.js"></script>
+  <script src="/static/themes/ubold/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js"></script>
+  <script
+    src="/static/themes/ubold/libs/admin-resources/jquery.vectormap/maps/jquery-jvectormap-world-mill-en.js"></script>
+
+  <!-- Dashboard 2 init -->
+  <script src="/static/themes/ubold/js/pages/dashboard-2.init.js"></script>
+
+  <!-- App js-->
+  <script src="/static/themes/ubold/js/app.min.js"></script>
+
+  {% block scripts %}{% endblock scripts %}
+</body>
+
+</html>
