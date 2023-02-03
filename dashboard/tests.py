@@ -86,37 +86,37 @@ class DashboardTests(TestCase):
     def test_demographics_renders_correctly(self):
         url = reverse("dashboard:preferences")
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "preferences.html")
+        self.assertTemplateUsed(response, "dashboard/preferences.html")
         self.assertIsInstance(response.context["form"], FilterForm)
 
     def test_inline_qns_renders_correctly(self):
         url = reverse("dashboard:inline")
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "inline.html")
+        self.assertTemplateUsed(response, "dashboard/inline.html")
         self.assertIsInstance(response.context["form"], InlineQnsForm)
 
     def test_messaging_qns_renders_correctly(self):
         url = reverse("dashboard:messaging")
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "messaging.html")
+        self.assertTemplateUsed(response, "dashboard/messaging.html")
         self.assertIsInstance(response.context["form"], FilterForm)
 
     def test_help_contacts_renders_correctly(self):
         url = reverse("dashboard:help_contacts")
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "help_contacts.html")
+        self.assertTemplateUsed(response, "dashboard/help_contacts.html")
         self.assertIsInstance(response.context["form"], FilterForm)
 
     def test_checklists_stats_renders_correctly(self):
         url = reverse("dashboard:checklists", args=("visa",))
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "visa_checklists.html")
+        self.assertTemplateUsed(response, "dashboard/visa_checklists.html")
         self.assertIsInstance(response.context["form"], FilterForm)
 
     def test_batch_sws_report_export_renders_correctly(self):
         url = reverse("dashboard:export_report")
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "batch_export.html")
+        self.assertTemplateUsed(response, "dashboard/batch_export.html")
         self.assertIsInstance(response.context["form"], ExportReportForm)
 
     def test_batch_sws_report_export(self):

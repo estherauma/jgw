@@ -126,7 +126,7 @@ def filter_data(request, category):
 def app_events_stats(request):
     helper = AppEvents()
     context_data = {"form": AppEventsForm()}
-    template_name = "app_events.html"
+    template_name = "dashboard/app_events.html"
     filters = request.GET.dict() or {}
     if "time_range" not in filters:
         filters["time_range"] = "7 Days"
@@ -143,7 +143,7 @@ def app_events_stats(request):
         return redirect_to_filtered_data(
             request,
             url=reverse("dashboard:app_events"),
-            template_name="app_events.html",
+            template_name=template_name,
             form=AppEventsForm(request.POST),
         )
     try:
@@ -172,31 +172,31 @@ def app_events_stats(request):
 @login_required()
 def inline_question_stats(request):
     form = InlineQnsForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
-    return render(request, "inline.html", {"form": form})
+    return render(request, "dashboard/inline.html", {"form": form})
 
 
 @login_required()
 def preferences_stats(request):
     form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
-    return render(request, "preferences.html", {"form": form})
+    return render(request, "dashboard/preferences.html", {"form": form})
 
 
 @login_required()
 def messaging_question_stats(request):
     form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
-    return render(request, "messaging.html", {"form": form})
+    return render(request, "dashboard/messaging.html", {"form": form})
 
 
 @login_required()
 def help_contacts_stats(request):
     form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
-    return render(request, "help_contacts.html", {"form": form})
+    return render(request, "dashboard/help_contacts.html", {"form": form})
 
 
 @login_required()
 def checklists_stats(request, key):
     form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
-    return render(request, f"{key}_checklists.html", {"form": form})
+    return render(request, f"dashboard/{key}_checklists.html", {"form": form})
 
 
 @login_required()
@@ -258,7 +258,7 @@ def export_report(request):
             return response
         else:
             messages.error(request, "Error validating form!")
-    return render(request, "batch_export.html", context={"form": form})
+    return render(request, "dashboard/batch_export.html", context={"form": form})
 
 
 def test_sentry(request):
