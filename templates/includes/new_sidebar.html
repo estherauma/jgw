@@ -1,0 +1,78 @@
+<div class="left-side-menu">
+    <div class="h-100" data-simplebar>
+        <div class="sidebar-menu">
+            <ul class="side-menu">
+                <li>
+                    <a href="{% url 'dashboard:preferences' %}"><span class="fa fa-home mr-3"></span>Preferences</a>
+                </li>
+                <li>
+                    <a href="{% url 'dashboard:inline' %}">
+                        <span class="fa fa-question-circle mr-3"></span> Inline Questions
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'dashboard:app_events' %}">
+                        <span class="fa fa-question-circle mr-3"></span> App Events
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'dashboard:messaging' %}">
+                        <i data-feather="mail"></i> Messaging Questions
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'dashboard:help_contacts' %}">
+                        <span class="fa fa-question-circle mr-3"></span> Help Contacts
+                    </a>
+                </li>
+                <li>
+                    <a href="#sidebarChecklists" data-bs-toggle="collapse">
+                        <i data-feather="clipboard"></i>
+                        <span class="badge bg-success rounded-pill float-end">4</span>
+                        <span> Checklists </span>
+                    </a>
+                    <div class="collapse" id="sidebarChecklists">
+                        <ul class="nav-second-level">
+                            <li>
+                                <a href="{% url 'dashboard:checklists' key='beforeyougo' %}">Before-You-Go</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'dashboard:checklists' key='contract' %}">Contract</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'dashboard:checklists' key='joboffer' %}">Job-Offer</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'dashboard:checklists' key='visa' %}">Visa</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#sidebarUsers" data-bs-toggle="collapse">
+                        <i data-feather="clipboard"></i>
+                        <span class="badge bg-success rounded-pill float-end">4</span>
+                        <span> User Accounts </span>
+                    </a>
+                    <div class="collapse" id="sidebarUsers">
+                        <ul class="nav-second-level">
+                            <li>
+                                <a href="{% url 'users:invite_user' %}">Invite Users</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'users:list_users' %}">User Accounts</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="{% url 'dashboard:export_report' %}"> <span class="fa fa-users mr-3"></span> Export
+                        Report</a>
+                </li>
+            </ul>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
