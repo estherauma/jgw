@@ -1,63 +1,50 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/new_base.html" %}
 
 <!-- title -->
 {% block title %} Invite User {% endblock title %}
 
+{% block page_title %} Invite User {% endblock page_title %}
 <!-- page content -->
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <!-- messages -->
-            {% if messages %} {% for message in messages %}
-            <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
-            {% endfor %} {% endif %}
-            <div class="card-header d-flex align-items-center">
-                <h3 class="mr-auto p-3">Invite User</h3>
-            </div>
-            <div class="card-body d-flex justify-content-center align-items-center mt-2">
-                <form method="POST" class="d-flex h-75 w-50  flex-column align-items-center mt-2">
+<div class="row align-items-center justify-content-center h-100">
+    <div class="col-lg-6">
+        <div class="card mt-5">
+            <div class="card-body"><!-- messages -->
+                {% if messages %} {% for message in messages %}
+                <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
+                {% endfor %} {% endif %}
+                <form method="POST">
                     {% csrf_token %}
-                    <div class="mb-3 form-group col">
-                        <label for="email" class="col-form-label">
-                            {{form.email.label}}
-                        </label>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">{{form.email.label}}</label>
                         {{form.email}}
                         <span>{{form.email.errors}}</span>
                     </div>
-                    <div class="mb-3 form-group col">
-                        <label for="scheme" class="col-form-label">
-                            {{form.scheme.label}}
-                        </label>
+                    <div class="mb-3">
+                        <label for="scheme" class="form-label">{{form.scheme.label}}</label>
                         {{form.scheme}}
                         <span>{{form.scheme.errors}}</span>
                     </div>
-                    <div class="mb-3 form-group col">
-                        <label for="factory" class="col-form-label">
-                            {{form.factory.label}}
-                        </label>
+                    <div class="mb-3">
+                        <label for="factory" class="form-label">{{form.factory.label}}</label>
                         {{form.factory}}
                         <span>{{form.factory.errors}}</span>
                     </div>
-                    <div class="mb-3 form-group col">
-                        <label for="organisation" class="col-form-label">
-                            {{form.organisation.label}}
-                        </label>
+                    <div class="mb-3">
+                        <label for="organisation" class="form-label">{{form.organisation.label}}</label>
                         {{form.organisation}}
                         <span>{{form.organisation.errors}}</span>
                     </div>
-                    <div class="mb-3 form-group col">
-                        <label for="role" class="col-form-label">
-                            {{form.role.label}}
-                        </label>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">{{form.role.label}}</label>
                         {{form.role}}
                         <span>{{form.role.errors}}</span>
                     </div>
-                    <div class="mb-3 form-group col">
+                    <div class="mb-3">
                         {{form.non_field_errors}}
                     </div>
-                    <div class="mb-3 d-flex justify-content-center form-group col">
-                        <input class="btn btn-primary" type="submit" value="Submit" />
+                    <div class="mb-3 align-items-center justify-content-center">
+                        <button class="btn btn-primary m-auto waves-effect waves-light" type="submit">Submit</button>
                     </div>
                 </form>
             </div>
