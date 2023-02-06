@@ -1,49 +1,43 @@
-{% extends "layouts/base.html" %}
-{% block title %} Manage Account {% endblock title %}
+{% extends "layouts/new_base.html" %}
+{% block title %} Manage User Account {% endblock title %}
+
+{% block page_title %} Manage User Account {% endblock page_title %}
 {% block content %}
-<div class="justify-content-center align-items-center d-flex flex-column h-75">
-    <div class="d-flex align-items-center">
-        <h4 class="mr-auto p-3">Manage User Account</h4>
-    </div>
-    <div class="col-6">
-        <div class="card">
+<div class="row align-items-center justify-content-center h-100">
+    <div class="col-lg-6">
+        <div class="card mt-5">
             <div class="card-body">
-                <form class="d-flex flex-column align-items-center" method="POST">
+                <form>
                     {% csrf_token %}
-                    <div class="mb-3 form-group col">
-                        <label class="form-label" for="role">
-                            {{form.role.label}}
-                        </label>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">{{form.role.label}}</label>
                         {{form.role}}
                         <span>{{form.role.errors}}</span>
                     </div>
-                    <div class="mb-3 form-group col">
-                        <label class="form-label" for="is_active">
-                            {{form.is_active.label}}
-                        </label>
-                        {{form.is_active}}
-                        <span>{{form.is_active.errors}}</span>
-                    </div>
-                    <div class="mb-3 form-group col">
-                        <label class="form-label" for="scheme">
-                            {{form.scheme.label}}
-                        </label>
+                    <div class="mb-3">
+                        <label for="scheme" class="form-label">{{form.scheme.label}}</label>
                         {{form.scheme}}
                         <span>{{form.scheme.errors}}</span>
                     </div>
-                    <div class="mb-3 form-group col">
-                        <label class="form-label" for="factory">
-                            {{form.factory.label}}
-                        </label>
+                    <div class="mb-3">
+                        <label for="factory" class="form-label">{{form.factory.label}}</label>
                         {{form.factory}}
                         <span>{{form.factory.errors}}</span>
                     </div>
-                    <div class="mb-3 form-group col text-center">
-                        <input type="submit" class="btn btn-primary" value="Update" />
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{form.is_active}}
+                            <label for="is_active" class="form-check-label">{{form.is_active.label}}</label>
+                            <span>{{form.role.errors}}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3 align-items-center justify-content-center">
+                        <button type="submit" class="btn btn-primary m-auto waves-effect waves-light">Update</button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div> <!-- end card-body-->
+        </div> <!-- end card-->
     </div>
+    <!-- end col -->
 </div>
 {% endblock content %}
