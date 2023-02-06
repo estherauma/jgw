@@ -38,6 +38,7 @@ class UserMgtForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control"
             self.fields[field].required = False
+        self.fields['is_active'].widget.attrs['class'] = 'form-check-input'
 
 
 class InviteUserForm(forms.ModelForm):
