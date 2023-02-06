@@ -25,7 +25,7 @@ class CreateUserForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+            self.fields[field].widget.attrs["class"] = "form-control"
 
 
 class UserMgtForm(forms.ModelForm):
@@ -36,7 +36,7 @@ class UserMgtForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+            self.fields[field].widget.attrs["class"] = "form-control"
             self.fields[field].required = False
 
 
@@ -48,7 +48,7 @@ class InviteUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+            self.fields[field].widget.attrs["class"] = "form-control"
             self.fields["email"].label = "Email Address"
             self.fields["factory"].label = "Factory/Farm"
 
@@ -58,6 +58,15 @@ class InviteUserForm(forms.ModelForm):
         if User.objects.filter(email=email).exists():
             raise ValidationError("An account with this email address already exists!")
         return cleaned_data
+
+
+class RequestPasswordResetForm(forms.Form):
+    email = forms.EmailField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control"
 
 
 class SetPasswordForm(forms.Form):
@@ -84,7 +93,7 @@ class SetPasswordForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+            self.fields[field].widget.attrs["class"] = "form-control"
 
     def clean_confirm_password(self):
         password = self.cleaned_data.get("new_password")

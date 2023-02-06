@@ -27,7 +27,9 @@
     <span>{{form.email.errors}}</span>
   </div>
   <div class="mb-3">
-    <!-- <a href="auth-recoverpw-2.html" class="text-muted float-end"><small>Forgot your password?</small></a> -->
+    <a href="{% url 'users:request_password_reset' %}" class="text-muted float-end">
+      <small>Forgot your password?</small>
+    </a>
     <label for="password" class="form-label">{{form.password.label}}</label>
     <div class="input-group input-group-merge">
       {{form.password}}
@@ -38,16 +40,14 @@
     </div>
   </div>
   <div class="text-center d-grid">
-    <button class="btn btn-primary" type="submit">Log In</button>
+    <button class="btn btn-primary" type="submit">Sign In</button>
   </div>
 </form>
 {% endblock form %}
 {% block footer %}
-<footer class="footer footer-alt">
-  <p class="text-muted text-center">
-    <a href="{% url 'users:create_user' %}">
-      Don't have an account? Sign up for one.
-    </a>
-  </p>
-</footer>
+<p class="text-muted text-center">
+  <a href="{% url 'users:create_user' %}">
+    Don't have an account? Sign up for one.
+  </a>
+</p>
 {% endblock footer %}

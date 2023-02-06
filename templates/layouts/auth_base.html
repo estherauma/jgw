@@ -19,7 +19,8 @@
     <link href="/static/themes/ubold/css/icons.min.css" rel="stylesheet" type="text/css" />
     <!-- Head js -->
     <script src="/static/themes/ubold/js/head.js"></script>
-
+    <!-- Custom CSS goes here -->
+    {% block stylesheets %}{% endblock stylesheets %}
 </head>
 
 <body class="auth-fluid-pages pb-0">
@@ -28,8 +29,7 @@
         <!--Auth fluid left content -->
         <div class="auth-fluid-form-box">
             <div class="align-items-center d-flex h-100">
-                <div class="p-3">
-
+                <div class="p-3 w-100">
                     <!-- Logo -->
                     <div class="auth-brand text-center text-lg-start">
                         <div class="auth-logo">
@@ -47,8 +47,8 @@
                         </div>
                     </div>
 
-                    <!-- title-->
-                    <h4 class="mt-0">{% block heading %}{% endblock %}</h4>
+                    <!-- heading-->
+                    {% block heading %}{% endblock %}
 
                     <!-- form -->
                     {% block form %} {% endblock %}
@@ -59,12 +59,9 @@
                         {% block footer %}{% endblock %}
                     </footer>
 
-
-
                 </div> <!-- end .card-body -->
             </div> <!-- end .align-items-center.d-flex.h-100-->
-        </div>
-        <!-- end auth-fluid-form-box-->
+        </div> <!-- end auth-fluid-form-box-->
 
         <!-- Auth fluid right content -->
         <div class="auth-fluid-right text-center">
