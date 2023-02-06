@@ -10,7 +10,14 @@
 
   <!-- favicon -->
   <link rel="shortcut icon" href="/static/themes/ubold/images/favicon.ico">
-
+  <!-- Bootstrap css -->
+  <link href="/static/themes/ubold/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+  <!-- App css -->
+  <link href="/static/themes/ubold/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
+  <!-- icons -->
+  <link href="/static/themes/ubold/css/icons.min.css" rel="stylesheet" type="text/css" />
+  <!-- Head js -->
+  <script src="/static/themes/ubold/js/head.js"></script>
   <!-- custom CSS goes here -->
   {% block stylesheets %}{% endblock stylesheets %}
 </head>
@@ -28,7 +35,10 @@
       <div class="content">
         <!-- page content-->
         <div class="container-fluid">
-          {% block page_title %}{% endblock page_title %}
+          <h4 class="page-title mt-4">
+            {% block page_title %}{% endblock page_title %}
+          </h4>
+          {% block content %}{% endblock content %}
         </div>
       </div>
     </div>
@@ -43,9 +53,8 @@
 
   <!-- Plugins js-->
   <script src="/static/themes/ubold/libs/jquery-sparkline/jquery.sparkline.min.js"></script>
-  <script src="/static/themes/ubold/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js"></script>
-  <script
-    src="/static/themes/ubold/libs/admin-resources/jquery.vectormap/maps/jquery-jvectormap-world-mill-en.js"></script>
+  <!-- <script src="/static/themes/ubold/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js"></script> -->
+  <!-- <script src="/static/themes/ubold/libs/admin-resources/jquery.vectormap/maps/jquery-jvectormap-world-mill-en.js"></script> -->
 
   <!-- Dashboard 2 init -->
   <script src="/static/themes/ubold/js/pages/dashboard-2.init.js"></script>
