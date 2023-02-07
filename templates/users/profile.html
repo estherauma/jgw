@@ -14,10 +14,10 @@
                     alt="profile-image">
 
                 <h4 class="mb-2">{{user.first_name | title }} {{user.last_name | title }}</h4>
-                <button type="button" class="btn btn-danger btn-xs waves-effect mb-2 waves-light">
+                <a role="button" class="btn btn-danger btn-xs waves-effect mb-2 waves-light"
+                    href="{% url 'users:request_password_reset%}">
                     Reset Password
-                </button>
-
+                </a
                 <div class="text-center mt-3">
                     <h4 class="font-13 text-uppercase">Account Details</h4>
                     <p class="text-muted mb-2 font-13">
