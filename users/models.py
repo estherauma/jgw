@@ -38,6 +38,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     ROLE = models.TextChoices("Role", " ".join(ROLES))
 
     password = models.CharField(blank=True, max_length=128)
+    first_name = models.CharField(blank=False, null=False, max_length=128)
+    last_name = models.CharField(blank=False, null=False, max_length=128)
     role = models.CharField(blank=False, null=True, choices=ROLE.choices, max_length=16)
     scheme = models.ForeignKey(to="dashboard.Scheme", on_delete=models.DO_NOTHING, null=True, max_length=16)
     factory = models.ForeignKey(to="dashboard.Factory", on_delete=models.DO_NOTHING, null=True, max_length=16)
