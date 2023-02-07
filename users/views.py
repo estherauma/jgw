@@ -232,3 +232,7 @@ def set_password(request, token):
     except User.DoesNotExist:
         messages.error(request, "User account not found!")
     return render(request, "users/set_password.html", {"form": form})
+
+@login_required
+def profile(request):
+    return render(request, template_name="users/profile.html")
