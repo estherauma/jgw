@@ -171,6 +171,7 @@ def handle_invite(request, token):
 
 
 def request_password_reset(request):
+    logout(request)
     form = RequestPasswordResetForm()
     if request.method == "POST":
         form = RequestPasswordResetForm(request.POST)
@@ -232,6 +233,7 @@ def set_password(request, token):
     except User.DoesNotExist:
         messages.error(request, "User account not found!")
     return render(request, "users/set_password.html", {"form": form})
+
 
 @login_required
 def profile(request):
