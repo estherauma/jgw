@@ -38,7 +38,7 @@ class UserMgtForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control"
             self.fields[field].required = False
-        self.fields['is_active'].widget.attrs['class'] = 'form-check-input'
+        self.fields["is_active"].widget.attrs["class"] = "form-check-input"
 
 
 class InviteUserForm(forms.ModelForm):
@@ -50,8 +50,8 @@ class InviteUserForm(forms.ModelForm):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control"
-            self.fields["email"].label = "Email Address"
-            self.fields["factory"].label = "Factory/Farm"
+        self.fields["email"].label = "Email Address"
+        self.fields["factory"].label = "Factory/Farm"
 
     def clean(self):
         cleaned_data = super().clean()
@@ -107,3 +107,14 @@ class SetPasswordForm(forms.Form):
                 )
         password_validation.validate_password(confirm_password)
         return confirm_password
+
+
+class ChangeEmailForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(forms.Form, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control"
+
+    new_email = forms.EmailField(
+        required=True, widget=forms.EmailInput(attrs={"placeholder": "New Email Address"})
+    )
