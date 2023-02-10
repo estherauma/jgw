@@ -14,23 +14,28 @@
                     alt="profile-image">
 
                 <h4 class="mb-2">{{user.first_name | title }} {{user.last_name | title }}</h4>
+                <a role="button" class="btn btn-success btn-xs waves-effect mb-2 waves-light"
+                    href="{% url 'users:change_email' %}">
+                    Change Email
+                </a>
+
                 <a role="button" class="btn btn-danger btn-xs waves-effect mb-2 waves-light"
-                    href="{% url 'users:request_password_reset%}">
+                    href="{% url 'users:request_password_reset' %}">
                     Reset Password
-                </a
+                </a>
                 <div class="text-center mt-3">
                     <h4 class="font-13 text-uppercase">Account Details</h4>
                     <p class="text-muted mb-2 font-13">
                         <strong>Email:</strong><span class="ms-2">{{user.email}}</span>
                     </p>
                     <p class="text-muted mb-1 font-13">
-                        <strong>Organisation:</strong><span class="ms-2">{{user.organisation | default:'N/A'}}</span>
+                        <strong>Role:</strong><span class="ms-2">{{user.role}}</span>
                     </p>
                     <p class="text-muted mb-1 font-13">
                         <strong>Factory/Farm:</strong><span class="ms-2">{{user.factory.name | default:'N/A'}}</span>
                     </p>
                     <p class="text-muted mb-1 font-13">
-                        <strong>Role:</strong><span class="ms-2">{{user.role}}</span>
+                        <strong>Organisation:</strong><span class="ms-2">{{user.organisation | default:'N/A'}}</span>
                     </p>
                 </div>
             </div>
