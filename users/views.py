@@ -5,13 +5,13 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import NON_FIELD_ERRORS
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from users.tasks import send_email_notification
 
 from .forms import (
+    ChangeEmailForm,
     CreateUserForm,
     InviteUserForm,
     LoginForm,
@@ -141,7 +141,7 @@ def invite_user(request):
                 subject="Set up your account on JGWPandas",
                 message=f"""
                 Please follow this link to set up your new account on JGW Pandas:
-                https://jgwpandas.herokuapp.com{reverse("users:handle_invite", args=(token,))}
+                https://jgwpandas.herokuapp.com{reverse("users:verify_invite", args=(token,))}
                 \nPlease note that this link expires in 3 days.
                 """,
                 recipients=[email_address],
@@ -154,7 +154,7 @@ def invite_user(request):
     return render(request, "users/invite_user.html", context={"form": form})
 
 
-def handle_invite(request, token):
+def verify_invite(request, token):
     logout(request)
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
@@ -168,6 +168,11 @@ def handle_invite(request, token):
     except UserInvitations.DoesNotExist:
         messages.error(request, "Invitation not found!")
     return render(request, "users/handle_invite.html")
+
+
+@login_required
+def profile(request):
+    return render(request, template_name="users/profile.html")
 
 
 def request_password_reset(request):
@@ -209,6 +214,9 @@ def set_password(request, token):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         user_id, invite_id = payload.get("user_id"), payload.get("invite_id")
+        if user_id is None and invite_id is None:
+            messages.error(request, "Invalid token!")
+            return redirect("users:login_user")
         if request.method == "POST":
             form = SetPasswordForm(request.POST)
             if form.is_valid():
@@ -223,8 +231,6 @@ def set_password(request, token):
                     ).get(id=invite_id)
                     invite["scheme_id"], invite["factory_id"] = invite.pop("scheme"), invite.pop("factory")
                     User.objects.create_user(**invite, password=password, is_active=True)
-                else:
-                    messages.error(request, "Invalid token!")
                 return redirect("users:login_user")
             else:
                 messages.error(request, "Error validating form!")
@@ -236,5 +242,59 @@ def set_password(request, token):
 
 
 @login_required
-def profile(request):
-    return render(request, template_name="users/profile.html")
+def change_email_address(request):
+    user = request.user
+    old_email = user.email
+    form = ChangeEmailForm()
+    if request.method == "POST":
+        logout(request)
+        form = ChangeEmailForm(request.POST)
+        if form.is_valid():
+            new_email = form.cleaned_data.get("new_email")
+            if new_email == old_email:
+                messages.error(request, "New email must be different from current email!")
+            elif User.objects.filter(email=new_email):
+                messages.error(request, "A user with this email address already exists!")
+            else:
+                token = generate_token(
+                    payload_data={"user_id": user.id, "new_email": new_email}, days_to_expiry=1
+                )
+                send_email_notification.delay(
+                    subject="Verify your email",
+                    message=f"""
+                    \n Click this link to verify this email for your account on JGW Pandas:
+                    \n https://jgwpandas.herokuapp.com{reverse("users:verify_email", args=(token,))}
+                    \n This link expires in 1 day.
+                    \n Reach out to your administrator if you didn't initiate this action.
+                    """,
+                    recipients=[new_email],
+                    attachment_path=None,
+                )
+                success_text = f"""
+                    An email has been sent to {new_email}.
+                    Please check for an email from JGWPandas and click on the included link to verify the change in email address.
+                    """
+                return render(
+                    request, template_name="users/email_sent.html", context={"success_text": success_text}
+                )
+        else:
+            messages.error(request, "Error validating form!")
+    return render(request, template_name="users/change_email.html", context={"form": form})
+
+
+def verify_email_change(request, token):
+    logout(request)
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        user_id, new_email = payload.get("user_id"), payload.get("new_email")
+        if user_id and new_email:
+            user = User.objects.get(id=user_id)
+            user.email = new_email
+            user.save()
+        else:
+            messages.error(request, "Invalid token!")
+    except jwt.ExpiredSignatureError:
+        messages.error(request, "This link is expired!")
+    except User.DoesNotExist:
+        messages.error(request, "User account not found!")
+    return redirect("users:login_user")
