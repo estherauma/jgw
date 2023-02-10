@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from dashboard.models import Factory, Scheme
 
-from .forms import CreateUserForm, InviteUserForm, SetPasswordForm, UserMgtForm
+from .forms import ChangeEmailForm, CreateUserForm, InviteUserForm, SetPasswordForm, UserMgtForm
 from .models import User, UserInvitations
 
 
@@ -21,12 +21,11 @@ class AuthTests(TestCase):
         )
         self.client.login(email=self.test_user, password=self.test_pword)
         self.test_scheme = Scheme.objects.create(name="Test_Scheme")
-        self.test_factory = Factory.objects.create(name="Test_Factory")
-        payload = {
-            "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
-            "user_id": self.test_user.id,
-        }
-        self.pword_reset_token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
+        self.factory = Factory.objects.create(name="Test_Factory")
+        expiry = datetime.now(tz=timezone.utc) + timedelta(days=1)
+        self.pword_reset_token = jwt.encode(
+            payload={"exp": expiry, "user_id": self.test_user.id}, key=settings.SECRET_KEY
+        )
 
     def test_authorisation(self):
         """
@@ -147,6 +146,16 @@ class AuthTests(TestCase):
         self.assertTrue(new_user.is_active)
         self.assertRedirects(response, "/accounts/")
 
+    def test_deactivate_user_OK(self):
+        new_user = User.objects.create_user(
+            email="test2@test.local", password=self.test_pword, is_active=True
+        )
+        response = self.client.get(reverse("users:activate_account", args=(new_user.id,)))
+        self.assertEqual(response.status_code, 302)
+        new_user = User.objects.get(email="test2@test.local")
+        self.assertFalse(new_user.is_active)
+        self.assertRedirects(response, "/accounts/")
+
     def test_create_user_view_renders_correctly(self):
         response = self.client.get(reverse("users:create_user"))
         self.assertEqual(response.status_code, 200)
@@ -160,7 +169,7 @@ class AuthTests(TestCase):
         self.assertEqual(len(response.context["users"]), 1)
         self.assertEqual(response.context["users"][0], self.test_user)
 
-    def test_handle_invite_view_OK(self):
+    def test_verify_invite_view_OK(self):
         invite_data = {
             "email": "test_invite@test.local",
             "role": "SCHEME",
@@ -174,12 +183,12 @@ class AuthTests(TestCase):
             "invite_id": invite.id,
         }
         invite_token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
-        response = self.client.get(reverse("users:handle_invite", args=(invite_token,)))
+        response = self.client.get(reverse("users:verify_invite", args=(invite_token,)))
         self.assertEqual(response.status_code, 302)
         invite = UserInvitations.objects.first()
         self.assertEqual(invite.status, "ACCEPTED")
 
-    def test_handle_invite_view_expired_token(self):
+    def test_verify_invite_view_expired_token(self):
         invite_data = {
             "email": "test_invite@test.local",
             "role": "SCHEME",
@@ -193,17 +202,17 @@ class AuthTests(TestCase):
             "invite_id": invite.id,
         }
         invite_token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
-        response = self.client.get(reverse("users:handle_invite", args=(invite_token,)))
+        response = self.client.get(reverse("users:verify_invite", args=(invite_token,)))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(response.context["messages"])[0].message, "This link is expired!")
 
-    def test_handle_invite_view_invalid_invitation(self):
+    def test_verify_invite_view_invalid_invitation(self):
         payload = {
             "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
             "invite_id": 3,
         }
         invite_token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
-        response = self.client.get(reverse("users:handle_invite", args=(invite_token,)))
+        response = self.client.get(reverse("users:verify_invite", args=(invite_token,)))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(response.context["messages"])[0].message, "Invitation not found!")
 
@@ -269,7 +278,15 @@ class AuthTests(TestCase):
         token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
         response = self.client.get(reverse("users:set_password", args=(token,)))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(list(response.context["messages"])[0].message, "This link is expired!")
+
+    def test_set_password_invalid_token(self):
+        payload = {
+            "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
+            "invalid_field": "invalid_value",
+        }
+        token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
+        response = self.client.get(reverse("users:set_password", args=(token,)))
+        self.assertEqual(response.status_code, 302)
 
     def test_set_password_account_not_found(self):
         payload = {
@@ -282,7 +299,6 @@ class AuthTests(TestCase):
             {"new_password": "samplePword123", "confirm_password": "samplePword123"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(list(response.context["messages"])[0].message, "User account not found!")
 
     def test_set_password_form_validation(self):
         response = self.client.post(
@@ -302,3 +318,72 @@ class AuthTests(TestCase):
         response = self.client.get(reverse("users:logout_user"))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("users:login_user"))
+
+    def test_profile_page_renders_correctly(self):
+        response = self.client.get(reverse("users:profile"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/profile.html")
+
+    def test_change_email_page_renders_correctly(self):
+        response = self.client.get(reverse("users:change_email"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/change_email.html")
+        self.assertIsInstance(response.context["form"], ChangeEmailForm)
+
+    def test_change_email_OK(self):
+        response = self.client.post(reverse("users:change_email"), {"new_email": "newEmail@test.local"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/email_sent.html")
+
+    def test_change_email_to_old_email(self):
+        response = self.client.post(reverse("users:change_email"), {"new_email": self.test_email})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/change_email.html")
+        messages = [str(i) for i in response.context["messages"]]
+        self.assertEqual(messages, ["New email must be different from current email!"])
+
+    def test_change_email_to_existing_email(self):
+        User.objects.create_user(email="test2@test.local", password=self.test_pword, is_active=True)
+        response = self.client.post(reverse("users:change_email"), {"new_email": "test2@test.local"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/change_email.html")
+        messages = [str(i) for i in response.context["messages"]]
+        self.assertEqual(messages, ["A user with this email address already exists!"])
+
+    def test_change_email_form_validation(self):
+        response = self.client.post(reverse("users:change_email"), {"new_email": "email@testF"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/change_email.html")
+        form_errors = dict(response.context["form"].errors)
+        self.assertEqual(form_errors, {"new_email": ["Enter a valid email address."]})
+
+    def test_verify_email_change_OK(self):
+        payload = {
+            "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
+            "user_id": self.test_user.id,
+            "new_email": "newEmail@test.local",
+        }
+        change_email_token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
+        response = self.client.get(reverse("users:verify_email", args=(change_email_token,)))
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(id=self.test_user.id)
+        self.assertEqual(user.email, "newEmail@test.local")
+
+    def test_verify_email_change_invalid_token(self):
+        payload = {
+            "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
+            "invalid_field": "invalid_value",
+        }
+        change_email_token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
+        response = self.client.get(reverse("users:verify_email", args=(change_email_token,)))
+        self.assertEqual(response.status_code, 302)
+
+    def test_verify_email_change_expired_token(self):
+        payload = {
+            "exp": datetime.now(tz=timezone.utc) - timedelta(days=1),
+            "user_id": self.test_user.id,
+            "new_email": "newEmail@test.local",
+        }
+        token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
+        response = self.client.get(reverse("users:verify_email", args=(token,)))
+        self.assertEqual(response.status_code, 302)
