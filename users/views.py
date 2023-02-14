@@ -26,8 +26,13 @@ from .tasks import send_email_notification
 @login_required
 def list_users(request):
     users = User.objects.all()
+    return render(request, "users/list_users.html", context={"users": users})
+
+
+@login_required
+def list_invitations(request):
     invitations = UserInvitations.objects.all()
-    return render(request, "users/list_users.html", context={"users": users, "invitations": invitations})
+    return render(request, template_name="users/list_invitations.html", context={"invitations": invitations})
 
 
 @login_required

@@ -58,16 +58,16 @@
                 <li>
                     <a href="#sidebarUsers" data-bs-toggle="collapse">
                         <i data-feather="users"></i>
-                        <span> User Accounts </span>
+                        <span>Users</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <div class="collapse" id="sidebarUsers">
                         <ul class="nav-second-level">
                             <li>
-                                <a href="{% url 'users:invite_user' %}">Invite Users</a>
+                                <a href="{% url 'users:list_users' %}">Accounts</a>
                             </li>
                             <li>
-                                <a href="{% url 'users:list_users' %}">User Accounts</a>
+                            <a href="{% url 'users:list_invitations' %}">Invitations</a>
                             </li>
                         </ul>
                     </div>
