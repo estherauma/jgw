@@ -37,7 +37,7 @@ class AuthTests(TestCase):
         self.assertRedirects(response, "/accounts/login/?next=/preferences")
         response = self.client.get(reverse("dashboard:inline"))
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, "/accounts/login/?next=/")
+        self.assertRedirects(response, "/accounts/login/?next=/inline")
 
     def test_signup_OK(self):
         response = self.client.post(
