@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Home | JGW Dashboard</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- favicon -->
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <!-- Bootstrap css -->
+    <link href="/static/themes/ubold/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- App css -->
+    <link href="/static/themes/ubold/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
+    <!-- icons -->
+    <link href="/static/themes/ubold/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <!-- Head js -->
+    <script src="/static/themes/ubold/js/head.js"></script>
+</head>
+
+<body>
+    <div class="mt-5 mb-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-11">
+                    <div class="text-center">
+                        <h2 class="page-title mt-5">Home</h2>
+                        <img src="/static/logo.jpeg" alt="50Eight logo" height="100" width="300">
+
+                        <div class="row mt-5">
+                            <div class="col-md-4">
+                                <div class="text-center mt-3 ps-1 pe-1">
+                                    <a href="{% url 'dashboard:preferences' %}">
+                                        <div class="avatar-md rounded-circle bg-soft-light mx-auto">
+                                            <i data-feather="file-text" class="file-text font-22 avatar-title"></i>
+                                        </div>
+                                        <h5 class="text-uppercase mt-3 ">Explore Data</h5>
+                                    </a>
+                                    <p class="text-50">
+                                        View and filter trends on different data points we track such as user
+                                        demographics and more.
+                                    </p>
+                                </div>
+                            </div> <!-- end col-->
+                            <div class="col-md-4">
+                                <div class="text-center mt-3 ps-1 pe-1">
+                                    <a href="{% url 'dashboard:export_report' %}">
+                                        <div class="avatar-md rounded-circle bg-soft-light mx-auto">
+                                            <i data-feather="download-cloud"
+                                                class="download-cloud font-22 avatar-title"></i>
+                                        </div>
+                                        <h5 class="text-uppercase mt-3 ">Export Reports</h5>
+                                    </a>
+                                    <p class="text-50">
+                                        Filter to create the report you need and download to an excel spreasheet.
+                                    </p>
+                                </div>
+                            </div> <!-- end col-->
+                            <div class="col-md-4">
+                                <div class="text-center mt-3 ps-1 pe-1">
+                                    <a href="{% url 'users:list_users' %}">
+                                        <div class="avatar-md rounded-circle bg-soft-light mx-auto">
+                                            <i data-feather="sliders" class="sliders font-22 avatar-title"></i>
+                                        </div>
+                                        <h5 class="text-uppercase mt-3 ">Accounts and Settings</h5>
+                                    </a>
+                                    <p class="text-50">View and update account details. </p>
+                                </div>
+                            </div> <!-- end col-->
+                        </div> <!-- end row-->
+                    </div> <!-- end /.text-center-->
+                </div> <!-- end col -->
+            </div>
+            <!-- end row -->
+        </div>
+    </div>
+    <footer class='footer' style="left: 0;">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    &copy;
+                    <script>document.write(new Date().getFullYear())</script>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-md-end footer-links d-none d-sm-block">
+                        <a href="">About Us</a>
+                        <a href="">Help</a>
+                        <a href="">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- App js -->
+    <script src="/static/themes/ubold/js/vendor.min.js"></script>
+    <script src="/static/themes/ubold/js/app.min.js"></script>
+</body>
+
+</html>

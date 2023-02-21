@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>{% block title %} {% endblock %} | JGW Data Dashboards</title>
+  <title>{% block title %} {% endblock %} | JGW Dashboard</title>
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -27,9 +27,8 @@
   <div id="wrapper">
     {% if request.user.is_authenticated %}
     <!-- show side bar and top menu only for logged-in users -->
-    {% include "includes/topbar.html" %}
-    {% include "includes/new_sidebar.html" %}
-    <!--  -->
+    {% block side_and_top_bar %}{% endblock side_and_top_bar %}
+      <!--  -->
     {% endif %}
     <div class="content-page">
       <div class="content">

@@ -20,8 +20,15 @@ from common.messaging import Messaging
 from common.preferences import Preferences
 from common.reports import get_start_date, get_SWS_report
 
-from .forms import (FACTORIES, AppEventsForm, ExportReportForm, FilterForm,
-                    InlineQnsForm, ORIGIN_COUNTRIES_template, get_start_date)
+from .forms import (
+    FACTORIES,
+    AppEventsForm,
+    ExportReportForm,
+    FilterForm,
+    InlineQnsForm,
+    ORIGIN_COUNTRIES_template,
+    get_start_date,
+)
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
 HELPERS = {
@@ -120,6 +127,11 @@ def filter_data(request, category):
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     return JsonResponse(chart_data)
+
+
+@login_required()
+def home(request):
+    return render(request, template_name="dashboard/home_page.html")
 
 
 @login_required()
