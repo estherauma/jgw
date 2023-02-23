@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 from google.cloud import bigquery
 
 from common.base import BaseAnalytics
-from common.retrieve_data import JGWApi
 from common.reports import get_start_date
+from common.retrieve_data import JGWApi
 
 api = JGWApi()
 client = bigquery.Client()
@@ -84,8 +84,14 @@ class AppEvents(BaseAnalytics):
         if "Mark as conversion" in chapters_df.columns:
             chapters_df = chapters_df.drop(columns=["Mark as conversion"])
 
+        chapter_feedback, clean = api.get_data(key="chapter_feedback")
+        chapter_feedback_df = pd.DataFrame.from_records(chapter_feedback)
+        chapter_feedback_df = chapter_feedback_df.rename(
+            columns={{i.replace("ChapterOpened_", ""): v for i, v in event_to_title.items()}}
+        )
+
         installs = client.query(installs_query).to_dataframe()
-        return {"chapters": chapters_df, "total_installs": installs}
+        return {"chapters": chapters_df, "chapters_feedback": chapter_feedback_df, "total_installs": installs}
 
     def replace_chapter_names(self, df) -> pd.DataFrame:
         if "Event Name" in df.columns:

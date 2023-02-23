@@ -7,13 +7,11 @@ from datetime import datetime
 from functools import reduce
 from typing import Dict, List, Tuple
 
-import pandas as pd
 import requests
 from langcodes import Language, LanguageTagError
 from pytz import country_names
 
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
-from jgwpandas.settings import CACHE_DIR
 
 data_categories = [
     "preferences",
@@ -24,6 +22,7 @@ data_categories = [
     "visa",
     "joboffer",
     "beforeyougo",
+    "chapter_feedback",
 ]
 URLS = {
     "preferences": "/preferences",
@@ -34,8 +33,8 @@ URLS = {
     "contract": "/contract-checklists",
     "visa": "/visa-checklists",
     "joboffer": "/joboffer-checklists",
+    "chapter_feedback": "/chapter-feedback",
 }
-CACHE_FILENAMES = {k: os.path.join(CACHE_DIR, f"{k}.csv") for k in data_categories}
 vk_country_names = {v.lower(): k for k, v in country_names.items()}
 vk_country_names.update({"republic of kosovo": "XK"})
 unwanted_cols = ["", "deviceId", "undefined", "__v", "_id"]
@@ -69,12 +68,11 @@ class JGWApi:
         """
         `key` is one of:
         `preferences, inline, messaging, help_contacts,
-        visa, contract, joboffer, beforeyougo, app_events`
+        visa, contract, joboffer, beforeyougo, app_events, chapter_feedback`
         """
         from dashboard.tasks import clean_data as schedule_clean_data
 
-        data = None
-        clean = False
+        data, clean = None, False
         if key not in data_categories:
             return data, clean
         result = JGWCache.objects.filter(category=key, date_created=datetime.today().date()).first()
@@ -101,15 +99,6 @@ class JGWApi:
         df = self.normalise_age_bands(df)
         df = self.standardise_locations(df)
         return df
-
-    def write_data_to_file(self, data: list, filename: str):
-        df = pd.DataFrame.from_records(data)
-        df.to_csv(filename, index=False)
-
-    def get_data_from_file(self, filename) -> Dict:
-        df = pd.read_csv(filename)
-        data = df.to_dict(orient="records")
-        return data
 
     def standardise_language_names(self, df):
         def get_language_name(entry):
