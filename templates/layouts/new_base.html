@@ -32,6 +32,9 @@
     {% endif %}
     <div class="content-page">
       <div class="content">
+        {% if messages %} {% for message in messages %}
+            <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
+        {% endfor %} {% endif %}
         <!-- page content-->
         <div class="container-fluid">
           <h4 class="page-title mt-4">
