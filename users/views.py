@@ -20,7 +20,6 @@ from .forms import (
     UserMgtForm,
 )
 from .models import User, UserInvitations
-from .tasks import send_email_notification
 
 
 @login_required
