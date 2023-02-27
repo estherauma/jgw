@@ -17,10 +17,11 @@ class DashboardTests(TestCase):
     def setUp(self):
         super(DashboardTests, self).setUp()
         email, pword = "test@test.local", "12t32thome"
-        with open("./temp/preferences_test_data.json") as seed_file:
-            JGWCache.objects.create(
-                category="preferences", is_cleaned=True, data=json.dumps(json.load(seed_file))
-            )
+        for category in ["preferences", "inline"]:
+            with open(f"./temp/{category}_test_data.json") as seed_file:
+                JGWCache.objects.create(
+                    category=category, is_cleaned=True, data=json.dumps(json.load(seed_file))
+                )
         _ = (Scheme.objects.create(name=f"testScheme_{i}") for i in (1, 2))
         _ = (Factory.objects.create(name=f"testFactory_{i}", scheme_id=i) for i in (1, 2))
         self.test_user = User.objects.create_user(email=email, password=pword, is_active=True)
