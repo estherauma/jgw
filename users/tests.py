@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from unittest.mock import patch
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
@@ -91,7 +92,8 @@ class AuthTests(TestCase):
         self.assertTemplateUsed(response, "users/invite_user.html")
         self.assertIsInstance(response.context["form"], InviteUserForm)
 
-    def test_invite_user_OK(self):
+    @patch('users.tasks.send_email_notification.delay')
+    def test_invite_user_OK(self, mock_send_email):
         response = self.client.post(
             reverse("users:invite_user"),
             {
@@ -138,7 +140,8 @@ class AuthTests(TestCase):
         new_user = User.objects.get(email="test2@test.local")
         self.assertTrue(new_user.is_active)
 
-    def test_activate_user_OK(self):
+    @patch('users.tasks.send_email_notification.delay')
+    def test_activate_user_OK(self, mock_send_email):
         new_user = User.objects.create_user(email="test2@test.local", password=self.test_pword)
         response = self.client.get(reverse("users:activate_account", args=(new_user.id,)))
         self.assertEqual(response.status_code, 302)
@@ -146,7 +149,8 @@ class AuthTests(TestCase):
         self.assertTrue(new_user.is_active)
         self.assertRedirects(response, "/accounts/")
 
-    def test_deactivate_user_OK(self):
+    @patch('users.tasks.send_email_notification.delay')
+    def test_deactivate_user_OK(self, mock_send_email):
         new_user = User.objects.create_user(
             email="test2@test.local", password=self.test_pword, is_active=True
         )
@@ -233,7 +237,8 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/")
 
-    def test_request_password_reset_OK(self):
+    @patch('users.tasks.send_email_notification.delay')
+    def test_request_password_reset_OK(self, mock_send_email):
         response = self.client.post(reverse("users:request_password_reset"), {"email": self.test_email})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/email_sent.html")
@@ -330,7 +335,8 @@ class AuthTests(TestCase):
         self.assertTemplateUsed(response, "users/change_email.html")
         self.assertIsInstance(response.context["form"], ChangeEmailForm)
 
-    def test_change_email_OK(self):
+    @patch('users.tasks.send_email_notification.delay')
+    def test_change_email_OK(self, mock_send_email):
         response = self.client.post(reverse("users:change_email"), {"new_email": "newEmail@test.local"})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/email_sent.html")

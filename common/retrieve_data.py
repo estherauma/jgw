@@ -9,10 +9,11 @@ from typing import Dict, List, Tuple
 
 import pandas as pd
 import requests
-from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
-from jgwpandas.settings import CACHE_DIR
 from langcodes import Language, LanguageTagError
 from pytz import country_names
+
+from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
+from jgwpandas.settings import CACHE_DIR
 
 data_categories = [
     "preferences",
@@ -51,6 +52,7 @@ demographic_cols = [
     "updatedAt",
 ]
 exclude_cols = [*unwanted_cols, *demographic_cols]
+
 
 class JGWApi:
     def __init__(self) -> None:
