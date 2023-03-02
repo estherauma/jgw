@@ -167,10 +167,9 @@ def app_events_stats(request):
             return render(request, template_name, context=context_data)
         context_data["total_installs"] = _data["total_installs"]
         chart_data = form_chart_data(
-            {"chapters": _data["chapters"], "chapters_feedback": _data["chapters_feedback"]}
+            {"chapters": _data["chapters"], "chapter_feedback": _data["chapter_feedback"]}
         )
         chart_data["chapters"]["data"] = reformat_grouped_data(chart_data["chapters"]["data"])
-        chart_data["chapters"]["data"] = reformat_grouped_data(chart_data["chapters_feedback"]["data"])
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, template_name, context=context_data)
