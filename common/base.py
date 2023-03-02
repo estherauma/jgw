@@ -16,12 +16,6 @@ class BaseAnalytics:
     def __init__(self) -> None:
         self.export_csv_name = "export.csv"
 
-    def get_df_path(self, query: Dict, extension="csv"):
-        searchParam_list = [f"{k}_{v}" for k, v in query.items()]
-        data_category = f"{type(self).__name__}"
-        searchParam_list = f"_{'-'.join(searchParam_list)}" if searchParam_list else ""
-        return os.path.join(CACHE_DIR, f"{data_category.lower()}{searchParam_list}.{extension}")
-
     def count_unique(self, field: str, df=None) -> Dict:
         _df = df if df is not None else self.raw_df
         return _df[field].value_counts().to_dict()

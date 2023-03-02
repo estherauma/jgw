@@ -78,6 +78,7 @@ class AppEvents(BaseAnalytics):
             start_date=start_date, end_date=end_date
         )
 
+        installs = client.query(installs_query).to_dataframe()
         chapters_df = client.query(chapters_query).to_dataframe()
         chapters_df = self.replace_chapter_names(chapters_df)
         chapters_df = chapters_df.set_index("chapters")
@@ -86,12 +87,11 @@ class AppEvents(BaseAnalytics):
 
         chapter_feedback, clean = api.get_data(key="chapter_feedback")
         chapter_feedback_df = pd.DataFrame.from_records(chapter_feedback)
-        chapter_feedback_df = chapter_feedback_df.rename(
-            columns={{i.replace("ChapterOpened_", ""): v for i, v in event_to_title.items()}}
-        )
-
-        installs = client.query(installs_query).to_dataframe()
-        return {"chapters": chapters_df, "chapters_feedback": chapter_feedback_df, "total_installs": installs}
+        new_column_names = {i.replace("ChapterOpened_", ""): v for i, v in event_to_title.items()}
+        chapter_feedback_df = chapter_feedback_df.rename(columns=new_column_names)
+        chapter_feedback_df = chapter_feedback_df.fillna("")
+        chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
+        return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
 
     def replace_chapter_names(self, df) -> pd.DataFrame:
         if "Event Name" in df.columns:
@@ -104,7 +104,13 @@ class AppEvents(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         data = self.get_df(filters)
-        _stats = {"chapters": data["chapters"].to_dict(orient="index")}
+        _stats = {
+            "chapters": data["chapters"].to_dict(orient="index"),
+            "chapter_feedback": {
+                field: self.count_unique(field, data["chapter_feedback"])
+                for field in data["chapter_feedback"].columns
+            },
+        }
         total_installs = data["total_installs"].to_dict(orient="records")[0]
         _stats.update(total_installs)
         return _stats
