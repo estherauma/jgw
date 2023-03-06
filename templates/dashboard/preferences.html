@@ -15,9 +15,10 @@
             <div class="card-header d-flex align-items-center">
                 <h3 class="mr-auto p-3">User Preferences</h3>
                 <div class="btn-group">
-                    <a class="btn btn-primary"
-                        href="{% url 'dashboard:export_to_excel' key='preferences' %}?{{filter_string}}"
-                        target="_blank">Export</a>
+                    <button class="btn btn-primary" id="exportFileBtn" target="_blank"
+                        export-url="{% url 'dashboard:export_to_excel' key='preferences' %}">
+                        Export
+                    </button>
                 </div>
             </div>
             <form id="filter_form" class="form-inline p-2" method="POST"
@@ -89,6 +90,8 @@
 <!-- ChartJS script  -->
 {% block scripts %}
 <script>
+    const export_button = document.querySelector('#exportFileBtn')
+    const export_url = export_button.attributes.getNamedItem("export-url").value
     const end_date = document.querySelector('#end_date')
     const factoryFarm_input = document.querySelector('#factory_farm')
     const filter_form = document.querySelector('#filter_form')
@@ -220,8 +223,8 @@
         const formData = new FormData(filter_form);
         let chartData = {};
         toggleElementDisplay(false, '#chart-area')
-        toggleElementDisplay(true, '#loader')
         toggleElementDisplay(false, '#no-results')
+        toggleElementDisplay(true, '#loader')
         clearFormErrors()
         fetch(url, { method: 'POST', body: formData })
             .then(response => response.json())
@@ -242,6 +245,41 @@
                 console.log(error)
             })
             .finally(() => toggleElementDisplay(false, '#loader'))
+    }
+
+    function exportToExcel(url) {
+        const formData = new FormData(filter_form);
+        toggleElementDisplay(false, '#chart-area')
+        toggleElementDisplay(false, '#no-results')
+        toggleElementDisplay(true, '#loader')
+        fetch(url, { method: 'POST', body: formData })
+            .then(response => {
+                if (!response.ok) {
+                    throw Error(response.statusText)
+                } else {
+                    const header = response.headers.get('Content-Disposition');
+                    const parts = header.split(';');
+                    filename = parts[1].split('=')[1].replaceAll("\"", "");
+                    return response.blob();
+                }
+            })
+            .then(blob => {
+                if (blob != null) {
+                    const a = document.createElement('a');
+                    a.href = window.URL.createObjectURL(blob);
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            })
+            .finally(() => {
+                toggleElementDisplay(true, '#chart-area')
+                toggleElementDisplay(false, '#loader')
+            })
     }
 
     function plotCharts(chartData) {
@@ -292,6 +330,7 @@
         }
     }
 
+    export_button.addEventListener('click', () => exportToExcel(export_url));
     end_date.addEventListener('change', debounce(autosubmit, 1000));
     start_date.addEventListener('change', debounce(autosubmit, 1000));
     window.addEventListener('DOMContentLoaded', getOriginOptions)
