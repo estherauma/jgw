@@ -33,6 +33,8 @@ from .forms import (
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
 HELPERS = {
     "inline": lambda: Inline(),
+    "inlineQNs_responses": lambda: Inline(),
+    "inlineQNs_participation": lambda: Inline(),
     "preferences": lambda: Preferences(),
     "help_contacts": lambda: HelpContacts(),
     "messaging": lambda: Messaging(),
@@ -243,17 +245,18 @@ def process_factory_options(request, key):
 def export_to_excel_file(request, key):
     if key not in ("preferences", "chapters", "inlineQNs_participation", "inlineQNs_responses"):
         messages.error(request, "Report not yet available!")
-        if key.startswith("inlineQNs"):
-            return redirect(reverse("dashboard:inline"))
-        return redirect(reverse(f"dashboard:preferences"))
-
+        return redirect(reverse("dashboard:preferences"))
+    form = InlineQnsForm(request.POST) if key.startswith("inlineQNs") else FilterForm(request.POST)
     helper = HELPERS[key]()
-    filters = process_filters(request)
-    df = helper.get_df(filters)
-    filename = get_SWS_report(
-        start=filters["time_range"], end=datetime.today().strftime("%Y-%m-%d"), category=key, df=df
-    )
-    response = FileResponse(open(filename, "rb"))
+    try:
+        filters = get_filters_from_form(form)
+        filters = format_time_range(filters)
+        start, end = filters["time_range"].split(",")
+        df = helper.get_df(filters)
+        filename = get_SWS_report(start=start, end=end, category=key, df=df)
+        response = FileResponse(open(filename, "rb"))
+    except ValidationError as e:
+        return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     return response
 
 
