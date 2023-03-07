@@ -23,14 +23,14 @@
                         Export
                     </a>
                     <div class="dropdown-menu" aria-labelledby="exportInline">
-                        <a class="dropdown-item"
-                            href="{% url 'dashboard:export_to_excel' key='inlineQNs_participation' %}?{{filter_string}}">
+                        <button id="exportFileBtn" class="dropdown-item"
+                            export-url="{% url 'dashboard:export_to_excel' key='inlineQNs_participation' %}">
                             Participation
-                        </a>
-                        <a class="dropdown-item"
-                            href="{% url 'dashboard:export_to_excel' key='inlineQNs_responses' %}?{{filter_string}}">
+                        </button>
+                        <button id="exportFileBtn1" key class="dropdown-item"
+                            export-url="{% url 'dashboard:export_to_excel' key='inlineQNs_responses' %}">
                             Answers Break-down
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -102,6 +102,10 @@
 <!-- ChartJS script  -->
 {% block scripts %}
 <script>
+    const export_button = document.querySelector('#exportFileBtn')
+    const export_url = export_button.attributes.getNamedItem("export-url").value;
+    const export_button_1 = document.querySelector('#exportFileBtn1')
+    const export_url_1 = export_button_1.attributes.getNamedItem("export-url").value;
     const end_date = document.querySelector('#end_date')
     const factoryFarm_input = document.querySelector('#factory_farm')
     const filter_form = document.querySelector('#filter_form')
@@ -258,8 +262,43 @@
             .catch(error => {
                 console.log(error)
             })
-            .finally(() =>  toggleElementDisplay(false, '#loader'))
-       
+            .finally(() => toggleElementDisplay(false, '#loader'))
+
+    }
+
+    function exportToExcel(url) {
+        const formData = new FormData(filter_form);
+        toggleElementDisplay(false, '#chart-area')
+        toggleElementDisplay(false, '#no-results')
+        toggleElementDisplay(true, '#loader')
+        fetch(url, { method: 'POST', body: formData })
+            .then(response => {
+                if (!response.ok) {
+                    throw Error(response.statusText)
+                } else {
+                    const header = response.headers.get('Content-Disposition');
+                    const parts = header.split(';');
+                    filename = parts[1].split('=')[1].replaceAll("\"", "");
+                    return response.blob();
+                }
+            })
+            .then(blob => {
+                if (blob != null) {
+                    const a = document.createElement('a');
+                    a.href = window.URL.createObjectURL(blob);
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            })
+            .finally(() => {
+                toggleElementDisplay(true, '#chart-area')
+                toggleElementDisplay(false, '#loader')
+            })
     }
 
     function plotCharts(chartData) {
@@ -310,6 +349,9 @@
         }
     }
 
+    
+    export_button.addEventListener('click', () => exportToExcel(export_url));
+    export_button_1.addEventListener('click', () => exportToExcel(export_url_1));
     end_date.addEventListener('change', debounce(autosubmit, 1000));
     start_date.addEventListener('change', debounce(autosubmit, 1000));
     window.addEventListener('DOMContentLoaded', getOriginOptions)
