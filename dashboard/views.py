@@ -1,7 +1,7 @@
 from datetime import datetime
 from http import HTTPStatus
 from operator import itemgetter
-from typing import Dict
+from typing import Dict, List
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -145,12 +145,20 @@ def app_events_stats(request):
     if "time_range" not in filters:
         filters["time_range"] = "7 Days"
 
-    def reformat_grouped_data(data):
+    def reformat_grouped_chapter_data(data):
         counts = [i["Count"] for i in data]
         users = [i["Users"] for i in data]
         return [
             {"label": "Counts", "backgroundColor": "blue", "data": counts},
             {"label": "Users", "backgroundColor": "red", "data": users},
+        ]
+    
+    def reformat_grouped_chapter_feedback_data(data):
+        smiles = [i["smile"] if 'smile' in i else 0 for i in data ]
+        frowns = [i["frown"] if 'frown' in i else 0 for i in data]
+        return [
+            {"label": "Smiles", "backgroundColor": "orange", "data": smiles},
+            {"label": "Frowns", "backgroundColor": "green", "data": frowns},
         ]
 
     if request.method == "POST":
@@ -169,7 +177,8 @@ def app_events_stats(request):
         chart_data = form_chart_data(
             {"chapters": _data["chapters"], "chapter_feedback": _data["chapter_feedback"]}
         )
-        chart_data["chapters"]["data"] = reformat_grouped_data(chart_data["chapters"]["data"])
+        chart_data["chapters"]["data"] = reformat_grouped_chapter_data(chart_data["chapters"]["data"])
+        chart_data["chapter_feedback"]["data"] = reformat_grouped_chapter_feedback_data(chart_data["chapter_feedback"]["data"])
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, template_name, context=context_data)
