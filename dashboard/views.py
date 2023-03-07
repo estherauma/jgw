@@ -275,3 +275,8 @@ def export_report(request):
 
 def test_sentry(request):
     division_error = 1 / 0
+
+
+
+def landing(request):
+    return render(request, template_name="landing/landing_page.html")
