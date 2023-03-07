@@ -53,6 +53,19 @@ class AppEvents(BaseAnalytics):
     def __init__(self, filters: QueryMap = None) -> None:
         self.raw_df, self.cleaned = self.get_data(filters=filters), True
         self.export_csv_name = "app_events.csv"
+    
+    def _get_chapters_feedback_data(self, start_date=None, end_date=None):
+        chapter_feedback, clean = api.get_data(key="chapter_feedback")
+        chapter_feedback_df = pd.DataFrame.from_records(chapter_feedback)
+        if start_date and end_date:
+            time_range = f"{start_date},{end_date}"
+            chapter_feedback_df = self.filter_by_timeRange(time_range=time_range, df=chapter_feedback_df)
+
+        new_column_names = {i.replace("ChapterOpened_", ""): v for i, v in event_to_title.items()}
+        chapter_feedback_df = chapter_feedback_df.rename(columns=new_column_names)
+        chapter_feedback_df = chapter_feedback_df.fillna("")
+        chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
+        return chapter_feedback_df
 
     def get_data(self, filters: QueryMap = None, start=None, end=None):
         end_date = end.replace("-", "") if end else datetime.today().strftime("%Y%m%d")
@@ -85,12 +98,7 @@ class AppEvents(BaseAnalytics):
         if "Mark as conversion" in chapters_df.columns:
             chapters_df = chapters_df.drop(columns=["Mark as conversion"])
 
-        chapter_feedback, clean = api.get_data(key="chapter_feedback")
-        chapter_feedback_df = pd.DataFrame.from_records(chapter_feedback)
-        new_column_names = {i.replace("ChapterOpened_", ""): v for i, v in event_to_title.items()}
-        chapter_feedback_df = chapter_feedback_df.rename(columns=new_column_names)
-        chapter_feedback_df = chapter_feedback_df.fillna("")
-        chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
+        chapter_feedback_df = self._get_chapters_feedback_data()
         return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
 
     def replace_chapter_names(self, df) -> pd.DataFrame:

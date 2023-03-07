@@ -87,7 +87,7 @@ class JGWApi:
                 data = result["data"]
                 clean = False
                 if key == "chapter_feedback":
-                    data = self.transform_chapter_feedback(data)
+                    data, clean = self.transform_chapter_feedback(data)
                 JGWCache.objects.create(category=key, data=json.dumps(data))
         if data and not clean:
             schedule_clean_data.delay(category=key)
@@ -135,7 +135,7 @@ class JGWApi:
                     i[k] = transform(v)
                 else:
                     i[k] = v
-        return data
+        return data, True
 
     def clean_data(self, df):
         df = self.normalise_questions_and_responses(df)
