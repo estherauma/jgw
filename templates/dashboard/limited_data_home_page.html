@@ -1,0 +1,63 @@
+
+<!-- title -->
+{% block title %} Unique and returning users {% endblock title %}
+
+{% block page_title %} Unique and returning users {% endblock page_title %}
+
+<!-- page content -->
+{% block content %}
+<div>
+    <div >
+        <div class="col-xl-4 col-md-12" style="width: 100%">
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="unique-and-returning-users" width="100%">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script  type="text/javascript">
+
+    var uniqueAndReturningUsersChartCtx = document.getElementById('unique-and-returning-users').getContext('2d');
+    var uniqueAndReturningUsersChart = new Chart(uniqueAndReturningUsersChartCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for label in labels %} '{{ label | safe }}', {% endfor %}],
+            datasets: [
+            {
+                label:'Returning users',
+                data: [{% for returning_data in returning_data_list %} '{{ returning_data }}', {% endfor %}],
+                backgroundColor:['rgba(17, 202, 108, 1)'],
+                borderWidth: 1
+            },
+            {
+                label:'Unique users',
+                data: [{% for unique_data in unique_data_list %} '{{ unique_data }}', {% endfor %}],
+                backgroundColor:['rgba(68, 191, 229, 1)'],
+                borderWidth: 1
+            }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    grid: {
+                        display: true
+                    }
+                },
+                x: {
+                    grid: {
+                        display: true,
+                        drawOnChartArea: true
+                    }
+                },
+            }
+
+        }
+    })
+</script>
+{% endblock scripts %}
