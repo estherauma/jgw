@@ -2,8 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 def home(request):
-    unique_and_returning_users_data = {
-        "routes":[
+    routes = [
             "bangladesh -> malaysia",
             "indonesia -> malaysia",
             "burma -> malaysia",
@@ -25,11 +24,12 @@ def home(request):
             "India -> uk",
             "Italy -> uk",
             "pakistan -> malaysia"
-        ],
-        "returning_data_list": [68, 39, 36, 35, 27, 18, 19, 25, 10, 5, 4, 4, 3, 3, 3, 3, 2, 2, 1, 1, 1],
-        "unique_data_list": [100, 27, 55, 35, 27, 18, 12, 77, 10, 5, 4, 4, 3, 13, 3, 3, 2, 2, 13, 9, 1]
-    }
+        ]
+    returning_data_list =  [68, 39, 36, 35, 27, 18, 19, 25, 10, 5, 4, 4, 3, 3, 3, 3, 2, 2, 1, 1, 1]
+    unique_data_list = [100, 27, 55, 35, 27, 18, 12, 77, 10, 5, 4, 4, 3, 13, 3, 3, 2, 2, 13, 9, 1]
 
     return render(request, template_name="demo_dashboard/index.html", context={ 
-            'unique_and_returning_users_data': unique_and_returning_users_data,
+            'routes':routes,
+            'returning_data_list': returning_data_list,
+            'unique_data_list': unique_data_list
     })
