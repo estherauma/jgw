@@ -55,14 +55,14 @@
                     </ul>
                     <div>
                         <a href="{% url 'users:create_user' %}" class="btn btn-info navbar-btn">Register</a>
-                        <a href="{% url 'users:login_user' %}" class="btn btn-info navbar-btn">Login</a>
+                        <a href="{% url 'demo_dashboard:home' %}" class="btn btn-info navbar-btn">Try free</a>
                     </div>
                 </div>
             </div>
         </nav>
         <!-- Navbar End -->
-    {% block body %}
-    {% endblock body %}
+        {% block body %}
+        {% endblock body %}
             <!-- footer start -->
             <footer class="bg-dark footer">
                 <div class="container-fluid">
@@ -98,9 +98,11 @@
     
             <!-- javascript -->
             
-            <script src="{% static 'langing/js/bootstrap.bundle.min.js' %}"></script>
+            <script src="{% static 'landing/js/bootstrap.bundle.min.js' %}"></script>
         
             <!-- custom js -->
             <script src="{% static 'themes/landing/js/app.js' %}"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            {% block scripts %}{% endblock scripts %}
     </body>
 </html>

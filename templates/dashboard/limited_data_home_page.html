@@ -1,11 +1,24 @@
 
 <!-- title -->
-{% block title %} Unique and returning users {% endblock title %}
-
-{% block page_title %} Unique and returning users {% endblock page_title %}
+{% extends 'layouts/non_auth_base.html' %}
+{% load static %}
 
 <!-- page content -->
-{% block content %}
+{% block body %}
+<body style="min-height: 400px;">
+    <section class="bg-home bg-gradient" id="home">
+        <div class="home-center">
+            <div class="home-desc-center">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <p>stats</p>
+                    </div>
+                    <!-- end row -->
+                </div>
+                <!-- end container-fluid -->
+            </div>
+        </div>
+    </section>
 <div>
     <div >
         <div class="col-xl-4 col-md-12" style="width: 100%">
@@ -17,7 +30,8 @@
         </div>
     </div>
 </div>
-{% endblock content %}
+</body>
+{% endblock body %}
 
 {% block scripts %}
 <script  type="text/javascript">

@@ -29,4 +29,5 @@ urlpatterns = [
     # accounts
     path("accounts/", include("users.urls")),
     path("health/", health),
+    path("demo", include("demo_dashboard.urls")),
 ]

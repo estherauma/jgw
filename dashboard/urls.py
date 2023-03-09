@@ -5,6 +5,7 @@ app_name = "dashboard"
 urlpatterns = [
     # Views
     path("", views.landing, name="landing"),
+    path("limited-data-home-page", views.limited_data_home_page, name="limited_data_home_page"),
     path("app_events", views.app_events_stats, name="app_events"),
     path("home", views.home, name="home"),
     path("preferences", views.preferences_stats, name="preferences"),
