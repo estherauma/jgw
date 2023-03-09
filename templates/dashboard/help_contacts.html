@@ -63,7 +63,7 @@
             <span class="sr-only">Loading...</span>
         </div>
     </div>
-    
+
     <div class="row text-danger text-center" id="no-results" style="display: none;">
         No data matches this search!
     </div>
@@ -243,46 +243,49 @@
         if (chartData) {
             clearCharts()
             for (const [key, values] of Object.entries(chartData)) {
-                graphDiv = document.getElementById(`${key}_graphcard`)
-                let canvas = document.createElement('canvas')
-                canvas.setAttribute('id', `_${key}`)
-                graphDiv.appendChild(canvas)
-                new Chart(canvas.getContext("2d"), {
-                    type: "bar",
-                    data: {
-                        labels: values.labels,
-                        datasets: [
-                            {
-                                label: key,
-                                data: values.data,
-                                backgroundColor: [
-                                    "rgba(255, 99, 132, 0.2)",
-                                    "rgba(54, 162, 235, 0.2)",
-                                    "rgba(255, 206, 86, 0.2)",
-                                    "rgba(75, 192, 192, 0.2)",
-                                    "rgba(153, 102, 255, 0.2)",
-                                    "rgba(255, 159, 64, 0.2)",
-                                ],
-                                borderColor: [
-                                    "rgba(255, 99, 132, 1)",
-                                    "rgba(54, 162, 235, 1)",
-                                    "rgba(255, 206, 86, 1)",
-                                    "rgba(75, 192, 192, 1)",
-                                    "rgba(153, 102, 255, 1)",
-                                    "rgba(255, 159, 64, 1)",
-                                ],
-                                borderWidth: 1,
-                            },
-                        ],
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true,
+                const graphDiv = document.getElementById(`${key}_graphcard`)
+                if (graphDiv) {
+                    let canvas = document.createElement('canvas')
+                    canvas.setAttribute('id', `_${key}`)
+                    graphDiv.appendChild(canvas)
+
+                    new Chart(canvas.getContext("2d"), {
+                        type: "bar",
+                        data: {
+                            labels: values.labels,
+                            datasets: [
+                                {
+                                    label: key,
+                                    data: values.data,
+                                    backgroundColor: [
+                                        "rgba(255, 99, 132, 0.2)",
+                                        "rgba(54, 162, 235, 0.2)",
+                                        "rgba(255, 206, 86, 0.2)",
+                                        "rgba(75, 192, 192, 0.2)",
+                                        "rgba(153, 102, 255, 0.2)",
+                                        "rgba(255, 159, 64, 0.2)",
+                                    ],
+                                    borderColor: [
+                                        "rgba(255, 99, 132, 1)",
+                                        "rgba(54, 162, 235, 1)",
+                                        "rgba(255, 206, 86, 1)",
+                                        "rgba(75, 192, 192, 1)",
+                                        "rgba(153, 102, 255, 1)",
+                                        "rgba(255, 159, 64, 1)",
+                                    ],
+                                    borderWidth: 1,
+                                },
+                            ],
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                },
                             },
                         },
-                    },
-                });
+                    });
+                }
             }
         }
     }
