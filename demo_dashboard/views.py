@@ -33,3 +33,11 @@ def home(request):
             'returning_data_list': returning_data_list,
             'unique_data_list': unique_data_list
     })
+
+
+def demographics(request):
+    return render(request, template_name="demo_dashboard/demographics.html")
+
+
+def inline_question(request):
+    return render(request, template_name="demo_dashboard/inline_question.html")
