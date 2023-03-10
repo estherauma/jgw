@@ -28,5 +28,5 @@ urlpatterns = [
     path("", include("dashboard.urls")),
     # accounts
     path("accounts/", include("users.urls")),
-    path("health/", health),
+    path("health/", health)
 ]

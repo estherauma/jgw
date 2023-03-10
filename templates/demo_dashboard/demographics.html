@@ -1,0 +1,138 @@
+{% extends 'demo_dashboard/base/base.html' %}
+
+{% block content %}
+<div class="content-page" style="margin-top: 100px;">
+<div>
+    <div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="uandrusers" class="collapse show">
+                            <div class="pt-1">
+                                <div>
+                                    <div id="age-bracket"></div>
+                                </div>
+                            </div>
+                        </div> <!-- collapsed end -->
+                    </div> <!-- end card-body -->
+                </div> <!-- end card-->
+            </div> <!-- end col -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="uandrusers" class="collapse show">
+                            <div class="pt-1">
+                                <div style="height: 395px;">
+                                    <div id="organisation"></div>
+                                </div>
+                            </div>
+                        </div> <!-- collapsed end -->
+                    </div> <!-- end card-body -->
+                </div> <!-- end card-->
+            </div> <!-- end col -->
+        </div>
+    </div>
+</div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script  type="text/javascript">
+
+
+  var options = {
+    series: [{
+    data:[110, 29, 9, 54, 32, 68, 33]
+  }],
+    chart: {
+    type: 'bar',
+    height: 380
+  },
+  plotOptions: {
+    bar: {
+      barHeight: '100%',
+      distributed: true,
+      horizontal: true,
+      dataLabels: {
+        position: 'bottom'
+      },
+    }
+  },
+  colors: ['#008FFB', '#00E396', '#FF4560', '#FFB019', '#775DD0', '#2b908f'],
+  dataLabels: {
+    enabled: true,
+    textAnchor: 'start',
+    style: {
+      colors: ['#fff']
+    },
+    formatter: function (val, opt) {
+      return opt.w.globals.labels[opt.dataPointIndex] + ":  " + val
+    },
+    offsetX: 0,
+    dropShadow: {
+      enabled: true
+    }
+  },
+  stroke: {
+    width: 1,
+    colors: ['#fff']
+  },
+  xaxis: {
+    categories: ['11-20','21-30', '31-40', '41-50', '51-60', '61-70', 'prefer not to answer'],
+    axisBorder: {
+        show: false // hide x-axis line
+      }
+  },
+  yaxis: {
+    labels: {
+      show: false
+    },
+    axisBorder: {
+        show: false // hide x-axis line
+      }
+  },
+  tooltip: {
+    theme: 'dark',
+    x: {
+      show: false
+    },
+    y: {
+      title: {
+        formatter: function () {
+          return ''
+        }
+      }
+    }
+  }
+  };
+
+  var chart = new ApexCharts(document.querySelector("#age-bracket"), options);
+  chart.render();
+
+
+  var pieOptions = {
+    series: [44, 55, 13, 33],
+    chart: {
+    width: "100%",
+    type: 'donut',
+  },
+  dataLabels: {
+    enabled: false
+  },
+  title: {
+    fontSize: '18px',
+    position: 'left',
+    
+  },
+    legend: {
+            position: 'bottom',
+            offsetY: 0        
+    }
+}
+
+  var pieChart = new ApexCharts(document.querySelector("#organisation"), pieOptions);
+  pieChart.render();
+
+</script>
+{% endblock scripts %}

@@ -4,8 +4,10 @@ from . import views
 app_name = "dashboard"
 urlpatterns = [
     # Views
-    path("app_events", views.app_events_stats, name="app_events"),
+    path("", views.landing, name="landing"),
     path("", views.home, name="home"),
+    path("app_events", views.app_events_stats, name="app_events"),
+    path("home", views.home, name="home"),
     path("preferences", views.preferences_stats, name="preferences"),
     path("inline", views.inline_question_stats, name="inline"),
     path("messaging-questions", views.messaging_question_stats, name="messaging"),
@@ -17,4 +19,9 @@ urlpatterns = [
     path("process-factory-options/<str:key>", views.process_factory_options, name="process_factory_options"),
     path("export/<str:key>", views.export_to_excel_file, name="export_to_excel"),
     path("trigger-sentry", views.test_sentry),
+
+    # test
+    path("demographics", views.limited_data_home_page_demographics, name="demographics"),
+    path("inline-question", views.limited_data_home_page_inline_question, name="inline_question"),
+    path("limited-data-home-page", views.limited_data_home_page, name="limited_data_home_page"),
 ]
