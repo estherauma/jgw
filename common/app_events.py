@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 from google.cloud import bigquery
 
 from common.base import BaseAnalytics
-from common.retrieve_data import JGWApi
 from common.reports import get_start_date
+from common.retrieve_data import JGWApi
 
 api = JGWApi()
 client = bigquery.Client()
@@ -53,6 +53,19 @@ class AppEvents(BaseAnalytics):
     def __init__(self, filters: QueryMap = None) -> None:
         self.raw_df, self.cleaned = self.get_data(filters=filters), True
         self.export_csv_name = "app_events.csv"
+    
+    def _get_chapters_feedback_data(self, start_date=None, end_date=None):
+        chapter_feedback, clean = api.get_data(key="chapter_feedback")
+        chapter_feedback_df = pd.DataFrame.from_records(chapter_feedback)
+        if start_date and end_date:
+            time_range = f"{start_date},{end_date}"
+            chapter_feedback_df = self.filter_by_timeRange(time_range=time_range, df=chapter_feedback_df)
+
+        new_column_names = {i.replace("ChapterOpened_", ""): v for i, v in event_to_title.items()}
+        chapter_feedback_df = chapter_feedback_df.rename(columns=new_column_names)
+        chapter_feedback_df = chapter_feedback_df.fillna("")
+        chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
+        return chapter_feedback_df
 
     def get_data(self, filters: QueryMap = None, start=None, end=None):
         end_date = end.replace("-", "") if end else datetime.today().strftime("%Y%m%d")
@@ -78,14 +91,15 @@ class AppEvents(BaseAnalytics):
             start_date=start_date, end_date=end_date
         )
 
+        installs = client.query(installs_query).to_dataframe()
         chapters_df = client.query(chapters_query).to_dataframe()
         chapters_df = self.replace_chapter_names(chapters_df)
         chapters_df = chapters_df.set_index("chapters")
         if "Mark as conversion" in chapters_df.columns:
             chapters_df = chapters_df.drop(columns=["Mark as conversion"])
 
-        installs = client.query(installs_query).to_dataframe()
-        return {"chapters": chapters_df, "total_installs": installs}
+        chapter_feedback_df = self._get_chapters_feedback_data()
+        return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
 
     def replace_chapter_names(self, df) -> pd.DataFrame:
         if "Event Name" in df.columns:
@@ -98,7 +112,13 @@ class AppEvents(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         data = self.get_df(filters)
-        _stats = {"chapters": data["chapters"].to_dict(orient="index")}
+        _stats = {
+            "chapters": data["chapters"].to_dict(orient="index"),
+            "chapter_feedback": {
+                field: self.count_unique(field, data["chapter_feedback"])
+                for field in data["chapter_feedback"].columns
+            },
+        }
         total_installs = data["total_installs"].to_dict(orient="records")[0]
         _stats.update(total_installs)
         return _stats

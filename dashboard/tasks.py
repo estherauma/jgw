@@ -3,13 +3,13 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 import six
-from celery import shared_task
-from common.reports import get_SWS_report
 from django.core.mail import EmailMessage
 from google.cloud import translate_v2 as translate
-from jgwpandas.settings import EMAIL_HOST_USER
 
+from celery import shared_task
+from common.reports import get_SWS_report
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
+from jgwpandas.settings import EMAIL_HOST_USER
 
 client = translate.Client()
 
@@ -41,6 +41,7 @@ def fetch_API_data(category=None):
         "joboffer",
         "contract",
         "beforeyougo",
+        "chapter_feedback",
     ]:
         jgw_api.get_data(key=key)
 
