@@ -1,5 +1,107 @@
 {% extends 'demo_dashboard/base/base.html' %}
 
 {% block content %}
-<h3>inline_question.html</h3>
+<div class="content-page" style="margin-top: 100px;">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+          <div class="card-body">
+            <div id="question-chart"></div>
+          </div>
+      </div> <!-- end card-->
+  </div> <!-- end col -->
+  </div>
+</div>
 {% endblock content %}
+{% block scripts %}
+<script>
+
+    
+    var data = JSON.parse('{{ data | safe }}');
+
+    var question = data.question
+    var language = data.language
+    var origin = data.origin
+
+    console.log(question.labels)
+    console.log(question.data)
+    
+    const options = {
+        chart: {
+          type: 'bar',
+          height: 800,
+          stacked: true,
+          toolbar: {
+            show: true,
+            tools: {
+              download: true,
+              selection: true,
+              zoom: true,
+              zoomin: true,
+              zoomout: true,
+              pan: true,
+              reset: true
+            }
+          }
+        },
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            barHeight: '100%',
+          }
+        },
+        series: [{
+          name: 'Yes',
+          data: question.data
+        }],
+        xaxis: {
+          categories: question.labels,
+          labels: {
+            show: true,
+            rotate: -45,
+            rotateAlways: false,
+            hideOverlappingLabels: true,
+            trim: true,
+            maxHeight: 50,
+            maxWidth: 30,
+            style: {
+              colors: [],
+              fontSize: '12px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: 400,
+              cssClass: 'apexcharts-xaxis-label'
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            show: true,
+            rotate: 0,
+            rotateAlways: false,
+            hideOverlappingLabels: true,
+            trim: true,
+            minWidth: undefined,
+            maxWidth: undefined,
+            style: {
+              colors: [],
+              fontSize: '12px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: 400,
+              cssClass: 'apexcharts-yaxis-label'
+            }
+          }
+        },
+        tooltip: {
+          enabled: true,
+          shared: false
+        }
+      };
+      
+      // create chart instance
+      const chart = new ApexCharts(document.querySelector('#question-chart'), options);
+      
+      // render chart
+      chart.render();
+
+</script>
+{% endblock scripts %}
