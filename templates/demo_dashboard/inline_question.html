@@ -1,0 +1,201 @@
+{% extends 'demo_dashboard/base/base.html' %}
+
+{% block content %}
+<div class="content-page" style="margin-top: 100px;">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <div id="region-chart"></div>
+        </div>
+      </div> <!-- end card-->
+    </div> <!-- end col -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <div id="chart"></div>
+        </div>
+      </div> <!-- end card-->
+    </div> <!-- end col -->
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+          <div class="card-body">
+            <div id="question-chart"></div>
+          </div>
+      </div> <!-- end card-->
+    </div> <!-- end col -->
+  </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script>
+
+    
+    var data = JSON.parse('{{ data | safe }}');
+
+    var question = data.question
+    var language = data.language
+    var origin = data.origin
+    
+
+    function createChartOptions (data, labels, height=2200, colors=["#0074D9"]){
+    // Questions Language
+    return {
+        chart: {
+          type: 'bar',
+          height: height,
+          stacked: false,
+          toolbar: {
+            show: false,
+            tools: {
+              download: true,
+              selection: true,
+              zoom: true,
+              zoomin: true,
+              zoomout: true,
+              pan: true,
+              reset: true
+            }
+          }
+        },
+        colors: colors,
+        title: {
+          text: "Questions Responses",
+          style: {
+              fontSize:  '17px',
+              fontWeight:  '400',
+              fontFamily:  undefined,
+              color:  '#6c757d'
+            },
+        },
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            barHeight: 50,
+            borderRadius: 4,
+            offsetX: 20,
+            dataLabels: {
+              style: {
+                borderRadius: 10 // Set the border radius of the data labels to 10 pixels
+              }
+            }
+          }
+        },
+        series: [{
+          name: 'Responses',
+          data: data
+        }],
+        xaxis: {
+          categories: labels,
+          labels: {
+            show: true,
+            rotate: -45,
+            rotateAlways: false,
+            hideOverlappingLabels: true,
+            trim: true,
+            maxHeight: 120,
+            maxWidth: 30,
+            style: {
+              colors: [],
+              fontSize: '12px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: 400,
+              cssClass: 'apexcharts-xaxis-label'
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            show: true,
+            rotate: 0,
+            rotateAlways: false,
+            hideOverlappingLabels: true,
+            trim: true,
+            minWidth: undefined,
+            maxWidth: undefined,
+            style: {
+              colors: [],
+              fontSize: '12px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: 400,
+              cssClass: 'apexcharts-yaxis-label'
+            }
+          }
+        },
+        grid: {
+          show: false // Hide both horizontal and vertical grid lines
+        },
+        tooltip: {
+          enabled: true,
+          shared: false
+        }
+      };
+    }
+    var questionsOptions = createChartOptions(question.data, question.labels);
+    var questionsOptionsChart = new ApexCharts(document.querySelector("#question-chart"), questionsOptions);
+    questionsOptionsChart.render();
+
+
+    var d = createChartOptions(language.data, language.labels, 400);
+    var dd = new ApexCharts(document.querySelector("#chart"), d);
+    dd.render();
+    {% comment %} var chart = new ApexCharts(document.querySelector("#chart"), options); {% endcomment %}
+
+
+    var originOptionsChart = {
+			chart: {
+				type: 'bar',
+        height: 400,
+        toolbar: {
+          show: false,
+        }
+			},
+      title: {
+        text: "Questions Responses By Origin",
+        style: {
+            fontSize:  '17px',
+            fontWeight:  '400',
+            fontFamily:  undefined,
+            color:  '#6c757d'
+          },
+      },
+      colors: ["#0074D9"],
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          barHeight: 50,
+          borderRadius: 4,
+          offsetX: 20,
+          dataLabels: {
+            style: {
+              borderRadius: 10 // Set the border radius of the data labels to 10 pixels
+            }
+          }
+        }
+      },
+			series: [{
+				name: 'Sales',
+				data:origin.data
+			}],
+			xaxis: {
+				categories: origin.labels
+			},
+			yaxis: {
+        labels: {
+          show: true
+        }
+			},
+      grid: {
+        show: true // Hide both horizontal and vertical grid lines
+      },
+		}
+
+    var originOptionsChart = new ApexCharts(document.querySelector("#region-chart"), originOptionsChart);
+    originOptionsChart.render();
+
+
+      // Language
+</script>
+{% endblock scripts %}

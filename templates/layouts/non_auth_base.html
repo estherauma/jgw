@@ -28,7 +28,7 @@
             <div class="container-fluid">
                 <!-- LOGO -->
                 <a class="logo text-uppercase" href="{% url 'dashboard:landing' %}">
-                    <img src="{% static 'themes/landing/images/logo-light.png' %}" alt="" class="logo-light" height="21" />
+                    <img src="/static/logo-nobg.png" class="logo-light" alt="" height="70" width="240"> 
                     <img src="{% static 'themes/landing/images/logo-dark.png' %}" alt="" class="logo-dark" height="21" />
                 </a>
 
@@ -55,7 +55,7 @@
                     </ul>
                     <div>
                         <a href="{% url 'users:create_user' %}" class="btn btn-info navbar-btn">Register</a>
-                        <a href="{% url 'demo_dashboard:home' %}" class="btn btn-info navbar-btn">Try free</a>
+                        <a href="{% url 'dashboard:limited_data_home_page' %}" class="btn btn-info navbar-btn">Try free</a>
                     </div>
                 </div>
             </div>

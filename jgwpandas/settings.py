@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "dashboard",
-    "demo_dashboard",
     "users",
 ]
 
