@@ -21,7 +21,7 @@ def home(request):
             "kenya -> saudi",
             "Ukraine -> uk",
             "vietnam -> malaysia",
-            "Other - The rest of the world -> uk",
+            "Rest of the world -> uk",
             "India -> uk",
             "Italy -> uk",
             "pakistan -> malaysia"
