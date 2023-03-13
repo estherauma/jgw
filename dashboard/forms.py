@@ -75,7 +75,7 @@ class FilterForm(forms.Form):
             if f not in ("start_date", "end_date", "time_range", "destination", "scheme_name"):
                 self.fields[f].widget.attrs = {
                     "onChange": mark_safe("filterData();"),
-                    "class": "form-select mx-2",
+                    "class": "form-select mx-1",
                     "id": f,
                 }
 
@@ -95,7 +95,7 @@ class FilterForm(forms.Form):
         choices=DEST_COUNTRIES.items(),
         required=False,
         widget=forms.Select(
-            attrs={"class": "form-select mx-2", "id": "destination", "onChange": "getOriginOptions();"}
+            attrs={"class": "form-select mx-1", "id": "destination", "onChange": "getOriginOptions();"}
         ),
     )
     origin = DependentChoiceField(choices=ORIGIN_COUNTRIES.items(), required=False)
@@ -104,7 +104,7 @@ class FilterForm(forms.Form):
         required=False,
         queryset=Scheme.objects.all(),
         widget=forms.Select(
-            attrs={"class": "form-select mx-2", "id": "scheme_name", "onChange": "getFactoryOptions();"}
+            attrs={"class": "form-select mx-1", "id": "scheme_name", "onChange": "getFactoryOptions();"}
         ),
     )
     organisation = forms.ChoiceField(label="Organisation", choices=OPERATORS.items(), required=False)
@@ -117,7 +117,7 @@ class FilterForm(forms.Form):
         required=False,
         widget=forms.Select(
             attrs={
-                "class": "form-select mx-2",
+                "class": "form-select mx-1",
                 "id": "time_range",
                 "onChange": mark_safe(
                     """
@@ -134,7 +134,7 @@ class FilterForm(forms.Form):
         widget=forms.DateInput(
             format=("%Y-%m-%d"),
             attrs={
-                "class": "form-control mx-2",
+                "class": "form-control mx-1",
                 "id": "start_date",
                 "placeholder": "Select a date",
                 "type": "date",
@@ -147,7 +147,7 @@ class FilterForm(forms.Form):
         widget=forms.DateInput(
             format=("%Y-%m-%d"),
             attrs={
-                "class": "form-control mx-2",
+                "class": "form-control mx-1",
                 "id": "end_date",
                 "placeholder": "Select a date",
                 "type": "date",
@@ -161,7 +161,7 @@ class ExportReportForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs["class"] = "form-control mx-2"
+            self.fields[field].widget.attrs["class"] = "form-control mx-1"
 
     category = forms.ChoiceField(choices=CATEGORIES.items())
     start_date = forms.DateField(
@@ -197,14 +197,14 @@ class InlineQnsForm(FilterForm):
             if f not in ("start_date", "end_date", "time_range"):
                 self.fields[f].widget.attrs = {
                     "onChange": mark_safe("document.getElementById('filter_form').submit();"),
-                    "class": "form-select mx-2",
+                    "class": "form-select mx-1",
                     "id": f,
                 }
 
     question = forms.ChoiceField(
         label="Question Key",
         required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "question"}),
+        widget=forms.Select(attrs={"class": "form-select mx-1", "id": "question"}),
     )
 
 
@@ -219,5 +219,5 @@ class AppEventsForm(forms.Form):
         label="Time Range",
         choices=TIME_RANGE.items(),
         required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-2", "id": "time_range"}),
+        widget=forms.Select(attrs={"class": "form-select mx-1", "id": "time_range"}),
     )

@@ -1,0 +1,47 @@
+{% load static %}
+<div class="navbar-custom dashboard-navbar">
+    <div class="container-fluid">
+    
+        <!-- LOGO -->
+        <div class="logo-box">
+            <a href="{% url 'dashboard:preferences' %}" class="logo logo-dark text-center">
+                <div class="logo-sm">
+                    <img src="/static/logo-nobg.png" class="logo-light" alt="" height="70" width="240"> 
+                </div>
+                <span class="logo-lg">
+                    <img src="/static/logo-nobg.png" class="logo-light" alt="" height="70" width="240"> 
+                </span>
+            </a>
+    
+            <a href="{% url 'dashboard:preferences' %}" class="logo logo-light text-center">
+                <span class="logo-sm">
+                    <h5 class="custom-sm-logo">FE</h5>
+                </span>
+                <span class="logo-lg">
+                    <img src="/static/logo-nobg.png" class="logo-light" alt="" height="70" width="240"> 
+                </span>
+            </a>
+        </div>
+    
+        <ul class="list-unstyled topnav-menu topnav-menu-left m-0">
+            <li>
+                <button class="button-menu-mobile waves-effect waves-light">
+                    <i class="fe-menu"></i>
+                </button>
+            </li>
+
+            <li>
+                <!-- Mobile menu toggle (Horizontal Layout)-->
+                <a class="navbar-toggle nav-link" data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
+                    <div class="lines">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </a>
+                <!-- End mobile menu toggle-->
+            </li>   
+        </ul>
+        <div class="clearfix"></div>
+    </div>
+</div>

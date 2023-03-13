@@ -1,0 +1,19 @@
+.custom-sm-logo {
+    color: white;
+    font-weight: 400;
+    font-size: 26px;
+    padding-top: 10px;
+}
+
+
+.bg-custom-soft-primary {
+    background-color: rgba(86, 113, 240, 0.2) !important;
+}
+
+.icon-color {
+    color: rgb(86, 113, 240);
+}
+
+.form-input-container{
+    width: '100%' !important;
+}
