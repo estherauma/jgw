@@ -12,7 +12,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-12 text-center">
-                                        <h5>Downloads</h5>
+                                        <h5>App Downloads</h5>
                                     </div>
                                     <div class="col-12">
                                         <div class="text-center">
@@ -130,13 +130,16 @@
                     <div class="col-xl-12">
                         <div class="card">
                             <div class="card-body">
-
+                                <div class="card-widgets">
+                                    <a href="javascript: void(0);" data-toggle="reload"><i class="mdi mdi-refresh"></i></a>
+                                    <a data-bs-toggle="collapse" href="#cardCollpase4" role="button" aria-expanded="false" aria-controls="cardCollpase4"><i class="mdi mdi-minus"></i></a>
+                                    <a href="javascript: void(0);" data-toggle="remove"><i class="mdi mdi-close"></i></a>
+                                </div>
                                 <h4 class="header-title mb-0">Countries</h4>
 
                                 <div id="cardCollpase4" class="collapse show">
                                     <div class="pt-3">
-                                        {% comment %} <div id="world-map-markers" style="height: 433px"></div> {% endcomment %}
-                                        <div id="mapid"></div>
+                                        <div id="mapid" style="max-height: 800px;"></div>
                                     </div>
                                 </div> <!-- collapsed end -->
                             </div> <!-- end card-body -->
@@ -157,7 +160,7 @@
 <script src="{% static 'map/routes.js' %}"></script>
 <script src="{% static 'map/map.js' %}"></script>
 <script  type="text/javascript">
-      var options = {
+      let options = {
         series: [{
         name: 'Returning users',
         data: [{% for returning_data in returning_data_list %} '{{ returning_data }}', {% endfor %}],
@@ -203,13 +206,13 @@
       tooltip: {
         y: {
           formatter: function (val) {
-            return "$ " + val + " thousands"
+            return val
           }
         }
       }
       };
 
-      var chart = new ApexCharts(document.querySelector("#unique-and-returning-users"), options);
+      let chart = new ApexCharts(document.querySelector("#unique-and-returning-users"), options);
       chart.render();
 
 

@@ -1,6 +1,9 @@
-var map = L.map('mapid').setView([-0.023559, 37.906193], 2);
+var map = L.map('mapid').setView([28.254249510296628, 84.00182396773297], 0);
+// map.zoomTo(10);
+map.flyTo([27.98545295039861, 53.278905995774146], 3);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    language: 'en',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
@@ -46,13 +49,6 @@ for (var i = 0; i < routes.length; i++) {
 
     });
     
-
-    // fit map to show all markers and polylines
-    var bounds = new L.LatLngBounds();
-    bounds.extend(fromMarker.getLatLng());
-    bounds.extend(toMarker.getLatLng());
-    bounds.extend(polyline.getBounds());
-    map.fitBounds(bounds);
 }
 
 // utils
