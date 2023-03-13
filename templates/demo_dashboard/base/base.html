@@ -4,7 +4,7 @@
     <head>
 
         <meta charset="utf-8" />
-        <title>UBold - Responsive Admin Dashboard Template</title>
+        <title>Just Good Work</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
         <meta content="Coderthemes" name="author" />
@@ -24,6 +24,11 @@
         <link rel="stylesheet" href="{% static 'themes/modern/css/custom.css' %}" type="text/css" id="app-style">
         <!-- Head js -->
         <script src="{% static 'themes/modern/js/head.js' %}"></script>
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-extra-markers/1.2.1/css/leaflet.extra-markers.min.css" integrity="sha512-wurszDyO1nj6ESdfrXb9h1hmoHMu3sQ3iXgKcu/p81lT+KaPGkta9NIPX7k6XXGgVYpcRHcc8AA4UIeQ7Ax/Cw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link type="text/css" rel="stylesheet" href="https://api.mqcdn.com/sdk/mapquest-js/v1.3.2/mapquest.css"/>
+        <link rel="stylesheet" href="{% static 'map/styles.css'%}"></link>
 
 
     </head>
@@ -60,6 +65,11 @@
 
         <!-- Dashboard 2 init -->
         <script src="{% static 'themes/modern/js/pages/dashboard-2.init.js' %}"></script>
+
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-extra-markers/1.2.1/js/leaflet.extra-markers.js" integrity="sha512-Jgp0ME6T7Hwe5HT+dHl8CFpKhtNbjgwyzLKq4/OGR2s8cfR3bORtDTTePvI8MO3jtOI47VTQOAL9VjF0sVNBhA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/perliedman-leaflet-control-geocoder/2.4.0/Control.Geocoder.min.js" integrity="sha512-Pwbi+LtFQRtPHuYkIIwns8XTgCPEV2Eqp4Sk/JovY+pbG6buhvnOfqKLXzo08GvodwJbBu+y3omGBAj4F4Xyig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdn.jsdelivr.net/npm/react-leaflet-arrowheads@1.1.0/build/react-leaflet-arrowheads.min.js"></script>
 
         <!-- App js-->
         <script src="{% static 'themes/modern/js/app.min.js' %}"></script>
