@@ -17,3 +17,7 @@
 .form-input-container{
     width: '100%' !important;
 }
+
+.dashboard-navbar{
+    background: #63e4ec;
+}
