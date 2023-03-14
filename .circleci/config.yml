@@ -68,7 +68,6 @@ jobs:
       - checkout
       - *cmd_attach_workspace
       - *cmd_install_packages
-      - *cmd_collect_static
       # - *cmd_save_cache
   test:
     <<: *defaults
@@ -77,6 +76,7 @@ jobs:
       - *cmd_add_google_creds
       - *cmd_attach_workspace
       - *cmd_install_packages
+      - *cmd_collect_static
       - *cmd_run_db_migrations
       # - *cmd_restore_cache
       - run:
