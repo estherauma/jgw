@@ -1,393 +1,416 @@
-
 {% extends 'layouts/non_auth_base.html' %}
 {% load static %}
 
 {% block body %}
+
 <body data-bs-spy="scroll" data-bs-target=".navbar" data-bs-offset="78">
-        <!-- home start -->
-        <section class="bg-home bg-gradient" id="home">
-            <div class="home-center">
-                <div class="home-desc-center">
-                    <div class="container-fluid">
-                        <div class="row align-items-center">
-                            <div class="col-lg-6">
-                                <div class="home-title mo-mb-20">
-                                    <h1 class="mb-4 text-white">Welcome to the Just Good Work Data Platform.</h1>
-                                    <p class="text-white-50 home-desc">The Just Good Work data platform offers information, data and insights about migrant labour.  This includes issues that affect migrants from when they are looking for work in their home countries, through their experience migrating and working until they finish. Through this platform, we hope to shed light on the issues that not only affect migrant workers, but also lead to inefficiencies in labour supply chains.  This resource is to provide insight and support that will help individuals, organizations, and governments to combat modern slavery and protect the rights of migrant workers.</p>
-                                </div>
-                            </div>
-                            <div class="col-xl-4 offset-xl-2 col-lg-5 offset-lg-1 col-md-7">
-                                <div class="home-img position-relative">
-                                    <img src="{% static 'themes/landing/images/home-img.png' %}" alt="" class="home-first-img">
-                                    <img src="{% static 'themes/landing/images/home-img.png' %}" alt="" class="home-second-img mx-auto d-block">
-                                    <img src="{% static 'themes/landing/images/home-img.png' %}" alt="" class="home-third-img">
-                                </div>
+    <!-- home start -->
+    <section class="bg-home bg-gradient" id="home">
+        <div class="home-center">
+            <div class="home-desc-center">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <div class="home-title mo-mb-20">
+                                <h1 class="mb-4 text-white">Welcome to the Just Good Work Data Platform.</h1>
+                                <p class="text-white-50 home-desc">The Just Good Work data platform offers information,
+                                    data and insights about migrant labour. This includes issues that affect migrants
+                                    from when they are looking for work in their home countries, through their
+                                    experience migrating and working until they finish. Through this platform, we hope
+                                    to shed light on the issues that not only affect migrant workers, but also lead to
+                                    inefficiencies in labour supply chains. This resource is to provide insight and
+                                    support that will help individuals, organizations, and governments to combat modern
+                                    slavery and protect the rights of migrant workers.</p>
                             </div>
                         </div>
-                        <!-- end row -->
+                        <div class="col-xl-4 offset-xl-2 col-lg-5 offset-lg-1 col-md-7">
+                            <div class="home-img position-relative">
+                                <img src="{% static 'themes/landing/images/home-img.png' %}" alt=""
+                                    class="home-first-img">
+                                <img src="{% static 'themes/landing/images/home-img.png' %}" alt=""
+                                    class="home-second-img mx-auto d-block">
+                                <img src="{% static 'themes/landing/images/home-img.png' %}" alt=""
+                                    class="home-third-img">
+                            </div>
+                        </div>
                     </div>
-                    <!-- end container-fluid -->
+                    <!-- end row -->
+                </div>
+                <!-- end container-fluid -->
+            </div>
+        </div>
+    </section>
+    <!-- home end -->
+
+    <!-- features start -->
+    <section class="section-sm" id="features">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="text-center mb-4 pb-1">
+                        <h3 class="mb-3">How can the JGW data platform help you?</h3>
+                        <p class="text-muted">officia laboris id sint. Voluptate laborum aliqua ipsum ex id et anim
+                            mollit minim aliqua. </p>
+                    </div>
                 </div>
             </div>
-        </section>
-        <!-- home end -->
+            <!-- end row -->
 
-        <!-- features start -->
-        <section class="section-sm" id="features">
-            <div class="container-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-lg-6">
-                        <div class="text-center mb-4 pb-1">
-                            <h3 class="mb-3">Ex officia tempor nisi aliqua.</h3>
-                            <p class="text-muted">Ut ullamco ut excepteur reprehenderit ea dolor. Sint est occaecat sit cupidatat officia laboris id sint. Voluptate laborum aliqua ipsum ex id et anim mollit minim aliqua. </p>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="features-box">
+                        <div class="features-img mb-4">
+                            <img src="{% static 'icons/Real_time.png' %}" alt="">
                         </div>
+                        <h4 class="mb-2">Real time insights</h4>
+                        <p class="text-muted">Get real time feedbacks and insights from 45000+ workers in over 30
+                            countries.</p>
                     </div>
                 </div>
-                <!-- end row -->
 
-                <div class="row">
-                    <div class="col-lg-4 col-md-6">
-                        <div class="features-box">
-                            <div class="features-img mb-4">
-                                <img src="{% static 'themes/landing/images/icons/layers.png' %}" alt="">
-                            </div>
-                            <h4 class="mb-2">Real Time Insights</h4>
-                            <p class="text-muted">Get real time feedback about issues facing migrant workers.</p>
+                <div class="col-lg-4 col-md-6">
+                    <div class="features-box">
+                        <div class="features-img mb-4">
+                            <img src="{% static 'icons/Supply_chain.png' %}" alt="">
                         </div>
+                        <h4 class="mb-2">Track issues specific to your supply chain</h4>
+                        <p class="text-muted">By using JGW in your supply chain you can find issues and inefficiencies
+                            earlier.</p>
                     </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <div class="features-box">
-                            <div class="features-img mb-4">
-                                <img src="{% static 'themes/landing/images/icons/paperdesk.png' %}" alt="">
-                            </div>
-                            <h4 class="mb-2">Track issues specific to your supply chain</h4>
-                            <p class="text-muted">By using JGW in your supply chain you can find issues and inefficiencies earlier.</p>
-                        </div>
-                    </div>
-                    <!-- end col -->
-
-                    <div class="col-lg-4 col-md-6">
-                        <div class="features-box">
-                            <div class="features-img mb-4">
-                                <img src="{% static 'themes/landing/images/icons/solarsystem.png' %}" alt="">
-                            </div>
-                            <h4 class="mb-3">Easy to understand</h4>
-                            <p class="text-muted">leave the below text blank - I need to think about some text.</p>
-                        </div>
-                    </div>
-                    <!-- end col -->
-                                        <!-- end col -->
-                                        <div class="col-lg-4 col-md-6">
-                                            <div class="features-box">
-                                                <div class="features-img mb-4">
-                                                    <img src="{% static 'themes/landing/images/icons/core.png' %}" alt="">
-                                                </div>
-                                                <h4 class="mb-2">Improve your recruitment and retention</h4>
-                                                <p class="text-muted">Lower staff turnover and increase retention proactively understanding issues negatively affecting migrants.</p>
-                                            </div>
-                                        </div>
-                                        <!-- end col -->
-                    <div class="col-lg-4 col-md-6">
-                        <div class="features-box">
-                            <div class="features-img mb-4">
-                                <img src="{% static 'themes/landing/images/icons/datatext.png' %}" alt="">
-                            </div>
-                            <h4 class="mb-3">Safe information</h4>
-                            <p class="text-muted">All the information we collect is anonymised to ensure protection for migrants.</p>
-                        </div>
-                    </div>
-                    <!-- end col -->
-                    <div class="col-lg-4 col-md-6">
-                        <div class="features-box">
-                            <div class="features-img mb-4">
-                                <img src="{% static 'themes/landing/images/icons/browserscript.png' %}" alt="">
-                            </div>
-                            <h4 class="mb-3">Accurate information</h4>
-                            <p class="text-muted">We have spent years building trust with migrants and migrant support agencies all over the world, which means we have the relationships to get accurate information</p>
-                        </div>
-                    </div>
-                    <!-- end col -->
                 </div>
-                <!-- end row -->
-            </div> <!-- end container-fluid -->
-        </section>
-        <!-- features end -->
+                <!-- end col -->
 
-        <!-- pricing start -->
-        <section class="section pb-0 bg-gradient" id="pricing">
-            <div class="bg-shape">
-                <img src="{% static 'themes/landing/images/bg-shape.png' %}" alt="" class="img-fluid mx-auto d-block">
+                <div class="col-lg-4 col-md-6">
+                    <div class="features-box">
+                        <div class="features-img mb-4">
+                            <img src="{% static 'icons/What_matters.png' %}" alt="">
+                        </div>
+                        <h4 class="mb-3">Understand what matters to workers</h4>
+                        <p class="text-muted">Improves worker's experience for better attraction, engagement, and
+                            retention.</p>
+                    </div>
+                </div>
+                <!-- end col -->
+                <!-- end col -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="features-box">
+                        <div class="features-img mb-4">
+                            <img src="{% static 'icons/recruitment.png' %}" alt="">
+                        </div>
+                        <h4 class="mb-2">Improve your recruitment and retention</h4>
+                        <p class="text-muted">Lower staff turnover and increase retention proactively understanding
+                            issues negatively affecting migrants.</p>
+                    </div>
+                </div>
+                <!-- end col -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="features-box">
+                        <div class="features-img mb-4">
+                            <img src="{% static 'icons/Safety.png' %}" alt="">
+                        </div>
+                        <h4 class="mb-3">Safety for workers</h4>
+                        <p class="text-muted">All the information we collect is anonymised to ensure protection for
+                            migrants.</p>
+                    </div>
+                </div>
+                <!-- end col -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="features-box">
+                        <div class="features-img mb-4">
+                            <img src="{% static 'icons/information.png' %}" alt="">
+                        </div>
+                        <h4 class="mb-3">Accurate information</h4>
+                        <p class="text-muted">We have spent years building trust with migrants and migrant support
+                            agencies all over the world, which means we have the relationships to get accurate
+                            information</p>
+                    </div>
+                </div>
+                <!-- end col -->
             </div>
-            <div class="container-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-lg-6">
-                        <div class="text-center mb-4">
-                            <h3 class="text-white">Choose Our Pricing Plans</h3>
-                            <p class="text-white-50">The clean and well commented code allows easy customization of the theme.It's designed for describing your app, agency or business.</p>
-                        </div>
+            <!-- end row -->
+        </div> <!-- end container-fluid -->
+    </section>
+    <!-- features end -->
+
+    <!-- pricing start -->
+    <section class="section pb-0 bg-gradient" id="pricing">
+        <div class="bg-shape">
+            <img src="{% static 'themes/landing/images/bg-shape.png' %}" alt="" class="img-fluid mx-auto d-block">
+        </div>
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="text-center mb-4">
+                        <h3 class="text-white">Choose Our Pricing Plans</h3>
+                        <p class="text-white-50">The clean and well commented code allows easy customization of the
+                            theme.It's designed for describing your app, agency or business.</p>
                     </div>
-                </div>
-                <!-- end row -->
-
-                <div class="row justify-content-center">
-                    <div class="col-xl-10">
-                        <div class="row align-items-center">
-                            <div class="col-lg-4">
-                                <div class="pricing-plan bg-white p-4 mt-4">
-                                    <div class="pricing-header text-center">
-                                        <h5 class="plan-title text-uppercase mb-4">Single Application</h5>
-                                        <h1><sup><small>$</small></sup>49</h1>
-                                        <div class="plan-duration text-muted">Per License</div>
-                                    </div>
-                                    <ul class="list-unstyled pricing-list mt-4">
-                                        <li>
-                                            <i class="mdi mdi-album"></i>
-                                            <p>Number of end products <b>1</b></p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-lifebuoy"></i>
-                                            <p>Customer support<p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-update"></i>
-                                            <p>Free Updates</p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-earth"></i>
-                                            <p> 1 Domain<p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-history"></i>
-                                            <p>Monthly updates</p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-alarm-check"></i>
-                                            <p>24x7 Support</p>
-                                        </li>
-                                    </ul>
-                                    <div class="text-center mt-5">
-                                        <a href="#" class="btn btn-primary">Purchase Now</a>
-                                    </div>
-                                </div>
-                            </div> <!-- end col -->
-
-                            <div class="col-lg-4">
-                                <div class="pricing-plan active p-4 mt-4">
-                                    <span class="lable">Popular</span>
-                                    <div class="pricing-header text-white text-center">
-                                        <h5 class="plan-title text-white text-uppercase mb-4">Multiple Application</h5>
-                                        <h1 class=" text-white"><sup><small>$</small></sup>149</h1>
-                                        <div class="plan-duration">Per License</div>
-                                    </div>
-                                    <ul class="list-unstyled text-white pricing-list mt-4">
-                                        <li>
-                                            <i class="mdi mdi-album"></i>
-                                            <p>Number of end products <b>5</b></p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-lifebuoy"></i>
-                                            <p>Customer support<p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-update"></i>
-                                            <p>Free Updates</p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-earth"></i>
-                                            <p> 1 Domain<p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-history"></i>
-                                            <p>Monthly updates</p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-alarm-check"></i>
-                                            <p>24x7 Support</p>
-                                        </li>
-                                    </ul>
-                                    <div class="text-center mt-5">
-                                        <a href="#" class="btn shadow btn-light">Purchase Now</a>
-                                    </div>
-                                </div>
-                            </div> <!-- end col -->
-
-                            <div class="col-lg-4">
-                                <div class="pricing-plan bg-white p-4 mt-4">
-                                    <div class="pricing-header text-center">
-                                        <h5 class="plan-title text-uppercase mb-4">Extended</h5>
-                                        <h1><sup><small>$</small></sup>999</h1>
-                                        <div class="plan-duration text-muted">Per License</div>
-                                    </div>
-                                    <ul class="list-unstyled pricing-list mt-4">
-                                        <li>
-                                            <i class="mdi mdi-album"></i>
-                                            <p>Number of end products <b>1</b></p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-lifebuoy"></i>
-                                            <p>Customer support<p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-update"></i>
-                                            <p>Free Updates</p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-earth"></i>
-                                            <p> 1 Domain<p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-history"></i>
-                                            <p>Monthly updates</p>
-                                        </li>
-                                        <li>
-                                            <i class="mdi mdi-alarm-check"></i>
-                                            <p>24x7 Support</p>
-                                        </li>
-                                    </ul>
-                                    <div class="text-center mt-5">
-                                        <a href="#" class="btn btn-primary">Purchase Now</a>
-                                    </div>
-                                </div>
-                            </div> <!-- end col -->
-                        </div>
-                        <!-- end row -->
-                    </div> <!-- end col-xl-10 -->
-
-                </div>
-                <!-- end row -->
-            </div>
-            <!-- end container-fluid -->
-        </section>
-        <!-- pricing end -->
-
-        <!-- faqs start -->
-        <section class="section" id="faq">
-            <div class="container-fluid">
-
-                <div class="row justify-content-center">
-                    <div class="col-lg-6">
-                        <div class="text-center mb-5">
-                            <h3>Frequently Asked Questions</h3>
-                            <p class="text-muted">At solmen va esser necessi far uniform grammatica.</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- end row -->
-
-                <div class="row">
-                    <div class="col-lg-5 offset-lg-1">
-                        <!-- Question/Answer -->
-                        <div>
-                            <div class="faq-question-q-box">Q.</div>
-                            <h4 class="faq-question">What is Lorem Ipsum?</h4>
-                            <p class="faq-answer mb-4 pb-1 text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                        </div>
-
-                        <!-- Question/Answer -->
-                        <div>
-                            <div class="faq-question-q-box">Q.</div>
-                            <h4 class="faq-question">Why use Lorem Ipsum?</h4>
-                            <p class="faq-answer mb-4 pb-1 text-muted">Lorem ipsum dolor sit amet, in mea nonumes dissentias dissentiunt, pro te solet oratio iriure. Cu sit consetetur moderatius intellegam, ius decore accusamus te. Ne primis suavitate disputando nam. Mutat convenirete.</p>
-                        </div>
-
-                        <!-- Question/Answer -->
-                        <div>
-                            <div class="faq-question-q-box">Q.</div>
-                            <h4 class="faq-question">How many variations exist?</h4>
-                            <p class="faq-answer mb-4 pb-1 text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                        </div>
-
-                    </div>
-                    <!--/col-lg-5 -->
-
-                    <div class="col-lg-5">
-                        <!-- Question/Answer -->
-                        <div>
-                            <div class="faq-question-q-box">Q.</div>
-                            <h4 class="faq-question">Is safe use Lorem Ipsum?</h4>
-                            <p class="faq-answer mb-4 pb-1 text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                        </div>
-
-                        <!-- Question/Answer -->
-                        <div>
-                            <div class="faq-question-q-box">Q.</div>
-                            <h4 class="faq-question">When can be used?</h4>
-                            <p class="faq-answer mb-4 pb-1 text-muted">Lorem ipsum dolor sit amet, in mea nonumes dissentias dissentiunt, pro te solet oratio iriure. Cu sit consetetur moderatius intellegam, ius decore accusamus te. Ne primis suavitate disputando nam. Mutat convenirete.</p>
-                        </div>
-
-                        <!-- Question/Answer -->
-                        <div>
-                            <div class="faq-question-q-box">Q.</div>
-                            <h4 class="faq-question">License &amp; Copyright</h4>
-                            <p class="faq-answer mb-4 pb-1 text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                        </div>
-
-                    </div>
-                    <!--/col-lg-5-->
-                </div>
-                <!-- end row -->
-
-            </div> <!-- end container-fluid -->
-        </section>
-        <!-- faqs end -->
-
-        <!-- contact start -->
-        <section class="section pb-0 bg-gradient" id="contact">
-            {% comment %} <div class="bg-shape">
-                <img src="{% static 'themes/landing/images/bg-shape-light.png' %}" alt="" class="img-fluid mx-auto d-block">
-            </div> {% endcomment %}
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="title text-center mb-4">
-                            <h3 class="text-white">Have any Questions ?</h3>
-                            <p class="text-white-50">Please reach out to us using an of the channels below</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- end row -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="contact-content text-center mt-4">
-                            <div class="contact-icon mb-2">
-                                <i class="mdi mdi-email-outline text-info h2"></i>
-                            </div>
-                            <div class="contact-details text-white">
-                                <h6 class="text-white">E-mail</h6>
-                                <p class="text-white-50">info@justgood.work</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end col -->
-                    <div class="col-md-4">
-                        <div class="contact-content text-center mt-4">
-                            <div class="contact-icon mb-2">
-                                <i class="mdi mdi-cellphone-iphone text-info h2"></i>
-                            </div>
-                            <div class="contact-details">
-                                <h6 class="text-white">Phone</h6>
-                                <p class="text-white-50">012-345-6789</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end col -->
-                    <div class="col-md-4">
-                        <div class="contact-content text-center mt-4">
-                            <div class="contact-icon mb-2">
-                                <i class="mdi mdi-map-marker text-info h2"></i>
-                            </div>
-                            <div class="contact-details">
-                                <h6 class="text-white">Address</h6>
-                                <p class="text-white-50">4413 Redbud Drive, New York</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end col -->
                 </div>
             </div>
-            <!-- end container-fluid -->
-        </section>
-        <!-- contact end -->
+            <!-- end row -->
+
+            <div class="row justify-content-center">
+                <div class="col-xl-10">
+                    <div class="row align-items-center">
+                        <div class="col-lg-4">
+                            <div class="pricing-plan bg-white p-4 mt-4">
+                                <div class="pricing-header text-center">
+                                    <h5 class="plan-title text-uppercase mb-4">Single Application</h5>
+                                    <h1><sup><small>$</small></sup>49</h1>
+                                    <div class="plan-duration text-muted">Per License</div>
+                                </div>
+                                <ul class="list-unstyled pricing-list mt-4">
+                                    <li>
+                                        <i class="mdi mdi-album"></i>
+                                        <p>Number of end products <b>1</b></p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-lifebuoy"></i>
+                                        <p>Customer support
+                                        <p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-update"></i>
+                                        <p>Free Updates</p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-earth"></i>
+                                        <p> 1 Domain
+                                        <p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-history"></i>
+                                        <p>Monthly updates</p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-alarm-check"></i>
+                                        <p>24x7 Support</p>
+                                    </li>
+                                </ul>
+                                <div class="text-center mt-5">
+                                    <a href="#" class="btn btn-primary">Purchase Now</a>
+                                </div>
+                            </div>
+                        </div> <!-- end col -->
+
+                        <div class="col-lg-4">
+                            <div class="pricing-plan active p-4 mt-4">
+                                <span class="lable">Popular</span>
+                                <div class="pricing-header text-white text-center">
+                                    <h5 class="plan-title text-white text-uppercase mb-4">Multiple Application</h5>
+                                    <h1 class=" text-white"><sup><small>$</small></sup>149</h1>
+                                    <div class="plan-duration">Per License</div>
+                                </div>
+                                <ul class="list-unstyled text-white pricing-list mt-4">
+                                    <li>
+                                        <i class="mdi mdi-album"></i>
+                                        <p>Number of end products <b>5</b></p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-lifebuoy"></i>
+                                        <p>Customer support
+                                        <p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-update"></i>
+                                        <p>Free Updates</p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-earth"></i>
+                                        <p> 1 Domain
+                                        <p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-history"></i>
+                                        <p>Monthly updates</p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-alarm-check"></i>
+                                        <p>24x7 Support</p>
+                                    </li>
+                                </ul>
+                                <div class="text-center mt-5">
+                                    <a href="#" class="btn shadow btn-light">Purchase Now</a>
+                                </div>
+                            </div>
+                        </div> <!-- end col -->
+
+                        <div class="col-lg-4">
+                            <div class="pricing-plan bg-white p-4 mt-4">
+                                <div class="pricing-header text-center">
+                                    <h5 class="plan-title text-uppercase mb-4">Extended</h5>
+                                    <h1><sup><small>$</small></sup>999</h1>
+                                    <div class="plan-duration text-muted">Per License</div>
+                                </div>
+                                <ul class="list-unstyled pricing-list mt-4">
+                                    <li>
+                                        <i class="mdi mdi-album"></i>
+                                        <p>Number of end products <b>1</b></p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-lifebuoy"></i>
+                                        <p>Customer support
+                                        <p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-update"></i>
+                                        <p>Free Updates</p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-earth"></i>
+                                        <p> 1 Domain
+                                        <p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-history"></i>
+                                        <p>Monthly updates</p>
+                                    </li>
+                                    <li>
+                                        <i class="mdi mdi-alarm-check"></i>
+                                        <p>24x7 Support</p>
+                                    </li>
+                                </ul>
+                                <div class="text-center mt-5">
+                                    <a href="#" class="btn btn-primary">Purchase Now</a>
+                                </div>
+                            </div>
+                        </div> <!-- end col -->
+                    </div>
+                    <!-- end row -->
+                </div> <!-- end col-xl-10 -->
+
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- end container-fluid -->
+    </section>
+    <!-- pricing end -->
+
+    <!-- faqs start -->
+    <section class="section" id="faq">
+        <div class="container-fluid">
+
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="text-center mb-5">
+                        <h3>Frequently Asked Questions</h3>
+                        <p class="text-muted">At solmen va esser necessi far uniform grammatica.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+
+            <div class="row">
+                <div class="col-lg-5 offset-lg-1">
+                    <!-- Question/Answer -->
+                    <div>
+                        <div class="faq-question-q-box">Q.</div>
+                        <h4 class="faq-question">What is Lorem Ipsum?</h4>
+                        <p class="faq-answer mb-4 pb-1 text-muted">Lorem Ipsum is simply dummy text of the printing and
+                            typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the
+                            1500s.</p>
+                    </div>
+
+                    <!-- Question/Answer -->
+                    <div>
+                        <div class="faq-question-q-box">Q.</div>
+                        <h4 class="faq-question">Why use Lorem Ipsum?</h4>
+                        <p class="faq-answer mb-4 pb-1 text-muted">Lorem ipsum dolor sit amet, in mea nonumes dissentias
+                            dissentiunt, pro te solet oratio iriure. Cu sit consetetur moderatius intellegam, ius decore
+                            accusamus te. Ne primis suavitate disputando nam. Mutat convenirete.</p>
+                    </div>
+
+                    <!-- Question/Answer -->
+                    <div>
+                        <div class="faq-question-q-box">Q.</div>
+                        <h4 class="faq-question">How many variations exist?</h4>
+                        <p class="faq-answer mb-4 pb-1 text-muted">Lorem Ipsum is simply dummy text of the printing and
+                            typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the
+                            1500s.</p>
+                    </div>
+
+                </div>
+                <!--/col-lg-5 -->
+
+                <div class="col-lg-5">
+                    <!-- Question/Answer -->
+                    <div>
+                        <div class="faq-question-q-box">Q.</div>
+                        <h4 class="faq-question">Is safe use Lorem Ipsum?</h4>
+                        <p class="faq-answer mb-4 pb-1 text-muted">Lorem Ipsum is simply dummy text of the printing and
+                            typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the
+                            1500s.</p>
+                    </div>
+
+                    <!-- Question/Answer -->
+                    <div>
+                        <div class="faq-question-q-box">Q.</div>
+                        <h4 class="faq-question">When can be used?</h4>
+                        <p class="faq-answer mb-4 pb-1 text-muted">Lorem ipsum dolor sit amet, in mea nonumes dissentias
+                            dissentiunt, pro te solet oratio iriure. Cu sit consetetur moderatius intellegam, ius decore
+                            accusamus te. Ne primis suavitate disputando nam. Mutat convenirete.</p>
+                    </div>
+
+                    <!-- Question/Answer -->
+                    <div>
+                        <div class="faq-question-q-box">Q.</div>
+                        <h4 class="faq-question">License &amp; Copyright</h4>
+                        <p class="faq-answer mb-4 pb-1 text-muted">Lorem Ipsum is simply dummy text of the printing and
+                            typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the
+                            1500s.</p>
+                    </div>
+
+                </div>
+                <!--/col-lg-5-->
+            </div>
+            <!-- end row -->
+
+        </div> <!-- end container-fluid -->
+    </section>
+    <!-- faqs end -->
+
+    <!-- contact start -->
+    <section class="section pb-0 bg-gradient" id="contact">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="title text-center mb-4">
+                        <h3 class="text-white">Have any Questions ?</h3>
+                        <p class="text-white-50">Please reach out to us using an of the channels below</p>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+            <div class="row mb-4">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h4 class="text-white">Locations</h4>
+                            <ul class="list-unstyled">
+                                <li class="text-white-50">United Kingdom</li>
+                                <li class="text-white-50">New Zealand</li>
+                                <li class="text-white-50">United States of America</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-white">Contact Us</h4>
+                            <ul class="list-unstyled">
+                                <li class="text-white-50">Email: Info@justgood.work</li>
+                                <li class="text-white-50">UK: +44 3036 665459</li>
+                                <li class="text-white-50">USA: +1 813 322 2785</li>
+                                <li class="text-white-50">New Zealand: +64 9 884 9737</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-white">Just good work</h4>
+                            <p class="text-white-50">A brief description of the company.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end container-fluid -->
+    </section>
+    <!-- contact end -->
 </body>
 {% endblock body %}
