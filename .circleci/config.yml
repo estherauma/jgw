@@ -58,6 +58,7 @@ cmd_add_google_creds: &cmd_add_google_creds
 cmd_collect_static: &cmd_collect_static
   run:
     command: |
+      . venv/bin/activate
       python manage.py collectstatic
 
 jobs:
