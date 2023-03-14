@@ -2,60 +2,63 @@
 
 This repository contains code for running analytics on data collected by the JGW API
 
-> [UI Template](https://colorlib.com/wp/template/bootstrap-sidebar-05/)
-> Built with Django
+> Built with [Django](https://www.djangoproject.com/) and [UBold](https://coderthemes.com/ubold/)
 
 ## SetUp
 
-#### Pre-requisites
+   Follow the attached links to ensure the following are installed and running:
 
 - [python](https://www.python.org/downloads/)
 - [postgresql](https://www.postgresql.org/download/)
 - [redis](https://redis.io/docs/getting-started/)
 
-#### Steps
+### Steps
 
-1. Set up your local database
-
-   Use [env.example](./env.example) as a template for your `.env` file where you can update any env variables such as db credentials.
+1. Use [env.example](./env.example) as a template for your `.env` file where you can update any env variables such as db credentials.
 
    You can get an API key for the google service account from this [link](https://console.cloud.google.com/iam-admin/serviceaccounts/details/104736138538665133501/keys?project=just-good-work). Download the json file to the project root and rename it to `google_cred.json`
 
-```bash
-psql -U postgres -h 127.0.0.1 -f create_dev_db.sql
-```
+2. Set up your local database
 
-2. In the root directory, create a new virtual environment; activate it and install dependencies
+   ```bash
+   psql -U postgres -h 127.0.0.1 -f create_dev_db.sql
+   ```
 
-```bash
-python3 -m venv ./.venv
-source ./.venv/bin/activate
-pip install -r requirements.txt
-```
+3. In the root directory, create a new virtual environment; activate it and install dependencies
 
-3. run database migrations with:
+   ```bash
+   python3 -m venv ./.venv
+   source ./.venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-```bash
-python manage.py migrate
-```
+4. Run database migrations and collect static files with:
 
-4. Run the following commands to start the celery scheduler and Django development server.
+   These only need to be run when there's a change to the database structure or new assets/static files are added for the UI.
+   ```bash
+   python manage.py migrate
+   python manage.py collectstatic
+   ```
 
-   Visit http://localhost:8000/ to use the running application
+5. Run the following commands to start the celery scheduler and Django development server.
 
-```bash
-# run celery worker and beat scheduler in background
-celery -A jgwpandas beat -l info --logfile=./celery/celery.beat.log --detach
-celery -A jgwpandas worker -l info --logfile=./celery/celery.log --detach
+   ```bash
+   # run celery worker and beat scheduler in background
+   celery -A jgwpandas beat -l info --logfile=./celery/celery.beat.log --detach
+   celery -A jgwpandas worker -l info --logfile=./celery/celery.log --detach
 
-# run django development server
-python manage.py runserver
-```
+   #run this and follow the prompts to create a superuser account
+   python manage.py createsuperuser
 
-5. Use `CTRL+C` to terminate the django server.
+   # run dev-server and visit http://localhost:8000/ in the browser to use the app
+   python manage.py runserver
+   ```
+   > NOTE: Accounts created through the Sign-Up page currently need to be activated by an admin user.
+
+6. Use `CTRL+C` to terminate the django server.
 
    To stop the background celery services started in the step above, run the following command
 
-```bash
-kill -9 $(ps aux | grep celery | grep -v grep | awk '{print $2}' | tr '\n'  ' ') > /dev/null 2>&1
-```
+   ```bash
+   kill -9 $(ps aux | grep celery | grep -v grep | awk '{print $2}' | tr '\n'  ' ') > /dev/null 2>&1
+   ```
