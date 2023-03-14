@@ -5,8 +5,9 @@
         <!--- Sidemenu -->
         <div id="sidebar-menu">
 
-            <ul  id="side-menu">
+           
             {% if user.is_authenticated %}
+            <ul  id="side-menu">
                     <li>
                         <a href="{% url 'dashboard:preferences' %}">
                             <i data-feather="bar-chart-2"></i>
@@ -94,13 +95,88 @@
                             <span>Log out</span> 
                         </a>
                     </li>
+                </ul>
             {% else %}
-                <li>
-                    <a>
-                        <i data-feather="bar-chart-2"></i>
-                        <span> Filters </span>
+            <ul  id="side-menu">
+                <li style="border-bottom: 1px solid #eeeeee; margin-bottom: 8px;">
+                    <a style="padding-top: 0px;"> 
+                        <i data-feather="list"></i>
+                        <span>Filters</span> 
                     </a>
                 </li>
+                <li>
+                    <a data-toggle="collapse" href="#genderFilter" role="button" aria-expanded="false" aria-controls="genderFilter">
+                        <i data-feather="users"></i>
+                        <span>Gender</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse multi-collapse" id="genderFilter">
+                        <ul class="nav-second-level">
+                            <li><a role="button">Male</a></li>
+                            <li><a role="button">Female</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a data-toggle="collapse" href="#ageFilter" role="button" aria-expanded="false" aria-controls="ageFilter">
+                        <i data-feather="user"></i>
+                        <span>Age</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse multi-collapse" id="ageFilter">
+                        <ul class="nav-second-level">
+                            <li><a role="button">21 - 30</a></li>
+                            <li><a role="button">31 - 40</a></li>
+                            <li><a role="button">41 - 50</a></li>
+                            <li><a role="button">51 - 60</a></li>
+                            <li><a role="button">no answered</a></li>
+                            <li><a role="button">60+</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a data-toggle="collapse" href="#countryFilter" role="button" aria-expanded="false" aria-controls="countryFilter">
+                        <i data-feather="map"></i>
+                        <span>Time period</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse multi-collapse" id="countryFilter">
+                        <div class="px-4">
+                            <div>
+                               <div class="form-group mb-2">
+                                  <label for="exampleInputEmail1">Start</label>
+                                  <input type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                                </div>
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">End</label>
+                                  <input type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                                </div>
+                            </div>
+                          </div>
+                    </div>
+                </li>
+                <li>
+                    <a data-toggle="collapse" href="#timeFilter" role="button" aria-expanded="false" aria-controls="timeFilter">
+                        <i data-feather="calendar"></i>
+                        <span>Country</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse multi-collapse" id="timeFilter">
+                        <div class="px-4">
+                          <div>
+                             <div class="form-group mb-2">
+                                <label for="exampleInputEmail1">Source</label>
+                                <input type="string" class="form-control" id="sourceCountry" placeholder="Source country">
+                              </div>
+                              <div class="form-group">
+                                <label for="exampleInputEmail1">Destination</label>
+                                <input type="string" class="form-control" id="destinationCountry" placeholder="Destination country">
+                              </div>
+                          </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
             {% endif %}
             </ul>
         </div>
