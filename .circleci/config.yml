@@ -55,6 +55,11 @@ cmd_add_google_creds: &cmd_add_google_creds
     command: |
       echo $GOOGLE_CRED | base64 --decode > google_cred.json
 
+cmd_collect_static: &cmd_collect_static
+  run:
+    command: |
+      python manage.py collectstatic
+
 jobs:
   build:
     docker:
@@ -63,6 +68,7 @@ jobs:
       - checkout
       - *cmd_attach_workspace
       - *cmd_install_packages
+      - *cmd_collect_static
       # - *cmd_save_cache
   test:
     <<: *defaults
