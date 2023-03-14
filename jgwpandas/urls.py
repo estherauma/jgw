@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from django.db.utils import OperationalError
 from django.db import connection
 from django.http import JsonResponse
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 @api_view(["GET"])
@@ -30,3 +32,6 @@ urlpatterns = [
     path("accounts/", include("users.urls")),
     path("health/", health)
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

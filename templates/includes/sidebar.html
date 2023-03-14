@@ -1,72 +1,114 @@
-{% block content %}
-<nav id="sidebar">
-    <div class="custom-menu">
-        <button type="button" id="sidebarCollapse" class="btn btn-primary">
-            <i class="fa fa-bars"></i>
-            <span class="sr-only">Toggle Menu</span>
-        </button>
-    </div>
-    <div class="p-4">
-        <h1>
-            <a href="{% url 'dashboard:preferences' %}" class="logo">JGW <span>Data Dashboards</span></a>
-        </h1>
-        <ul class="list-unstyled components mb-5">
-            <li class="">
-                <a href="{% url 'dashboard:preferences' %}"><span class="fa fa-home mr-3"></span>Preferences</a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:inline' %}">
-                    <span class="fa fa-question-circle mr-3"></span> Inline Questions
-                </a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:app_events' %}">
-                    <span class="fa fa-question-circle mr-3"></span> App Events
-                </a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:messaging' %}">
-                    <span class="fa fa-question-circle mr-3"></span> Messaging Questions
-                </a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:help_contacts' %}">
-                    <span class="fa fa-question-circle mr-3"></span> Help Contacts
-                </a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:checklists' key='beforeyougo' %}">
-                    <span class="fa fa-question-circle mr-3"></span> Before-You-Go
-                </a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:checklists' key='contract' %}">
-                    <span class="fa fa-question-circle mr-3"></span> Contract Checklists
-                </a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:checklists' key='joboffer' %}">
-                    <span class="fa fa-question-circle mr-3"></span> Job-Offer Checklists
-                </a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:checklists' key='visa' %}">
-                    <span class="fa fa-question-circle mr-3"></span> Visa Checklists
-                </a>
-            </li>
+{% load static %}
+<div class="left-side-menu">
 
-            <li class="">
-                <a href="{% url 'users:list_users' %}"> <span class="fa fa-users mr-3"></span> User Accounts</a>
-            </li>
-            <li class="">
-                <a href="{% url 'dashboard:export_report' %}"> <span class="fa fa-users mr-3"></span> Export Report</a>
-            </li>
-            <li class="">
-                <a class="text-white" href="{% url 'users:logout_user' %}">
-                    <span class="fa fa-sign-out m-3"></span> Sign Out
-                </a>
-            </li>
-        </ul>
+    <div class="h-100" data-simplebar>
+        <!--- Sidemenu -->
+        <div id="sidebar-menu">
+
+            <ul  id="side-menu">
+            {% if user.is_authenticated %}
+                    <li>
+                        <a href="{% url 'dashboard:preferences' %}">
+                            <i data-feather="bar-chart-2"></i>
+                            <span> Preferences </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'dashboard:inline' %}">
+                            <i data-feather="help-circle"></i>
+                            <span> Inline Questions </span>
+                        </a>
+                    </li>
+
+                    <li >
+                        <a href="{% url 'dashboard:app_events' %}">
+                            <i data-feather="activity"></i>
+                            <span>App Events</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'dashboard:messaging' %}">
+                            <i data-feather="message-square"></i>
+                            <span>Messaging Questions</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'dashboard:help_contacts' %}">
+                            <i data-feather="phone"></i>
+                            <span>Help Contacts</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'dashboard:checklists' key='beforeyougo' %}">
+                            <i data-feather="x-octagon"></i>
+                            <span>Before-You-Go</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'dashboard:checklists' key='contract' %}">
+                            <i data-feather="check-circle"></i>
+                            <span>Contract Checklists</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'dashboard:checklists' key='joboffer' %}">
+                            <i data-feather="check"></i>
+                            <span>Job-Offer Checklists</span>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'dashboard:checklists' key='visa' %}">
+                            <i data-feather="check-square"></i>
+                            <span>Visa Checklists</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#sidebarUsers" data-bs-toggle="collapse">
+                            <i data-feather="users"></i>
+                            <span>Users</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse" id="sidebarUsers">
+                            <ul class="nav-second-level">
+                                <li>
+                                    <a href="{% url 'users:list_users' %}">Accounts</a>
+                                </li>
+                                <li>
+                                <a href="{% url 'users:list_invitations' %}">Invitations</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li >
+                        <a href="{% url 'dashboard:export_report' %}"> 
+                            <i data-feather="external-link"></i>
+                            <span>Export Report</span> 
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'users:logout_user' %}"> 
+                            <i data-feather="log-out"></i>
+                            <span>Log out</span> 
+                        </a>
+                    </li>
+            {% else %}
+                <li>
+                    <a>
+                        <i data-feather="bar-chart-2"></i>
+                        <span> Filters </span>
+                    </a>
+                </li>
+            {% endif %}
+            </ul>
+        </div>
+        <!-- End Sidebar -->
+
+        <div class="clearfix"></div>
+
     </div>
-</nav>
-{% endblock content %}
+    <!-- Sidebar -left -->
+
+</div>

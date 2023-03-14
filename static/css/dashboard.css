@@ -21,3 +21,19 @@
 .dashboard-navbar{
     background: #63e4ec;
 }
+
+.display-hidden {
+    display: none;
+}
+
+.display-block {
+    display: block;
+}
+
+.nav-fil-btn {
+    cursor: pointer;
+}
+
+.nav-fil-btn:hover {
+    color: #63e4ec;
+}

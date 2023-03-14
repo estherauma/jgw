@@ -21,7 +21,5 @@ urlpatterns = [
     path("trigger-sentry", views.test_sentry),
 
     # test
-    path("demographics", views.limited_data_home_page_demographics, name="demographics"),
-    path("inline-question", views.limited_data_home_page_inline_question, name="inline_question"),
     path("limited-data-home-page", views.limited_data_home_page, name="limited_data_home_page"),
 ]

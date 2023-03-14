@@ -1,77 +1,220 @@
 
 <!-- title -->
-{% extends 'layouts/non_auth_base.html' %}
+{% extends 'layouts/base.html' %}
 {% load static %}
 
 <!-- page content -->
-{% block body %}
-<body style="min-height: 400px;">
-    <section class="bg-home bg-gradient" id="home">
-        <div class="home-center">
-            <div class="home-desc-center">
-                <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <p>stats</p>
-                    </div>
-                    <!-- end row -->
-                </div>
-                <!-- end container-fluid -->
+{% block content %}
+    <div class="content">
+        <!-- Start Content-->
+        <div class="container-fluid">
+            <div class="row">
+                 <div class="col-md-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h5>App Downloads</h5>
+                                </div>
+                                <div class="col-12">
+                                    <div class="text-center">
+                                        <h1 class="text-primary my-1"><span data-plugin="counterup">12,145</span></h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end card-->
+                </div> <!-- end col -->
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h5>Views</h5>
+                                </div>
+                                <div class="col-12">
+                                    <div class="text-center">
+                                        <h1 class="text-primary my-1"><span data-plugin="counterup">456,145</span></h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end card-->
+                </div> <!-- end col -->
+                <div class="col-md-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h5>Question Responses</h5>
+                                </div>
+                                <div class="col-12">
+                                    <div class="text-center">
+                                        <h1 class="text-primary my-1"><span data-plugin="counterup">18,145</span></h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end card-->
+                </div> <!-- end col -->
+                <div class="col-md-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h5>Anonymous stories</h5>
+                                </div>
+                                <div class="col-12">
+                                    <div class="text-center">
+                                        <h1 class="text-primary my-1"><span data-plugin="counterup">18,145</span></h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end card-->
+                </div> <!-- end col -->
             </div>
-        </div>
-    </section>
-<div>
-    <div >
-        <div class="col-xl-4 col-md-12" style="width: 100%">
-            <div class="card">
-                <div class="card-body">
-                    <canvas id="unique-and-returning-users" width="100%">
-                </div>
+            <!-- end row -->
+
+            <div class="row">
+                <div class="col-xl-4 col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-widgets">
+                                <a href="javascript: void(0);" data-toggle="reload"><i class="mdi mdi-refresh"></i></a>
+                                <a data-bs-toggle="collapse" href="#cardCollpase3" role="button" aria-expanded="false" aria-controls="cardCollpase3"><i class="mdi mdi-minus"></i></a>
+                                <a href="javascript: void(0);" data-toggle="remove"><i class="mdi mdi-close"></i></a>
+                            </div>
+                            <h4 class="header-title mb-0">Gender</h4>
+
+                            <div id="cardCollpase3" class="collapse show">
+                                <div class="text-center pt-3">
+                                    <div id="total-users" data-colors="#4a81d4,#fcc644,#e3eaef,#43bfe5"></div>
+                                    <div class="row mt-3">
+                                        <div class="col-4">
+                                            <p class="text-muted font-15 mb-1 text-truncate">Total</p>
+                                            <h4><i class="fe-arrow-down text-danger me-1"></i>18k</h4>
+                                        </div>
+                                        <div class="col-4">
+                                            <p class="text-muted font-15 mb-1 text-truncate">Male</p>
+                                            <h4><i class="fe-arrow-up text-success me-1"></i>3.25k</h4>
+                                        </div>
+                                        <div class="col-4">
+                                            <p class="text-muted font-15 mb-1 text-truncate">Female</p>
+                                            <h4><i class="fe-arrow-up text-success me-1"></i>28k</h4>
+                                        </div>
+                                    </div> <!-- end row -->
+                                </div>
+                            </div> <!-- collapsed end -->
+                        </div> <!-- end card-body -->
+                    </div> <!-- end card-->
+                </div> <!-- end col-->
             </div>
-        </div>
-    </div>
-</div>
-</body>
-{% endblock body %}
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="uandrusers" class="collapse show">
+                                <div class="pt-1">
+                                    <div>
+                                        <div id="unique-and-returning-users"></div>
+                                    </div>
+                                </div>
+                            </div> <!-- collapsed end -->
+                        </div> <!-- end card-body -->
+                    </div> <!-- end card-->
+                </div> <!-- end col -->
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-widgets">
+                                <a href="javascript: void(0);" data-toggle="reload"><i class="mdi mdi-refresh"></i></a>
+                                <a data-bs-toggle="collapse" href="#cardCollpase4" role="button" aria-expanded="false" aria-controls="cardCollpase4"><i class="mdi mdi-minus"></i></a>
+                                <a href="javascript: void(0);" data-toggle="remove"><i class="mdi mdi-close"></i></a>
+                            </div>
+                            <h4 class="header-title mb-0">Countries</h4>
+
+                            <div id="cardCollpase4" class="collapse show">
+                                <div class="pt-3">
+                                    <div id="mapid" style="max-height: 800px;"></div>
+                                </div>
+                            </div> <!-- collapsed end -->
+                        </div> <!-- end card-body -->
+                    </div> <!-- end card-->
+                </div> <!-- end col -->
+            </div>
+            <!-- end row -->
+
+        </div> <!-- container -->
+
+    </div> <!-- content -->
+{% endblock content %}
 
 {% block scripts %}
+<script src="{% static 'map/routes.js' %}"></script>
+<script src="{% static 'map/map.js' %}"></script>
+
 <script  type="text/javascript">
-
-    var uniqueAndReturningUsersChartCtx = document.getElementById('unique-and-returning-users').getContext('2d');
-    var uniqueAndReturningUsersChart = new Chart(uniqueAndReturningUsersChartCtx, {
+      let options = {
+        series: [{
+        name: 'Returning users',
+        data: [{% for returning_data in returning_data_list %} '{{ returning_data }}', {% endfor %}],
+      }, {
+        name: 'Unique users',
+        data: [{% for unique_users in unique_data_list %} '{{ unique_users }}', {% endfor %}],
+      }],
+        chart: {
         type: 'bar',
-        data: {
-            labels: [{% for label in labels %} '{{ label | safe }}', {% endfor %}],
-            datasets: [
-            {
-                label:'Returning users',
-                data: [{% for returning_data in returning_data_list %} '{{ returning_data }}', {% endfor %}],
-                backgroundColor:['rgba(17, 202, 108, 1)'],
-                borderWidth: 1
-            },
-            {
-                label:'Unique users',
-                data: [{% for unique_data in unique_data_list %} '{{ unique_data }}', {% endfor %}],
-                backgroundColor:['rgba(68, 191, 229, 1)'],
-                borderWidth: 1
-            }
-            ]
-        },
-        options: {
-            scales: {
-                y: {
-                    grid: {
-                        display: true
-                    }
-                },
-                x: {
-                    grid: {
-                        display: true,
-                        drawOnChartArea: true
-                    }
-                },
-            }
-
+        height: 500
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: "55%",
+          barHeight: 50,
+          endingShape: 'rounded'
         }
-    })
+      },
+      title: {
+        text: "Unique and Returning users",
+        style: {
+            fontSize:  '18px',
+            fontWeight:  '400',
+            fontFamily:  undefined,
+            color:  '#343A40'
+          },
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        show: true,
+        width: 2,
+        colors: ['transparent']
+      },
+      xaxis: {
+        categories: [{% for label in routes %} '{{ label | safe }}', {% endfor %}],
+      },
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        y: {
+          formatter: function (val) {
+            return val
+          }
+        }
+      }
+      };
+
+      let chart = new ApexCharts(document.querySelector("#unique-and-returning-users"), options);
+      chart.render();
+
+
 </script>
 {% endblock scripts %}
