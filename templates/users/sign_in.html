@@ -28,9 +28,6 @@
     <span>{{form.email.errors}}</span>
   </div>
   <div class="mb-3">
-    <a href="{% url 'users:request_password_reset' %}" class="text-muted float-end">
-      <small>Forgot your password?</small>
-    </a>
     <label for="password" class="form-label">{{form.password.label}}</label>
     <div class="input-group input-group-merge">
       {{form.password}}
@@ -44,6 +41,12 @@
     <button class="btn btn-primary" type="submit">Sign In</button>
   </div>
 </form>
+
+<p class="text-muted text-center">
+  <a href="{% url 'users:request_password_reset' %}" class="text-muted float-end">
+    <small>Forgot your password?</small>
+  </a>
+</p>
 {% endblock form %}
 {% block footer %}
 <p class="text-muted text-center">
@@ -52,3 +55,4 @@
   </a>
 </p>
 {% endblock footer %}
+
