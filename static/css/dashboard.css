@@ -1,0 +1,43 @@
+.custom-sm-logo {
+    color: white;
+    font-weight: 400;
+    font-size: 26px;
+    padding-top: 10px;
+}
+
+
+.bg-custom-soft-primary {
+    background-color: rgba(86, 113, 240, 0.2) !important;
+}
+
+.icon-color {
+    color: rgb(86, 113, 240);
+}
+
+.form-input-container{
+    width: '100%' !important;
+}
+
+.dashboard-navbar{
+    background: #63e4ec;
+}
+
+.display-hidden {
+    display: none;
+}
+
+.display-block {
+    display: block;
+}
+
+.nav-fil-btn {
+    cursor: pointer;
+}
+
+.nav-fil-btn:hover {
+    color: #63e4ec;
+}
+
+.bg-logo-img{
+    margin-bottom: 2px;
+}

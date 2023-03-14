@@ -55,6 +55,12 @@ cmd_add_google_creds: &cmd_add_google_creds
     command: |
       echo $GOOGLE_CRED | base64 --decode > google_cred.json
 
+cmd_collect_static: &cmd_collect_static
+  run:
+    command: |
+      . venv/bin/activate
+      python manage.py collectstatic
+
 jobs:
   build:
     docker:
@@ -71,6 +77,7 @@ jobs:
       - *cmd_add_google_creds
       - *cmd_attach_workspace
       - *cmd_install_packages
+      - *cmd_collect_static
       - *cmd_run_db_migrations
       # - *cmd_restore_cache
       - run:

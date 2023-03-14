@@ -325,32 +325,8 @@ def limited_data_home_page(request):
     returning_data_list =  [68, 39, 36, 35, 27, 18, 19, 25, 10, 5, 4, 4, 3, 3, 3, 3, 2, 2, 1, 1, 1]
     unique_data_list = [100, 27, 55, 35, 27, 18, 12, 77, 10, 5, 4, 4, 3, 13, 3, 3, 2, 2, 13, 9, 1]
 
-    return render(request, template_name="demo_dashboard/index.html", context={ 
+    return render(request, template_name="dashboard/limited_data_home_page.html", context={ 
             'routes':routes,
             'returning_data_list': returning_data_list,
             'unique_data_list': unique_data_list
     })
-
-
-def limited_data_home_page_demographics(request):
-    return render(request, template_name="demo_dashboard/demographics.html")
-
-
-def limited_data_home_page_inline_question(request):
-    data = {
-        "origin": {
-            "labels": ["Uzbekistan", "Kazakhstan", "Tajikistan", "Kyrgyzstan", "Rest Of The World", "Ukraine", "India", "Pakistan", "Nepal", "Britain (Uk)", "Russia", "South Africa", "Azerbaijan", "Georgia", "Albania", "Poland", "Bulgaria", "Indonesia", "Moldova", "Thailand", "Kenya", "Romania", "Estonia", "Serbia", "Vietnam", "Philippines", "Bangladesh"],
-            "data": [117, 92, 84, 56, 43, 23, 19, 16, 16, 15, 20, 6, 43, 31, 29, 88, 3, 222, 19, 100, 51, 22, 17, 267, 71, 44]
-        },
-        "language": {
-            "labels": ["Russian", "English", "Ukrainian", "Uzbek", "Bulgarian", "Nepali", "Albanian", "Indonesian", "Polish", "Romanian", "Serbian", "Vietnamese"],
-            "data": [154, 72, 129, 189, 97, 30, 236, 98, 28, 110, 183, 116]
-        },
-        "question": {
-            "labels": ["swsLabourProviderAskedToMakePayments", "recruiterKeptId", "areYouSure", "labourProviderAskedToMakePayment", "swsCopyOfContractInYourLanguage", "copyOfContractInYourLanguage", "swsAmountAskedToPay", "hadInductionTraining", "inductionLength", "paidForInductionTraining", "manageYourBankAccount", "correctHolidayPay", "paidCorrectNationalMinimumWage", "amountAskedToPay", "daysWithoutIds", "howMuchPerHour", "askForContractCopy", "askedToPayRecruitmentFee", "didYouHavePredepartureTraining", "contractInNativelanguage", "metInTimelyManner", "givenOrientation", "bankAccountExploitation", "swsLabourProviderAskedToMakePayment", "recruiterKeepID", "<br/><br/>copyOfContractInYourLanguage", "haveACallWithEmployerAboutTheJob", "researchedEmployer", "detailedJobOffer", "makePaymentToCompanyAccount", "agentAskedToMakePayment", "incorrectHolidayPay", "paidByEmployer", "wagesPaidToBankAccount", "paidAmountListedInContract", "providedWorkPlace", "readTrainingSection", "registeredRecruitmentAgency", "communicatedFullFinalAmountForJob", "nameAndAddressIncludedInContract", "foundGoodTestimoniesAboutAgency", "informedAboutRightsAndResponsibilities", "isAgentRegistered", "labourProviderFromRecognisedTradeAssociation", "askedToMakePayment", "payingIntoCompanyAccount", "communicatedAmountCharged", "employerNameAndAddressInContract", "givenOrientationAndInduction", "passportTakenAway", "passportUsedForResidentPermit", "passportReturned", "paidInYourBank", "providedSafeAndHygienicWorkPlace", "licensedLabourProvider", "labourProviderMemberOfTradeAssociation", "haveCopyOfContract", "trainingDuration", "paidNationalMinimumWage", "amountPerHour", "passportTaken", "passportUsedToGetResidentPermit", "employerOpenedPaidBankAccount", "openBankAccount"],
-            "data": [235, 127, 349, 204, 268, 192, 297, 95, 379, 415, 267, 209, 222, 319, 195, 337, 183, 110, 149, 113, 224, 373, 60, 186, 407, 134, 342, 181, 428, 268, 284, 200, 310, 120, 148, 220, 269, 289, 193, 286, 61, 171, 327, 275, 128, 372, 94, 374, 209, 273, 381, 159, 83, 413, 252, 347, 388, 269, 350, 197, 86, 193, 103, 147, 114, 245, 362, 396, 156, 236, 359]
-        }
-
-    }
-
-    return render(request, template_name="demo_dashboard/inline_question.html",  context={ "data": json.dumps(data) })
