@@ -6,6 +6,36 @@
 <!-- page content -->
 {% block content %}
 <div class="row">
+    <div class="col-md-12">
+        <div class="widget-rounded-circle card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-11">
+                        <div class="text-start">
+                            <p class="text-muted text-truncate">Contract Checklists</p>
+                        </div>
+                    </div>
+                    <div class="col-1 d-flex flex-column">
+                        <div class="dropdown mr-2" style="width: 76.5px !important">
+                            <a class="btn btn-primary dropdown-toggle waves-effect text-center" href="#" role="button" id="exportInline"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Export
+                                <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="exportInline">
+                                <a class="btn btn-primary dropdown-item"
+                                href="{% url 'dashboard:export_to_excel' key='contract' %}?{{filter_string}}"
+                                target="_blank">Contract</a>
+                            </div>
+                        </div>
+                        <button data-toggle="modal" data-target="#filterModal" style="width: 76.5px !important" role="button" class="btn btn-primary w-100 my-1 waves-effect text-center">Filter</button>
+                    </div>
+                    </div>
+                </div> <!-- end row-->
+            </div>
+        </div> <!-- end widget-rounded-circle-->
+</div>
+<div class="row">
     <div class="col-12">
         <div class="card">
             <!-- messages -->
@@ -13,46 +43,53 @@
             <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
             {% endfor %} {% endif %}
 
-            <div class="card-header d-flex align-items-center">
-                <span class="mr-auto p-3">
-                    <h3>Contract Checklists</h3>
-                </span>
-                <div class="btn-group">
-                    <a class="btn btn-primary"
-                        href="{% url 'dashboard:export_to_excel' key='contract' %}?{{filter_string}}"
-                        target="_blank">Export</a>
+            <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Filters</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="filter_form" class="form-inline p-2" method="POST"
+                        data-origins-url="{% url 'dashboard:process_origin_options' key='contract'%}"
+                        data-factories-url="{% url 'dashboard:process_factory_options' key='contract'%}"
+                        submit-url="{% url 'dashboard:filter_data' category='contract' %}">
+                        {% csrf_token %}
+                        <label class="form-label" for="destination">{{form.destination.label}}</label>
+                        {{form.destination}}
+                        <span id='destination-errors' class='text-danger'></span>
+                        <label class="form-label" for="origin">{{form.origin.label}}</label>
+                        {{form.origin}}
+                        <span class='text-danger'></span>
+                        <label class="form-label" for="scheme_name">{{form.scheme_name.label}}</label>
+                        {{form.scheme_name}}
+                        <span id='scheme_name-errors' class='text-danger'></span>
+                        <label class="form-label" for="factory_farm">{{form.factory_farm.label}}</label>
+                        {{form.factory_farm}}
+                        <span id='factory_farm_errors' class='text-danger'></span>
+                        <label class="form-label" for="time_range">{{form.time_range.label}}</label>
+                        {{form.time_range}}
+                        <span id='time_range-errors' class='text-danger'></span>
+                        <span class="mx-2"> OR </span>
+                        <label class="form-label" for="start_date">{{form.start_date.label}}</label>
+                        {{form.start_date}}
+                        <span id='start_date-errors' class='text-danger'></span>
+                        <label class="form-label" for="end_date">{{form.end_date.label}}</label>
+                        {{form.end_date}}
+                        <span id='end_date-errors' class='text-danger'></span>
+                        <span id="__all__-errors" class="text-danger"></span>
+                    </form>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn btn-secondary text-center" href="{% url 'dashboard:checklists' key='contract' %}">Reset</a>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
                 </div>
             </div>
-            <form id="filter_form" class="form-inline p-2" method="POST"
-                data-origins-url="{% url 'dashboard:process_origin_options' key='contract'%}"
-                data-factories-url="{% url 'dashboard:process_factory_options' key='contract'%}"
-                submit-url="{% url 'dashboard:filter_data' category='contract' %}">
-                {% csrf_token %}
-                <label class="form-label" for="destination">{{form.destination.label}}</label>
-                {{form.destination}}
-                <span id='destination-errors' class='text-danger'></span>
-                <label class="form-label" for="origin">{{form.origin.label}}</label>
-                {{form.origin}}
-                <span class='text-danger'></span>
-                <label class="form-label" for="scheme_name">{{form.scheme_name.label}}</label>
-                {{form.scheme_name}}
-                <span id='scheme_name-errors' class='text-danger'></span>
-                <label class="form-label" for="factory_farm">{{form.factory_farm.label}}</label>
-                {{form.factory_farm}}
-                <span id='factory_farm_errors' class='text-danger'></span>
-                <label class="form-label" for="time_range">{{form.time_range.label}}</label>
-                {{form.time_range}}
-                <span id='time_range-errors' class='text-danger'></span>
-                <span class="mx-2"> OR </span>
-                <label class="form-label" for="start_date">{{form.start_date.label}}</label>
-                {{form.start_date}}
-                <span id='start_date-errors' class='text-danger'></span>
-                <label class="form-label" for="end_date">{{form.end_date.label}}</label>
-                {{form.end_date}}
-                <span id='end_date-errors' class='text-danger'></span>
-                <span id="__all__-errors" class="text-danger"></span>
-                <a href="{% url 'dashboard:checklists' key='contract' %}" class="mx-2">Reset</a>
-            </form>
         </div>
     </div>
 </div>

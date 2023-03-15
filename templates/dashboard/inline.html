@@ -6,19 +6,18 @@
 {% block content %}
 
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-12">
         <div class="widget-rounded-circle card">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-11">
                         <div class="text-start">
                             <h3 class="text-dark"><span data-plugin="counterup" id="response-count"></span></h3>
                             <p class="text-muted text-truncate">Responses</p>
                         </div>
                     </div>
-                    <div class="col-6">
-                        <div class="d-flex mt-1">
-                        <div class="dropdown mr-2">
+                    <div class="col-1 d-flex flex-column">
+                        <div class="dropdown mr-2" style="width: 76.5px !important">
                             <a class="btn btn-primary dropdown-toggle waves-effect text-center" href="#" role="button" id="exportInline"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Export
@@ -35,78 +34,17 @@
                                 </button>
                             </div>
                         </div>
+                        <button data-toggle="modal" data-target="#filterModal" style="width: 76.5px !important" role="button" class="btn btn-primary w-100 my-1 waves-effect text-center">Filter</button>
                     </div>
                     </div>
                 </div> <!-- end row-->
             </div>
         </div> <!-- end widget-rounded-circle-->
     </div>
-    <div class="col-md-9">
-        <div class="card">
-            <!-- messages -->
-            {% if messages %} {% for message in messages %}
-            <p class="text-center alert alert-{{ message.tags }} mt-2" role="alert">{{ message }}</p>
-            {% endfor %} {% endif %}
-            <div class="card-body">
-                <div>
-                    <div>
-                        <form id="filter_form" class="form-inline" method="POST"
-                        data-origins-url="{% url 'dashboard:process_origin_options' key='inline'%}"
-                        data-factories-url="{% url 'dashboard:process_factory_options' key='inline'%}"
-                        submit-url="{% url 'dashboard:filter_data' category='inline' %}">
-                        {% csrf_token %}
-                            <div class="row">
-                                <div class="col-md-3 mb-2">
-                                    <div class="form-input-container">{{form.destination}}</div>
-                                    <span id='destination-errors' class='text-danger'></span>
-                                </div>
-            
-                                <div class="col-md-3">
-                                    <div class="form-input-container">{{form.origin}}</div>
-                                    <span class='text-danger'></span>
-                                </div>
-            
-                                <div class="col-md-3">
-                                    <div class="form-input-container">{{form.organisation}}</div>
-                                    <span id='organisation-errors' class='text-danger'></span>
-                                </div>
-            
-                                <div class="col-md-3">
-                                    <div class="form-input-container">{{form.scheme_name}}</div>
-                                    <span id='scheme_name-errors' class='text-danger'></span>
-                                </div>
-            
-                                <div class="col-md-3">
-                                    <div class="form-input-container">{{form.factory_farm}}</div>
-                                    <span id='factory_farm_errors' class='text-danger'></span>
-                                </div>
-            
-                                <div class="col-md-3">
-                                    <div class="form-input-container">{{form.time_range}}</div>
-                                    <span id='time_range-errors' class='text-danger'></span>
-                                </div>
-            
-                                <div class="col-md-3">
-                                    <div class="form-input-container">{{form.start_date}}</div>
-                                    <span id='start_date-errors' class='text-danger'></span>
-                                </div>
-            
-                                <div class="col-md-3">
-                                    <div class="form-input-container">{{form.end_date}}</div>
-                                    <span id='end_date-errors' class='text-danger'></span>
-                                    <span id="__all__-errors" class="text-danger"></span>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
     <div class="col-md-12">
-  
         <!-- Modal -->
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">

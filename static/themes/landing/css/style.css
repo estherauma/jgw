@@ -562,3 +562,16 @@ html {
     text-align: center;
   }
 }/*# sourceMappingURL=style.css.map */
+
+
+
+.eu-logo {
+  padding-top: 21px;
+  padding-left: 8px;
+  color: #000000;
+}
+
+.eu-logo-title {
+  display: block;
+  font-weight: 800;
+}
