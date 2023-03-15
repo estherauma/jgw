@@ -1,4 +1,4 @@
-{% extends "layouts/new_base_sidebar.html" %}
+{% extends "layouts/base.html" %}
 
 {% block title %} My Account {% endblock title %}
 
@@ -6,40 +6,184 @@
 
 {% block content %}
 
-<div class="row align-items-center justify-content-center h-100">
-    <div class="col-lg-6">
-        <div class="card text-center mt-5">
-            <div class="card-body">
-                <img src="/static/avatar.png" class="rounded-circle avatar-lg img-thumbnail"
-                    alt="profile-image">
+<div class="content">
 
-                <h4 class="mb-2">{{user.first_name | title }} {{user.last_name | title }}</h4>
-                <a role="button" class="btn btn-success btn-xs waves-effect mb-2 waves-light"
-                    href="{% url 'users:change_email' %}">
-                    Change Email
-                </a>
+    <!-- Start Content-->
+    <div class="container-fluid">
 
-                <a role="button" class="btn btn-danger btn-xs waves-effect mb-2 waves-light"
-                    href="{% url 'users:request_password_reset' %}">
-                    Reset Password
-                </a>
-                <div class="text-center mt-3">
-                    <h4 class="font-13 text-uppercase">Account Details</h4>
-                    <p class="text-muted mb-2 font-13">
-                        <strong>Email:</strong><span class="ms-2">{{user.email}}</span>
-                    </p>
-                    <p class="text-muted mb-1 font-13">
-                        <strong>Role:</strong><span class="ms-2">{{user.role}}</span>
-                    </p>
-                    <p class="text-muted mb-1 font-13">
-                        <strong>Factory/Farm:</strong><span class="ms-2">{{user.factory.name | default:'N/A'}}</span>
-                    </p>
-                    <p class="text-muted mb-1 font-13">
-                        <strong>Organisation:</strong><span class="ms-2">{{user.organisation | default:'N/A'}}</span>
-                    </p>
+        <!-- start page title -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Account</a></li>
+                            <li class="breadcrumb-item active">Profile</li>
+                        </ol>
+                    </div>
+                    <h4 class="page-title">My Profile</h4>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+        <!-- end page title -->
+
+        <div class="row">
+            <div class="col-lg-4 col-xl-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <img src="/static/assets/default-user.png" class="rounded-circle avatar-lg img-thumbnail"
+                            alt="profile-image">
+
+                        <h4 class="mb-0">{{user}}</h4>
+
+                        <div class="text-start mt-3">
+                            <h4 class="font-13 text-uppercase">About Me :</h4>
+                            <p class="text-muted font-16 mb-3">
+                                Hi I'm Johnathn Deo,has been the industry's standard dummy text ever since the 1500s,
+                                when an unknown printer took a galley of type.
+                            </p>
+                            <p class="text-muted mb-2 font-16"><strong>First Name :</strong> <span
+                                    class="ms-2">{{user.first_name}}</span></p>
+
+                            <p class="text-muted mb-2 font-16"><strong>Last name :</strong><span
+                                    class="ms-2">{{user.last_name}}</span></p>
+
+                            <p class="text-muted mb-2 font-16"><strong>Email :</strong> <span
+                                    class="ms-2">{{user.email}}</span></p>
+
+                            <p class="text-muted mb-1 font-16"><strong>Factory :</strong> <span
+                                    class="ms-2">{{user.organization.name | default:'N/A'}}</span></p>
+
+                            <p class="text-muted mb-1 font-16"><strong>Factory :</strong> <span
+                                    class="ms-2">{{user.factory.name | default:'N/A'}}</span></p>
+
+                            <p class="text-muted mb-1 font-16"><strong>Scheme :</strong> <span
+                                    class="ms-2">{{user.scheme.name | default:'N/A'}}</span></p>
+                        </div>
+                    </div>
+                </div> <!-- end card -->
+            </div> <!-- end col-->
+
+            <div class="col-lg-8 col-xl-8">
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="nav nav-pills nav-fill navtab-bg">
+                            <li class="nav-item">
+                                <a href="#settings" data-bs-toggle="tab" aria-expanded="false" class="nav-link active">
+                                    Settings
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#password" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+                                    Update Password
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane show active" id="settings">
+                                <form>
+                                    <h5 class="mb-4 text-uppercase"><i class="mdi mdi-account-circle me-1"></i> Personal
+                                        Info</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="firstname" class="form-label">First Name</label>
+                                                <input type="text" class="form-control" id="firstname"
+                                                    placeholder="Enter first name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="lastname" class="form-label">Last Name</label>
+                                                <input type="text" class="form-control" id="lastname"
+                                                    placeholder="Enter last name">
+                                            </div>
+                                        </div> <!-- end col -->
+                                    </div> <!-- end row -->
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="mb-3">
+                                                <label for="userbio" class="form-label">Bio</label>
+                                                <textarea class="form-control" id="userbio" rows="4"
+                                                    placeholder="Write something..."></textarea>
+                                            </div>
+                                        </div> <!-- end col -->
+                                    </div> <!-- end row -->
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="useremail" class="form-label">Email Address</label>
+                                                <input type="email" class="form-control" id="useremail"
+                                                    placeholder="Enter email">
+                                                <span class="form-text text-muted"><small>If you want to change email
+                                                        please <a href="javascript: void(0);">click</a>
+                                                        here.</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="userpassword" class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="userpassword"
+                                                    placeholder="Enter password">
+                                                <span class="form-text text-muted"><small>If you want to change password
+                                                        please <a href="javascript: void(0);">click</a>
+                                                        here.</small></span>
+                                            </div>
+                                        </div> <!-- end col -->
+                                    </div> <!-- end row -->
+
+                                    <h5 class="mb-3 text-uppercase bg-light p-2"><i
+                                            class="mdi mdi-office-building me-1"></i> Company Info</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="companyname" class="form-label">Company Name</label>
+                                                <input type="text" class="form-control" id="companyname"
+                                                    placeholder="Enter company name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="cwebsite" class="form-label">Website</label>
+                                                <input type="text" class="form-control" id="cwebsite"
+                                                    placeholder="Enter website url">
+                                            </div>
+                                        </div> <!-- end col -->
+                                    </div> <!-- end row -->
+
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-success waves-effect waves-light mt-2"><i
+                                                class="mdi mdi-content-save"></i> Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- end settings content-->
+
+                            <div class="tab-pane" id="password">
+                                <div class="card">
+                                    <div class="card-body">
+                                        Coming soon...
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div> <!-- end tab-content -->
+                    </div>
+                </div> <!-- end card-->
+
+            </div> <!-- end col -->
+        </div>
+        <!-- end row-->
+
+    </div> <!-- container -->
+
+</div> <!-- content -->
+
+
+
+
+
+
 {% endblock content %}
