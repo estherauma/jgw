@@ -141,18 +141,20 @@
                         <span class="menu-arrow"></span>
                     </a>
                     <div class="collapse multi-collapse" id="countryFilter">
-                        <div class="px-4">
-                            <div>
-                               <div class="form-group mb-2">
-                                  <label for="exampleInputEmail1">Start</label>
-                                  <input type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-                                </div>
-                                <div class="form-group">
-                                  <label for="exampleInputEmail1">End</label>
-                                  <input type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-                                </div>
-                            </div>
-                          </div>
+                            <ul class="nav-second-level">
+                                <li>
+                                    <div class="form-group px-2 mb-2">
+                                        <label for="exampleInputEmail1">Start</label>
+                                        <input type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                                      </div>
+                                </li>
+                                <li>
+                                    <div class="form-group px-2">
+                                      <label for="exampleInputEmail1">End</label>
+                                      <input type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                                    </div>
+                                </li>
+                            </ul>
                     </div>
                 </li>
                 <li>
@@ -162,18 +164,20 @@
                         <span class="menu-arrow"></span>
                     </a>
                     <div class="collapse multi-collapse" id="timeFilter">
-                        <div class="px-4">
-                          <div>
-                             <div class="form-group mb-2">
-                                <label for="exampleInputEmail1">Source</label>
-                                <input type="string" class="form-control" id="sourceCountry" placeholder="Source country">
-                              </div>
-                              <div class="form-group">
-                                <label for="exampleInputEmail1">Destination</label>
-                                <input type="string" class="form-control" id="destinationCountry" placeholder="Destination country">
-                              </div>
-                          </div>
-                        </div>
+                        <ul class="nav-second-level">
+                            <li>
+                                <div class="form-group px-2 mb-2">
+                                    <label for="exampleInputEmail1">Source</label>
+                                    <select class="selectpicker countrypicker form-control" placeholder="Destination country" data-flag="true" data-countries="AT,BE,BG,HR,CY,CZ,DK,EE,FI,FR,DE,GR,HU,IE,IT,LV,LT,LU,MT,NL,PL,PT,RO,SK,SI,ES,SE" ></select>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="form-group px-2">
+                                    <label for="exampleInputEmail1">Destination</label>
+                                    <select class="selectpicker countrypicker form-control" placeholder="Destination country" data-flag="true" data-countries="AT,BE,BG,HR,CY,CZ,DK,EE,FI,FR,DE,GR,HU,IE,IT,LV,LT,LU,MT,NL,PL,PT,RO,SK,SI,ES,SE" ></select>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                 </li>
             </ul>
