@@ -41,3 +41,7 @@
 .bg-logo-img{
     margin-bottom: 2px;
 }
+
+.navbar-custom .topnav-menu .nav-link {
+    color: rgba(255,255,255) !important;
+}
