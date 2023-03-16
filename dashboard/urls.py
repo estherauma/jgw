@@ -19,6 +19,7 @@ urlpatterns = [
     path("process-factory-options/<str:key>", views.process_factory_options, name="process_factory_options"),
     path("export/<str:key>", views.export_to_excel_file, name="export_to_excel"),
     path("trigger-sentry", views.test_sentry),
+    path("notifications", views.notifications, name="notifications"),
 
     # test
     path("limited-data-home-page", views.limited_data_home_page, name="limited_data_home_page"),
