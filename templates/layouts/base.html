@@ -37,6 +37,9 @@
 
         <!-- custom styles -->
         <link rel="stylesheet" href="{% static 'css/dashboard.css' %} " />
+        <style>
+            {% block styles %}{% endblock %}
+        </style>
     </head>
 
     <body  data-layout-mode="detached" data-theme="light" data-topbar-color="dark" data-menu-position="fixed" data-leftbar-color="light" data-leftbar-size='default' data-sidebar-user='true'>
