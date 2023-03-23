@@ -46,35 +46,25 @@
     color: rgba(255,255,255) !important;
 }
 
-/* .question-chart-box {
+.generic-chart-box {
     height: 1500px; 
     max-height: 500px; 
     overflow-y: scroll;
 }
 
-.question-chart-sub-box{
-    height: 2000px;
-}
-
-.language-chart-box{
-    height: 600px !important; 
-    margin: auto;
-}
-
-
-.question-chart-box::-webkit-scrollbar {
+.generic-chart-box::-webkit-scrollbar {
     width: 6px;
 }
 
-.question-chart-box::-webkit-scrollbar-track {
+.generic-chart-box::-webkit-scrollbar-track {
     background: #f1f1f1; 
 }
 
-.question-chart-box::-webkit-scrollbar-thumb {
+.generic-chart-box::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: #63e4ec; 
 }
 
-.question-chart-box::-webkit-scrollbar-thumb:hover {
+.generic-chart-box::-webkit-scrollbar-thumb:hover {
     background: #63e4ec; 
-} */
+}

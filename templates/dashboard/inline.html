@@ -139,22 +139,22 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <div>
-                        <div id="origin_graphcard" class="origin-chart-box"></div>
+                    <div class="origin-chart-box">
+                        <div id="origin_graphcard"></div>
                     </div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body">
-                    <div>
-                        <div id="language_graphcard" class="language-chart-box"></div>
+                    <div class="language-chart-box">
+                        <div id="language_graphcard"></div>
                     </div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body">
-                    <div>
-                        <div  id="question_graphcard" class="question-chart-box"></div>
+                    <div class="question-chart-box">
+                        <div  id="question_graphcard"></div>
                     </div>
                 </div>
             </div>
@@ -434,7 +434,15 @@
 
                 const totlaChart = chartObject.config.data.labels.length
                 graphDiv.style.height = `${totlaChart * 25}px`
-                console.log("chartObject::", chartObject)
+
+                /** 
+                    if the number of bars are > 25, add generic-chart-box class to currentChartBox
+                    to make it scrollable instead of a very long chart
+                **/
+                if (totlaChart > 25) {
+                    let currentChartBox = document.querySelector(`.${key}-chart-box`)
+                    currentChartBox.classList.add('generic-chart-box')
+                }
             }
         }
     }
