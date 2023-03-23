@@ -373,6 +373,7 @@
       }
 
     function plotCharts(chartData) {
+        console.log("chartData::", chartData)
         if (chartData) {
             clearCharts()
             for (const [key, values] of Object.entries(chartData)) {
@@ -407,6 +408,17 @@
                         plugins: {
                             legend: {
                                 display: false
+                            },
+                            title: {
+                                display: false,
+                                text: `Response ${key}`,
+                                font: {
+                                  size: 20,
+                                  weight: '400',
+                                  lineHeight: 1.2,
+                                  textAlign: 'left',
+                                },
+                                padding: {top: 20, left: 0, right: 0, bottom: 20}
                             }
                         },
                         scales: {
