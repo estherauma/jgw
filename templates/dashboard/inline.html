@@ -139,13 +139,22 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <div id="language_graphcard" class="language-chart-box"></div>
+                    <div>
+                        <div id="origin_graphcard" class="origin-chart-box"></div>
+                    </div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body">
-                    <div class="question-chart-box">
-                        <div  id="question_graphcard"  class="question-chart-sub-box" ></div>
+                    <div>
+                        <div id="language_graphcard" class="language-chart-box"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div>
+                        <div  id="question_graphcard" class="question-chart-box"></div>
                     </div>
                 </div>
             </div>
@@ -364,18 +373,18 @@
       }
 
     function plotCharts(chartData) {
-        console.log("---->chartData---->", chartData)
         if (chartData) {
             clearCharts()
             for (const [key, values] of Object.entries(chartData)) {
 
+                
                 graphDiv = document.getElementById(`${key}_graphcard`)
                 let canvas = document.createElement('canvas')
                 canvas.setAttribute('id', `_${key}`)
                 canvas.setAttribute('class', "chartContainer")
                 graphDiv.appendChild(canvas)
 
-                new Chart(canvas.getContext("2d"), {
+                const chartObject = new Chart(canvas.getContext("2d"), {
                     type: "bar",
                     data: {
                         labels: removeBrTags(values.labels),
@@ -422,6 +431,10 @@
                         }
                     }
                 });
+
+                const totlaChart = chartObject.config.data.labels.length
+                graphDiv.style.height = `${totlaChart * 25}px`
+                console.log("chartObject::", chartObject)
             }
         }
     }

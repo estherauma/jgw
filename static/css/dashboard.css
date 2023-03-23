@@ -46,7 +46,7 @@
     color: rgba(255,255,255) !important;
 }
 
-.question-chart-box {
+/* .question-chart-box {
     height: 1500px; 
     max-height: 500px; 
     overflow-y: scroll;
@@ -77,4 +77,4 @@
 
 .question-chart-box::-webkit-scrollbar-thumb:hover {
     background: #63e4ec; 
-}
+} */
