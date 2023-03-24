@@ -158,6 +158,20 @@
                     </div>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="destination-chart-box">
+                        <div id="destination_graphcard"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="organisation-chart-box">
+                        <div id="organisation_graphcard"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -373,7 +387,6 @@
       }
 
     function plotCharts(chartData) {
-        console.log("chartData::", chartData)
         if (chartData) {
             clearCharts()
             for (const [key, values] of Object.entries(chartData)) {
@@ -410,8 +423,8 @@
                                 display: false
                             },
                             title: {
-                                display: false,
-                                text: `Response ${key}`,
+                                display: true,
+                                text: key,
                                 font: {
                                   size: 20,
                                   weight: '400',
@@ -445,16 +458,22 @@
                 });
 
                 const totlaChart = chartObject.config.data.labels.length
-                graphDiv.style.height = `${totlaChart * 25}px`
+                 let totalHeight;
 
                 /** 
                     if the number of bars are > 25, add generic-chart-box class to currentChartBox
                     to make it scrollable instead of a very long chart
                 **/
-                if (totlaChart > 25) {
-                    let currentChartBox = document.querySelector(`.${key}-chart-box`)
+                let currentChartBox = document.querySelector(`.${key}-chart-box`)
+                if(totlaChart <= 10){
+                    totalHeight = `${totlaChart * 50}px`
+                }else if (totlaChart > 28) {
+                    totalHeight = `${totlaChart * 28}px`
                     currentChartBox.classList.add('generic-chart-box')
+                }else{
+                    totalHeight = `${totlaChart * 28}px`
                 }
+                graphDiv.style.height = totalHeight;
             }
         }
     }
