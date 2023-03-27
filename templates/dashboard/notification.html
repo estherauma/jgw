@@ -1,0 +1,60 @@
+{% extends 'layouts/base.html' %}
+
+<!-- title -->
+{% block title %} Notifications {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div>
+            <ul class="list-unstyled">
+                <li class="notification-list">
+                    <div>
+    
+                        <!-- item-->
+                        <h4><span class="badge bg-primary rounded-pill ms-auto">{{total_notifications}}</span> Notifications</h4>
+    
+                        <div >
+        
+                            <!-- item-->
+                            {% for key, notif_data in notifications_data.items %}
+                                <div class="noti-title">
+                                    <h5 class="m-0">
+                                        {{key}}
+                                    </h5>
+                                </div>
+                                {% for notification_data in notif_data %}
+                                    <div class="notify-item bg-white p-3 rounded mb-2">
+                                        <div class="row">
+                                            <div class="col-md-11">
+                                               
+                                                {% if not notification_data.image_url %}
+                                                    <div class="notify-icon bg-primary">
+                                                        <i class="mdi mdi-comment-account-outline"></i>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="notify-icon bg-primary" style="background-image: url({{notification_data.image_url}}); background-repeat: no-repeat; background-position: center;"></div>
+                                                {% endif %}
+                                                
+                                                <p class="notify-details">{{notification_data.title}}</p>
+                                                <p class="text-muted mb-0 user-msg">
+                                                    <small>{{notification_data.text}}</small>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <small>{{notification_data.time}}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+    
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock content %}

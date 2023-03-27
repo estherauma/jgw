@@ -330,3 +330,44 @@ def limited_data_home_page(request):
             'returning_data_list': returning_data_list,
             'unique_data_list': unique_data_list
     })
+
+
+def notifications(request):
+        notifications_data = {
+                "Today":[
+                    {
+                        'image_url': '',
+                        'title': 'Caleb Flakelar commented on Admin',
+                        'text': 'Hi, How are you? What about our next meeting',
+                        'time': '1 min ago'
+                    },
+                    {
+                        'image_url': '',
+                        'title': 'Admin',
+                        'text': 'New user registration',
+                        'time': '10 hours ago',
+                        'time_param': 'today'
+                    }
+                ],
+                "This Week":[
+                    {
+                        'image_url': 'https://api.lorem.space/image/fashion?w=150&h=220',
+                        'title': 'Christine Pride',
+                        'text': 'Wow ! this admin looks good and awesome design',
+                        'time': '5 days ago'
+                    }
+                ],
+                "Last Year":[
+                    {
+                        'image_url': 'https://api.lorem.space/image/face?w=150&h=220',
+                        'title': 'Christine Pride',
+                        'text': 'Wow ! this admin looks good and awesome design',
+                        'time': '385 days ago'
+                    }
+                ]
+            }
+        total_notifications = 4;  
+        return render(request, template_name="dashboard/notification.html", context={
+            'notifications_data': notifications_data,
+            'total_notifications': total_notifications
+        })
