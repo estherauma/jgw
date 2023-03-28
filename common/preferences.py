@@ -9,6 +9,10 @@ from common.retrieve_data import JGWApi
 api = JGWApi()
 QueryMap = Dict[str, list[str]]
 
+def clean_df(df):
+    # remove `Seasonal Worker Scheme -` from orgaisation name
+    df["organisation"] = df["organisation"].str.replace("Seasonal Worker Scheme - ", "").str.replace("Seasonal  Worker Scheme -", "")
+    return df
 
 class Preferences(BaseAnalytics):
     def __init__(self) -> None:
@@ -19,7 +23,8 @@ class Preferences(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         return_fields = fields or ["age", "gender", "organisation"]
-        _df = self.get_df(filters)
+        _df = clean_df(self.get_df(filters))
+        # print(_df["organisation"])
         if _df.empty:
             return {}
         _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
