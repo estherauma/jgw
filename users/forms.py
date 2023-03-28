@@ -128,7 +128,6 @@ class UpdateUserProfileForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            print(field)
             self.fields[field].widget.attrs["class"] = "form-control"
 
             if field == 'receive_marketing_emails':

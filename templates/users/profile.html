@@ -82,6 +82,7 @@
                         <div class="tab-content">
                             <div class="tab-pane show active" id="settings">
                                 <form action="" method="post">
+                                    {% csrf_token %}
                                     <h5 class="mb-4 text-uppercase"><i class="mdi mdi-account-circle me-1"></i> Personal
                                         Info</h5>
                                     <div class="row">
