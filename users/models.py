@@ -53,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False,
         help_text="Designates whether this user should be treated as active.\nUnselect this instead of deleting accounts.",
     )
+    receive_marketing_emails = models.BooleanField(default=False,help_text="Designates whether this user should receive marketing emails.")
 
     def __str___(self):
         return f"{self.email}"

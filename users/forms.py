@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import ModelForm
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
@@ -118,3 +119,18 @@ class ChangeEmailForm(forms.Form):
     new_email = forms.EmailField(
         required=True, widget=forms.EmailInput(attrs={"placeholder": "New Email Address"})
     )
+
+class UpdateUserProfileForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "email", "receive_marketing_emails")
+
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            print(field)
+            self.fields[field].widget.attrs["class"] = "form-control"
+
+            if field == 'receive_marketing_emails':
+                self.fields[field].widget.attrs["class"] = "form-check-input"
+

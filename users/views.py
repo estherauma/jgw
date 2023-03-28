@@ -17,6 +17,7 @@ from .forms import (
     LoginForm,
     RequestPasswordResetForm,
     SetPasswordForm,
+    UpdateUserProfileForm,
     UserMgtForm,
 )
 from .models import User, UserInvitations
@@ -176,7 +177,15 @@ def verify_invite(request, token):
 
 @login_required
 def profile(request):
-    return render(request, template_name="users/profile.html")
+    profile = request.user
+    form = UpdateUserProfileForm(initial={
+        "first_name": profile.first_name, 
+        "last_name": profile.last_name,
+        "email": profile.email,
+        'receive_marketing_emails': profile.receive_marketing_emails,
+    })
+    context = {"profile": profile, 'form': form}
+    return render(request, template_name="users/profile.html", context=context)
 
 
 def request_password_reset(request):
