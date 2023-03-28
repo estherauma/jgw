@@ -22,7 +22,7 @@ class Inline(BaseAnalytics):
         _df = self.get_df(filters)
         _stats = {}
         if not _df.empty:
-            return_fields = fields or [i for i in ["origin", "language"] if i in _df.columns]
+            return_fields = fields or [i for i in ["origin", "language", "organisation", "destination"] if i in _df.columns]
             _stats["response_count"] = len(_df)
             _stats["data"] = {field: self.count_unique(field, _df) for field in return_fields}
             questions_df = _df[[i for i in _df.columns if i not in exclude_cols]]
