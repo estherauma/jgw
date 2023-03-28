@@ -14,12 +14,12 @@
     color: rgb(86, 113, 240);
 }
 
-.form-input-container{
+.form-input-container {
     width: '100%' !important;
 }
 
-.dashboard-navbar{
-    background: #63e4ec;
+.dashboard-navbar {
+    background: #37C1E3;
 }
 
 .display-hidden {
@@ -38,10 +38,25 @@
     color: #63e4ec;
 }
 
-.bg-logo-img{
+.bg-logo-img {
     margin-bottom: 2px;
 }
 
 .navbar-custom .topnav-menu .nav-link {
-    color: rgba(255,255,255) !important;
+    color: rgba(255, 255, 255) !important;
+}
+
+.color-jgw-deep-blue {
+    color: #193560 !important;
+}
+
+.bg-jgw-deep-blue {
+    background-color: #193560 !important;
+}
+
+.chart-title {
+    color: #193560;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
 }
