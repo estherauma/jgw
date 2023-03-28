@@ -45,3 +45,26 @@
 .navbar-custom .topnav-menu .nav-link {
     color: rgba(255,255,255) !important;
 }
+
+.generic-chart-box {
+    height: 1500px; 
+    max-height: 500px; 
+    overflow-y: scroll;
+}
+
+.generic-chart-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.generic-chart-box::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+
+.generic-chart-box::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #63e4ec; 
+}
+
+.generic-chart-box::-webkit-scrollbar-thumb:hover {
+    background: #63e4ec; 
+}
