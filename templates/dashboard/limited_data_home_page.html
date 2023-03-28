@@ -185,6 +185,34 @@
                 </div>
                 <!-- end row -->
 
+                <div class="row">
+                    <!-- Language horizontal chart -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-widgets">
+                                    <a href="javascript: void(0);" data-toggle="reload"><i class="mdi mdi-refresh"></i></a>
+                                    <a data-bs-toggle="collapse" href="#countryComparison" role="button" aria-expanded="false" aria-controls="countryComparison"><i class="mdi mdi-minus"></i></a>
+                                    <a href="javascript: void(0);" data-toggle="remove"><i class="mdi mdi-close"></i></a>
+                                </div>
+                                <h4 class="header-title mb-0">App usage by language</h4>
+
+                                <div id="countryComparison" class="collapse show">
+                                    <div class="pt-3">
+                                        <canvas id="acquisitions"></canvas>
+                                    </div>
+                                </div> <!-- collapsed end -->
+                            </div> <!-- end card-body -->
+                        </div>
+                    </div>
+                    <!-- End language horizontal chart -->
+
+                    <!-- Second language chart -->
+                    <div class="col-md-6">
+
+                    </div>
+                </div>
+              
             </div> <!-- container -->
 
         </div> <!-- content -->
@@ -192,13 +220,55 @@
 {% block scripts %}
 <script src="{% static 'map/routes.js' %}"></script>
 <script src="{% static 'map/map.js' %}"></script>
+<script>
+// Sammie changes
+const data = [
+    { lang: 'English', count: 10 },
+    { lang: 'Russian', count: 20 },
+    { lang: 'Nepali', count: 15 },
+    { lang: 'Ukranian', count: 25 },
+    { lang: 'Romanian', count: 22 },
+    { lang: 'Bulgarian', count: 30 },
+    { lang: 'Serbian', count: 28 }, 
+  ];
+  new Chart(
+    document.getElementById('acquisitions'),
+    {
+      type: 'pie',
+      data: {
+        labels: data.map(row => row.lang),
+        datasets: [
+          {
+            label: 'Language',
+            data: data.map(row => row.count),
+            backgroundColor: ["red", "blue", "green", "purple", "maroon", "grey", 'orange'], 
+          }
+        ]
+      },
+      
+      options: {
+        responsive: true,
+        plugins: {
+      legend: {
+        position: 'bottom',
+      },
+     
+    }
+       
+      }
+    }
+  );
+  console.log(data);
+</script>
 
 <script  type="text/javascript">
     let options = {
-      series: [{
-      name: 'Returning users',
-      data: [{% for returning_data in returning_data_list %} '{{ returning_data }}', {% endfor %}],
-    }, {
+        series: [
+            {
+                name: 'Returning users',
+                data: [{% for returning_data in returning_data_list %} '{{ returning_data }}', {% endfor %}],
+            },
+    {
       name: 'Unique users',
       data: [{% for unique_users in unique_data_list %} '{{ unique_users }}', {% endfor %}],
     }],
