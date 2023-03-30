@@ -1,4 +1,5 @@
 {% extends "layouts/base.html" %}
+{% load static %}
 
 <!-- title -->
 {% block title %} App Events {% endblock title %}
@@ -52,24 +53,12 @@
 
 <!-- ChartJS script  -->
 {% block scripts %}
+<script src="{% static 'dashboard/js/app_events.js' %}"></script>
 <script>
-
     {% for key, values in data.items %}
-    new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
-        type: "bar",
-        data: {
-            labels: {{ values.labels | safe }},
-        datasets: {{ values.data | safe }},
-            },
-        options: {
-        barValueSpacing: 50,
-        scales: {
-            y: {
-                beginAtZero: true,
-            },
-        },
-    },
-        });
+        labels = {{ values.labels | safe }}
+        dataset = {{ values.data | safe }}
+        plotChat(labels, dataset)
     {% endfor %}
 </script>
 {% endblock %}

@@ -270,6 +270,7 @@ function ageGraph(ageGraphData) {
 }
 
 function genderGraph(genderGraphData) {
+    console.log("genderGraphData", genderGraphData)
     const labels = genderGraphData["labels"]
     const data = genderGraphData["data"]
     const chartData = {

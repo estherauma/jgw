@@ -37,3 +37,6 @@ class JGWCache(models.Model):
     data = models.JSONField(null=False)
     date_created = models.DateField(auto_now_add=True)
     date_modified = models.DateField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f'{self.category} - {self.date_created} - {self.is_cleaned}'
