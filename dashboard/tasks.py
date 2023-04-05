@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+import logging
 
 import pandas as pd
 import six
@@ -12,7 +13,7 @@ from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedRespons
 from jgwpandas.settings import EMAIL_HOST_USER
 
 client = translate.Client()
-
+logger = logging.getLogger(__name__)
 
 def translate_to_eng(text, client=client):
     if isinstance(text, six.binary_type):
@@ -91,7 +92,13 @@ def clean_data(category):
     api_helper = APIHelper()
     result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
     df = pd.read_json(result.data, orient="records")
+
+    logger.info("-------before cleaning------")
+    logger.info(df["gender"])
     df = api_helper.clean_data(df)
+    logger.info(df["gender"])
+    logger.info("------after cleaning------")
+
     data = df.to_json(orient="records")
     result.data = data
     result.is_cleaned = True

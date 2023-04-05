@@ -76,9 +76,9 @@
 
 .generic-chart-box::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background: #63e4ec; 
+    background: #aeaeaf; 
 }
 
 .generic-chart-box::-webkit-scrollbar-thumb:hover {
-    background: #63e4ec; 
+    background: #aeaeaf; 
 }

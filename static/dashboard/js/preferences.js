@@ -209,7 +209,7 @@ function plotCharts(chartData) {
 
 function ageGraph(ageGraphData) {
     var ctx = document.getElementById('age-graph').getContext('2d');
-    const chart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ageGraphData["labels"],
@@ -270,7 +270,6 @@ function ageGraph(ageGraphData) {
 }
 
 function genderGraph(genderGraphData) {
-    console.log("genderGraphData", genderGraphData)
     const labels = genderGraphData["labels"]
     const data = genderGraphData["data"]
     const chartData = {
@@ -309,7 +308,7 @@ function organisationGraph(organisationGraphData) {
     
     var ctx = document.getElementById('_organisation').getContext('2d');
 
-    const chart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
