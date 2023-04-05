@@ -213,12 +213,12 @@ function plotCharts(chartData) {
             }
 
             if (chartDataKey === "destination") {
-                // map
-                console.log(chartData['destination'])
+                // originChart(chartData['destination'])
             }
 
             if (chartDataKey === "origin") {
-                // map
+                // originChart(chartData['destination'])
+                originChart(chartData['origin'])
             }
 
             if (chartDataKey === "language") {
@@ -420,6 +420,72 @@ function languageChart(langaugeData) {
     new Chart(ctx,languageChartConfig);
 }
 
+function originChart(originChartData) {
+    const data = originChartData["data"]
+    const labels = originChartData["labels"].map(label => label.replace("Other - The Rest Of The World", "Others"))
+    
+
+    var ctx = document.getElementById('destination_graphcard').getContext('2d');
+    const languageChartConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Responses',
+                data: data,
+                backgroundColor: COLORS.skyBlue,
+                borderWidth: 0,
+                borderRadius: 20,
+                borderSkipped: false,
+                barThickness: 18,
+                barPercentage: 0.8
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: 'red',
+                        fontSize: 12
+                    },
+                    grid: {
+                        color: COLORS.lightGray,
+                        borderDash: [2],
+                        drawBorder: false,
+                        borderWidth: 0,
+                        borderDash: [],
+                        borderDashOffset: 0,
+                        drawTicks: true,
+                        display: false
+                    },
+                    autoSkip: false,
+                    maxTicksLimit: 5
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: COLORS.navyBlue,
+                        fontSize: 12
+                    },
+                    grid: {
+                        drawBorder: false,
+                        display: false
+                    }
+                },
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    }
+
+    new Chart(ctx,languageChartConfig);
+}
 
 export_button.addEventListener('click', () => exportToExcel(export_url));
 export_button_1.addEventListener('click', () => exportToExcel(export_url_1));
