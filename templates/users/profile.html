@@ -81,77 +81,43 @@
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane show active" id="settings">
-                                <form>
+                                <form action="" method="post">
+                                    {% csrf_token %}
                                     <h5 class="mb-4 text-uppercase"><i class="mdi mdi-account-circle me-1"></i> Personal
                                         Info</h5>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="firstname" class="form-label">First Name</label>
-                                                <input type="text" class="form-control" id="firstname"
-                                                    placeholder="Enter first name">
+                                                {{form.first_name}}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="lastname" class="form-label">Last Name</label>
-                                                <input type="text" class="form-control" id="lastname"
-                                                    placeholder="Enter last name">
+                                                {{form.last_name}}
                                             </div>
                                         </div> <!-- end col -->
                                     </div> <!-- end row -->
 
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <div class="mb-3">
-                                                <label for="userbio" class="form-label">Bio</label>
-                                                <textarea class="form-control" id="userbio" rows="4"
-                                                    placeholder="Write something..."></textarea>
-                                            </div>
-                                        </div> <!-- end col -->
-                                    </div> <!-- end row -->
+                                    
 
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="useremail" class="form-label">Email Address</label>
-                                                <input type="email" class="form-control" id="useremail"
-                                                    placeholder="Enter email">
-                                                <span class="form-text text-muted"><small>If you want to change email
-                                                        please <a href="javascript: void(0);">click</a>
-                                                        here.</small></span>
+                                                {{form.email}}
+                                                
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="userpassword" class="form-label">Password</label>
-                                                <input type="password" class="form-control" id="userpassword"
-                                                    placeholder="Enter password">
-                                                <span class="form-text text-muted"><small>If you want to change password
-                                                        please <a href="javascript: void(0);">click</a>
-                                                        here.</small></span>
+                                                <label for="userpassword" class="form-label">Receive Marketing emails?</label>
+                                                {{form.receive_marketing_emails}}
                                             </div>
                                         </div> <!-- end col -->
-                                    </div> <!-- end row -->
-
-                                    <h5 class="mb-3 text-uppercase bg-light p-2"><i
-                                            class="mdi mdi-office-building me-1"></i> Company Info</h5>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="companyname" class="form-label">Company Name</label>
-                                                <input type="text" class="form-control" id="companyname"
-                                                    placeholder="Enter company name">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="cwebsite" class="form-label">Website</label>
-                                                <input type="text" class="form-control" id="cwebsite"
-                                                    placeholder="Enter website url">
-                                            </div>
-                                        </div> <!-- end col -->
-                                    </div> <!-- end row -->
+                                    </div> 
+                                    <!-- end row -->
 
                                     <div class="text-end">
                                         <button type="submit" class="btn btn-success waves-effect waves-light mt-2"><i
