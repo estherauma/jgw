@@ -218,11 +218,10 @@ function plotCharts(chartData) {
             }
 
             if (chartDataKey === "destination") {
-                // originChart(chartData['destination'])
+                destinationChart(chartData['destination'])
             }
 
             if (chartDataKey === "origin") {
-                // originChart(chartData['destination'])
                 originChart(chartData['origin'])
             }
 
@@ -490,6 +489,27 @@ function originChart(originChartData) {
     }
 
     new Chart(ctx,languageChartConfig);
+}
+
+function destinationChart(destinationData) {
+    const data = destinationData["data"]
+    const labels = destinationData["labels"]
+
+    console.log(destinationData)
+
+    var tableHead = $('#origin-table thead');
+    var headerRow = $('<tr></tr>');
+    headerRow.append($('<th></th>').text('Origin'));
+    headerRow.append($('<th></th>').text('Responses'));
+    tableHead.append(headerRow);
+
+    var tableBody = $('#origin-table tbody');
+    $.each(labels, function (index, label) {
+        var tableRow = $('<tr></tr>');
+        tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${label}</div></td>`));
+        tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${data[index]}</div></td>`));
+        tableBody.append(tableRow);
+    });
 }
 
 export_button.addEventListener('click', () => exportToExcel(export_url));
