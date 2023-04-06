@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 
 from users.tasks import send_email_notification
 
@@ -17,6 +18,7 @@ from .forms import (
     LoginForm,
     RequestPasswordResetForm,
     SetPasswordForm,
+    UpdateUserProfileForm,
     UserMgtForm,
 )
 from .models import User, UserInvitations
@@ -176,7 +178,29 @@ def verify_invite(request, token):
 
 @login_required
 def profile(request):
-    return render(request, template_name="users/profile.html")
+    profile = User.objects.get(id=request.user.id)
+
+    if request.method == "POST":
+        form = UpdateUserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            profile.first_name = form.cleaned_data.get("first_name")
+            profile.last_name = form.cleaned_data.get("last_name")
+            profile.email = form.cleaned_data.get("email")
+            profile.receive_marketing_emails = form.cleaned_data.get("receive_marketing_emails")
+            profile.save()
+            messages.info(request, "Profile updated successfully!")
+        else:
+            print(form.errors)
+            messages.error(request, "Error validating form!")
+    else:
+        form = UpdateUserProfileForm(initial={
+            "first_name": profile.first_name, 
+            "last_name": profile.last_name,
+            "email": profile.email,
+            'receive_marketing_emails': profile.receive_marketing_emails,
+        })
+    context = {"profile": profile, 'form': form}
+    return render(request, template_name="users/profile.html", context=context)
 
 
 def request_password_reset(request):
