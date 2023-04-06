@@ -33,8 +33,12 @@ function clearFormErrors() {
 }
 
 function clearCharts() {
-    const canvases = document.querySelectorAll("canvas")
-    canvases.forEach(element => element.remove());
+    const canvases = document.querySelectorAll("canvas");
+    canvases.forEach(element => {
+        const newCanvas = document.createElement("canvas");
+        newCanvas.id = element.id; // set the new canvas id to the same value as the old canvas id
+        element.parentNode.replaceChild(newCanvas, element);
+    });
 }
 
 function getOriginOptions() {
@@ -114,6 +118,7 @@ function getFactoryOptions() {
 }
 
 function autosubmit() {
+    clearCharts()
     document.getElementById('time_range').value = '';
     filterData()
 }
@@ -357,7 +362,7 @@ function languageChart(langaugeData) {
     const labels = langaugeData["labels"]
     
 
-    var ctx = document.getElementById('language_graph').getContext('2d');
+    var ctx = document.getElementById('language_graphcard').getContext('2d');
     const languageChartConfig = {
         type: 'bar',
         data: {

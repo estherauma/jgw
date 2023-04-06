@@ -89,8 +89,8 @@ class JGWApi:
                 if key == "chapter_feedback":
                     data, clean = self.transform_chapter_feedback(data)
                 JGWCache.objects.create(category=key, data=json.dumps(data))
-        # if data and not clean:
-        schedule_clean_data.delay(category=key)
+        if data and not clean:
+            schedule_clean_data.delay(category=key)
         return data, clean
 
     def transform_chapter_feedback(self, data):
