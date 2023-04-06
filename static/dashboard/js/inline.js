@@ -32,15 +32,6 @@ function clearFormErrors() {
     }
 }
 
-function clearCharts() {
-    const canvases = document.querySelectorAll("canvas");
-    canvases.forEach(element => {
-        const newCanvas = document.createElement("canvas");
-        newCanvas.id = element.id; // set the new canvas id to the same value as the old canvas id
-        element.parentNode.replaceChild(newCanvas, element);
-    });
-}
-
 function getOriginOptions() {
     const destination_input = document.querySelector('#destination')
     const url = filter_form.attributes.getNamedItem("data-origins-url").value;

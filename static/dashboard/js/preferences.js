@@ -29,11 +29,6 @@ function clearFormErrors() {
     }
 }
 
-function clearCharts() {
-    const canvases = document.querySelectorAll("canvas")
-    canvases.forEach(element => element.remove());
-}
-
 function getOriginOptions() {
     const destination_input = document.querySelector('#destination')
     const url = filter_form.attributes.getNamedItem("data-origins-url").value;
@@ -191,6 +186,7 @@ function exportToExcel(url) {
 }
 
 function plotCharts(chartData) {
+    clearCharts()
     let chartDataKeys = Object.keys(chartData)
     chartDataKeys.map(chartDataKeys => {
         if (chartDataKeys === "age") {
