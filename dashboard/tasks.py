@@ -1,6 +1,5 @@
 import os
 from datetime import datetime, timedelta
-import logging
 
 import pandas as pd
 import six
