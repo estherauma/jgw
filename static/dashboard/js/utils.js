@@ -64,11 +64,45 @@ function getCountryLatLng(country) {
 }
 
 
+const idToIgnoreWhenRecreatingRemovedCharts = ['_question']
+
 function clearCharts() {
   const canvases = document.querySelectorAll("canvas");
   canvases.forEach(element => {
+
+    if(idToIgnoreWhenRecreatingRemovedCharts.includes(element.id)) {
+      element.remove()
+      return;
+    }
+
     const newCanvas = document.createElement("canvas");
     newCanvas.id = element.id; // set the new canvas id to the same value as the old canvas id
     element.parentNode.replaceChild(newCanvas, element);
   });
 }
+
+
+function formDataToObject(formData) {
+  const normalizeValues = (values) => (values.length > 1) ? values : values[0];
+  const formElemKeys = Array.from(formData.keys());
+  const finalKeysArray = formElemKeys.filter(formElemKey => formElemKey !== 'csrfmiddlewaretoken');
+
+  return Object.fromEntries(
+    finalKeysArray.map(key => 
+      {
+        return [key, normalizeValues(formData.getAll(key))]
+      })
+  );
+}
+
+
+function debounce(cb, delay) {
+  let timer;
+  return function () {
+      let context = this;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+          cb.apply(context, arguments);
+      }, delay);
+  };
+};

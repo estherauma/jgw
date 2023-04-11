@@ -31,7 +31,7 @@ class BaseAnalytics:
     def filter_by_destination(self, destination: str, df):
         if "destination" in df.columns:
             destinations = df["destination"].astype("str")
-            mask = destinations == destination
+            mask = destinations.isin(destination)
             return df[mask]
         return pd.DataFrame()
 

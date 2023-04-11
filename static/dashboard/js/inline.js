@@ -9,6 +9,7 @@ const filter_form = document.querySelector('#filter_form')
 const origin_input = document.querySelector('#origin')
 const start_date = document.querySelector('#start_date')
 
+
 function toggleElementDisplay(flag, selector) {
     const element = document.querySelector(selector)
     if (flag === true) {
@@ -114,25 +115,19 @@ function autosubmit() {
     filterData()
 }
 
-function debounce(cb, delay) {
-    let timer;
-    return function () {
-        let context = this;
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            cb.apply(context, arguments);
-        }, delay);
-    };
-};
 
 function filterData() {
+    clearCharts()
+
     const url = filter_form.attributes.getNamedItem("submit-url").value;
     const formData = new FormData(filter_form);
+
     let chartData = {};
     toggleElementDisplay(false, '#chart-area')
     toggleElementDisplay(true, '#loader')
     toggleElementDisplay(false, '#no-results')
     clearFormErrors()
+    
     fetch(url, { method: 'POST', body: formData })
         .then(response => response.json())
         .then(data => {
@@ -264,6 +259,7 @@ function organisationChart(organisationData) {
 
 function genericBarChart(key, values) {
     graphDiv = document.getElementById(`${key}_graphcard`)
+    
     let canvas = document.createElement('canvas')
     canvas.setAttribute('id', `_${key}`)
     canvas.setAttribute('class', "chartContainer")
@@ -328,7 +324,7 @@ function genericBarChart(key, values) {
         }
     });
 
-    const totlaChart = chartObject.config.data.labels.length
+    const totalChart = chartObject.config.data.labels.length
     let totalHeight;
 
     /** 
@@ -336,13 +332,14 @@ function genericBarChart(key, values) {
         to make it scrollable instead of a very long chart
     **/
     let currentChartBox = document.querySelector(`.${key}-chart-box`)
-    if (totlaChart <= 10) {
-        totalHeight = `${totlaChart * 50}px`
-    } else if (totlaChart > 28) {
-        totalHeight = `${totlaChart * 28}px`
+
+    if (totalChart <= 10) {
+        totalHeight = `${totalChart * 50}px`
+    } else if (totalChart > 28) {
+        totalHeight = `${totalChart * 28}px`
         currentChartBox.classList.add('generic-chart-box')
     } else {
-        totalHeight = `${totlaChart * 28}px`
+        totalHeight = `${totalChart * 28}px`
     }
     graphDiv.style.height = totalHeight;
 }
@@ -483,18 +480,21 @@ function originChart(originChartData) {
 }
 
 function destinationChart(destinationData) {
+
+
     const data = destinationData["data"]
     const labels = destinationData["labels"]
-
-    console.log(destinationData)
-
     var tableHead = $('#origin-table thead');
+    tableHead.empty()
+
     var headerRow = $('<tr></tr>');
     headerRow.append($('<th></th>').text('Origin'));
     headerRow.append($('<th></th>').text('Responses'));
     tableHead.append(headerRow);
 
     var tableBody = $('#origin-table tbody');
+    tableBody.empty()
+
     $.each(labels, function (index, label) {
         var tableRow = $('<tr></tr>');
         tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${label}</div></td>`));
@@ -505,8 +505,6 @@ function destinationChart(destinationData) {
 
 export_button.addEventListener('click', () => exportToExcel(export_url));
 export_button_1.addEventListener('click', () => exportToExcel(export_url_1));
-end_date.addEventListener('change', debounce(autosubmit, 1000));
-start_date.addEventListener('change', debounce(autosubmit, 1000));
 window.addEventListener('DOMContentLoaded', getOriginOptions)
 window.addEventListener('DOMContentLoaded', getFactoryOptions)
 window.addEventListener('DOMContentLoaded', filterData)

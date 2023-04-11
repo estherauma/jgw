@@ -110,17 +110,6 @@ function autosubmit() {
     filterData()
 }
 
-function debounce(cb, delay) {
-    let timer;
-    return function () {
-        let context = this;
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            cb.apply(context, arguments);
-        }, delay);
-    };
-};
-
 function filterData() {
     const url = filter_form.attributes.getNamedItem("submit-url").value;
     const formData = new FormData(filter_form);
