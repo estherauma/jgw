@@ -71,11 +71,11 @@ class DependentChoiceField(forms.ChoiceField):
 class FilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
-        for f in self.fields:
-            if f not in ("start_date", "end_date", "time_range", "scheme_name"):
-                self.fields[f].widget.attrs = {
+        for field in self.fields:
+            if field not in ("start_date", "end_date", "time_range", "scheme_name"):
+                self.fields[field].widget.attrs = {
                     "class": "form-select mx-1",
-                    "id": f,
+                    "id": field,
                 }
 
     def clean(self):
@@ -203,12 +203,12 @@ class InlineQnsForm(FilterForm):
         self.fields["question"].choices = question_choices
         qn_mark = mark_safe("'")
         form_name = f"{qn_mark}filter_form{qn_mark}"
-        for f in self.fields:
-            if f not in ("time_range"):
-                self.fields[f].widget.attrs = {
+        for field in self.fields:
+            if field not in ("time_range"):
+                self.fields[field].widget.attrs = {
                     "onChange": mark_safe("filterData();"),
                     "class": "form-select mx-1",
-                    "id": f,
+                    "id": field,
                 }
 
     question = forms.ChoiceField(
