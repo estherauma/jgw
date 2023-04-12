@@ -71,12 +71,12 @@ class DependentChoiceField(forms.ChoiceField):
 class FilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
-        for f in self.fields:
-            if f not in ("start_date", "end_date", "time_range", "destination", "scheme_name"):
-                self.fields[f].widget.attrs = {
+        for field in self.fields:
+            if field not in ("start_date", "end_date", "time_range", "scheme_name"):
+                self.fields[field].widget.attrs = {
                     "onChange": mark_safe("filterData();"),
                     "class": "form-select mx-1",
-                    "id": f,
+                    "id": field,
                 }
 
     def clean(self):
@@ -91,13 +91,24 @@ class FilterForm(forms.Form):
 
         return cleaned_data
 
-    destination = forms.ChoiceField(
+    destination = forms.MultipleChoiceField(
         choices=DEST_COUNTRIES.items(),
         required=False,
-        widget=forms.Select(
-            attrs={"class": "form-select mx-1", "id": "destination", "onChange": "getOriginOptions();"}
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select mx-1 selectpicker", 
+                "id": "destination", 
+                "onChange": mark_safe(
+                    """
+                        filterData()
+                        getOriginOptions();
+                    """
+                ),
+                "data-live-search": "true"
+            }
         ),
     )
+    
     origin = DependentChoiceField(choices=ORIGIN_COUNTRIES.items(), required=False)
     scheme_name = forms.ModelChoiceField(
         label="Scheme",
@@ -193,18 +204,18 @@ class InlineQnsForm(FilterForm):
         self.fields["question"].choices = question_choices
         qn_mark = mark_safe("'")
         form_name = f"{qn_mark}filter_form{qn_mark}"
-        for f in self.fields:
-            if f not in ("start_date", "end_date", "time_range"):
-                self.fields[f].widget.attrs = {
-                    "onChange": mark_safe("document.getElementById('filter_form').submit();"),
+        for field in self.fields:
+            if field not in ("time_range"):
+                self.fields[field].widget.attrs = {
+                    "onChange": mark_safe("filterData();"),
                     "class": "form-select mx-1",
-                    "id": f,
+                    "id": field,
                 }
 
     question = forms.ChoiceField(
         label="Question Key",
         required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-1", "id": "question"}),
+        widget=forms.Select(attrs={"class": "form-select mx-1", "id": "question", "onChange": mark_safe("filterData();")}),
     )
 
 
