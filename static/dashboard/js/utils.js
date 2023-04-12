@@ -81,7 +81,6 @@ function clearCharts() {
   });
 }
 
-
 function formDataToObject(formData) {
   const normalizeValues = (values) => (values.length > 1) ? values : values[0];
   const formElemKeys = Array.from(formData.keys());
@@ -94,7 +93,6 @@ function formDataToObject(formData) {
       })
   );
 }
-
 
 function debounce(cb, delay) {
   let timer;
