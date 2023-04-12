@@ -23,7 +23,7 @@ ORIGIN_COUNTRIES.update({country_names[i].title(): country_names[i].title() for 
 
 DEST_COUNTRIES = {"": "Select a Country"}
 DEST_COUNTRIES.update(
-    {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL")}
+    {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL", "RO")}
 )
 
 FACTORIES = {"": "Select a Factory or Farm"}

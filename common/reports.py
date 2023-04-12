@@ -89,7 +89,7 @@ def get_inlineQNs_responses_report(start, end, df=None):
     ).first()
     if df is None:
         df = pd.read_json(result.data, orient="records")
-    df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
+    df = df.loc[df["createdAt"].between(str(start), str(end), inclusive="both")]
     question_cols = [i for i in df.columns if i not in exclude_cols]
     try:
         write_to_xls_sheet(

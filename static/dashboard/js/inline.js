@@ -1,7 +1,7 @@
 
-const export_button = document.querySelector('#exportFileBtn')
+const export_button = document.querySelector('#exportParticipation')
 const export_url = export_button.attributes.getNamedItem("export-url").value;
-const export_button_1 = document.querySelector('#exportFileBtn1')
+const export_button_1 = document.querySelector('#exportAnswersBreakdown')
 const export_url_1 = export_button_1.attributes.getNamedItem("export-url").value;
 const end_date = document.querySelector('#end_date')
 const factoryFarm_input = document.querySelector('#factory_farm')
@@ -30,11 +30,6 @@ function clearFormErrors() {
     for (i in errorMessages) {
         i.textContent = ''
     }
-}
-
-function clearCharts() {
-    const canvases = document.querySelectorAll("canvas")
-    canvases.forEach(element => element.remove());
 }
 
 function getOriginOptions() {
@@ -114,6 +109,7 @@ function getFactoryOptions() {
 }
 
 function autosubmit() {
+    clearCharts()
     document.getElementById('time_range').value = '';
     filterData()
 }
@@ -205,96 +201,307 @@ function removeBrTags(list) {
 
 function plotCharts(chartData) {
     if (chartData) {
-        clearCharts()
-        for (const [key, values] of Object.entries(chartData)) {
+        let chartDataKeys = Object.keys(chartData)
 
-
-            graphDiv = document.getElementById(`${key}_graphcard`)
-            let canvas = document.createElement('canvas')
-            canvas.setAttribute('id', `_${key}`)
-            canvas.setAttribute('class', "chartContainer")
-            graphDiv.appendChild(canvas)
-
-            const chartObject = new Chart(canvas.getContext("2d"), {
-                type: "bar",
-                data: {
-                    labels: removeBrTags(values.labels),
-                    datasets: [
-                        {
-                            label: key,
-                            data: values.data,
-                            backgroundColor: ["#5671F0"],
-                            borderWidth: 0,
-                            borderRadius: 20,
-                            borderSkipped: false,
-                            barThickness: 18,
-                            barPercentage: 0.8
-                        },
-                    ],
-                },
-                options: {
-                    indexAxis: 'y',
-                    hover: { mode: null },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: key,
-                            font: {
-                                size: 20,
-                                weight: '400',
-                                lineHeight: 1.2,
-                                textAlign: 'left',
-                            },
-                            padding: { top: 20, left: 0, right: 0, bottom: 20 }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                display: false
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    maintainAspectRatio: false,
-                    responsive: true,
-                },
-                plugins: {
-                    scrollbar: {
-                        enabled: true
-                    }
-                }
-            });
-
-            const totlaChart = chartObject.config.data.labels.length
-            let totalHeight;
-
-            /** 
-                if the number of bars are > 25, add generic-chart-box class to currentChartBox
-                to make it scrollable instead of a very long chart
-            **/
-            let currentChartBox = document.querySelector(`.${key}-chart-box`)
-            if (totlaChart <= 10) {
-                totalHeight = `${totlaChart * 50}px`
-            } else if (totlaChart > 28) {
-                totalHeight = `${totlaChart * 28}px`
-                currentChartBox.classList.add('generic-chart-box')
-            } else {
-                totalHeight = `${totlaChart * 28}px`
+        chartDataKeys.map(chartDataKey => {
+            if (chartDataKey === "organisation") {
+                organisationChart(chartData['organisation'])
             }
-            graphDiv.style.height = totalHeight;
-        }
+
+            if (chartDataKey === "destination") {
+                destinationChart(chartData['destination'])
+            }
+
+            if (chartDataKey === "origin") {
+                originChart(chartData['origin'])
+            }
+
+            if (chartDataKey === "language") {
+                languageChart(chartData['language'])
+            }
+
+
+            if (chartDataKey === "question") {
+                genericBarChart(chartDataKey, chartData['question'])
+            }
+        })
     }
 }
 
+function organisationChart(organisationData) {
+    const organisationCleanedLabels = organisationData["labels"].map(org => { 
+        return org.replace("Seasonal Worker Scheme - ", "").replace("Seasonal  Worker Scheme - ", "")
+    })
+    const organisationChartData = {
+        labels: organisationCleanedLabels,
+        datasets: [{
+          label: 'Responses',
+          data: organisationData["data"],
+          backgroundColor: [
+            COLORS.mediumBlue,
+            COLORS.skyBlue,
+            COLORS.navyBlue,
+            COLORS.appleGreen,
+          ],
+          hoverOffset: 4
+        }]
+      };
+      const organisationChartConfig = {
+        type: 'doughnut',
+        data: organisationChartData,
+        options: {
+            plugins: {
+                legend: {
+                    display: true,
+                }
+            }
+        }
+      };
+    
+    var ctx = document.getElementById('organisation_graph').getContext('2d');
+    new Chart(ctx,organisationChartConfig);
+}
+
+function genericBarChart(key, values) {
+    graphDiv = document.getElementById(`${key}_graphcard`)
+    let canvas = document.createElement('canvas')
+    canvas.setAttribute('id', `_${key}`)
+    canvas.setAttribute('class', "chartContainer")
+    graphDiv.appendChild(canvas)
+
+    const chartObject = new Chart(canvas.getContext("2d"), {
+        type: "bar",
+        data: {
+            labels: removeBrTags(values.labels),
+            datasets: [
+                {
+                    label: key,
+                    data: values.data,
+                    backgroundColor: COLORS.appleGreen,
+                    borderWidth: 0,
+                    borderRadius: 20,
+                    borderSkipped: false,
+                    barThickness: 18,
+                    barPercentage: 0.8
+                },
+            ],
+        },
+        options: {
+            indexAxis: 'y',
+            hover: { mode: null },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: false,
+                    text: key,
+                    font: {
+                        size: 20,
+                        weight: '400',
+                        lineHeight: 1.2,
+                        textAlign: 'left',
+                    },
+                    padding: { top: 20, left: 0, right: 0, bottom: 20 }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            maintainAspectRatio: false,
+            responsive: true,
+        },
+        plugins: {
+            scrollbar: {
+                enabled: true
+            }
+        }
+    });
+
+    const totlaChart = chartObject.config.data.labels.length
+    let totalHeight;
+
+    /** 
+        if the number of bars are > 25, add generic-chart-box class to currentChartBox
+        to make it scrollable instead of a very long chart
+    **/
+    let currentChartBox = document.querySelector(`.${key}-chart-box`)
+    if (totlaChart <= 10) {
+        totalHeight = `${totlaChart * 50}px`
+    } else if (totlaChart > 28) {
+        totalHeight = `${totlaChart * 28}px`
+        currentChartBox.classList.add('generic-chart-box')
+    } else {
+        totalHeight = `${totlaChart * 28}px`
+    }
+    graphDiv.style.height = totalHeight;
+}
+
+function languageChart(langaugeData) {
+    const data = langaugeData["data"]
+    const labels = langaugeData["labels"]
+    
+
+    var ctx = document.getElementById('language_graphcard').getContext('2d');
+    const languageChartConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Users',
+                data: data,
+                backgroundColor: COLORS.navyBlue,
+                borderWidth: 0,
+                borderRadius: 20,
+                borderSkipped: false,
+                barThickness: 18,
+                barPercentage: 0.8
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: 'red',
+                        fontSize: 12
+                    },
+                    grid: {
+                        color: COLORS.lightGray,
+                        borderDash: [2],
+                        drawBorder: false,
+                        borderWidth: 0,
+                        borderDash: [],
+                        borderDashOffset: 0,
+                        drawTicks: true,
+                        display: false
+                    },
+                    autoSkip: false,
+                    maxTicksLimit: 5
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: COLORS.navyBlue,
+                        fontSize: 12
+                    },
+                    grid: {
+                        drawBorder: false,
+                        display: false
+                    }
+                },
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    }
+
+    new Chart(ctx,languageChartConfig);
+}
+
+function originChart(originChartData) {
+    const data = originChartData["data"]
+    const labels = originChartData["labels"].map(label => label.replace("Other - The Rest Of The World", "Others"))
+    
+
+    var ctx = document.getElementById('destination_graphcard').getContext('2d');
+    const languageChartConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Responses',
+                data: data,
+                backgroundColor: COLORS.skyBlue,
+                borderWidth: 0,
+                borderRadius: 20,
+                borderSkipped: false,
+                barThickness: 18,
+                barPercentage: 0.8
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: 'red',
+                        fontSize: 12
+                    },
+                    grid: {
+                        color: COLORS.lightGray,
+                        borderDash: [2],
+                        drawBorder: false,
+                        borderWidth: 0,
+                        borderDash: [],
+                        borderDashOffset: 0,
+                        drawTicks: true,
+                        display: false
+                    },
+                    autoSkip: false,
+                    maxTicksLimit: 5
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: COLORS.navyBlue,
+                        fontSize: 12
+                    },
+                    grid: {
+                        drawBorder: false,
+                        display: false
+                    }
+                },
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    }
+
+    new Chart(ctx,languageChartConfig);
+}
+
+function destinationChart(destinationData) {
+    const data = destinationData["data"]
+    const labels = destinationData["labels"]
+
+    console.log(destinationData)
+
+    var tableHead = $('#origin-table thead');
+    var headerRow = $('<tr></tr>');
+    headerRow.append($('<th></th>').text('Origin'));
+    headerRow.append($('<th></th>').text('Responses'));
+    tableHead.append(headerRow);
+
+    var tableBody = $('#origin-table tbody');
+    $.each(labels, function (index, label) {
+        var tableRow = $('<tr></tr>');
+        tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${label}</div></td>`));
+        tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${data[index]}</div></td>`));
+        tableBody.append(tableRow);
+    });
+}
 
 export_button.addEventListener('click', () => exportToExcel(export_url));
 export_button_1.addEventListener('click', () => exportToExcel(export_url_1));

@@ -13,7 +13,6 @@ from jgwpandas.settings import EMAIL_HOST_USER
 
 client = translate.Client()
 
-
 def translate_to_eng(text, client=client):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
