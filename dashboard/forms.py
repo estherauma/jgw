@@ -74,6 +74,7 @@ class FilterForm(forms.Form):
         for field in self.fields:
             if field not in ("start_date", "end_date", "time_range", "scheme_name"):
                 self.fields[field].widget.attrs = {
+                    "onChange": mark_safe("filterData();"),
                     "class": "form-select mx-1",
                     "id": field,
                 }
