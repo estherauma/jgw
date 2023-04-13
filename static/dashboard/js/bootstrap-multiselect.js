@@ -413,7 +413,7 @@
             buttonClass: 'custom-select',
             inheritClass: false,
             buttonWidth: 'auto',
-            buttonContainer: '<div class="btn-group" />',
+            buttonContainer: '<div class="btn-group w-100" />',
             dropRight: false,
             dropUp: false,
             selectedClass: 'active',
@@ -456,7 +456,7 @@
             buttonTextAlignment: 'center',
             enableResetButton: false,
             templates: {
-                button: '<button type="button" class="btn multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+                button: '<button type="button" class="btn multiselect dropdown-toggle" data-bs-toggle="dropdown" style="text-align: start !important; font-size: 13.4px; padding-left: 16px;"><span class="multiselect-selected-text"></span></button>',
                 popupContainer: '<div class="multiselect-container dropdown-menu"></div>',
                 filter: '<div class="multiselect-filter d-flex align-items-center"><i class="fas fa-sm fa-search text-muted"></i><input type="search" class="multiselect-search form-control" /></div>',
                 buttonGroup: '<div class="multiselect-buttons btn-group" style="display:flex;"></div>',

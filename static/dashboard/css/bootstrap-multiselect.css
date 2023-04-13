@@ -242,3 +242,7 @@ span.multiselect-native-select select {
     padding-left: 1rem;
     font-size: 1.25rem
 }
+
+.multiselect-selected-text {
+  text-align: start !important;
+}
