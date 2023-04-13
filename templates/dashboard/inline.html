@@ -65,7 +65,7 @@
                         submit-url="{% url 'dashboard:filter_data' category='inline' %}">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label class="form-label" for="destination">{{form.destination.label}}</label>
+                            <label class="form-label" for="destination">{{form.destination.label}}</label></br>
                             {{form.destination}}
                             <span id='destination-errors' class='text-danger'></span>
                         </div>

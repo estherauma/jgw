@@ -9,6 +9,7 @@ const filter_form = document.querySelector('#filter_form')
 const origin_input = document.querySelector('#origin')
 const start_date = document.querySelector('#start_date')
 
+
 function toggleElementDisplay(flag, selector) {
     const element = document.querySelector(selector)
     if (flag === true) {
