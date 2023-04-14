@@ -72,7 +72,6 @@ class FilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
         for field in self.fields:
-            print("--->:::field::generic", field)
             if field not in ("start_date", "end_date", "time_range", "scheme_name"):
                 self.fields[field].widget.attrs = {
                     "onChange": mark_safe("filterData();"),
@@ -209,7 +208,6 @@ class InlineQnsForm(FilterForm):
             if field in ("destination"):
                 self.fields[field].widget.attrs = {
                     "onChange": mark_safe("filterData();"),
-                    # "class": "form-select select mx-1",
                     "id": field,
                 }
                                 
