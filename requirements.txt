@@ -28,6 +28,7 @@ django-heroku==0.3.1
 djangorestframework==3.12.4
 et-xmlfile==1.1.0
 executing==0.8.3
+Faker==18.4.0
 fonttools==4.38.0
 google-api-core==1.31.5
 google-auth==1.35.0
