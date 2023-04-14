@@ -40,3 +40,7 @@ class JGWCache(models.Model):
 
     def __str__(self) -> str:
         return f'{self.category} - {self.date_created} - {self.is_cleaned}'
+    
+
+class Routes(models.Model):
+    pass
