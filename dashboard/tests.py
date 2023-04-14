@@ -148,22 +148,22 @@ class DashboardTests(TestCase):
         self.assertEqual(form_errors, {"end_date": ["Enter a valid date."]})
 
     def test_summerberry_dummy_data_response_code(self):
-        url = reverse("dashboard:summerberry_dummy_data")
+        url = reverse("dashboard:summerberry-sample")
         response = self.client.get(url)
         assert response.status_code == 200
 
     def test_summerberry_dummy_data_response_type(self):
-        url = reverse("dashboard:summerberry_dummy_data")
+        url = reverse("dashboard:summerberry-sample")
         response = self.client.get(url)
         assert response['Content-Type'] == 'application/json'
 
     def test_summerberry_dummy_data_response_type(self):
-        url = reverse("dashboard:summerberry_dummy_data")
+        url = reverse("dashboard:summerberry-sample")
         response = self.client.get(url)
         assert response['Content-Type'] == 'application/json'
 
     def test_summerberry_dummy_data_item_fields(self):
-        url = reverse("dashboard:summerberry_dummy_data")
+        url = reverse("dashboard:summerberry-sample")
         response = self.client.get(url)
         data = json.loads(response.content)
         for item in data:
