@@ -23,4 +23,7 @@ urlpatterns = [
 
     # test
     path("limited-data-home-page", views.limited_data_home_page, name="limited_data_home_page"),
+
+    # summerberry
+    path("summerberry-sample", views.summerberry_dummy_data, name="summerberry-sample"),
 ]

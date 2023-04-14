@@ -18,13 +18,13 @@ This repository contains code for running analytics on data collected by the JGW
 
    You can get an API key for the google service account from this [link](https://console.cloud.google.com/iam-admin/serviceaccounts/details/104736138538665133501/keys?project=just-good-work). Download the json file to the project root and rename it to `google_cred.json`
 
-2. Set up your local database
+1. Set up your local database
 
    ```bash
    psql -U postgres -h 127.0.0.1 -f create_dev_db.sql
    ```
 
-3. In the root directory, create a new virtual environment; activate it and install dependencies
+1. In the root directory, create a new virtual environment; activate it and install dependencies
 
    ```bash
    python3 -m venv ./.venv
@@ -32,7 +32,7 @@ This repository contains code for running analytics on data collected by the JGW
    pip install -r requirements.txt
    ```
 
-4. Run database migrations and collect static files with:
+1. Run database migrations and collect static files with:
 
    These only need to be run when there's a change to the database structure or new assets/static files are added for the UI.
    ```bash
@@ -40,7 +40,7 @@ This repository contains code for running analytics on data collected by the JGW
    python manage.py collectstatic
    ```
 
-5. Run the following commands to start the celery scheduler and Django development server.
+1. Run the following commands to start the celery scheduler and Django development server.
 
    ```bash
    # run celery worker and beat scheduler in background
@@ -53,12 +53,18 @@ This repository contains code for running analytics on data collected by the JGW
    # run dev-server and visit http://localhost:8000/ in the browser to use the app
    python manage.py runserver
    ```
+
    > NOTE: Accounts created through the Sign-Up page currently need to be activated by an admin user.
 
-6. Use `CTRL+C` to terminate the django server.
+1. Use `CTRL+C` to terminate the django server.
 
    To stop the background celery services started in the step above, run the following command
 
    ```bash
    kill -9 $(ps aux | grep celery | grep -v grep | awk '{print $2}' | tr '\n'  ' ') > /dev/null 2>&1
    ```
+
+## Testing
+
+To run tests, run `coverage run manage.py test`   
+To get coverage report, run `coverage report`
