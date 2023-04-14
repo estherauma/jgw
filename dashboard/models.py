@@ -40,7 +40,27 @@ class JGWCache(models.Model):
 
     def __str__(self) -> str:
         return f'{self.category} - {self.date_created} - {self.is_cleaned}'
-    
 
-class Routes(models.Model):
-    pass
+class Route(models.Model):
+    origin_country = models.CharField(max_length=255)
+    destination_country = models.CharField(max_length=255)
+    origin_coordinates = models.CharField(max_length=255)
+    destination_coordinates = models.CharField(max_length=255)
+
+    def _coordinates_as_list(self, coordinates_str):
+        coords_str = coordinates_str.strip('[]')
+        coords_list = coords_str.split(',')
+        coords_float = [float(coord) for coord in coords_list]
+        return coords_float
+
+    @property
+    def origin_coordinates_as_list(self):
+        return self._coordinates_as_list(self.origin_coordinates)
+
+    @property
+    def destination_coordinates_as_list(self):
+        return self._coordinates_as_list(self.destination_coordinates)
+
+    def __str__(self):
+        return f"{self.origin_country} to {self.destination_country}: {self.origin_coordinates_as_list} - {self.destination_coordinates_as_list}"
+
