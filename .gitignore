@@ -163,4 +163,4 @@ celerybeat-schedule.db
 ./preferences.xlsx
 
 
-.xlsx
+/*.xlsx
