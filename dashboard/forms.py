@@ -21,10 +21,7 @@ ORIGIN_COUNTRIES_template = {"": "Select a Country"}
 ORIGIN_COUNTRIES = ORIGIN_COUNTRIES_template.copy()
 ORIGIN_COUNTRIES.update({country_names[i].title(): country_names[i].title() for i in country_names})
 
-DEST_COUNTRIES = {"": "Select a Country"}
-DEST_COUNTRIES.update(
-    {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL", "RO")}
-)
+DEST_COUNTRIES = {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL", "RO")}
 
 FACTORIES = {"": "Select a Factory or Farm"}
 OPERATORS = {
