@@ -161,3 +161,6 @@ staticfiles/
 google_cred.json
 celerybeat-schedule.db
 ./preferences.xlsx
+
+
+.xlsx
