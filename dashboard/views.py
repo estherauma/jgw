@@ -390,5 +390,4 @@ def summerberry_dummy_data(request):
             'hygiene_signed': faker.boolean(),
             'medical_signed': faker.boolean(),
         })
-    print (data)
     return  JsonResponse(data, status=200, safe=False)
