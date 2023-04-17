@@ -382,7 +382,7 @@ def summerberry_dummy_data(request):
     for i in range(20):
         data.append({
             'name': faker.name(),
-            'number': faker.random_number(digits=10),
+            'number': faker.random_number(digits=6),
             'start_date': faker.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d'),
             'reg_date': faker.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d'),
             'completed_registration': faker.boolean(),
