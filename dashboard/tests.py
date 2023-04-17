@@ -178,7 +178,7 @@ class DashboardTests(TestCase):
             assert 'hygiene_signed' in item
             assert 'medical_signed' in item
             assert isinstance(item['name'], str)
-            assert isinstance(item['number'], str)
+            assert isinstance(item['number'], int)
             assert isinstance(item['start_date'], str)
             assert isinstance(item['reg_date'], str)
             assert isinstance(item['completed_registration'], bool)
