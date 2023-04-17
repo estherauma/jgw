@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from http import HTTPStatus
 from operator import itemgetter
+import random
 from typing import Dict, List
 
 from django.contrib import messages
@@ -31,6 +32,7 @@ from .forms import (
     ORIGIN_COUNTRIES_template,
     get_start_date,
 )
+from faker import Faker
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
 HELPERS = {
@@ -297,8 +299,6 @@ def test_sentry(request):
 def landing(request):
     return render(request, template_name="landing/landing_page.html")
 
-
-# Create your views here.
 def limited_data_home_page(request):
     routes_label = [
             "bangladesh -> malaysia",
@@ -376,3 +376,23 @@ def notifications(request):
             'notifications_data': notifications_data,
             'total_notifications': total_notifications
         })
+
+def summerberry_dummy_data(request):
+    faker = Faker()
+    induction_statuses = ['Completed', 'Incomplete', 'Not_started']
+    worker_directive_statuses = ['Yes', 'No', 'Unknown']
+    data = []
+    for i in range(20):
+        data.append({
+            'name': faker.name(),
+            'number': faker.phone_number(),
+            'start_date': faker.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d'),
+            'reg_date': faker.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d'),
+            'completed_registration': faker.boolean(),
+            'completed_induction': random.choice(induction_statuses),
+            'signed_contract': faker.boolean(),
+            'worker_directive_signed': random.choice(worker_directive_statuses),
+            'hygiene_signed': faker.boolean(),
+            'medical_signed': faker.boolean(),
+        })
+    return  JsonResponse(data, status=200, safe=False)
