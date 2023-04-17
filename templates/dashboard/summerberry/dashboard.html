@@ -1,0 +1,77 @@
+{% extends 'layouts/base.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+{% endblock styles %}
+
+<!-- title -->
+{% block title %} SummeryBerry Dashboard {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="summerberry-dash" class="table dt-responsive nowrap w-100" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Worker Name</th>
+                            <th>Worker Number</th>
+                            <th>Start Date</th>
+                            <th>Registration Date</th>
+                            <th>Registration</th>
+                            <th>Induction</th>
+                            <th>Contract Signed</th>
+                            <th>Worker Directive Signed?</th>
+                            <th>Hygiene</th>
+                            <th>Medical</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for worker in data %}
+                        <tr>
+                            <td>{{ worker.name }}</td>
+                            <td>{{ worker.number }}</td>
+                            <td>{{ worker.start_date }}</td>
+                            <td>{{ worker.reg_date }}</td>
+                            <td>{{ worker.completed_registration }}</td>
+                            <td>{{ worker.completed_induction }}</td>
+                            <td>{{ worker.signed_contract }}</td>
+                            <td>{{ worker.worker_directive_signed }}</td>
+                            <td>{{ worker.hygiene_signed }}</td>
+                            <td>{{ worker.medical_signed }}</td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        
+
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+    $('#summerberry-dash').DataTable({
+        columnDefs: [
+            {
+                targets: [3],
+                orderData: [0, 1],
+            },
+            {
+                targets: [3],
+                orderData: [1, 0],
+            }
+        ],
+    });
+});
+</script>
+
+{% endblock scripts %}
