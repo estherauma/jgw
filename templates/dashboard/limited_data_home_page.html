@@ -218,13 +218,20 @@
         </div> <!-- content -->
 {% endblock content %}
 {% block scripts %}
-<script src="{% static 'map/routes.js' %}"></script>
+<!-- <script src="{% static 'map/routes.js' %}"></script> -->
 <script src="{% static 'map/map.js' %}"></script>
 <script src="{% static 'dashboard/js/limited_data_home_page.js' %}"></script>
 <script type="text/javascript">
-    const labels = [{% for label in routes %} '{{ label | safe }}', {% endfor %}]
-    const returning_data = [{% for returning_data in returning_data_list %} '{{ returning_data }}', {% endfor %}]
-    const unique_data = [{% for unique_users in unique_data_list %} '{{ unique_users }}', {% endfor %}]
-    uniqueAndReturningUsersGraph({ returning_data,unique_data,labels })
+    // load all view context data
+    var page_context_data = JSON.parse('{{ limited_data_home_page_context | safe }}');
+
+    uniqueAndReturningUsersGraph({ 
+        returning_data: page_context_data['returning_users_list'], 
+        unique_data: page_context_data['unique_users_list'], 
+        labels: page_context_data['routes_label'] 
+    })
+
+    initiateRoutesMap(page_context_data['route_list'])
+
 </script>
 {% endblock scripts %}
