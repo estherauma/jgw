@@ -6,7 +6,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from pytz import country_names
 
-from common.utils.helpers import HELPERS, HelpersParameters
+from common.utils.dashboard import get_destination_countries_from_preferences
 from common.inline import Inline
 from common.reports import get_start_date
 from common.retrieve_data import exclude_cols
@@ -21,8 +21,6 @@ TODAY = datetime.today().date()
 ORIGIN_COUNTRIES_template = {"": "Select a Country"}
 ORIGIN_COUNTRIES = ORIGIN_COUNTRIES_template.copy()
 ORIGIN_COUNTRIES.update({country_names[i].title(): country_names[i].title() for i in country_names})
-
-DEST_COUNTRIES = {country_names[k].title(): country_names[k] for k in ("MY", "QA", "SA", "AE", "GB", "PL", "RO")}
 
 FACTORIES = {"": "Select a Factory or Farm"}
 OPERATORS = {
@@ -67,11 +65,10 @@ class DependentChoiceField(forms.ChoiceField):
 
 
 class FilterForm(forms.Form):
+    
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
-        helper = HELPERS[HelpersParameters.PREFERENCES.value]()
-        print("helper--->", helper.get_destination_countries())
-        print(DEST_COUNTRIES)
+
         for field in self.fields:
             if field not in ("start_date", "end_date", "time_range", "scheme_name"):
                 self.fields[field].widget.attrs = {
@@ -93,7 +90,7 @@ class FilterForm(forms.Form):
         return cleaned_data
 
     destination = forms.MultipleChoiceField(
-        choices=DEST_COUNTRIES.items(),
+        choices= get_destination_countries_from_preferences().items(),
         required=False,
         widget=forms.SelectMultiple(
             attrs={

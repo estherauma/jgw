@@ -29,21 +29,44 @@ class Preferences(BaseAnalytics):
         _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
         return _stats
     
-    def get_destination_countries(self):
-        _df = clean_df(self.get_df())
-        if _df.empty:
+    def origin_and_destination_dataframe(self):
+        preference_df = clean_df(self.get_df())
+
+        if preference_df.empty:
             return {}
+    
+        routes_df_series = preference_df['route']
+        unique_routes = routes_df_series.unique()
+        unique_routes_series = pd.Series(unique_routes)
+
+        # split_by_arrow_get_long_and_lat
+        routes_df = unique_routes_series.str.split(' -> ', expand=True)
+
+        # add columns to then data frame
+        routes_df.columns = ['Origin', 'Destination']
+        routes_df = routes_df.replace('United Kingdom', 'Britain (Uk)')\
+            .replace('uk', 'Britain (Uk)')\
+            .replace('Other - The rest of the world', 'other').replace('uae','United Arab Emirates')\
+            .replace('saudi', 'Saudi Arabia')\
+            .replace('malaysia', 'Malaysia')\
+            .replace('qatar', 'Qatar')
         
-        routes = _df['route']
+        routes_df = routes_df.dropna()
+        routes_df.reset_index(drop=True)
+        routes_df = routes_df[routes_df['Origin'] != routes_df['Destination']]
 
-        # get unique routes and addd to series
-        unique_routes = routes.unique()
-        routes_series = pd.Series(unique_routes)
+        return routes_df
+    
+    def get_destination_countries(self):
+        origin_and_destination_dataframe = self.origin_and_destination_dataframe()
+        destination_countries = origin_and_destination_dataframe['Destination'].dropna().unique().tolist()
 
-        # split with and add cloumns
-        origin_dest_df = routes_series.str.split(' -> ', expand=True)
-        origin_dest_df.columns = ['Origin', 'Destination']
+        # Remove empty string from the list
+        destination_countries = list(filter(None, destination_countries))
 
-        # origin_dest_df
-        print("yes the country")
-        pass
+        # Create dictionary with country names as keys and values
+        country_dict = {}
+        for country in destination_countries:
+            country_dict[country] = country
+
+        return country_dict
