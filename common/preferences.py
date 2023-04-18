@@ -28,3 +28,22 @@ class Preferences(BaseAnalytics):
             return {}
         _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
         return _stats
+    
+    def get_destination_countries(self):
+        _df = clean_df(self.get_df())
+        if _df.empty:
+            return {}
+        
+        routes = _df['route']
+
+        # get unique routes and addd to series
+        unique_routes = routes.unique()
+        routes_series = pd.Series(unique_routes)
+
+        # split with and add cloumns
+        origin_dest_df = routes_series.str.split(' -> ', expand=True)
+        origin_dest_df.columns = ['Origin', 'Destination']
+
+        # origin_dest_df
+        print("yes the country")
+        pass

@@ -6,6 +6,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from pytz import country_names
 
+from common.utils.helpers import HELPERS, HelpersParameters
 from common.inline import Inline
 from common.reports import get_start_date
 from common.retrieve_data import exclude_cols
@@ -68,6 +69,9 @@ class DependentChoiceField(forms.ChoiceField):
 class FilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(forms.Form, self).__init__(*args, **kwargs)
+        helper = HELPERS[HelpersParameters.PREFERENCES.value]()
+        print("helper--->", helper.get_destination_countries())
+        print(DEST_COUNTRIES)
         for field in self.fields:
             if field not in ("start_date", "end_date", "time_range", "scheme_name"):
                 self.fields[field].widget.attrs = {
