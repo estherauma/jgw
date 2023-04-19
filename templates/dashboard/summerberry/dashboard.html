@@ -36,12 +36,52 @@
                             <td>{{ worker.number }}</td>
                             <td>{{ worker.start_date }}</td>
                             <td>{{ worker.reg_date }}</td>
-                            <td>{{ worker.completed_registration }}</td>
-                            <td>{{ worker.completed_induction }}</td>
-                            <td>{{ worker.signed_contract }}</td>
-                            <td>{{ worker.worker_directive_signed }}</td>
-                            <td>{{ worker.hygiene_signed }}</td>
-                            <td class="colorfy">{{ worker.medical_signed }}</td>
+                            <td>
+                                {% if worker.completed_registration %}
+                                <span class="badge bg-success">{{ worker.completed_registration }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">{{ worker.completed_registration }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if worker.completed_induction == 'Completed' %}
+                                <span class="badge bg-success">{{ worker.completed_induction }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">{{ worker.completed_induction }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if worker.signed_contract %}
+                                <span class="badge bg-success">{{ worker.signed_contract }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">{{ worker.signed_contract }}</span>
+                                {% endif %}
+                            </td>
+
+
+                            <td>
+                                {% if worker.worker_directive_signed == 'Yes' %}
+                                    <span class="badge bg-success">{{ worker.worker_directive_signed }}</span>
+                                {% elif worker.worker_directive_signed == 'No' %}
+                                    <span class="badge bg-danger">{{ worker.worker_directive_signed }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning">{{ worker.worker_directive_signed }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if worker.hygiene_signed %}
+                                <span class="badge bg-success">{{ worker.hygiene_signed }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">{{ worker.hygiene_signed }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if worker.medical_signed %}
+                                <span class="badge bg-success">{{ worker.medical_signed }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">{{ worker.medical_signed }}</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
 
@@ -49,8 +89,8 @@
                 </table>
             </div>
         </div>
-        
-        
+
+
 
     </div>
 </div>
@@ -66,25 +106,25 @@
 <script src=""></script>
 <script>
     $(document).ready(function () {
-    $('#summerberry-dash').DataTable({
-        columnDefs: [
-            {
-                targets: [3],
-                orderData: [0, 1],
-            },
-            {
-                targets: [3],
-                orderData: [1, 0],
-            }
-        ],
-        dom: 'Bfrtip',
-        buttons: [
-            'excelHtml5',
-            'csvHtml5',
-            'pdfHtml5'
-        ]
+        $('#summerberry-dash').DataTable({
+            columnDefs: [
+                {
+                    targets: [3],
+                    orderData: [0, 1],
+                },
+                {
+                    targets: [3],
+                    orderData: [1, 0],
+                }
+            ],
+            dom: 'Bfrtipl',
+            buttons: [
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+            ]
+        });
     });
-});
 </script>
 
 {% endblock scripts %}
