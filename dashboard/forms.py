@@ -6,7 +6,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from pytz import country_names
 
-from common.dashboard import get_destination_countries_from_preferences
+from common.helpers import HELPERS, HelpersParameters
 from common.inline import Inline
 from common.reports import get_start_date
 from common.retrieve_data import exclude_cols
@@ -76,6 +76,10 @@ class FilterForm(forms.Form):
                     "class": "form-select mx-1",
                     "id": field,
                 }
+                
+    def get_destination_countries_from_preferences():
+        helper = HELPERS[HelpersParameters.PREFERENCES.value]()
+        return helper.get_destination_countries().items()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -90,7 +94,7 @@ class FilterForm(forms.Form):
         return cleaned_data
 
     destination = forms.MultipleChoiceField(
-        choices= get_destination_countries_from_preferences().items(),
+        choices= get_destination_countries_from_preferences(),
         required=False,
         widget=forms.SelectMultiple(
             attrs={
