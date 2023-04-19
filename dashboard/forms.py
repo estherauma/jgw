@@ -6,7 +6,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from pytz import country_names
 
-from common.utils.dashboard import get_destination_countries_from_preferences
+from common.dashboard import get_destination_countries_from_preferences
 from common.inline import Inline
 from common.reports import get_start_date
 from common.retrieve_data import exclude_cols
