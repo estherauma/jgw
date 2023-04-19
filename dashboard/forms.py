@@ -90,8 +90,7 @@ class FilterForm(forms.Form):
         return cleaned_data
 
     destination = forms.MultipleChoiceField(
-        choices= {},
-        # get_destination_countries_from_preferences().items(),
+        choices= get_destination_countries_from_preferences().items(),
         required=False,
         widget=forms.SelectMultiple(
             attrs={
