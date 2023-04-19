@@ -67,8 +67,8 @@ class DependentChoiceField(forms.ChoiceField):
 class FilterForm(forms.Form):
     
     def __init__(self, *args, **kwargs):
-        print("form initialized -----> ")
         super(forms.Form, self).__init__(*args, **kwargs)
+        self.fields['destination'].choices = get_destination_countries_from_preferences().items()
 
         for field in self.fields:
             if field not in ("start_date", "end_date", "time_range", "scheme_name"):
@@ -91,7 +91,6 @@ class FilterForm(forms.Form):
         return cleaned_data
 
     destination = forms.MultipleChoiceField(
-        choices= get_destination_countries_from_preferences().items(),
         required=False,
         widget=forms.SelectMultiple(
             attrs={
