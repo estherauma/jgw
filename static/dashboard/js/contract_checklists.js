@@ -130,13 +130,18 @@ function filterData() {
                 setFormErrors(data.form_errors)
             }
             else {
-                if (Object.keys(data).length === 0) {
+                chartData = data['chart_data']
+
+                if (Object.keys(chartData).length === 0) {
                     toggleElementDisplay(true, '#no-results')
                 } else {
-                    plotCharts(data)
+                    plotCharts(chartData)
                     toggleElementDisplay(true, '#chart-area')
                 }
             }
+
+            const filterStateData = data["filter_state"]
+            buildFilterStateAlert('contract-checklist', filterStateData)
         })
         .catch(error => {
             console.log(error)

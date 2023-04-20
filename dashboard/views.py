@@ -23,6 +23,7 @@ from common.inline import Inline
 from common.messaging import Messaging
 from common.preferences import Preferences
 from common.reports import get_start_date, get_SWS_report
+from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
 
 from .forms import (
     FACTORIES,
@@ -124,16 +125,17 @@ def filter_data(request, category):
         filters = get_filters_from_form(form)
         filters.update(get_user_role(request.user))
         filters = format_time_range(filters)
-
+        list_of_filters = change_dictionary_to_list_of_dictionaries(filters)
         data = helper.compute_stats(filters=filters)
         if category == "inline":
             response_count, raw_chart_data = itemgetter("response_count", "data")(data)
             chart_data = form_chart_data(raw_chart_data)
-            return JsonResponse({"chart_data": chart_data, "response_count": response_count})
+            return JsonResponse({"chart_data": chart_data, "response_count": response_count, "filter_state": list_of_filters })
         chart_data = form_chart_data(data)
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
-    return JsonResponse(chart_data)
+    
+    return JsonResponse({"chart_data": chart_data, "filter_state":  list_of_filters})
 
 
 @login_required()

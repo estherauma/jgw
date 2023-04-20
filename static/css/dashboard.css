@@ -82,3 +82,7 @@
 .generic-chart-box::-webkit-scrollbar-thumb:hover {
     background: #aeaeaf; 
 }
+
+.filter-state-container span{
+    color: #193560;
+}

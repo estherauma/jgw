@@ -104,3 +104,22 @@ function debounce(cb, delay) {
       }, delay);
   };
 };
+
+
+
+function buildFilterStateAlert(filterStateContainerId, data) {
+  const filterStateContainer = document.querySelector(`#${filterStateContainerId}-filter-state-container`)
+
+  const existingSpan = filterStateContainer.querySelector('span');
+  if (existingSpan) {
+      filterStateContainer.removeChild(existingSpan);
+  }
+
+  const span = document.createElement('span');
+  let formattedText = '';
+  for (const key in data[0]) {
+      formattedText += `<strong>${key}:</strong> ${data[0][key]}<br>`;
+  }
+  span.innerHTML = formattedText;
+  filterStateContainer.appendChild(span);
+}
