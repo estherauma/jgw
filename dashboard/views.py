@@ -17,12 +17,8 @@ from django.utils.http import urlencode
 from requests.exceptions import HTTPError
 
 from common.app_events import AppEvents
-from common.checklists import CheckLists
-from common.help_contacts import HelpContacts
-from common.inline import Inline
-from common.messaging import Messaging
-from common.preferences import Preferences
 from common.reports import get_start_date, get_SWS_report
+from common.helpers import HELPERS
 from dashboard.models import Route
 
 from .forms import (
@@ -37,18 +33,7 @@ from .forms import (
 from faker import Faker
 
 KEYS = ["age", "locale", "gender", "origin", "destination", "organisation", "language"]
-HELPERS = {
-    "inline": lambda: Inline(),
-    "inlineQNs_responses": lambda: Inline(),
-    "inlineQNs_participation": lambda: Inline(),
-    "preferences": lambda: Preferences(),
-    "help_contacts": lambda: HelpContacts(),
-    "messaging": lambda: Messaging(),
-    "visa": lambda: CheckLists(key="visa"),
-    "joboffer": lambda: CheckLists(key="joboffer"),
-    "contract": lambda: CheckLists(key="contract"),
-    "beforeyougo": lambda: CheckLists(key="beforeyougo"),
-}
+
 OPERATORS = {
     "Concordia": "Seasonal  Worker Scheme - Concordia",
     "AG Recruitment": "Seasonal Worker Scheme - AG Recruitment",
