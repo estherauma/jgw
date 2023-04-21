@@ -204,6 +204,7 @@ class InlineQnsForm(FilterForm):
         form_name = f"{qn_mark}filter_form{qn_mark}"
         for field in self.fields:
             if field in ("destination"):
+                self.fields[field].choices = get_destination_countries_from_preferences().items()
                 self.fields[field].widget.attrs = {
                     "onChange": mark_safe("filterData();"),
                     "id": field,
