@@ -40,3 +40,54 @@ class JGWCache(models.Model):
 
     def __str__(self) -> str:
         return f'{self.category} - {self.date_created} - {self.is_cleaned}'
+
+class Route(models.Model):
+    origin_country = models.CharField(
+        max_length=255,
+        blank=False, null=False,
+        verbose_name="Origin Country",
+        help_text="Enter the name of the country for the origin location"
+    )
+    destination_country = models.CharField(
+        max_length=255,
+        blank=False, null=False,
+        verbose_name="Destination Country",
+        help_text="Enter the name of the country for the destination location"
+    )
+    origin_longitude = models.FloatField(
+        blank=False, null=False,
+        verbose_name="Origin Longitude",
+        help_text="Enter the longitude of the origin location"
+    )
+    origin_latitude = models.FloatField(
+        blank=False, null=False,
+        verbose_name="Origin Latitude",
+        help_text="Enter the latitude of the origin location"
+    )
+    destination_longitude = models.FloatField(
+        blank=False, null=False,
+        verbose_name="Destination Longitude",
+        help_text="Enter the longitude of the destination location"
+    )
+    destination_latitude = models.FloatField(
+        blank=False, null=False,
+        verbose_name="Destination Latitude",
+        help_text="Enter the latitude of the destination location"
+    )
+
+    @classmethod
+    def get_routes(cls):
+        routes = []
+        for route in cls.objects.all():
+            routes.append({
+                "from": route.origin_country,
+                "to": route.destination_country,
+                "from_coords": [route.origin_latitude, route.origin_longitude],
+                "to_coords": [route.destination_latitude, route.destination_longitude]
+            })
+        return routes
+
+    def __str__(self):
+        return f"Route from {self.origin_country} to {self.destination_country}"
+
+
