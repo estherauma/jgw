@@ -18,11 +18,8 @@ from requests.exceptions import HTTPError
 
 from common.app_events import AppEvents
 from common.reports import get_start_date, get_SWS_report
-<<<<<<< HEAD
 from common.helpers import HELPERS
-=======
 from dashboard.models import Route
->>>>>>> develop
 
 from .forms import (
     FACTORIES,
