@@ -23,6 +23,7 @@ from common.inline import Inline
 from common.messaging import Messaging
 from common.preferences import Preferences
 from common.reports import get_start_date, get_SWS_report
+from dashboard.models import Route
 
 from .forms import (
     FACTORIES,
@@ -301,7 +302,7 @@ def landing(request):
     return render(request, template_name="landing/landing_page.html")
 
 def limited_data_home_page(request):
-    routes = [
+    routes_label = [
             "bangladesh -> malaysia",
             "indonesia -> malaysia",
             "burma -> malaysia",
@@ -324,14 +325,18 @@ def limited_data_home_page(request):
             "Italy -> uk",
             "pakistan -> malaysia"
         ]
-    returning_data_list =  [68, 39, 36, 35, 27, 18, 19, 25, 10, 5, 4, 4, 3, 3, 3, 3, 2, 2, 1, 1, 1]
-    unique_data_list = [100, 27, 55, 35, 27, 18, 12, 77, 10, 5, 4, 4, 3, 13, 3, 3, 2, 2, 13, 9, 1]
+    returning_users_list =  [68, 39, 36, 35, 27, 18, 19, 25, 10, 5, 4, 4, 3, 3, 3, 3, 2, 2, 1, 1, 1]
+    unique_users_list = [100, 27, 55, 35, 27, 18, 12, 77, 10, 5, 4, 4, 3, 13, 3, 3, 2, 2, 13, 9, 1]
 
-    return render(request, template_name="dashboard/limited_data_home_page.html", context={ 
-            'routes':routes,
-            'returning_data_list': returning_data_list,
-            'unique_data_list': unique_data_list
-    })
+    route_list = Route.get_routes()
+
+    context =  {
+        'routes_label':routes_label,
+        'returning_users_list': returning_users_list,
+        'unique_users_list': unique_users_list,
+        'route_list': route_list,
+    }
+    return render(request, template_name="dashboard/limited_data_home_page.html", context={"limited_data_home_page_context": json.dumps(context)})
 
 
 def notifications(request):
