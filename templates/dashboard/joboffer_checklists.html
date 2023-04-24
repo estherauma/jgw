@@ -11,12 +11,12 @@
         <div class="widget-rounded-circle card">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-10 col-xl-11">
                         <div class="text-start">
                             <p class="text-muted text-truncate">Job-Offer Checklists</p>
                         </div>
                     </div>
-                    <div class="col-1 d-flex flex-column">
+                    <div class="col-2 col-xl-1">
                         <div class="dropdown mr-2" style="width: 76.5px !important">
                             <a class="btn btn-primary dropdown-toggle waves-effect text-center" href="#" role="button" id="exportInline"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -54,6 +54,7 @@
                     </button>
                     </div>
                     <div class="modal-body">
+                        {% include 'includes/filter_state_alert.html' with id="joboffer-checklist-filter-state-container" %}
                         <form id="filter_form" class="form-inline p-2" method="POST"
                         data-origins-url="{% url 'dashboard:process_origin_options' key='joboffer'%}"
                         data-factories-url="{% url 'dashboard:process_factory_options' key='joboffer'%}"

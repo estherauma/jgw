@@ -114,7 +114,6 @@ function autosubmit() {
     filterData()
 }
 
-
 function filterData() {
     clearCharts()
 
@@ -134,10 +133,11 @@ function filterData() {
                 setFormErrors(data.form_errors)
             }
             else {
-                if (Object.keys(data).length === 0) {
+                chartData = data['chart_data']
+                
+                if (Object.keys(chartData).length === 0) {
                     toggleElementDisplay(true, '#no-results')
                 } else {
-                    chartData = data['chart_data']
                     responseCountValue = data['response_count']
                     const responseCountElement = document.querySelector('#response-count')
                     responseCountElement.textContent = responseCountValue
@@ -145,6 +145,9 @@ function filterData() {
                     toggleElementDisplay(true, '#chart-area')
                 }
             }
+            
+            const filterStateData = data["filter_state"]
+            buildFilterStateAlert('inline-question', filterStateData)
         })
         .catch(error => {
             console.log(error)
