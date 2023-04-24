@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from django.db import models
 
 
@@ -41,6 +43,7 @@ class JGWCache(models.Model):
     def __str__(self) -> str:
         return f'{self.category} - {self.date_created} - {self.is_cleaned}'
 
+
 class Route(models.Model):
     origin_country = models.CharField(
         max_length=255,
@@ -55,30 +58,37 @@ class Route(models.Model):
         help_text="Enter the name of the country for the destination location"
     )
     origin_longitude = models.FloatField(
-        blank=False, null=False,
+        blank=True, null=True,
         verbose_name="Origin Longitude",
         help_text="Enter the longitude of the origin location"
     )
     origin_latitude = models.FloatField(
-        blank=False, null=False,
+        blank=True, null=True,
         verbose_name="Origin Latitude",
         help_text="Enter the latitude of the origin location"
     )
     destination_longitude = models.FloatField(
-        blank=False, null=False,
+        blank=True, null=True,
         verbose_name="Destination Longitude",
         help_text="Enter the longitude of the destination location"
     )
     destination_latitude = models.FloatField(
-        blank=False, null=False,
+        blank=True, null=True,
         verbose_name="Destination Latitude",
         help_text="Enter the latitude of the destination location"
     )
+    active = models.BooleanField(default=False)
 
     @classmethod
     def get_routes(cls):
         routes = []
-        for route in cls.objects.all():
+        for route in cls.objects.filter(
+            Q(origin_longitude__isnull=False),
+            Q(origin_latitude__isnull=False),
+            Q(destination_longitude__isnull=False),
+            Q(destination_latitude__isnull=False),
+            active=True
+        ):
             routes.append({
                 "from": route.origin_country,
                 "to": route.destination_country,

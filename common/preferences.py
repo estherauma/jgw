@@ -9,10 +9,12 @@ from common.retrieve_data import JGWApi
 api = JGWApi()
 QueryMap = Dict[str, list[str]]
 
+
 def clean_df(df):
     if "organisation" in df.columns:
         df["organisation"] = df["organisation"].str.replace("Seasonal Worker Scheme - ", "").str.replace("Seasonal  Worker Scheme -", "")
     return df
+
 
 class Preferences(BaseAnalytics):
     def __init__(self) -> None:
@@ -78,7 +80,7 @@ class Preferences(BaseAnalytics):
         origin_and_destination_list = origin_and_destination_df.to_dict(orient='records')
 
         for data in origin_and_destination_list:
-            data['origin'] = data.pop('Origin')
-            data['destination'] = data.pop('Destination')
+            data['origin_country'] = data.pop('Origin')
+            data['destination_country'] = data.pop('Destination')
 
         return origin_and_destination_list
