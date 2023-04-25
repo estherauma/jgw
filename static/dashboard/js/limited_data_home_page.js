@@ -94,3 +94,67 @@ function uniqueAndReturningUsersGraph({ returning_data, unique_data, labels }) {
     let chart = new ApexCharts(document.querySelector("#unique-and-returning-users"), options);
     chart.render();
 }
+
+function plotLimitedHomePageDataCharts(chartData) {
+    let chartDataKeys = Object.keys(chartData)
+    chartDataKeys.map(chartDataKeys => {
+        if (chartDataKeys === "age") {
+            usageByAgeChart(chartData['age'])
+        }
+
+        if (chartDataKeys === "gender") {
+            usageByGenderChart(chartData['gender'])
+        }
+    })
+    
+}
+
+function usageByAgeChart(usageByAgeData) {
+    var ctx = document.getElementById('usage-by-age-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: usageByAgeData["labels"],
+            datasets: [{
+                label: 'Number of Users',
+                data: usageByAgeData["data"],
+                backgroundColor: [COLORS.appleGreen, COLORS.mediumBlue, COLORS.lightGreen, COLORS.skyBlue, COLORS.navyBlue],
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function usageByGenderChart(genderGraphData) {
+    const labels = genderGraphData["labels"]
+    const data = genderGraphData["data"]
+    const chartData = {
+        labels: labels,
+        datasets: [{
+            label: 'My First Dataset',
+            data: data,
+            backgroundColor: [COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue]
+        }]
+    };
+    const config = {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    };
+
+    var ctx = document.getElementById('usage-by-gender-chart').getContext('2d');
+    new Chart(ctx, config)
+}
+

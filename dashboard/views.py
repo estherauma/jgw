@@ -19,7 +19,7 @@ from requests.exceptions import HTTPError
 from common.app_events import AppEvents
 from common.reports import get_start_date, get_SWS_report
 from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
-from common.helpers import HELPERS
+from common.helpers import HELPERS, HelpersParameters
 from dashboard.models import Route
 
 from .forms import (
@@ -288,6 +288,7 @@ def test_sentry(request):
 def landing(request):
     return render(request, template_name="landing/landing_page.html")
 
+
 def limited_data_home_page(request):
     routes_label = [
             "bangladesh -> malaysia",
@@ -312,16 +313,22 @@ def limited_data_home_page(request):
             "Italy -> uk",
             "pakistan -> malaysia"
         ]
-    returning_users_list =  [68, 39, 36, 35, 27, 18, 19, 25, 10, 5, 4, 4, 3, 3, 3, 3, 2, 2, 1, 1, 1]
+    returning_users_list = [68, 39, 36, 35, 27, 18, 19, 25, 10, 5, 4, 4, 3, 3, 3, 3, 2, 2, 1, 1, 1]
     unique_users_list = [100, 27, 55, 35, 27, 18, 12, 77, 10, 5, 4, 4, 3, 13, 3, 3, 2, 2, 13, 9, 1]
+
+    helper = HELPERS[HelpersParameters.PREFERENCES.value]()
+    todays_date = '2023-04-25'
+    data = helper.compute_stats(filters={f'time_range': 'all_time,{todays_date}'})
+    chart_data = form_chart_data(data)
 
     route_list = Route.get_routes()
 
-    context =  {
-        'routes_label':routes_label,
+    context = {
+        'routes_label': routes_label,
         'returning_users_list': returning_users_list,
         'unique_users_list': unique_users_list,
         'route_list': route_list,
+        'chart_data': chart_data
     }
     return render(request, template_name="dashboard/limited_data_home_page.html", context={"limited_data_home_page_context": json.dumps(context)})
 
@@ -365,6 +372,7 @@ def notifications(request):
             'notifications_data': notifications_data,
             'total_notifications': total_notifications
         })
+
 
 def summerberry_dummy_data(request):
     faker = Faker()
