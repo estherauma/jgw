@@ -1,4 +1,6 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
+
 
 {% block styles %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
@@ -121,70 +123,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
-    <script src=""></script>
-    <script>
-        $(document).ready(function () {
-            $('#summerberry-dash').DataTable({
-                columnDefs: [
-                    {
-                        targets: [3],
-                        orderData: [0, 1],
-                    },
-                    {
-                        targets: [3],
-                        orderData: [1, 0],
-                    }
-                ],
-                dom: 'Bfrtipl',
-                buttons: [
-                    'excelHtml5',
-                    'csvHtml5',
-                    'pdfHtml5'
-                ]
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            $('#startDate, #endDate').change(function () {
-                const startDate = $('#startDate').val();
-                const endDate = $('#endDate').val();
-                // pass request to server with these as query params
-                $.ajax({
-                    url: '/dashboard/summeryberry',
-                    type: 'GET',
-                    data: {
-                        'startDate': startDate,
-                        'endDate': endDate
-                    },
-                    success: function (data) {
-                        console.log(data);
-                        // update table
-                        $('#summerberry-dash').DataTable().clear().destroy();
-                        $('#summerberry-dash').DataTable({
-                            data: data,
-                            columnDefs: [
-                                {
-                                    targets: [3],
-                                    orderData: [0, 1],
-                                },
-                                {
-                                    targets: [3],
-                                    orderData: [1, 0],
-                                }
-                            ],
-                            dom: 'Bfrtipl',
-                            buttons: [
-                                'excelHtml5',
-                                'csvHtml5',
-                                'pdfHtml5'
-                            ]
-                        });
-                    }
-                });
-            });
-        });
-    </script>
-
+    <script src="{% static 'dashboard/js/summerberry.js' %}"></script>
+    
     {% endblock scripts %}
