@@ -317,7 +317,7 @@ def limited_data_home_page(request):
     unique_users_list = [100, 27, 55, 35, 27, 18, 12, 77, 10, 5, 4, 4, 3, 13, 3, 3, 2, 2, 13, 9, 1]
 
     helper = HELPERS[HelpersParameters.PREFERENCES.value]()
-    todays_date = '2023-04-25'
+    todays_date = datetime.now().date().strftime("%Y-%m-%d")
     data = helper.compute_stats(filters={f'time_range': 'all_time,{todays_date}'})
     chart_data = form_chart_data(data)
 
