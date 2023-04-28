@@ -80,33 +80,18 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="card h-100">
-                            <div class="card-body">
+                            <div class="card-body h-100">
                                 <div class="card-widgets">
                                     <a href="javascript: void(0);" data-toggle="reload"><i class="mdi mdi-refresh"></i></a>
                                     <a data-bs-toggle="collapse" href="#age-demographics" role="button" aria-expanded="false" aria-controls="cardCollpase3"><i class="mdi mdi-minus"></i></a>
                                     <a href="javascript: void(0);" data-toggle="remove"><i class="mdi mdi-close"></i></a>
                                 </div>
-                                <h4 class="header-title mb-0">Usage by Location</h4>
-
-                                <div id="age-demographics" class="collapse show">
-                                    <div class="text-center pt-3">
-                                        <div id="total-users-by-age" data-colors="#4a81d4,#fcc644,#e3eaef,#43bfe5"></div>
-                                        <div class="row mt-3">
-                                            <div class="col-4">
-                                                <p class="text-muted font-15 mb-1 text-truncate">Total</p>
-                                                <h4><i class="fe-arrow-down text-danger me-1"></i>18k</h4>
-                                            </div>
-                                            <div class="col-4">
-                                                <p class="text-muted font-15 mb-1 text-truncate">Male</p>
-                                                <h4><i class="fe-arrow-up text-success me-1"></i>3.25k</h4>
-                                            </div>
-                                            <div class="col-4">
-                                                <p class="text-muted font-15 mb-1 text-truncate">Female</p>
-                                                <h4><i class="fe-arrow-up text-success me-1"></i>28k</h4>
-                                            </div>
-                                        </div> <!-- end row -->
+                                <h4 class="header-title mb-0">Usage by language</h4>
+                                <div class="collapse show h-100">
+                                    <div class="mt-5">
+                                        <canvas id="usage-by-language-chart"></canvas>
                                     </div>
-                                </div> <!-- collapsed end -->
+                                </div> <!-- collapsed end --> 
                             </div> <!-- end card-body -->
                         </div> <!-- end card-->
                     </div> <!-- end col-->
@@ -228,7 +213,7 @@
 <script src="{% static 'dashboard/js/limited_data_home_page.js' %}"></script>
 <script type="text/javascript">
     // load all view context data
-    var page_context_data = JSON.parse('{{ limited_data_home_page_context | safe }}');
+    var page_context_data = JSON.parse('{{ limited_data_home_page_context | escapejs }}');
 
     uniqueAndReturningUsersGraph({ 
         returning_data: page_context_data['returning_users_list'], 
@@ -238,7 +223,7 @@
 
     plotLimitedHomePageDataCharts(page_context_data["chart_data"])
 
-    initiateRoutesMap(page_context_data['route_list'])
+    initiateRoutesMap(page_context_data['route_list']) 
 
 </script>
 {% endblock scripts %}
