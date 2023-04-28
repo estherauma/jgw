@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pandas as pd
+from common.helpers import remove_file
 from dashboard.models import JGWCache
 
 from .retrieve_data import exclude_cols
@@ -69,6 +70,7 @@ def get_SWS_report(start, end, category, df=None):
     df = df.loc[df["createdAt"].between(start, end, inclusive="both")]
 
     try:
+        remove_file(output_filename)
         write_to_xls_sheet(df, sheet_name=f"{category[:8]}-All", filename=output_filename)
     except FileNotFoundError:
         shutil.copy("./temp/preferences.xlsx", output_filename)

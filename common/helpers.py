@@ -1,5 +1,6 @@
 from enum import Enum
 import pandas as pd
+import os
 
 from common.checklists import CheckLists
 from common.help_contacts import HelpContacts
@@ -38,3 +39,7 @@ def save_as_excel(df):
     excel_writer = pd.ExcelWriter('file.xlsx', engine='openpyxl')
     df.to_excel(excel_writer, index=False)
     excel_writer.close()
+
+
+def remove_file(file_path):
+    os.remove(file_path)
