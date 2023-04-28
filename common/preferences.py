@@ -30,13 +30,13 @@ class Preferences(BaseAnalytics):
             return {}
         _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
         return _stats
-    
+
     def origin_and_destination_dataframe(self):
         preference_df = clean_df(self.get_df())
 
         if preference_df.empty:
             return {}
-    
+
         routes_df_series = preference_df['route']
         unique_routes = routes_df_series.unique()
         unique_routes_series = pd.Series(unique_routes)
@@ -52,7 +52,7 @@ class Preferences(BaseAnalytics):
             .replace('saudi', 'Saudi Arabia')\
             .replace('malaysia', 'Malaysia')\
             .replace('qatar', 'Qatar')
-        
+
         routes_df = routes_df.dropna()
         routes_df.reset_index(drop=True)
         routes_df = routes_df[routes_df['Origin'] != routes_df['Destination']]
@@ -60,7 +60,7 @@ class Preferences(BaseAnalytics):
         routes_df = routes_df.reset_index(drop=True)
 
         return routes_df
-    
+
     def get_destination_countries(self):
         origin_and_destination_dataframe = self.origin_and_destination_dataframe()
         destination_countries = origin_and_destination_dataframe['Destination'].dropna().unique().tolist()
@@ -74,7 +74,7 @@ class Preferences(BaseAnalytics):
             country_dict[country] = country
 
         return country_dict
-    
+
     def origin_and_destination_list(self):
         origin_and_destination_df = self.origin_and_destination_dataframe()
         origin_and_destination_list = origin_and_destination_df.to_dict(orient='records')
@@ -84,3 +84,8 @@ class Preferences(BaseAnalytics):
             data['destination_country'] = data.pop('Destination')
 
         return origin_and_destination_list
+
+    def unique_series_list(self, column):
+        preference_df = clean_df(self.get_df())
+        series = preference_df[column].str.strip()
+        return series.unique()

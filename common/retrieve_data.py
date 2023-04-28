@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 from functools import reduce
 from typing import Dict, List, Tuple
+from django.db.models import Q
 
 import requests
 from langcodes import Language, LanguageTagError
@@ -336,11 +337,15 @@ class JGWApi:
             return text
 
         def translate_field_or_mark(column):
+            column = column.str.strip()
             merge_dicts = lambda x: reduce(lambda a, b: {**a, **b}, x)
             TranslatedModel = TranslatedResponseText if column.name == "questionResponse" else TranslatedText
             queryset = TranslatedModel.objects.filter(
-                original_text__in=column.to_list(), translation__isnull=False
+                Q(translation__isnull=False) & ~Q(translation=''), original_text__in=column.to_list()
             ).values("original_text", "translation")
+
+            if column.name == "gender":
+                print("column list::::",column.unique())
             if queryset:
                 result_list = [{i["original_text"]: i["translation"]} for i in list(queryset)]
                 result_list = merge_dicts(result_list)

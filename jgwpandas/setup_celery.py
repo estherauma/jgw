@@ -18,7 +18,8 @@ celery_app.conf.beat_schedule = {
     },
     "translate-API-data": {
         "task": "translate_to_eng",
-        "schedule": crontab(minute="*/5"),  # every five minutes
+        # "schedule": crontab(minute="*/5"),  # every five minutes
+        "schedule": crontab(minute=0, hour=0),
     },
     "generate-report": {
         "task": "generate_report",
