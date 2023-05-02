@@ -329,7 +329,6 @@ function genericBarChart(key, values) {
         }
     }
 
-    // const chartObject = new Chart(canvas.getContext("2d"), chartConfig);
     const chartObject = drawChart(`_${key}`, data, chartConfig);
 
     const totalChart = chartObject.config.data.labels.length || 0
