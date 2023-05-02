@@ -86,3 +86,8 @@
 .filter-state-container span{
     color: #193560;
 }
+
+.chart-message {
+    text-align: center;
+    margin: auto;
+}
