@@ -422,7 +422,7 @@ function languageChart(langaugeData) {
 
 function originChart(originChartData) {
     const data = originChartData["data"]
-    const labels = originChartData["labels"].map(label => label.replace("Other - The Rest Of The World", "Others"))
+    const labels = originChartData["labels"]
     
     const originChartConfig = {
         type: 'bar',
