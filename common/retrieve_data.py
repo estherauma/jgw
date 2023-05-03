@@ -340,14 +340,11 @@ class JGWApi:
             column = column.str.strip()
             merge_dicts = lambda x: reduce(lambda a, b: {**a, **b}, x)
             TranslatedModel = TranslatedResponseText if column.name == "questionResponse" else TranslatedText
-            queryset = TranslatedModel.objects.filter(
-                Q(translation__isnull=False) & ~Q(translation=''), original_text__in=column.to_list()
-            ).values("original_text", "translation")
+            queryset = TranslatedModel.objects.filter(translation__isnull=False).values("original_text", "translation")
 
-            if column.name == "gender":
-                print("column list::::",column.unique())
+            column = column.str.strip().str.lower()
             if queryset:
-                result_list = [{i["original_text"]: i["translation"]} for i in list(queryset)]
+                result_list = [{i["original_text"].lower(): i["translation"].lower()} for i in list(queryset)]
                 result_list = merge_dicts(result_list)
                 column = column.replace(result_list)
             return column
