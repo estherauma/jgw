@@ -4,7 +4,7 @@ const factoryFarm_input = document.querySelector('#factory_farm')
 const filter_form = document.querySelector('#filter_form')
 const origin_input = document.querySelector('#origin')
 const start_date = document.querySelector('#start_date')
-const exportHelpContactsBtn = document.querySelector('#export-help-contacts')
+const exportHelpContactsBtn = document.querySelector('#export-help-contacts-btn')
 const exportHelpContactsUrl = exportHelpContactsBtn.attributes.getNamedItem("export-url").value
 
 function toggleElementDisplay(flag, selector) {
