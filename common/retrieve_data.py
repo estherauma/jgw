@@ -343,9 +343,6 @@ class JGWApi:
             queryset = TranslatedModel.objects.filter(translation__isnull=False).values("original_text", "translation")
 
             column = column.str.strip().str.lower()
-            if column.name == "gender":
-                print("column list::::",column.unique())
-                print("list:::", list(queryset))
             if queryset:
                 result_list = [{i["original_text"].lower(): i["translation"].lower()} for i in list(queryset)]
                 result_list = merge_dicts(result_list)
