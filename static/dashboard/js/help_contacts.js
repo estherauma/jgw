@@ -4,6 +4,8 @@ const factoryFarm_input = document.querySelector('#factory_farm')
 const filter_form = document.querySelector('#filter_form')
 const origin_input = document.querySelector('#origin')
 const start_date = document.querySelector('#start_date')
+const exportHelpContactsBtn = document.querySelector('#export-help-contacts')
+const exportHelpContactsUrl = exportHelpContactsBtn.attributes.getNamedItem("export-url").value
 
 function toggleElementDisplay(flag, selector) {
     const element = document.querySelector(selector)
@@ -200,6 +202,42 @@ function plotCharts(chartData) {
     }
 }
 
+function exportToExcel(url) {
+    const formData = new FormData(filter_form);
+    toggleElementDisplay(false, '#chart-area')
+    toggleElementDisplay(false, '#no-results')
+    toggleElementDisplay(true, '#loader')
+    fetch(url, { method: 'POST', body: formData })
+        .then(response => {
+            if (!response.ok) {
+                throw Error(response.statusText)
+            } else {
+                const header = response.headers.get('Content-Disposition');
+                const parts = header.split(';');
+                filename = parts[1].split('=')[1].replaceAll("\"", "");
+                return response.blob();
+            }
+        })
+        .then(blob => {
+            if (blob != null) {
+                const a = document.createElement('a');
+                a.href = window.URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
+        .finally(() => {
+            toggleElementDisplay(true, '#chart-area')
+            toggleElementDisplay(false, '#loader')
+        })
+}
+
+exportHelpContactsBtn.addEventListener('click', () => exportToExcel(exportHelpContactsUrl));
 end_date.addEventListener('change', debounce(autosubmit, 1000));
 start_date.addEventListener('change', debounce(autosubmit, 1000));
 window.addEventListener('DOMContentLoaded', getOriginOptions)

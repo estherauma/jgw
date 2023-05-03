@@ -24,9 +24,9 @@
                                 <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
                             </a>
                             <div class="dropdown-menu" aria-labelledby="exportInline">
-                                <a class="btn btn-primary dropdown-item"
-                                href="{% url 'dashboard:export_to_excel' key='help_contacts' %}?{{filter_string}}"
-                                target="_blank">Contacts</a>
+                                <button class="btn btn-primary dropdown-item"
+                                id="export-help-contacts"
+                                export-url="{% url 'dashboard:export_to_excel' key='help_contacts' %}">Contacts</button>
                             </div>
                         </div>
                         <button data-toggle="modal" data-target="#filterModal" style="width: 76.5px !important" role="button" class="btn btn-primary w-100 my-1 waves-effect text-center">Filter</button>

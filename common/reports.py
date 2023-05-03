@@ -49,6 +49,7 @@ def get_SWS_report(start, end, category, df=None):
         "chapters": "chapters",
         "inlineQNs_participation": "inlineQNs_participation",
         "inlineQNs_responses": "inlineQNs_responses",
+        "help_contacts": "help_contacts"
     }
     if filenames.get(category) is None:
         return None
@@ -76,11 +77,12 @@ def get_SWS_report(start, end, category, df=None):
         shutil.copy("./temp/preferences.xlsx", output_filename)
         write_to_xls_sheet(df, sheet_name=f"{category[:8]}-All", filename=output_filename)
     for k, operator_name in OPERATORS.items():
-        new_df = df.loc[df["organisation"] == operator_name]
-        new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
-        write_to_xls_sheet(
-            new_df, sheet_name=f"{category[:8]}-{k}", filename=output_filename
-        )
+        if "organisation" in df.columns:
+            new_df = df.loc[df["organisation"] == operator_name]
+            new_df = new_df.loc[~new_df["origin"].isin(["MY", "US", "KY", "UG", "TZ", "BD"])]
+            write_to_xls_sheet(
+                new_df, sheet_name=f"{category[:8]}-{k}", filename=output_filename
+            )
     return output_filename
 
 

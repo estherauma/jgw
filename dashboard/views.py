@@ -247,7 +247,14 @@ def process_factory_options(request, key):
 
 @login_required()
 def export_to_excel_file(request, key):
-    if key not in ("preferences", "chapters", "inlineQNs_participation", "inlineQNs_responses"):
+    print("key", key)
+    if key not in (
+        "preferences",
+        "chapters",
+        "inlineQNs_participation",
+        "inlineQNs_responses",
+        "help_contacts"
+    ):
         messages.error(request, "Report not yet available!")
         return redirect(reverse("dashboard:preferences"))
     form = InlineQnsForm(request.POST) if key.startswith("inlineQNs") else FilterForm(request.POST)
