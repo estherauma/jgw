@@ -105,6 +105,10 @@ function plotLimitedHomePageDataCharts(chartData) {
         if (chartDataKeys === "gender") {
             usageByGenderChart(chartData['gender'])
         }
+
+        if (chartDataKeys === "language") {
+            usageByLanguageChart(chartData['language'])
+        }
     })
     
 }
@@ -158,3 +162,70 @@ function usageByGenderChart(genderGraphData) {
     new Chart(ctx, config)
 }
 
+function usageByLanguageChart(langaugeData) {
+    const data = langaugeData["data"]
+    const labels = langaugeData["labels"]
+    
+
+    var ctx = document.getElementById('usage-by-language-chart').getContext('2d');
+    const languageChartConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Users',
+                data: data,
+                backgroundColor: COLORS.navyBlue,
+                borderWidth: 0,
+                borderRadius: 20,
+                borderSkipped: false,
+                barThickness: 18,
+                barPercentage: 0.8
+            }]
+        },
+        options: {
+            // indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: 'red',
+                        fontSize: 12
+                    },
+                    grid: {
+                        color: COLORS.lightGray,
+                        borderDash: [2],
+                        drawBorder: false,
+                        borderWidth: 0,
+                        borderDash: [],
+                        borderDashOffset: 0,
+                        drawTicks: true,
+                        display: false
+                    },
+                    autoSkip: false,
+                    maxTicksLimit: 5
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: COLORS.navyBlue,
+                        fontSize: 12
+                    },
+                    grid: {
+                        drawBorder: false,
+                        display: false
+                    }
+                },
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    }
+
+    new Chart(ctx,languageChartConfig);
+}
