@@ -6,7 +6,7 @@
 
 <!-- page content -->
 {% block content %}
-<div class="row">
+{% comment %} <div class="row">
     <div class="col-md-12">
         <div class="widget-rounded-circle card">
             <div class="card-body">
@@ -39,7 +39,8 @@
             </div> <!-- end row-->
         </div>
     </div>
-</div>
+</div> {% endcomment %}
+{% include 'includes/dashboard_banner.html' with title="User Preferences" export_buttons_config=preferences_export_buttons_config %}
 
 {% if messages %}
 <div class="row">
