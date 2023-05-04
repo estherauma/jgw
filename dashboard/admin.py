@@ -7,7 +7,7 @@ from .models import (Factory, JGWCache, Scheme, TranslatedQuestionText,
 class TranslatedTextDisplay(admin.ModelAdmin):
     """This adds search and table view for the TranslatedTexts"""
     list_display = ['id','original_text', 'translation']
-    search_fields = ['original_text']
+    search_fields = ['original_text', 'translation']
     
 admin.site.register(TranslatedQuestionText)
 admin.site.register(TranslatedResponseText)
