@@ -4,14 +4,14 @@ from .models import (Factory, JGWCache, Scheme, TranslatedQuestionText,
                      TranslatedResponseText, TranslatedText, Route)
 
 
-class TranslatedTextDisplay(admin.ModelAdmin):
-    """This adds search and table view for the TranslatedTexts"""
+class GenericTranslatedTextAdminDisplay(admin.ModelAdmin):
+    """This adds search and table view for the tranlation tables"""
     list_display = ['id','original_text', 'translation']
     search_fields = ['original_text', 'translation']
     
-admin.site.register(TranslatedQuestionText)
-admin.site.register(TranslatedResponseText)
-admin.site.register(TranslatedText, TranslatedTextDisplay)
+admin.site.register(TranslatedQuestionText, GenericTranslatedTextAdminDisplay)
+admin.site.register(TranslatedResponseText, GenericTranslatedTextAdminDisplay)
+admin.site.register(TranslatedText, GenericTranslatedTextAdminDisplay)
 admin.site.register(JGWCache)
 admin.site.register(Scheme)
 admin.site.register(Factory)
