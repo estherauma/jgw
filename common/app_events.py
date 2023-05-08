@@ -70,7 +70,7 @@ class AppEvents(BaseAnalytics):
     def get_data(self, filters: QueryMap = None, start=None, end=None):
         end_date = end.replace("-", "") if end else datetime.today().strftime("%Y%m%d")
         start_date = start.replace("-", "") if start else end_date
-        if filters is not None:
+        if filters is not None and not isinstance(filters, str):
             start_date = TIME_RANGE.get(filters.get("time_range"))
         chapters_query = """
             SELECT event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users, COUNT(event_timestamp) as Count,

@@ -44,7 +44,10 @@ def fetch_API_data(category=None):
     ]:
         jgw_api.get_data(key=key)
 
-
+@shared_task(name="add_texts_for_transaltion")
+def add_texts_for_transaltion():
+    print("transalted ----> ")
+    
 @shared_task(name="translate_to_eng")
 def translate_API_data():
     def _doer(model, limit=50):
@@ -55,6 +58,7 @@ def translate_API_data():
                 obj.translation = translate_to_eng(obj.original_text)
                 objs.append(obj)
             model.objects.bulk_update(objs, ["translation"])
+            
 
     for model in [TranslatedQuestionText, TranslatedResponseText, TranslatedText]:
         _doer(model)
