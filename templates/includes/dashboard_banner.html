@@ -6,7 +6,10 @@
                     <div class="col-9">
                         <div class="text-start">
                             {% if counter_id %}
-                            <h3 class="text-dark"><span data-plugin="counterup" id="{{counter_id}}"></span></h3>
+                                <h3 class="text-dark"><span data-plugin="counterup" id="{{counter_id}}"></span></h3>
+                            {% endif %}
+                            {% if value_counter %}
+                                <h5 class="text-muted">Number of Installs: <span data-plugin="counterup">{{value_counter}}</span></h5>
                             {% endif %}
                             <p class="text-muted text-truncate">{{title}}</p>
                         </div>
