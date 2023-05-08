@@ -247,7 +247,6 @@ def process_factory_options(request, key):
 
 @login_required()
 def export_to_excel_file(request, key):
-    print("key", key)
     if key not in (
         "preferences",
         "chapters",
