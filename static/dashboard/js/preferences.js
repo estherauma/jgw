@@ -198,14 +198,14 @@ function plotCharts(chartData) {
 }
 
 function ageGraph(ageGraphData) {
-    var ctx = document.getElementById('age-graph').getContext('2d');
-    new Chart(ctx, {
+    const data = ageGraphData["data"];
+    const chartConfig =  {
         type: 'bar',
         data: {
             labels: ageGraphData["labels"],
             datasets: [{
                 label: 'Number of Users',
-                data: ageGraphData["data"],
+                data: data,
                 backgroundColor: '#37C1E3',
                 borderWidth: 0,
                 borderRadius: 20,
@@ -256,7 +256,8 @@ function ageGraph(ageGraphData) {
                 }
             }
         }
-    });
+    }
+    drawChart('age-graph', data, chartConfig);
 }
 
 function genderGraph(genderGraphData) {
@@ -283,18 +284,15 @@ function genderGraph(genderGraphData) {
         }
     };
 
-    var ctx = document.getElementById('_gender').getContext('2d');
-    new Chart(ctx, config)
+    drawChart('_gender', data, config);
 }
 
 
 function organisationGraph(organisationGraphData) {
     const data = organisationGraphData["data"]
     const labels = organisationGraphData["labels"]
-    
-    var ctx = document.getElementById('_organisation').getContext('2d');
 
-    new Chart(ctx, {
+    const chartConfig = {
         type: 'bar',
         data: {
             labels: labels,
@@ -350,7 +348,9 @@ function organisationGraph(organisationGraphData) {
                 }
             }
         }
-    });
+    }
+
+    drawChart('_organisation', data, chartConfig);
 }
 
 function usersNewUsersChart(){
