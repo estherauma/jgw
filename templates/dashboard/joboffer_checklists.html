@@ -6,36 +6,7 @@
 
 <!-- page content -->
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="widget-rounded-circle card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-10 col-xl-11">
-                        <div class="text-start">
-                            <p class="text-muted text-truncate">Job-Offer Checklists</p>
-                        </div>
-                    </div>
-                    <div class="col-2 col-xl-1">
-                        <div class="dropdown mr-2" style="width: 76.5px !important">
-                            <a class="btn btn-primary dropdown-toggle waves-effect text-center" href="#" role="button" id="exportInline"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Export
-                                <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="exportInline">
-                                <a class="btn btn-primary dropdown-item"
-                                href="{% url 'dashboard:export_to_excel' key='joboffer' %}?{{filter_string}}"
-                                target="_blank">Job Offer</a>
-                            </div>
-                        </div>
-                        <button data-toggle="modal" data-target="#filterModal" style="width: 76.5px !important" role="button" class="btn btn-primary w-100 my-1 waves-effect text-center">Filter</button>
-                    </div>
-                    </div>
-                </div> <!-- end row-->
-            </div>
-        </div> <!-- end widget-rounded-circle-->
-</div>
+{% include 'includes/dashboard_banner.html' with title="Job-Offer Checklists" export_buttons_config=jobffer_export_buttons_config %}
 <div class="row">
     <div class="col-12">
         <div class="card">
