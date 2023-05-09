@@ -9,43 +9,7 @@
 <!-- page content -->
 {% block content %}
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="widget-rounded-circle card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-10 col-xl-11">
-                        <div class="text-start">
-                            <h3 class="text-dark"><span data-plugin="counterup" id="response-count"></span></h3>
-                            <p class="text-muted text-truncate">Responses</p>
-                        </div>
-                    </div>
-                    <div class="col-2 col-xl-1">
-                        <div class="dropdown mr-2" style="width: 76.5px !important">
-                            <a class="btn btn-primary dropdown-toggle waves-effect text-center" href="#" role="button"
-                                id="exportInline" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Export
-                                <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="exportInline">
-                                <button id="exportParticipation" class="dropdown-item"
-                                    export-url="{% url 'dashboard:export_to_excel' key='inlineQNs_participation' %}">
-                                    Participation
-                                </button>
-                                <button id="exportAnswersBreakdown" key class="dropdown-item"
-                                    export-url="{% url 'dashboard:export_to_excel' key='inlineQNs_responses' %}">
-                                    Answers Break-down
-                                </button>
-                            </div>
-                        </div>
-                        <button data-toggle="modal" data-target="#filterModal" style="width: 76.5px !important"
-                            role="button" class="btn btn-primary w-100 my-1 waves-effect text-center">Filter</button>
-                    </div>
-                </div>
-            </div> <!-- end row-->
-        </div>
-    </div> <!-- end widget-rounded-circle-->
-</div>
+{% include 'includes/dashboard_banner.html' with title="Responses" counter_id="response-count" export_buttons_config=inline_questions_export_buttons_config %}
 
 <div class="col-md-12">
     <!-- Modal -->

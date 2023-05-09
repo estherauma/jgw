@@ -24,8 +24,8 @@ HELPERS = {
 
 class HelpersParameters(Enum):
     INLINE = 'inline'
-    INLINEQNS_RESPONSES = 'inlineQNs_responses'   
-    INLINEQNS_PARTICIPATION = 'inlineQNs_participation' 
+    INLINEQNS_RESPONSES = 'inlineQNs_responses'
+    INLINEQNS_PARTICIPATION = 'inlineQNs_participation'
     PREFERENCES = 'preferences'
     HELP_CONTACTS = 'help_contacts'
     MESSAGING = 'messaging'
@@ -35,8 +35,8 @@ class HelpersParameters(Enum):
     BEFOREYOUGO = 'beforeyougo'
 
 
-def save_as_excel(df):
-    excel_writer = pd.ExcelWriter('file.xlsx', engine='openpyxl')
+def save_as_excel(df, file_name='file'):
+    excel_writer = pd.ExcelWriter(f'{file_name}.xlsx', engine='openpyxl')
     df.to_excel(excel_writer, index=False)
     excel_writer.close()
 

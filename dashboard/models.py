@@ -12,11 +12,19 @@ class TranslatedQuestionText(models.Model):
 class TranslatedResponseText(models.Model):
     original_text = models.TextField(null=False)
     translation = models.TextField(null=True)
+    
+    def __str__(self):
+        return f"{self.original_text} -> {self.translation}"
 
 
 class TranslatedText(models.Model):
     original_text = models.TextField(null=False)
     translation = models.TextField(null=True)
+
+    def __str__(self):
+        return f"{self.original_text} -> {self.translation}"
+
+
 
 
 class Scheme(models.Model):
