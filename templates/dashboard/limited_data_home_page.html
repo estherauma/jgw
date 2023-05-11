@@ -166,13 +166,31 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body h-100">
+                                <div class="card-widgets">
+                                    <a href="javascript: void(0);" data-toggle="reload"><i class="mdi mdi-refresh"></i></a>
+                                    <a data-bs-toggle="collapse" href="#cardCollpase4" role="button" aria-expanded="false" aria-controls="cardCollpase4"><i class="mdi mdi-minus"></i></a>
+                                    <a href="javascript: void(0);" data-toggle="remove"><i class="mdi mdi-close"></i></a>
+                                </div>
+                                <h4 class="header-title mb-0">New and Returning Users</h4>
+
+                                <div id="cardCollpase4" class="collapse show">
+                                    <div class="pt-3">
+                                        <canvas id="new-by-unique-users-chart"></canvas>
+                                    </div>
+                                </div> <!-- collapsed end -->
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+                    <div class="col-md-8">
                         <div class="card">
                             <div class="card-body">
                                 <div id="uandrusers" class="collapse show">
                                     <div class="pt-1">
                                         <div>
-                                            <div id="unique-and-returning-users"></div>
+                                            <canvas id="unique-and-returning-users"></canvas>
                                         </div>
                                     </div>
                                 </div> <!-- collapsed end -->
@@ -222,6 +240,8 @@
     })
 
     plotLimitedHomePageDataCharts(page_context_data["chart_data"])
+
+    newUsersByUniqueUsersChart(page_context_data["new_and_returning_users"])
 
     initiateRoutesMap(page_context_data['route_list']) 
 

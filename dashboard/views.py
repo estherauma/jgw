@@ -323,6 +323,10 @@ def limited_data_home_page(request):
     route_list = Route.get_routes()
     app_events = AppEvents()
     new_and_returning_users = app_events.new_and_returning_users()
+    new_and_returning_users = { 
+                                'data': [new_and_returning_users['new_users'], new_and_returning_users['returning_users']], 
+                                'labels': ['new users', 'returning users']
+                            }
 
     context = {
         'routes_label': routes_label,
