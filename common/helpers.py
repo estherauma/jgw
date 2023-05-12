@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 from common.checklists import CheckLists
-from common.help_contacts import HelpContacts
+from common.utils.help_contacts import HelpContacts
 from common.inline import Inline
 from common.messaging import Messaging
 from common.preferences import Preferences
@@ -33,13 +33,3 @@ class HelpersParameters(Enum):
     JOBOFFER = 'joboffer'
     CONTRACT = 'contract'
     BEFOREYOUGO = 'beforeyougo'
-
-
-def save_as_excel(df, file_name='file'):
-    excel_writer = pd.ExcelWriter(f'{file_name}.xlsx', engine='openpyxl')
-    df.to_excel(excel_writer, index=False)
-    excel_writer.close()
-
-
-def remove_file(file_path):
-    os.remove(file_path)

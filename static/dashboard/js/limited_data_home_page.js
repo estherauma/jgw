@@ -242,28 +242,3 @@ function usageByLanguageChart(langaugeData) {
 
     new Chart(ctx,languageChartConfig);
 }
-
-function newUsersByUniqueUsersChart(newUsersByUniqueUsersData) {
-    const labels = newUsersByUniqueUsersData["labels"]
-    const  data = newUsersByUniqueUsersData["data"]
-    var ctx = document.getElementById('new-by-unique-users-chart').getContext('2d');
-
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'New Users Vs Unique Users',
-                data: data,
-                backgroundColor: [COLORS.navyBlue, COLORS.darkGray],
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-}

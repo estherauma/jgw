@@ -179,7 +179,7 @@
                                 <div id="cardCollpase4" class="collapse show">
                                     <div class="pt-3">
                                         <div class="d-flex align-items-center justify-content-center">
-                                            <canvas id="new-by-unique-users-chart"></canvas>
+                                            {% include 'charts/new_returning_users.html' %}
                                         </div>
                                     </div>
                                 </div>
@@ -231,9 +231,11 @@
 <!-- <script src="{% static 'map/routes.js' %}"></script> -->
 <script src="{% static 'map/map.js' %}"></script>
 <script src="{% static 'dashboard/js/limited_data_home_page.js' %}"></script>
+<script src="{% static 'dashboard/js/charts/pie/new_returning_users.js' %}"></script>
 <script type="text/javascript">
     // load all view context data
     var page_context_data = JSON.parse('{{ limited_data_home_page_context | escapejs }}');
+    const chart_data = page_context_data["chart_data"]
 
     uniqueAndReturningUsersGraph({ 
         returning_data: page_context_data['returning_users_list'], 
@@ -241,9 +243,9 @@
         labels: page_context_data['routes_label'] 
     })
 
-    plotLimitedHomePageDataCharts(page_context_data["chart_data"])
+    plotLimitedHomePageDataCharts(chart_data)
 
-    newUsersByUniqueUsersChart(page_context_data["new_and_returning_users"])
+    newUsersAndReturningUsersChart(chart_data["new_and_returning_users"]) 
 
     initiateRoutesMap(page_context_data['route_list']) 
 
