@@ -225,7 +225,9 @@ function plotCharts(chartData) {
     }
 }
 
+
 function organisationChart(organisationData) {
+    const data = organisationData["data"]
     const organisationCleanedLabels = organisationData["labels"].map(org => { 
         return org.replace("Seasonal Worker Scheme - ", "").replace("Seasonal  Worker Scheme - ", "")
     })
@@ -233,7 +235,7 @@ function organisationChart(organisationData) {
         labels: organisationCleanedLabels,
         datasets: [{
           label: 'Responses',
-          data: organisationData["data"],
+          data: data,
           backgroundColor: [
             COLORS.mediumBlue,
             COLORS.skyBlue,
@@ -254,9 +256,8 @@ function organisationChart(organisationData) {
             }
         }
       };
-    
-    var ctx = document.getElementById('organisation_graph').getContext('2d');
-    new Chart(ctx,organisationChartConfig);
+
+    drawChart('organisation_graph', data, organisationChartConfig)
 }
 
 function languageChart(langaugeData) {
@@ -323,17 +324,14 @@ function languageChart(langaugeData) {
             }
         }
     }
-
-    new Chart(ctx,languageChartConfig);
+    drawChart('language_graphcard', data, languageChartConfig)
 }
 
 function originChart(originChartData) {
     const data = originChartData["data"]
-    const labels = originChartData["labels"].map(label => label.replace("Other - The Rest Of The World", "Others"))
+    const labels = originChartData["labels"]
     
-
-    var ctx = document.getElementById('destination_graphcard').getContext('2d');
-    const languageChartConfig = {
+    const originChartConfig = {
         type: 'bar',
         data: {
             labels: labels,
@@ -390,8 +388,7 @@ function originChart(originChartData) {
             }
         }
     }
-
-    new Chart(ctx,languageChartConfig);
+    drawChart('destination_graphcard', data, originChartConfig)
 }
 
 function destinationChart(destinationData) {
@@ -410,12 +407,18 @@ function destinationChart(destinationData) {
     var tableBody = $('#origin-table tbody');
     tableBody.empty()
 
-    $.each(labels, function (index, label) {
-        var tableRow = $('<tr></tr>');
-        tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${label}</div></td>`));
-        tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${data[index]}</div></td>`));
+    if (data.length === 0) {
+        const tableRow = $('<tr></tr>');
+        tableRow.append($('<td></td>').text('No data available').attr('colspan', '2').css('text-align', 'center'));
         tableBody.append(tableRow);
-    });
+    } else {
+        $.each(labels, function (index, label) {
+            var tableRow = $('<tr></tr>');
+            tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${label}</div></td>`));
+            tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${data[index]}</div></td>`));
+            tableBody.append(tableRow);
+        });
+    }
 }
 
 function genericBarChart(key, values) {

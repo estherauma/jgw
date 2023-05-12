@@ -123,3 +123,32 @@ function buildFilterStateAlert(filterStateContainerId, data) {
   span.innerHTML = formattedText;
   filterStateContainer.appendChild(span);
 }
+
+
+function drawChart(canvasId, data, chartConfig, noDataMessage = "No data available") {
+  var canvas = document.getElementById(canvasId);
+  var ctx = canvas.getContext('2d');
+  var sum = data.reduce(function(a, b) { return a + b; }, 0);
+  var parent = canvas.parentNode;
+  var existingMessage = parent.querySelector('.chart-message');
+  if (data.length === 0 || sum === 0) {
+    if (existingMessage) {
+      parent.removeChild(existingMessage);
+    }
+
+    canvas.style.display = "none";
+    var message = document.createElement('p');
+    message.classList.add('chart-message');
+    message.textContent = noDataMessage;
+    parent.appendChild(message);
+
+    return new Chart(ctx, {});
+  } else {
+    if (existingMessage) {
+      parent.removeChild(existingMessage);
+    }
+
+    canvas.style.display = "block";
+    return new Chart(ctx, chartConfig);
+  }
+}
