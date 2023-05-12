@@ -4,6 +4,7 @@ from functools import reduce
 from typing import Dict
 
 import pandas as pd
+from common.utils.helpers import save_as_excel 
 
 from jgwpandas.settings import CACHE_DIR
 
@@ -58,6 +59,7 @@ class BaseAnalytics:
 
     def filter_by_timeRange(self, time_range: str, df):
         start_date, end_date = time_range.split(",")
+        save_as_excel(df, "hc_filter_by_timeRange")
         if start_date == "all_time":
             return df
         if "createdAt" in df.columns:
