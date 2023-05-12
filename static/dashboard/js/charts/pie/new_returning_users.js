@@ -10,13 +10,13 @@ function newUsersAndReturningUsersChart(newUsersAndReturningUsersData) {
             datasets: [{
                 label: 'New Users Vs Returning Users',
                 data: data,
-                backgroundColor: [COLORS.navyBlue, COLORS.darkGray],
+                backgroundColor: [COLORS.skyBlue, COLORS.appleGreen],
             }]
         },
         options: {
             plugins: {
                 legend: {
-                    display: true
+                    display: false
                 }
             }
         }
