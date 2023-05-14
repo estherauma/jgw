@@ -69,7 +69,7 @@
                     <div class="card-body">
                         <ul class="nav nav-pills nav-fill navtab-bg">
                             <li class="nav-item">
-                                <a href="#settings" data-bs-toggle="tab" aria-expanded="false" class="nav-link active">
+                                <a href="#settings" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
                                     Settings
                                 </a>
                             </li>
@@ -130,7 +130,24 @@
                             <div class="tab-pane" id="password">
                                 <div class="card">
                                     <div class="card-body">
-                                        Coming soon...
+                                        <form action="" method="post" class="form" id="password-reset-form">
+                                            {% csrf_token %}
+                                            <div class="form-group mb-3">
+                                                <label for="currentPassword">Current Password</label>
+                                                <input name="old_password" type="password" id="currentPassword" class="form-control" placeholder="Current Password">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="newPassword">New Password</label>
+                                                <input name="new_password" type="password" id="newPassword" class="form-control" placeholder="New Password">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="confirmNewPassword">Confirm New Password</label>
+                                                <input name="confirm_password" type="password" id="confirmNewPassword" class="form-control" placeholder="Confirm New Password">
+                                            </div>
+                                            <div>
+                                                <button type="submit" class="btn btn-primary waves-effect waves-light mt-2">Confirm update</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -146,10 +163,62 @@
     </div> <!-- container -->
 
 </div> <!-- content -->
-
-
-
-
-
-
 {% endblock content %}
+
+{% block scripts %}
+<script>
+const passwordTabLinkTag = document.querySelector('a[href="#password"]');
+const settingTabLinkTag = document.querySelector('a[href="#settings"]');
+const settingTabPane = document.querySelector('#settings');
+const passwordTabPane = document.querySelector('#password');
+const currentUrlparams = new URLSearchParams(window.location.search);
+const form = document.getElementById('password-reset-form');
+
+if (currentUrlparams.has('tab')) {
+  const tab = currentUrlparams.get('tab');
+  tabToggler(tab)
+} else {
+    tabToggler('settings')
+}
+
+passwordTabLinkTag.addEventListener('click', function(event) {
+    console.log("passwordTabLinkTag: clicked")
+})
+
+settingTabLinkTag.addEventListener('click', function(event) {
+    console.log("settingTabLinkTag: clicked")
+})
+
+function tabToggler(tab){
+    if (tab === 'password') {
+        passwordTabPane.classList.add('active');
+        settingTabPane.classList.remove('active');
+    
+        passwordTabPane.classList.add('show');
+        settingTabPane.classList.remove('show');
+    
+        passwordTabLinkTag.classList.add('active');
+        settingTabLinkTag.classList.remove('active');
+    
+      } else if (tab === 'settings') {
+        settingTabPane.classList.add('active');
+        passwordTabPane.classList.remove('active');
+    
+        settingTabPane.classList.add('show');
+        passwordTabPane.classList.remove('show');
+    
+        passwordTabLinkTag.classList.remove('active');
+        settingTabLinkTag.classList.add('active');
+      }
+}
+
+// submit form with tab param
+form.addEventListener('submit', function(event) {
+    event.preventDefault(); 
+    const url = window.location.href.split('?')[0] + '?tab=password';
+    form.action = url;
+    form.submit();
+});
+
+</script>
+{% endblock scripts %}
