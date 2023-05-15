@@ -321,8 +321,6 @@ def limited_data_home_page(request):
     data = helper.compute_stats(filters={'time_range': 'all_time,{}'.format(todays_date)})
     chart_data = form_chart_data(data)
     route_list = Route.get_routes()
-    
-    # new_and_returning_users = AppEvents().new_and_returning_users()
 
     context = {
         'routes_label': routes_label,
@@ -330,7 +328,6 @@ def limited_data_home_page(request):
         'unique_users_list': unique_users_list,
         'route_list': route_list,
         'chart_data': chart_data,
-        # 'new_and_returning_users': new_and_returning_users
     }
     return render(request, template_name="dashboard/limited_data_home_page.html", context={"limited_data_home_page_context": json.dumps(context)})
 
