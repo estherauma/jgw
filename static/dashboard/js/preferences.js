@@ -113,6 +113,7 @@ function autosubmit() {
 function filterData() {
     const url = filter_form.attributes.getNamedItem("submit-url").value;
     const formData = new FormData(filter_form);
+    console.log("filter_form::", filter_form)
     let chartData = {};
     toggleElementDisplay(false, '#chart-area')
     toggleElementDisplay(false, '#no-results')
@@ -380,9 +381,12 @@ function usersNewUsersChart(){
 }
 usersNewUsersChart()
 
+// var applyBtn = document.getElementsByClassName("applyBtn")[0];
+// applyBtn.addEventListener('click', (e) => {
+//     console.log("event", e)
+// })
+
 export_button.addEventListener('click', () => exportToExcel(export_url));
-end_date.addEventListener('change', debounce(autosubmit, 1000));
-start_date.addEventListener('change', debounce(autosubmit, 1000));
 window.addEventListener('DOMContentLoaded', getOriginOptions)
 window.addEventListener('DOMContentLoaded', getFactoryOptions)
 window.addEventListener('DOMContentLoaded', filterData)

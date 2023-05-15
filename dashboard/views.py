@@ -77,13 +77,16 @@ def redirect_to_filtered_data(request, url, template_name, form=None):
 
 def format_time_range(filters):
     fields = filters.keys()
-    if "time_range" not in fields and "start_date" not in fields:
-        # set time-range to 30 if no time-range/date
-        filters["time_range"] = f"{get_start_date(days=30)},{TODAY}"
-    elif "time_range" in fields:
-        filters["time_range"] = f"{filters['time_range']},{TODAY}"
-    elif ("end_date" in fields or "start_date" in fields) and "time_range" not in fields:
-        filters["time_range"] = f"{filters['start_date']},{filters.get('end_date', TODAY)}"
+    if "date_range_normal" in fields:
+        start_date = filters["date_range_normal"][0]
+        end_date = filters["date_range_normal"][0]
+        date_range = '{},{}'.format(start_date, end_date)
+        if not start_date and not end_date:
+            start_date = get_start_date(days=30)
+            end_date = TODAY
+            date_range = '{},{}'.format(start_date, end_date)
+        filters["time_range"] = '{}'.format(date_range)
+        filters["date_range_normal"] = '{}'.format(date_range)
     return filters
 
 
@@ -111,6 +114,7 @@ def filter_data(request, category):
         filters = get_filters_from_form(form)
         filters.update(get_user_role(request.user))
         filters = format_time_range(filters)
+        print("filters:", filters)
         list_of_filters = change_dictionary_to_list_of_dictionaries(filters)
         data = helper.compute_stats(filters=filters)
         if category == "inline":
