@@ -5,7 +5,6 @@ from operator import itemgetter
 from django import forms
 from django.utils.safestring import mark_safe
 from pytz import country_names
-from bootstrap_daterangepicker import widgets, fields
 
 from common.dashboard import get_destination_countries_from_preferences
 from common.inline import Inline
@@ -110,15 +109,10 @@ class FilterForm(forms.Form):
     factory_farm = forms.ModelChoiceField(
         label="Factory/Farm", required=False, queryset=Factory.objects.all()
     )
-    date_range_normal = fields.DateRangeField(
+    date_range_filter = forms.CharField(
         required=False,
-        widget=widgets.DateRangeWidget(
-            attrs={'id': 'date-range-filter'},
-            picker_options={
-                'ranges': {
-                    'Today': [date.today(), date.today()],
-                }
-            }
+        widget=forms.TextInput(
+            attrs={'name':'date_range_normal', 'class':'form-select mx-1', 'id':'date_range_normal'}
         )
     )
 

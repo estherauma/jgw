@@ -77,16 +77,17 @@ def redirect_to_filtered_data(request, url, template_name, form=None):
 
 def format_time_range(filters):
     fields = filters.keys()
-    if "date_range_normal" in fields:
-        start_date = filters["date_range_normal"][0]
-        end_date = filters["date_range_normal"][0]
+    if "date_range_filter" in fields:
+        start_date, end_date = filters["date_range_filter"].split("-")
+        start_date = datetime.strptime(start_date.strip(), '%m/%d/%Y').strftime('%Y-%m-%d')
+        end_date = datetime.strptime(end_date.strip(), '%m/%d/%Y').strftime('%Y-%m-%d')
+        
         date_range = '{},{}'.format(start_date, end_date)
         if not start_date and not end_date:
             start_date = get_start_date(days=30)
             end_date = TODAY
             date_range = '{},{}'.format(start_date, end_date)
         filters["time_range"] = '{}'.format(date_range)
-        filters["date_range_normal"] = '{}'.format(date_range)
     return filters
 
 
