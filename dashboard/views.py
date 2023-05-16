@@ -77,6 +77,10 @@ def redirect_to_filtered_data(request, url, template_name, form=None):
 
 def format_time_range(filters):
     fields = filters.keys()
+    
+    if "time_range" not in fields:
+        filters["time_range"] = f"{get_start_date(days=30)},{TODAY}"
+        
     if "time_range" in fields:
         start_date, end_date = filters["time_range"].split("-")
         start_date = datetime.strptime(start_date.strip(), '%m/%d/%Y').strftime('%Y-%m-%d')
@@ -265,6 +269,7 @@ def export_to_excel_file(request, key):
     try:
         filters = get_filters_from_form(form)
         filters = format_time_range(filters)
+        print("ccccc:::::", filters["time_range"])
         start, end = filters["time_range"].split(",")
         df = helper.get_df(filters)
         filename = get_SWS_report(start=start, end=end, category=key, df=df)
