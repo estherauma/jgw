@@ -78,7 +78,13 @@ class FilterForm(forms.Form):
                     "id": field,
                 }
 
-
+    time_range = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={'name':'time_range', 'class':'form-select', 'id':'time_range'}
+        )
+    )
+    
     destination = forms.MultipleChoiceField(
         required=False,
         widget=forms.SelectMultiple(
@@ -108,12 +114,6 @@ class FilterForm(forms.Form):
     organisation = forms.ChoiceField(label="Organisation", choices=OPERATORS.items(), required=False)
     factory_farm = forms.ModelChoiceField(
         label="Factory/Farm", required=False, queryset=Factory.objects.all()
-    )
-    date_range_filter = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={'name':'date_range_normal', 'class':'form-select mx-1', 'id':'date_range_normal'}
-        )
     )
 
 class ExportReportForm(forms.Form):

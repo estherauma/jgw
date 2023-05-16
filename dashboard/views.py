@@ -77,8 +77,8 @@ def redirect_to_filtered_data(request, url, template_name, form=None):
 
 def format_time_range(filters):
     fields = filters.keys()
-    if "date_range_filter" in fields:
-        start_date, end_date = filters["date_range_filter"].split("-")
+    if "time_range" in fields:
+        start_date, end_date = filters["time_range"].split("-")
         start_date = datetime.strptime(start_date.strip(), '%m/%d/%Y').strftime('%Y-%m-%d')
         end_date = datetime.strptime(end_date.strip(), '%m/%d/%Y').strftime('%Y-%m-%d')
         

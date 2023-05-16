@@ -37,7 +37,7 @@
                     data-factories-url="{% url 'dashboard:process_factory_options' key='preferences'%}"
                     submit-url="{% url 'dashboard:filter_data' category='preferences' %}">
                     {% csrf_token %}
-                    {{form}}
+                    {% include 'includes/generic_form_content.html' %}
                 </form>
             </div>
             <div class="modal-footer">

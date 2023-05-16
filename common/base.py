@@ -57,7 +57,6 @@ class BaseAnalytics:
         return pd.DataFrame()
 
     def filter_by_timeRange(self, time_range: str, df):
-        print("time_range::", time_range)
         start_date, end_date = time_range.split(",")
         if start_date == "all_time":
             return df
