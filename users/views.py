@@ -181,24 +181,40 @@ def profile(request):
     profile = User.objects.get(id=request.user.id)
 
     if request.method == "POST":
-        form = UpdateUserProfileForm(request.POST, instance=request.user)
-        if form.is_valid():
-            profile.first_name = form.cleaned_data.get("first_name")
-            profile.last_name = form.cleaned_data.get("last_name")
-            profile.email = form.cleaned_data.get("email")
-            profile.receive_marketing_emails = form.cleaned_data.get("receive_marketing_emails")
-            profile.save()
-            messages.info(request, "Profile updated successfully!")
-        else:
-            print(form.errors)
-            messages.error(request, "Error validating form!")
-    else:
-        form = UpdateUserProfileForm(initial={
-            "first_name": profile.first_name, 
-            "last_name": profile.last_name,
-            "email": profile.email,
-            'receive_marketing_emails': profile.receive_marketing_emails,
-        })
+        form = UpdateUserProfileForm(request.POST or None, instance=request.user)
+        if not request.GET.get('tab') or request.GET.get('tab') == 'profile':
+            if form.is_valid():
+                profile.first_name = form.cleaned_data.get("first_name")
+                profile.last_name = form.cleaned_data.get("last_name")
+                profile.email = form.cleaned_data.get("email")
+                profile.receive_marketing_emails = form.cleaned_data.get("receive_marketing_emails")
+                profile.save()
+                messages.info(request, "Profile updated successfully!")
+            else:
+                messages.error(request, "Error validating form!")
+                
+        if request.GET.get('tab') == 'password':
+            old_password = request.POST.get('old_password')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            if new_password == confirm_password:
+                if request.user.check_password(old_password):
+                    request.user.set_password(new_password)
+                    request.user.save()
+                    messages.success(request, 'Password successfully changed!')
+                    logout(request)
+                    return redirect("users:login_user")
+                else:
+                    messages.error(request, 'Old password does not match!')
+            else:
+                messages.error(request, 'New password and confirm password do not match!')
+
+    form = UpdateUserProfileForm(initial={
+        "first_name": profile.first_name, 
+        "last_name": profile.last_name,
+        "email": profile.email,
+        'receive_marketing_emails': profile.receive_marketing_emails,
+    })
     context = {"profile": profile, 'form': form}
     return render(request, template_name="users/profile.html", context=context)
 
