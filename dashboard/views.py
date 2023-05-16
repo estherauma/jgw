@@ -115,7 +115,6 @@ def filter_data(request, category):
         filters = get_filters_from_form(form)
         filters.update(get_user_role(request.user))
         filters = format_time_range(filters)
-        print("filters:", filters)
         list_of_filters = change_dictionary_to_list_of_dictionaries(filters)
         data = helper.compute_stats(filters=filters)
         if category == "inline":
