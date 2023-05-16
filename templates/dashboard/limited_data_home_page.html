@@ -166,13 +166,33 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body h-100">
+                                <div class="card-widgets">
+                                    <a href="javascript: void(0);" data-toggle="reload"><i class="mdi mdi-refresh"></i></a>
+                                    <a data-bs-toggle="collapse" href="#cardCollpase4" role="button" aria-expanded="false" aria-controls="cardCollpase4"><i class="mdi mdi-minus"></i></a>
+                                    <a href="javascript: void(0);" data-toggle="remove"><i class="mdi mdi-close"></i></a>
+                                </div>
+                                <h4 class="header-title mb-0">New and Returning Users</h4>
+
+                                <div id="cardCollpase4" class="collapse show">
+                                    <div class="pt-3">
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            {% include 'charts/new_returning_users.html' %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
                         <div class="card">
                             <div class="card-body">
                                 <div id="uandrusers" class="collapse show">
                                     <div class="pt-1">
                                         <div>
-                                            <div id="unique-and-returning-users"></div>
+                                            <canvas id="unique-and-returning-users"></canvas>
                                         </div>
                                     </div>
                                 </div> <!-- collapsed end -->
@@ -211,9 +231,11 @@
 <!-- <script src="{% static 'map/routes.js' %}"></script> -->
 <script src="{% static 'map/map.js' %}"></script>
 <script src="{% static 'dashboard/js/limited_data_home_page.js' %}"></script>
+<script src="{% static 'dashboard/js/charts/pie/new_returning_users.js' %}"></script>
 <script type="text/javascript">
     // load all view context data
     var page_context_data = JSON.parse('{{ limited_data_home_page_context | escapejs }}');
+    const chart_data = page_context_data["chart_data"]
 
     uniqueAndReturningUsersGraph({ 
         returning_data: page_context_data['returning_users_list'], 
@@ -221,7 +243,9 @@
         labels: page_context_data['routes_label'] 
     })
 
-    plotLimitedHomePageDataCharts(page_context_data["chart_data"])
+    plotLimitedHomePageDataCharts(chart_data)
+
+    newUsersAndReturningUsersChart(chart_data["new_and_returning_users"]) 
 
     initiateRoutesMap(page_context_data['route_list']) 
 

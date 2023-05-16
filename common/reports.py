@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pandas as pd
-from common.helpers import remove_file
+from common.utils.helpers import remove_file
 from dashboard.models import JGWCache
 
 from .retrieve_data import exclude_cols

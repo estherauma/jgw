@@ -2,6 +2,7 @@
 from typing import Dict
 
 import pandas as pd
+from common.app_events import AppEvents
 
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
@@ -29,6 +30,11 @@ class Preferences(BaseAnalytics):
         if _df.empty:
             return {}
         _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
+        
+        # add new and returning users to preferences stats
+        new_and_returning_users = AppEvents().new_and_returning_users()
+        _stats["new_and_returning_users"]  = new_and_returning_users
+
         return _stats
 
     def origin_and_destination_dataframe(self):

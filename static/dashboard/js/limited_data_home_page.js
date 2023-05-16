@@ -37,62 +37,75 @@ new Chart(
 
 
 function uniqueAndReturningUsersGraph({ returning_data, unique_data, labels }) {
-    let options = {
-        series: [
-            {
-                name: 'Returning users',
+    var ctx = document.getElementById('unique-and-returning-users').getContext('2d');
+    const languageChartConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                label: 'Number of Users',
                 data: returning_data,
-            },
-            {
-                name: 'Unique users',
+                backgroundColor: COLORS.navyBlue,
+                borderWidth: 0,
+                borderRadius: 20,
+                borderSkipped: false,
+                barThickness: 18,
+                barPercentage: 0.8
+            },{
                 data: unique_data,
-            }],
-        chart: {
-            type: 'bar',
-            height: 500
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: "55%",
-                barHeight: 50,
-                endingShape: 'rounded'
+                borderWidth: 0,
+                borderRadius: 20,
+                borderSkipped: false,
+                barThickness: 18,
+                barPercentage: 0.8
             }
+        ]
         },
-        title: {
-            text: "Unique and Returning users",
-            style: {
-                fontSize: '18px',
-                fontWeight: '400',
-                fontFamily: undefined,
-                color: '#343A40'
+        options: {
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: 'red',
+                        fontSize: 12
+                    },
+                    grid: {
+                        color: COLORS.lightGray,
+                        borderDash: [2],
+                        drawBorder: false,
+                        borderWidth: 0,
+                        borderDash: [],
+                        borderDashOffset: 0,
+                        drawTicks: true,
+                        display: false
+                    },
+                    autoSkip: false,
+                    maxTicksLimit: 5
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: COLORS.navyBlue,
+                        fontSize: 12
+                    },
+                    grid: {
+                        drawBorder: false,
+                        display: false
+                    }
+                },
             },
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            show: true,
-            width: 2,
-            colors: ['transparent']
-        },
-        xaxis: {
-            categories: labels,
-        },
-        fill: {
-            opacity: 1
-        },
-        tooltip: {
-            y: {
-                formatter: function (val) {
-                    return val
+            plugins: {
+                legend: {
+                    display: false
                 }
             }
         }
-    };
+    }
 
-    let chart = new ApexCharts(document.querySelector("#unique-and-returning-users"), options);
-    chart.render();
+    new Chart(ctx,languageChartConfig);
 }
 
 function plotLimitedHomePageDataCharts(chartData) {

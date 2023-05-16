@@ -333,9 +333,8 @@ def limited_data_home_page(request):
 
     helper = HELPERS[HelpersParameters.PREFERENCES.value]()
     todays_date = datetime.now().date().strftime("%Y-%m-%d")
-    data = helper.compute_stats(filters={f'time_range': 'all_time,{todays_date}'})
+    data = helper.compute_stats(filters={'time_range': 'all_time,{}'.format(todays_date)})
     chart_data = form_chart_data(data)
-
     route_list = Route.get_routes()
 
     context = {
@@ -343,7 +342,7 @@ def limited_data_home_page(request):
         'returning_users_list': returning_users_list,
         'unique_users_list': unique_users_list,
         'route_list': route_list,
-        'chart_data': chart_data
+        'chart_data': chart_data,
     }
     return render(request, template_name="dashboard/limited_data_home_page.html", context={"limited_data_home_page_context": json.dumps(context)})
 

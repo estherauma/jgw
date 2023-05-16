@@ -183,6 +183,7 @@ function exportToExcel(url) {
 function plotCharts(chartData) {
     clearCharts()
     let chartDataKeys = Object.keys(chartData)
+    console.log("chartDataKeys::", chartDataKeys)
     chartDataKeys.map(chartDataKeys => {
         if (chartDataKeys === "age") {
             ageGraph(chartData['age'])
@@ -194,6 +195,10 @@ function plotCharts(chartData) {
 
         if (chartDataKeys === "organisation") {
             organisationGraph(chartData['organisation'])
+        }
+
+        if (chartDataKeys === "new_and_returning_users") {
+            newUsersAndReturningUsersChart(chartData['new_and_returning_users'])
         }
     })
 }
@@ -353,33 +358,6 @@ function organisationGraph(organisationGraphData) {
 
     drawChart('_organisation', data, chartConfig);
 }
-
-function usersNewUsersChart(){
-    var ctx = document.getElementById('users-new-users-chart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-            datasets: [{
-                label: 'USERS',
-                data: [12, 19, 3, 5, 2, 3, 7],
-                borderColor: COLORS.lightBlue
-            }, {
-                label: 'NEW USERS',
-                data: [6, 9, 12, 5, 8, 7, 10],
-                borderColor: COLORS.lightGreen
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                },
-            }
-        }
-    });
-}
-usersNewUsersChart()
 
 export_button.addEventListener('click', () => exportToExcel(export_url));
 window.addEventListener('DOMContentLoaded', getOriginOptions)
