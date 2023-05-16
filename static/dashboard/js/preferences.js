@@ -183,7 +183,6 @@ function exportToExcel(url) {
 function plotCharts(chartData) {
     clearCharts()
     let chartDataKeys = Object.keys(chartData)
-    console.log("chartDataKeys::", chartDataKeys)
     chartDataKeys.map(chartDataKeys => {
         if (chartDataKeys === "age") {
             ageGraph(chartData['age'])
