@@ -1,17 +1,75 @@
-function plotChat(labels, values) {
-    new Chart(document.getElementById("_" + "{{key}}").getContext("2d"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: values,
+function plotChat(key, labels, values) {
+  const ctx = document.getElementById("_" + `${key}`).getContext("2d");
+
+  let firstGraphBg = COLORS.skyBlue;
+  let secondGraphOneBg = COLORS.appleGreen;
+
+  if (key == "chapter_feedback") {
+    firstGraphBg = COLORS.navyBlue;
+    secondGraphOneBg = COLORS.lightGray;
+  }
+
+  const chapersAndChapterFeedbackChartConfig = {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: values[0].label,
+          data: values[0].data,
+          backgroundColor: firstGraphBg,
+          ...genericBarGraphDatasetConfig,
         },
-        options: {
-            barValueSpacing: 50,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                },
-            },
+        {
+          label: values[1].label,
+          data: values[1].data,
+          backgroundColor: secondGraphOneBg,
+          ...genericBarGraphDatasetConfig,
         },
-    });
+      ],
+    },
+    options: {
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: {
+            display: true,
+            fontColor: "red",
+            fontSize: 12,
+          },
+          grid: {
+            color: COLORS.lightGray,
+            borderDash: [2],
+            drawBorder: false,
+            borderWidth: 0,
+            borderDash: [],
+            borderDashOffset: 0,
+            drawTicks: true,
+            display: false,
+          },
+          autoSkip: false,
+          maxTicksLimit: 5,
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            display: true,
+            fontColor: COLORS.navyBlue,
+            fontSize: 12,
+          },
+          grid: {
+            drawBorder: false,
+            display: false,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  };
+
+  new Chart(ctx, chapersAndChapterFeedbackChartConfig);
 }

@@ -15,3 +15,11 @@ const COLORS = {
     skyBlue: '#37c1e3',
     navyBlue: '#193560',
 }
+
+const genericBarGraphDatasetConfig = {
+    borderWidth: 0,
+    borderRadius: 20,
+    borderSkipped: false,
+    barThickness: 18,
+    barPercentage: 0.8,
+}
