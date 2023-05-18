@@ -81,17 +81,8 @@ class AppEvents(BaseAnalytics):
             """.format(
             start_date=start_date, end_date=end_date
         )
-
-        installs_query = """
-            SELECT COUNT(DISTINCT user_pseudo_id) as total_installs
-            FROM `just-good-work.analytics_191478110.events_*`
-            WHERE event_name = 'first_open'
-            AND _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING)
-            """.format(
-            start_date=start_date, end_date=end_date
-        )
-
-        installs = client.query(installs_query).to_dataframe()
+        installs = self.total_new_users()
+        self.new_and_returning_users()
         chapters_df = client.query(chapters_query).to_dataframe()
         chapters_df = self.replace_chapter_names(chapters_df)
         chapters_df = chapters_df.set_index("chapters")
@@ -100,6 +91,34 @@ class AppEvents(BaseAnalytics):
 
         chapter_feedback_df = self._get_chapters_feedback_data()
         return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
+    
+    def total_new_users(self, start_date=None, end_date=None) -> pd.DataFrame:
+        total_new_users_query = """
+                SELECT COUNT(DISTINCT user_pseudo_id) as total_installs
+                FROM `just-good-work.analytics_191478110.events_*`
+                WHERE event_name = 'first_open'
+            """
+            
+        if start_date is not None and end_date is not None:
+            total_new_users_query += """
+                AND _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING)
+            """.format(start_date=start_date, end_date=end_date)
+        
+        return self.query_to_dataframe(total_new_users_query)
+    
+    def new_and_returning_users(self):
+        new_and_returning_users_query = """
+            SELECT 
+            COUNT(DISTINCT CASE WHEN event_name = 'first_open' THEN user_pseudo_id END) AS new_users,
+            COUNT(DISTINCT CASE WHEN event_name = 'homepage' THEN user_pseudo_id END) AS returning_users
+            FROM `just-good-work.analytics_191478110.events_*`
+            WHERE event_name IN ('first_open', 'homepage')
+        """
+        new_and_returning_users_df = self.query_to_dataframe(new_and_returning_users_query)
+        return new_and_returning_users_df.iloc[0].to_dict()
+    
+    def query_to_dataframe(self, query):
+        return client.query(query).to_dataframe()
 
     def replace_chapter_names(self, df) -> pd.DataFrame:
         if "Event Name" in df.columns:

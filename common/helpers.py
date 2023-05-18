@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 from common.checklists import CheckLists
-from common.help_contacts import HelpContacts
+from common.utils.help_contacts import HelpContacts
 from common.inline import Inline
 from common.messaging import Messaging
 from common.preferences import Preferences
