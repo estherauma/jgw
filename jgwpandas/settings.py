@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "crispy_forms",
+    "crispy_bootstrap5",
     "dashboard",
     "users",
 ]
@@ -217,3 +219,7 @@ EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

@@ -37,6 +37,7 @@
         <link rel="stylesheet" href="{% static 'map/styles.css'%}"></link>
         <link rel="stylesheet" href="{% static 'css/dashboard.css' %} " />
         <link rel="stylesheet" href="{% static 'dashboard/css/bootstrap-multiselect.css' %} " />
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
         
         <style>
             {% block styles %}{% endblock %}
@@ -97,6 +98,9 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script>
 
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
         <!-- App js-->
         <script src="{% static 'themes/modern/js/app.min.js' %}"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -106,5 +110,25 @@
 
         <script src="{% static 'dashboard/js/index.js' %}"></script>
         {% block scripts %}{% endblock scripts %}
+        <script>
+
+            var start = moment().subtract(29, 'days');
+            var end = moment();
+            
+            $('#time_range').daterangepicker({
+                startDate: start,
+                endDate: end,
+                ranges: {
+                   'Today': [moment(), moment()],
+                   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                   'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                   'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                   'Last 60 Days': [moment().subtract(59, 'days'), moment()],
+                   'Last 90 Days': [moment().subtract(89, 'days'), moment()],
+                   'This Month': [moment().startOf('month'), moment().endOf('month')],
+                   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+            });
+        </script>
     </body>
 </html>
