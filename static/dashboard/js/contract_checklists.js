@@ -197,8 +197,6 @@ function plotCharts(chartData) {
     }
 }
 
-end_date.addEventListener('change', debounce(autosubmit, 1000));
-start_date.addEventListener('change', debounce(autosubmit, 1000));
 window.addEventListener('DOMContentLoaded', getOriginOptions)
 window.addEventListener('DOMContentLoaded', getFactoryOptions)
 window.addEventListener('DOMContentLoaded', filterData)

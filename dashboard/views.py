@@ -77,13 +77,24 @@ def redirect_to_filtered_data(request, url, template_name, form=None):
 
 def format_time_range(filters):
     fields = filters.keys()
-    if "time_range" not in fields and "start_date" not in fields:
-        # set time-range to 30 if no time-range/date
+    
+    if "time_range" not in fields:
         filters["time_range"] = f"{get_start_date(days=30)},{TODAY}"
-    elif "time_range" in fields:
-        filters["time_range"] = f"{filters['time_range']},{TODAY}"
-    elif ("end_date" in fields or "start_date" in fields) and "time_range" not in fields:
-        filters["time_range"] = f"{filters['start_date']},{filters.get('end_date', TODAY)}"
+        
+    if "time_range" in fields:
+        if '/' in filters["time_range"]:
+            start_date, end_date = filters["time_range"].split("-")
+            start_date = datetime.strptime(start_date.strip(), '%m/%d/%Y').strftime('%Y-%m-%d')
+            end_date = datetime.strptime(end_date.strip(), '%m/%d/%Y').strftime('%Y-%m-%d')
+        else:
+            start_date, end_date = filters["time_range"].split(",")
+        
+        date_range = '{},{}'.format(start_date, end_date)
+        if not start_date and not end_date:
+            start_date = get_start_date(days=30)
+            end_date = TODAY
+            date_range = '{},{}'.format(start_date, end_date)
+        filters["time_range"] = '{}'.format(date_range)
     return filters
 
 
