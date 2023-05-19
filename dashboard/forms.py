@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import date, datetime
 from operator import itemgetter
 
 from django import forms
@@ -71,25 +71,20 @@ class FilterForm(forms.Form):
         self.fields['destination'].choices = get_destination_countries_from_preferences().items()
 
         for field in self.fields:
-            if field not in ("start_date", "end_date", "time_range", "scheme_name"):
+            if field not in ("scheme_name"):
                 self.fields[field].widget.attrs = {
                     "onChange": mark_safe("filterData();"),
                     "class": "form-select mx-1",
                     "id": field,
                 }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        start_date, end_date, time_range = itemgetter("start_date", "end_date", "time_range")(cleaned_data)
-
-        if (start_date or end_date) and time_range:
-            raise forms.ValidationError("Please fill either start/end date or time range, but not both!")
-
-        if all((start_date, end_date)) and start_date > end_date:
-            raise forms.ValidationError("Start date must be earlier than end date!")
-
-        return cleaned_data
-
+    time_range = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={'name':'time_range', 'class':'form-select', 'id':'time_range'}
+        )
+    )
+    
     destination = forms.MultipleChoiceField(
         required=False,
         widget=forms.SelectMultiple(
@@ -120,51 +115,6 @@ class FilterForm(forms.Form):
     factory_farm = forms.ModelChoiceField(
         label="Factory/Farm", required=False, queryset=Factory.objects.all()
     )
-    time_range = forms.ChoiceField(
-        label="Time Range",
-        choices=TIME_RANGE.items(),
-        required=False,
-        widget=forms.Select(
-            attrs={
-                "class": "form-select mx-1",
-                "id": "time_range",
-                "onChange": mark_safe(
-                    """
-                    document.getElementById('start_date').value = '';
-                    document.getElementById('end_date').value = '';
-                    filterData()
-                """
-                ),
-            }
-        ),
-    )
-    start_date = forms.DateField(
-        required=False,
-        widget=forms.DateInput(
-            format=("%Y-%m-%d"),
-            attrs={
-                "class": "form-control mx-1",
-                "id": "start_date",
-                "placeholder": "Select a date",
-                "type": "date",
-                "max": TODAY,
-            },
-        ),
-    )
-    end_date = forms.DateField(
-        required=False,
-        widget=forms.DateInput(
-            format=("%Y-%m-%d"),
-            attrs={
-                "class": "form-control mx-1",
-                "id": "end_date",
-                "placeholder": "Select a date",
-                "type": "date",
-                "max": TODAY,
-            },
-        ),
-    )
-
 
 class ExportReportForm(forms.Form):
     def __init__(self, *args, **kwargs):
