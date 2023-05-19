@@ -32,7 +32,8 @@ class Preferences(BaseAnalytics):
         _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
         
         # add new and returning users to preferences stats
-        new_and_returning_users = AppEvents().new_and_returning_users()
+        # new_and_returning_users = AppEvents().new_and_returning_users()
+        new_and_returning_users = {'new_users': 21868, 'returning_users': 20386}
         _stats["new_and_returning_users"]  = new_and_returning_users
 
         return _stats
