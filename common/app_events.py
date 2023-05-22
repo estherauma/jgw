@@ -7,6 +7,7 @@ from google.cloud import bigquery
 from common.base import BaseAnalytics
 from common.reports import get_start_date
 from common.retrieve_data import JGWApi
+from tabulate import tabulate
 
 api = JGWApi()
 client = bigquery.Client()
@@ -117,16 +118,21 @@ class AppEvents(BaseAnalytics):
         new_and_returning_users_df = self.query_to_dataframe(new_and_returning_users_query)
         return new_and_returning_users_df.iloc[0].to_dict()
     
-    def help_contact_clicks_count(self):
-        help_contact_clicks_count_query = """
-            SELECT event_name, COUNT(*) AS event_count
-            FROM `just-good-work.analytics_191478110.events_20230521`
-            WHERE event_name IN ('Emergency_help_link', 'Emergency_help_tel')
-            GROUP BY event_name;
+    def help_contact_clicks(self):
+        help_contact_clicks_query = """
+            SELECT 
+                event_name, 
+                event_param_unnest.value.string_value AS string_value
+            FROM 
+                `just-good-work.analytics_191478110.events_20230521`,
+                UNNEST(event_params) AS event_param_unnest
+            WHERE 
+                event_name IN ('Emergency_help_link', 'Emergency_help_tel')
+                AND event_param_unnest.value.string_value IS NOT NULL;
         """
-        help_contact_clicks_count_df = self.query_to_dataframe(help_contact_clicks_count_query)
-        print(help_contact_clicks_count_df)
-        return help_contact_clicks_count_df
+        help_contact_clicks_df = self.query_to_dataframe(help_contact_clicks_query)
+        print(tabulate(help_contact_clicks_df, headers='keys', tablefmt='rounded_grid'))
+        return help_contact_clicks_df
         
     def query_to_dataframe(self, query):
         return client.query(query).to_dataframe()
