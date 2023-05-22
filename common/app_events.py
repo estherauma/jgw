@@ -117,13 +117,16 @@ class AppEvents(BaseAnalytics):
         new_and_returning_users_df = self.query_to_dataframe(new_and_returning_users_query)
         return new_and_returning_users_df.iloc[0].to_dict()
     
-    def help_contact_clicks(self):
-        help_contact_clicks_query = """
-        SELECT * FROM `just-good-work.analytics_191478110.events_20230521` 
-        WHERE event_name IN ('Emergency_help_link', 'Emergency_help_tel')
+    def help_contact_clicks_count(self):
+        help_contact_clicks_count_query = """
+            SELECT event_name, COUNT(*) AS event_count
+            FROM `just-good-work.analytics_191478110.events_20230521`
+            WHERE event_name IN ('Emergency_help_link', 'Emergency_help_tel')
+            GROUP BY event_name;
         """
-        help_contact_clicks_df = self.query_to_dataframe(help_contact_clicks_query)
-        print("help_contact_clicks_df:::", help_contact_clicks_df)
+        help_contact_clicks_count_df = self.query_to_dataframe(help_contact_clicks_count_query)
+        print(help_contact_clicks_count_df)
+        return help_contact_clicks_count_df
         
     def query_to_dataframe(self, query):
         return client.query(query).to_dataframe()

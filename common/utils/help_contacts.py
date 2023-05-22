@@ -1,5 +1,6 @@
 from typing import Dict
 import pandas as pd
+from common.app_events import AppEvents
 
 from dashboard.models import TranslatedText
 from common.base import BaseAnalytics
@@ -18,6 +19,8 @@ class HelpContacts(BaseAnalytics):
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
         return_fields = fields or ["route", "locale", "language", "phoneNumber", "email", "organization"]
         _df = self.get_df(filters)
+        app_events = AppEvents().help_contact_clicks()
+        # print("app_events", app_events)
         if _df.empty:
             return {}
         return {field: self.count_unique(field, _df) for field in return_fields}
