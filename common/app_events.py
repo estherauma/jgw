@@ -128,7 +128,8 @@ class AppEvents(BaseAnalytics):
                 UNNEST(event_params) AS event_param_unnest
             WHERE 
                 event_name IN ('Emergency_help_link', 'Emergency_help_tel')
-                AND event_param_unnest.value.string_value IS NOT NULL;
+                AND event_param_unnest.value.string_value IS NOT NULL
+                AND event_name NOT IN ('app', 'MainActivity');
         """
         help_contact_clicks_df = self.query_to_dataframe(help_contact_clicks_query)
         print(tabulate(help_contact_clicks_df, headers='keys', tablefmt='rounded_grid'))
