@@ -153,19 +153,12 @@ class InlineQnsForm(FilterForm):
         qn_mark = mark_safe("'")
         form_name = f"{qn_mark}filter_form{qn_mark}"
         for field in self.fields:
+            self.fields[field].widget.attrs = {
+                "onChange": mark_safe("filterData();"),
+                "id": field,
+            }
             if field in ("destination"):
                 self.fields[field].choices = get_destination_countries_from_preferences().items()
-                self.fields[field].widget.attrs = {
-                    "onChange": mark_safe("filterData();"),
-                    "id": field,
-                }
-                                
-            if field not in ("time_range", "destination"):
-                self.fields[field].widget.attrs = {
-                    "onChange": mark_safe("filterData();"),
-                    "class": "form-select mx-1",
-                    "id": field,
-                }
 
     question = forms.ChoiceField(
         label="Question Key",
