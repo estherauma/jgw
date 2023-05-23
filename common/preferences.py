@@ -13,12 +13,13 @@ QueryMap = Dict[str, list[str]]
 
 def clean_df(df):
     if "organisation" in df.columns:
+        df.loc[df["organisation"] == '', "organisation"] = 'Not specified'
+        
         """
-          This pattern matches the phrase "Seasonal Worker Scheme" 
-          followed by any number of spaces (denoted by \s+) and then the "-" character. 
-          We replace this pattern with an empty string
+          The pattern matches 'Seasonal Worker Scheme' & '-' 
+          & replace with an empty string
         """
-        df["organisation"] = df["organisation"].str.replace(r'Seasonal\s+Worker\s+Worker\s+-', '')
+        df["organisation"] = df["organisation"].replace(r'Seasonal\s+Worker\s+Scheme\s+-',"", regex=True)
     return df
 
 

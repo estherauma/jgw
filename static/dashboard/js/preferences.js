@@ -358,7 +358,6 @@ function organisationGraph(organisationGraphData) {
                 datalabels: {
                     anchor: 'end',
                     align: 'end',
-                    color: COLORS.navyBlue,
                     formatter: (value)  => changeThousandsToLetterK(value)
                 }
             }
