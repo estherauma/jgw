@@ -278,7 +278,7 @@ function genderGraph(genderGraphData) {
         }]
     };
     const config = {
-        type: 'polarArea',
+        type: 'pie',
         data: chartData,
         options: {
             plugins: {
@@ -336,6 +336,10 @@ function organisationGraph(organisationGraphData) {
                 },
                 y: {
                     beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of users'
+                    },
                     ticks: {
                         display: true,
                         fontColor: COLORS.navyBlue,
@@ -350,9 +354,15 @@ function organisationGraph(organisationGraphData) {
             plugins: {
                 legend: {
                     display: false
+                },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: (value)  => changeThousandsToLetterK(value)
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     }
 
     drawChart('_organisation', data, chartConfig);

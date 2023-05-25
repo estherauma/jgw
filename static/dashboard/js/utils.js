@@ -152,3 +152,10 @@ function drawChart(canvasId, data, chartConfig, noDataMessage = "No data availab
     return new Chart(ctx, chartConfig);
   }
 }
+
+function changeThousandsToLetterK(value) {
+  if(value >  1000) {
+    return (value/1000) + "K"
+  }
+  return value
+}
