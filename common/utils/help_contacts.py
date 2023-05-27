@@ -1,6 +1,7 @@
 from typing import Dict
 import pandas as pd
 from common.app_events import AppEvents
+from common.lib.pandas.utils import aggregate_by_group, count_unique
 
 from dashboard.models import TranslatedText
 from common.base import BaseAnalytics
@@ -17,10 +18,21 @@ class HelpContacts(BaseAnalytics):
         self.export_csv_name = "help_contacts_data.csv"
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
-        return_fields = fields or ["route", "locale", "language", "phoneNumber", "email", "organization"]
+        return_fields = fields or ["locale", "language", "organization"]
         _df = self.get_df(filters)
-        app_events = AppEvents().help_contact_clicks()
-        # print("app_events", app_events)
+        
+        emails_phonenumbers_clicks_by_route = self.emails_phonenumbers_clicks_by_group(_df)
+        emails_phonenumbers_clicks_by_org = self.emails_phonenumbers_clicks_by_group(
+            _df,
+            group_field = "organization"
+        )
+        
+        # print("emails_phonenumbers_clicks_by_route,", emails_phonenumbers_clicks_by_route)
+        # print("-----------------------------------------------")
+        # print("emails_phonenumbers_clicks_by_org::", emails_phonenumbers_clicks_by_org)
+        
+        print(":::", {field: self.count_unique(field, _df) for field in return_fields})
+        
         if _df.empty:
             return {}
         return {field: self.count_unique(field, _df) for field in return_fields}
@@ -30,21 +42,23 @@ class HelpContacts(BaseAnalytics):
         help_contacts_series = help_contacts_df[column].str.strip()
         return help_contacts_series.unique()
     
-    def emails_and_phonenumbers_clicks_by_group(
+    def emails_phonenumbers_clicks_by_group(
+        self,
         df, 
         result_fields = ["phoneNumber", "email"],
         group_field: str = 'route'
     ):
-        df[group_field] = df[group_field].replace("","Not specified")
+        return aggregate_by_group(
+            df,
+            result_fields=result_fields,
+            group_field=group_field
+        )
         
-        phonenumber_and_emails_by_route_df = df.groupby(group_field)[result_fields].agg({
-            "phoneNumber": lambda phoneNumbers: phoneNumbers.count(),
-            "email": lambda emails: emails.count()
-        })
+    
+    def phone_email_comparision(df):
         return {
-            "labels": phonenumber_and_emails_by_route_df.index.values,
-            "phoneNumbers": phonenumber_and_emails_by_route_df["phoneNumber"].values,
-            "email": phonenumber_and_emails_by_route_df["email"].values
+            "phone": count_unique(df, "phoneNumber"),
+            "email": count_unique(df, "email")
         }
 
 
