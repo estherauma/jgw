@@ -1,7 +1,8 @@
 from typing import Dict
 import pandas as pd
 from common.app_events import AppEvents
-from common.lib.pandas.utils import aggregate_by_group, count_unique
+from common.lib.pandas.utils import df_aggregate_by_group, count_unique
+from common.utils.helpers import dictionary_from_two_lists
 
 from dashboard.models import TranslatedText
 from common.base import BaseAnalytics
@@ -21,39 +22,54 @@ class HelpContacts(BaseAnalytics):
         return_fields = fields or ["locale", "language", "organization"]
         _df = self.get_df(filters)
         
-        emails_phonenumbers_clicks_by_route = self.emails_phonenumbers_clicks_by_group(_df)
-        emails_phonenumbers_clicks_by_org = self.emails_phonenumbers_clicks_by_group(
+        # aggregate
+        emails_and_phonenumbers_clicks_by_route = df_aggregate_by_group(
             _df,
-            group_field = "organization"
+            result_fields=["phoneNumber", "email"],
+            group_field="route"
+        )
+        emails_and_phonenumbers_clicks_by_org = df_aggregate_by_group(
+            _df,
+            result_fields=["phoneNumber", "email"],
+            group_field="organization"
+        )
+        phone_numbers_by_route = dictionary_from_two_lists(
+            emails_and_phonenumbers_clicks_by_route.get("labels"),
+            emails_and_phonenumbers_clicks_by_route.get("phoneNumber")
+        )
+        emails_by_route = dictionary_from_two_lists(
+            emails_and_phonenumbers_clicks_by_route.get("labels"),
+            emails_and_phonenumbers_clicks_by_route.get("email")
         )
         
-        # print("emails_phonenumbers_clicks_by_route,", emails_phonenumbers_clicks_by_route)
-        # print("-----------------------------------------------")
-        # print("emails_phonenumbers_clicks_by_org::", emails_phonenumbers_clicks_by_org)
+        phone_numbers_by_org = dictionary_from_two_lists(
+            emails_and_phonenumbers_clicks_by_org.get("labels"),
+            emails_and_phonenumbers_clicks_by_org.get("phoneNumber")
+        )
+        emails_by_org = dictionary_from_two_lists(
+            emails_and_phonenumbers_clicks_by_org.get("labels"),
+            emails_and_phonenumbers_clicks_by_org.get("email")
+        )
+        print({
+            "phone_numbers_by_route": phone_numbers_by_route, 
+            "emails_by_route": emails_by_route,
+            # "phone_numbers_by_org":phone_numbers_by_org,
+            # "emails_by_org":emails_by_org
+            })
         
-        print(":::", {field: self.count_unique(field, _df) for field in return_fields})
+        
+        cc= {field: self.count_unique(field, _df) for field in return_fields}
         
         if _df.empty:
             return {}
-        return {field: self.count_unique(field, _df) for field in return_fields}
+        return cc
+    # {**cc, **emails_phonenumbers_clicks_by_route, **emails_phonenumbers_clicks_by_org}
     
     def unique_help_contacts_list(self, column):
         help_contacts_df = self.get_df()
         help_contacts_series = help_contacts_df[column].str.strip()
         return help_contacts_series.unique()
-    
-    def emails_phonenumbers_clicks_by_group(
-        self,
-        df, 
-        result_fields = ["phoneNumber", "email"],
-        group_field: str = 'route'
-    ):
-        return aggregate_by_group(
-            df,
-            result_fields=result_fields,
-            group_field=group_field
-        )
-        
+            
     
     def phone_email_comparision(df):
         return {

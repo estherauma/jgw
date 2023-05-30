@@ -61,6 +61,7 @@ function getOriginOptions() {
                     options += `<option value="${k}">${v}</option>`
                 })
                 origin_input.innerHTML = options;
+                console.log(data)
                 filterData()
             })
             .catch(error => {
