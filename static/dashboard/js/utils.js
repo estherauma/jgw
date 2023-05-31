@@ -152,3 +152,16 @@ function drawChart(canvasId, data, chartConfig, noDataMessage = "No data availab
     return new Chart(ctx, chartConfig);
   }
 }
+
+function checkObjectProperties(obj, properties) {
+  for (let i = 0; i < properties.length; i++) {
+    if (!obj.hasOwnProperty(properties[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function checkObjectProperty(obj, property) {
+  return obj.hasOwnProperty(property);
+}

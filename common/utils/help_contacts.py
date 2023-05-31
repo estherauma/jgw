@@ -50,20 +50,25 @@ class HelpContacts(BaseAnalytics):
             emails_and_phonenumbers_clicks_by_org.get("labels"),
             emails_and_phonenumbers_clicks_by_org.get("email")
         )
-        print({
-            "phone_numbers_by_route": phone_numbers_by_route, 
-            "emails_by_route": emails_by_route,
-            # "phone_numbers_by_org":phone_numbers_by_org,
-            # "emails_by_org":emails_by_org
-            })
+        aggregate_phonenumber_and_email_clicks = {
+            "phone_number_clicks_by_route": phone_numbers_by_route, 
+            "email_clicks_by_route": emails_by_route,
+            "phone_number_clicks_by_org":phone_numbers_by_org,
+            "email_clicks_by_org":emails_by_org
+        }
+        
+        # reshaped_data = {
+        #     'route': list(data['phone_numbers_by_route'].keys()) + list(data['emails_by_route'].keys()),
+        #     'phone_numbers_by_route': list(data['phone_numbers_by_route'].values()),
+        #     'emails_by_route': list(data['emails_by_route'].values())
+        # }
         
         
-        cc= {field: self.count_unique(field, _df) for field in return_fields}
+        unique_value_counts = {field: self.count_unique(field, _df) for field in return_fields}
         
         if _df.empty:
             return {}
-        return cc
-    # {**cc, **emails_phonenumbers_clicks_by_route, **emails_phonenumbers_clicks_by_org}
+        return {**unique_value_counts, **aggregate_phonenumber_and_email_clicks}
     
     def unique_help_contacts_list(self, column):
         help_contacts_df = self.get_df()
