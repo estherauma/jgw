@@ -37,7 +37,7 @@
         <link rel="stylesheet" href="{% static 'map/styles.css'%}"></link>
         <link rel="stylesheet" href="{% static 'css/dashboard.css' %} " />
         <link rel="stylesheet" href="{% static 'dashboard/css/bootstrap-multiselect.css' %} " />
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+        <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
         
         <style>
             {% block styles %}{% endblock %}
@@ -99,13 +99,14 @@
         <script>hljs.initHighlightingOnLoad();</script>
 
         <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+        <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
 
         <!-- App js-->
         <script src="{% static 'themes/modern/js/app.min.js' %}"></script>
 
         <!-- Chart |  charts configs -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
         <script src="{% static 'dashboard/js/bootstrap-multiselect.js' %} "></script>

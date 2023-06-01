@@ -165,3 +165,9 @@ function checkObjectProperties(obj, properties) {
 function checkObjectProperty(obj, property) {
   return obj.hasOwnProperty(property);
 }
+function changeThousandsToLetterK(value) {
+  if(value >  1000) {
+    return (value/1000) + "K"
+  }
+  return value
+}

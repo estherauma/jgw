@@ -116,6 +116,7 @@ def get_user_role(user):
 
 
 def filter_data(request, category):
+    print("filter_data call::", filter_data)
     form = InlineQnsForm(request.POST) if category == "inline" else FilterForm(request.POST)
     helper = HELPERS[category]()
     try:

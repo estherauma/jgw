@@ -32,11 +32,6 @@ function clearFormErrors() {
   }
 }
 
-function clearCharts() {
-  const canvases = document.querySelectorAll("canvas");
-  canvases.forEach((element) => element.remove());
-}
-
 function getOriginOptions() {
   const destination_input = document.querySelector("#destination");
   const url = filter_form.attributes.getNamedItem("data-origins-url").value;
@@ -113,11 +108,6 @@ function getFactoryOptions() {
   }
 }
 
-function autosubmit() {
-  document.getElementById("time_range").value = "";
-  filterData();
-}
-
 function filterData() {
   const url = filter_form.attributes.getNamedItem("submit-url").value;
   const formData = new FormData(filter_form);
@@ -156,10 +146,11 @@ function plotCharts(chartData) {
     checkObjectProperty(chartData, "phone_number_clicks_by_route") &&
     checkObjectProperty(chartData, "email_clicks_by_route")
   ) {
+    const labels = chartData["phone_number_clicks_by_route"]["labels"] || chartData["email_clicks_by_route"]["labels"];
     emailAndPhonenumberClicksByRouteChart(
       chartData["email_clicks_by_route"],
       chartData["phone_number_clicks_by_route"],
-      chartData["phone_number_clicks_by_route"]["labels"]
+      labels
     );
   }
 }
@@ -180,6 +171,12 @@ function emailAndPhonenumberClicksByRouteChart(
         {
           label: "Email Clicks",
           data: emailClicksData,
+          backgroundColor: COLORS.appleGreen,
+          borderWidth: 0,
+          borderRadius: 20,
+          borderSkipped: false,
+          barThickness: 18,
+          barPercentage: 0.8
         },
         {
           label: "Phonenumber Clicks",
@@ -201,11 +198,11 @@ function emailAndPhonenumberClicksByRouteChart(
     },
   };
 
-//   drawChart(
-//     "email_and_phonenumber_clicks_by_route",
-//     [...emailClicksData, ...phonenumberClicksData],
-//     config
-//   );
+  drawChart(
+    "email_and_phonenumber_clicks_by_route",
+    [...emailClicksData, ...phonenumberClicksData],
+    config
+  );
 }
 
 function exportToExcel(url) {
