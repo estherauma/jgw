@@ -48,13 +48,14 @@ class HelpContacts(BaseAnalytics):
             emails_and_phonenumbers_clicks_by_org.get("labels"),
             emails_and_phonenumbers_clicks_by_org.get("email")
         )
+        most_clicked_email_and_phonenumber = self.phone_email_comparision(_df)
         aggregate_phonenumber_and_email_clicks = {
             "phone_number_clicks_by_route": phone_numbers_by_route, 
             "email_clicks_by_route": emails_by_route,
             "phone_number_clicks_by_org":phone_numbers_by_org,
-            "email_clicks_by_org":emails_by_org
+            "email_clicks_by_org":emails_by_org,
+            "most_clicked_email_and_phonenumber": most_clicked_email_and_phonenumber
         }
-        
         
         unique_value_counts = {field: self.count_unique(field, _df) for field in return_fields}
         
@@ -68,7 +69,7 @@ class HelpContacts(BaseAnalytics):
         return help_contacts_series.unique()
             
     
-    def phone_email_comparision(df):
+    def phone_email_comparision(self, df):
         return {
             "phone": count_unique(df, "phoneNumber"),
             "email": count_unique(df, "email")

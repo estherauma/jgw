@@ -171,6 +171,10 @@ function plotCharts(chartData) {
       labels
     );
   }
+
+  if ( checkObjectProperty(chartData, "most_clicked_email_and_phonenumber")) {
+    mostClickedEmailAndPhonenumber(chartData["most_clicked_email_and_phonenumber"])
+  }
 }
 
 function emailAndPhonenumberClicksByOrgChart(
@@ -296,6 +300,33 @@ function emailAndPhonenumberClicksByRouteChart(
     config
   );
 }
+
+function mostClickedEmailAndPhonenumber(emailPhonenumberClicks){
+  const labels = emailPhonenumberClicks["labels"]
+  const  data = emailPhonenumberClicks["data"]
+  var ctx = document.getElementById('most_clicked_email_and_phonenumber').getContext('2d');
+
+  new Chart(ctx, {
+      type: 'pie',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'Email Vs Phonenumber',
+              data: data,
+              backgroundColor: [COLORS.skyBlue, COLORS.appleGreen],
+          }]
+      },
+      options: {
+          plugins: {
+              legend: {
+                  display: true
+              }
+          }
+      }
+  });
+}
+
+
 
 function exportToExcel(url) {
   const formData = new FormData(filter_form);

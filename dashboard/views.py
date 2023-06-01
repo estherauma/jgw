@@ -120,7 +120,6 @@ def filter_data(request, category):
     helper = HELPERS[category]()
     try:
         filters = get_filters_from_form(form)
-        print("filters::", filters)
         filters.update(get_user_role(request.user))
         filters = format_time_range(filters)
         list_of_filters = change_dictionary_to_list_of_dictionaries(filters)
