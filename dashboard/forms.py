@@ -71,7 +71,7 @@ class FilterForm(forms.Form):
         self.fields['destination'].choices = get_destination_countries_from_preferences().items()
 
         for field in self.fields:
-            if field not in ("scheme_name"):
+            if field not in ("scheme_name", "time_range"):
                 self.fields[field].widget.attrs = {
                     "onChange": mark_safe("filterData();"),
                     "class": "form-select mx-1",
@@ -81,7 +81,7 @@ class FilterForm(forms.Form):
     time_range = forms.CharField(
         required=False,
         widget=forms.TextInput(
-            attrs={'name':'time_range', 'class':'form-select', 'id':'time_range'}
+            attrs={'name':'time_range', 'class':'form-select', 'id':'time_range', 'onChange': 'filterData();'}
         )
     )
     

@@ -57,12 +57,6 @@ class HelpContacts(BaseAnalytics):
             "email_clicks_by_org":emails_by_org
         }
         
-        # reshaped_data = {
-        #     'route': list(data['phone_numbers_by_route'].keys()) + list(data['emails_by_route'].keys()),
-        #     'phone_numbers_by_route': list(data['phone_numbers_by_route'].values()),
-        #     'emails_by_route': list(data['emails_by_route'].values())
-        # }
-        
         
         unique_value_counts = {field: self.count_unique(field, _df) for field in return_fields}
         

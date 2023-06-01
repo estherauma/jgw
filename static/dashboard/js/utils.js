@@ -131,6 +131,7 @@ function drawChart(canvasId, data, chartConfig, noDataMessage = "No data availab
   var sum = data.reduce(function(a, b) { return a + b; }, 0);
   var parent = canvas.parentNode;
   var existingMessage = parent.querySelector('.chart-message');
+  
   if (data.length === 0 || sum === 0) {
     if (existingMessage) {
       parent.removeChild(existingMessage);
@@ -165,6 +166,7 @@ function checkObjectProperties(obj, properties) {
 function checkObjectProperty(obj, property) {
   return obj.hasOwnProperty(property);
 }
+
 function changeThousandsToLetterK(value) {
   if(value >  1000) {
     return (value/1000) + "K"

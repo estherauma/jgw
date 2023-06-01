@@ -109,6 +109,8 @@ function getFactoryOptions() {
 }
 
 function filterData() {
+  clearCharts();
+
   const url = filter_form.attributes.getNamedItem("submit-url").value;
   const formData = new FormData(filter_form);
   let chartData = {};
@@ -146,13 +148,91 @@ function plotCharts(chartData) {
     checkObjectProperty(chartData, "phone_number_clicks_by_route") &&
     checkObjectProperty(chartData, "email_clicks_by_route")
   ) {
-    const labels = chartData["phone_number_clicks_by_route"]["labels"] || chartData["email_clicks_by_route"]["labels"];
+    const labels =
+      chartData["phone_number_clicks_by_route"]["labels"] ||
+      chartData["email_clicks_by_route"]["labels"];
     emailAndPhonenumberClicksByRouteChart(
       chartData["email_clicks_by_route"],
       chartData["phone_number_clicks_by_route"],
       labels
     );
   }
+
+  if (
+    checkObjectProperty(chartData, "phone_number_clicks_by_org") &&
+    checkObjectProperty(chartData, "email_clicks_by_org")
+  ) {
+    const labels =
+      chartData["phone_number_clicks_by_org"]["labels"] ||
+      chartData["email_clicks_by_org"]["labels"];
+    emailAndPhonenumberClicksByOrgChart(
+      chartData["email_clicks_by_org"],
+      chartData["phone_number_clicks_by_org"],
+      labels
+    );
+  }
+}
+
+function emailAndPhonenumberClicksByOrgChart(
+  emailClicks,
+  phonenumberClicks,
+  labels
+) {
+  const emailClicksData = emailClicks["data"];
+  const phonenumberClicksData = phonenumberClicks["data"];
+
+  const config = {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Email Clicks",
+          data: emailClicksData,
+          backgroundColor: COLORS.appleGreen,
+          borderWidth: 0,
+          borderRadiusTop: 20,
+          borderSkipped: false,
+          barThickness: 18,
+          barPercentage: 0.8,
+        },
+        {
+          label: "Phonenumber Clicks",
+          data: phonenumberClicksData,
+          backgroundColor: COLORS.navyBlue,
+          borderWidth: 0,
+          borderRadiusBottom: 20,
+          borderSkipped: false,
+          barThickness: 18,
+          barPercentage: 0.8,
+        },
+      ],
+    },
+    options: {
+      plugins: {},
+      responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+          grid: {
+            display: false,
+          },
+        },
+        y: {
+          stacked: true,
+          grid: {
+            display: false,
+          },
+        },
+      },
+    },
+  };
+
+  drawChart(
+    "email_and_phonenumber_clicks_by_org",
+    [...emailClicksData, ...phonenumberClicksData],
+    config
+  );
 }
 
 function emailAndPhonenumberClicksByRouteChart(
@@ -173,14 +253,20 @@ function emailAndPhonenumberClicksByRouteChart(
           data: emailClicksData,
           backgroundColor: COLORS.appleGreen,
           borderWidth: 0,
-          borderRadius: 20,
+          borderRadiusTop: 20,
           borderSkipped: false,
           barThickness: 18,
-          barPercentage: 0.8
+          barPercentage: 0.8,
         },
         {
           label: "Phonenumber Clicks",
           data: phonenumberClicksData,
+          backgroundColor: COLORS.navyBlue,
+          borderWidth: 0,
+          borderRadiusBottom: 20,
+          borderSkipped: false,
+          barThickness: 18,
+          barPercentage: 0.8,
         },
       ],
     },
@@ -190,9 +276,15 @@ function emailAndPhonenumberClicksByRouteChart(
       scales: {
         x: {
           stacked: true,
+          grid: {
+            display: false,
+          },
         },
         y: {
           stacked: true,
+          grid: {
+            display: false,
+          },
         },
       },
     },
