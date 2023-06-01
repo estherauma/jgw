@@ -189,7 +189,7 @@ function emailAndPhonenumberClicksByOrgChart(
         {
           label: "Email Clicks",
           data: emailClicksData,
-          backgroundColor: COLORS.appleGreen,
+          backgroundColor: COLORS.navyBlue,
           borderWidth: 0,
           borderRadiusTop: 20,
           borderSkipped: false,
@@ -199,7 +199,7 @@ function emailAndPhonenumberClicksByOrgChart(
         {
           label: "Phonenumber Clicks",
           data: phonenumberClicksData,
-          backgroundColor: COLORS.navyBlue,
+          backgroundColor: COLORS.mediumGray,
           borderWidth: 0,
           borderRadiusBottom: 20,
           borderSkipped: false,
@@ -261,7 +261,7 @@ function emailAndPhonenumberClicksByRouteChart(
         {
           label: "Phonenumber Clicks",
           data: phonenumberClicksData,
-          backgroundColor: COLORS.navyBlue,
+          backgroundColor: COLORS.skyBlue,
           borderWidth: 0,
           borderRadiusBottom: 20,
           borderSkipped: false,

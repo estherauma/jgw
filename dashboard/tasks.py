@@ -8,6 +8,8 @@ from google.cloud import translate_v2 as translate
 
 from celery import shared_task
 from common.reports import get_SWS_report
+from dashboard.management.commands.add_contacts import add_new_contacts
+from dashboard.management.commands.add_genders import add_new_genders
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from jgwpandas.settings import EMAIL_HOST_USER
 
@@ -43,10 +45,13 @@ def fetch_API_data(category=None):
         "chapter_feedback",
     ]:
         jgw_api.get_data(key=key)
-
-@shared_task(name="add_texts_for_transaltion")
-def add_texts_for_transaltion():
-    print("transalted ----> ")
+    
+    # # add help contacts
+    add_new_genders()
+    
+    # # add help contacts
+    # add_new_contacts()
+    
     
 @shared_task(name="translate_to_eng")
 def translate_API_data():

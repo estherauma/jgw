@@ -1,10 +1,8 @@
 from typing import Dict
 import pandas as pd
-from common.app_events import AppEvents
 from common.lib.pandas.utils import df_aggregate_by_group, count_unique
 from common.utils.helpers import dictionary_from_two_lists
 
-from dashboard.models import TranslatedText
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
 
@@ -75,18 +73,3 @@ class HelpContacts(BaseAnalytics):
             "phone": count_unique(df, "phoneNumber"),
             "email": count_unique(df, "email")
         }
-
-
-def load_phone_number():
-        preferences = HelpContacts()
-        unique_phone_number_list = preferences.unique_help_contacts_list("phoneNumber")
-
-        # get the existing values from the database
-        existing_values = set(TranslatedText.objects.values_list('original_text', flat=True))
-
-        new_phone_numbers = []
-        for phone_number in unique_phone_number_list:
-            if phone_number not in existing_values:
-                new_phone_numbers.append(TranslatedText(original_text=phone_number))
-        # bulk create only the new values
-        TranslatedText.objects.bulk_create(new_phone_numbers)
