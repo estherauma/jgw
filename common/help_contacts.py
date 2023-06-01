@@ -1,6 +1,6 @@
 from typing import Dict
 import pandas as pd
-from common.lib.pandas.utils import df_aggregate_by_group, count_unique
+from common.custom_libs.pandas.utils import count_unique, df_aggregate_by_group
 from common.utils.helpers import dictionary_from_two_lists
 
 from common.base import BaseAnalytics

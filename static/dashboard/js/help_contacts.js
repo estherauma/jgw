@@ -320,7 +320,7 @@ function mostClickedEmailAndPhonenumber(emailPhonenumberClicks){
           plugins: {
               legend: {
                   display: true
-              }
+              },
           }
       }
   });
