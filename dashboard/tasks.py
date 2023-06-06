@@ -8,6 +8,8 @@ from google.cloud import translate_v2 as translate
 
 from celery import shared_task
 from common.reports import get_SWS_report
+from dashboard.management.commands.add_contacts import add_new_contacts
+from dashboard.management.commands.add_genders import add_new_genders
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from jgwpandas.settings import EMAIL_HOST_USER
 
@@ -43,8 +45,14 @@ def fetch_API_data(category=None):
         "chapter_feedback",
     ]:
         jgw_api.get_data(key=key)
-
-
+    
+    # # add help contacts
+    add_new_genders()
+    
+    # # add help contacts
+    # add_new_contacts()
+    
+    
 @shared_task(name="translate_to_eng")
 def translate_API_data():
     def _doer(model, limit=50):
@@ -55,6 +63,7 @@ def translate_API_data():
                 obj.translation = translate_to_eng(obj.original_text)
                 objs.append(obj)
             model.objects.bulk_update(objs, ["translation"])
+            
 
     for model in [TranslatedQuestionText, TranslatedResponseText, TranslatedText]:
         _doer(model)

@@ -56,16 +56,38 @@
         No data matches this search!
     </div>
 
-    <div class="row" id="chart-area">
-        <div class="col-12">
-            <div class="card" id="locale_graphcard">
-                <canvas id="_locale"></canvas>
+    <div id="chart-area">
+        <div class="row">
+            <div class="col-8 mb-3">
+                <div class="card h-100" id="age_graphcard">
+                    <div class="card-body">
+                        <p class="chart-title">Email and Phonenumber Click By Routes</p>
+                        <canvas id="email_and_phonenumber_clicks_by_route"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="card" id="route_graphcard">
-                <canvas id="_route"></canvas>
+            <div class="col-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title pb-1">Email vs Phonenumber Clicks</p>
+                        <canvas id="most_clicked_email_and_phonenumber"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-8">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">Email and Phonenumber Click By Organisation</p>
+                        <canvas id="email_and_phonenumber_clicks_by_org"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
     </div>
+
 </div>
 {% endblock %}
 

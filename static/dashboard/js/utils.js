@@ -131,6 +131,7 @@ function drawChart(canvasId, data, chartConfig, noDataMessage = "No data availab
   var sum = data.reduce(function(a, b) { return a + b; }, 0);
   var parent = canvas.parentNode;
   var existingMessage = parent.querySelector('.chart-message');
+  
   if (data.length === 0 || sum === 0) {
     if (existingMessage) {
       parent.removeChild(existingMessage);
@@ -151,6 +152,19 @@ function drawChart(canvasId, data, chartConfig, noDataMessage = "No data availab
     canvas.style.display = "block";
     return new Chart(ctx, chartConfig);
   }
+}
+
+function checkObjectProperties(obj, properties) {
+  for (let i = 0; i < properties.length; i++) {
+    if (!obj.hasOwnProperty(properties[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function checkObjectProperty(obj, property) {
+  return obj.hasOwnProperty(property);
 }
 
 function changeThousandsToLetterK(value) {

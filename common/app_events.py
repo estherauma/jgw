@@ -7,6 +7,7 @@ from google.cloud import bigquery
 from common.base import BaseAnalytics
 from common.reports import get_start_date
 from common.retrieve_data import JGWApi
+from tabulate import tabulate
 
 api = JGWApi()
 client = bigquery.Client()
@@ -70,7 +71,7 @@ class AppEvents(BaseAnalytics):
     def get_data(self, filters: QueryMap = None, start=None, end=None):
         end_date = end.replace("-", "") if end else datetime.today().strftime("%Y%m%d")
         start_date = start.replace("-", "") if start else end_date
-        if filters is not None:
+        if filters is not None and not isinstance(filters, str):
             start_date = TIME_RANGE.get(filters.get("time_range"))
         chapters_query = """
             SELECT event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users, COUNT(event_timestamp) as Count,
@@ -117,6 +118,23 @@ class AppEvents(BaseAnalytics):
         new_and_returning_users_df = self.query_to_dataframe(new_and_returning_users_query)
         return new_and_returning_users_df.iloc[0].to_dict()
     
+    def help_contact_clicks(self):
+        help_contact_clicks_query = """
+            SELECT 
+                event_name, 
+                event_param_unnest.value.string_value AS string_value
+            FROM 
+                `just-good-work.analytics_191478110.events_20230521`,
+                UNNEST(event_params) AS event_param_unnest
+            WHERE 
+                event_name IN ('Emergency_help_link', 'Emergency_help_tel')
+                AND event_param_unnest.value.string_value IS NOT NULL
+                AND event_name NOT IN ('app', 'MainActivity');
+        """
+        help_contact_clicks_df = self.query_to_dataframe(help_contact_clicks_query)
+        print(tabulate(help_contact_clicks_df, headers='keys', tablefmt='rounded_grid'))
+        return help_contact_clicks_df
+        
     def query_to_dataframe(self, query):
         return client.query(query).to_dataframe()
 

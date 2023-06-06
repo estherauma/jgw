@@ -75,10 +75,9 @@
         <!-- custom js files -->
         <script src="{% static 'dashboard/js/utils.js' %}"></script>
         <script src="{% static 'dashboard/js/const.js' %}"></script>
-        <script src='/static/themes/colorlib/js/jquery.min.js'></script>
-        <script src='/static/themes/colorlib/js/popper.js'></script>
-        <script src='/static/themes/colorlib/js/bootstrap.min.js'></script>
-        <!-- Vendor js -->
+        <script src="{% static 'themes/colorlib/js/jquery.min.js' %}"></script>
+        <script src="{% static 'themes/colorlib/js/popper.js' %}"></script>
+        <script src="{% static 'themes/colorlib/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'themes/modern/js/vendor.min.js' %}"></script>
 
         <!-- Plugins js-->
@@ -89,6 +88,7 @@
         <!-- Dashboard 2 init -->
         <script src="{% static 'themes/modern/js/pages/dashboard-2.init.js' %}"></script>
 
+        <!-- leftlet js -->
         <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-extra-markers/1.2.1/js/leaflet.extra-markers.js" integrity="sha512-Jgp0ME6T7Hwe5HT+dHl8CFpKhtNbjgwyzLKq4/OGR2s8cfR3bORtDTTePvI8MO3jtOI47VTQOAL9VjF0sVNBhA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/perliedman-leaflet-control-geocoder/2.4.0/Control.Geocoder.min.js" integrity="sha512-Pwbi+LtFQRtPHuYkIIwns8XTgCPEV2Eqp4Sk/JovY+pbG6buhvnOfqKLXzo08GvodwJbBu+y3omGBAj4F4Xyig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -103,13 +103,19 @@
 
         <!-- App js-->
         <script src="{% static 'themes/modern/js/app.min.js' %}"></script>
+
+        <!-- Chart |  charts configs -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
         <script src="{% static 'dashboard/js/bootstrap-multiselect.js' %} "></script>
-
         <script src="{% static 'dashboard/js/index.js' %}"></script>
+
+
+        <!-- Custom generic charts -->
+        <script src="{% static 'dashboard/js/charts/bar.js' %}"></script>
+
         {% block scripts %}{% endblock scripts %}
         <script>
 
