@@ -30,12 +30,18 @@ class TranslatedText(models.Model):
 class Scheme(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
 
+    def __str__(self):
+        return self.name
+
 
 class Factory(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
     scheme = models.ForeignKey(
         to="Scheme", related_name="factories", on_delete=models.CASCADE, null=True, blank=True, default=None
     )
+
+    def __str__(self):
+        return f"{self.name} belonging to scheme {self.scheme.name}"
 
 
 class JGWCache(models.Model):
