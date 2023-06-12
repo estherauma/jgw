@@ -121,7 +121,6 @@ def filter_data(request, category):
     try:
         filters = get_filters_from_form(form)
         filters.update(get_user_role(request.user))
-        filters["time_range"] = '11/01/2020 - 03/16/2023'
         filters = format_time_range(filters)
         list_of_filters = change_dictionary_to_list_of_dictionaries(filters)
         data = helper.compute_stats(filters=filters)
