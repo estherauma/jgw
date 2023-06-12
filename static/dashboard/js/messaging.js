@@ -150,48 +150,71 @@ function filterData() {
 
 function plotCharts(chartData) {
     if (chartData) {
-        clearCharts()
         for (const [key, values] of Object.entries(chartData)) {
-            graphDiv = document.getElementById(`${key}_graphcard`)
-            let canvas = document.createElement('canvas')
-            canvas.setAttribute('id', `_${key}`)
-            graphDiv.appendChild(canvas)
-            new Chart(canvas.getContext("2d"), {
+            const elementId = `${key}_graphcard`
+            const backgroundColor = elementId === 'route_graphcard' ?  COLORS.appleGreen : COLORS.skyBlue
+
+            const chartConfig = {
                 type: "bar",
                 data: {
                     labels: values.labels,
+                    label: "countries",
                     datasets: [
                         {
-                            label: key,
-                            data: values.data,
-                            backgroundColor: [
-                                "rgba(255, 99, 132, 0.2)",
-                                "rgba(54, 162, 235, 0.2)",
-                                "rgba(255, 206, 86, 0.2)",
-                                "rgba(75, 192, 192, 0.2)",
-                                "rgba(153, 102, 255, 0.2)",
-                                "rgba(255, 159, 64, 0.2)",
-                            ],
-                            borderColor: [
-                                "rgba(255, 99, 132, 1)",
-                                "rgba(54, 162, 235, 1)",
-                                "rgba(255, 206, 86, 1)",
-                                "rgba(75, 192, 192, 1)",
-                                "rgba(153, 102, 255, 1)",
-                                "rgba(255, 159, 64, 1)",
-                            ],
-                            borderWidth: 1,
+                            label: "message questions",
+                            data: shuffleArray(values.data),
+                            backgroundColor: backgroundColor,
+                            ...genericBarGraphDatasetConfig
                         },
                     ],
                 },
                 options: {
                     scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                display: true,
+                            },
+                            grid: {
+                                drawTicks: true,
+                                display: false
+                            },
+                            autoSkip: false,
+                            maxTicksLimit: 5,
+                            title: {
+                                display: true,
+                                text: key
+                            }
+                        },
                         y: {
                             beginAtZero: true,
-                        },
+                            title: {
+                                display: true,
+                                text: 'Number of message questions'
+                            },
+                            ticks: {
+                                display: true,
+                                fontColor: COLORS.navyBlue,
+                                fontSize: 12
+                            },
+                            grid: {
+                                drawBorder: false,
+                                display: false
+                            }
+                        }
                     },
+                    plugins: {
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            formatter: (value)  => changeThousandsToLetterK(value)
+                        }
+                    }
                 },
-            });
+                plugins: [ChartDataLabels]
+            }
+
+            drawChart(elementId, values.data, chartConfig)
         }
     }
 }
