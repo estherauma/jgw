@@ -41,7 +41,7 @@ class Factory(models.Model):
     )
 
     def __str__(self):
-        return f"{self.name} belonging to scheme {self.scheme.name}"
+        return f"{self.name}"
 
 
 class JGWCache(models.Model):

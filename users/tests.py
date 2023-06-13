@@ -17,11 +17,11 @@ class AuthTests(TestCase):
         super(AuthTests, self).setUp()
         self.test_email = "test@test.local"
         self.test_pword = "12t32thome"
+        self.test_scheme = Scheme.objects.create(name="Test_Scheme")
         self.test_user = User.objects.create_user(
-            email=self.test_email, password=self.test_pword, is_active=True
+            email=self.test_email, password=self.test_pword, is_active=True, scheme=self.test_scheme
         )
         self.client.login(email=self.test_user, password=self.test_pword)
-        self.test_scheme = Scheme.objects.create(name="Test_Scheme")
         self.factory = Factory.objects.create(name="Test_Factory")
         expiry = datetime.now(tz=timezone.utc) + timedelta(days=1)
         self.pword_reset_token = jwt.encode(
