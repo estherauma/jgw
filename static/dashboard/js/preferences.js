@@ -360,6 +360,11 @@ function organisationGraph(organisationGraphData) {
                     align: 'end',
                     formatter: (value)  => changeThousandsToLetterK(value)
                 }
+            },
+            layout: {
+                padding: {
+                    bottom: 20
+                }
             }
         },
         plugins: [ChartDataLabels]
