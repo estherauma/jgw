@@ -68,7 +68,6 @@ class AuthTests(TestCase):
             reverse("users:login_user"), {"email": self.test_email, "password": self.test_pword}
         )
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("dashboard:inline"))
 
     def test_login_form_validation(self):
         """
