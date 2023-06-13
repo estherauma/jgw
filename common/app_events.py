@@ -5,6 +5,7 @@ import pandas as pd
 from google.cloud import bigquery
 
 from common.base import BaseAnalytics
+from common.custom_libs.pandas.utils import print_pandas_df_in_table_format
 from common.reports import get_start_date
 from common.retrieve_data import JGWApi
 from tabulate import tabulate
@@ -91,6 +92,7 @@ class AppEvents(BaseAnalytics):
             chapters_df = chapters_df.drop(columns=["Mark as conversion"])
 
         chapter_feedback_df = self._get_chapters_feedback_data()
+        print_pandas_df_in_table_format(chapters_df)
         return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
     
     def total_new_users(self, start_date=None, end_date=None) -> pd.DataFrame:
