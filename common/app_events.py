@@ -75,11 +75,12 @@ class AppEvents(BaseAnalytics):
         if filters is not None and not isinstance(filters, str):
             start_date = TIME_RANGE.get(filters.get("time_range"))
         chapters_query = """
-            SELECT event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users, COUNT(event_timestamp) as Count,
+            SELECT event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users,
+            COUNT(event_timestamp) as Count,DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date
             FROM (SELECT * FROM `just-good-work.analytics_191478110.events_*`
                 WHERE _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING))
             WHERE event_name LIKE 'ChapterOpened%'
-            GROUP BY event_name
+            GROUP BY event_name, event_date
             """.format(
             start_date=start_date, end_date=end_date
         )
@@ -92,7 +93,6 @@ class AppEvents(BaseAnalytics):
             chapters_df = chapters_df.drop(columns=["Mark as conversion"])
 
         chapter_feedback_df = self._get_chapters_feedback_data()
-        print_pandas_df_in_table_format(chapters_df)
         return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
     
     def total_new_users(self, start_date=None, end_date=None) -> pd.DataFrame:
@@ -151,8 +151,11 @@ class AppEvents(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         data = self.get_df(filters)
+        # print_pandas_df_in_table_format(data)
+        print("chapters:",data["chapters"].to_dict())
+            
         _stats = {
-            "chapters": data["chapters"].to_dict(orient="index"),
+            "chapters": data["chapters"].to_dict(orient="records"),
             "chapter_feedback": {
                 field: self.count_unique(field, data["chapter_feedback"])
                 for field in data["chapter_feedback"].columns
