@@ -159,19 +159,23 @@ class AppEvents(BaseAnalytics):
         }
         
     def chapters_opened_data(self, start_date=None, end_date=None):
-        chaptes_data = list(BigQueryChaptersData.objects.filter(
+        chapters_data = list(BigQueryChaptersData.objects.filter(
                 event_date__range=[start_date, end_date]
         ).values('chapters', 'users', 'count'))
         
-        chapters_df = pd.DataFrame(chaptes_data)
-        chapters_df = chapters_df.rename(columns={'users': 'Users', 'count': 'Count', 'chapters': 'Chapters'})
+        chapters_df = pd.DataFrame(chapters_data)
+        
+        if not chapters_df.columns.empty:
+            chapters_df = chapters_df.rename(columns={'users': 'Users', 'count': 'Count', 'chapters': 'chapters'})
+            chapters_df["chapters"] = chapters_df["chapters"].replace(event_to_title)
+            chapters_df = chapters_df.set_index("chapters")
         
         return chapters_df
         
         
 
     def get_data(self, filters: QueryMap = None, start=None, end=None):
-        end_date = end if end else datetime.today().strftime("%Y-%m-%d")
+        end_date = end if end else previous_dates(days=1)
         start_date = start if start else end_date
         if filters is not None and not isinstance(filters, str):
             start_date = TIME_RANGE.get(filters.get("time_range"))
@@ -181,7 +185,6 @@ class AppEvents(BaseAnalytics):
 
         # chapters_opened_data
         chapters_df = self.chapters_opened_data(start_date=start_date, end_date=end_date)
-        print(chapters_df.to_dict('records'))
         
         # chapter_feedback_df
         chapter_feedback_df = self._get_chapters_feedback_data()
@@ -203,7 +206,7 @@ class AppEvents(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         data = self.get_df(filters)
-            
+        print(data["chapters"])    
         _stats = {
             "chapters": data["chapters"].to_dict(orient="records"),
             "chapter_feedback": {
