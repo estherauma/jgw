@@ -208,7 +208,7 @@ class AppEvents(BaseAnalytics):
         data = self.get_df(filters)
         print(data["chapters"])    
         _stats = {
-            "chapters": data["chapters"].to_dict(orient="records"),
+            "chapters": data["chapters"].to_dict(orient="index"),
             "chapter_feedback": {
                 field: self.count_unique(field, data["chapter_feedback"])
                 for field in data["chapter_feedback"].columns
