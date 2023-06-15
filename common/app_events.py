@@ -63,7 +63,7 @@ class AppEvents(BaseAnalytics):
     def _get_chapters_feedback_data(self, start_date=None, end_date=None):
         chapter_feedback, clean = api.get_data(key="chapter_feedback")
         chapter_feedback_df = pd.DataFrame.from_records(chapter_feedback)
-        print_pandas_df_in_table_format(chapter_feedback_df)
+        
         if start_date and end_date:
             time_range = f"{start_date},{end_date}"
             chapter_feedback_df = self.filter_by_timeRange(time_range=time_range, df=chapter_feedback_df)
@@ -72,11 +72,8 @@ class AppEvents(BaseAnalytics):
         chapter_feedback_df = chapter_feedback_df.rename(columns=new_column_names)
         chapter_feedback_df = chapter_feedback_df.fillna("")
         
-        # print_pandas_df_in_table_format(chapter_feedback_df)
-        # print(new_column_names)
-        
-        if not chapter_feedback_df.empty:
-            chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
+        # if not chapter_feedback_df.empty:
+        #     chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
             
         return chapter_feedback_df
     
@@ -184,6 +181,7 @@ class AppEvents(BaseAnalytics):
 
         # chapters_opened_data
         chapters_df = self.chapters_opened_data(start_date=start_date, end_date=end_date)
+        print(chapters_df.to_dict('records'))
         
         # chapter_feedback_df
         chapter_feedback_df = self._get_chapters_feedback_data()

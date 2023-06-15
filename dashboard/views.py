@@ -49,6 +49,7 @@ def form_chart_data(data: Dict) -> Dict:
     try:
         return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
     except Exception as e:
+        print(data)
         print(f"An error occurred: {str(e)}")
         return {i: {"labels": [], "data": []} for i in data.keys()}
 

@@ -47,7 +47,7 @@ class Factory(models.Model):
 class JGWCache(models.Model):
     class Meta:
         ordering = ("-date_created",)
-
+   # cat = prefer, data = fact
     category = models.CharField(max_length=128, null=False, blank=False)
     is_cleaned = models.BooleanField(default=False, null=False, blank=False)
     data = models.JSONField(null=False)
