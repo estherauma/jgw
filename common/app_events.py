@@ -50,8 +50,7 @@ event_to_title = {
     "ChapterOpened_3_6": "Complaints and grievances",
     "ChapterOpened_3_7": "Resignation and dismisal",
     "ChapterOpened_3_8": "Trade Unions",
-    "ChapterOpened_3_9": "Accomodation",
-    "No specified": None
+    "ChapterOpened_3_9": "Accomodation"
 }
 
 
@@ -72,8 +71,8 @@ class AppEvents(BaseAnalytics):
         chapter_feedback_df = chapter_feedback_df.rename(columns=new_column_names)
         chapter_feedback_df = chapter_feedback_df.fillna("")
         
-        # if not chapter_feedback_df.empty:
-        #     chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
+        if not chapter_feedback_df.empty:
+            chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
             
         return chapter_feedback_df
     
