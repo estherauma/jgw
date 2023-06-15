@@ -11,11 +11,12 @@ from common.retrieve_data import JGWApi
 from tabulate import tabulate
 
 from common.utils.date_utils import previous_dates
+from events.models import BigQueryChaptersData
 
 api = JGWApi()
 client = bigquery.Client()
 QueryMap = Dict[str, list[str]]
-TIME_RANGE = {f"{n} Days": get_start_date(days=n, format="%Y%m%d") for n in [7, 30, 55]}
+TIME_RANGE = {f"{n} Days": get_start_date(days=n, format="%Y-%m-%d") for n in [7, 30, 55]}
 
 
 event_to_title = {
@@ -62,6 +63,7 @@ class AppEvents(BaseAnalytics):
     def _get_chapters_feedback_data(self, start_date=None, end_date=None):
         chapter_feedback, clean = api.get_data(key="chapter_feedback")
         chapter_feedback_df = pd.DataFrame.from_records(chapter_feedback)
+        print_pandas_df_in_table_format(chapter_feedback_df)
         if start_date and end_date:
             time_range = f"{start_date},{end_date}"
             chapter_feedback_df = self.filter_by_timeRange(time_range=time_range, df=chapter_feedback_df)
@@ -69,10 +71,13 @@ class AppEvents(BaseAnalytics):
         new_column_names = {i.replace("ChapterOpened_", ""): v for i, v in event_to_title.items()}
         chapter_feedback_df = chapter_feedback_df.rename(columns=new_column_names)
         chapter_feedback_df = chapter_feedback_df.fillna("")
+        
+        # print_pandas_df_in_table_format(chapter_feedback_df)
+        # print(new_column_names)
+        
         if not chapter_feedback_df.empty:
             chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
-        else:
-            chapter_feedback_df = pd.DataFrame(columns=new_column_names.values())
+            
         return chapter_feedback_df
     
     def bigquery_chapters_data(self, select_all=False,start_date=None, end_date=None):
@@ -156,73 +161,35 @@ class AppEvents(BaseAnalytics):
             "bigquery_firstopen_homepage_data": bigquery_firstopen_homepage_data
         }
         
+    def chapters_opened_data(self, start_date=None, end_date=None):
+        chaptes_data = list(BigQueryChaptersData.objects.filter(
+                event_date__range=[start_date, end_date]
+        ).values('chapters', 'users', 'count'))
+        
+        chapters_df = pd.DataFrame(chaptes_data)
+        chapters_df = chapters_df.rename(columns={'users': 'Users', 'count': 'Count', 'chapters': 'Chapters'})
+        
+        return chapters_df
+        
         
 
     def get_data(self, filters: QueryMap = None, start=None, end=None):
-        end_date = end.replace("-", "") if end else datetime.today().strftime("%Y%m%d")
-        start_date = start.replace("-", "") if start else end_date
+        end_date = end if end else datetime.today().strftime("%Y-%m-%d")
+        start_date = start if start else end_date
         if filters is not None and not isinstance(filters, str):
             start_date = TIME_RANGE.get(filters.get("time_range"))
-        chapters_query = """
-            SELECT DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date, event_name as chapters, COUNT(DISTINCT user_pseudo_id) as Users,
-            COUNT(event_timestamp) as Count
-            FROM (SELECT * FROM `just-good-work.analytics_191478110.events_*`
-                WHERE _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING))
-            WHERE event_name LIKE 'ChapterOpened%'
-            GROUP BY event_name, event_date
-            """.format(
-            start_date=start_date, end_date=end_date
-        )
-        installs = self.total_new_users()
-        chapters_df = client.query(chapters_query).to_dataframe()
-        chapters_df = self.replace_chapter_names(chapters_df)
-        chapters_df = chapters_df.set_index("chapters")
-        if "Mark as conversion" in chapters_df.columns:
-            chapters_df = chapters_df.drop(columns=["Mark as conversion"])
+            
+        # total installs data
+        installs = pd.DataFrame({'total_installs': [45677]}) #where event_name = 'first_open'
 
+        # chapters_opened_data
+        chapters_df = self.chapters_opened_data(start_date=start_date, end_date=end_date)
+        
+        # chapter_feedback_df
         chapter_feedback_df = self._get_chapters_feedback_data()
+              
         return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
     
-    def total_new_users(self, start_date=None, end_date=None) -> pd.DataFrame:
-        total_new_users_query = """
-                SELECT COUNT(DISTINCT user_pseudo_id) as total_installs
-                FROM `just-good-work.analytics_191478110.events_*`
-                WHERE event_name = 'first_open'
-            """
-            
-        if start_date is not None and end_date is not None:
-            total_new_users_query += """
-                AND _table_suffix BETWEEN CAST({start_date} AS STRING) AND CAST({end_date} AS STRING)
-            """.format(start_date=start_date, end_date=end_date)
-        
-        return self.query_to_dataframe(total_new_users_query)
-    
-    def new_and_returning_users(self):
-        new_and_returning_users_query = """
-            SELECT 
-            COUNT(DISTINCT CASE WHEN event_name = 'first_open' THEN user_pseudo_id END) AS new_users,
-            COUNT(DISTINCT CASE WHEN event_name = 'homepage' THEN user_pseudo_id END) AS returning_users
-            FROM `just-good-work.analytics_191478110.events_*`
-            WHERE event_name IN ('first_open', 'homepage')
-        """
-        new_and_returning_users_df = self.query_to_dataframe(new_and_returning_users_query)
-        return new_and_returning_users_df.iloc[0].to_dict()
-    
-    def help_contact_clicks(self):
-        help_contact_clicks_query = """
-            SELECT 
-                event_name, 
-                event_param_unnest.value.string_value AS string_value
-            FROM 
-                `just-good-work.analytics_191478110.events_20230521`,
-                UNNEST(event_params) AS event_param_unnest
-            WHERE 
-                event_name IN ('Emergency_help_link', 'Emergency_help_tel')
-                AND event_param_unnest.value.string_value IS NOT NULL
-                AND event_name NOT IN ('app', 'MainActivity');
-        """
-        help_contact_clicks_df = self.query_to_dataframe(help_contact_clicks_query)
-        return help_contact_clicks_df
         
     def query_to_dataframe(self, query):
         return client.query(query).to_dataframe()
