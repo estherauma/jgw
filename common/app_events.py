@@ -206,7 +206,6 @@ class AppEvents(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         data = self.get_df(filters)
-        print(data["chapters"])    
         _stats = {
             "chapters": data["chapters"].to_dict(orient="index"),
             "chapter_feedback": {
