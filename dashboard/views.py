@@ -46,10 +46,11 @@ TODAY = datetime.today().strftime("%Y-%m-%d")
 
 
 def form_chart_data(data: Dict) -> Dict:
-    """
-    reshapes data as expected by chart library
-    """
-    return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
+    try:
+        return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return {i: {"labels": [], "data": []} for i in data.keys()}
 
 
 def process_filters(request):
