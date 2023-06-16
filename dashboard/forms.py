@@ -171,12 +171,10 @@ class AppEventsForm(forms.Form):
     TIME_RANGE = {
         "7 Days": "7 Days",
         "30 Days": "30 Days",
-        "60 Days": "60 Days",
-        # "90 Days": "90 Days",
     }
     time_range = forms.ChoiceField(
         label="Time Range",
         choices=TIME_RANGE.items(),
         required=False,
-        widget=forms.Select(attrs={"class": "form-select mx-1", "id": "time_range"}),
+        widget=forms.Select(attrs={"class": "form-select mx-1"}),
     )

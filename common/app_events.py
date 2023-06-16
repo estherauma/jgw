@@ -148,9 +148,9 @@ class AppEvents(BaseAnalytics):
         
         return bigquery_firstopen_homepage_df_dict
         
-    def bigquery_data(self, end_date=previous_dates(days=1), start_date=previous_dates(days=1)):
-        bigquery_chapters_data = self.bigquery_chapters_data(start_date=start_date, end_date=end_date)
-        bigquery_firstopen_homepage_data = self.bigquery_firstopen_homepage_data(start_date=start_date, end_date=end_date)
+    def bigquery_data(self, end_date=previous_dates(days=1), start_date=previous_dates(days=1), select_all=False):
+        bigquery_chapters_data = self.bigquery_chapters_data(start_date=start_date, end_date=end_date, select_all=select_all)
+        bigquery_firstopen_homepage_data = self.bigquery_firstopen_homepage_data(start_date=start_date, end_date=end_date, select_all=select_all)
         
         return {
             "bigquery_chapters_data": bigquery_chapters_data,
