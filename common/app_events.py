@@ -11,6 +11,7 @@ from common.retrieve_data import JGWApi
 from tabulate import tabulate
 
 from common.utils.date_utils import previous_dates
+from common.utils.helpers import save_as_excel
 from events.models import BigQueryChaptersData
 
 api = JGWApi()
@@ -168,6 +169,8 @@ class AppEvents(BaseAnalytics):
             chapters_df = chapters_df.rename(columns={'users': 'Users', 'count': 'Count', 'chapters': 'chapters'})
             chapters_df["chapters"] = chapters_df["chapters"].replace(event_to_title)
             chapters_df = chapters_df.set_index("chapters")
+            
+        chapters_df = chapters_df.groupby(level=0).sum()
         
         return chapters_df
         
@@ -205,6 +208,7 @@ class AppEvents(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         data = self.get_df(filters)
+        save_as_excel(data["chapters"], "chapters.csv")
         _stats = {
             "chapters": data["chapters"].to_dict(orient="index"),
             "chapter_feedback": {
