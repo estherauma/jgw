@@ -46,10 +46,12 @@ TODAY = datetime.today().strftime("%Y-%m-%d")
 
 
 def form_chart_data(data: Dict) -> Dict:
-    """
-    reshapes data as expected by chart library
-    """
-    return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
+    try:
+        return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
+    except Exception as e:
+        # print(data)
+        print(f"An error occurred: {str(e)}")
+        return {i: {"labels": [], "data": []} for i in data.keys()}
 
 
 def process_filters(request):
@@ -116,10 +118,12 @@ def get_user_role(user):
 
 
 def filter_data(request, category):
+    print("filter_data")
     form = InlineQnsForm(request.POST) if category == "inline" else FilterForm(request.POST)
     helper = HELPERS[category]()
     try:
         filters = get_filters_from_form(form)
+        print(filters)
         filters.update(get_user_role(request.user))
         filters = format_time_range(filters)
         list_of_filters = change_dictionary_to_list_of_dictionaries(filters)

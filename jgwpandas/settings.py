@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "crispy_forms",
     "crispy_bootstrap5",
+    
+    "events",
     "dashboard",
     "users",
 ]
