@@ -1,8 +1,9 @@
-from datetime import datetime
 from typing import Dict
 
 import pandas as pd
 from google.cloud import bigquery
+from django.db.models import Sum, Value
+from django.db.models.functions import Coalesce
 
 from common.base import BaseAnalytics
 from common.custom_libs.pandas.utils import print_pandas_df_in_table_format
@@ -12,7 +13,7 @@ from tabulate import tabulate
 
 from common.utils.date_utils import previous_dates
 from common.utils.helpers import save_as_excel
-from events.models import BigQueryChaptersData
+from events.models import BigQueryChaptersData, BigQueryFirstOpenHomepageData
 
 api = JGWApi()
 client = bigquery.Client()
@@ -145,6 +146,7 @@ class AppEvents(BaseAnalytics):
                 """
         bigquery_firstopen_homepage_df = client.query(bigquery_firstopen_homepage_query).to_dataframe()
         bigquery_firstopen_homepage_df['event_date'] = bigquery_firstopen_homepage_df['event_date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+        print_pandas_df_in_table_format(bigquery_firstopen_homepage_df)
         bigquery_firstopen_homepage_df_dict = bigquery_firstopen_homepage_df.to_dict('records')
         
         return bigquery_firstopen_homepage_df_dict
@@ -173,7 +175,18 @@ class AppEvents(BaseAnalytics):
         chapters_df = chapters_df.groupby(level=0).sum()
         
         return chapters_df
+    
+    def total_intalls_data(self, start_date=None, end_date=None):
+        total_installs_data = BigQueryFirstOpenHomepageData.objects.filter(
+                event_date__range=[start_date, end_date],
+                event_name='first_open'
+        ).aggregate(
+            users=Coalesce(Sum('users'), Value(0)), 
+            count=Coalesce(Sum('count'), Value(0))
+        )
+        total_installs_df = pd.DataFrame({'total_installs': [total_installs_data.get("users")]})
         
+        return total_installs_df
         
 
     def get_data(self, filters: QueryMap = None, start=None, end=None):
@@ -183,7 +196,7 @@ class AppEvents(BaseAnalytics):
             start_date = TIME_RANGE.get(filters.get("time_range"))
             
         # total installs data
-        installs = pd.DataFrame({'total_installs': [45677]}) #where event_name = 'first_open'
+        installs = self.total_intalls_data(start_date=start_date, end_date=end_date)
 
         # chapters_opened_data
         chapters_df = self.chapters_opened_data(start_date=start_date, end_date=end_date)

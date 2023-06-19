@@ -18,22 +18,22 @@ def add_biquery_data(select_all=False):
     # Process BigQueryChaptersData
     for chapter_data in bigquery_chapters_data:
         item = change_dictionary_keys_lowercase(chapter_data)
-        BigQueryChaptersData.objects.get_or_create(
-            event_date=item.get('event_date'),
-            chapters=item.get('chapters'),
-            users=item.get('users'),
-            count=item.get('count')
-        )
+        # BigQueryChaptersData.objects.get_or_create(
+        #     event_date=item.get('event_date'),
+        #     chapters=item.get('chapters'),
+        #     users=item.get('users'),
+        #     count=item.get('count')
+        # )
 
     # Process BigQueryFirstOpenHomepageData
     for firstopen_homepage_data in bigquery_firstopen_homepage_data:
         item = change_dictionary_keys_lowercase(firstopen_homepage_data)
-        BigQueryFirstOpenHomepageData.objects.get_or_create(
-            event_date=item.get('event_date'),
-            users=item.get('users'),
-            count=item.get('count'),
-            event_name=item.get('event_name')
-        )
+        # BigQueryFirstOpenHomepageData.objects.get_or_create(
+        #     event_date=item.get('event_date'),
+        #     users=item.get('users'),
+        #     count=item.get('count'),
+        #     event_name=item.get('event_name')
+        # )
 
     
 class Command(BaseCommand):

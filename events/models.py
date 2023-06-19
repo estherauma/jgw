@@ -20,6 +20,10 @@ class BigQueryChaptersData(TimestampedModel):
         return self.chapters
 
 class BigQueryFirstOpenHomepageData(TimestampedModel):
+    """
+        This model is used to store data from BigQueryFirstOpenHomepageData
+        event_name are :  homepage, first_open
+    """
     event_date = models.DateField()
     users = models.IntegerField()
     count = models.IntegerField()
