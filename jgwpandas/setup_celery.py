@@ -20,8 +20,8 @@ celery_app.conf.beat_schedule = {
         "task": "cache_bigquery_data",
         "schedule": crontab(minute=0, hour=0),  # everyday at midnight
     },
-    "load_bigquery_data_once": {
-        "task": "load_bigquery_data_once",
+    "load_all_bigquery_data_at_once": {
+        "task": "load_all_bigquery_data_at_once",
         "schedule": crontab(minute=0, hour=23) ,  # run 11pm everyday
     },
     "translate-API-data": {

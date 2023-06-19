@@ -7,11 +7,11 @@ def cache_bigquery_data():
     add_biquery_data()
     
 
-@shared_task(name="load_bigquery_data_once")
-def load_bigquery_data_once():
-    load_bigquery_event_data, created = OneTimeEventJob.objects.get_or_create(name="load_bigquery_data_once")
+@shared_task(name="load_all_bigquery_data_at_once")
+def load_all_bigquery_data_at_once():
+    load_all_bigquery_data_at_once, created = OneTimeEventJob.objects.get_or_create(name="load_all_bigquery_data_at_once")
     
-    if not load_bigquery_event_data.run:
+    if not load_all_bigquery_data_at_once.run:
         add_biquery_data(select_all=True)
-        load_bigquery_event_data.run = True
-        load_bigquery_event_data.save()
+        load_all_bigquery_data_at_once.run = True
+        load_all_bigquery_data_at_once.save()
