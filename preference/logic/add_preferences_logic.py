@@ -1,40 +1,7 @@
 
+from common.const.value_const import NOT_SPECIFIED
 from common.services.api_client import JustGoodWorkAPIClient
-from preference.models import NOT_SPECIFIED, FactoryFarm, Organisation, OrganisationSector, SectorOfWork
-
-preferences = [{'_id': '6486133489f5f2ecb2582151',
-  'deviceId': 'jgw-vanilla-157b84322970cbf4-KAZ -> GBR',
-  'updatedAt': '2023-06-22T11:16:15.914Z',
-  'location_of_potential_work': 'GBR',
-  'gender': 'женский',
-  'age': '31-40',
-  'factoryFarm': '',
-  'organisationSector': 'agriculture',
-  'organisation': 'Seasonal Worker Scheme - Generic',
-  'route': 'KAZ -> GBR',
-  'locale': 'KAZ',
-  'appId': 'jgw-vanilla',
-  '__v': 0,
-  'createdAt': '2023-06-11T18:32:20.189Z',
-  'sectorsOfWork': ['agriculture'],
-  'language': 'ru-gc'},
-               {'_id': '6486133489f5f2ecb2582151',
-  'deviceId': 'jgw-vanilla-157b84322970cbf4-KAZ -> GBR',
-  'updatedAt': '2023-06-22T11:16:15.914Z',
-  'location_of_potential_work': 'GBR',
-  'gender': 'женский',
-  'age': '31-40',
-  'factoryFarm': '',
-  'organisationSector': 'agriculture',
-  'organisation': 'Seasonal Worker Scheme - Upper Tier',
-  'route': 'KAZ -> GBR',
-  'locale': 'KAZ',
-  'appId': 'jgw-vanilla',
-  '__v': 0,
-  'createdAt': '2023-06-11T18:32:20.189Z',
-  'sectorsOfWork': ['agriculture', 'construction'],
-  'language': 'ru-gc'}
-               ]
+from preference.models import FactoryFarm, Organisation, OrganisationSector, Preference, SectorOfWork
 
 
 def get_or_create_model_instance(model, value):
@@ -49,10 +16,14 @@ def fetch_preferences_from_api(client):
 
 
 def fetch_preferences_from_api_to_db():
-    # jgw_api_client = JustGoodWorkAPIClient()
-    # preferences = fetch_preferences_from_api(jgw_api_client)
+    jgw_api_client = JustGoodWorkAPIClient()
+    preferences = fetch_preferences_from_api(jgw_api_client)
 
     for preference in preferences:
+        add_preference_to_db(preference)
+
+
+def add_preference_to_db(preference):
         organisation_sector = preference.get("organisationSector")
         organisation = preference.get("organisation")
         factory_farm = preference.get("factoryFarm")
@@ -65,28 +36,44 @@ def fetch_preferences_from_api_to_db():
         org = add_organisation_to_db(organisation)
         
         # add factory_farm to db
-        factory_farm = add_factory_farm_to_db(factory_farm)
-        
-        # add sectors_of_work to db
-        sectors_of_work = add_sector_of_work_to_db(sectors_of_work)
-        
-        print("org: ", org)
-        print("factory_farm: ", factory_farm)
-        print("sectors_of_work: ", sectors_of_work)
-        print("org_sector: ", org_sector)
+        fact_farm = add_factory_farm_to_db(factory_farm)
         
         # add preference to db
+        new_preference = Preference.objects.create(
+            data_source_id= preference.get('_id'),
+            device_id= preference.get('deviceId'),
+            updated_at= preference.get('updatedAt'),
+            location_of_potential_work= preference.get('location_of_potential_work'),
+            gender= preference.get('gender'),
+            age= preference.get('age'),
+            route= preference.get('route'),
+            locale= preference.get('locale'),
+            app_id= preference.get('appId'),
+            created_at= preference.get('createdAt'),
+            language= preference.get('language'),
+            organisation_sector=org_sector,
+            factory_farm=fact_farm,
+            organisation=org
+        )
 
-def add_organisation_sector_to_db(organisation_sector):
+        # Create SectorOfWork instances and associate them with the preference
+        sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
+        for sec_of_work in sec_of_work_list:
+            new_preference.sectors_of_work.add(sec_of_work)
+
+        return preference
+
+
+def add_organisation_sector_to_db(organisation_sector: str) -> OrganisationSector:
     return get_or_create_model_instance(OrganisationSector, organisation_sector)
 
-def add_organisation_to_db(organisation):
+def add_organisation_to_db(organisation: str) -> Organisation:
     return get_or_create_model_instance(Organisation, organisation)
 
-def add_factory_farm_to_db(factory_farm):
+def add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
     return get_or_create_model_instance(FactoryFarm, factory_farm)
 
-def add_sector_of_work_to_db(sectors_of_work):
+def add_sector_of_work_to_db(sectors_of_work: list[str]) -> list[SectorOfWork]:
     sector_list = []
     
     # Check if sectors_of_work is empty
