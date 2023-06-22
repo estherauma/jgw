@@ -1,6 +1,9 @@
 
+from django.db import transaction
+
 from common.const.value_const import NOT_SPECIFIED
 from common.services.api_client import JustGoodWorkAPIClient
+from common.utils.preferences import get_origin_and_destination_from_route
 from preference.models import FactoryFarm, Organisation, OrganisationSector, Preference, SectorOfWork
 
 
@@ -15,12 +18,19 @@ def fetch_preferences_from_api(client):
     return client.get_data("/preferences")
 
 
+@transaction.atomic
 def fetch_preferences_from_api_to_db():
+    
     jgw_api_client = JustGoodWorkAPIClient()
     preferences = fetch_preferences_from_api(jgw_api_client)
-
+    
     for preference in preferences:
-        add_preference_to_db(preference)
+        try:
+            add_preference_to_db(preference)
+        except Exception as e:
+            print('An error occurred during preference creation:', str(e))
+            transaction.set_rollback(True)
+            raise
 
 
 def add_preference_to_db(preference):
@@ -39,21 +49,24 @@ def add_preference_to_db(preference):
         fact_farm = add_factory_farm_to_db(factory_farm)
         
         # add preference to db
+        route = preference.get('route') or NOT_SPECIFIED
         new_preference = Preference.objects.create(
             data_source_id= preference.get('_id'),
             device_id= preference.get('deviceId'),
             updated_at= preference.get('updatedAt'),
             location_of_potential_work= preference.get('location_of_potential_work'),
-            gender= preference.get('gender'),
-            age= preference.get('age'),
-            route= preference.get('route'),
-            locale= preference.get('locale'),
+            gender= preference.get('gender') or NOT_SPECIFIED,
+            age= preference.get('age') or NOT_SPECIFIED,
+            route= route,
+            locale= preference.get('locale') or NOT_SPECIFIED,
             app_id= preference.get('appId'),
             created_at= preference.get('createdAt'),
-            language= preference.get('language'),
+            language= preference.get('language') or NOT_SPECIFIED,
             organisation_sector=org_sector,
             factory_farm=fact_farm,
-            organisation=org
+            organisation=org,
+            origin= get_origin_and_destination_from_route(route).get('origin'),
+            destination= get_origin_and_destination_from_route(route).get('destination'),
         )
 
         # Create SectorOfWork instances and associate them with the preference

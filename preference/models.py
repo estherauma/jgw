@@ -41,6 +41,9 @@ class Preference(models.Model):
     app_id = models.CharField(max_length=255)
     created_at = models.DateTimeField()
     language = models.CharField(max_length=255)
+    origin = models.CharField(max_length=255, null=True)
+    destination = models.CharField(max_length=255, null=True)
+    cleaned = models.BooleanField(default=False)
     
     sectors_of_work = models.ManyToManyField(SectorOfWork)
     organisation_sector = models.ForeignKey(OrganisationSector, on_delete=models.CASCADE)
