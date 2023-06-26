@@ -18,7 +18,6 @@ class InlineQuestionStandard(models.Model):
 
 
 class InlineQuestion(models.Model):
-    inline_question_standard = models.ForeignKey(InlineQuestionStandard, on_delete=models.CASCADE)
     question = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -27,6 +26,7 @@ class InlineQuestion(models.Model):
     
 
 class InlineQuestionResponse(models.Model):
+    inline_question_standard = models.ForeignKey(InlineQuestionStandard, on_delete=models.CASCADE)
     inline_question = models.ForeignKey(InlineQuestion, on_delete=models.CASCADE)
     response = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

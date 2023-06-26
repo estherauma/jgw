@@ -21,7 +21,7 @@ def separate_inline_question_standard_fields_from_others(inline_question_dict):
         if obj_key not in list_fields:
             other_fields.append({"key":obj_key, "value": obj_value})
     
-    return {"other_fields_list": other_fields, "standard_fields_dict": standard_fields}
+    return {"responses_list": other_fields, "standard_fields_dict": standard_fields}
 
         
 @transaction.atomic
@@ -43,7 +43,7 @@ def add_inline_question_to_db(inline_question):
     if type(inline_question) is not str:
         standard_and_other_fields = separate_inline_question_standard_fields_from_others(inline_question)
         standard_fields_dict = standard_and_other_fields.get("standard_fields_dict")
-        other_fields_list = standard_and_other_fields.get("other_fields_list")
+        responses_list = standard_and_other_fields.get("responses_list")
         
         # delete all from models
         # InlineQuestionStandard.objects.all().delete()
@@ -66,18 +66,13 @@ def add_inline_question_to_db(inline_question):
         )
         
         #  save inline question with standard ID
-        for other_field in other_fields_list:
-            inline_question = InlineQuestion.objects.filter(
-                question = other_field.get('key')
-            ).first()
-            
-            if not inline_question:
-                inline_question = InlineQuestion.objects.create(
-                    inline_question_standard = inline_question_standard,
-                    question = other_field.get('key')
-                )
-            
+        for response_list in responses_list:
+            inline_question, _ = InlineQuestion.objects.get_or_create(
+                question = response_list.get('key')
+            )
+
             InlineQuestionResponse.objects.create(
+                inline_question_standard = inline_question_standard,
                 inline_question = inline_question,
-                response = other_field.get('value')
+                response = response_list.get('value')
             )
