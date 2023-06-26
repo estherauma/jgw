@@ -1,19 +1,36 @@
 from django.db import models
 
-class InlineQuestion(models.Model):
+class InlineQuestionStandard(models.Model):
     data_source_id = models.CharField(max_length=24)
     device_id = models.CharField(max_length=255)
     app_id = models.CharField(max_length=255)
-    locale = models.CharField(max_length=255)
-    route = models.CharField(max_length=255)
-    language = models.CharField(max_length=255)
-    organisation = models.CharField(max_length=255, blank=True)
-    organisation_sector = models.CharField(max_length=255, blank=True)
-    factory_farm = models.CharField(max_length=255, blank=True)
-    recruiter_kept_id = models.CharField(max_length=255)
-    are_you_sure = models.CharField(max_length=255)
+    locale = models.CharField(max_length=255, blank=True, null=True)
+    route = models.CharField(max_length=255, blank=True, null=True)
+    language = models.CharField(max_length=255, blank=True, null=True)
+    organisation = models.CharField(max_length=255, blank=True, null=True)
+    organisation_sector = models.CharField(max_length=255, blank=True, null=True)
+    factory_farm = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     
     def __str__(self):
         return f"InlineQuestion {self.id}"
+
+
+class InlineQuestion(models.Model):
+    inline_question_standard = models.ForeignKey(InlineQuestionStandard, on_delete=models.CASCADE)
+    question = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self) -> str:
+        return f"InlineQuestion {self.question}"
+    
+
+class InlineQuestionResponse(models.Model):
+    inline_question = models.ForeignKey(InlineQuestion, on_delete=models.CASCADE)
+    response = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self) -> str:
+        return f"InlineQuestionResponse {self.response}"
+    
