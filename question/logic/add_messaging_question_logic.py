@@ -2,7 +2,7 @@ from django.db import transaction
 from common.const.value_const import NOT_SPECIFIED
 
 from common.services.api_client import JustGoodWorkAPIClient
-from question.models import MessagingQuestion, MessagingQuestionResponse, MessagingQuestionStandard
+from question.models import MessagingQuestion, MessagingQuestionOptionResponseAnswer, MessagingQuestionResponse, MessagingQuestionStandard
 from preference.models import Preference
 
 
@@ -19,6 +19,8 @@ def fetch_messaging_questions_from_api_to_db():
     
     # MessagingQuestionStandard.objects.all().delete()
     # MessagingQuestion.objects.all().delete()
+    # MessagingQuestionResponse.objects.all().delete()
+    # MessagingQuestionOptionResponseAnswer.objects.all().delete()
     
     for messaging_question in messaging_questions:
         try:
@@ -65,9 +67,13 @@ def add_messaging_question_to_db(messaging_question):
             )
 
         if question_response_data_type is list:
-            messaging_question_response = MessagingQuestionResponse.objects.create(
+            new_messaging_question_response = MessagingQuestionResponse.objects.create(
                 messaging_question = new_messaging_question,
                 response_option_type = "multiple"
             )
             for response_option in question_responses:
-                print(response_option)
+                MessagingQuestionOptionResponseAnswer.objects.create(
+                    messaging_question_response = new_messaging_question_response,
+                    option = response_option.get('value'),
+                    answer = response_option.get('isChecked')
+                )
