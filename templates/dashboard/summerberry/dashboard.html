@@ -56,53 +56,53 @@
                             {% for worker in data %}
                             <tr>
                                 <td>{{ worker.name }}</td>
-                                <td>{{ worker.number }}</td>
+                                <td>{{ worker.employeeID }}</td>
                                 <td>{{ worker.start_date }}</td>
                                 <td>{{ worker.reg_date }}</td>
                                 <td>
-                                    {% if worker.completed_registration %}
-                                    <span class="badge bg-success">{{ worker.completed_registration }}</span>
+                                    {% if worker.completedRegistration %}
+                                    <span class="badge bg-success">{{ worker.completedRegistration }}</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.completed_registration }}</span>
+                                    <span class="badge bg-danger">{{ worker.completedRegistration }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if worker.completed_induction == 'Completed' %}
-                                    <span class="badge bg-success">{{ worker.completed_induction }}</span>
+                                    {% if worker.completedInduction %}
+                                    <span class="badge bg-success">{{ worker.completedInduction }}</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.completed_induction }}</span>
+                                    <span class="badge bg-danger">{{ worker.completedInduction }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if worker.signed_contract %}
-                                    <span class="badge bg-success">{{ worker.signed_contract }}</span>
+                                    {% if worker.contractSigned %}
+                                    <span class="badge bg-success">{{ worker.contractSigned }}</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.signed_contract }}</span>
+                                    <span class="badge bg-danger">{{ worker.contractSigned }}</span>
                                     {% endif %}
                                 </td>
 
 
                                 <td>
-                                    {% if worker.worker_directive_signed == 'Yes' %}
-                                    <span class="badge bg-success">{{ worker.worker_directive_signed }}</span>
-                                    {% elif worker.worker_directive_signed == 'No' %}
-                                    <span class="badge bg-danger">{{ worker.worker_directive_signed }}</span>
+                                    {% if worker.workerDirectiveSigned == 'Yes' %}
+                                    <span class="badge bg-success">{{ worker.workerDirectiveSigned }}</span>
+                                    {% elif worker.workerDirectiveSigned == 'No' %}
+                                    <span class="badge bg-danger">{{ worker.workerDirectiveSigned }}</span>
                                     {% else %}
-                                    <span class="badge bg-warning">{{ worker.worker_directive_signed }}</span>
+                                    <span class="badge bg-warning">{{ worker.workerDirectiveSigned }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if worker.hygiene_signed %}
-                                    <span class="badge bg-success">{{ worker.hygiene_signed }}</span>
+                                    {% if worker.hygieneSigned %}
+                                    <span class="badge bg-success">{{ worker.hygieneSigned }}</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.hygiene_signed }}</span>
+                                    <span class="badge bg-danger">{{ worker.hygieneSigned }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if worker.medical_signed %}
-                                    <span class="badge bg-success">{{ worker.medical_signed }}</span>
+                                    {% if worker.medicalSigned %}
+                                    <span class="badge bg-success">{{ worker.medicalSigned }}</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.medical_signed }}</span>
+                                    <span class="badge bg-danger">{{ worker.medicalSigned }}</span>
                                     {% endif %}
                                 </td>
                             </tr>
