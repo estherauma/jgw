@@ -83,6 +83,9 @@
     background: #aeaeaf; 
 }
 
+.filter-state-container {
+    background-color:rgb(230, 245, 250);
+}
 .filter-state-container span{
     color: #193560;
 }
