@@ -4,7 +4,6 @@ from http import HTTPStatus
 from operator import itemgetter
 import random
 from typing import Dict, List
-import requests
 from django.urls import reverse
 
 from django.contrib import messages
@@ -21,8 +20,7 @@ from common.reports import get_start_date, get_SWS_report
 from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
 from common.helpers import HELPERS, HelpersParameters
 from dashboard.models import Route
-import base64
-import os
+
 
 
 from .forms import (
@@ -401,21 +399,5 @@ def summerberry_dashboard(request):
     return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
 
 
-def summerberry_data(request):
-    auth_api_username = os.getenv("SUMMERBERRY_API_USERNAME")
-    auth_api_password = os.getenv("SUMMERBERRY_API_PASSWORD")
-    auth_api_url = os.getenv("SUMMERBERRY_API_URL")
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": "Basic " + base64.b64encode(
-            (auth_api_username + ":" + auth_api_password).encode("utf-8")
-        ).decode("utf-8")
-    }
 
-    response = requests.get(auth_api_url, headers=headers)
-    with open('summerberry_data.json', 'w') as outfile:
-        json.dump(response.json(), outfile)
-
-    return  JsonResponse('', status=200, safe=False)
 
