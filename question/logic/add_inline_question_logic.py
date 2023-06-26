@@ -2,7 +2,7 @@ from django.db import transaction
 from common.const.value_const import NOT_SPECIFIED
 
 from common.services.api_client import JustGoodWorkAPIClient
-from question.models import InlineQuestion, InlineQuestionResponse, InlineQuestionStandard
+from question.models import InlineQuestion, InlineQuestionResponse, InlineQuestionStandard, InlineQuestionText
 from preference.models import Preference
 
 
@@ -45,11 +45,6 @@ def add_inline_question_to_db(inline_question):
         standard_fields_dict = standard_and_other_fields.get("standard_fields_dict")
         responses_list = standard_and_other_fields.get("responses_list")
         
-        # delete all from models
-        # InlineQuestionStandard.objects.all().delete()
-        # InlineQuestion.objects.all().delete()
-        # InlineQuestionResponse.objects.all().delete()
-        
         # save the standard fields, 
         inline_question_standard = InlineQuestionStandard.objects.create(
             data_source_id = standard_fields_dict.get('_id'),
@@ -65,14 +60,19 @@ def add_inline_question_to_db(inline_question):
             updated_at = standard_fields_dict.get('updatedAt')
         )
         
-        #  save inline question with standard ID
+        #  get or create inline question text
         for response_list in responses_list:
-            inline_question, _ = InlineQuestion.objects.get_or_create(
-                question = response_list.get('key')
+            inline_question_text, _ = InlineQuestionText.objects.get_or_create(
+                text = response_list.get('key'),
             )
-
+            
+            inline_question = InlineQuestion.objects.create(
+                question = inline_question_text,
+                inline_question_standard = inline_question_standard
+            )
+            
+            # create inline question response 
             InlineQuestionResponse.objects.create(
-                inline_question_standard = inline_question_standard,
                 inline_question = inline_question,
                 response = response_list.get('value')
             )
