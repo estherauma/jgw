@@ -113,7 +113,6 @@ function autosubmit() {
 function filterData() {
     const url = filter_form.attributes.getNamedItem("submit-url").value;
     const formData = new FormData(filter_form);
-    console.log("filter_form::", filter_form)
     let chartData = {};
     toggleElementDisplay(false, '#chart-area')
     toggleElementDisplay(false, '#no-results')

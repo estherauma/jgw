@@ -15,4 +15,4 @@ class HelpContact(models.Model):
     cleaned = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.phone_number
+        return f"phone: {self.phone_number} ------- email: {self.email}"
