@@ -14,8 +14,8 @@ def get_or_create_model_instance(model, value):
         instance, _ = model.objects.get_or_create(name=value)
     return instance
 
-def fetch_preferences_from_api(client):
-    return client.get_data("/preferences")
+def fetch_preferences_from_api(client, start_date='2019-01-01', end_date='2023-06-27'):
+    return client.get_data(f"/preferences?startDate={start_date}&endDate={end_date}")
 
 
 @transaction.atomic
@@ -24,6 +24,7 @@ def fetch_preferences_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     preferences = fetch_preferences_from_api(jgw_api_client)
     
+    print("preferences: ", preferences)
     for preference in preferences:
         try:
             add_preference_to_db(preference)
@@ -55,13 +56,13 @@ def add_preference_to_db(preference):
             device_id= preference.get('deviceId'),
             updated_at= preference.get('updatedAt'),
             location_of_potential_work= preference.get('location_of_potential_work'),
-            gender= preference.get('gender') or NOT_SPECIFIED,
-            age= preference.get('age') or NOT_SPECIFIED,
+            gender= preference.get('gender'),
+            age= preference.get('age'),
             route= route,
-            locale= preference.get('locale') or NOT_SPECIFIED,
+            locale= preference.get('locale'),
             app_id= preference.get('appId'),
             created_at= preference.get('createdAt'),
-            language= preference.get('language') or NOT_SPECIFIED,
+            language= preference.get('language'),
             organisation_sector=org_sector,
             factory_farm=fact_farm,
             organisation=org,

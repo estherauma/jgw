@@ -17,11 +17,6 @@ def fetch_messaging_questions_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     messaging_questions = fetch_messaging_question_from_api(jgw_api_client)
     
-    # MessagingQuestionStandard.objects.all().delete()
-    # MessagingQuestion.objects.all().delete()
-    # MessagingQuestionResponse.objects.all().delete()
-    # MessagingQuestionOptionResponseAnswer.objects.all().delete()
-    
     for messaging_question in messaging_questions:
         try:
             add_messaging_question_to_db(messaging_question)
