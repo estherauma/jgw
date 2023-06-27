@@ -282,7 +282,7 @@ function questionsAndAnswers(chartData) {
 function organisationChart(organisationData) {
     const data = organisationData["data"]
     const organisationCleanedLabels = organisationData["labels"].map(org => { 
-        return org.replace("Seasonal Worker Scheme - ", "").replace("Seasonal  Worker Scheme - ", "")
+        return org.replace("SEASONAL WORKER SCHEME - ", "").replace("SEASONAL  WORKER SCHEME - ", "")
     })
     const organisationChartData = {
         labels: organisationCleanedLabels,

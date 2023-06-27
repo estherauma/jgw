@@ -208,7 +208,7 @@ function ageGraph(ageGraphData) {
         data: {
             labels: ageGraphData["labels"],
             datasets: [{
-                label: 'Number of Users',
+                label: 'NUMBER OF USERS',
                 data: data,
                 backgroundColor: '#37C1E3',
                 borderWidth: 0,
@@ -272,8 +272,7 @@ function genderGraph(genderGraphData) {
         datasets: [{
             label: 'My First Dataset',
             data: data,
-            backgroundColor: [COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue,
-            ]
+            backgroundColor: [COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue, COLORS.black, COLORS.darkBlue]
         }]
     };
     const config = {
@@ -301,7 +300,7 @@ function organisationGraph(organisationGraphData) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Number of Users',
+                label: 'NUMBER OF USERS',
                 data: data,
                 backgroundColor: COLORS.appleGreen,
                 borderWidth: 0,
@@ -337,7 +336,7 @@ function organisationGraph(organisationGraphData) {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Number of users'
+                        text: 'NUMBER OF USERS'
                     },
                     ticks: {
                         display: true,

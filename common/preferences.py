@@ -6,6 +6,7 @@ from common.app_events import AppEvents
 
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
+from common.utils.dictionary_utils import convert_nested_dictionary_keys_to_uppercase
 
 api = JGWApi()
 QueryMap = Dict[str, list[str]]
@@ -38,6 +39,8 @@ class Preferences(BaseAnalytics):
         if _df.empty:
             return {}
         _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
+        
+        _stats = convert_nested_dictionary_keys_to_uppercase(_stats)
         
         # add new and returning users to preferences stats
         # new_and_returning_users = AppEvents().new_and_returning_users()

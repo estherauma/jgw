@@ -5,6 +5,7 @@ import pandas as pd
 
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi, exclude_cols
+from common.utils.dictionary_utils import convert_nested_dictionary_keys_to_uppercase
 from common.utils.strings import camel_case_to_uppercase_text
 
 api = JGWApi()
@@ -25,28 +26,34 @@ class Inline(BaseAnalytics):
         for column in questions_df.columns:
             counts = questions_df[column].value_counts()
             result[column] = {'yes': int(counts.get('yes', 0)), 'no': int(counts.get('no', 0))}
+        
+        questions_and_answers = {camel_case_to_uppercase_text(key): value for key, value in result.items()}
             
-        return result
+        return questions_and_answers
         
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
         _df = self.get_df(filters)
         _stats = {"response_count": 0, "data": {}}
-
+        
+        
         return_fields = fields or [i for i in ["origin", "language", "organisation", "destination"] if i in _df.columns]
         _stats["response_count"] = len(_df)
         _stats["data"] = {field: self.count_unique(field, _df) for field in return_fields}
-        questions_df = _df[[i for i in _df.columns if i not in exclude_cols]]
         
+        data_with_keys_converted_to_uppercase = convert_nested_dictionary_keys_to_uppercase(_stats["data"])
+        
+        questions_df = _df[[i for i in _df.columns if i not in exclude_cols]]
         if "question" in filters:
             _stats["data"]["question"] = self.count_unique(filters["question"], _df)
         else:
             _stats["data"]["question"] = questions_df.count().to_dict()
             
-        # change question keys to upper case texts
-        _stats["data"]["question"] = {camel_case_to_uppercase_text(key): value for key, value in _stats["data"]["question"].items()}
-        
+        # change question keys to upper case texts        
         questions_and_answers = self.question_stats(questions_df=questions_df)
-        _stats["data"]["questions_and_answers"] = {camel_case_to_uppercase_text(key): value for key, value in questions_and_answers.items()}
+        _stats["data"] = { 
+            **data_with_keys_converted_to_uppercase, 
+            "questions_and_answers": questions_and_answers
+        }
         
         return _stats
