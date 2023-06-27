@@ -37,8 +37,8 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <h4 class="chart-title">Chapters Opened</h4>
-                <canvas id="_chapters"> </canvas>
+                {% include 'includes/chart_title.html' with title='Chapters Feedback' %}
+                <canvas id="_chapter_feedback"> </canvas>
             </div>
         </div>
     </div>
@@ -48,8 +48,8 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <h4 class="chart-title">Chapters Feedback</h4>
-                <canvas id="_chapter_feedback"> </canvas>
+                {% include 'includes/chart_title.html' with title='Chapters Opened' %}
+                <canvas id="_chapters"> </canvas>
             </div>
         </div>
     </div>

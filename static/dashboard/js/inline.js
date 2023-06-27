@@ -217,14 +217,67 @@ function plotCharts(chartData) {
                 languageChart(chartData['language'])
             }
 
-
-            if (chartDataKey === "question") {
-                genericBarChart(chartDataKey, chartData['question'])
+            if (chartDataKey === "questions_and_answers") {
+                questionsAndAnswers(chartData['questions_and_answers'])
             }
         })
     }
 }
 
+function questionsAndAnswers(chartData) {
+    const data = chartData['data'];
+    const labels = chartData['labels'];
+
+    const yesArray = data.map(obj => obj.yes);
+    const noArray = data.map(obj => obj.no);
+
+    const config = {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Yes",
+              data: yesArray,
+              backgroundColor: COLORS.navyBlue,
+            },
+            {
+              label: "No",
+              data: noArray,
+              backgroundColor: COLORS.appleGreen,
+            },
+          ],
+        },
+        options: {
+        indexAxis: 'y',
+          plugins: {},
+          responsive: true,
+          scales: {
+            x: {
+              stacked: true,
+              grid: {
+                display: false,
+              },
+            },
+            y: {
+              stacked: true,
+              grid: {
+                display: false,
+              },
+            },
+          },
+          maintainAspectRatio: false,
+          responsive: true,
+        },
+        plugins: {
+            scrollbar: {
+                enabled: true
+            }
+        }
+      };
+      
+    scrollableVerticalBarChart('question_graphcard', data, config)
+}
 
 function organisationChart(organisationData) {
     const data = organisationData["data"]

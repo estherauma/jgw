@@ -5,6 +5,7 @@ import pandas as pd
 
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi, exclude_cols
+from common.utils.strings import camel_case_to_uppercase_text
 
 api = JGWApi()
 QueryMap = Dict[str, list[str]]
@@ -17,6 +18,16 @@ class Inline(BaseAnalytics):
         self.raw_df = pd.DataFrame.from_records(inline_data)
         self.raw_df = self.raw_df.replace("", np.nan)
         self.export_csv_name = "inline_qn_responses.csv"
+    
+    def question_stats(self, questions_df=None):
+        result = {}
+
+        for column in questions_df.columns:
+            counts = questions_df[column].value_counts()
+            result[column] = {'yes': int(counts.get('yes', 0)), 'no': int(counts.get('no', 0))}
+            
+        return result
+        
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
         _df = self.get_df(filters)
@@ -31,5 +42,11 @@ class Inline(BaseAnalytics):
             _stats["data"]["question"] = self.count_unique(filters["question"], _df)
         else:
             _stats["data"]["question"] = questions_df.count().to_dict()
+            
+        # change question keys to upper case texts
+        _stats["data"]["question"] = {camel_case_to_uppercase_text(key): value for key, value in _stats["data"]["question"].items()}
+        
+        questions_and_answers = self.question_stats(questions_df=questions_df)
+        _stats["data"]["questions_and_answers"] = {camel_case_to_uppercase_text(key): value for key, value in questions_and_answers.items()}
         
         return _stats

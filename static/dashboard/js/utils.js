@@ -87,6 +87,37 @@ function drawChart(canvasId, data, chartConfig, noDataMessage = "No data availab
   }
 }
 
+function scrollableVerticalBarChart(containerId, data, chartConfig) {
+  graphDiv = document.getElementById(containerId)
+  
+  let canvas = document.createElement('canvas')
+  let canvasId = `canvas_${containerId}`
+  canvas.setAttribute('id', canvasId)
+  canvas.setAttribute('class', "chartContainer")
+  graphDiv.appendChild(canvas)
+
+  const chartObject = drawChart(canvasId, data, chartConfig)
+
+  const totalChart = chartObject.config.data.labels.length
+  let totalHeight;
+
+  /** 
+      if the number of bars are > 25, add generic-chart-box class to currentChartBox
+      to make it scrollable instead of a very long chart
+  **/
+  let currentChartBox = document.querySelector(`.${containerId}-chart-box`)
+
+  if (totalChart <= 10) {
+      totalHeight = `${totalChart * 50}px`
+  } else if (totalChart > 28) {
+      totalHeight = `${totalChart * 28}px`
+      currentChartBox.classList.add('generic-chart-box')
+  } else {
+      totalHeight = `${totalChart * 28}px`
+  }
+  graphDiv.style.height = totalHeight;
+}
+
 function checkObjectProperties(obj, properties) {
   for (let i = 0; i < properties.length; i++) {
     if (!obj.hasOwnProperty(properties[i])) {

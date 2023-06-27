@@ -6,7 +6,7 @@ function plotChat(key, labels, values) {
 
   if (key == "chapter_feedback") {
     firstGraphBg = COLORS.navyBlue;
-    secondGraphOneBg = COLORS.lightGray;
+    secondGraphOneBg = COLORS.appleGreen;
   }
 
   const chapersAndChapterFeedbackChartConfig = {
@@ -32,6 +32,7 @@ function plotChat(key, labels, values) {
       scales: {
         x: {
           beginAtZero: true,
+          stacked: true,
           ticks: {
             display: true,
             fontColor: "red",
@@ -52,6 +53,7 @@ function plotChat(key, labels, values) {
         },
         y: {
           beginAtZero: true,
+          stacked: true,
           ticks: {
             display: true,
             fontColor: COLORS.navyBlue,
@@ -61,11 +63,15 @@ function plotChat(key, labels, values) {
             drawBorder: false,
             display: false,
           },
+          title: {
+            display: true,
+            text: 'Number of users'
+        },
         },
       },
       plugins: {
         legend: {
-          display: false,
+          display: true,
         },
       },
     },
