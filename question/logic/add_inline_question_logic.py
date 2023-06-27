@@ -46,9 +46,13 @@ def add_inline_question_to_db(inline_question):
         responses_list = standard_and_other_fields.get("responses_list")
         
         # save the standard fields, 
+        device_id = standard_fields_dict.get('deviceId')
+        preference = Preference.objects.get(device_id=device_id)
+        
         inline_question_standard = InlineQuestionStandard.objects.create(
             data_source_id = standard_fields_dict.get('_id'),
-            device_id = standard_fields_dict.get('deviceId'),
+            device_id = device_id,
+            preference = preference,
             app_id = standard_fields_dict.get('appId'),
             locale = standard_fields_dict.get('locale'),
             route = standard_fields_dict.get('route'),

@@ -34,9 +34,13 @@ def fetch_messaging_questions_from_api_to_db():
 def add_messaging_question_to_db(messaging_question):
         
         # save the standard fields, 
+        device_id = messaging_question.get('deviceId')
+        preference = Preference.objects.get(device_id=device_id)
+        
         messaging_question_standard = MessagingQuestionStandard.objects.create(
             data_source_id = messaging_question.get('_id'),
             device_id = messaging_question.get('deviceId'),
+            preference = preference,
             app_id = messaging_question.get('appId'),
             locale = messaging_question.get('locale'),
             route = messaging_question.get('route'),
