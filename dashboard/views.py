@@ -4,7 +4,6 @@ from http import HTTPStatus
 from operator import itemgetter
 import random
 from typing import Dict, List
-import requests
 from django.urls import reverse
 
 from django.contrib import messages
@@ -21,6 +20,8 @@ from common.reports import get_start_date, get_SWS_report
 from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
 from common.helpers import HELPERS, HelpersParameters
 from dashboard.models import Route
+
+
 
 from .forms import (
     FACTORIES,
@@ -391,30 +392,14 @@ def notifications(request):
             'total_notifications': total_notifications
         })
 
-
-def summerberry_dummy_data(request):
-    faker = Faker()
-    induction_statuses = ['Completed', 'Incomplete', 'Not_started']
-    worker_directive_statuses = ['Yes', 'No', 'Unknown']
-    data = []
-    for i in range(20):
-        data.append({
-            'name': faker.name(),
-            'number': faker.random_number(digits=6),
-            'start_date': faker.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d'),
-            'reg_date': faker.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d'),
-            'completed_registration': faker.boolean(),
-            'completed_induction': random.choice(induction_statuses),
-            'signed_contract': faker.boolean(),
-            'worker_directive_signed': random.choice(worker_directive_statuses),
-            'hygiene_signed': faker.boolean(),
-            'medical_signed': faker.boolean(),
-        })
-    return  JsonResponse(data, status=200, safe=False)
-
-
 def summerberry_dashboard(request):
-    url = request.build_absolute_uri(reverse('dashboard:summerberry-sample'))
-    data = requests.get(url).json()
-    context = { 'data': data}
+    with open('summerberry_data.json') as json_file:
+        data = json.load(json_file)
+
+    context = { 'data': data['portal']}
+    print(context['data'][0])
     return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
+
+
+
+

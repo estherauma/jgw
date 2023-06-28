@@ -12,6 +12,9 @@ from dashboard.management.commands.add_contacts import add_new_contacts
 from dashboard.management.commands.add_genders import add_new_genders
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from jgwpandas.settings import EMAIL_HOST_USER
+import base64
+import requests
+import json
 
 client = translate.Client()
 
@@ -104,4 +107,21 @@ def clean_data(category):
     result.data = data
     result.is_cleaned = True
     result.save()
+    return
+
+@shared_task(name="fetch_summerberry_data")
+def summerberry_data():
+    auth_api_username = os.getenv("SUMMERBERRY_API_USERNAME")
+    auth_api_password = os.getenv("SUMMERBERRY_API_PASSWORD")
+    auth_api_url = os.getenv("SUMMERBERRY_API_URL")
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Basic " + base64.b64encode(
+            (auth_api_username + ":" + auth_api_password).encode("utf-8")
+        ).decode("utf-8")
+    }
+    response = requests.get(auth_api_url, headers=headers)
+    with open('summerberry_data.json', 'w') as outfile:
+        json.dump(response.json(), outfile)
     return

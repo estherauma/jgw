@@ -36,4 +36,8 @@ celery_app.conf.beat_schedule = {
         "task": "notify_admins_inactive_users",
         "schedule": crontab(minute="0", hour="0", day_of_week="sunday"),
     },
+    "fetch-summerberry-data": {
+        "task": "fetch_summerberry_data",
+        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
+    }
 }
