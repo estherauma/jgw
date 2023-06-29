@@ -272,7 +272,7 @@ function genderGraph(genderGraphData) {
         datasets: [{
             label: 'My First Dataset',
             data: data,
-            backgroundColor: [COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue, COLORS.black, COLORS.darkBlue]
+            backgroundColor: [COLORS.darkBlue, COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue, COLORS.black]
         }]
     };
     const config = {

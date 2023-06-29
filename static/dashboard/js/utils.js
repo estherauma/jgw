@@ -144,3 +144,7 @@ const shuffleArray = array => {
       .sort(([a], [b]) => a - b)
       .map(([, i]) => array[i])
 }
+
+function stopScrollPropagation(event) {
+  event.stopPropagation();
+}
