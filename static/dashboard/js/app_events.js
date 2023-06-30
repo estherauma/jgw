@@ -39,13 +39,6 @@ function plotChat(key, labels, values) {
             fontSize: 12,
           },
           grid: {
-            color: COLORS.lightGray,
-            borderDash: [2],
-            drawBorder: false,
-            borderWidth: 0,
-            borderDash: [],
-            borderDashOffset: 0,
-            drawTicks: true,
             display: false,
           },
           autoSkip: false,
