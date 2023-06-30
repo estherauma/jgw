@@ -24,6 +24,4 @@ const genericBarGraphDatasetConfig = {
     borderRadius: 2,
     borderColor: "#eaeaea",
     borderSkipped: false,
-    barThickness: 18,
-    barPercentage: 0.8,
 }
