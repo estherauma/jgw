@@ -216,6 +216,7 @@ class JGWApi:
             "men": "male",
             "male gender": "male",
             "woman": "female",
+            "a woman": "female",
             "women": "female",
             "feminine": "female",
             "better not answer": "prefer not to answer",

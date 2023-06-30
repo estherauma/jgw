@@ -14,12 +14,14 @@ const COLORS = {
     appleGreen: '#9dbe3b',
     skyBlue: '#37c1e3',
     navyBlue: '#193560',
+
+    black: '000000',
+    pink: '#FFC0CB'
 }
 
 const genericBarGraphDatasetConfig = {
-    borderWidth: 0,
-    borderRadius: 20,
+    borderWidth: 1,
+    borderRadius: 2,
+    borderColor: "#eaeaea",
     borderSkipped: false,
-    barThickness: 18,
-    barPercentage: 0.8,
 }

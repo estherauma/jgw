@@ -217,19 +217,72 @@ function plotCharts(chartData) {
                 languageChart(chartData['language'])
             }
 
-
-            if (chartDataKey === "question") {
-                genericBarChart(chartDataKey, chartData['question'])
+            if (chartDataKey === "questions_and_answers") {
+                questionsAndAnswers(chartData['questions_and_answers'])
             }
         })
     }
 }
 
+function questionsAndAnswers(chartData) {
+    const data = chartData['data'];
+    const labels = chartData['labels'];
+
+    const yesArray = data.map(obj => obj.yes);
+    const noArray = data.map(obj => obj.no);
+
+    const config = {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Yes",
+              data: yesArray,
+              backgroundColor: COLORS.navyBlue,
+            },
+            {
+              label: "No",
+              data: noArray,
+              backgroundColor: COLORS.appleGreen,
+            },
+          ],
+        },
+        options: {
+        indexAxis: 'y',
+          plugins: {},
+          responsive: true,
+          scales: {
+            x: {
+              stacked: true,
+              grid: {
+                display: false,
+              },
+            },
+            y: {
+              stacked: true,
+              grid: {
+                display: false,
+              },
+            },
+          },
+          maintainAspectRatio: false,
+          responsive: true,
+        },
+        plugins: {
+            scrollbar: {
+                enabled: true
+            }
+        }
+      };
+      
+    scrollableVerticalBarChart('question_graphcard', data, config)
+}
 
 function organisationChart(organisationData) {
     const data = organisationData["data"]
     const organisationCleanedLabels = organisationData["labels"].map(org => { 
-        return org.replace("Seasonal Worker Scheme - ", "").replace("Seasonal  Worker Scheme - ", "")
+        return org.replace("SEASONAL WORKER SCHEME - ", "").replace("SEASONAL  WORKER SCHEME - ", "")
     })
     const organisationChartData = {
         labels: organisationCleanedLabels,
@@ -265,20 +318,14 @@ function languageChart(langaugeData) {
     const labels = langaugeData["labels"]
     
 
-    var ctx = document.getElementById('language_graphcard').getContext('2d');
     const languageChartConfig = {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Number of Users',
+                label: 'RESPONSES',
                 data: data,
                 backgroundColor: COLORS.navyBlue,
-                borderWidth: 0,
-                borderRadius: 20,
-                borderSkipped: false,
-                barThickness: 18,
-                barPercentage: 0.8
             }]
         },
         options: {
@@ -288,16 +335,8 @@ function languageChart(langaugeData) {
                     beginAtZero: true,
                     ticks: {
                         display: true,
-                        fontColor: 'red',
-                        fontSize: 12
                     },
                     grid: {
-                        color: COLORS.lightGray,
-                        borderDash: [2],
-                        drawBorder: false,
-                        borderWidth: 0,
-                        borderDash: [],
-                        borderDashOffset: 0,
                         drawTicks: true,
                         display: false
                     },
@@ -317,14 +356,20 @@ function languageChart(langaugeData) {
                     }
                 },
             },
-            plugins: {
-                legend: {
-                    display: false
-                }
+            maintainAspectRatio: false,
+            responsive: true,
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            scrollbar: {
+                enabled: true
             }
         }
     }
-    drawChart('language_graphcard', data, languageChartConfig)
+
+    scrollableVerticalBarChart('language_graphcard', data, languageChartConfig)
 }
 
 function originChart(originChartData) {
@@ -336,32 +381,17 @@ function originChart(originChartData) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Responses',
+                label: 'RESPONSES',
                 data: data,
                 backgroundColor: COLORS.skyBlue,
-                borderWidth: 0,
-                borderRadius: 20,
-                borderSkipped: false,
-                barThickness: 18,
-                barPercentage: 0.8
             }]
         },
         options: {
+            indexAxis: 'y',
             scales: {
                 x: {
                     beginAtZero: true,
-                    ticks: {
-                        display: true,
-                        fontColor: 'red',
-                        fontSize: 12
-                    },
                     grid: {
-                        color: COLORS.lightGray,
-                        borderDash: [2],
-                        drawBorder: false,
-                        borderWidth: 0,
-                        borderDash: [],
-                        borderDashOffset: 0,
                         drawTicks: true,
                         display: false
                     },
@@ -381,14 +411,19 @@ function originChart(originChartData) {
                     }
                 },
             },
-            plugins: {
-                legend: {
-                    display: false
-                }
+            maintainAspectRatio: false,
+            responsive: true,
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            scrollbar: {
+                enabled: true
             }
         }
     }
-    drawChart('destination_graphcard', data, originChartConfig)
+    scrollableVerticalBarChart('destination_graphcard', data, originChartConfig)
 }
 
 function destinationChart(destinationData) {

@@ -74,7 +74,8 @@ class AppEvents(BaseAnalytics):
         chapter_feedback_df = chapter_feedback_df.fillna("")
         
         if not chapter_feedback_df.empty:
-            chapter_feedback_df = chapter_feedback_df[new_column_names.values()]
+            columns_in_new_column_names_and_chapter_feedback_df = [col for col in new_column_names.values() if col in chapter_feedback_df.columns]
+            chapter_feedback_df = chapter_feedback_df[columns_in_new_column_names_and_chapter_feedback_df]
             
         return chapter_feedback_df
     

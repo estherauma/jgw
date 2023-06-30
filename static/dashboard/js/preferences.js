@@ -113,7 +113,6 @@ function autosubmit() {
 function filterData() {
     const url = filter_form.attributes.getNamedItem("submit-url").value;
     const formData = new FormData(filter_form);
-    console.log("filter_form::", filter_form)
     let chartData = {};
     toggleElementDisplay(false, '#chart-area')
     toggleElementDisplay(false, '#no-results')
@@ -209,7 +208,7 @@ function ageGraph(ageGraphData) {
         data: {
             labels: ageGraphData["labels"],
             datasets: [{
-                label: 'Number of Users',
+                label: 'NUMBER OF USERS',
                 data: data,
                 backgroundColor: '#37C1E3',
                 borderWidth: 0,
@@ -273,8 +272,7 @@ function genderGraph(genderGraphData) {
         datasets: [{
             label: 'My First Dataset',
             data: data,
-            backgroundColor: [COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue,
-            ]
+            backgroundColor: [COLORS.darkBlue, COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue, COLORS.black]
         }]
     };
     const config = {
@@ -302,7 +300,7 @@ function organisationGraph(organisationGraphData) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Number of Users',
+                label: 'NUMBER OF USERS',
                 data: data,
                 backgroundColor: COLORS.appleGreen,
                 borderWidth: 0,
@@ -338,7 +336,7 @@ function organisationGraph(organisationGraphData) {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Number of users'
+                        text: 'NUMBER OF USERS'
                     },
                     ticks: {
                         display: true,

@@ -69,9 +69,9 @@
                     <div class="col-md-8 mb-3">
                         <div class="card h-100">
                             <div class="card-body">
-                                <div class="origin-chart-box">
-                                    <p class="chart-title">Language</p>
-                                    <canvas id="language_graphcard"></canvas>
+                                <p class="chart-title">Language</p>
+                                <div class="language_graphcard-chart-box">
+                                    <div id="language_graphcard"></div>
                                 </div>
                             </div>
                         </div>
@@ -82,9 +82,9 @@
             <div class="col-md-8 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <div class="origin-chart-box">
-                            <p class="chart-title">Origin</p>
-                            <canvas id="destination_graphcard"></canvas>
+                        <p class="chart-title">Origin</p>
+                        <div class="destination_graphcard-chart-box">
+                            <div id="destination_graphcard"></div>
                         </div>
                     </div>
                 </div>
@@ -92,13 +92,15 @@
             <div class="col-md-4 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <p class="chart-title">Destination</p>
-                        <table class="table" id="origin-table">
-                            <thead>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+                        <p class="chart-title">RESPONSES PER Destination</p>
+                        <div class="scrollable-table-container" onscroll="stopScrollPropagation(event)">
+                            <table class="table" id="origin-table">
+                                <thead>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,8 +108,8 @@
             <div class="col-md-12 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <div class="question-chart-box">
-                            <p class="chart-title">Questions</p>
+                        <p class="chart-title">Questions</p>
+                        <div class="question_graphcard-chart-box">
                             <div id="question_graphcard"></div>
                         </div>
                     </div>
