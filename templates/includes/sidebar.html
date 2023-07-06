@@ -11,7 +11,7 @@
                     <li>
                         <a href="{% url 'dashboard:preferences' %}">
                             <i data-feather="bar-chart-2"></i>
-                            <span> Preferences </span>
+                            <span> Users Overview </span>
                         </a>
                     </li>
 
@@ -32,14 +32,21 @@
                     <li >
                         <a href="{% url 'dashboard:app_events' %}">
                             <i data-feather="activity"></i>
-                            <span>App Events</span>
+                            <span>What Matters to Workers</span>
                         </a>
                     </li>
 
+                    <li >
+                        <a href="{% url 'dashboard:export_report' %}"> 
+                            <i data-feather="external-link"></i>
+                            <span>Export Report</span> 
+                        </a>
+                    </li>
+                    {% if user.is_staff %}
                     <li>
                         <a href="#sidebarUsers" data-bs-toggle="collapse">
                             <i data-feather="users"></i>
-                            <span>Users</span>
+                            <span>Settings</span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebarUsers">
@@ -53,13 +60,7 @@
                             </ul>
                         </div>
                     </li>
-
-                    <li >
-                        <a href="{% url 'dashboard:export_report' %}"> 
-                            <i data-feather="external-link"></i>
-                            <span>Export Report</span> 
-                        </a>
-                    </li>
+                    {% endif %}     
                     <li >
                         <a href="{% url 'users:logout_user' %}"> 
                             <i data-feather="log-out"></i>

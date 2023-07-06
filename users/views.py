@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
+from common.utils.auth import admin_required
 
 import jwt
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -25,12 +26,14 @@ from .models import User, UserInvitations
 
 
 @login_required
+@admin_required
 def list_users(request):
     users = User.objects.all()
     return render(request, "users/list_users.html", context={"users": users})
 
 
 @login_required
+@admin_required
 def list_invitations(request):
     invitations = UserInvitations.objects.all()
     return render(request, template_name="users/list_invitations.html", context={"invitations": invitations})
@@ -87,9 +90,10 @@ def manage_account(request, id):
 
 
 @login_required
+@admin_required
 def activate_account(request, id):
     user = User.objects.get(id=id)
-    subject = "Your account at JGWPandas."
+    subject = "Your account at JGW Data Dashboard."
     deactivation_message = (
         f"Hello\n, Your account at JGW Pandas has been deactivated.\n"
         f"\nPlease reach out to the administrator if this action was not initiated by you."
@@ -135,6 +139,7 @@ def generate_token(payload_data=None, days_to_expiry=1):
 
 
 @login_required
+@admin_required
 def invite_user(request):
     form = InviteUserForm()
     if request.method == "POST":
