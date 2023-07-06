@@ -19,13 +19,16 @@ class AuthTests(TestCase):
         self.test_pword = "12t32thome"
         self.test_scheme = Scheme.objects.create(name="Test_Scheme")
         self.test_user = User.objects.create_user(
-            email=self.test_email, password=self.test_pword, is_active=True, scheme=self.test_scheme
+            email=self.test_email, password=self.test_pword, is_active=True, scheme=self.test_scheme, is_staff=True
         )
         self.client.login(email=self.test_user, password=self.test_pword)
         self.factory = Factory.objects.create(name="Test_Factory")
         expiry = datetime.now(tz=timezone.utc) + timedelta(days=1)
         self.pword_reset_token = jwt.encode(
             payload={"exp": expiry, "user_id": self.test_user.id}, key=settings.SECRET_KEY
+        )
+        self.test_user_2 = User.objects.create_user(
+            email="test2@test.com", password=self.test_pword, is_active=True, scheme=self.test_scheme, 
         )
 
     def test_authorisation(self):
@@ -169,8 +172,17 @@ class AuthTests(TestCase):
         response = self.client.get(reverse("users:list_users"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/list_users.html")
-        self.assertEqual(len(response.context["users"]), 1)
+        self.assertEqual(len(response.context["users"]), 2)
         self.assertEqual(response.context["users"][0], self.test_user)
+
+    def test_list_users_view_non_admin(self):
+        self.client.logout()
+        self.client.login(email=self.test_user_2, password=self.test_pword)
+
+        response = self.client.get(reverse("users:list_users"))
+        print(response)
+        self.assertEqual(response.status_code, 403)
+ 
 
     def test_verify_invite_view_OK(self):
         invite_data = {
