@@ -93,7 +93,7 @@ def manage_account(request, id):
 @admin_required
 def activate_account(request, id):
     user = User.objects.get(id=id)
-    subject = "Your account at JGWPandas."
+    subject = "Your account at JGW Data Dashboard."
     deactivation_message = (
         f"Hello\n, Your account at JGW Pandas has been deactivated.\n"
         f"\nPlease reach out to the administrator if this action was not initiated by you."
