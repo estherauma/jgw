@@ -166,7 +166,7 @@ class JGWApi:
         return df
 
     def normalise_age_bands(self, df):
-        groups = ["11-20", "21-30", "31-40", "41-50", "51-60", "61-70"]
+        groups = ["15-17","18-20" ,"21-30", "31-40", "41-50", "51-60", "60+"]
 
         def range_str_to_int(arg):
             _ = ["Prefer not to answer", "prefer not to answer"]
