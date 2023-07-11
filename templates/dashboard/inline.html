@@ -9,7 +9,7 @@
 <!-- page content -->
 {% block content %}
 
-{% include 'includes/dashboard_banner.html' with title="Responses" counter_id="response-count" export_buttons_config=inline_questions_export_buttons_config %}
+{% include 'includes/dashboard_banner.html' with title="TOTAL QUESTION RESPONSES" counter_id="response-count" export_buttons_config=inline_questions_export_buttons_config %}
 
 <div class="col-md-12">
     <!-- Modal -->
@@ -69,7 +69,7 @@
                     <div class="col-md-8 mb-3">
                         <div class="card h-100">
                             <div class="card-body">
-                                <p class="chart-title">Language</p>
+                                <p class="chart-title">SELECTED USER LANGUAGE</p>
                                 <div class="language_graphcard-chart-box">
                                     <div id="language_graphcard"></div>
                                 </div>
@@ -82,7 +82,7 @@
             <div class="col-md-8 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <p class="chart-title">Origin</p>
+                        <p class="chart-title">Origin Country</p>
                         <div class="destination_graphcard-chart-box">
                             <div id="destination_graphcard"></div>
                         </div>
@@ -92,7 +92,7 @@
             <div class="col-md-4 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <p class="chart-title">RESPONSES PER Destination</p>
+                        <p class="chart-title">Responses per Origin Country</p>
                         <div class="scrollable-table-container" onscroll="stopScrollPropagation(event)">
                             <table class="table" id="origin-table">
                                 <thead>
@@ -108,7 +108,7 @@
             <div class="col-md-12 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <p class="chart-title">Questions</p>
+                        <p class="chart-title">In-line Question Responses</p>
                         <div class="question_graphcard-chart-box">
                             <div id="question_graphcard"></div>
                         </div>
