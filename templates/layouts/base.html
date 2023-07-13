@@ -125,8 +125,8 @@
             $('#time_range').daterangepicker({
                 startDate: start,
                 endDate: end,
-                //maxDate: moment(),
-                //minDate: moment().subtract(90, 'days'),
+                maxDate: moment(),
+                minDate: moment().subtract(90, 'days'),
                 ranges: {
                    'Today': [moment(), moment()],
                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
