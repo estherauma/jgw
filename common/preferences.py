@@ -37,8 +37,6 @@ class Preferences(BaseAnalytics):
         
         _df = clean_df(self.get_df(filters))
         
-        save_as_excel(_df, file_name="all_preferences")
-        
         # normalize some gender 
         if _df.empty:
             return {}
