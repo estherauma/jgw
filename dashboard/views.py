@@ -46,11 +46,17 @@ OPERATORS = {
 TODAY = datetime.today().strftime("%Y-%m-%d")
 
 
-def form_chart_data(data: Dict) -> Dict:
+def form_chart_data(data: Dict,helper=None) -> Dict:
     try:
-        return {i: {"labels": list(data[i].keys()), "data": list(data[i].values())} for i in data.keys()}
+        chart_data =  {} 
+        for key, value in data.items():
+            if key == 'age':
+                chart_data[key] = helper.age_groups_chart_data(value)
+            else:
+                chart_data[key] = {'labels': list(value.keys()), 'data': list(value.values())}
+
+        return chart_data
     except Exception as e:
-        # print(data)
         print(f"An error occurred: {str(e)}")
         return {i: {"labels": [], "data": []} for i in data.keys()}
 
@@ -131,7 +137,7 @@ def filter_data(request, category):
             response_count, raw_chart_data = itemgetter("response_count", "data")(data)
             chart_data = form_chart_data(raw_chart_data)
             return JsonResponse({"chart_data": chart_data, "response_count": response_count, "filter_state": list_of_filters })
-        chart_data = form_chart_data(data)
+        chart_data = form_chart_data(data,helper)
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     
