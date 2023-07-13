@@ -103,7 +103,6 @@ def clean_data(category):
     result = JGWCache.objects.filter(category=category, date_created=datetime.today().date()).first()
     df = pd.read_json(result.data, orient="records")
     df = api_helper.clean_data(df)
-    print("clean_data df ---> ::", df)
     if df is not None:
         data = df.to_json(orient="records")
         result.data = data

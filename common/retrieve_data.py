@@ -148,34 +148,16 @@ class JGWApi:
         if df is None:
             return df
         
-        df = self.sectorsOfWorkBefore(df)
         df = self.normalise_questions_and_responses(df)
         df = self.standardise_language_names(df)
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
         df = self.normalise_age_bands(df)
         df = self.standardise_locations(df)
-        df = self.sectorsOfWorkAfter(df)
         
-        return df
-    
-    def sectorsOfWorkBefore(self, df):
-        if "sectorsOfWork" in df.columns:
-            print("sectorsOfWorkBefore--->",df["sectorsOfWork"].value_counts())
-        return df
-    
-    def sectorsOfWorkAfter(self, df):
-        if df is None:
-            return df
-        
-        if "sectorsOfWork" in df.columns:
-            print("sectorsOfWorkAfter--->",df["sectorsOfWork"].value_counts())
         return df
 
-    def standardise_language_names(self, df):
-        if df is None:
-            return df
-        
+    def standardise_language_names(self, df):        
         def get_language_name(entry):
             try:
                 code = Language.get(entry).language_name()
@@ -194,8 +176,6 @@ class JGWApi:
         return df
 
     def normalise_age_bands(self, df):
-        if df is None:
-            return df
         
         groups = ["11-20", "21-30", "31-40", "41-50", "51-60", "61-70"]
 
@@ -241,10 +221,7 @@ class JGWApi:
             df["age"] = df["age"].apply(doer)
         return df
 
-    def clean_gender_data(self, df):
-        if df is None:
-            return df
-        
+    def clean_gender_data(self, df):        
         patterns_to_replace = {
             "man": "male",
             "men": "male",
@@ -278,8 +255,6 @@ class JGWApi:
 
     def standardise_locations(self, df):
         """Replace country name with ISO-3166-1-alpha-3 code."""
-        if df is None:
-            return df
 
         def get_origin_country(i):
             if isinstance(i, str):
@@ -326,9 +301,6 @@ class JGWApi:
 
     def normalise_questions_and_responses(self, df):
         
-        if df is None:
-            return df
-        
         def cast_to_native(value):
             if "[{" in value or "[" in value:
                 return ast.literal_eval(value)
@@ -359,9 +331,7 @@ class JGWApi:
 
     def standardise_lang_to_eng(self, df):
         """Translate text values to English."""
-        if df is None:
-            return df
-
+        
         def translate_question(id, text):
             query = TranslatedQuestionText.objects.filter(prismic_id=id).first()
             if query:
@@ -382,17 +352,20 @@ class JGWApi:
             return text
 
         def translate_field_or_mark(column):
-            column = column.str.strip()
+
+            stripped_column_values = column.apply(lambda x: x.strip() if isinstance(x, str) else x)
+             
             merge_dicts = lambda x: reduce(lambda a, b: {**a, **b}, x)
-            TranslatedModel = TranslatedResponseText if column.name == "questionResponse" else TranslatedText
+            TranslatedModel = TranslatedResponseText if stripped_column_values.name == "questionResponse" else TranslatedText
             queryset = TranslatedModel.objects.filter(translation__isnull=False).values("original_text", "translation")
 
-            column = column.str.strip().str.lower()
+            column_to_lowercase = stripped_column_values.apply(lambda x: x.lower() if isinstance(x, str) else x)
+
             if queryset:
                 result_list = [{i["original_text"].lower(): i["translation"].lower()} for i in list(queryset)]
                 result_list = merge_dicts(result_list)
-                column = column.replace(result_list)
-            return column
+                translated_column_mapped = column_to_lowercase.replace(result_list)
+            return translated_column_mapped
 
         def translate_list_field(column):
             def _do_translate_listfield(text_list, field):
@@ -408,13 +381,14 @@ class JGWApi:
                 return text_list
 
             column = column.apply(lambda x: _do_translate_listfield(text_list=x, field=column.name))
+            
             return column
 
         question_cols = [i for i in df.columns if i not in exclude_cols]
         scalar_cols = [
             i for i in df.columns if i in ["age", "gender", "phoneNumber", "language", *question_cols]
         ]
-        list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "questionResponse"]]
+        list_cols = [i for i in df.columns if i in ["hearAboutUs", "sectorOfWork", "sectorsOfWork", "questionResponse"]]
         df = df.fillna("")
         if "questionText" in df.columns:
             df["questionText"] = df.apply(
@@ -427,7 +401,7 @@ class JGWApi:
         columns_to_replace = [i for i in df.columns if i in question_cols]
         patterns_to_replace = {"not": "no", "it is": "yes", "are not": "no", "have": "yes"}
         if columns_to_replace:
-            df[columns_to_replace] = df[columns_to_replace].apply(lambda x: x.str.lower())
+            df[columns_to_replace] = df[columns_to_replace].apply(lambda x: x.str.lower() if isinstance(x, str) else x)
             df[columns_to_replace] = df[columns_to_replace].replace(patterns_to_replace)
 
         return df
