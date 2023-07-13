@@ -109,3 +109,15 @@ class Preferences(BaseAnalytics):
         preference_df = clean_df(self.get_df())
         series = preference_df[column].str.strip()
         return series.unique()
+    
+    def age_groups_chart_data(self, data):
+        prefer_not_to_answer = data['PREFER NOT TO ANSWER']
+        del data['PREFER NOT TO ANSWER']
+        sorted_items = sorted(data.items(), reverse=True)
+        labels, data = zip(*sorted_items)
+        labels = list(labels)
+        data = list(data)
+        if prefer_not_to_answer:
+            labels.append('PREFER NOT TO ANSWER')
+            data.append(prefer_not_to_answer)
+        return {'labels': labels, 'data': data}
