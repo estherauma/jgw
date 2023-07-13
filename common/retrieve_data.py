@@ -81,7 +81,13 @@ class JGWApi:
             clean = result.is_cleaned
             data = json.loads(result.data)
         else:
-            url = f"{self.base_url}{URLS.get(key)}"
+
+            # url = f"{self.base_url}{URLS.get(key)}"
+            
+            startDate = "2023-07-01"
+            endDate = "2023-07-12"
+            url = f"{self.base_url}{URLS.get(key)}?startDate={startDate}&endDate={endDate}"
+            
             response = self._get(url, {})
             if response and response.status_code == requests.codes.ok:
                 result = response.json()
@@ -139,15 +145,37 @@ class JGWApi:
         return data, True
 
     def clean_data(self, df):
+        if df is None:
+            return df
+        
+        df = self.sectorsOfWorkBefore(df)
         df = self.normalise_questions_and_responses(df)
         df = self.standardise_language_names(df)
         df = self.standardise_lang_to_eng(df)
         df = self.clean_gender_data(df)
         df = self.normalise_age_bands(df)
         df = self.standardise_locations(df)
+        df = self.sectorsOfWorkAfter(df)
+        
+        return df
+    
+    def sectorsOfWorkBefore(self, df):
+        if "sectorsOfWork" in df.columns:
+            print("sectorsOfWorkBefore--->",df["sectorsOfWork"].value_counts())
+        return df
+    
+    def sectorsOfWorkAfter(self, df):
+        if df is None:
+            return df
+        
+        if "sectorsOfWork" in df.columns:
+            print("sectorsOfWorkAfter--->",df["sectorsOfWork"].value_counts())
         return df
 
     def standardise_language_names(self, df):
+        if df is None:
+            return df
+        
         def get_language_name(entry):
             try:
                 code = Language.get(entry).language_name()
@@ -166,6 +194,9 @@ class JGWApi:
         return df
 
     def normalise_age_bands(self, df):
+        if df is None:
+            return df
+        
         groups = ["11-20", "21-30", "31-40", "41-50", "51-60", "61-70"]
 
         def range_str_to_int(arg):
@@ -211,6 +242,9 @@ class JGWApi:
         return df
 
     def clean_gender_data(self, df):
+        if df is None:
+            return df
+        
         patterns_to_replace = {
             "man": "male",
             "men": "male",
@@ -244,6 +278,8 @@ class JGWApi:
 
     def standardise_locations(self, df):
         """Replace country name with ISO-3166-1-alpha-3 code."""
+        if df is None:
+            return df
 
         def get_origin_country(i):
             if isinstance(i, str):
@@ -289,6 +325,10 @@ class JGWApi:
         return df
 
     def normalise_questions_and_responses(self, df):
+        
+        if df is None:
+            return df
+        
         def cast_to_native(value):
             if "[{" in value or "[" in value:
                 return ast.literal_eval(value)
@@ -319,6 +359,8 @@ class JGWApi:
 
     def standardise_lang_to_eng(self, df):
         """Translate text values to English."""
+        if df is None:
+            return df
 
         def translate_question(id, text):
             query = TranslatedQuestionText.objects.filter(prismic_id=id).first()
