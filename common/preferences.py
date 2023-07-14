@@ -7,6 +7,7 @@ from common.app_events import AppEvents
 from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
 from common.utils.dictionary_utils import convert_nested_dictionary_keys_to_uppercase
+from common.utils.helpers import save_as_excel
 
 api = JGWApi()
 QueryMap = Dict[str, list[str]]
@@ -35,6 +36,7 @@ class Preferences(BaseAnalytics):
         return_fields = fields or ["age", "language", "gender", "organisation"]
         
         _df = clean_df(self.get_df(filters))
+        
         # normalize some gender 
         if _df.empty:
             return {}
