@@ -11,6 +11,7 @@ from django.db.models import Q
 import requests
 from langcodes import Language, LanguageTagError
 from pytz import country_names
+from common.custom_libs.pandas.pycountry import country_name_from_aplha_code
 
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 
@@ -262,12 +263,12 @@ class JGWApi:
 
         def get_origin_country(i):
             if isinstance(i, str):
-                return i.split(" -> ")[0]
+                 return country_name_from_aplha_code(i.split(" -> ")[0])
             return None
 
         def get_dest_country(i):
             if isinstance(i, str) and i:
-                return i.split(" -> ")[1]
+                return country_name_from_aplha_code(i.split(" -> ")[1])
             return None
 
         country_from_route = {
