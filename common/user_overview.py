@@ -11,14 +11,5 @@ def get_user_overview_data(filters):
         dictionary = preferences.compute_stats(filters=filters),
         prefix = "preference"
     )
-    inline_question_overview_stats = add_prefix_to_dictionary_keys(
-        dictionary = inline.overview_stats(filters=filters),
-        prefix = "inline_question"
-    )
     
-    user_overview_dictionary = combine_dictionaries(
-        preferences_question_overview_stats,
-        inline_question_overview_stats
-    )
-    
-    return user_overview_dictionary
+    return preferences_question_overview_stats

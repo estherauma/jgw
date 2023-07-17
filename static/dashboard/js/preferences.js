@@ -195,17 +195,17 @@ function plotCharts(chartData) {
             organisationGraph(chartData['preference_organisation'])
         }
 
-        if (chartDataKey === "inline_question_language") {
-            inlineQuestionLanguageChart(chartData['inline_question_language'])
-        }
+        // if (chartDataKey === "preference_language") {
+        //     preferenceLanguageChart(chartData['inline_question_language'])
+        // }
 
-        if (chartDataKey === "inline_question_origin") {
-            inlineQuestionOriginChart(chartData['inline_question_origin'])
-        }
+        // if (chartDataKey === "preference_origin") {
+        //     preferenceOriginChart(chartData['inline_question_origin'])
+        // }
 
-        if (chartDataKey === "inline_question_destination") {
-            inlineQestionDestinationTable(chartData['inline_question_destination'])
-        }
+        // if (chartDataKey === "preference_destination") {
+        //     preferenceDestinationChart(chartData['inline_question_destination'])
+        // }
         
     })
 }

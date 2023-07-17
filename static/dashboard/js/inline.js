@@ -205,6 +205,18 @@ function plotCharts(chartData) {
                 organisationChart(chartData['organisation'])
             }
 
+            if (chartDataKey === "destination") {
+                destinationChart(chartData['destination'])
+            }
+
+            if (chartDataKey === "origin") {
+                originChart(chartData['origin'])
+            }
+
+            if (chartDataKey === "language") {
+                languageChart(chartData['language'])
+            }
+
             if (chartDataKey === "questions_and_answers") {
                 questionsAndAnswers(chartData['questions_and_answers'])
             }
@@ -299,6 +311,149 @@ function organisationChart(organisationData) {
       };
 
     drawChart('organisation_graph', data, organisationChartConfig)
+}
+
+function languageChart(langaugeData) {
+    const data = langaugeData["data"]
+    const labels = langaugeData["labels"]
+    
+
+    const languageChartConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'RESPONSES',
+                data: data,
+                backgroundColor: COLORS.navyBlue,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                    },
+                    grid: {
+                        drawTicks: true,
+                        display: false
+                    },
+                    autoSkip: false,
+                    maxTicksLimit: 5
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: COLORS.navyBlue,
+                        fontSize: 12
+                    },
+                    grid: {
+                        drawBorder: false,
+                        display: false
+                    }
+                },
+            },
+            maintainAspectRatio: false,
+            responsive: true,
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            scrollbar: {
+                enabled: true
+            }
+        }
+    }
+
+    scrollableVerticalBarChart('language_graphcard', data, languageChartConfig)
+}
+
+function originChart(originChartData) {
+    const data = originChartData["data"]
+    const labels = originChartData["labels"]
+    
+    const originChartConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'RESPONSES',
+                data: data,
+                backgroundColor: COLORS.skyBlue,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        drawTicks: true,
+                        display: false
+                    },
+                    autoSkip: false,
+                    maxTicksLimit: 5
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,
+                        fontColor: COLORS.navyBlue,
+                        fontSize: 12
+                    },
+                    grid: {
+                        drawBorder: false,
+                        display: false
+                    }
+                },
+            },
+            maintainAspectRatio: false,
+            responsive: true,
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            scrollbar: {
+                enabled: true
+            }
+        }
+    }
+    scrollableVerticalBarChart('destination_graphcard', data, originChartConfig)
+}
+
+function destinationChart(destinationData) {
+
+
+    const data = destinationData["data"]
+    const labels = destinationData["labels"]
+    var tableHead = $('#origin-table thead');
+    tableHead.empty()
+
+    var headerRow = $('<tr></tr>');
+    headerRow.append($('<th></th>').text('Origin'));
+    headerRow.append($('<th></th>').text('Responses'));
+    tableHead.append(headerRow);
+
+    var tableBody = $('#origin-table tbody');
+    tableBody.empty()
+
+    if (data.length === 0) {
+        const tableRow = $('<tr></tr>');
+        tableRow.append($('<td></td>').text('No data available').attr('colspan', '2').css('text-align', 'center'));
+        tableBody.append(tableRow);
+    } else {
+        $.each(labels, function (index, label) {
+            var tableRow = $('<tr></tr>');
+            tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${label}</div></td>`));
+            tableRow.append($(`<td><div class="py-2 d-flex justify-contents-center" style="color: ${COLORS.navyBlue}">${data[index]}</div></td>`));
+            tableBody.append(tableRow);
+        });
+    }
 }
 
 export_button.addEventListener('click', () => exportToExcel(export_url));
