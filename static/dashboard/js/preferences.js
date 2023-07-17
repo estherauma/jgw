@@ -182,22 +182,31 @@ function exportToExcel(url) {
 function plotCharts(chartData) {
     clearCharts()
     let chartDataKeys = Object.keys(chartData)
-    chartDataKeys.map(chartDataKeys => {
-        if (chartDataKeys === "age") {
-            ageGraph(chartData['age'])
+    chartDataKeys.map(chartDataKey => {
+        if (chartDataKey === "preference_age") {
+            ageGraph(chartData['preference_age'])
         }
 
-        if (chartDataKeys === "gender") {
-            genderGraph(chartData['gender'])
+        if (chartDataKey === "preference_gender") {
+            genderGraph(chartData['preference_gender'])
         }
 
-        if (chartDataKeys === "organisation") {
-            organisationGraph(chartData['organisation'])
+        if (chartDataKey === "preference_organisation") {
+            organisationGraph(chartData['preference_organisation'])
         }
 
-        if (chartDataKeys === "new_and_returning_users") {
-            newUsersAndReturningUsersChart(chartData['new_and_returning_users'])
+        if (chartDataKey === "inline_question_language") {
+            inlineQuestionLanguageChart(chartData['inline_question_language'])
         }
+
+        if (chartDataKey === "inline_question_origin") {
+            inlineQuestionOriginChart(chartData['inline_question_origin'])
+        }
+
+        if (chartDataKey === "inline_question_destination") {
+            inlineQestionDestinationTable(chartData['inline_question_destination'])
+        }
+        
     })
 }
 
