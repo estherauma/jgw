@@ -316,8 +316,6 @@ function organisationChart(organisationData) {
 function languageChart(langaugeData) {
     const data = langaugeData["data"]
     const labels = langaugeData["labels"]
-
-    console.log(langaugeData)
     
 
     const languageChartConfig = {
