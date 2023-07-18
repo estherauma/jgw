@@ -1,13 +1,14 @@
 function preferenceOriginChart(preferenceDestinationData) {
-    const labels = preferenceDestinationData["labels"]
     const data = preferenceDestinationData["data"]
+    const labels = preferenceDestinationData["labels"]
+    
 
     const originChartConfig = {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'PREFERENCES',
+                label: 'RESPONSES',
                 data: data,
                 backgroundColor: COLORS.navyBlue,
             }]
@@ -53,5 +54,5 @@ function preferenceOriginChart(preferenceDestinationData) {
         }
     }
 
-    scrollableVerticalBarChart('preference_origin', data, originChartConfig);
+    scrollableVerticalBarChart('preference_origin_graphcard', data, originChartConfig);
 }
