@@ -51,7 +51,7 @@ def form_chart_data(data: Dict,helper=None) -> Dict:
     try:
         chart_data =  {} 
         for key, value in data.items():
-            if key == 'age':
+            if key == 'preference_age':
                 chart_data[key] = helper.age_groups_chart_data(value)
             else:
                 chart_data[key] = {'labels': list(value.keys()), 'data': list(value.values())}
