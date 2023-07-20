@@ -4,6 +4,7 @@ from django.db import transaction
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.custom_libs.pandas.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
 from common.helpers.model_helpers.get_create import get_or_create_model_instance
+from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
@@ -12,6 +13,8 @@ from preference.models import (
     )
 
 
+
+kunfu_panda_logger = KunfuPandaLogger()
 
 
 def fetch_preferences_from_api(client):
@@ -35,11 +38,12 @@ def fetch_preferences_from_api_to_db():
     for preference in preferences:
         try:
             add_preference_to_db(preference)
-            pass
         except Exception as e:
-            print('An error occurred during preference creation:', str(e))
+            kunfu_panda_logger.error(f'An error occurred during preference creation: {str(e)}')
             transaction.set_rollback(True)
             raise
+        
+    kunfu_panda_logger.info(f'Added {len(preferences)} preferences to the database')
 
 
 def add_preference_to_db(preference):
