@@ -162,8 +162,8 @@ def app_events_stats(request):
         counts = [i["Count"] for i in data]
         users = [i["Users"] for i in data]
         return [
-            {"label": "Counts", "backgroundColor": "blue", "data": counts},
-            {"label": "Users", "backgroundColor": "red", "data": users},
+            {"label": "Number of Views", "backgroundColor": "blue", "data": counts},
+            {"label": "Unique Users", "backgroundColor": "red", "data": users},
         ]
     
     def reformat_grouped_chapter_feedback_data(data):
@@ -195,6 +195,7 @@ def app_events_stats(request):
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, template_name, context=context_data)
+    # print('cccccc', chart_data)
     context_data.update({"data": chart_data})
     if helper.cleaned is False:
         messages.info(
