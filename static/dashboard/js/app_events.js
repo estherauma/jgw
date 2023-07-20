@@ -5,8 +5,8 @@ function plotChat(key, labels, values) {
   let secondGraphOneBg = COLORS.appleGreen;
 
   if (key == "chapter_feedback") {
-    firstGraphBg = COLORS.navyBlue;
-    secondGraphOneBg = COLORS.appleGreen;
+    firstGraphBg = COLORS.appleGreen;
+    secondGraphOneBg = COLORS.navyBlue;
   }
 
   const chapersAndChapterFeedbackChartConfig = {
