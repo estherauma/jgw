@@ -18,7 +18,7 @@ from requests.exceptions import HTTPError
 from common.app_events import AppEvents
 from common.reports import get_start_date, get_SWS_report
 from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
-from common.helpers import HELPERS, HelpersParameters
+from common.helpers.common import HELPERS, HelpersParameters
 from dashboard.models import Route
 
 

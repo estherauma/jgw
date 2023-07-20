@@ -1,7 +1,5 @@
 from django.db import models
 
-from preference.models import Preference
-
 class InlineQuestionStandard(models.Model):
     data_source_id = models.CharField(max_length=24)
     device_id = models.CharField(max_length=255)
@@ -12,7 +10,6 @@ class InlineQuestionStandard(models.Model):
     organisation = models.CharField(max_length=255, blank=True, null=True)
     organisation_sector = models.CharField(max_length=255, blank=True, null=True)
     factory_farm = models.CharField(max_length=255, blank=True, null=True)
-    preference = models.ForeignKey(Preference, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     
@@ -57,7 +54,6 @@ class MessagingQuestionStandard(models.Model):
     message_id = models.CharField(max_length=255, blank=True, null=True)
     locale = models.CharField(max_length=255, blank=True, null=True)
     route = models.CharField(max_length=255, blank=True, null=True)
-    preference = models.ForeignKey(Preference, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     
