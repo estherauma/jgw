@@ -3,20 +3,16 @@ from django.db import transaction
 
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.custom_libs.pandas.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
+from common.helpers.model_helpers.get_create import get_or_create_model_instance
 from common.services.api_client import JustGoodWorkAPIClient
-from common.utils.date_utils import previous_dates, todays_date
+from common.utils.date_utils import todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
 from preference.models import (
     Age, Country, FactoryFarm, Gender, Organisation, OrganisationSector, Preference, SectorOfWork, Language, Route
     )
 
 
-def get_or_create_model_instance(model, value):
-    if not value:
-        instance, _ = model.objects.get_or_create(name=NOT_SPECIFIED)
-    else:
-        instance, _ = model.objects.get_or_create(name=value)
-    return instance
+
 
 def fetch_preferences_from_api(client):
     start_date= APPLICATION_POSSIBLE_START_DATE

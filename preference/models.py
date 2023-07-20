@@ -43,20 +43,20 @@ class Language(models.Model):
         return self.name
     
 class Route(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=255)
     
     def __str__(self):
         return self.name
     
 
 class Gender(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=255)
     
     def __str__(self):
         return self.name
     
 class Age(models.Model):
-    range = models.CharField(max_length=20)
+    range = models.CharField(max_length=255)
     
     def __str__(self):
         return self.range

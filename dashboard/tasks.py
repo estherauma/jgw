@@ -16,6 +16,8 @@ import base64
 import requests
 import json
 
+from preference.logic.add_preferences_logic import fetch_preferences_from_api_to_db
+
 client = translate.Client()
 
 def translate_to_eng(text, client=client):
@@ -26,7 +28,9 @@ def translate_to_eng(text, client=client):
         return result["translatedText"]
     return text
 
-
+def fetch_data_from_jgw_api():
+    fetch_preferences_from_api_to_db()
+    
 @shared_task(name="get_jgw_data")
 def fetch_API_data(category=None):
     from common.retrieve_data import JGWApi as APIHelper
@@ -52,8 +56,8 @@ def fetch_API_data(category=None):
     # # add help contacts
     add_new_genders()
     
-    # # add help contacts
-    # add_new_contacts()
+    # fetch data from api v2
+    fetch_data_from_jgw_api()
     
     
 @shared_task(name="translate_to_eng")
