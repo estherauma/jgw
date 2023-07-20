@@ -47,6 +47,10 @@ def fetch_preferences_from_api_to_db():
 
 
 def add_preference_to_db(preference):
+        # check if already exists
+        if Preference.objects.filter(data_source_id=preference.get("_id")).exists():
+            return
+            
         organisation_sector = preference.get("organisationSector")
         organisation = preference.get("organisation")
         factory_farm = preference.get("factoryFarm")
@@ -73,34 +77,31 @@ def add_preference_to_db(preference):
         destination_state_data = get_or_add_country_to_db(destination_state, "destination_state_data")
         route_data = get_or_add_route_to_db(route)
         
-        # check if already exists
-        if not Preference.objects.filter(data_source_id=preference.get("_id")).exists():
-        
-            new_preference = Preference.objects.create(
-                data_source_id = preference.get("_id"),
-                device_id = preference.get("deviceId"),
-                locale = preference.get("locale"),
-                app_id = preference.get("appId"),
-                api_created_at = preference.get("createdAt"),
-                api_updated_at = preference.get("updatedAt"),
-                location_of_potential_work = location_of_potential_work_data,
-                gender = gender_data,
-                age = age_data,
-                language = language_data,
-                origin = origin_data,
-                destination = destination_data,
-                destination_state = destination_state_data,
-                route = route_data,
-                organisation_sector = organisation_sector_data,
-                factory_farm = factory_farm_data,
-                organisation = organisation_data ,      
-            )
+        new_preference = Preference.objects.create(
+            data_source_id = preference.get("_id"),
+            device_id = preference.get("deviceId"),
+            locale = preference.get("locale"),
+            app_id = preference.get("appId"),
+            api_created_at = preference.get("createdAt"),
+            api_updated_at = preference.get("updatedAt"),
+            location_of_potential_work = location_of_potential_work_data,
+            gender = gender_data,
+            age = age_data,
+            language = language_data,
+            origin = origin_data,
+            destination = destination_data,
+            destination_state = destination_state_data,
+            route = route_data,
+            organisation_sector = organisation_sector_data,
+            factory_farm = factory_farm_data,
+            organisation = organisation_data ,      
+        )
 
-            # Create SectorsOfWork instances and associate them with the preference
-            
-            sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
-            for sec_of_work in sec_of_work_list:
-                new_preference.sectors_of_work.add(sec_of_work)
+        # Create SectorsOfWork instances and associate them with the preference
+        
+        sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
+        for sec_of_work in sec_of_work_list:
+            new_preference.sectors_of_work.add(sec_of_work)
 
 
 
