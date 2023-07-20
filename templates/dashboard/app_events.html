@@ -37,7 +37,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                {% include 'includes/chart_title.html' with title='Chapters Feedback' %}
+                {% include 'includes/chart_title.html' with title='User Feedback - Was this information helpful?' %}
                 <canvas id="_chapter_feedback"> </canvas>
             </div>
         </div>
@@ -48,7 +48,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                {% include 'includes/chart_title.html' with title='Chapters Opened' %}
+                {% include 'includes/chart_title.html' with title='What matters to workers (Where people spend time in the app)' %}
                 <canvas id="_chapters"> </canvas>
             </div>
         </div>
@@ -64,6 +64,7 @@
         labels = {{ values.labels | safe }}
         dataset = {{ values.data | safe }}
         key = '{{ key }}'
+        
         plotChat(key, labels, dataset)
     {% endfor %}
 </script>
