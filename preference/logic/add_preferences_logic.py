@@ -1,10 +1,14 @@
 
 from django.db import transaction
 
-from common.const.value_const import NOT_SPECIFIED
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
+from common.custom_libs.pandas.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
 from common.services.api_client import JustGoodWorkAPIClient
+from common.utils.date_utils import previous_dates, todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
-from preference.models import FactoryFarm, Organisation, OrganisationSector, Preference, SectorOfWork
+from preference.models import (
+    Age, Country, FactoryFarm, Gender, Organisation, OrganisationSector, Preference, SectorOfWork, Language, Route
+    )
 
 
 def get_or_create_model_instance(model, value):
@@ -14,7 +18,15 @@ def get_or_create_model_instance(model, value):
         instance, _ = model.objects.get_or_create(name=value)
     return instance
 
-def fetch_preferences_from_api(client, start_date='2019-01-01', end_date='2023-06-27'):
+def fetch_preferences_from_api(client):
+    start_date= APPLICATION_POSSIBLE_START_DATE
+    end_date= todays_date()
+    
+    # get the last time preferences were fetched
+    latest_preference = Preference.objects.last()
+    if latest_preference:
+        start_date = latest_preference.created_at.strftime("%Y-%m-%d")
+        
     return client.get_data(f"/preferences?startDate={start_date}&endDate={end_date}")
 
 
@@ -22,12 +34,12 @@ def fetch_preferences_from_api(client, start_date='2019-01-01', end_date='2023-0
 def fetch_preferences_from_api_to_db():
     
     jgw_api_client = JustGoodWorkAPIClient()
-    preferences = fetch_preferences_from_api(jgw_api_client)
+    preferences = fetch_preferences_from_api(jgw_api_client) or []
     
-    print("preferences: ", preferences)
     for preference in preferences:
         try:
             add_preference_to_db(preference)
+            pass
         except Exception as e:
             print('An error occurred during preference creation:', str(e))
             transaction.set_rollback(True)
@@ -39,53 +51,95 @@ def add_preference_to_db(preference):
         organisation = preference.get("organisation")
         factory_farm = preference.get("factoryFarm")
         sectors_of_work = preference.get("sectorsOfWork")
-        
-        # add organisation_sector to db
-        org_sector = add_organisation_sector_to_db(organisation_sector)
-        
-        # add organisation to db
-        org = add_organisation_to_db(organisation)
-        
-        # add factory_farm to db
-        fact_farm = add_factory_farm_to_db(factory_farm)
-        
-        # add preference to db
+        location_of_potential_work = preference.get('location_of_potential_work')
+        gender = preference.get('gender')
+        age = preference.get('age')
+        language= preference.get('language')
         route = preference.get('route') or NOT_SPECIFIED
-        new_preference = Preference.objects.create(
-            data_source_id= preference.get('_id'),
-            device_id= preference.get('deviceId'),
-            updated_at= preference.get('updatedAt'),
-            location_of_potential_work= preference.get('location_of_potential_work'),
-            gender= preference.get('gender'),
-            age= preference.get('age'),
-            route= route,
-            locale= preference.get('locale'),
-            app_id= preference.get('appId'),
-            created_at= preference.get('createdAt'),
-            language= preference.get('language'),
-            organisation_sector=org_sector,
-            factory_farm=fact_farm,
-            organisation=org,
-            origin= get_origin_and_destination_from_route(route).get('origin'),
-            destination= get_origin_and_destination_from_route(route).get('destination'),
-        )
+        origin= get_origin_and_destination_from_route(route).get('origin')
+        destination= get_origin_and_destination_from_route(route).get('destination')
+        destination_state = preference.get('destinationState')
+        
+        # related fields 
+        organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
+        organisation_data = get_or_add_organisation_to_db(organisation)
+        factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
+        location_of_potential_work_data = get_or_add_country_to_db(location_of_potential_work, "location_of_potential_work_data")
+        gender_data = get_or_add_gender_to_db(gender)
+        age_data = get_or_add_age_to_db(age)
+        language_data = get_or_add_language_to_db(language)
+        origin_data = get_or_add_country_to_db(origin, "origin_data")
+        destination_data = get_or_add_country_to_db(destination, "destination_data")
+        destination_state_data = get_or_add_country_to_db(destination_state, "destination_state_data")
+        route_data = get_or_add_route_to_db(route)
+        
+        # check if already exists
+        if not Preference.objects.filter(data_source_id=preference.get("_id")).exists():
+        
+            new_preference = Preference.objects.create(
+                data_source_id = preference.get("_id"),
+                device_id = preference.get("deviceId"),
+                locale = preference.get("locale"),
+                app_id = preference.get("appId"),
+                api_created_at = preference.get("createdAt"),
+                api_updated_at = preference.get("updatedAt"),
+                location_of_potential_work = location_of_potential_work_data,
+                gender = gender_data,
+                age = age_data,
+                language = language_data,
+                origin = origin_data,
+                destination = destination_data,
+                destination_state = destination_state_data,
+                route = route_data,
+                organisation_sector = organisation_sector_data,
+                factory_farm = factory_farm_data,
+                organisation = organisation_data ,      
+            )
 
-        # Create SectorOfWork instances and associate them with the preference
-        sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
-        for sec_of_work in sec_of_work_list:
-            new_preference.sectors_of_work.add(sec_of_work)
+            # Create SectorsOfWork instances and associate them with the preference
+            
+            sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
+            for sec_of_work in sec_of_work_list:
+                new_preference.sectors_of_work.add(sec_of_work)
 
-        return preference
 
 
-def add_organisation_sector_to_db(organisation_sector: str) -> OrganisationSector:
+def get_or_add_organisation_sector_to_db(organisation_sector: str) -> OrganisationSector:
     return get_or_create_model_instance(OrganisationSector, organisation_sector)
 
-def add_organisation_to_db(organisation: str) -> Organisation:
+def get_or_add_organisation_to_db(organisation: str) -> Organisation:
     return get_or_create_model_instance(Organisation, organisation)
 
-def add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
+def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
     return get_or_create_model_instance(FactoryFarm, factory_farm)
+
+def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
+        if country_name:
+            country_instance, _ = Country.objects.get_or_create(
+                code= aplha_code_from_country_name(country_name) or NOT_SPECIFIED,
+                name= country_name_from_aplha_code(country_name) or NOT_SPECIFIED
+            )
+            return country_instance
+        else:
+            country_instance, _ = Country.objects.get_or_create(
+                code= NOT_SPECIFIED,
+                name= NOT_SPECIFIED
+            )
+            return country_instance
+
+def get_or_add_gender_to_db(gender: str) -> Gender:
+    return get_or_create_model_instance(Gender, gender)
+
+def get_or_add_age_to_db(age_range: str) -> Age:
+    age_instance, _ = Age.objects.get_or_create(range= age_range or NOT_SPECIFIED)
+    return age_instance
+
+
+def get_or_add_language_to_db(language_name: str) -> Language:
+    return get_or_create_model_instance(Language, language_name)
+
+def get_or_add_route_to_db(route_name: str) -> Route:
+    return get_or_create_model_instance(Route, route_name)
 
 def add_sector_of_work_to_db(sectors_of_work: list[str]) -> list[SectorOfWork]:
     sector_list = []

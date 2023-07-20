@@ -11,7 +11,6 @@ class HelpContact(models.Model):
     email = models.EmailField(blank=True)
     createdAt = models.DateTimeField()
     updatedAt = models.DateTimeField()
-    preference = models.ForeignKey(Preference, on_delete=models.SET_NULL, null=True)
     cleaned = models.BooleanField(default=False)
 
     def __str__(self):

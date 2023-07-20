@@ -5,7 +5,11 @@ from preference.models import (
         Organisation, 
         OrganisationSector, 
         Preference, 
-        SectorOfWork
+        SectorOfWork, 
+        Route,
+        Language,
+        Gender,
+        Country
     )
 
 
@@ -15,3 +19,7 @@ admin.site.register(OrganisationSector)
 admin.site.register(FactoryFarm)
 admin.site.register(Organisation)
 admin.site.register(Preference)
+admin.site.register(Route)
+admin.site.register(Language)
+admin.site.register(Gender)
+admin.site.register(Country)
