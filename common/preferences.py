@@ -15,13 +15,13 @@ QueryMap = Dict[str, list[str]]
 
 def clean_df(df):
     if "organisation" in df.columns:
-        df.loc[df["organisation"] == '', "organisation"] = 'Not specified'
+        df.loc[df["organisation"] == '', "organisation"] = 'No code'
         
         """
           The pattern matches 'Seasonal Worker Scheme' & '-' 
           & replace with an empty string
         """
-        df["organisation"] = df["organisation"].replace(r'Seasonal\s+Worker\s+Scheme\s+-',"", regex=True)
+        df["organisation"] = df["organisation"].replace(r'seasonal\s+worker\s+scheme\s+- ',"", regex=True)
     return df
 
 
