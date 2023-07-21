@@ -53,6 +53,7 @@ def fetch_inline_questions_from_api_to_db():
  
        
 def add_inline_question_to_db(inline_question):
+     
     if isinstance(inline_question, str):
         return
     

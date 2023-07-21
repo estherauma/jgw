@@ -52,7 +52,7 @@ class InlineQuestion(models.Model):
 
 class InlineQuestionResponse(models.Model):
     inline_question = models.ForeignKey(InlineQuestion, on_delete=models.CASCADE)
-    response = models.CharField(max_length=255, blank=True, null=True)
+    response = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
