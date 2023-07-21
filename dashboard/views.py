@@ -17,6 +17,7 @@ from requests.exceptions import HTTPError
 
 from common.app_events import AppEvents
 from common.reports import get_start_date, get_SWS_report
+from common.user_overview import get_user_overview_data
 from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
 from common.helpers.common import HELPERS, HelpersParameters
 from dashboard.models import Route
@@ -50,7 +51,7 @@ def form_chart_data(data: Dict,helper=None) -> Dict:
     try:
         chart_data =  {} 
         for key, value in data.items():
-            if key == 'age':
+            if key == 'preference_age':
                 chart_data[key] = helper.age_groups_chart_data(value)
             else:
                 chart_data[key] = {'labels': list(value.keys()), 'data': list(value.values())}
@@ -132,16 +133,26 @@ def filter_data(request, category):
         filters.update(get_user_role(request.user))
         filters = format_time_range(filters)
         list_of_filters = change_dictionary_to_list_of_dictionaries(filters)
-        data = helper.compute_stats(filters=filters)
+        
+        if category != "preferences":
+            data = helper.compute_stats(filters=filters)
+        else:
+            data = get_user_overview_data(filters=filters)
+        response_count = 0
         if category == "inline":
             response_count, raw_chart_data = itemgetter("response_count", "data")(data)
             chart_data = form_chart_data(raw_chart_data)
             return JsonResponse({"chart_data": chart_data, "response_count": response_count, "filter_state": list_of_filters })
+        
+        if category == 'preferences':
+            response_count = data['preference_response_count']
+            del data['preference_response_count']
+
         chart_data = form_chart_data(data,helper)
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     
-    return JsonResponse({"chart_data": chart_data, "filter_state":  list_of_filters})
+    return JsonResponse({"chart_data": chart_data, "filter_state":  list_of_filters, "response_count":response_count})
 
 
 @login_required()

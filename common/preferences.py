@@ -33,7 +33,7 @@ class Preferences(BaseAnalytics):
         self.export_csv_name = "preferences.csv"
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
-        return_fields = fields or ["age", "language", "gender", "organisation"]
+        return_fields = fields or ["age", "language", "gender", "organisation", "origin", "destination"]
         
         _df = clean_df(self.get_df(filters))
         
@@ -48,7 +48,7 @@ class Preferences(BaseAnalytics):
         # new_and_returning_users = AppEvents().new_and_returning_users()
         new_and_returning_users = {'new_users': 21868, 'returning_users': 20386}
         _stats["new_and_returning_users"]  = new_and_returning_users
-
+        _stats["response_count"] = len(_df)
         return _stats
 
     def origin_and_destination_dataframe(self):

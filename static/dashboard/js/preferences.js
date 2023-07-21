@@ -130,6 +130,9 @@ function filterData() {
                 if (Object.keys(chartData).length === 0) {
                     toggleElementDisplay(true, '#no-results')
                 } else {
+                    responseCountValue = data['response_count']
+                    const responseCountElement = document.querySelector('#response-count')
+                    responseCountElement.textContent = responseCountValue
                     plotCharts(chartData)
                     toggleElementDisplay(true, '#chart-area')
                 }
@@ -182,22 +185,31 @@ function exportToExcel(url) {
 function plotCharts(chartData) {
     clearCharts()
     let chartDataKeys = Object.keys(chartData)
-    chartDataKeys.map(chartDataKeys => {
-        if (chartDataKeys === "age") {
-            ageGraph(chartData['age'])
+    chartDataKeys.map(chartDataKey => {
+        if (chartDataKey === "preference_age") {
+            ageGraph(chartData['preference_age'])
         }
 
-        if (chartDataKeys === "gender") {
-            genderGraph(chartData['gender'])
+        if (chartDataKey === "preference_gender") {
+            genderGraph(chartData['preference_gender'])
         }
 
-        if (chartDataKeys === "organisation") {
-            organisationGraph(chartData['organisation'])
+        if (chartDataKey === "preference_organisation") {
+            organisationGraph(chartData['preference_organisation'])
         }
 
-        if (chartDataKeys === "new_and_returning_users") {
-            newUsersAndReturningUsersChart(chartData['new_and_returning_users'])
+        if (chartDataKey === "preference_language") {
+            preferenceLanguageChart(chartData['preference_language'])
         }
+
+        if (chartDataKey === "preference_origin") {
+            preferenceOriginChart(chartData['preference_origin'])
+        }
+
+        if (chartDataKey === "preference_destination") {
+            preferenceDestinationChart(chartData['preference_destination'])
+        }
+        
     })
 }
 

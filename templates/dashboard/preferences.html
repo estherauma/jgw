@@ -7,7 +7,7 @@
 <!-- page content -->
 {% block content %}
 
-{% include 'includes/dashboard_banner.html' with title="User Overview" export_buttons_config=preferences_export_buttons_config %}
+{% include 'includes/dashboard_banner.html' with title="TOTAL USER OVERVIEW RESPONSES" counter_id="response-count" export_buttons_config=preferences_export_buttons_config %}
 
 {% if messages %}
 <div class="row">
@@ -60,8 +60,8 @@
     </div>
 
     <div id="chart-area">
-        <div class="row">
-            <div class="col-8 mb-3">
+        <div class="row mb-3">
+            <div class="col-8">
                 <div class="card h-100" id="age_graphcard">
                     <div class="card-body">
                         <p class="chart-title">Users By Age</p>
@@ -69,7 +69,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-4 mb-3">
+            <div class="col-4">
                 <div class="card h-100">
                     <div class="card-body">
                         <p class="chart-title pb-1">Users By Gender</p>
@@ -78,20 +78,47 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-4">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <p class="chart-title">New Vs Returning Users</p>
-                        {% include 'charts/new_returning_users.html' %}
+                        <p class="chart-title">USER PER DESTINATION COUNTRY</p>
+                        <div>
+                            <canvas id="preference_destination_graphcard"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-8">
+            <div class="col-md-8">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">SELECTED USER LANGUAGE</p>
+                        <div class="preference_language_graphcard-chart-box">
+                            <div id="preference_language_graphcard"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row mb-3">
+            <div class="col-12">
                 <div class="card h-100">
                     <div class="card-body">
                         <p class="chart-title">Work Code Usage</p>
                         <canvas id="_organisation"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-8 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">USER PER ORIGIN COUNTRY</p>
+                        <div class="preference_origin_graphcard-chart-box">
+                            <div id="preference_origin_graphcard"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,5 +133,8 @@
 <!-- ChartJS script  -->
 {% block scripts %}
 <script src="{% static 'dashboard/js/charts/pie/new_returning_users.js' %}"></script>
+<script src="{% static 'dashboard/js/charts/preference_language_chart.js' %}"></script>
+<script src="{% static 'dashboard/js/charts/preference_origin_chart.js' %}"></script>
+<script src="{% static 'dashboard/js/charts/preference_destination_chart.js' %}"></script>
 <script src="{% static 'dashboard/js/preferences.js' %}"></script>
 {% endblock %}
