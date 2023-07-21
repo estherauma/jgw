@@ -28,7 +28,7 @@ def fetch_messaging_questions_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     messaging_questions = fetch_messaging_question_from_api(jgw_api_client)
     
-    for messaging_question in messaging_questions[0:2]:
+    for messaging_question in messaging_questions:
         try:
             add_messaging_question_to_db(messaging_question)
         except Exception as e:

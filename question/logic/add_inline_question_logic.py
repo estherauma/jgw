@@ -18,6 +18,8 @@ def fetch_inline_question_from_api(client):
     if latest_inlinequestion:
         start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
         
+    print(f"Fetching inline questions from {start_date} to {end_date}")
+        
     return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
 
 
@@ -41,7 +43,7 @@ def fetch_inline_questions_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     inline_questions = fetch_inline_question_from_api(jgw_api_client)
     
-    for inline_question in inline_questions[0:2]:
+    for inline_question in inline_questions:
         try:
             add_inline_question_to_db(inline_question)
         except Exception as e:
