@@ -74,6 +74,11 @@ class MessagingQuestionStandard(models.Model):
     origin = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_origin')
     destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_destination')
     
+    organisation_sector = models.ForeignKey(OrganisationSector, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_organisation_sector')
+    factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_factory_farm')
+    organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_organisation')
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_language')
+    
     api_created_at = models.DateTimeField(default=timezone.now)
     api_updated_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)

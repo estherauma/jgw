@@ -10,16 +10,13 @@ from preference.models import Preference
 
 
 def fetch_inline_question_from_api(client):
-    # start_date = APPLICATION_POSSIBLE_START_DATE
-    # end_date = todays_date()
-    
-    start_date = "2022-03-01"
-    end_date= "2022-03-02"
+    start_date = APPLICATION_POSSIBLE_START_DATE
+    end_date = todays_date()
     
     # get the last time inline question were fetched
-    # latest_inlinequestion = InlineQuestion.objects.last()
-    # if latest_inlinequestion:
-    #     start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
+    latest_inlinequestion = InlineQuestionStandard.objects.last()
+    if latest_inlinequestion:
+        start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
         
     return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
 
@@ -57,12 +54,13 @@ def add_inline_question_to_db(inline_question):
     if isinstance(inline_question, str):
         return
     
-    route = standard_fields_dict.get('route') or NOT_SPECIFIED
-    origin= get_origin_and_destination_from_route(route).get('origin')
-    destination= get_origin_and_destination_from_route(route).get('destination')
     standard_and_other_fields = separate_inline_question_standard_fields_from_others(inline_question)
     standard_fields_dict = standard_and_other_fields.get("standard_fields_dict")
     responses_list = standard_and_other_fields.get("responses_list")
+    
+    route = standard_fields_dict.get('route') or NOT_SPECIFIED
+    origin= get_origin_and_destination_from_route(route).get('origin')
+    destination= get_origin_and_destination_from_route(route).get('destination')
     language = standard_fields_dict.get('language')
     organisation_sector = standard_fields_dict.get('organisationSector')
     organisation = standard_fields_dict.get('organisation')
