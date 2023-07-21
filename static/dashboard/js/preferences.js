@@ -130,6 +130,9 @@ function filterData() {
                 if (Object.keys(chartData).length === 0) {
                     toggleElementDisplay(true, '#no-results')
                 } else {
+                    responseCountValue = data['response_count']
+                    const responseCountElement = document.querySelector('#response-count')
+                    responseCountElement.textContent = responseCountValue
                     plotCharts(chartData)
                     toggleElementDisplay(true, '#chart-area')
                 }
