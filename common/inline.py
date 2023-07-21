@@ -31,7 +31,9 @@ class Inline(BaseAnalytics):
             
         return questions_and_answers
         
-
+    def overview_stats(self, filters: QueryMap = None):
+        return self.compute_stats(filters=filters, fields=["origin", "language", "destination"])["data"]
+        
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None, df=None):
         _df = self.get_df(filters)
         _stats = {"response_count": 0, "data": {}}

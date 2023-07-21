@@ -109,11 +109,11 @@ function scrollableVerticalBarChart(containerId, data, chartConfig) {
 
   if (totalChart <= 10) {
       totalHeight = `${totalChart * 50}px`
-  } else if (totalChart > 28) {
-      totalHeight = `${totalChart * 28}px`
+  } else if (totalChart > 20) {
+      totalHeight = `${totalChart * 20}px`
       currentChartBox.classList.add('generic-chart-box')
   } else {
-      totalHeight = `${totalChart * 28}px`
+      totalHeight = `${totalChart * 20}px`
   }
   graphDiv.style.height = totalHeight;
 }

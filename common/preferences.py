@@ -33,7 +33,7 @@ class Preferences(BaseAnalytics):
         self.export_csv_name = "preferences.csv"
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
-        return_fields = fields or ["age", "language", "gender", "organisation"]
+        return_fields = fields or ["age", "language", "gender", "organisation", "origin", "destination"]
         
         _df = clean_df(self.get_df(filters))
         
