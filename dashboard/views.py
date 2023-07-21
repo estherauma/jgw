@@ -138,17 +138,21 @@ def filter_data(request, category):
             data = helper.compute_stats(filters=filters)
         else:
             data = get_user_overview_data(filters=filters)
-        
-        
+        response_count = 0
         if category == "inline":
             response_count, raw_chart_data = itemgetter("response_count", "data")(data)
             chart_data = form_chart_data(raw_chart_data)
             return JsonResponse({"chart_data": chart_data, "response_count": response_count, "filter_state": list_of_filters })
+        
+        if category == 'preferences':
+            response_count = data['preference_response_count']
+            del data['preference_response_count']
+
         chart_data = form_chart_data(data,helper)
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     
-    return JsonResponse({"chart_data": chart_data, "filter_state":  list_of_filters})
+    return JsonResponse({"chart_data": chart_data, "filter_state":  list_of_filters, "response_count":response_count})
 
 
 @login_required()

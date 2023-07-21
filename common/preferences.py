@@ -48,7 +48,7 @@ class Preferences(BaseAnalytics):
         # new_and_returning_users = AppEvents().new_and_returning_users()
         new_and_returning_users = {'new_users': 21868, 'returning_users': 20386}
         _stats["new_and_returning_users"]  = new_and_returning_users
-
+        _stats["response_count"] = len(_df)
         return _stats
 
     def origin_and_destination_dataframe(self):
