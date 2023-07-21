@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from preference.models import Country, FactoryFarm, Language, Organisation, OrganisationSector, Route
 
@@ -19,8 +20,8 @@ class InlineQuestionStandard(models.Model):
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_organisation')
     
     
-    api_created_at = models.DateTimeField()
-    api_updated_at = models.DateTimeField()
+    api_created_at = models.DateTimeField(default=timezone.now)
+    api_updated_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -73,8 +74,8 @@ class MessagingQuestionStandard(models.Model):
     origin = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_origin')
     destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_destination')
     
-    api_created_at = models.DateTimeField()
-    api_updated_at = models.DateTimeField()
+    api_created_at = models.DateTimeField(default=timezone.now)
+    api_updated_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
