@@ -1,13 +1,27 @@
 from django.db import transaction
-from common.const.value_const import NOT_SPECIFIED
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
+from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
 
 from common.services.api_client import JustGoodWorkAPIClient
+from common.utils.date_utils import todays_date
+from common.utils.preferences import get_origin_and_destination_from_route
 from question.models import InlineQuestion, InlineQuestionResponse, InlineQuestionStandard, InlineQuestionText
 from preference.models import Preference
 
 
 def fetch_inline_question_from_api(client):
-    return client.get_data("/inlinequestions")
+    # start_date = APPLICATION_POSSIBLE_START_DATE
+    # end_date = todays_date()
+    
+    start_date = "2022-03-01"
+    end_date= "2022-03-02"
+    
+    # get the last time inline question were fetched
+    # latest_inlinequestion = InlineQuestion.objects.last()
+    # if latest_inlinequestion:
+    #     start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
+        
+    return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
 
 
 list_fields = ['language', 'locale', 'deviceId', 'createdAt', 'updatedAt', '_id', 'appId', 'route', 'organisation', 'factoryFarm', '__v']
@@ -30,7 +44,7 @@ def fetch_inline_questions_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     inline_questions = fetch_inline_question_from_api(jgw_api_client)
     
-    for inline_question in inline_questions:
+    for inline_question in inline_questions[0:2]:
         try:
             add_inline_question_to_db(inline_question)
         except Exception as e:
@@ -40,43 +54,62 @@ def fetch_inline_questions_from_api_to_db():
  
        
 def add_inline_question_to_db(inline_question):
-    if type(inline_question) is not str:
-        standard_and_other_fields = separate_inline_question_standard_fields_from_others(inline_question)
-        standard_fields_dict = standard_and_other_fields.get("standard_fields_dict")
-        responses_list = standard_and_other_fields.get("responses_list")
-        
-        # save the standard fields, 
-        device_id = standard_fields_dict.get('deviceId')
-        preference = Preference.objects.get(device_id=device_id)
-        
-        inline_question_standard = InlineQuestionStandard.objects.create(
-            data_source_id = standard_fields_dict.get('_id'),
-            device_id = device_id,
-            preference = preference,
-            app_id = standard_fields_dict.get('appId'),
-            locale = standard_fields_dict.get('locale'),
-            route = standard_fields_dict.get('route'),
-            language = standard_fields_dict.get('language'),
-            organisation = standard_fields_dict.get('organisation'),
-            organisation_sector = standard_fields_dict.get('organisationSector'),
-            factory_farm = standard_fields_dict.get('factoryFarm'),
-            created_at = standard_fields_dict.get('createdAt'),
-            updated_at = standard_fields_dict.get('updatedAt')
+    if isinstance(inline_question, str):
+        return
+    
+    route = standard_fields_dict.get('route') or NOT_SPECIFIED
+    origin= get_origin_and_destination_from_route(route).get('origin')
+    destination= get_origin_and_destination_from_route(route).get('destination')
+    standard_and_other_fields = separate_inline_question_standard_fields_from_others(inline_question)
+    standard_fields_dict = standard_and_other_fields.get("standard_fields_dict")
+    responses_list = standard_and_other_fields.get("responses_list")
+    language = standard_fields_dict.get('language')
+    organisation_sector = standard_fields_dict.get('organisationSector')
+    organisation = standard_fields_dict.get('organisation')
+    factory_farm = standard_fields_dict.get('factoryFarm')
+    
+    route_data = get_or_add_route_to_db(route)
+    language_data = get_or_add_language_to_db(language)
+    origin_data = get_or_add_country_to_db(origin, "origin_data")
+    destination_data = get_or_add_country_to_db(destination, "destination_data")
+    organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
+    organisation_data = get_or_add_organisation_to_db(organisation)
+    factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
+    
+    # save the standard fields, 
+    device_id = standard_fields_dict.get('deviceId')
+    preference = Preference.objects.filter(device_id=device_id).first()
+    
+    inline_question_standard = InlineQuestionStandard.objects.create(
+        data_source_id = standard_fields_dict.get('_id'),
+        device_id = device_id,
+        preference = preference,
+        app_id = standard_fields_dict.get('appId'),
+        locale = standard_fields_dict.get('locale'),
+        route = route_data,
+        language = language_data,
+        origin = origin_data,
+        destination = destination_data,
+        organisation_sector = organisation_sector_data,
+        organisation = organisation_data,
+        factory_farm = factory_farm_data,
+        api_created_at = standard_fields_dict.get('createdAt'),
+        api_updated_at = standard_fields_dict.get('updatedAt')
+    )
+    
+    #  get or create inline question text
+    for response_list in responses_list:
+        inline_question_text, _ = InlineQuestionText.objects.get_or_create(
+            text = response_list.get('key'),
         )
         
-        #  get or create inline question text
-        for response_list in responses_list:
-            inline_question_text, _ = InlineQuestionText.objects.get_or_create(
-                text = response_list.get('key'),
-            )
-            
-            inline_question = InlineQuestion.objects.create(
-                question = inline_question_text,
-                inline_question_standard = inline_question_standard
-            )
-            
-            # create inline question response 
-            InlineQuestionResponse.objects.create(
-                inline_question = inline_question,
-                response = response_list.get('value')
-            )
+        inline_question = InlineQuestion.objects.create(
+            question = inline_question_text,
+            inline_question_standard = inline_question_standard
+        )
+        
+        # create inline question response 
+        InlineQuestionResponse.objects.create(
+            inline_question = inline_question,
+            response = response_list.get('value')
+        )

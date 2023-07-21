@@ -2,6 +2,7 @@ from django.db import transaction
 from common.const.value_const import NOT_SPECIFIED
 
 from common.services.api_client import JustGoodWorkAPIClient
+from common.utils.preferences import get_origin_and_destination_from_route
 from question.models import MessagingQuestion, MessagingQuestionOptionResponseAnswer, MessagingQuestionResponse, MessagingQuestionStandard
 from preference.models import Preference
 
@@ -27,10 +28,15 @@ def fetch_messaging_questions_from_api_to_db():
  
        
 def add_messaging_question_to_db(messaging_question):
+    
+        route = messaging_question.get('route')
+        origin= get_origin_and_destination_from_route(route).get('origin')
+        destination= get_origin_and_destination_from_route(route).get('destination')
         
         # save the standard fields, 
         device_id = messaging_question.get('deviceId')
-        preference = Preference.objects.get(device_id=device_id)
+        preference = Preference.objects.filter(device_id=device_id).first()
+        
         
         messaging_question_standard = MessagingQuestionStandard.objects.create(
             data_source_id = messaging_question.get('_id'),
@@ -38,10 +44,10 @@ def add_messaging_question_to_db(messaging_question):
             preference = preference,
             app_id = messaging_question.get('appId'),
             locale = messaging_question.get('locale'),
-            route = messaging_question.get('route'),
+            route = route,
             created_at = messaging_question.get('createdAt'),
-            updated_at = messaging_question.get('updatedAt'),
-            message_id = messaging_question.get('messageId'),
+            api_updated_at = messaging_question.get('updatedAt'),
+            api_message_id = messaging_question.get('messageId'),
             question_id = messaging_question.get('questionId')
         )
         
