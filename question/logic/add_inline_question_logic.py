@@ -57,6 +57,11 @@ def add_inline_question_to_db(inline_question):
         return
     
     standard_and_other_fields = separate_inline_question_standard_fields_from_others(inline_question)
+    
+    if InlineQuestionStandard.objects.filter(data_source_id=inline_question.get("_id")).exists():
+        return
+        
+        
     standard_fields_dict = standard_and_other_fields.get("standard_fields_dict")
     responses_list = standard_and_other_fields.get("responses_list")
     

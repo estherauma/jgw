@@ -5,8 +5,8 @@ from preference.models import Country, FactoryFarm, Language, Organisation, Orga
 
 class InlineQuestionStandard(models.Model):
     data_source_id = models.CharField(max_length=24)
-    device_id = models.CharField(max_length=255)
-    app_id = models.CharField(max_length=255)
+    device_id = models.CharField(max_length=255, blank=True, null=True)
+    app_id = models.CharField(max_length=255, blank=True, null=True)
     locale = models.CharField(max_length=255, blank=True, null=True)
     
     
@@ -63,8 +63,8 @@ class InlineQuestionResponse(models.Model):
 
 class MessagingQuestionStandard(models.Model):
     data_source_id = models.CharField(max_length=24)
-    device_id = models.CharField(max_length=255)
-    app_id = models.CharField(max_length=255)
+    device_id = models.CharField(max_length=255, blank=True, null=True)
+    app_id = models.CharField(max_length=255, blank=True, null=True)
     question_id = models.CharField(max_length=255, blank=True, null=True)
     message_id = models.CharField(max_length=255, blank=True, null=True)
     locale = models.CharField(max_length=255, blank=True, null=True)

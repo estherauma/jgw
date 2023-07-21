@@ -39,6 +39,9 @@ def fetch_messaging_questions_from_api_to_db():
        
 def add_messaging_question_to_db(messaging_question):
     
+        if MessagingQuestionStandard.objects.filter(data_source_id=messaging_question.get("_id")).exists():
+            return
+    
         route = messaging_question.get('route')
         origin= get_origin_and_destination_from_route(route).get('origin')
         destination= get_origin_and_destination_from_route(route).get('destination')
