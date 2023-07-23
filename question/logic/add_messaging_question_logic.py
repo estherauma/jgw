@@ -104,8 +104,6 @@ def add_messaging_question_to_db(messaging_question):
         
         question_responses = messaging_question.get('questionResponse')
         
-        print(question_responses)
-        
         if isinstance(question_responses, str):
             new_question_response = MessagingResponse.objects.create(
                 option = question_responses,
