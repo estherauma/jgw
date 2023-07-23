@@ -11,7 +11,7 @@ def get_or_add_organisation_sector_to_db(organisation_sector: str) -> Organisati
 
 def get_or_add_organisation_to_db(organisation_name: str) -> Organisation:
     normalized_organisation_name = normalize_organisation_name(organisation_name)
-    return get_or_create_model_instance(Organisation, normalized_organisation_name.lower())
+    return get_or_create_model_instance(Organisation, normalized_organisation_name)
 
 def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
     return get_or_create_model_instance(FactoryFarm, factory_farm)

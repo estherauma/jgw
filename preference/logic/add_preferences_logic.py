@@ -18,7 +18,7 @@ from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import previous_dates, todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
 from preference.models import Preference
-from preference.tasks import translate_preferences_fields
+from preference.tasks import translate_and_clean_preferences_fields
 
 
 
@@ -54,7 +54,7 @@ def fetch_preferences_from_api_to_db():
     kunfu_panda_logger.info(f'Added {len(preferences)} preferences to the database')
     
     # call celery to the translate, gender, language and sector of work functions
-    translate_preferences_fields.delay()
+    translate_and_clean_preferences_fields()
 
 
 def add_preference_to_db(preference):
