@@ -6,6 +6,7 @@ def normalize_gender_name(gender: str):
         "woman": "female",
         "a woman": "female",
         "women": "female",
+        "girl": "female",
         "feminine": "female",
         "better not answer": "prefer not to answer",
         "better not to answer": "prefer not to answer",
@@ -20,6 +21,7 @@ def normalize_gender_name(gender: str):
         "": "prefer not to answer",
         None: "prefer not to answer",
         "another": "other",
+        "behavoir": "other",
         "i don&#39;t feel comfortable answering":"prefer not to answer",
         "behavior":"prefer not to answer"
     }
