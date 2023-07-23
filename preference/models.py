@@ -5,6 +5,10 @@ from django.db import models
 
 class SectorOfWork(models.Model):
     name = models.CharField(max_length=255)
+    translated_name = models.CharField(max_length=255, null=True, blank=True)
+    translated_to = models.CharField(max_length=255, default='en')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
@@ -17,6 +21,8 @@ class OrganisationSector(models.Model):
     
 class FactoryFarm(models.Model):
     name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
@@ -24,6 +30,8 @@ class FactoryFarm(models.Model):
 
 class Organisation(models.Model):
     name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
@@ -32,18 +40,27 @@ class Organisation(models.Model):
 class Country(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)
     code = models.CharField(max_length=50, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f'{self.name} ({self.code})'
 
 class Language(models.Model):
     name = models.CharField(max_length=255)
+    translated_name = models.CharField(max_length=255, null=True, blank=True)
+    translated_to = models.CharField(max_length=255, default='en')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.name
     
 class Route(models.Model):
     name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
     
     def __str__(self):
         return self.name
@@ -51,12 +68,18 @@ class Route(models.Model):
 
 class Gender(models.Model):
     name = models.CharField(max_length=255)
+    translated_name = models.CharField(max_length=255, null=True, blank=True)
+    translated_to = models.CharField(max_length=255, default='en')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.name
     
 class Age(models.Model):
     range = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.range
