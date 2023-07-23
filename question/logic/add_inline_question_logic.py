@@ -1,13 +1,17 @@
 from django.db import transaction
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
+from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
 from question.models import InlineQuestion, InlineQuestionResponse, InlineQuestionStandard, InlineQuestionText
 from preference.models import Preference
+from question.tasks import translate_and_clean_inline_question_fields
 
+
+kunfu_panda_logger = KunfuPandaLogger(log_file="kunfu_panda_logs/inline_question_tasks.log")
 
 def fetch_inline_question_from_api(client):
     start_date = APPLICATION_POSSIBLE_START_DATE
@@ -50,7 +54,9 @@ def fetch_inline_questions_from_api_to_db():
             print('An error occurred during inline questions creation:', str(e))
             transaction.set_rollback(True)
             raise
- 
+    kunfu_panda_logger.info(f'Added {len(inline_questions)} messaging questions to the database')
+    
+    translate_and_clean_inline_question_fields()
        
 def add_inline_question_to_db(inline_question):
      

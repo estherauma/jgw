@@ -1,9 +1,9 @@
 
 from common.custom_libs.pandas.google_translate import pandas_translator_translate
-from question.models import MessagingQuestion, MessagingResponse
+from question.models import InlineQuestionResponse, MessagingQuestion, MessagingResponse
 
 
-def translate_and_clean_question_fields():
+def translate_and_clean_messaging_question_question_fields():
     untranslated_questions = MessagingQuestion.objects.filter(translated_question__isnull=True)
     for question in untranslated_questions:
         translated_question = pandas_translator_translate(question.question)
@@ -11,7 +11,7 @@ def translate_and_clean_question_fields():
         question.save()
         
         
-def translate_and_clean_response_fields():
+def translate_and_clean_messaging_question_response_fields():
     untranslated_responses = MessagingResponse.objects.filter(translated_option__isnull=True)
     for response in untranslated_responses:
         translated_option = pandas_translator_translate(response.option)
@@ -20,5 +20,17 @@ def translate_and_clean_response_fields():
         
         
 def translate_and_clean_messaging_question_fields():
-    translate_and_clean_question_fields()
-    translate_and_clean_response_fields()
+    translate_and_clean_messaging_question_question_fields()
+    translate_and_clean_messaging_question_response_fields()
+    
+
+def translate_and_clean_inline_question_response_fields():
+    untranslated_responses = InlineQuestionResponse.objects.filter(translated_response__isnull=True)
+    for response in untranslated_responses:
+        translated_option = pandas_translator_translate(response.response)
+        response.translated_response = translated_option
+        response.save()
+        
+
+def translate_and_clean_inline_question_fields():
+    translate_and_clean_inline_question_response_fields()

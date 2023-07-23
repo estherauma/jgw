@@ -53,6 +53,7 @@ class InlineQuestion(models.Model):
 class InlineQuestionResponse(models.Model):
     inline_question = models.ForeignKey(InlineQuestion, on_delete=models.CASCADE)
     response = models.TextField(null=True, blank=True)
+    translated_response = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -97,7 +98,7 @@ class MessagingQuestion(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.question} {self.translated_question}"
+        return f"{self.translated_question}"
 
     
 class MessagingResponse(models.Model):
@@ -108,7 +109,7 @@ class MessagingResponse(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.option} {self.translated_option}"
+        return f"{self.translated_option}"
     
 class MessagingQuestionResponse(models.Model):
     messaging_question = models.ForeignKey(MessagingQuestion, on_delete=models.CASCADE)
