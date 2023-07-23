@@ -1,5 +1,5 @@
 import logging
-
+import os
 
 
 class KunfuPandaLogger:
@@ -10,6 +10,9 @@ class KunfuPandaLogger:
         formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
         if log_file:
+            if not os.path.exists(log_file):
+                os.makedirs(os.path.dirname(log_file))
+                
             file_handler = logging.FileHandler(log_file)
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
