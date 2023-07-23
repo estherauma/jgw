@@ -26,8 +26,7 @@ kunfu_panda_logger = KunfuPandaLogger(log_file="kunfu_panda_logs/preference_task
 
 
 def fetch_preferences_from_api(client):
-    # start_date= APPLICATION_POSSIBLE_START_DATE
-    start_date= previous_dates()
+    start_date= APPLICATION_POSSIBLE_START_DATE
     end_date= todays_date()
     
     # get the last time preferences were fetched
