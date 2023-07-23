@@ -5,12 +5,13 @@ from question.models import (
     InlineQuestionResponse, 
     InlineQuestionStandard, 
     InlineQuestionText,
+    InlineQuestionResponseText,
     MessagingQuestion,
     MessagingResponse,
     MessagingQuestionResponse, 
     MessagingQuestionStandard,
     MessagingQuestionText,
-    MessagingResponseOptionText
+    MessagingResponseOptionText,
 )
 
 
@@ -21,6 +22,7 @@ class Command(BaseCommand):
         InlineQuestion.objects.all().delete()
         InlineQuestionText.objects.all().delete()
         InlineQuestionResponse.objects.all().delete()
+        InlineQuestionResponseText.objects.all().delete()
         
         MessagingQuestionStandard.objects.all().delete()
         MessagingQuestion.objects.all().delete()

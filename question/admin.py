@@ -6,6 +6,7 @@ from question.models import (
     InlineQuestionResponse,
     InlineQuestionStandard,
     InlineQuestionText,
+    InlineQuestionResponseText,
     MessagingQuestion,
     MessagingQuestionResponse,
     MessagingQuestionStandard,
@@ -18,6 +19,7 @@ admin.site.register(InlineQuestionStandard)
 admin.site.register(InlineQuestion)
 admin.site.register(InlineQuestionResponse)
 admin.site.register(InlineQuestionText)
+admin.site.register(InlineQuestionResponseText)
 
 admin.site.register(MessagingQuestionStandard)
 admin.site.register(MessagingQuestion)

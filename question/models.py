@@ -26,16 +26,17 @@ class InlineQuestionStandard(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"InlineQuestion {self.id}"
+        return f"{self.id}"
 
 
 
 class InlineQuestionText(models.Model):
     text = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self) -> str:
-        return f"InlineQuestionText {self.text}"
+        return f"{self.text}"
 
 
 
@@ -46,19 +47,26 @@ class InlineQuestion(models.Model):
     inline_question_standard = models.ForeignKey(InlineQuestionStandard, on_delete=models.CASCADE)
     
     def __str__(self) -> str:
-        return f"InlineQuestion {self.question}"
+        return f"{self.question}"
 
 
-
-class InlineQuestionResponse(models.Model):
-    inline_question = models.ForeignKey(InlineQuestion, on_delete=models.CASCADE)
-    response = models.TextField(null=True, blank=True)
-    translated_response = models.TextField(null=True, blank=True)
+class InlineQuestionResponseText(models.Model):
+    text = models.CharField(max_length=255, blank=True, null=True)
+    translated_text = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self) -> str:
-        return f"{self.response}"
+        return f"{self.translated_text}"
+
+class InlineQuestionResponse(models.Model):
+    inline_question = models.ForeignKey(InlineQuestion, on_delete=models.CASCADE)
+    response = models.ForeignKey(InlineQuestionResponseText, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self) -> str:
+        return f"{self.inline_question.question.text} -> {self.response.translated_text}"
     
     
 
@@ -87,13 +95,14 @@ class MessagingQuestionStandard(models.Model):
     
     
     def __str__(self):
-        return f"MessagingQuestion {self.id}"
+        return f"{self.id}"
     
 
 class MessagingQuestionText(models.Model):
     text = models.CharField(max_length=255, blank=True, null=True)
     translated_text = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self) -> str:
         return f"{self.translated_text}"
@@ -111,6 +120,7 @@ class MessagingResponseOptionText(models.Model):
     option = models.TextField(blank=True, null=True)
     translated_option = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self) -> str:
         return f"{self.translated_option}"

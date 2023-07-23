@@ -6,7 +6,7 @@ from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
-from question.models import InlineQuestion, InlineQuestionResponse, InlineQuestionStandard, InlineQuestionText
+from question.models import InlineQuestion, InlineQuestionResponse, InlineQuestionResponseText, InlineQuestionStandard, InlineQuestionText
 from preference.models import Preference
 from question.tasks import translate_and_clean_inline_question_fields
 
@@ -22,7 +22,7 @@ def fetch_inline_question_from_api(client):
     if latest_inlinequestion:
         start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
         
-    print(f"Fetching inline questions from {start_date} to {end_date}")
+    kunfu_panda_logger.info(f"Fetching inline questions from {start_date} to {end_date}")
         
     return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
 
@@ -54,7 +54,7 @@ def fetch_inline_questions_from_api_to_db():
             print('An error occurred during inline questions creation:', str(e))
             transaction.set_rollback(True)
             raise
-    kunfu_panda_logger.info(f'Added {len(inline_questions)} messaging questions to the database')
+    kunfu_panda_logger.info(f'Added {len(inline_questions)} inline questions to the database')
     
     translate_and_clean_inline_question_fields()
        
@@ -112,7 +112,7 @@ def add_inline_question_to_db(inline_question):
     #  get or create inline question text
     for response_list in responses_list:
         inline_question_text, _ = InlineQuestionText.objects.get_or_create(
-            text = response_list.get('key'),
+            text = response_list.get('key')
         )
         
         inline_question = InlineQuestion.objects.create(
@@ -121,7 +121,10 @@ def add_inline_question_to_db(inline_question):
         )
         
         # create inline question response 
+        inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
+            text = response_list.get('value')
+        )
         InlineQuestionResponse.objects.create(
             inline_question = inline_question,
-            response = response_list.get('value')
+            response = inline_question_response_text
         )
