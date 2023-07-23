@@ -15,17 +15,19 @@ from common.helpers.model_helpers.preference import (
 )
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
-from common.utils.date_utils import todays_date
+from common.utils.date_utils import previous_dates, todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
 from preference.models import Preference
+from preference.tasks import translate_gender, translate_language
 
 
 
-kunfu_panda_logger = KunfuPandaLogger()
+kunfu_panda_logger = KunfuPandaLogger(log_file="kunfu_panda_logs/preference_tasks.log")
 
 
 def fetch_preferences_from_api(client):
-    start_date= APPLICATION_POSSIBLE_START_DATE
+    # start_date= APPLICATION_POSSIBLE_START_DATE
+    start_date= previous_dates()
     end_date= todays_date()
     
     # get the last time preferences were fetched
@@ -51,6 +53,10 @@ def fetch_preferences_from_api_to_db():
             raise
         
     kunfu_panda_logger.info(f'Added {len(preferences)} preferences to the database')
+    
+    # call the translate, gender, language and sector of work functions
+    translate_gender.delay()
+    translate_language.delay()
 
 
 def add_preference_to_db(preference):
