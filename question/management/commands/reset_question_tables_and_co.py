@@ -6,7 +6,7 @@ from question.models import (
     InlineQuestionStandard, 
     InlineQuestionText,
     MessagingQuestion,
-    MessagingQuestionOptionResponseAnswer,
+    MessagingResponse,
     MessagingQuestionResponse, 
     MessagingQuestionStandard
 )
@@ -23,6 +23,6 @@ class Command(BaseCommand):
         MessagingQuestionStandard.objects.all().delete()
         MessagingQuestion.objects.all().delete()
         MessagingQuestionResponse.objects.all().delete()
-        MessagingQuestionOptionResponseAnswer.objects.all().delete()
+        MessagingResponse.objects.all().delete()
     
         self.stdout.write(self.style.SUCCESS('Successfully reset questions tables and co tables'))

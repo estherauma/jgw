@@ -1,16 +1,21 @@
 from django.db import transaction
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
+from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
-from common.utils.date_utils import todays_date
+from common.utils.date_utils import previous_dates, todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
-from question.models import MessagingQuestion, MessagingQuestionOptionResponseAnswer, MessagingQuestionResponse, MessagingQuestionStandard
+from question.models import MessagingQuestion, MessagingQuestionResponse, MessagingQuestionStandard, MessagingResponse
 from preference.models import Preference
+from question.tasks import translate_and_clean_messaging_question_fields
 
+
+kunfu_panda_logger = KunfuPandaLogger(log_file="kunfu_panda_logs/messaging_question_tasks.log")
 
 def fetch_messaging_question_from_api(client, start_date='2020-01-01', end_date='2023-06-26'):
-    start_date = APPLICATION_POSSIBLE_START_DATE
+    # start_date = APPLICATION_POSSIBLE_START_DATE
+    start_date = "2022-06-20"
     end_date = todays_date()
     
     # get the last time inline question were fetched
@@ -35,6 +40,10 @@ def fetch_messaging_questions_from_api_to_db():
             print('An error occurred during inline questions creation:', str(e))
             transaction.set_rollback(True)
             raise
+    kunfu_panda_logger.info(f'Added {len(messaging_questions)} messaging questions to the database')
+    
+   # call to translate, question text, response
+    translate_and_clean_messaging_question_fields()
  
        
 def add_messaging_question_to_db(messaging_question):
@@ -94,23 +103,27 @@ def add_messaging_question_to_db(messaging_question):
         )
         
         question_responses = messaging_question.get('questionResponse')
-        question_response_data_type = type(question_responses)
         
-        if question_response_data_type is str:
-            # add response as response_text, response_option_type='text' by default
-            MessagingQuestionResponse.objects.create(
-                messaging_question = new_messaging_question,
-                response_text = question_responses
+        print(question_responses)
+        
+        if isinstance(question_responses, str):
+            new_question_response = MessagingResponse.objects.create(
+                option = question_responses,
+                value = question_responses
             )
-
-        if question_response_data_type is list:
-            new_messaging_question_response = MessagingQuestionResponse.objects.create(
+            messaging_question_response = MessagingQuestionResponse.objects.create(
                 messaging_question = new_messaging_question,
-                response_option_type = "multiple"
+            )
+            messaging_question_response.responses.add(new_question_response)
+            
+
+        if isinstance(question_responses , list):
+            messaging_question_response = MessagingQuestionResponse.objects.create(
+                messaging_question = new_messaging_question,
             )
             for response_option in question_responses:
-                MessagingQuestionOptionResponseAnswer.objects.create(
-                    messaging_question_response = new_messaging_question_response,
+                new_question_response = MessagingResponse.objects.create(
                     option = response_option.get('value'),
-                    answer = response_option.get('isChecked')
+                    value = response_option.get('isChecked')
                 )
+                messaging_question_response.responses.add(new_question_response)

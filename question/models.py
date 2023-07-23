@@ -91,41 +91,28 @@ class MessagingQuestionStandard(models.Model):
     
 class MessagingQuestion(models.Model):
     question = models.CharField(max_length=255, blank=True, null=True)
+    translated_question = models.CharField(max_length=255, blank=True, null=True)
     messaging_question_standard = models.ForeignKey(MessagingQuestionStandard, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"MessagingQuestion {self.question}"
+        return f"{self.question} {self.translated_question}"
+
     
-
-MESAGING_QUESTION_RESPONSE_OPTION_TYPE_CHOICES = (
-    ('text', 'Text'),
-    ('multiple', 'Multiple'),
-)
-
+class MessagingResponse(models.Model):
+    option = models.CharField(max_length=255, blank=True, null=True)
+    value = models.TextField(blank=True, null=True)
+    translated_option = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.option} {self.translated_option}"
+    
 class MessagingQuestionResponse(models.Model):
     messaging_question = models.ForeignKey(MessagingQuestion, on_delete=models.CASCADE)
-    response_text = models.CharField(max_length=255, blank=True, null=True)
-    response_option_type = models.CharField(
-        max_length=255,
-        choices=MESAGING_QUESTION_RESPONSE_OPTION_TYPE_CHOICES,
-        blank=True,
-        null=True,
-        default="text"
-    )
+    responses = models.ManyToManyField(MessagingResponse)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    def __str__(self):
-        return f"MessagingQuestionResponse {self.response_text}"
-    
-class MessagingQuestionOptionResponseAnswer(models.Model):
-    messaging_question_response = models.ForeignKey(MessagingQuestionResponse, on_delete=models.CASCADE)
-    option = models.CharField(max_length=255, blank=True, null=True)
-    answer = models.CharField(max_length=255, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f"MessagingQuestionResponseOption {self.option}"
