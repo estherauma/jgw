@@ -1,4 +1,5 @@
 from common.const.value_const import NOT_SPECIFIED
+from common.custom_libs.pandas.language_codes import get_language_name
 from common.custom_libs.pandas.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
 from common.helpers.model_helpers.get_create import get_or_create_model_instance
 from preference.models import Age, Country, FactoryFarm, Gender, Language, Organisation, OrganisationSector, Route, SectorOfWork
@@ -35,8 +36,13 @@ def get_or_add_age_to_db(age_range: str) -> Age:
     return age_instance
 
 
-def get_or_add_language_to_db(language_name: str) -> Language:
-    return get_or_create_model_instance(Language, language_name)
+def get_or_add_language_to_db(language_code: str) -> Language:
+    language_name_from_code = get_language_name(language_code)
+    instance, _ = Language.objects.get_or_create(
+        code = language_code or NOT_SPECIFIED, 
+        name = language_name_from_code.lower() or NOT_SPECIFIED
+    )
+    return instance
 
 def get_or_add_route_to_db(route_name: str) -> Route:
     return get_or_create_model_instance(Route, route_name)

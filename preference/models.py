@@ -46,17 +46,18 @@ class Country(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f'{self.name} ({self.code})'
+        return f'{self.code} - {self.name}'
 
 class Language(models.Model):
     name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255, null=True, blank=True)
     translated_name = models.CharField(max_length=255, null=True, blank=True)
     translated_to = models.CharField(max_length=255, default='en')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.name
+        return f"{self.code} - {self.name}"
     
 class Route(models.Model):
     name = models.CharField(max_length=255)
@@ -76,7 +77,7 @@ class Gender(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.translated_name}"
     
 class Age(models.Model):
     range = models.CharField(max_length=255)
