@@ -6,7 +6,7 @@ from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import previous_dates, todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
-from question.models import MessagingQuestion, MessagingQuestionResponse, MessagingQuestionStandard, MessagingResponse
+from question.models import MessagingQuestion, MessagingQuestionResponse, MessagingQuestionStandard, MessagingQuestionText, MessagingResponse, MessagingResponseOptionText
 from preference.models import Preference
 from question.tasks import translate_and_clean_messaging_question_fields
 
@@ -95,17 +95,25 @@ def add_messaging_question_to_db(messaging_question):
         messaging_question_text = messaging_question.get('questionText')
         if  messaging_question_text is not None and len(messaging_question_text) > 0:
             messaging_question_text = messaging_question_text[0]
+            
+        messaging_question_text_object, _ = MessagingQuestionText.objects.get_or_create(
+            text = messaging_question_text,
+        )
         
         new_messaging_question = MessagingQuestion.objects.create(
-            question = messaging_question_text,
+            question = messaging_question_text_object,
             messaging_question_standard = messaging_question_standard
         )
         
         question_responses = messaging_question.get('questionResponse')
         
         if isinstance(question_responses, str):
-            new_question_response = MessagingResponse.objects.create(
+            messaging_question_response_option_object, _ = MessagingResponseOptionText.objects.get_or_create(
                 option = question_responses,
+            )
+                    
+            new_question_response = MessagingResponse.objects.create(
+                option = messaging_question_response_option_object,
                 value = question_responses
             )
             messaging_question_response = MessagingQuestionResponse.objects.create(
@@ -119,8 +127,11 @@ def add_messaging_question_to_db(messaging_question):
                 messaging_question = new_messaging_question,
             )
             for response_option in question_responses:
-                new_question_response = MessagingResponse.objects.create(
+                messaging_question_response_option_object, _ = MessagingResponseOptionText.objects.get_or_create(
                     option = response_option.get('value'),
+                )
+                new_question_response = MessagingResponse.objects.create(
+                    option = messaging_question_response_option_object,
                     value = response_option.get('isChecked')
                 )
                 messaging_question_response.responses.add(new_question_response)

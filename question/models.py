@@ -89,27 +89,40 @@ class MessagingQuestionStandard(models.Model):
     def __str__(self):
         return f"MessagingQuestion {self.id}"
     
+
+class MessagingQuestionText(models.Model):
+    text = models.CharField(max_length=255, blank=True, null=True)
+    translated_text = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
+    def __str__(self) -> str:
+        return f"{self.translated_text}"
+        
 class MessagingQuestion(models.Model):
-    question = models.CharField(max_length=255, blank=True, null=True)
-    translated_question = models.CharField(max_length=255, blank=True, null=True)
+    question = models.ForeignKey(MessagingQuestionText, on_delete=models.CASCADE, null=True, blank=True)
     messaging_question_standard = models.ForeignKey(MessagingQuestionStandard, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.translated_question}"
+        return f"{self.question.translated_text}"
 
+class MessagingResponseOptionText(models.Model):
+    option = models.TextField(blank=True, null=True)
+    translated_option = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
+    def __str__(self) -> str:
+        return f"{self.translated_option}"
+        
 class MessagingResponse(models.Model):
-    option = models.CharField(max_length=255, blank=True, null=True)
+    option = models.ForeignKey(MessagingResponseOptionText, on_delete=models.CASCADE, null=True, blank=True)
     value = models.TextField(blank=True, null=True)
-    translated_option = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.translated_option}"
+        return f"{self.option.translated_option}"
     
 class MessagingQuestionResponse(models.Model):
     messaging_question = models.ForeignKey(MessagingQuestion, on_delete=models.CASCADE)
