@@ -2,7 +2,7 @@ import requests
 
 class JustGoodWorkAPIClient:
     def __init__(self):
-        self.base_url = 'http://api.justgood.work/api/v2'
+        self.base_url = 'https://sapi.justgood.work/api/v2'
 
     def get_data(self, endpoint):
         url = f'{self.base_url}{endpoint}'
