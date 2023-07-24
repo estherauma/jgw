@@ -17,6 +17,8 @@ import requests
 import json
 
 from preference.logic.add_preferences_logic import fetch_preferences_from_api_to_db
+from question.logic.add_inline_question_logic import fetch_inline_questions_from_api_to_db
+from question.logic.add_messaging_question_logic import fetch_messaging_questions_from_api_to_db
 
 client = translate.Client()
 
@@ -30,6 +32,8 @@ def translate_to_eng(text, client=client):
 
 def fetch_data_from_jgw_api():
     fetch_preferences_from_api_to_db()
+    fetch_inline_questions_from_api_to_db()
+    fetch_messaging_questions_from_api_to_db()
     
 @shared_task(name="get_jgw_data")
 def fetch_API_data(category=None):

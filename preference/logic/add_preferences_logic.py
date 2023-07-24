@@ -2,19 +2,27 @@
 from django.db import transaction
 
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
-from common.custom_libs.pandas.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
-from common.helpers.model_helpers.get_create import get_or_create_model_instance
+from common.helpers.model_helpers.preference import (
+    add_sector_of_work_to_db,
+    get_or_add_age_to_db,
+    get_or_add_country_to_db,
+    get_or_add_factory_farm_to_db,
+    get_or_add_gender_to_db,
+    get_or_add_language_to_db,
+    get_or_add_organisation_sector_to_db,
+    get_or_add_organisation_to_db,
+    get_or_add_route_to_db
+)
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
-from common.utils.date_utils import todays_date
+from common.utils.date_utils import previous_dates, todays_date
 from common.utils.preferences import get_origin_and_destination_from_route
-from preference.models import (
-    Age, Country, FactoryFarm, Gender, Organisation, OrganisationSector, Preference, SectorOfWork, Language, Route
-    )
+from preference.models import Preference
+from preference.tasks import translate_and_clean_preferences_fields
 
 
 
-kunfu_panda_logger = KunfuPandaLogger()
+kunfu_panda_logger = KunfuPandaLogger(log_file="kunfu_panda_logs/preference_tasks.log")
 
 
 def fetch_preferences_from_api(client):
@@ -44,6 +52,9 @@ def fetch_preferences_from_api_to_db():
             raise
         
     kunfu_panda_logger.info(f'Added {len(preferences)} preferences to the database')
+    
+    # call celery to the translate, gender, language and sector of work functions
+    translate_and_clean_preferences_fields()
 
 
 def add_preference_to_db(preference):
@@ -104,55 +115,4 @@ def add_preference_to_db(preference):
             new_preference.sectors_of_work.add(sec_of_work)
 
 
-
-def get_or_add_organisation_sector_to_db(organisation_sector: str) -> OrganisationSector:
-    return get_or_create_model_instance(OrganisationSector, organisation_sector)
-
-def get_or_add_organisation_to_db(organisation: str) -> Organisation:
-    return get_or_create_model_instance(Organisation, organisation)
-
-def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
-    return get_or_create_model_instance(FactoryFarm, factory_farm)
-
-def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
-        if country_name:
-            country_instance, _ = Country.objects.get_or_create(
-                code= aplha_code_from_country_name(country_name) or NOT_SPECIFIED,
-                name= country_name_from_aplha_code(country_name) or NOT_SPECIFIED
-            )
-            return country_instance
-        else:
-            country_instance, _ = Country.objects.get_or_create(
-                code= NOT_SPECIFIED,
-                name= NOT_SPECIFIED
-            )
-            return country_instance
-
-def get_or_add_gender_to_db(gender: str) -> Gender:
-    return get_or_create_model_instance(Gender, gender)
-
-def get_or_add_age_to_db(age_range: str) -> Age:
-    age_instance, _ = Age.objects.get_or_create(range= age_range or NOT_SPECIFIED)
-    return age_instance
-
-
-def get_or_add_language_to_db(language_name: str) -> Language:
-    return get_or_create_model_instance(Language, language_name)
-
-def get_or_add_route_to_db(route_name: str) -> Route:
-    return get_or_create_model_instance(Route, route_name)
-
-def add_sector_of_work_to_db(sectors_of_work: list[str]) -> list[SectorOfWork]:
-    sector_list = []
-    
-    # Check if sectors_of_work is empty
-    if not sectors_of_work:
-        sector, _ = SectorOfWork.objects.get_or_create(name=NOT_SPECIFIED)
-        sector_list.append(sector)
-    else:
-        for sector_name in sectors_of_work:
-            sector, _ = SectorOfWork.objects.get_or_create(name=sector_name)
-            sector_list.append(sector)
-
-    return sector_list
     
