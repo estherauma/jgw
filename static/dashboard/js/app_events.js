@@ -69,20 +69,22 @@ function plotChat(key, labels, values) {
       },
     };
   }else{
+    firstGraphBg = COLORS.navyBlue;
+    secondGraphOneBg = COLORS.skyBlue;
     chapersAndChapterFeedbackChartConfig = {
       type: "bar",
       data: {
         labels: labels,
         datasets: [
           {
-            label: values[0].label,
-            data: values[0].data,
+            label: values[1].label,
+            data: values[1].data,
             backgroundColor: firstGraphBg,
             ...genericBarGraphDatasetConfig,
           },
           {
-            label: values[1].label,
-            data: values[1].data,
+            label: values[0].label,
+            data: values[0].data,
             backgroundColor: secondGraphOneBg,
             ...genericBarGraphDatasetConfig,
           },

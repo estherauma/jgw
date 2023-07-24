@@ -172,9 +172,10 @@ class AppEvents(BaseAnalytics):
             chapters_df = chapters_df.rename(columns={'users': 'Users', 'count': 'Count', 'chapters': 'chapters'})
             chapters_df["chapters"] = chapters_df["chapters"].replace(event_to_title)
             chapters_df = chapters_df.set_index("chapters")
-            
+
         chapters_df = chapters_df.groupby(level=0).sum()
-        chapters_df.sort_values(by='Count', ascending=False, inplace=True)
+        if len(chapters_df.columns):
+            chapters_df.sort_values(by='Count', ascending=False, inplace=True)
 
         return chapters_df
     
