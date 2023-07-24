@@ -167,14 +167,15 @@ class AppEvents(BaseAnalytics):
         ).values('chapters', 'users', 'count'))
         
         chapters_df = pd.DataFrame(chapters_data)
-        
+
         if not chapters_df.columns.empty:
             chapters_df = chapters_df.rename(columns={'users': 'Users', 'count': 'Count', 'chapters': 'chapters'})
             chapters_df["chapters"] = chapters_df["chapters"].replace(event_to_title)
             chapters_df = chapters_df.set_index("chapters")
             
         chapters_df = chapters_df.groupby(level=0).sum()
-        
+        chapters_df.sort_values(by='Count', ascending=False, inplace=True)
+
         return chapters_df
     
     def total_intalls_data(self, start_date=None, end_date=None):

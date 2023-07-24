@@ -163,3 +163,4 @@ celerybeat-schedule.db
 ./preferences.xlsx
 /*.xlsx
 summerberry_data.json
+manual_clean.py
