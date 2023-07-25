@@ -414,7 +414,6 @@ def summerberry_dashboard(request):
         data = json.load(json_file)
 
     context = { 'data': data}
-    print(context['data'][0])
     return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
 
 
