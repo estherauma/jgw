@@ -57,13 +57,13 @@
                             <tr>
                                 <td>{{ worker.name }}</td>
                                 <td>{{ worker.employeeID }}</td>
-                                <td>{{ worker.start_date }}</td>
-                                <td>{{ worker.reg_date }}</td>
+                                <td>{{ worker.startDate }}</td>
+                                <td>{{ worker.registrationDate }}</td>
                                 <td>
-                                    {% if worker.completedRegistration %}
-                                    <span class="badge bg-success">{{ worker.completedRegistration }}</span>
+                                    {% if worker.completedRegistration == 1 %}
+                                    <span class="badge bg-success">Yes</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.completedRegistration }}</span>
+                                    <span class="badge bg-danger">No</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -74,10 +74,10 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if worker.contractSigned %}
-                                    <span class="badge bg-success">{{ worker.contractSigned }}</span>
+                                    {% if worker.contractSigned == 1 %}
+                                    <span class="badge bg-success">Yes</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.contractSigned }}</span>
+                                    <span class="badge bg-danger">No</span>
                                     {% endif %}
                                 </td>
 
@@ -92,17 +92,17 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if worker.hygieneSigned %}
-                                    <span class="badge bg-success">{{ worker.hygieneSigned }}</span>
+                                    {% if worker.hygieneSigned == 1 %}
+                                    <span class="badge bg-success">Yes</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.hygieneSigned }}</span>
+                                    <span class="badge bg-danger">No</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if worker.medicalSigned %}
-                                    <span class="badge bg-success">{{ worker.medicalSigned }}</span>
+                                    {% if worker.medicalSigned == 1 %}
+                                    <span class="badge bg-success">Yes</span>
                                     {% else %}
-                                    <span class="badge bg-danger">{{ worker.medicalSigned }}</span>
+                                    <span class="badge bg-danger">No</span>
                                     {% endif %}
                                 </td>
                             </tr>
