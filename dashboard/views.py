@@ -322,7 +322,6 @@ def test_sentry(request):
     division_error = 1 / 0
 
 
-
 def landing(request):
     return render(request, template_name="landing/landing_page.html")
 
@@ -414,7 +413,7 @@ def summerberry_dashboard(request):
     with open('summerberry_data.json') as json_file:
         data = json.load(json_file)
 
-    context = { 'data': data['portal']}
+    context = { 'data': data}
     print(context['data'][0])
     return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
 
