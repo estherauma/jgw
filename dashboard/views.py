@@ -140,7 +140,6 @@ def filter_data(request, category):
             data = get_user_overview_data(filters=filters)
         response_count = 0
         if category == "inline" or category == "messaging":
-            # print(data)
             response_count, raw_chart_data = itemgetter("response_count", "data")(data)
             chart_data = form_chart_data(raw_chart_data)
             return JsonResponse({"chart_data": chart_data, "response_count": response_count, "filter_state": list_of_filters })
