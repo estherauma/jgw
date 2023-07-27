@@ -22,7 +22,7 @@ from preference.tasks import translate_and_clean_preferences_fields
 
 
 
-kunfu_panda_logger = KunfuPandaLogger(log_file="kunfu_panda_logs/preference_tasks.log")
+kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
 
 
 def fetch_preferences_from_api(client):
