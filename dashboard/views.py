@@ -21,6 +21,7 @@ from common.user_overview import get_user_overview_data
 from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
 from common.helpers.common import HELPERS, HelpersParameters
 from dashboard.models import Route
+from jgwpandas.settings import BASE_DIR
 
 
 
@@ -410,7 +411,7 @@ def notifications(request):
         })
 
 def summerberry_dashboard(request):
-    with open('summerberry_data.json') as json_file:
+    with open(BASE_DIR + '/summerberry_data.json') as json_file:
         data = json.load(json_file)
 
     context = { 'data': data}
