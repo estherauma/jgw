@@ -6,7 +6,7 @@
 
 <!-- page content -->
 {% block content %}
-{% include 'includes/dashboard_banner.html' with title="Messaging/Spot Questions" export_buttons_config=messaging_export_buttons_config %}
+{% include 'includes/dashboard_banner.html' with title="MESSAGING/SPOT QUESTIONS" counter_id="messaging-question-response-count" export_buttons_config=messaging_export_buttons_config %}
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -54,18 +54,36 @@
         No data matches this search!
     </div>
 
-    <div class="row" id="chart-area">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <canvas id="locale_graphcard"></canvas>
+    <div id="chart-area">
+        <div class="row">
+
+            <div class="col-md-8 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">Responses per Origin Country</p>
+                        <div class="messaging_question_origin_graphcard-chart-box">
+                            <div id="messaging_question_origin_graphcard"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <canvas id="route_graphcard"></canvas>
+
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">Responses per Destination Country</p>
+                        <div class="scrollable-table-container">
+                            <table class="table" id="messaging_question_destination_table">
+                                <thead>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -73,5 +91,7 @@
 
 <!-- ChartJS script  -->
 {% block scripts %}
+<script src="{% static 'dashboard/js/charts/messaging_question_destination_table.js' %}"></script>
+<script src="{% static 'dashboard/js/charts/messaging_question_origin_chart.js' %}"></script>
 <script src="{% static 'dashboard/js/messaging.js' %}"></script>
 {% endblock %}

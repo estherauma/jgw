@@ -190,7 +190,24 @@ class AppEvents(BaseAnalytics):
         total_installs_df = pd.DataFrame({'total_installs': [total_installs_data.get("users")]})
         
         return total_installs_df
-        
+    
+    def get_first_open_home_page(self, event_name, start_date=None, end_date=None):
+        data = BigQueryFirstOpenHomepageData.objects.filter(
+                event_date__range=[start_date, end_date],
+                event_name=event_name
+        ).values('event_date', 'users')
+
+        df = pd.DataFrame(data)
+
+        if not df.columns.empty:
+            df['event_date'] = pd.to_datetime(df['event_date'])
+            df = df.set_index("event_date")
+            date_range = pd.date_range(start=start_date, end=end_date)
+            df = df.reindex(date_range)
+            df = df['users'].fillna(0)
+            df.index = df.index.strftime('%b %d')
+
+        return df      
 
     def get_data(self, filters: QueryMap = None, start=None, end=None):
         end_date = end if end else previous_dates(days=1)

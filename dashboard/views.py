@@ -21,7 +21,8 @@ from common.user_overview import get_user_overview_data
 from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
 from common.helpers.common import HELPERS, HelpersParameters
 from dashboard.models import Route
-
+from jgwpandas.settings import BASE_DIR
+from dashboard.models import JGWCache
 
 
 from .forms import (
@@ -139,7 +140,7 @@ def filter_data(request, category):
         else:
             data = get_user_overview_data(filters=filters)
         response_count = 0
-        if category == "inline":
+        if category == "inline" or category == "messaging":
             response_count, raw_chart_data = itemgetter("response_count", "data")(data)
             chart_data = form_chart_data(raw_chart_data)
             return JsonResponse({"chart_data": chart_data, "response_count": response_count, "filter_state": list_of_filters })
@@ -152,7 +153,12 @@ def filter_data(request, category):
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     
-    return JsonResponse({"chart_data": chart_data, "filter_state":  list_of_filters, "response_count":response_count})
+    return JsonResponse({
+        "chart_data": chart_data, 
+        "filter_state":  list_of_filters, 
+        "response_count":response_count,
+        "new_and_returning_users": data["preference_new_and_returning_users"]
+        })
 
 
 @login_required()
@@ -206,7 +212,6 @@ def app_events_stats(request):
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, template_name, context=context_data)
-    # print('cccccc', chart_data)
     context_data.update({"data": chart_data})
     if helper.cleaned is False:
         messages.info(
@@ -410,13 +415,6 @@ def notifications(request):
         })
 
 def summerberry_dashboard(request):
-    with open('summerberry_data.json') as json_file:
-        data = json.load(json_file)
-
-    context = { 'data': data}
-    print(context['data'][0])
+    jgwcache_entry = JGWCache.objects.filter(category='summerberry').first()
+    context = { 'data': jgwcache_entry.data}
     return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
-
-
-
-

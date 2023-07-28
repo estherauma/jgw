@@ -17,3 +17,6 @@ add_genders:
 
 runserver:
 	python manage.py runserver
+
+runtests:
+	coverage run manage.py test

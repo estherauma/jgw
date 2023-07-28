@@ -11,7 +11,7 @@ from preference.models import Preference
 from question.tasks import translate_and_clean_inline_question_fields
 
 
-kunfu_panda_logger = KunfuPandaLogger(log_file="kunfu_panda_logs/inline_question_tasks.log")
+kunfu_panda_logger = KunfuPandaLogger(log_file="logs/inline_question_tasks.log")
 
 def fetch_inline_question_from_api(client):
     start_date = APPLICATION_POSSIBLE_START_DATE
