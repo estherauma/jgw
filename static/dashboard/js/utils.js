@@ -91,7 +91,7 @@ function scrollableVerticalBarChart(containerId, data, chartConfig) {
   graphDiv = document.getElementById(containerId)
   
   let canvas = document.createElement('canvas')
-  let canvasId = `canvas_${containerId}`
+  let canvasId = `canvas-${containerId}`
   canvas.setAttribute('id', canvasId)
   canvas.setAttribute('class', "chartContainer")
   graphDiv.appendChild(canvas)
@@ -108,12 +108,10 @@ function scrollableVerticalBarChart(containerId, data, chartConfig) {
   let currentChartBox = document.querySelector(`.${containerId}-chart-box`)
 
   if (totalChart <= 10) {
-      totalHeight = `${totalChart * 50}px`
-  } else if (totalChart > 20) {
-      totalHeight = `${totalChart * 20}px`
-      currentChartBox.classList.add('generic-chart-box')
+      totalHeight = `${totalChart * 30}px`
   } else {
-      totalHeight = `${totalChart * 20}px`
+      totalHeight = `${totalChart * 30}px`
+      currentChartBox.classList.add('generic-chart-box')
   }
   graphDiv.style.height = totalHeight;
 }

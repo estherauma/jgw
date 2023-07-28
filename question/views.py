@@ -1,3 +1,56 @@
 from django.shortcuts import render
+from core.forms import GenericFilterForm
+from question.models import MessagingQuestionStandard
+from question.repository.messaging_questions_standard import (
+    get_messaging_question_per_destination_counts, 
+    get_messaging_question_per_origin_counts,
+    messaging_questions_count
+)
 
-# Create your views here.
+
+
+def messaging_question(request):
+    
+    if request.method != 'POST':
+        filter_form = GenericFilterForm()
+        total_messaging_questions = messaging_questions_count()
+        messaging_question_per_origin = get_messaging_question_per_origin_counts()
+        messaging_question_per_destination = get_messaging_question_per_destination_counts()
+        
+    else:
+        filter_form = GenericFilterForm(request.POST)
+        if filter_form.is_valid():
+            start_date = filter_form.cleaned_data['start_date']
+            end_date = filter_form.cleaned_data['end_date']
+            destinations = filter_form.cleaned_data['destination']
+            origins = filter_form.cleaned_data['origin']
+            print(start_date, end_date, destinations, origins)
+            
+        total_messaging_questions = messaging_questions_count(
+            start_date=start_date,
+            end_date=end_date,
+        )
+        
+        messaging_question_per_origin = get_messaging_question_per_origin_counts(
+            start_date=start_date,
+            end_date=end_date,
+        )
+        
+        messaging_question_per_destination = get_messaging_question_per_destination_counts(
+            start_date=start_date,
+            end_date=end_date,
+        )
+    
+    
+
+    context = {
+        "total_messaging_questions": total_messaging_questions,
+        "messaging_question_per_origin": messaging_question_per_origin,
+        "messaging_question_per_destination": messaging_question_per_destination,
+        'filter_form': filter_form,
+    }
+    return render(
+        request,
+        "question/messaging_question.html", 
+        context = context
+    )

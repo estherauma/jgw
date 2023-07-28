@@ -1,0 +1,61 @@
+
+{% extends 'core/layouts/base.html' %}
+{% load crispy_forms_tags %}
+
+{% load static %}
+
+<!-- title -->
+{% block title %} Messaging Questions {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+
+<div class="container mb-4">
+    <form method="post">
+        {% csrf_token %}
+        {{filter_form|crispy}}
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+<div>
+    <h3>{{total_messaging_questions}}</h3>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Messaging question per origin</p>
+                <div class="messaging-question-origin-chart-id-chart-box">
+                    <div id="messaging-question-origin-chart-id"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Messaging question per destination</p>
+                <div id="messaging-question-destination-chart-id-chart-box">
+                    <div id="messaging-question-destination-chart-id"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+<script type="text/javascript">
+    // get data from context
+    var originData = {{ messaging_question_per_origin|safe }};
+    var destinationData = {{ messaging_question_per_destination|safe }};
+</script>
+
+<script src="{% static 'js/charts/bar/messaging_question_origin_graph.js' %}"></script>
+<script src="{% static 'js/charts/bar/messaging_question_destination_graph.js' %}"></script>
+<script src="{% static 'js/app/messaging_question.js' %}"></script>
+{% endblock %}
