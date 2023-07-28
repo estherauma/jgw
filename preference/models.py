@@ -46,7 +46,7 @@ class Country(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f'{self.code} - {self.name}'
+        return f'{self.name}'
 
 class Language(models.Model):
     name = models.CharField(max_length=255)
@@ -57,7 +57,7 @@ class Language(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.code} - {self.name}"
+        return f"{self.name}"
     
 class Route(models.Model):
     name = models.CharField(max_length=255)

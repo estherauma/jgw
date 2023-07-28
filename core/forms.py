@@ -21,12 +21,14 @@ class GenericFilterForm(forms.Form):
         )
     )
 
-    destination = forms.ModelChoiceField(
+    destination = forms.ModelMultipleChoiceField(
         queryset=Country.objects.all(),
+        widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "destination"}),
         required=False
     )
 
-    origin = forms.ModelChoiceField(
+    origin = forms.ModelMultipleChoiceField(
         queryset=Country.objects.all(),
+        widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "origin"}),
         required=False
     )

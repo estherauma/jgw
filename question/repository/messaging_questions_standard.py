@@ -24,7 +24,7 @@ def get_messaging_question_per_origin_counts(start_date=None, end_date=None):
     ).order_by()
     
     origin_data = [count['count'] for count in origin_counts_data]
-    origin_labels = [count['origin__name'] for count in origin_counts_data]
+    origin_labels = [count['origin__name'].upper() for count in origin_counts_data]
     
     return {
             "data": origin_data,
@@ -54,7 +54,7 @@ def get_messaging_question_per_destination_counts(start_date=None, end_date=None
     
     
     destination_data = [count['count'] for count in destination_counts_data]
-    destination_labels = [count['destination__name'] for count in destination_counts_data]
+    destination_labels = [count['destination__name'].upper() for count in destination_counts_data]
     
     return {
             "data": destination_data,

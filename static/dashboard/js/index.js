@@ -1,1 +1,2 @@
 $('#destination').multiselect(); 
+$('#origin').multiselect();
