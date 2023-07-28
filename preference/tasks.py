@@ -4,7 +4,7 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.logger import KunfuPandaLogger
 from preference.models import Gender, Language, SectorOfWork
 
-kunfu_panda_logger = KunfuPandaLogger(log_file="kunfu_panda_logs/preference_tasks.log")
+kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
 
 
 def translate_and_clean_gender():

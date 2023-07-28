@@ -134,6 +134,9 @@ function filterData() {
                 if (Object.keys(chartData).length === 0) {
                     toggleElementDisplay(true, '#no-results')
                 } else {
+                    responseCountValue = data['response_count']
+                    const responseCountElement = document.querySelector('#messaging-question-response-count')
+                    responseCountElement.textContent = responseCountValue
                     plotCharts(chartData)
                     toggleElementDisplay(true, '#chart-area')
                 }
@@ -150,72 +153,18 @@ function filterData() {
 
 function plotCharts(chartData) {
     if (chartData) {
-        for (const [key, values] of Object.entries(chartData)) {
-            const elementId = `${key}_graphcard`
-            const backgroundColor = elementId === 'route_graphcard' ?  COLORS.appleGreen : COLORS.skyBlue
-
-            const chartConfig = {
-                type: "bar",
-                data: {
-                    labels: values.labels,
-                    label: "countries",
-                    datasets: [
-                        {
-                            label: "message questions",
-                            data: shuffleArray(values.data),
-                            backgroundColor: backgroundColor,
-                            ...genericBarGraphDatasetConfig
-                        },
-                    ],
-                },
-                options: {
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            ticks: {
-                                display: true,
-                            },
-                            grid: {
-                                drawTicks: true,
-                                display: false
-                            },
-                            autoSkip: false,
-                            maxTicksLimit: 5,
-                            title: {
-                                display: true,
-                                text: key
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Number of message questions'
-                            },
-                            ticks: {
-                                display: true,
-                                fontColor: COLORS.navyBlue,
-                                fontSize: 12
-                            },
-                            grid: {
-                                drawBorder: false,
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'end',
-                            formatter: (value)  => changeThousandsToLetterK(value)
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels]
+        let chartDataKeys = Object.keys(chartData)
+        
+        chartDataKeys.map(chartDataKey => {
+            if (chartDataKey === "messaging_question_destination") {
+                messagingQestionDestinationTable(chartData['messaging_question_destination'])
             }
-
-            drawChart(elementId, values.data, chartConfig)
-        }
+    
+            if (chartDataKey === "messaging_question_origin") {
+                messagingQuestionOriginChart(chartData['messaging_question_origin'])
+            }
+    
+        })
     }
 }
 

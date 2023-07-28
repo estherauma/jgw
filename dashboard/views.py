@@ -21,7 +21,8 @@ from common.user_overview import get_user_overview_data
 from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictionaries
 from common.helpers.common import HELPERS, HelpersParameters
 from dashboard.models import Route
-
+from jgwpandas.settings import BASE_DIR
+from dashboard.models import JGWCache
 
 
 from .forms import (
@@ -139,7 +140,7 @@ def filter_data(request, category):
         else:
             data = get_user_overview_data(filters=filters)
         response_count = 0
-        if category == "inline":
+        if category == "inline" or category == "messaging":
             response_count, raw_chart_data = itemgetter("response_count", "data")(data)
             chart_data = form_chart_data(raw_chart_data)
             return JsonResponse({"chart_data": chart_data, "response_count": response_count, "filter_state": list_of_filters })
@@ -326,7 +327,6 @@ def test_sentry(request):
     division_error = 1 / 0
 
 
-
 def landing(request):
     return render(request, template_name="landing/landing_page.html")
 
@@ -415,13 +415,6 @@ def notifications(request):
         })
 
 def summerberry_dashboard(request):
-    with open('summerberry_data.json') as json_file:
-        data = json.load(json_file)
-
-    context = { 'data': data['portal']}
-    print(context['data'][0])
+    jgwcache_entry = JGWCache.objects.filter(category='summerberry').first()
+    context = { 'data': jgwcache_entry.data}
     return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
-
-
-
-

@@ -19,6 +19,9 @@ import json
 from preference.logic.add_preferences_logic import fetch_preferences_from_api_to_db
 from question.logic.add_inline_question_logic import fetch_inline_questions_from_api_to_db
 from question.logic.add_messaging_question_logic import fetch_messaging_questions_from_api_to_db
+from common.logger import KunfuPandaLogger
+
+from dashboard.models import JGWCache
 
 client = translate.Client()
 
@@ -120,6 +123,8 @@ def clean_data(category):
 
 @shared_task(name="fetch_summerberry_data")
 def summerberry_data():
+    logger = KunfuPandaLogger(log_file="logs/summerberry-api.log")
+    logger.info(f"Date time: {datetime.now()} - Starting data fetch")
     auth_api_username = os.getenv("SUMMERBERRY_API_USERNAME")
     auth_api_password = os.getenv("SUMMERBERRY_API_PASSWORD")
     auth_api_url = os.getenv("SUMMERBERRY_API_URL")
@@ -131,6 +136,14 @@ def summerberry_data():
         ).decode("utf-8")
     }
     response = requests.get(auth_api_url, headers=headers)
-    with open('summerberry_data.json', 'w') as outfile:
-        json.dump(response.json(), outfile)
+    if response.status_code != 200:
+        logger.error(f"Date time: {datetime.now()} - Error: {response.text}")
+        return
+    # create or update jgw cache
+    JGWCache.objects.update_or_create(
+        category="summerberry",
+        date_created=datetime.today().date(),
+        defaults={"data": response.json(), "is_cleaned": True},
+    )
+    logger.info(f"Date time: {datetime.now()} - Ending data fetch")
     return
