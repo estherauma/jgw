@@ -203,7 +203,7 @@ class AppEvents(BaseAnalytics):
             df['event_date'] = pd.to_datetime(df['event_date'])
             df = df.set_index("event_date")
             date_range = pd.date_range(start=start_date, end=end_date)
-            df = df.reindex(date_range)
+            df = df.reindex(date_range, keep='last')
             df = df['users'].fillna(0)
             df.index = df.index.strftime('%b %d')
 
