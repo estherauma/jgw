@@ -116,3 +116,11 @@
 .scrollable-table-container::-webkit-scrollbar-thumb:hover {
     background: #aeaeaf; 
 }
+
+#preference_user_trends_caption {
+    margin-top: 30px;
+    font-weight: 300;
+    font-size: 0.8rem;
+    color: #6E768E;
+    text-align: center;
+}

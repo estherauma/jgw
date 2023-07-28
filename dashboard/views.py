@@ -152,7 +152,12 @@ def filter_data(request, category):
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
     
-    return JsonResponse({"chart_data": chart_data, "filter_state":  list_of_filters, "response_count":response_count})
+    return JsonResponse({
+        "chart_data": chart_data, 
+        "filter_state":  list_of_filters, 
+        "response_count":response_count,
+        "new_and_returning_users": data["preference_new_and_returning_users"]
+        })
 
 
 @login_required()
@@ -206,7 +211,6 @@ def app_events_stats(request):
     except HTTPError:
         messages.error(request, "Error fetching data!")
         return render(request, template_name, context=context_data)
-    # print('cccccc', chart_data)
     context_data.update({"data": chart_data})
     if helper.cleaned is False:
         messages.info(
