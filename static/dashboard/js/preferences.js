@@ -184,6 +184,12 @@ function exportToExcel(url) {
 
 function plotCharts(chartData) {
     clearCharts()
+    chartData.preference_user_trends = {
+        'new_users': chartData["preference_new_users"],
+        'returning_users': chartData["preference_returning_users"],
+        'count': chartData["preference_new_and_returning_users"]
+    }
+
     let chartDataKeys = Object.keys(chartData)
     chartDataKeys.map(chartDataKey => {
         if (chartDataKey === "preference_age") {
@@ -209,7 +215,9 @@ function plotCharts(chartData) {
         if (chartDataKey === "preference_destination") {
             preferenceDestinationChart(chartData['preference_destination'])
         }
-        
+        if (chartDataKey === "preference_user_trends" ) {
+            userTrendsGraph(chartData['preference_user_trends'])
+        }
     })
 }
 
@@ -382,6 +390,83 @@ function organisationGraph(organisationGraphData) {
 
     drawChart('_organisation', data, chartConfig);
 }
+
+function userTrendsGraph(trendsData) {
+    const ctx = document.getElementById('preference_user_trends').getContext("2d");
+    const new_users = trendsData.new_users
+    const returning_users = trendsData.returning_users
+    const count = trendsData.count
+    const new_users_count = count.data[0]
+    const returning_users_count = count.data[1]
+
+    firstGraphBg = COLORS.navyBlue;
+    secondGraphOneBg = COLORS.skyBlue;
+
+    const chartConfig = {
+      type: "line",
+      data: {
+        labels: new_users.labels,
+        datasets: [
+          {
+            ...genericBarGraphDatasetConfig,
+            label: 'New users',
+            data: new_users.data,
+            backgroundColor: firstGraphBg,
+            borderColor:firstGraphBg
+          },
+          {
+            ...genericBarGraphDatasetConfig,
+            label: 'Users',
+            data: returning_users.data,
+            backgroundColor: secondGraphOneBg,
+            borderColor:secondGraphOneBg
+          },
+        ],
+      },
+      options: {
+        scales: {
+          x: {
+            ticks: {
+              autoSkip: false, 
+                maxRotation: 0,
+                callback: function (value, index, values) {
+                  // Show the label only for every 6th date
+                  if (index % 6 === 0) {
+                    return new_users.labels[index];
+                   } else {
+                      return ''; //index,  Return an empty string for other labels
+                   }
+                },        
+            },
+            grid: {
+              display: false,
+            },
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: true,
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'right',
+            align: 'start', 
+          },
+        },
+      },
+    };
+
+    const captionElement = document.getElementById('preference_user_trends_caption');
+    const startDate = convertDateToLongFormat(new_users.labels[0]);
+    const endDate = convertDateToLongFormat(new_users.labels[new_users.labels.length - 1])
+    const dateRangeText = `Between ${startDate} - ${endDate} there was a total of  <strong>${returning_users_count}</strong> users and <strong>${new_users_count}</strong> new users`;
+    captionElement.innerHTML = dateRangeText;
+   
+    new Chart(ctx, chartConfig);
+  }
 
 export_button.addEventListener('click', () => exportToExcel(export_url));
 window.addEventListener('DOMContentLoaded', getOriginOptions)

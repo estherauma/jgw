@@ -45,10 +45,20 @@ class Preferences(BaseAnalytics):
         _stats = convert_nested_dictionary_keys_to_uppercase(_stats)
         
         # add new and returning users to preferences stats
-        # new_and_returning_users = AppEvents().new_and_returning_users()
-        new_and_returning_users = {'new_users': 21868, 'returning_users': 20386}
+        time_range = filters['time_range']
+        split_time_range = time_range.split(',')
+        start_date = split_time_range[0]
+        end_date = split_time_range[1]
+
+        new_users_df = AppEvents().get_first_open_home_page(event_name="first_open",start_date=start_date, end_date=end_date)
+        returning_users_df = AppEvents().get_first_open_home_page(event_name="homepage",start_date=start_date, end_date=end_date)
+
+        new_and_returning_users = {'new_users': new_users_df.sum(), 'returning_users': returning_users_df.sum()}
+
         _stats["new_and_returning_users"]  = new_and_returning_users
         _stats["response_count"] = len(_df)
+        _stats["new_users"] = new_users_df.to_dict()
+        _stats["returning_users"] = returning_users_df.to_dict()
         return _stats
 
     def origin_and_destination_dataframe(self):
