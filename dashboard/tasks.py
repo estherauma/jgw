@@ -21,6 +21,8 @@ from question.logic.add_inline_question_logic import fetch_inline_questions_from
 from question.logic.add_messaging_question_logic import fetch_messaging_questions_from_api_to_db
 from common.logger import KunfuPandaLogger
 
+from dashboard.models import JGWCache
+
 client = translate.Client()
 
 def translate_to_eng(text, client=client):
@@ -134,12 +136,14 @@ def summerberry_data():
         ).decode("utf-8")
     }
     response = requests.get(auth_api_url, headers=headers)
-    # check if response isn't successful
     if response.status_code != 200:
         logger.error(f"Date time: {datetime.now()} - Error: {response.text}")
         return
-
-    with open('summerberry_data.json', 'w') as outfile:
-        json.dump(response.json(), outfile)
+    # create or update jgw cache
+    JGWCache.objects.update_or_create(
+        category="summerberry",
+        date_created=datetime.today().date(),
+        defaults={"data": response.json(), "is_cleaned": True},
+    )
     logger.info(f"Date time: {datetime.now()} - Ending data fetch")
     return

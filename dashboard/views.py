@@ -22,7 +22,7 @@ from dashboard.utils.helper_functions import change_dictionary_to_list_of_dictio
 from common.helpers.common import HELPERS, HelpersParameters
 from dashboard.models import Route
 from jgwpandas.settings import BASE_DIR
-
+from dashboard.models import JGWCache
 
 
 from .forms import (
@@ -411,12 +411,6 @@ def notifications(request):
         })
 
 def summerberry_dashboard(request):
-    with open(BASE_DIR + '/summerberry_data.json') as json_file:
-        data = json.load(json_file)
-
-    context = { 'data': data}
+    jgwcache_entry = JGWCache.objects.filter(category='summerberry').first()
+    context = { 'data': jgwcache_entry.data}
     return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
-
-
-
-
