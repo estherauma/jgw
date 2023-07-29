@@ -107,7 +107,11 @@ function scrollableVerticalBarChart(containerId, data, chartConfig) {
   **/
   let currentChartBox = document.querySelector(`.${containerId}-chart-box`)
 
-  if (totalChart <= 10) {
+  if (totalChart <= 2) {
+      totalHeight = `${totalChart * 100}px`
+  } else if (totalChart <= 4) {
+    totalHeight = `${totalChart * 50}px`
+  } else if (totalChart <= 10) {
       totalHeight = `${totalChart * 30}px`
   } else {
       totalHeight = `${totalChart * 30}px`

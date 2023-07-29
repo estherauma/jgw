@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from core.filters import generic_filter_form_parser
 from core.forms import GenericFilterForm
 from question.models import MessagingQuestionStandard
 from question.repository.messaging_questions_standard import (
@@ -20,25 +21,28 @@ def messaging_question(request):
     else:
         filter_form = GenericFilterForm(request.POST)
         if filter_form.is_valid():
-            start_date = filter_form.cleaned_data['start_date']
-            end_date = filter_form.cleaned_data['end_date']
-            destinations = filter_form.cleaned_data['destination']
-            origins = filter_form.cleaned_data['origin']
-            print(start_date, end_date, destinations, origins)
+            (start_date, end_date, origins, destinations) = generic_filter_form_parser(filter_form)
+            print(start_date, end_date, origins, destinations)
             
         total_messaging_questions = messaging_questions_count(
-            start_date=start_date,
-            end_date=end_date,
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
         )
         
         messaging_question_per_origin = get_messaging_question_per_origin_counts(
-            start_date=start_date,
-            end_date=end_date,
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
         )
         
         messaging_question_per_destination = get_messaging_question_per_destination_counts(
-            start_date=start_date,
-            end_date=end_date,
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
         )
     
     

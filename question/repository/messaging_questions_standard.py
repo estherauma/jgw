@@ -1,16 +1,25 @@
 from common.utils.date_utils import django_date_make_aware, string_to_date
+from core.filters import generic_queryset_filter
 from question.models import MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
 
 
-def get_messaging_question_per_origin_counts(start_date=None, end_date=None):
-    # start_date = django_date_make_aware(string_to_date(start_date))
-    # end_date = django_date_make_aware(string_to_date(end_date))
+def get_messaging_question_per_origin_counts(
+    start_date=None,
+    end_date=None,
+    destination_countries=None,
+    origin_countries=None,
+):
     
     queryset = MessagingQuestionStandard.objects.all()
     
-    if start_date and end_date:
-        queryset = queryset.filter(api_created_at__range=(start_date, end_date))
+    queryset = generic_queryset_filter(
+        queryset = queryset, 
+        start_date = start_date, 
+        end_date = end_date,
+        origin_countries = origin_countries,
+        destination_countries = destination_countries,
+    )
         
     origin_counts_data = queryset.annotate(
         origin_name=Case(
@@ -32,14 +41,23 @@ def get_messaging_question_per_origin_counts(start_date=None, end_date=None):
         }
 
 
-def get_messaging_question_per_destination_counts(start_date=None, end_date=None):  
-    # start_date = django_date_make_aware(string_to_date(start_date))
-    # end_date = django_date_make_aware(string_to_date(end_date))
+def get_messaging_question_per_destination_counts(
+    start_date=None,
+    end_date=None,
+    destination_countries=None,
+    origin_countries=None,
+):  
      
     queryset = MessagingQuestionStandard.objects.all()
     
-    if start_date and end_date:
-        queryset = queryset.filter(api_created_at__range=(start_date, end_date))
+    
+    queryset = generic_queryset_filter(
+        queryset = queryset, 
+        start_date = start_date, 
+        end_date = end_date,
+        origin_countries = origin_countries,
+        destination_countries = destination_countries,
+    )
      
     destination_counts_data = queryset.annotate(
         origin_name=Case(
@@ -63,11 +81,22 @@ def get_messaging_question_per_destination_counts(start_date=None, end_date=None
     
 
 
-def messaging_questions_count(start_date=None, end_date=None):
-    # start_date = django_date_make_aware(string_to_date(start_date))
-    # end_date = django_date_make_aware(string_to_date(end_date))
+def messaging_questions_count(
+    start_date=None,
+    end_date=None,
+    destination_countries=None,
+    origin_countries=None,
+):
     
-    messaging_questions_count_queryset = MessagingQuestionStandard.objects.all()
+    queryset = MessagingQuestionStandard.objects.all()
+    
+    messaging_questions_count_queryset = generic_queryset_filter(
+        queryset = queryset, 
+        start_date = start_date, 
+        end_date = end_date,
+        origin_countries = origin_countries,
+        destination_countries = destination_countries,
+    )
     
     if start_date and end_date:
         messaging_questions_count_queryset = messaging_questions_count_queryset.filter(
