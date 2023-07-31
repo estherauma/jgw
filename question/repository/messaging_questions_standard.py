@@ -1,5 +1,5 @@
 from common.utils.date_utils import django_date_make_aware, string_to_date
-from core.filters import generic_queryset_filter
+from core.filters import generic_filtered_queryset
 from question.models import MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
 
@@ -13,7 +13,7 @@ def get_messaging_question_per_origin_counts(
     
     queryset = MessagingQuestionStandard.objects.all()
     
-    queryset = generic_queryset_filter(
+    queryset = generic_filtered_queryset(
         queryset = queryset, 
         start_date = start_date, 
         end_date = end_date,
@@ -51,7 +51,7 @@ def get_messaging_question_per_destination_counts(
     queryset = MessagingQuestionStandard.objects.all()
     
     
-    queryset = generic_queryset_filter(
+    queryset = generic_filtered_queryset(
         queryset = queryset, 
         start_date = start_date, 
         end_date = end_date,
@@ -90,7 +90,7 @@ def messaging_questions_count(
     
     queryset = MessagingQuestionStandard.objects.all()
     
-    messaging_questions_count_queryset = generic_queryset_filter(
+    messaging_questions_count_queryset = generic_filtered_queryset(
         queryset = queryset, 
         start_date = start_date, 
         end_date = end_date,

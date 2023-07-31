@@ -10,7 +10,7 @@ def generic_filter_form_parser(filter_form):
         
         return (start_date, end_date, origins, destinations)
             
-def generic_queryset_filter(
+def generic_filtered_queryset(
     queryset: BaseManager[Any],
     start_date=None,
     end_date=None,
