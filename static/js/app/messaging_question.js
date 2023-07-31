@@ -1,5 +1,8 @@
-// plots the origin graph
-messagingQuestionOriginChart(originData)
+// export messaging question to excel
+const messagingQuestionForm = document.getElementById("messaging-question-filter-form")
+const messagingQuestionExportButton = document.getElementById("export-messaging-question-to-excel")
 
-// plots the origin graph
-messagingQuestionDestinationChart(destinationData)
+messagingQuestionExportButton.addEventListener("click",function() {
+    const url = `${window.location.href}export_stats`
+    exportStatsData(url, messagingQuestionForm)
+})

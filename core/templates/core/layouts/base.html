@@ -103,27 +103,5 @@
         <script src="{% static 'dashboard/js/charts/bar.js' %}"></script>
 
         {% block scripts %}{% endblock scripts %}
-        <script>
-
-            var start = moment().subtract(29, 'days');
-            var end = moment();
-            
-            $('#time_range').daterangepicker({
-                startDate: start,
-                endDate: end,
-                maxDate: moment(),
-                minDate: moment().subtract(90, 'days'),
-                ranges: {
-                   'Today': [moment(), moment()],
-                   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                   'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                   'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                   'Last 60 Days': [moment().subtract(59, 'days'), moment()],
-                   'Last 90 Days': [moment().subtract(89, 'days'), moment()],
-                   'This Month': [moment().startOf('month'), moment().endOf('month')],
-                   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                }
-            });
-        </script>
     </body>
 </html>

@@ -1,10 +1,7 @@
-import csv
-from django.http import HttpResponse
 from django.shortcuts import render
-from openpyxl import Workbook
 from core.filters import generic_filter_form_parser
 from core.forms import GenericFilterForm
-from question.models import MessagingQuestionStandard
+from core.logic.file_export import create_workbook, generate_export_response
 from question.repository.messaging_questions_standard import (
     get_messaging_question_per_destination_counts, 
     get_messaging_question_per_origin_counts,
@@ -15,7 +12,7 @@ from question.repository.messaging_questions_standard import (
 
 def messaging_question(request):
     
-    if request.method != 'POST':
+    if request.method == 'GET':
         filter_form = GenericFilterForm()
         total_messaging_questions = messaging_questions_count()
         messaging_question_per_origin = get_messaging_question_per_origin_counts()
@@ -25,7 +22,6 @@ def messaging_question(request):
         filter_form = GenericFilterForm(request.POST)
         if filter_form.is_valid():
             (start_date, end_date, origins, destinations) = generic_filter_form_parser(filter_form)
-            print(start_date, end_date, origins, destinations)
             
         total_messaging_questions = messaging_questions_count(
             start_date = start_date,
@@ -48,7 +44,6 @@ def messaging_question(request):
             origin_countries = origins,
         )
     
-    
 
     context = {
         "total_messaging_questions": total_messaging_questions,
@@ -63,53 +58,74 @@ def messaging_question(request):
     )
 
 
-def export_question_stats(request, question_type):
-    
-    export_name = f"{question_type}_question_stats"
-    work_sheets_data = [
-        {
-            'name': 'Sheet1',
-            'headers': ['Column1', 'Column2', 'Column3'],
-            'contents': [
-                ['Value11', 'Value12', 'Value13'],
-                ['Value21', 'Value22', 'Value23'],
-            ],
-        },
-        {
-            'name': 'Sheet2',
-            'headers': ['AnotherColumn1', 'AnotherColumn2', 'AnotherColumn3'],
-            'contents': [
-                ['ValueA1', 'ValueA2', 'ValueA3'],
-                ['ValueB1', 'ValueB2', 'ValueB3'],
-            ],
-        },
-    ]
-    
-    workbook = Workbook()
-    
-    for work_sheet_data in work_sheets_data:
-        # Extract sheet data
-        name = work_sheet_data['name']
-        headers = work_sheet_data['headers']
-        contents = work_sheet_data['contents']
-
-        # Create a new sheet with the given name
-        sheet = workbook.create_sheet(title=name)
-
-        # Write headers to the sheet
-        sheet.append(headers)
-
-        # Write contents to the sheet
-        for content_row in contents:
-            sheet.append(content_row)
-    
-    # Make the first sheet active
-    workbook.active = 1
-    
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename={export_name}.xlsx'
-    
-    workbook.save(response)
+def export_question_stas(request):
+    if request.method == 'POST':
+        filter_form = GenericFilterForm(request.POST)
+        if filter_form.is_valid():
+            (start_date, end_date, origins, destinations) = generic_filter_form_parser(filter_form)
         
-    return response
-    
+        total_messaging_questions = messaging_questions_count(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        
+        messaging_question_per_origin = get_messaging_question_per_origin_counts(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        
+        messaging_question_per_destination = get_messaging_question_per_destination_counts(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        
+        country_responses_per_origin_data = [
+            {
+                'country': label, 
+                'responses': response
+            } for label, response in zip(
+                messaging_question_per_origin['labels'], 
+                messaging_question_per_origin['data']
+                )
+            ]
+        
+        country_responses_per_destination_data = [
+            {
+                'country': label, 
+                'responses': response
+            } for label, response in zip(
+                messaging_question_per_destination['labels'], 
+                messaging_question_per_destination['data']
+                )
+            
+            ]
+        export_name = f"question_stats"
+        
+        work_sheets_data = [
+            {
+                'name': 'All',
+                'headers': ['Total Messaging Question'],
+                'contents': [[total_messaging_questions]],
+            },
+            {
+                'name': 'Responses Per Origin',
+                'headers': ['country', 'responses'],
+                'contents': [[row['country'], row['responses']] for row in country_responses_per_origin_data],
+            },
+            {
+                'name': 'Responses Per Destination',
+                'headers': ['country', 'responses'],
+                'contents': [[row['country'], row['responses']] for row in country_responses_per_destination_data],
+            },
+        ]
+        workbook = create_workbook(work_sheets_data)
+        return generate_export_response(
+            workbook=workbook, 
+            export_name=f"{export_name}-{start_date}-{end_date}"
+        )

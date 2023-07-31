@@ -175,3 +175,27 @@ function convertDateToLongFormat(dateStr) {
 
   return `${monthNames[month]} ${dayNum}${suffix}`;
 }
+
+
+function exportStatsData(url, form, fileName='untitled_stats.xlsx') {
+  const formData = new FormData(form);
+  fetch(url, { method: 'POST', body: formData })
+  .then((response) => {
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+
+      return response.blob()
+          .then((blob) => {
+              const url = URL.createObjectURL(blob);
+
+              const fileName = fileName;
+
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = fileName;
+              a.click();
+              URL.revokeObjectURL(url);
+          });
+  })
+}
