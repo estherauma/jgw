@@ -11,7 +11,7 @@ from django.db.models import Q
 import requests
 from langcodes import Language, LanguageTagError
 from pytz import country_names
-from common.custom_libs.pandas.pycountry import country_name_from_aplha_code
+from common.custom_libs.pycountry import country_name_from_aplha_code
 
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 

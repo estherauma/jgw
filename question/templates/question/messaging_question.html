@@ -50,15 +50,13 @@
                                     </a>
         
                                     <div class="dropdown-menu" aria-labelledby="exportInline">
-                                        <button class="dropdown-item" >
-                                            cooming soon ...
-                                        </button>
+                                        <a  class="dropdown-item" href="{% url 'export_question_stats_to_excel' question_type='messaging' %}" target="_blank">Export to Excel</a>
                                     </div>
                                     
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <button data-toggle="modal" data-target="#filter-model"
+                                <button data-bs-toggle="modal" data-bs-target="#filter-model"
                                 role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
                             </div>
                         </div>
