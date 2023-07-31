@@ -8,6 +8,8 @@ class InlineQuestionStandard(models.Model):
     device_id = models.CharField(max_length=255, blank=True, null=True)
     app_id = models.CharField(max_length=255, blank=True, null=True)
     locale = models.CharField(max_length=255, blank=True, null=True)
+    api_origin = models.CharField(max_length=255, blank=True, null=True)
+    api_destination = models.CharField(max_length=255, blank=True, null=True)
     
     
     route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_route')
@@ -77,6 +79,8 @@ class MessagingQuestionStandard(models.Model):
     question_id = models.CharField(max_length=255, blank=True, null=True)
     message_id = models.CharField(max_length=255, blank=True, null=True)
     locale = models.CharField(max_length=255, blank=True, null=True)
+    api_origin = models.CharField(max_length=255, blank=True, null=True)
+    api_destination = models.CharField(max_length=255, blank=True, null=True)
     
     route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_route')
     preference = models.ForeignKey('preference.Preference', on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_preference')

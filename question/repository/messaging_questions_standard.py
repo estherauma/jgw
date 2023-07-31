@@ -24,7 +24,7 @@ def get_messaging_question_per_origin_counts(
     origin_counts_data = queryset.annotate(
         origin_name=Case(
             When(preference__isnull=False, then=F('preference__origin__name')),
-            default=F('origin__name')
+            default=F('api_origin__name')
         )
     ).values(
         'origin__name'
@@ -62,7 +62,7 @@ def get_messaging_question_per_destination_counts(
     destination_counts_data = queryset.annotate(
         origin_name=Case(
             When(preference__isnull=False, then=F('preference__destination__name')),
-            default=F('destination__name')
+            default=F('api_destination__name')
         )
     ).values(
         'destination__name'
