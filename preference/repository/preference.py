@@ -149,3 +149,28 @@ def preferences_by_language(
         "labels": labels,
         "counts": counts
     }
+    
+    
+def preferences_by_organisation(
+    start_date=None, 
+    end_date=None, 
+    origin_countries=None, 
+    destination_countries=None
+):
+    organisation = generic_filtered_queryset(
+        queryset=Preference.objects.all(),
+        start_date=start_date,
+        end_date=end_date,
+        origin_countries=origin_countries,
+        destination_countries=destination_countries,
+    )
+
+    organisation_counts = organisation.values('organisation__name').annotate(total=Count('id'))
+
+    labels = [organisation['organisation__name'] for organisation in organisation_counts]
+    counts = [organisation['total'] for organisation in organisation_counts]
+
+    return {
+        "labels": labels,
+        "counts": counts
+    }
