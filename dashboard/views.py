@@ -134,7 +134,7 @@ def filter_data(request, category):
         filters.update(get_user_role(request.user))
         filters = format_time_range(filters)
         list_of_filters = change_dictionary_to_list_of_dictionaries(filters)
-        
+        user_locations = []
         if category != "preferences":
             data = helper.compute_stats(filters=filters)
         else:
@@ -148,6 +148,7 @@ def filter_data(request, category):
         if category == 'preferences':
             response_count = data['preference_response_count']
             del data['preference_response_count']
+            user_locations = helper.get_user_locations( data['preference_origin'])
 
         chart_data = form_chart_data(data,helper)
     except ValidationError as e:
@@ -157,7 +158,8 @@ def filter_data(request, category):
         "chart_data": chart_data, 
         "filter_state":  list_of_filters, 
         "response_count":response_count,
-        "new_and_returning_users": data["preference_new_and_returning_users"]
+        "new_and_returning_users": data["preference_new_and_returning_users"],
+        "user_locations": user_locations
         })
 
 

@@ -8,6 +8,7 @@ from common.base import BaseAnalytics
 from common.retrieve_data import JGWApi
 from common.utils.dictionary_utils import convert_nested_dictionary_keys_to_uppercase
 from common.utils.helpers import save_as_excel
+from dashboard.utils.helper_functions import get_country_coordinates
 
 api = JGWApi()
 QueryMap = Dict[str, list[str]]
@@ -34,16 +35,18 @@ class Preferences(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         return_fields = fields or ["age", "language", "gender", "organisation", "origin", "destination"]
+
         
         _df = clean_df(self.get_df(filters))
-        
+        # print('feilds', _df.columns)
+
         # normalize some gender 
         if _df.empty:
             return {}
         _stats = {field: self.count_unique(field, _df) for field in return_fields if field in _df.columns}
         
         _stats = convert_nested_dictionary_keys_to_uppercase(_stats)
-        
+
         # add new and returning users to preferences stats
         time_range = filters['time_range']
         split_time_range = time_range.split(',')
@@ -54,15 +57,17 @@ class Preferences(BaseAnalytics):
         returning_users_df = AppEvents().get_first_open_home_page(event_name="homepage",start_date=start_date, end_date=end_date)
 
         new_and_returning_users = {'new_users': new_users_df.sum(), 'returning_users': returning_users_df.sum()}
-
         _stats["new_and_returning_users"]  = new_and_returning_users
         _stats["response_count"] = len(_df)
         _stats["new_users"] = new_users_df.to_dict()
         _stats["returning_users"] = returning_users_df.to_dict()
+        
+
         return _stats
 
     def origin_and_destination_dataframe(self):
         preference_df = clean_df(self.get_df())
+        
 
         if preference_df.empty:
             return {}
@@ -131,3 +136,25 @@ class Preferences(BaseAnalytics):
             labels.append('PREFER NOT TO ANSWER')
             data.append(prefer_not_to_answer)
         return {'labels': labels, 'data': data}
+    
+    def get_user_locations(self, data):
+        locations = []
+
+        for key, value in data.items():
+            coords = get_country_coordinates(key)
+            if coords:
+               latitude, longitude = coords
+               locations.append({
+                    "country": key,
+                    "users": value,
+                    "coords": [latitude,longitude]
+                })             
+            else: 
+                locations.append({
+                    "country": key,
+                    "users": value,
+                    "coords": []
+                })
+            
+        return locations
+
