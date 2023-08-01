@@ -31,6 +31,11 @@ OPERATORS = {
     "Seasonal Worker Scheme - Pro-Force": "Pro-Force",
     "Seasonal Worker Scheme - Fruitful Jobs": "Fruitful Jobs",
     "Seasonal Worker Scheme - Clock House Farm": "Clock House Farm",
+    "Seasonal Worker Scheme - Hops": "Hops",
+    "Seasonal Worker Scheme - Ethero": "Ethero",
+    "Seasonal Worker Scheme - Agri-Hr": "Agri Hr",
+    "Place UK": "PlaceUK",
+    
 }
 CATEGORIES = {
     "preferences": "Demographics",
