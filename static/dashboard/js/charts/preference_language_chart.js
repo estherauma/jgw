@@ -11,6 +11,7 @@ function preferenceLanguageChart(langaugeData) {
                     label: 'PREFERENCES',
                     data: data,
                     backgroundColor: COLORS.navyBlue,
+                    barThickness: 15,
                 }]
             },
             options: {

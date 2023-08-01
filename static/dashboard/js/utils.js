@@ -91,7 +91,7 @@ function scrollableVerticalBarChart(containerId, data, chartConfig) {
   graphDiv = document.getElementById(containerId)
   
   let canvas = document.createElement('canvas')
-  let canvasId = `canvas_${containerId}`
+  let canvasId = `canvas-${containerId}`
   canvas.setAttribute('id', canvasId)
   canvas.setAttribute('class', "chartContainer")
   graphDiv.appendChild(canvas)
@@ -107,13 +107,15 @@ function scrollableVerticalBarChart(containerId, data, chartConfig) {
   **/
   let currentChartBox = document.querySelector(`.${containerId}-chart-box`)
 
-  if (totalChart <= 10) {
-      totalHeight = `${totalChart * 50}px`
-  } else if (totalChart > 20) {
-      totalHeight = `${totalChart * 20}px`
-      currentChartBox.classList.add('generic-chart-box')
+  if (totalChart <= 2) {
+      totalHeight = `${totalChart * 100}px`
+  } else if (totalChart <= 4) {
+    totalHeight = `${totalChart * 50}px`
+  } else if (totalChart <= 10) {
+      totalHeight = `${totalChart * 30}px`
   } else {
-      totalHeight = `${totalChart * 20}px`
+      totalHeight = `${totalChart * 30}px`
+      currentChartBox.classList.add('generic-chart-box')
   }
   graphDiv.style.height = totalHeight;
 }
@@ -172,4 +174,28 @@ function convertDateToLongFormat(dateStr="") {
   }
 
   return `${monthNames[month]} ${dayNum}${suffix}`;
+}
+
+
+function exportStatsData(url, form, fileName='untitled_stats.xlsx') {
+  const formData = new FormData(form);
+  fetch(url, { method: 'POST', body: formData })
+  .then((response) => {
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+
+      return response.blob()
+          .then((blob) => {
+              const url = URL.createObjectURL(blob);
+
+              const fileName = fileName;
+
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = fileName;
+              a.click();
+              URL.revokeObjectURL(url);
+          });
+  })
 }

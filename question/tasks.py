@@ -1,5 +1,5 @@
 
-from common.custom_libs.pandas.google_translate import pandas_translator_translate
+from common.custom_libs.google_translate import pandas_translator_translate
 from question.models import InlineQuestionResponseText, MessagingResponseOptionText, MessagingQuestionText
 
 
