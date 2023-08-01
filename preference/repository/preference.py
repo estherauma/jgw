@@ -124,3 +124,28 @@ def preferences_by_destination(
         "labels": labels,
         "counts": counts
     }
+    
+    
+def preferences_by_language(
+    start_date=None, 
+    end_date=None, 
+    origin_countries=None, 
+    destination_countries=None
+):
+    preferences_language_queryset = generic_filtered_queryset(
+        queryset=Preference.objects.all(),
+        start_date=start_date,
+        end_date=end_date,
+        origin_countries=origin_countries,
+        destination_countries=destination_countries,
+    )
+
+    language_counts = preferences_language_queryset.values('language__translated_name').annotate(total=Count('id'))
+
+    labels = [destination['language__translated_name'] for destination in language_counts]
+    counts = [destination['total'] for destination in language_counts]
+
+    return {
+        "labels": labels,
+        "counts": counts
+    }

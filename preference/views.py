@@ -4,7 +4,8 @@ from core.forms import GenericFilterForm
 from preference.repository.preference import (
     preferences_by_age, 
     preferences_by_destination, 
-    preferences_by_gender, 
+    preferences_by_gender,
+    preferences_by_language, 
     preferences_by_origin, 
     preferences_count
 )
@@ -18,6 +19,9 @@ def user_overview(request):
         preferences_per_destination_country_responses = preferences_by_destination()
         preferences_by_age_responses = preferences_by_age()
         preferences_by_gender_responses = preferences_by_gender()
+        preferences_by_language_responses = preferences_by_language()
+        
+        print(preferences_by_language_responses)
         
     context = {
         'filter_form': filter_form,
@@ -26,6 +30,7 @@ def user_overview(request):
         'preferences_by_gender': preferences_by_gender_responses,
         'preferences_per_origin_country': preferences_per_origin_country_responses,
         'preferences_per_destination_country': preferences_per_destination_country_responses,
+        'preferences_selected_user_language': preferences_by_language_responses,
     }
     return render(
         request, 
