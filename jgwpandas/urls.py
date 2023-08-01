@@ -34,6 +34,7 @@ urlpatterns = [
     
     # questions
     path("question/", include("question.urls")),
+    path("preference/", include("preference.urls")),
 ]
 
 if settings.DEBUG:

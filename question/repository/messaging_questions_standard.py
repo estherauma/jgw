@@ -97,10 +97,5 @@ def messaging_questions_count(
         origin_countries = origin_countries,
         destination_countries = destination_countries,
     )
-    
-    if start_date and end_date:
-        messaging_questions_count_queryset = messaging_questions_count_queryset.filter(
-            api_created_at__range=(start_date, end_date)
-        )
         
     return messaging_questions_count_queryset.count()
