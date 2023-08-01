@@ -16,7 +16,8 @@ const COLORS = {
     navyBlue: '#193560',
 
     black: '000000',
-    pink: '#FFC0CB'
+    pink: '#FFC0CB',
+    white: '#FFF'
 }
 
 const genericBarGraphDatasetConfig = {
