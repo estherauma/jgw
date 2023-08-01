@@ -149,7 +149,7 @@ function stopScrollPropagation(event) {
   event.stopPropagation();
 }
 
-function convertDateToLongFormat(dateStr) {
+function convertDateToLongFormat(dateStr="") {
   const [month, day] = dateStr.split(' ');
   const monthNames = {
     'Jan':'January', 'Feb':'February', 'Mar':'March', 

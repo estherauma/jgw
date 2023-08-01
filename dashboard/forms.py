@@ -30,6 +30,7 @@ OPERATORS = {
     "Seasonal Worker Scheme - Generic": "Generic",
     "Seasonal Worker Scheme - Pro-Force": "Pro-Force",
     "Seasonal Worker Scheme - Fruitful Jobs": "Fruitful Jobs",
+    "Seasonal Worker Scheme - Clock House Farm": "Clock House Farm",
 }
 CATEGORIES = {
     "preferences": "Demographics",
