@@ -189,11 +189,11 @@ function exportStatsData(url, form, fileName='untitled_stats.xlsx') {
           .then((blob) => {
               const url = URL.createObjectURL(blob);
 
-              const fileName = fileName;
+              const finalFileName = fileName;
 
               const a = document.createElement('a');
               a.href = url;
-              a.download = fileName;
+              a.download = finalFileName;
               a.click();
               URL.revokeObjectURL(url);
           });
