@@ -1,6 +1,6 @@
 from common.const.value_const import NOT_SPECIFIED
-from common.custom_libs.pandas.language_codes import get_language_name
-from common.custom_libs.pandas.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
+from common.custom_libs.language_codes import get_language_name
+from common.custom_libs.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
 from common.helpers.model_helpers.get_create import get_or_create_model_instance
 from common.helpers.preference_helpers.organisation import normalize_organisation_name
 from preference.models import Age, Country, FactoryFarm, Gender, Language, Organisation, OrganisationSector, Route, SectorOfWork

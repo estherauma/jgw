@@ -11,6 +11,7 @@ function inlineQuestionLanguageChart(langaugeData) {
                 label: 'RESPONSES',
                 data: data,
                 backgroundColor: COLORS.navyBlue,
+                barThickness: 15,
             }]
         },
         options: {

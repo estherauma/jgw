@@ -30,7 +30,10 @@ urlpatterns = [
     path("", include("dashboard.urls")),
     # accounts
     path("accounts/", include("users.urls")),
-    path("health/", health)
+    path("health/", health),
+    
+    # questions
+    path("question/", include("question.urls")),
 ]
 
 if settings.DEBUG:

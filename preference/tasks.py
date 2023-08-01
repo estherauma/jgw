@@ -1,5 +1,5 @@
 from celery import shared_task
-from common.custom_libs.pandas.google_translate import pandas_translator_translate
+from common.custom_libs.google_translate import pandas_translator_translate
 from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.logger import KunfuPandaLogger
 from preference.models import Gender, Language, SectorOfWork
