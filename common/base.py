@@ -78,7 +78,7 @@ class BaseAnalytics:
 
     def filter_by_organisation(self, org_name: str, df):
         if "organisation" in df.columns:
-            return df.loc[df["organisation"] == org_name]
+            return df.loc[df["organisation"] == org_name.lower()]
         return pd.DataFrame()
 
     def filter_data(self, df, query):

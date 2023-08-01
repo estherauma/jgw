@@ -146,8 +146,9 @@ def filter_data(request, category):
             return JsonResponse({"chart_data": chart_data, "response_count": response_count, "filter_state": list_of_filters })
         
         if category == 'preferences':
-            response_count = data['preference_response_count']
-            del data['preference_response_count']
+            response_count = data.get('preference_response_count')
+            if response_count:
+                del data['preference_response_count']
 
         chart_data = form_chart_data(data,helper)
     except ValidationError as e:
@@ -157,7 +158,7 @@ def filter_data(request, category):
         "chart_data": chart_data, 
         "filter_state":  list_of_filters, 
         "response_count":response_count,
-        "new_and_returning_users": data["preference_new_and_returning_users"]
+        "new_and_returning_users": data.get("preference_new_and_returning_users")
         })
 
 
