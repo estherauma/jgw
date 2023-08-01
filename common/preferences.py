@@ -1,6 +1,6 @@
 
 from typing import Dict
-
+import time
 import pandas as pd
 from common.app_events import AppEvents
 
@@ -141,6 +141,7 @@ class Preferences(BaseAnalytics):
         locations = []
 
         for key, value in data.items():
+            time.sleep(1) # fix rate limit issue
             coords = get_country_coordinates(key)
             if coords:
                latitude, longitude = coords
