@@ -71,18 +71,39 @@
             <div class="card h-100" id="age_graphcard">
                 <div class="card-body">
                     <p class="chart-title">Users By Age</p>
-                    <canvas id="age-graph"></canvas>
+                    <div class="preference-age-graph-id-chart-box">
+                        <div id="preference-age-graph-id"></div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-4">
             <div class="card h-100">
                 <div class="card-body">
-                    <p class="chart-title pb-1">Users By Gender</p>
-                    <canvas id="_gender"></canvas>
+                    <p class="chart-title">Users By Gender</p>
+                        <canvas id="preference-gender-pie-chart-id"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock content %}
+{% block scripts %}
+<script src="{% static 'js/charts/bar/preference_age_graph.js' %}"></script>
+<script src="{% static 'js/charts/pie/preference_gender_pie_chart.js' %}"></script>
+<script type="text/javascript">
+    // get data from context
+    var ageData = {{ preferences_by_age | safe }};
+    var genderData = {{ preferences_by_gender | safe }};
+    var originData = {{ preferences_per_origin_country | safe }};
+    var destinationData = {{ preferences_per_destination_country | safe }};
+    var languageData = {{ preferences_selected_user_language | safe }};
+    var workCodeData = {{ work_code_usage | safe }};
+
+    // plots the age graph
+    preferenceAgeGraph(ageData)
+
+    // plots the gender piechart
+    preferenceGenderPieChart(genderData)
+</script>
+{% endblock %}

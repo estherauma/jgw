@@ -82,7 +82,7 @@ class JGWApi:
             clean = result.is_cleaned
             data = json.loads(result.data)
         else:
-            url = f"{self.base_url}{URLS.get(key)}"
+            url = f"{self.base_url}{URLS.get(key)}?startDate=2023-01-01&endDate=2023-07-31"
             
             response = self._get(url, {})
             if response and response.status_code == requests.codes.ok:

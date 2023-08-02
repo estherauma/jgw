@@ -43,7 +43,7 @@ def preferences_by_age(
 
     age_counts = preferences_age_queryset.values('age__range').annotate(total=Count('id'))
 
-    labels = [age['age__range'] for age in age_counts]
+    labels = [age['age__range'].upper() for age in age_counts]
     counts = [age['total'] for age in age_counts]
 
     return {
@@ -68,7 +68,7 @@ def preferences_by_gender(
 
     gender_counts = preferences_gender_queryset.values('gender__translated_name').annotate(total=Count('id'))
 
-    labels = [gender['gender__translated_name'] for gender in gender_counts]
+    labels = [gender['gender__translated_name'].upper() for gender in gender_counts]
     counts = [gender['total'] for gender in gender_counts]
 
     return {
