@@ -1,5 +1,4 @@
 function preferenceAgeGraph(preferenceAgeGraphData) {
-    console.log(preferenceAgeGraphData)
     const data = preferenceAgeGraphData["counts"];
     const chartConfig =  {
         type: 'bar',

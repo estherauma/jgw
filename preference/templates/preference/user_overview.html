@@ -65,23 +65,41 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="row mb-3">
-        <div class="col-8">
-            <div class="card h-100" id="age_graphcard">
-                <div class="card-body">
-                    <p class="chart-title">Users By Age</p>
-                    <div class="preference-age-graph-id-chart-box">
-                        <div id="preference-age-graph-id"></div>
-                    </div>
+<div class="row mb-3">
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Users By Age</p>
+                <div class="preference-age-graph-id-chart-box">
+                    <div id="preference-age-graph-id"></div>
                 </div>
             </div>
         </div>
-        <div class="col-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <p class="chart-title">Users By Gender</p>
-                        <canvas id="preference-gender-pie-chart-id"></canvas>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Users By Gender</p>
+                <canvas id="preference-gender-pie-chart-id"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">USER PER DESTINATION COUNTRY</p>
+                    <canvas id="preference-destination-pie-chart-id"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">SELECTED USER LANGUAGE</p>
+                <div class="preference-language-graph-id-chart-box">
+                    <div id="preference-language-graph-id"></div>
                 </div>
             </div>
         </div>
@@ -91,6 +109,8 @@
 {% block scripts %}
 <script src="{% static 'js/charts/bar/preference_age_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_gender_pie_chart.js' %}"></script>
+<script src="{% static 'js/charts/bar/preference_language_graph.js' %}"></script>
+<script src="{% static 'js/charts/pie/preference_destination_pie_chart.js' %}"></script>
 <script type="text/javascript">
     // get data from context
     var ageData = {{ preferences_by_age | safe }};
@@ -105,5 +125,11 @@
 
     // plots the gender piechart
     preferenceGenderPieChart(genderData)
+
+    // plots the language graph
+    preferenceLanguageGraph(languageData)
+
+    // plots the destination piechart
+    preferenceDestinationPieChart(destinationData)
 </script>
 {% endblock %}

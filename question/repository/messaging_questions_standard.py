@@ -33,7 +33,7 @@ def get_messaging_question_per_origin_counts(
     ).order_by()
     
     origin_data = [count['count'] for count in origin_counts_data]
-    origin_labels = [count['origin__name'].upper() for count in origin_counts_data]
+    origin_labels = [count['origin__name'].upper() for count in origin_counts_data if count['origin__name'] is not None]
     
     return {
             "data": origin_data,
@@ -60,7 +60,7 @@ def get_messaging_question_per_destination_counts(
     )
      
     destination_counts_data = queryset.annotate(
-        origin_name=Case(
+        destination_name=Case(
             When(preference__isnull=False, then=F('preference__destination__name')),
             default=F('destination__name')
         )
@@ -72,7 +72,7 @@ def get_messaging_question_per_destination_counts(
     
     
     destination_data = [count['count'] for count in destination_counts_data]
-    destination_labels = [count['destination__name'].upper() for count in destination_counts_data]
+    destination_labels = [count['destination__name'].upper() for count in destination_counts_data if count['destination__name'] is not None]
     
     return {
             "data": destination_data,

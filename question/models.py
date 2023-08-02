@@ -10,14 +10,14 @@ class InlineQuestionStandard(models.Model):
     locale = models.CharField(max_length=255, blank=True, null=True)
     
     
-    route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_route')
-    preference = models.ForeignKey('preference.Preference', on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_preference')
-    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_language')
-    origin = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_origin')
-    destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_destination')
-    organisation_sector = models.ForeignKey(OrganisationSector, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_organisation_sector')
-    factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_factory_farm')
-    organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True, related_name='inline_question_organisation')
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='inline_question_route')
+    preference = models.ForeignKey('preference.Preference', on_delete=models.CASCADE, null=True, blank=True, related_name='inline_question_preference')
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, null=True, blank=True, related_name='inline_question_language')
+    origin = models.ForeignKey(Country, on_delete=models.CASCADE, null=True, blank=True, related_name='inline_question_origin')
+    destination = models.ForeignKey(Country, on_delete=models.CASCADE, null=True, blank=True, related_name='inline_question_destination')
+    organisation_sector = models.ForeignKey(OrganisationSector, on_delete=models.CASCADE, null=True, blank=True, related_name='inline_question_organisation_sector')
+    factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.CASCADE, null=True, blank=True, related_name='inline_question_factory_farm')
+    organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE, null=True, blank=True, related_name='inline_question_organisation')
     
     
     api_created_at = models.DateTimeField(default=timezone.now)
@@ -78,15 +78,15 @@ class MessagingQuestionStandard(models.Model):
     message_id = models.CharField(max_length=255, blank=True, null=True)
     locale = models.CharField(max_length=255, blank=True, null=True)
     
-    route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_route')
-    preference = models.ForeignKey('preference.Preference', on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_preference')
-    origin = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_origin')
-    destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_destination')
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='messaging_question_route')
+    preference = models.ForeignKey('preference.Preference', on_delete=models.CASCADE, null=True, blank=True, related_name='messaging_question_preference')
+    origin = models.ForeignKey(Country, on_delete=models.CASCADE, null=True, blank=True, related_name='messaging_question_origin')
+    destination = models.ForeignKey(Country, on_delete=models.CASCADE, null=True, blank=True, related_name='messaging_question_destination')
     
-    organisation_sector = models.ForeignKey(OrganisationSector, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_organisation_sector')
-    factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_factory_farm')
-    organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_organisation')
-    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True, related_name='messaging_question_language')
+    organisation_sector = models.ForeignKey(OrganisationSector, on_delete=models.CASCADE, null=True, blank=True, related_name='messaging_question_organisation_sector')
+    factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.CASCADE, null=True, blank=True, related_name='messaging_question_factory_farm')
+    organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE, null=True, blank=True, related_name='messaging_question_organisation')
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, null=True, blank=True, related_name='messaging_question_language')
     
     api_created_at = models.DateTimeField(default=timezone.now)
     api_updated_at = models.DateTimeField(default=timezone.now)

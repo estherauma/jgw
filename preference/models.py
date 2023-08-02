@@ -46,7 +46,7 @@ class Country(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.code} ::: {self.name}'
 
 class Language(models.Model):
     name = models.CharField(max_length=255)
@@ -81,6 +81,8 @@ class Gender(models.Model):
     
 class Age(models.Model):
     range = models.CharField(max_length=255)
+    translated_range = models.CharField(max_length=255, null=True, blank=True)
+    translated_to = models.CharField(max_length=255, default='en')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

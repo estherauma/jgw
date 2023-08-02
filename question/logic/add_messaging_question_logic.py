@@ -5,7 +5,7 @@ from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import previous_dates, todays_date
-from common.utils.preferences import get_origin_and_destination_from_route
+from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
 from question.models import MessagingQuestion, MessagingQuestionResponse, MessagingQuestionStandard, MessagingQuestionText, MessagingResponse, MessagingResponseOptionText
 from preference.models import Preference
 from question.tasks import translate_and_clean_messaging_question_fields

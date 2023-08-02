@@ -16,7 +16,7 @@ from common.helpers.model_helpers.preference import (
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import previous_dates, todays_date
-from common.utils.preferences import get_origin_and_destination_from_route
+from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
 from preference.models import Preference
 from preference.tasks import translate_and_clean_preferences_fields
 
