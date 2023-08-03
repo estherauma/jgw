@@ -1,0 +1,51 @@
+from django.db.models import Manager as BaseManager, Q
+from typing import Any
+
+
+def preference_filtered_queryset(
+    queryset: BaseManager[Any],
+    start_date=None,
+    end_date=None,
+    destination_countries=None,
+    origin_countries=None,
+    organisations = None,
+    schemes = None,
+    factory_farms = None,
+):
+    if destination_countries is None:
+        destination_countries = []
+    
+    if origin_countries is None:
+        origin_countries = []
+        
+    if organisations is None:
+        organisations = []
+    
+    if schemes is None:
+        schemes = []
+        
+    if factory_farms is None:
+        factory_farms = []
+    
+    
+    if start_date and end_date:
+        queryset = queryset.filter(api_created_at__range=(start_date, end_date))
+        
+    if destination_countries:
+        current_model_dest_q = Q(destination__in=destination_countries)
+        queryset = queryset.filter(current_model_dest_q)
+        
+    if origin_countries:
+        current_model_dest_q = Q(origin__in=origin_countries)
+        queryset = queryset.filter(current_model_dest_q)
+        
+    if organisations:
+        current_model_dest_q = Q(organisation__in=organisations)
+        queryset = queryset.filter(current_model_dest_q)
+    
+    if factory_farms:
+        current_model_dest_q = Q(factory_farm__in=factory_farms)
+        queryset = queryset.filter(current_model_dest_q)
+        
+    
+    return queryset

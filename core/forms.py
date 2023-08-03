@@ -1,6 +1,6 @@
 from django import forms
 
-from preference.models import Country
+from preference.models import Country, FactoryFarm, Organisation
 
 
 class GenericFilterForm(forms.Form):
@@ -36,5 +36,17 @@ class GenericFilterForm(forms.Form):
     origin = forms.ModelMultipleChoiceField(
         queryset=Country.objects.all(),
         widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "origin"}),
+        required=False
+    )
+    
+    organisation = forms.ModelMultipleChoiceField(
+        queryset=Organisation.objects.all(),
+        widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "organisation"}),
+        required=False
+    )
+    
+    factory_farm = forms.ModelMultipleChoiceField(
+        queryset=FactoryFarm.objects.all(),
+        widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "factory_farm"}),
         required=False
     )

@@ -1,7 +1,7 @@
 def normalize_gender_name(gender: str):
     male = "male"
     female = "female"
-    other = "other"
+    other = "others"
     prefer_not_to_answer = "prefer not to answer"
     
     patterns_to_replace = {
@@ -31,6 +31,7 @@ def normalize_gender_name(gender: str):
         "behavior": other,
         "not specified": other,
         "others": other,
+        "other": other,
         "i don&#39;t feel comfortable answering":prefer_not_to_answer
     }
     

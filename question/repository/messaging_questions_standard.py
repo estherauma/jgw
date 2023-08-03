@@ -4,21 +4,11 @@ from question.models import MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
 
 
-def get_messaging_question_per_origin_counts(
-    start_date=None,
-    end_date=None,
-    destination_countries=None,
-    origin_countries=None,
-):
-    
-    queryset = MessagingQuestionStandard.objects.all()
+def get_messaging_question_per_origin_counts(**filters):
     
     queryset = generic_filtered_queryset(
-        queryset = queryset, 
-        start_date = start_date, 
-        end_date = end_date,
-        origin_countries = origin_countries,
-        destination_countries = destination_countries,
+        queryset = MessagingQuestionStandard.objects.all(), 
+        **filters
     )
         
     origin_counts_data = queryset.annotate(
@@ -41,22 +31,11 @@ def get_messaging_question_per_origin_counts(
         }
 
 
-def get_messaging_question_per_destination_counts(
-    start_date=None,
-    end_date=None,
-    destination_countries=None,
-    origin_countries=None,
-):  
-     
-    queryset = MessagingQuestionStandard.objects.all()
-    
-    
+def get_messaging_question_per_destination_counts(**filters):  
+        
     queryset = generic_filtered_queryset(
-        queryset = queryset, 
-        start_date = start_date, 
-        end_date = end_date,
-        origin_countries = origin_countries,
-        destination_countries = destination_countries,
+        queryset = MessagingQuestionStandard.objects.all(), 
+        **filters
     )
      
     destination_counts_data = queryset.annotate(
@@ -81,21 +60,11 @@ def get_messaging_question_per_destination_counts(
     
 
 
-def messaging_questions_count(
-    start_date=None,
-    end_date=None,
-    destination_countries=None,
-    origin_countries=None,
-):
-    
-    queryset = MessagingQuestionStandard.objects.all()
+def messaging_questions_count(**filters):
     
     messaging_questions_count_queryset = generic_filtered_queryset(
-        queryset = queryset, 
-        start_date = start_date, 
-        end_date = end_date,
-        origin_countries = origin_countries,
-        destination_countries = destination_countries,
+        queryset = MessagingQuestionStandard.objects.all(), 
+        **filters
     )
         
     return messaging_questions_count_queryset.count()

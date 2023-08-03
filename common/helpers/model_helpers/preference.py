@@ -19,21 +19,31 @@ def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
 
 def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
         country_name = normalize_country_name(country_name)
+        is_origin = True if source == "origin" else False
+        is_destination = True if source == "destination" else False
         if country_name:
             country_instance, _ = Country.objects.get_or_create(
                 code= aplha_code_from_country_name(country_name).lower() or NOT_SPECIFIED,
                 name= country_name_from_aplha_code(country_name).lower() or NOT_SPECIFIED,
-                is_origin = True if source == "origin" else False,
-                is_destination = True if source == "destination" else False
             )
+            if not country_instance.is_origin:
+                country_instance.is_origin = is_origin
+            if not country_instance.is_destination:
+                country_instance.is_destination = is_destination
+            country_instance.save()
+            
             return country_instance
         else:
             country_instance, _ = Country.objects.get_or_create(
                 code = NOT_SPECIFIED,
-                name = NOT_SPECIFIED,
-                is_origin = True if source == "origin" else False,
-                is_destination = True if source == "destination" else False
+                name = NOT_SPECIFIED
             )
+            if not country_instance.is_origin:
+                country_instance.is_origin = is_origin
+            if not country_instance.is_destination:
+                country_instance.is_destination = is_destination
+            country_instance.save()
+            
             return country_instance
 
 def get_or_add_gender_to_db(gender: str) -> Gender:
