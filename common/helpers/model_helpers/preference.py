@@ -2,6 +2,7 @@ from common.const.value_const import NOT_SPECIFIED
 from common.custom_libs.language_codes import get_language_name
 from common.custom_libs.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
 from common.helpers.model_helpers.get_create import get_or_create_model_instance
+from common.helpers.preference_helpers.country import normalize_country_name
 from common.helpers.preference_helpers.organisation import normalize_organisation_name
 from preference.models import Age, Country, FactoryFarm, Gender, Language, Organisation, OrganisationSector, Route, SectorOfWork
 
@@ -17,16 +18,17 @@ def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
     return get_or_create_model_instance(FactoryFarm, factory_farm)
 
 def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
+        country_name = normalize_country_name(country_name)
         if country_name:
             country_instance, _ = Country.objects.get_or_create(
-                code= aplha_code_from_country_name(country_name) or NOT_SPECIFIED,
-                name= country_name_from_aplha_code(country_name) or NOT_SPECIFIED
+                code= aplha_code_from_country_name(country_name).lower() or NOT_SPECIFIED,
+                name= country_name_from_aplha_code(country_name).lower() or NOT_SPECIFIED
             )
             return country_instance
         else:
             country_instance, _ = Country.objects.get_or_create(
-                code= NOT_SPECIFIED,
-                name= NOT_SPECIFIED
+                code = NOT_SPECIFIED,
+                name = NOT_SPECIFIED
             )
             return country_instance
 

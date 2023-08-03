@@ -21,6 +21,6 @@ def get_origin_and_destination_from_route(route: str) -> dict[str, str]:
     else:
         origin, destination = route.split(" -> ")
         return { 
-                "origin" : normalize_country_name(origin), 
-                "destination": normalize_country_name(destination)
+                "origin" : origin, 
+                "destination": destination
             }

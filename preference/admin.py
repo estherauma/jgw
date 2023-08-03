@@ -9,7 +9,8 @@ from preference.models import (
         Route,
         Language,
         Gender,
-        Country
+        Country,
+        Age
     )
 
 class SectorOfWorkTabularAdminDisplay(admin.ModelAdmin):
@@ -35,3 +36,4 @@ admin.site.register(Route)
 admin.site.register(Language, LanguageTabularAdminDisplay)
 admin.site.register(Gender, GenderTabularAdminDisplay)
 admin.site.register(Country)
+admin.site.register(Age)

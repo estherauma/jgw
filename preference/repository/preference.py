@@ -1,6 +1,7 @@
 
 
 
+from common.helpers.preference_helpers.organisation import format_org_name_fro_display
 from core.filters import generic_filtered_queryset
 from preference.models import Preference
 
@@ -119,7 +120,7 @@ def preferences_by_origin(
 
     origin_counts = preferences_origin_queryset.values('origin__name').annotate(total=Count('id'))
 
-    labels = [origin['origin__name'] for origin in origin_counts]
+    labels = [origin['origin__name'].upper() for origin in origin_counts if origin['origin__name'] is not None]
     counts = [origin['total'] for origin in origin_counts]
 
     return {
@@ -193,7 +194,7 @@ def preferences_by_organisation(
 
     organisation_counts = organisation.values('organisation__name').annotate(total=Count('id'))
 
-    labels = [organisation['organisation__name'].upper() for organisation in organisation_counts]
+    labels = [format_org_name_fro_display(organisation['organisation__name']).upper() for organisation in organisation_counts]
     counts = [organisation['total'] for organisation in organisation_counts]
 
     return {

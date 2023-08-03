@@ -69,9 +69,9 @@
     <div class="col-md-8">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">Users By Age</p>
-                <div class="preference-age-graph-id-chart-box">
-                    <div id="preference-age-graph-id"></div>
+                <p class="chart-title">USER PER ORIGIN COUNTRY</p>
+                <div class="preference-origin-graph-id-chart-box">
+                    <div id="preference-origin-graph-id"></div>
                 </div>
             </div>
         </div>
@@ -85,6 +85,7 @@
         </div>
     </div>
 </div>
+
 <div class="row mb-3">
     <div class="col-4">
         <div class="card h-100">
@@ -105,11 +106,34 @@
         </div>
     </div>
 </div>
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">WORK CODE USAGE</p>
+                <div class="preference-work-code-usage-graph-id-chart-box">
+                    <div id="preference-work-code-usage-graph-id"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Users By Age</p>
+                <canvas id="preference-age-graph-id"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}
 {% block scripts %}
-<script src="{% static 'js/charts/bar/preference_age_graph.js' %}"></script>
+<script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_gender_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/bar/preference_language_graph.js' %}"></script>
+<script src="{% static 'js/charts/bar/preference_origin_graph.js' %}"></script>
+<script src="{% static 'js/charts/bar/preference_work-code-usage_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_destination_pie_chart.js' %}"></script>
 <script type="text/javascript">
     // get data from context
@@ -120,8 +144,8 @@
     var languageData = {{ preferences_selected_user_language | safe }};
     var workCodeData = {{ work_code_usage | safe }};
 
-    // plots the age graph
-    preferenceAgeGraph(ageData)
+    // plots the age piechart
+    preferenceAgePieChart(ageData)
 
     // plots the gender piechart
     preferenceGenderPieChart(genderData)
@@ -131,5 +155,11 @@
 
     // plots the destination piechart
     preferenceDestinationPieChart(destinationData)
+
+    // plots the origin graph
+    preferenceOriginGraph(originData)
+
+    // plots the work code usage graph
+    preferenceWorkCodeUsageGraph(workCodeData)
 </script>
 {% endblock %}
