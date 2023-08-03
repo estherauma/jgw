@@ -1,7 +1,8 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from core.filters import generic_filter_form_parser
 from core.forms import GenericFilterForm
-from core.logic.file_export import create_workbook, generate_export_response
+from core.logic.file_export import generate_and_export_excel
 from preference.repository.preference import get_all_organisations
 from question.repository.messaging_questions_standard import (
     get_messaging_question_per_destination_counts, 
@@ -55,14 +56,14 @@ def export_question_stats(request):
         filter_form = GenericFilterForm(request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
+
+        organisations = filters.get('organisation', None)
         
-        # get the orgs in filter or all logged in user's orgs
-        # organisations = filters.get('organisation') or request.user.organisation
-        organisations = get_all_organisations()
-        for org in organisations:
-            org_stats = question_stats_for_export(filters)
-            # all_question_stats[org] = org_stats
+        if organisations is None:
+            organisations = get_all_organisations()
         
-        print(get_all_organisations())
-        
-        pass
+        export_dict = {}
+        for organisation in organisations:
+            export_dict[organisation.name] = question_stats_for_export({**filters, 'organisations': [organisation]})
+            
+        return generate_and_export_excel(export_dict)

@@ -1,37 +1,49 @@
 from django.http import HttpResponse
-from openpyxl import Workbook
+import openpyxl
+from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 
-def create_workbook(work_sheets_data):
-    workbook = Workbook()
-    
-    for work_sheet_data in work_sheets_data:
-        name = work_sheet_data['name']
-        headers = work_sheet_data['headers']
-        contents = work_sheet_data['contents']
+def generate_and_export_excel(data):
+    # Create a new Excel workbook
+    wb = openpyxl.Workbook()
 
-        sheet = workbook.create_sheet(title=name)
+    for sheet_name, data_dict in data.items():
+        ws = wb.create_sheet(title=sheet_name)
 
-        sheet.append(headers)
+        for key, value in data_dict.items():
+            ws.append(['', ''])
+            title_cell = ws.cell(row=ws.max_row + 1, column=1, value=key.replace("_", " ").upper())
+            title_cell.font = Font(bold=True)
+            title_cell.fill = PatternFill(start_color='F2F2F2', end_color='F2F2F2', fill_type='solid')
 
-        for content_row in contents:
-            sheet.append(content_row)
-            
-        for col in sheet.columns:
+            ws.append(['', 'LABELS', 'COUNTS'])
+            labels = value['labels']
+            counts = value['data']
+
+            for label, count in zip(labels, counts):
+                ws.append(['', label, count])
+
+            # Make 'LABELS' and 'COUNTS' bold
+            ws['B{}'.format(ws.max_row - 1)].font = Font(bold=True)
+            ws['C{}'.format(ws.max_row - 1)].font = Font(bold=True)
+
+        # Adjust column widths
+        for column_cells in ws.columns:
             max_length = 0
-            for cell in col:
+            for cell in column_cells:
                 try:
                     if len(str(cell.value)) > max_length:
                         max_length = len(cell.value)
                 except:
                     pass
             adjusted_width = (max_length + 2) * 1.2
-            sheet.column_dimensions[get_column_letter(col[0].column)].width = adjusted_width
-    
-    workbook.active = 1
-    
-    return workbook
+            ws.column_dimensions[column_cells[0].column_letter].width = adjusted_width
+
+    # Remove the default empty sheet
+    del wb[wb.sheetnames[0]]
+
+    return generate_export_response(wb, 'output')
 
 
 def generate_export_response(workbook, export_name):

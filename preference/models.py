@@ -48,7 +48,7 @@ class Country(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f'{self.code} ::: {self.name} :: {self.is_origin} :: {self.is_destination}'
+        return f'{self.name}'
 
 class Language(models.Model):
     name = models.CharField(max_length=255)
