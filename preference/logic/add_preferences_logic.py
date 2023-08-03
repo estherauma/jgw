@@ -27,7 +27,7 @@ kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
 
 def fetch_preferences_from_api(client):
     start_date= APPLICATION_POSSIBLE_START_DATE
-    # start_date = previous_dates(5)
+    start_date = previous_dates(30)
     end_date= todays_date()
     
     # get the last time preferences were fetched
@@ -80,13 +80,13 @@ def add_preference_to_db(preference):
         organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
         organisation_data = get_or_add_organisation_to_db(organisation)
         factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
-        location_of_potential_work_data = get_or_add_country_to_db(location_of_potential_work, "location_of_potential_work_data")
+        location_of_potential_work_data = get_or_add_country_to_db(location_of_potential_work, source="destination")
         gender_data = get_or_add_gender_to_db(gender)
         age_data = get_or_add_age_to_db(age)
         language_data = get_or_add_language_to_db(language)
-        origin_data = get_or_add_country_to_db(origin, "origin_data")
-        destination_data = get_or_add_country_to_db(destination, "destination_data")
-        destination_state_data = get_or_add_country_to_db(destination_state, "destination_state_data")
+        origin_data = get_or_add_country_to_db(origin, source="origin")
+        destination_data = get_or_add_country_to_db(destination, source="destination")
+        destination_state_data = get_or_add_country_to_db(destination_state, source="destination")
         route_data = get_or_add_route_to_db(route)
         
         new_preference = Preference.objects.create(

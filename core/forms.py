@@ -4,6 +4,12 @@ from preference.models import Country
 
 
 class GenericFilterForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['origin'].queryset = Country.objects.filter(is_origin=True)
+        self.fields['destination'].queryset = Country.objects.filter(is_destination=True)
+        
     start_date = forms.DateField(
         label='Start Date',
         required=False,

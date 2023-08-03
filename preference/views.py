@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from core.filters import generic_filter_form_parser
 
 from core.forms import GenericFilterForm
 from preference.repository.preference import (
@@ -22,6 +23,54 @@ def user_overview(request):
         preferences_by_gender_responses = preferences_by_gender()
         preferences_by_language_responses = preferences_by_language()
         preferences_by_organisation_responses = preferences_by_organisation()
+    
+    else:
+        filter_form = GenericFilterForm(request.POST)
+        if filter_form.is_valid():
+            (start_date, end_date, origins, destinations) = generic_filter_form_parser(filter_form)
+        
+        total_user_overview_responses = preferences_count(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        preferences_per_origin_country_responses = preferences_by_origin(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        preferences_per_destination_country_responses = preferences_by_destination(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        preferences_by_age_responses = preferences_by_age(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        preferences_by_gender_responses = preferences_by_gender(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        preferences_by_language_responses = preferences_by_language(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
+        preferences_by_organisation_responses = preferences_by_organisation(
+            start_date = start_date,
+            end_date = end_date,
+            destination_countries = destinations,
+            origin_countries = origins,
+        )
         
     context = {
         'filter_form': filter_form,

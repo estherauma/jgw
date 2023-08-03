@@ -22,13 +22,17 @@ def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
         if country_name:
             country_instance, _ = Country.objects.get_or_create(
                 code= aplha_code_from_country_name(country_name).lower() or NOT_SPECIFIED,
-                name= country_name_from_aplha_code(country_name).lower() or NOT_SPECIFIED
+                name= country_name_from_aplha_code(country_name).lower() or NOT_SPECIFIED,
+                is_origin = True if source == "origin" else False,
+                is_destination = True if source == "destination" else False
             )
             return country_instance
         else:
             country_instance, _ = Country.objects.get_or_create(
                 code = NOT_SPECIFIED,
-                name = NOT_SPECIFIED
+                name = NOT_SPECIFIED,
+                is_origin = True if source == "origin" else False,
+                is_destination = True if source == "destination" else False
             )
             return country_instance
 

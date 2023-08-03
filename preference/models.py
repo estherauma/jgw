@@ -42,6 +42,8 @@ class Organisation(models.Model):
 class Country(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)
     code = models.CharField(max_length=50, null=True, blank=True)
+    is_origin = models.BooleanField(default=False)
+    is_destination = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

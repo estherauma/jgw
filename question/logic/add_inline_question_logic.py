@@ -82,8 +82,8 @@ def add_inline_question_to_db(inline_question):
     
     route_data = get_or_add_route_to_db(route)
     language_data = get_or_add_language_to_db(language)
-    origin_data = get_or_add_country_to_db(origin, "origin_data")
-    destination_data = get_or_add_country_to_db(destination, "destination_data")
+    origin_data = get_or_add_country_to_db(origin, source="origin")
+    destination_data = get_or_add_country_to_db(destination, source="destination")
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
     organisation_data = get_or_add_organisation_to_db(organisation)
     factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
