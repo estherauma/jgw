@@ -26,13 +26,13 @@ function messagingQuestionOriginChart(originChartData) {
             },
             maintainAspectRatio: false,
             responsive: true,
-        },
-        plugins: {
-            legend: {
-                display: false
-            },
-            scrollbar: {
-                enabled: true
+            plugins: {
+                legend: {
+                    display: false
+                },
+                scrollbar: {
+                    enabled: true
+                }
             }
         }
     }
