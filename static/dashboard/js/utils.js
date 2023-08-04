@@ -215,3 +215,26 @@ function getRandomColorArray(length) {
 
   return randomColors;
 }
+
+function pieChartColors(extra_colors_length=5) {
+  return [
+    COLORS.appleGreen,
+    COLORS.navyBlue,
+    COLORS.skyBlue,
+    
+    COLORS.lightGray,
+    COLORS.mediumGray,
+    COLORS.darkGray,
+
+    COLORS.lightBlue,
+    COLORS.mediumBlue,
+    COLORS.darkBlue,
+
+    COLORS.mediumGreen,
+    COLORS.darkGreen,
+
+    COLORS.black,
+    COLORS.pink,
+    ...getRandomColorArray(extra_colors_length)
+  ]
+}

@@ -10,14 +10,7 @@ function preferenceDestinationPieChart(preferenceDestinationData) {
             datasets: [{
                 label: 'My First Dataset',
                 data: data,
-                backgroundColor: [
-                    COLORS.darkBlue, 
-                    COLORS.appleGreen,
-                    COLORS.skyBlue,
-                    COLORS.navyBlue, 
-                    COLORS.black,
-                    ...getRandomColorArray(data.length)
-                ],
+                backgroundColor: pieChartColors(data.length),
                 barThickness: 15,
             }]
         },
