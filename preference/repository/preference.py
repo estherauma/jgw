@@ -148,3 +148,21 @@ def preferences_by_organisation(**filters):
     
 def get_all_organisations():
     return Organisation.objects.all()
+
+
+def preference_stats_for_export(filters):
+    preferences_per_origin_country_responses = preferences_by_origin(**filters)
+    preferences_per_destination_country_responses = preferences_by_destination(**filters)
+    preferences_by_age_responses = preferences_by_age(**filters)
+    preferences_by_gender_responses = preferences_by_gender(**filters)
+    preferences_by_language_responses = preferences_by_language(**filters)
+    preferences_by_organisation_responses = preferences_by_organisation(**filters)
+        
+    return {
+        'preferences_by_age': preferences_by_age_responses,
+        'preferences_by_gender': preferences_by_gender_responses,
+        'preferences_per_origin_country': preferences_per_origin_country_responses,
+        'preferences_per_destination_country': preferences_per_destination_country_responses,
+        'preferences_selected_user_language': preferences_by_language_responses,
+        'work_code_usage': preferences_by_organisation_responses,
+    }

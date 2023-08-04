@@ -7,7 +7,8 @@ from preference.repository.preference import get_all_organisations
 from question.repository.messaging_questions_standard import (
     get_messaging_question_per_destination_counts, 
     get_messaging_question_per_origin_counts,
-    messaging_questions_count
+    messaging_questions_count,
+    question_stats_for_export
 )
 
 
@@ -43,13 +44,6 @@ def messaging_question(request):
     )
 
 
-def question_stats_for_export(filters):
-    messaging_question_per_origin = get_messaging_question_per_origin_counts(**filters)
-    messaging_question_per_destination = get_messaging_question_per_destination_counts(**filters)
-    return {
-        "messaging_question_per_origin": messaging_question_per_origin,
-        "messaging_question_per_destination": messaging_question_per_destination,
-    }
 
 def export_question_stats(request):
     if request.method == 'POST':
@@ -60,6 +54,7 @@ def export_question_stats(request):
         organisations = filters.get('organisation', None)
         
         if organisations is None:
+            # otherwise , get all loggedin user's organisations
             organisations = get_all_organisations()
         
         export_dict = {}

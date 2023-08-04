@@ -17,7 +17,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="post" id="messaging-question-filter-form">
+                <form method="post" id="user-overview-question-filter-form">
                     {% csrf_token %}
                     {{filter_form|crispy}}
                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -48,7 +48,7 @@
                                     </a>
         
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
-                                        <button  class="dropdown-item" id="export-messaging-question-to-excel">Export to Excel</button>
+                                        <button  class="dropdown-item" id="export-user-overview-to-excel">Export to Excel</button>
                                     </div>
                                     
                                 </div>
@@ -135,6 +135,7 @@
 <script src="{% static 'js/charts/bar/preference_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/preference_work-code-usage_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_destination_pie_chart.js' %}"></script>
+<script src="{% static 'js/app/user_overview.js' %}"></script>
 <script type="text/javascript">
     // get data from context
     var ageData = {{ preferences_by_age | safe }};

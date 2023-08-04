@@ -18,15 +18,11 @@ def generate_and_export_excel(data):
             title_cell.fill = PatternFill(start_color='F2F2F2', end_color='F2F2F2', fill_type='solid')
 
             ws.append(['', 'LABELS', 'COUNTS'])
-            labels = value['labels']
-            counts = value['data']
+            labels =  value['labels']
+            counts = value.get('data') or value.get('counts')
 
             for label, count in zip(labels, counts):
                 ws.append(['', label, count])
-
-            # Make 'LABELS' and 'COUNTS' bold
-            ws['B{}'.format(ws.max_row - 1)].font = Font(bold=True)
-            ws['C{}'.format(ws.max_row - 1)].font = Font(bold=True)
 
         # Adjust column widths
         for column_cells in ws.columns:
