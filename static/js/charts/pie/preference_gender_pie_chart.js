@@ -6,7 +6,14 @@ function preferenceGenderPieChart(preferenceGenderGraphData) {
         datasets: [{
             label: 'My First Dataset',
             data: data,
-            backgroundColor: [COLORS.darkBlue, COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue, COLORS.black]
+            backgroundColor: [
+                COLORS.darkBlue, 
+                COLORS.appleGreen,
+                COLORS.skyBlue,
+                COLORS.navyBlue, 
+                COLORS.black,
+                ...getRandomColorArray(data.length)
+            ]
         }]
     };
     const config = {

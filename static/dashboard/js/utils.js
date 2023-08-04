@@ -199,3 +199,19 @@ function exportStatsData(url, form, fileName='untitled_stats.xlsx') {
           });
   })
 }
+
+
+function getRandomColorArray(length) {
+  const randomColors = [];
+  const letters = "0123456789ABCDEF";
+
+  for (let i = 0; i < length; i++) {
+    let color = "#";
+    for (let j = 0; j < 6; j++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    randomColors.push(color);
+  }
+
+  return randomColors;
+}
