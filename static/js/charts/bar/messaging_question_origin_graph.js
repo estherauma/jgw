@@ -1,5 +1,5 @@
 function messagingQuestionOriginChart(originChartData) {
-    const data = originChartData["data"]
+    const data = originChartData["counts"]
     const labels = originChartData["labels"]
 
     const originChartConfig = {

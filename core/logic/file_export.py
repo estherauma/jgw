@@ -19,7 +19,7 @@ def generate_and_export_excel(data):
 
             ws.append(['', 'LABELS', 'COUNTS'])
             labels =  value['labels']
-            counts = value.get('data') or value.get('counts')
+            counts = value.get('counts')
 
             for label, count in zip(labels, counts):
                 ws.append(['', label, count])
