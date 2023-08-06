@@ -10,7 +10,7 @@ def normalize_organisation_name(org: str) -> str:
     }
     return patterns_to_replace.get(org.lower(), org).lower()
 
-def format_org_name_fro_display(name) -> str:
+def format_org_name_from_display(name) -> str:
     # remove the 'seasonal worker scheme - ' prefix
     pattern = re.compile(r'seasonal\s*worker\s*scheme\s*-\s*', re.IGNORECASE)
     return pattern.sub('', name)

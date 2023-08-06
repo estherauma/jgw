@@ -1,7 +1,7 @@
 
 from django.db.models import Count
 
-from common.helpers.preference_helpers.organisation import format_org_name_fro_display
+from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from preference.filters import preference_filtered_queryset
 from preference.models import Organisation, Preference
 
@@ -137,7 +137,7 @@ def preferences_by_organisation(**filters):
 
     organisation_counts = organisation_queryset.values('organisation__name').annotate(total=Count('id'))
 
-    labels = [format_org_name_fro_display(organisation['organisation__name']).upper() for organisation in organisation_counts]
+    labels = [format_org_name_from_display(organisation['organisation__name']).upper() for organisation in organisation_counts]
     counts = [organisation['total'] for organisation in organisation_counts]
 
     return {
