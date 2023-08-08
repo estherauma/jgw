@@ -148,8 +148,8 @@ def filter_data(request, category):
         if category == 'preferences':
             response_count = data['preference_response_count']
             del data['preference_response_count']
-            user_locations = helper.get_user_locations( data['preference_origin'])
-
+            origin_data = data.get('preference_origin',{})
+            user_locations = helper.get_user_locations(origin_data)
         chart_data = form_chart_data(data,helper)
     except ValidationError as e:
         return JsonResponse({"form_errors": e.message_dict}, status=HTTPStatus.BAD_REQUEST)
