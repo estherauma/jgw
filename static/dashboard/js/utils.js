@@ -176,11 +176,6 @@ function convertDateToLongFormat(dateStr="") {
   return `${monthNames[month]} ${dayNum}${suffix}`;
 }
 
-function toTitleCase(str){
-  return str?.toLowerCase()?.replace(/(?:^|\s)\w/g, (match) => {
-    return match?.toUpperCase();
-  })
-}
 
 function exportStatsData(url, form, fileName='untitled_stats.xlsx') {
   const formData = new FormData(form);
