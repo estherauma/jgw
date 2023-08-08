@@ -1,4 +1,5 @@
 from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
 
 def capitalize_string(string, separator):
     words = string.split(separator)
@@ -21,7 +22,9 @@ def change_dictionary_to_list_of_dictionaries(dictionary):
 
 def get_country_coordinates(country_name):
     geolocator = Nominatim(user_agent="country-locator")
-    location = geolocator.geocode(country_name)
+    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+    location = geocode(country_name)
+    
     if location:
         return location.latitude, location.longitude
     else:
