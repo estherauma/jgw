@@ -1,3 +1,5 @@
+from geopy.geocoders import Nominatim
+
 def capitalize_string(string, separator):
     words = string.split(separator)
     return ' '.join(word.capitalize() for word in words)
@@ -16,3 +18,11 @@ def change_dictionary_to_list_of_dictionaries(dictionary):
         list_of_dicts.append(dict_item)
     
     return list_of_dicts
+
+def get_country_coordinates(country_name):
+    geolocator = Nominatim(user_agent="country-locator")
+    location = geolocator.geocode(country_name)
+    if location:
+        return location.latitude, location.longitude
+    else:
+        return None
