@@ -3,6 +3,6 @@ const messagingQuestionForm = document.getElementById("messaging-question-filter
 const messagingQuestionExportButton = document.getElementById("export-messaging-question-to-excel")
 
 messagingQuestionExportButton.addEventListener("click",function() {
-    const url = `${window.location.href}export_stats`
+    const url = `${window.location.href}export_messaging_question_stats`
     exportStatsData(url, messagingQuestionForm)
 })

@@ -31,7 +31,6 @@ def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
             if not country_instance.is_destination:
                 country_instance.is_destination = is_destination
             country_instance.save()
-            
             return country_instance
         else:
             country_instance, _ = Country.objects.get_or_create(

@@ -1,13 +1,13 @@
 from django.db.models import Count, Case, When, F
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
+from question.filters import generic_question_filtered_queryset
 
-from core.filters import generic_filtered_queryset
 from question.models import InlineQuestionStandard
 
 
 def inline_questions_count(**filters):
     
-    inline_questions_count_queryset = generic_filtered_queryset(
+    inline_questions_count_queryset = generic_question_filtered_queryset(
         queryset = InlineQuestionStandard.objects.all(), 
         **filters
     )
@@ -17,7 +17,7 @@ def inline_questions_count(**filters):
 
 def get_inline_question_per_origin_counts(**filters):
     
-    queryset = generic_filtered_queryset(
+    queryset = generic_question_filtered_queryset(
         queryset = InlineQuestionStandard.objects.all(), 
         **filters
     )
@@ -44,7 +44,7 @@ def get_inline_question_per_origin_counts(**filters):
 
 def get_inline_question_per_destination_counts(**filters):  
         
-    queryset = generic_filtered_queryset(
+    queryset = generic_question_filtered_queryset(
         queryset = InlineQuestionStandard.objects.all(), 
         **filters
     )
@@ -72,7 +72,7 @@ def get_inline_question_per_destination_counts(**filters):
     
 def get_inline_question_per_organisation_counts(**filters):
     
-    queryset = generic_filtered_queryset(
+    queryset = generic_question_filtered_queryset(
         queryset = InlineQuestionStandard.objects.all(), 
         **filters
     )
@@ -99,7 +99,7 @@ def get_inline_question_per_organisation_counts(**filters):
     
 def get_inline_question_per_language_counts(**filters):
     
-    queryset = generic_filtered_queryset(
+    queryset = generic_question_filtered_queryset(
         queryset = InlineQuestionStandard.objects.all(), 
         **filters
     )

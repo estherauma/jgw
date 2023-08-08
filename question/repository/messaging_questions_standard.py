@@ -1,11 +1,11 @@
-from core.filters import generic_filtered_queryset
+from question.filters import generic_question_filtered_queryset
 from question.models import MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
 
 
 def get_messaging_question_per_origin_counts(**filters):
     
-    queryset = generic_filtered_queryset(
+    queryset = generic_question_filtered_queryset(
         queryset = MessagingQuestionStandard.objects.all(), 
         **filters
     )
@@ -32,7 +32,7 @@ def get_messaging_question_per_origin_counts(**filters):
 
 def get_messaging_question_per_destination_counts(**filters):  
         
-    queryset = generic_filtered_queryset(
+    queryset = generic_question_filtered_queryset(
         queryset = MessagingQuestionStandard.objects.all(), 
         **filters
     )
@@ -61,7 +61,7 @@ def get_messaging_question_per_destination_counts(**filters):
 
 def messaging_questions_count(**filters):
     
-    messaging_questions_count_queryset = generic_filtered_queryset(
+    messaging_questions_count_queryset = generic_question_filtered_queryset(
         queryset = MessagingQuestionStandard.objects.all(), 
         **filters
     )

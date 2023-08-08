@@ -18,7 +18,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="post" id="messaging-question-filter-form">
+                <form method="post" id="inline-question-filter-form">
                     {% csrf_token %}
                     {{filter_form|crispy}}
                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -51,7 +51,7 @@
                                     </a>
         
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
-                                        <button  class="dropdown-item" id="export-messaging-question-to-excel">Export to Excel</button>
+                                        <button  class="dropdown-item" id="export-inline-question-to-excel">Export to Excel</button>
                                     </div>
                                     
                                 </div>
