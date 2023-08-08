@@ -124,30 +124,3 @@
     color: #6E768E;
     text-align: center;
 }
-
-#location-table{
-    border-spacing: 30px 0;
-    border-collapse: unset;
-    overflow-y: auto;
-}
-
-#location-table-body{
-    display:block;
-    height: 300px;
-    overflow-y: scroll;
-}
-
-#location-table-body >tr> td{
-    font-size: 12px;
-    color: white;
-    padding: 0 10px;
-}
-
-#users-map{
-    height:500px;
-    width: 100%;
-}
-
-.location-table-wrapper{
-    margin: auto 0;
-}
