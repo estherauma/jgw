@@ -38,7 +38,7 @@ class Preferences(BaseAnalytics):
 
         
         _df = clean_df(self.get_df(filters))
-        # print('feilds', _df.columns)
+       
 
         # normalize some gender 
         if _df.empty:
