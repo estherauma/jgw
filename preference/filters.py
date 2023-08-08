@@ -32,19 +32,19 @@ def preference_filtered_queryset(
         queryset = queryset.filter(api_created_at__range=(start_date, end_date))
         
     if destination_countries:
-        current_model_dest_q = Q(destination__in=destination_countries)
+        current_model_dest_q = Q(destination__name__in=destination_countries)
         queryset = queryset.filter(current_model_dest_q)
         
     if origin_countries:
-        current_model_dest_q = Q(origin__in=origin_countries)
+        current_model_dest_q = Q(origin__name__in=origin_countries)
         queryset = queryset.filter(current_model_dest_q)
         
     if organisations:
-        current_model_dest_q = Q(organisation__in=organisations)
+        current_model_dest_q = Q(organisation__name__in=organisations)
         queryset = queryset.filter(current_model_dest_q)
     
     if factory_farms:
-        current_model_dest_q = Q(factory_farm__in=factory_farms)
+        current_model_dest_q = Q(factory_farm__name__in=factory_farms)
         queryset = queryset.filter(current_model_dest_q)
         
     

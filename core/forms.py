@@ -7,8 +7,20 @@ class GenericFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['origin'].queryset = Country.objects.filter(is_origin=True)
-        self.fields['destination'].queryset = Country.objects.filter(is_destination=True)
+        self.fields['origin'].choices = [
+            (country.name, country.name)
+            for country in Country.objects.filter(is_origin=True)
+        ]
+        self.fields['destination'].queryset = [
+            (country.name, country.name)
+            for country in Country.objects.filter(is_destination=True)
+        ]
+        self.fields["factory_farm"].choices = [
+            (farm.name, farm.name) for farm in FactoryFarm.objects.all()
+        ]
+        self.fields["organisation"].choices = [
+            (org.name, org.name) for org in Organisation.objects.all()
+        ]
         
     start_date = forms.DateField(
         label='Start Date',
@@ -27,26 +39,38 @@ class GenericFilterForm(forms.Form):
         )
     )
 
-    destination = forms.ModelMultipleChoiceField(
-        queryset=Country.objects.all(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "destination"}),
+    destination = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker", 
+            "data-live-search": "true", 
+            "id": "destination"
+        }),
         required=False
     )
 
-    origin = forms.ModelMultipleChoiceField(
-        queryset=Country.objects.all(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "origin"}),
+    origin = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker", 
+            "data-live-search": "true", 
+            "id": "origin"
+        }),
         required=False
     )
     
-    organisation = forms.ModelMultipleChoiceField(
-        queryset=Organisation.objects.all(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "organisation"}),
+    organisation = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker", 
+            "data-live-search": "true",
+            "id": "organisation"
+        }),
         required=False
     )
     
-    factory_farm = forms.ModelMultipleChoiceField(
-        queryset=FactoryFarm.objects.all(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "factory_farm"}),
+    factory_farm = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker", 
+            "data-live-search": "true", 
+            "id": "factory_farm"
+        }),
         required=False
     )

@@ -52,7 +52,7 @@ def generic_filtered_queryset(
     
     if origin_countries is None:
         origin_countries = []
-        
+       
     if organisations is None:
         organisations = []
     
@@ -67,26 +67,26 @@ def generic_filtered_queryset(
         queryset = queryset.filter(api_created_at__range=(start_date, end_date))
         
     if destination_countries:
-        preference_dest_q = Q(preference__destination__in=destination_countries)
-        current_model_dest_q = Q(destination__in=destination_countries)
+        preference_dest_q = Q(preference__destination__name__in=destination_countries)
+        current_model_dest_q = Q(destination__name__in=destination_countries)
         combined_dest_q = preference_dest_q | current_model_dest_q
         queryset = queryset.filter(combined_dest_q)
         
     if origin_countries:
-        preference_origin_q = Q(preference__origin__in=origin_countries)
-        current_model_dest_q = Q(origin__in=origin_countries)
+        preference_origin_q = Q(preference__origin__name__in=origin_countries)
+        current_model_dest_q = Q(origin__name__in=origin_countries)
         combined_origin_q = preference_origin_q | current_model_dest_q
         queryset = queryset.filter(combined_origin_q)
         
     if organisations:
-        preference_organisation_q = Q(preference__organisation__in=organisations)
-        current_model_dest_q = Q(organisation__in=organisations)
+        preference_organisation_q = Q(preference__organisation__name__in=organisations)
+        current_model_dest_q = Q(organisation__name__in=organisations)
         combined_organisation_q = preference_organisation_q | current_model_dest_q
         queryset = queryset.filter(combined_organisation_q)
     
     if factory_farms:
-        preference_factory_farm_q = Q(preference__factory_farm__in=factory_farms)
-        current_model_dest_q = Q(factory_farm__in=factory_farms)
+        preference_factory_farm_q = Q(preference__factory_farm__name__in=factory_farms)
+        current_model_dest_q = Q(factory_farm__name__in=factory_farms)
         combined_factory_farm_q = preference_factory_farm_q | current_model_dest_q
         queryset = queryset.filter(combined_factory_farm_q)
         

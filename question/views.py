@@ -79,6 +79,9 @@ def inline_question(request):
         filter_form = GenericFilterForm(request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
+        else:
+            # filters = {}
+            print(filter_form.errors)
             
         total_inline_questions = inline_questions_count(**filters)
         inline_question_per_origin = get_inline_question_per_origin_counts(**filters)
