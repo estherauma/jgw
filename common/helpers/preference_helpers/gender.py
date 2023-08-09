@@ -34,7 +34,8 @@ def normalize_gender_name(gender: str):
         "not specified": other,
         "others": other,
         "other": other,
-        "i don&#39;t feel comfortable answering":prefer_not_to_answer
+        "i don&#39;t feel comfortable answering":prefer_not_to_answer,
+        "prefernottoanswer": prefer_not_to_answer,
     }
     
     if gender is None:

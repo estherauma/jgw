@@ -1,5 +1,7 @@
 
+from collections import defaultdict
 from django.db.models import Count
+from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from preference.filters import preference_filtered_queryset
@@ -70,14 +72,18 @@ def preferences_by_gender(**filters):
 
     gender_counts = preferences_gender_queryset.values('gender__translated_name').annotate(total=Count('id'))
 
-    labels = [gender['gender__translated_name'].upper() for gender in gender_counts]
-    counts = [gender['total'] for gender in gender_counts]
+    label_sums = defaultdict(int)
+    for gender in gender_counts:
+        normalized_label = normalize_gender_name(gender['gender__translated_name']).upper()
+        label_sums[normalized_label] += gender['total']
+
+    summed_labels = list(label_sums.keys())
+    summed_counts = list(label_sums.values())
 
     return {
-        "labels": labels,
-        "counts": counts
+        "labels": summed_labels,
+        "counts": summed_counts
     }
-    
 
 def preferences_by_origin(**filters):
     preferences_origin_queryset = preference_filtered_queryset(
