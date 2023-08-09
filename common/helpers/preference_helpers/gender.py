@@ -1,3 +1,6 @@
+from common.const.value_const import NOT_SPECIFIED
+
+
 def normalize_gender_name(gender: str):
     male = "male"
     female = "female"
@@ -26,7 +29,6 @@ def normalize_gender_name(gender: str):
         "i don&#39;t want to answer.": prefer_not_to_answer,
         "prefer to answer": prefer_not_to_answer,
         "": prefer_not_to_answer,
-        None: prefer_not_to_answer,
         "another": other,
         "behavior": other,
         "not specified": other,
@@ -35,4 +37,12 @@ def normalize_gender_name(gender: str):
         "i don&#39;t feel comfortable answering":prefer_not_to_answer
     }
     
-    return patterns_to_replace.get(gender.lower(), gender)
+    if gender is None:
+        return prefer_not_to_answer.lower()
+    
+    normalize_gender = patterns_to_replace.get(gender.lower(), gender)
+    
+    if not normalize_gender.strip():
+        normalize_gender = NOT_SPECIFIED
+        
+    return normalize_gender

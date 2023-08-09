@@ -122,7 +122,7 @@ def add_inline_question_to_db(inline_question):
         
         # create inline question response 
         inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
-            text = response_list.get('value')
+            text = response_list.get('value') or NOT_SPECIFIED
         )
         InlineQuestionResponse.objects.create(
             inline_question = inline_question,

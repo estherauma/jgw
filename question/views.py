@@ -7,6 +7,7 @@ from question.repository.inline_questions_standard import get_inline_question_pe
 from question.repository.messaging_questions_standard import (
     get_messaging_question_per_destination_counts, 
     get_messaging_question_per_origin_counts,
+    inline_question_response,
     messaging_questions_count,
     question_stats_for_export
 )
@@ -73,6 +74,7 @@ def inline_question(request):
         inline_question_per_destination = get_inline_question_per_destination_counts()
         inline_question_per_organisation = get_inline_question_per_organisation_counts()
         inline_question_per_language = get_inline_question_per_language_counts()
+        inline_question_response_data = inline_question_response()
         
     else:
         filter_form = InlineQuestionFilterForm(request.POST)
@@ -84,6 +86,7 @@ def inline_question(request):
         inline_question_per_destination = get_inline_question_per_destination_counts(**filters)
         inline_question_per_organisation = get_inline_question_per_organisation_counts(**filters)
         inline_question_per_language = get_inline_question_per_language_counts(**filters)
+        inline_question_response_data = inline_question_response()
     
 
     context = {
@@ -92,6 +95,7 @@ def inline_question(request):
         "inline_question_per_destination": inline_question_per_destination,
         "inline_question_per_organisation": inline_question_per_organisation,
         "inline_question_per_language": inline_question_per_language,
+        "inline_question_response_data": inline_question_response_data,
         'filter_form': filter_form,
     }
     return render(

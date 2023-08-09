@@ -52,7 +52,7 @@ class InlineQuestion(models.Model):
 
 
 class InlineQuestionResponseText(models.Model):
-    text = models.TextField(blank=True, null=True)
+    text = models.TextField(blank=True, null=True, unique=True)
     translated_text = models.TextField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -100,7 +100,7 @@ class MessagingQuestionStandard(models.Model):
     
 
 class MessagingQuestionText(models.Model):
-    text = models.CharField(max_length=255, blank=True, null=True)
+    text = models.CharField(max_length=255, blank=True, null=True, unique=True)
     translated_text = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

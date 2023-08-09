@@ -1,5 +1,5 @@
 from question.filters import generic_question_filtered_queryset
-from question.models import MessagingQuestionStandard
+from question.models import InlineQuestionResponse, InlineQuestionResponseText, MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
 
 
@@ -75,4 +75,38 @@ def question_stats_for_export(filters):
     return {
         "messaging_question_per_origin": messaging_question_per_origin,
         "messaging_question_per_destination": messaging_question_per_destination,
+    }
+    
+    
+def inline_question_response():
+    # Get all possible response texts
+
+    # Get the responses count for each unique response text for each InlineQuestionText
+    responses_count = InlineQuestionResponse.objects.values(
+        question_text=F('inline_question__question__text'),
+        response_text=F('response__translated_text')
+    ).annotate(
+        response_count=Count('response')
+    )
+
+    # Create dictionaries to store question labels and response counts
+    question_labels = []
+    response_counts = []
+
+    question_texts_list = []
+    responses = []
+    for response in responses_count:
+        if response['question_text'] not in question_texts_list:
+            question_texts_list.append(response['question_text'])
+            responses.append({
+                "response_texts": [response['response_text']],
+                "response_counts": [response['response_count']]
+            })
+        else:
+            responses[question_texts_list.index(response['question_text'])]["response_texts"].append(response['response_text'])
+            responses[question_texts_list.index(response['question_text'])]["response_counts"].append(response['response_count'])
+    
+    return {
+        "responses": responses,
+        "question_texts": question_texts_list
     }

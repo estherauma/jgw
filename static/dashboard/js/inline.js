@@ -225,6 +225,7 @@ function plotCharts(chartData) {
 }
 
 function questionsAndAnswers(chartData) {
+    console.log(chartData)
     const data = chartData['data'];
     const labels = chartData['labels'];
 

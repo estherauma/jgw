@@ -40,8 +40,8 @@ class Organisation(models.Model):
     
 
 class Country(models.Model):
-    name = models.CharField(max_length=255, null=True, blank=True)
-    code = models.CharField(max_length=50, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    code = models.CharField(max_length=50, null=True, blank=True, unique=True)
     is_origin = models.BooleanField(default=False)
     is_destination = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -62,7 +62,7 @@ class Language(models.Model):
         return f"{self.name}"
     
 class Route(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
