@@ -6,7 +6,7 @@ function preferenceAgePieChart(preferenceAgePieChartData) {
         datasets: [{
             label: 'My First Dataset',
             data: data,
-            backgroundColor: pieChartColors(data.length)
+            backgroundColor: genericChartColors(data.length)
         }]
     };
     const config = {

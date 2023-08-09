@@ -116,17 +116,6 @@
             </div>
         </div>
     </div>
-
-    <div class="col-md-12 mb-3">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">In-line Question Responses</p>
-                <div class="question_graphcard-chart-box">
-                    <div id="inline-question-responses-graph"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 {% endblock content %}
@@ -135,6 +124,7 @@
 <script src="{% static 'js/charts/table/inline_question_destination_table.js' %}"></script>
 <script src="{% static 'js/charts/bar/inline_question_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/inline_question_language_graph.js' %}"></script>
+<script src="{% static 'js/charts/bar/inline_question_responses_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/inline_question_organisation_pie_chart.js' %}"></script>
 <script src="{% static 'js/app/inline_question.js' %}"></script>
 <script type="text/javascript">
@@ -144,8 +134,6 @@
     var languageData = {{ inline_question_per_language|safe }};
     var organisationData = {{ inline_question_per_organisation|safe }};
     var responseData  = {{ inline_question_response_data | safe }}
-
-    console.log(responseData)
 
     // plots the origin graph
     inlineQuestionOriginGraph(originData)

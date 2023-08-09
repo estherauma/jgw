@@ -216,7 +216,7 @@ function getRandomColorArray(length) {
   return randomColors;
 }
 
-function pieChartColors(extra_colors_length=5) {
+function genericChartColors(extra_colors_length=5) {
   return [
     COLORS.appleGreen,
     COLORS.navyBlue,

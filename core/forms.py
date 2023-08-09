@@ -11,13 +11,16 @@ class GenericFilterForm(forms.Form):
             (country.name, country.name)
             for country in Country.objects.filter(is_origin=True)
         ]
-        self.fields['destination'].queryset = [
+        
+        self.fields['destination'].choices = [
             (country.name, country.name)
             for country in Country.objects.filter(is_destination=True)
         ]
+
         self.fields["factory_farm"].choices = [
             (farm.name, farm.name) for farm in FactoryFarm.objects.all()
         ]
+        
         self.fields["organisation"].choices = [
             (org.name, org.name) for org in Organisation.objects.all()
         ]
@@ -39,20 +42,20 @@ class GenericFilterForm(forms.Form):
         )
     )
 
-    destination = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple(attrs={
-            "class": "form-select selectpicker", 
-            "data-live-search": "true", 
-            "id": "destination"
-        }),
-        required=False
-    )
-
     origin = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(attrs={
             "class": "form-select selectpicker", 
             "data-live-search": "true", 
             "id": "origin"
+        }),
+        required=False
+    )
+    
+    destination = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker", 
+            "data-live-search": "true", 
+            "id": "destination"
         }),
         required=False
     )
