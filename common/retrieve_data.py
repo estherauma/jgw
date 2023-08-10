@@ -246,6 +246,7 @@ class JGWApi:
             "i don&#39;t want to answer.": "prefer not to answer",
             "prefer to answer": "prefer not to answer",
             "": "prefer not to answer",
+            "prefernottoanswer": "prefer not to answer",
             None: "prefer not to answer",
             "another": "other",
             "i don&#39;t feel comfortable answering":"prefer not to answer",
