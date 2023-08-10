@@ -140,11 +140,14 @@ def preferences_by_organisation(**filters):
         queryset=Preference.objects.all(),
         **filters
     )
+    print("organisation_queryset::::---->",filters)
 
-    organisation_counts = organisation_queryset.values('organisation__name').annotate(total=Count('id'))
+    organisation_counts = organisation_queryset.values('organisation__name').annotate(
+        count=Count('organisation__name')
+    ).order_by()
 
     labels = [format_org_name_from_display(organisation['organisation__name']).upper() for organisation in organisation_counts]
-    counts = [organisation['total'] for organisation in organisation_counts]
+    counts = [organisation['count'] for organisation in organisation_counts]
 
     return {
         "labels": labels,
@@ -152,8 +155,9 @@ def preferences_by_organisation(**filters):
     }
     
     
-def get_all_organisations():
-    return Organisation.objects.all()
+def get_all_organisations_list(by_field = 'name'):
+    orgs_queryset = Organisation.objects.all()
+    return [getattr(org, by_field) for org in orgs_queryset]
 
 
 def preference_stats_for_export(filters):

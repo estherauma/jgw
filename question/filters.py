@@ -48,6 +48,7 @@ def generic_question_filtered_queryset(
         queryset = queryset.filter(combined_origin_q)
         
     if organisations:
+        print(organisations)
         preference_organisation_q = Q(preference__organisation__name__in=organisations)
         current_model_dest_q = Q(organisation__name__in=organisations)
         combined_organisation_q = preference_organisation_q | current_model_dest_q

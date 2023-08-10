@@ -4,7 +4,7 @@ from core.filters import generic_filter_form_parser
 from core.forms import GenericFilterForm
 from core.logic.file_export import generate_and_export_excel
 from preference.repository.preference import (
-    get_all_organisations,
+    get_all_organisations_list,
     preference_stats_for_export,
     preferences_by_age, 
     preferences_by_destination, 
@@ -59,6 +59,7 @@ def user_overview(request):
 
 def export_preference_stats(request):
     if request.method == 'POST':
+        
         filter_form = GenericFilterForm(request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
@@ -66,13 +67,14 @@ def export_preference_stats(request):
         organisations = filters.get('organisation', None)
         
         if organisations is None:
-            # otherwise , get all loggedin user's organisations
-            organisations = get_all_organisations()
+            # TODO: otherwise , get all loggedin user's organisations
+            organisations = get_all_organisations_list()
         
         export_dict = {
             "all": preference_stats_for_export({**filters, 'organisations': organisations})
         }
+        
         for organisation in organisations:
-            export_dict[organisation.name] = preference_stats_for_export({**filters, 'organisations': [organisation]})
+            export_dict[organisation] = preference_stats_for_export({**filters, 'organisations': [organisation]})
             
         return generate_and_export_excel(export_dict) 
