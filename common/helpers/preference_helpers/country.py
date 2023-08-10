@@ -9,6 +9,7 @@ def normalize_country_name(country: str) -> str:
         'uk': 'united kingdom',
         'gbr': 'united kingdom',
         'united kingdom': 'united kingdom',
+        'zzz': 'other - the rest of the world',
         '': NOT_SPECIFIED,
         ' ': NOT_SPECIFIED,
     }
