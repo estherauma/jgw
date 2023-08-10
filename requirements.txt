@@ -17,12 +17,14 @@ click-plugins==1.1.1
 click-repl==0.2.0
 contourpy==1.0.5
 coverage==6.0.2
+crispy-bootstrap5==0.7
 cycler==0.11.0
 db-dtypes==1.0.3
 decorator==5.1.1
 Deprecated==1.2.13
 dj-database-url==0.5.0
 Django==3.2.8
+django-crispy-forms==2.0
 django-extensions==3.1.5
 django-heroku==0.3.1
 djangorestframework==3.12.4
@@ -30,6 +32,8 @@ et-xmlfile==1.1.0
 executing==0.8.3
 Faker==18.4.0
 fonttools==4.38.0
+geographiclib==2.0
+geopy==2.3.0
 google-api-core==1.31.5
 google-auth==1.35.0
 google-cloud-bigquery==3.3.2
@@ -80,6 +84,7 @@ pure-eval==0.2.2
 pyarrow==9.0.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+pycountry==22.3.5
 Pygments==2.11.2
 PyJWT==2.6.0
 pyparsing==3.0.8
@@ -95,6 +100,7 @@ six==1.16.0
 sniffio==1.2.0
 sqlparse==0.4.2
 stack-data==0.2.0
+tabulate==0.9.0
 tomli==2.0.1
 traitlets==5.1.1
 typing_extensions==4.1.1

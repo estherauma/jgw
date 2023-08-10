@@ -126,6 +126,12 @@ function filterData() {
             }
             else {
                 chartData = data['chart_data']
+                const user_locations = data['user_locations']
+                var map = L.map('users-map').setView([27.98545295039861, 53.278905995774146], 2);
+
+                if(user_locations?.length){
+                    userLocationsMap(map, user_locations)
+                }
 
                 if (Object.keys(chartData).length === 0) {
                     toggleElementDisplay(true, '#no-results')
@@ -135,6 +141,7 @@ function filterData() {
                     responseCountElement.textContent = responseCountValue
                     plotCharts(chartData)
                     toggleElementDisplay(true, '#chart-area')
+                    map.invalidateSize()
                 }
             }
             
@@ -466,7 +473,44 @@ function userTrendsGraph(trendsData) {
     captionElement.innerHTML = dateRangeText;
    
     new Chart(ctx, chartConfig);
-  }
+}
+
+function userLocationsMap(map,data){
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        language: 'en',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    for (let i = 0; i < data.length; i++) {
+        const location = data[i];
+
+        if(location.coords.length<1){
+            continue;
+        }
+        var marker = L.marker(location.coords).addTo(map);
+
+        var tooltipContent = '<b>' + location.country + '</b><br>Users: ' + location.users;
+        marker.bindTooltip(tooltipContent);
+        createLocationsTable(location)
+    }
+}
+
+function createLocationsTable(data){
+    var table = document.getElementById('location-table-body');
+    var row = document.createElement("tr");
+    var countryCell= document.createElement("td");
+    var usersCell  = document.createElement("td");
+
+    countryCell.textContent = toTitleCase(data.country)
+    countryCell.style.backgroundColor = COLORS.navyBlue; 
+
+    usersCell.textContent = data.users
+    usersCell.style.backgroundColor = COLORS.skyBlue; 
+
+    row.appendChild(countryCell);
+    row.appendChild(usersCell);
+    table.appendChild(row);
+}
+
 
 export_button.addEventListener('click', () => exportToExcel(export_url));
 window.addEventListener('DOMContentLoaded', getOriginOptions)

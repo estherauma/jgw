@@ -134,6 +134,25 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="card user-location-card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-8">
+                            <p class="chart-title">USERS LOCATIONS</p>
+                            <div id="users-map"></div>
+                        </div>
+                        <div class="col-4 location-table-wrapper">
+                            <p class="chart-title">ORIGIN COUNTRIES</p>
+                            <table id="location-table">
+                                <tbody id="location-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
         </div>
     </div>
 </div>
@@ -148,4 +167,6 @@
 <script src="{% static 'dashboard/js/charts/preference_origin_chart.js' %}"></script>
 <script src="{% static 'dashboard/js/charts/preference_destination_chart.js' %}"></script>
 <script src="{% static 'dashboard/js/preferences.js' %}"></script>
+
+
 {% endblock %}
