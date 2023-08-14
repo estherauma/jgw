@@ -1,11 +1,15 @@
 from django.shortcuts import render
 from core.filters import generic_filter_form_parser
-from core.forms import GenericFilterForm
-from core.logic.file_export import create_workbook, generate_export_response
+from core.logic.file_export import generate_and_export_excel
+from preference.repository.preference import get_all_organisations_list
+from question.forms import InlineQuestionFilterForm, MessagingQuestionFilterForm
+from question.repository.inline_questions_standard import get_inline_question_per_destination_counts, get_inline_question_per_language_counts, get_inline_question_per_organisation_counts, get_inline_question_per_origin_counts, inline_questions_count
 from question.repository.messaging_questions_standard import (
     get_messaging_question_per_destination_counts, 
     get_messaging_question_per_origin_counts,
-    messaging_questions_count
+    inline_question_response,
+    messaging_questions_count,
+    question_stats_for_export
 )
 
 
@@ -13,36 +17,19 @@ from question.repository.messaging_questions_standard import (
 def messaging_question(request):
     
     if request.method == 'GET':
-        filter_form = GenericFilterForm()
+        filter_form = MessagingQuestionFilterForm()
         total_messaging_questions = messaging_questions_count()
         messaging_question_per_origin = get_messaging_question_per_origin_counts()
         messaging_question_per_destination = get_messaging_question_per_destination_counts()
         
     else:
-        filter_form = GenericFilterForm(request.POST)
+        filter_form = MessagingQuestionFilterForm(request.POST)
         if filter_form.is_valid():
-            (start_date, end_date, origins, destinations) = generic_filter_form_parser(filter_form)
+            filters = generic_filter_form_parser(filter_form)
             
-        total_messaging_questions = messaging_questions_count(
-            start_date = start_date,
-            end_date = end_date,
-            destination_countries = destinations,
-            origin_countries = origins,
-        )
-        
-        messaging_question_per_origin = get_messaging_question_per_origin_counts(
-            start_date = start_date,
-            end_date = end_date,
-            destination_countries = destinations,
-            origin_countries = origins,
-        )
-        
-        messaging_question_per_destination = get_messaging_question_per_destination_counts(
-            start_date = start_date,
-            end_date = end_date,
-            destination_countries = destinations,
-            origin_countries = origins,
-        )
+        total_messaging_questions = messaging_questions_count(**filters)
+        messaging_question_per_origin = get_messaging_question_per_origin_counts(**filters)
+        messaging_question_per_destination = get_messaging_question_per_destination_counts(**filters)
     
 
     context = {
@@ -58,74 +45,103 @@ def messaging_question(request):
     )
 
 
-def export_question_stas(request):
+
+def export_messaging_question_stats(request):
     if request.method == 'POST':
-        filter_form = GenericFilterForm(request.POST)
+        filter_form = MessagingQuestionFilterForm(request.POST)
         if filter_form.is_valid():
-            (start_date, end_date, origins, destinations) = generic_filter_form_parser(filter_form)
+            filters = generic_filter_form_parser(filter_form)
+
+        organisations = filters.get('organisation', None)
         
-        total_messaging_questions = messaging_questions_count(
-            start_date = start_date,
-            end_date = end_date,
-            destination_countries = destinations,
-            origin_countries = origins,
-        )
+        if organisations is None:
+            # otherwise , get all loggedin user's organisations
+            organisations = get_all_organisations_list()
         
-        messaging_question_per_origin = get_messaging_question_per_origin_counts(
-            start_date = start_date,
-            end_date = end_date,
-            destination_countries = destinations,
-            origin_countries = origins,
-        )
-        
-        messaging_question_per_destination = get_messaging_question_per_destination_counts(
-            start_date = start_date,
-            end_date = end_date,
-            destination_countries = destinations,
-            origin_countries = origins,
-        )
-        
-        country_responses_per_origin_data = [
-            {
-                'country': label, 
-                'responses': response
-            } for label, response in zip(
-                messaging_question_per_origin['labels'], 
-                messaging_question_per_origin['data']
-                )
-            ]
-        
-        country_responses_per_destination_data = [
-            {
-                'country': label, 
-                'responses': response
-            } for label, response in zip(
-                messaging_question_per_destination['labels'], 
-                messaging_question_per_destination['data']
-                )
+        export_dict = {}
+        for organisation in organisations:
+            export_dict[organisation.name] = question_stats_for_export({**filters, 'organisations': [organisation]})
             
-            ]
-        export_name = f"question_stats"
+        return generate_and_export_excel(export_dict)
+    
+    
+def inline_question(request):
+    
+    if request.method == 'GET':
+        filter_form = InlineQuestionFilterForm()
+        total_inline_questions = inline_questions_count()
+        inline_question_per_origin = get_inline_question_per_origin_counts()
+        inline_question_per_destination = get_inline_question_per_destination_counts()
+        inline_question_per_organisation = get_inline_question_per_organisation_counts()
+        inline_question_per_language = get_inline_question_per_language_counts()
+        inline_question_response_data = inline_question_response()
         
-        work_sheets_data = [
-            {
-                'name': 'All',
-                'headers': ['Total Messaging Question'],
-                'contents': [[total_messaging_questions]],
-            },
-            {
-                'name': 'Responses Per Origin',
-                'headers': ['country', 'responses'],
-                'contents': [[row['country'], row['responses']] for row in country_responses_per_origin_data],
-            },
-            {
-                'name': 'Responses Per Destination',
-                'headers': ['country', 'responses'],
-                'contents': [[row['country'], row['responses']] for row in country_responses_per_destination_data],
-            },
-        ]
-        workbook = create_workbook(work_sheets_data)
-        return generate_export_response(
-            workbook=workbook, 
-            export_name=f"{export_name}-{start_date}-{end_date}"
-        )
+    else:
+        filter_form = InlineQuestionFilterForm(request.POST)
+        if filter_form.is_valid():
+            filters = generic_filter_form_parser(filter_form)
+            
+        total_inline_questions = inline_questions_count(**filters)
+        inline_question_per_origin = get_inline_question_per_origin_counts(**filters)
+        inline_question_per_destination = get_inline_question_per_destination_counts(**filters)
+        inline_question_per_organisation = get_inline_question_per_organisation_counts(**filters)
+        inline_question_per_language = get_inline_question_per_language_counts(**filters)
+        inline_question_response_data = inline_question_response()
+    
+
+    context = {
+        "total_inline_questions": total_inline_questions,
+        "inline_question_per_origin": inline_question_per_origin,
+        "inline_question_per_destination": inline_question_per_destination,
+        "inline_question_per_organisation": inline_question_per_organisation,
+        "inline_question_per_language": inline_question_per_language,
+        "inline_question_response_data": inline_question_response_data,
+        'filter_form': filter_form,
+    }
+    return render(
+        request,
+        "question/inline_question.html", 
+        context = context
+    )
+    
+    
+def export_messaging_question_stats(request):
+    if request.method == 'POST':
+        filter_form = MessagingQuestionFilterForm(request.POST)
+        if filter_form.is_valid():
+            filters = generic_filter_form_parser(filter_form)
+
+        organisations = filters.get('organisation', None)
+        
+        if organisations is None:
+            # TODO: otherwise , get all loggedin user's organisations
+            organisations = get_all_organisations_list()
+        
+        export_dict = {
+            # TODO: add all organisations stats to the export_dict
+        }
+        for organisation in organisations:
+            export_dict[organisation] = question_stats_for_export({**filters, 'organisations': [organisation]})
+            
+        return generate_and_export_excel(export_dict)
+    
+    
+def export_inline_question_stats(request):
+    if request.method == 'POST':
+        filter_form = InlineQuestionFilterForm(request.POST)
+        if filter_form.is_valid():
+            filters = generic_filter_form_parser(filter_form)
+
+        organisations = filters.get('organisation', None)
+        
+        if organisations is None:
+            # TODO: otherwise , get all loggedin user's organisations
+            organisations = get_all_organisations_list()
+        
+        export_dict = {
+            # TODO: add all organisations stats to the export_dict
+        }
+        for organisation in organisations:
+            export_dict[organisation] = question_stats_for_export({**filters, 'organisations': [organisation]})
+            
+        return generate_and_export_excel(export_dict)

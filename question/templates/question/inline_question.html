@@ -1,0 +1,148 @@
+
+{% extends 'core/layouts/base.html' %}
+{% load crispy_forms_tags %}
+
+{% load static %}
+
+<!-- title -->
+{% block title %} Inline Questions {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+
+<div class="modal fade" id="messaging-question-filter-modal" tabindex="-1" role="dialog" aria-labelledby="filter-modal-area-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="filter-modal-area-label">Filters</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="inline-question-filter-form">
+                    {% csrf_token %}
+                    {{filter_form|crispy}}
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a href="" class="btn btn-secondary">Reset</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="widget-rounded-circle card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-9">
+                        <div class="text-start">
+                            <h3 class="text-dark"><span data-plugin="counterup">{{total_inline_questions}}</span></h3>
+                            <h5 class="text-muted">TOTAL QUESTION RESPONSES</h5>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="dropdown w-100">
+                                    <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                                        id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Export
+                                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                                    </a>
+        
+                                    <div class="dropdown-menu" aria-labelledby="export-menu">
+                                        <button  class="dropdown-item" id="export-inline-question-to-excel">Export to Excel</button>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
+                                role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">Organisation</p>
+                        <canvas id="inline-question-organisation-pie-chart-id"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">SELECTED USER LANGUAGE</p>
+                        <div class="inline-question-language-graph-id-chart-box">
+                            <div id="inline-question-language-graph-id"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Responses per Origin Country</p>
+                <div class="inline-question-destination-graph-id-chart-box">
+                    <div id="inline-question-destination-graph-id"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Responses per destination Country</p>
+                <div class="scrollable-table-container" onscroll="stopScrollPropagation(event)">
+                    <table class="table" id="inline-question-origin-table-id">
+                        <thead>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'js/charts/table/inline_question_destination_table.js' %}"></script>
+<script src="{% static 'js/charts/bar/inline_question_origin_graph.js' %}"></script>
+<script src="{% static 'js/charts/bar/inline_question_language_graph.js' %}"></script>
+<script src="{% static 'js/charts/bar/inline_question_responses_graph.js' %}"></script>
+<script src="{% static 'js/charts/pie/inline_question_organisation_pie_chart.js' %}"></script>
+<script src="{% static 'js/app/inline_question.js' %}"></script>
+<script type="text/javascript">
+    // get data from context
+    var originData = {{ inline_question_per_origin|safe }};
+    var destinationData = {{ inline_question_per_destination|safe }};
+    var languageData = {{ inline_question_per_language|safe }};
+    var organisationData = {{ inline_question_per_organisation|safe }};
+    var responseData  = {{ inline_question_response_data | safe }}
+
+    // plots the origin graph
+    inlineQuestionOriginGraph(originData)
+
+    // plots the destination table
+    inlineQuestionDestinationTable(destinationData)
+
+    inlineQustionOrganisationPieChart(organisationData)
+
+    inlineQuestionLanguageGraph(languageData)
+</script>
+{% endblock %}

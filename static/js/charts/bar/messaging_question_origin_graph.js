@@ -1,5 +1,5 @@
 function messagingQuestionOriginChart(originChartData) {
-    const data = originChartData["data"]
+    const data = originChartData["counts"]
     const labels = originChartData["labels"]
 
     const originChartConfig = {
@@ -26,13 +26,13 @@ function messagingQuestionOriginChart(originChartData) {
             },
             maintainAspectRatio: false,
             responsive: true,
-        },
-        plugins: {
-            legend: {
-                display: false
-            },
-            scrollbar: {
-                enabled: true
+            plugins: {
+                legend: {
+                    display: false
+                },
+                scrollbar: {
+                    enabled: true
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ from common.const.value_const import NOT_SPECIFIED
 from common.custom_libs.language_codes import get_language_name
 from common.custom_libs.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
 from common.helpers.model_helpers.get_create import get_or_create_model_instance
+from common.helpers.preference_helpers.country import normalize_country_name
 from common.helpers.preference_helpers.organisation import normalize_organisation_name
 from preference.models import Age, Country, FactoryFarm, Gender, Language, Organisation, OrganisationSector, Route, SectorOfWork
 
@@ -17,18 +18,42 @@ def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
     return get_or_create_model_instance(FactoryFarm, factory_farm)
 
 def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
-        if country_name:
-            country_instance, _ = Country.objects.get_or_create(
-                code= aplha_code_from_country_name(country_name) or NOT_SPECIFIED,
-                name= country_name_from_aplha_code(country_name) or NOT_SPECIFIED
+    country_name = normalize_country_name(country_name)
+    is_origin = True if source == "origin" else False
+    is_destination = True if source == "destination" else False
+    if country_name:
+        country_code = aplha_code_from_country_name(country_name).lower() or NOT_SPECIFIED
+        real_country_name = country_name_from_aplha_code(country_code).lower() or NOT_SPECIFIED
+        try:
+            country_instance = Country.objects.get(
+                name__iexact= real_country_name,
+                code__iexact= country_code
+            )
+        except Country.DoesNotExist:
+            country_instance = Country.objects.create(
+                code= country_code,
+                name= real_country_name,
+                is_origin=is_origin,
+                is_destination=is_destination
             )
             return country_instance
-        else:
-            country_instance, _ = Country.objects.get_or_create(
-                code= NOT_SPECIFIED,
-                name= NOT_SPECIFIED
-            )
-            return country_instance
+
+        if is_origin and not country_instance.is_origin:
+            country_instance.is_origin = True
+            country_instance.save()
+        if is_destination and not country_instance.is_destination:
+            country_instance.is_destination = True
+            country_instance.save()
+        
+        return country_instance
+    
+    else:
+        country_instance, _ = Country.objects.get_or_create(
+            code=NOT_SPECIFIED,
+            name=NOT_SPECIFIED,
+            defaults={"is_origin": is_origin, "is_destination": is_destination}
+        )
+        return country_instance
 
 def get_or_add_gender_to_db(gender: str) -> Gender:
     return get_or_create_model_instance(Gender, gender)

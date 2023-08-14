@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "crispy_forms",
     "crispy_bootstrap5",
+    "debug_toolbar",
     
     "core",
     "events",
@@ -73,6 +74,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "jgwpandas.urls"
@@ -233,3 +235,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+
+# debug toolbar settings
+INTERNAL_IPS = [
+    "127.0.0.1",
+]

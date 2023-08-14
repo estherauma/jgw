@@ -5,7 +5,7 @@ from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
-from common.utils.preferences import get_origin_and_destination_from_route
+from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
 from question.models import InlineQuestion, InlineQuestionResponse, InlineQuestionResponseText, InlineQuestionStandard, InlineQuestionText
 from preference.models import Preference
 from question.tasks import translate_and_clean_inline_question_fields
@@ -82,8 +82,8 @@ def add_inline_question_to_db(inline_question):
     
     route_data = get_or_add_route_to_db(route)
     language_data = get_or_add_language_to_db(language)
-    origin_data = get_or_add_country_to_db(origin, "origin_data")
-    destination_data = get_or_add_country_to_db(destination, "destination_data")
+    origin_data = get_or_add_country_to_db(origin, source="origin")
+    destination_data = get_or_add_country_to_db(destination, source="destination")
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
     organisation_data = get_or_add_organisation_to_db(organisation)
     factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
@@ -122,7 +122,7 @@ def add_inline_question_to_db(inline_question):
         
         # create inline question response 
         inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
-            text = response_list.get('value')
+            text = response_list.get('value') or NOT_SPECIFIED
         )
         InlineQuestionResponse.objects.create(
             inline_question = inline_question,

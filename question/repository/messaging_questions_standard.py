@@ -1,24 +1,13 @@
-from common.utils.date_utils import django_date_make_aware, string_to_date
-from core.filters import generic_filtered_queryset
-from question.models import MessagingQuestionStandard
+from question.filters import generic_question_filtered_queryset
+from question.models import InlineQuestionResponse, InlineQuestionResponseText, MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
 
 
-def get_messaging_question_per_origin_counts(
-    start_date=None,
-    end_date=None,
-    destination_countries=None,
-    origin_countries=None,
-):
+def get_messaging_question_per_origin_counts(**filters):
     
-    queryset = MessagingQuestionStandard.objects.all()
-    
-    queryset = generic_filtered_queryset(
-        queryset = queryset, 
-        start_date = start_date, 
-        end_date = end_date,
-        origin_countries = origin_countries,
-        destination_countries = destination_countries,
+    queryset = generic_question_filtered_queryset(
+        queryset = MessagingQuestionStandard.objects.all(), 
+        **filters
     )
         
     origin_counts_data = queryset.annotate(
@@ -33,34 +22,23 @@ def get_messaging_question_per_origin_counts(
     ).order_by()
     
     origin_data = [count['count'] for count in origin_counts_data]
-    origin_labels = [count['origin__name'].upper() for count in origin_counts_data]
+    origin_labels = [count['origin__name'].upper() for count in origin_counts_data if count['origin__name'] is not None]
     
     return {
-            "data": origin_data,
+            "counts": origin_data,
             "labels": origin_labels,
         }
 
 
-def get_messaging_question_per_destination_counts(
-    start_date=None,
-    end_date=None,
-    destination_countries=None,
-    origin_countries=None,
-):  
-     
-    queryset = MessagingQuestionStandard.objects.all()
-    
-    
-    queryset = generic_filtered_queryset(
-        queryset = queryset, 
-        start_date = start_date, 
-        end_date = end_date,
-        origin_countries = origin_countries,
-        destination_countries = destination_countries,
+def get_messaging_question_per_destination_counts(**filters):  
+        
+    queryset = generic_question_filtered_queryset(
+        queryset = MessagingQuestionStandard.objects.all(), 
+        **filters
     )
      
     destination_counts_data = queryset.annotate(
-        origin_name=Case(
+        destination_name=Case(
             When(preference__isnull=False, then=F('preference__destination__name')),
             default=F('destination__name')
         )
@@ -72,35 +50,56 @@ def get_messaging_question_per_destination_counts(
     
     
     destination_data = [count['count'] for count in destination_counts_data]
-    destination_labels = [count['destination__name'].upper() for count in destination_counts_data]
+    destination_labels = [count['destination__name'].upper() for count in destination_counts_data if count['destination__name'] is not None]
     
     return {
-            "data": destination_data,
+            "counts": destination_data,
             "labels": destination_labels,
         }
     
 
 
-def messaging_questions_count(
-    start_date=None,
-    end_date=None,
-    destination_countries=None,
-    origin_countries=None,
-):
+def messaging_questions_count(**filters):
     
-    queryset = MessagingQuestionStandard.objects.all()
-    
-    messaging_questions_count_queryset = generic_filtered_queryset(
-        queryset = queryset, 
-        start_date = start_date, 
-        end_date = end_date,
-        origin_countries = origin_countries,
-        destination_countries = destination_countries,
+    messaging_questions_count_queryset = generic_question_filtered_queryset(
+        queryset = MessagingQuestionStandard.objects.all(), 
+        **filters
     )
-    
-    if start_date and end_date:
-        messaging_questions_count_queryset = messaging_questions_count_queryset.filter(
-            api_created_at__range=(start_date, end_date)
-        )
         
     return messaging_questions_count_queryset.count()
+
+
+def question_stats_for_export(filters):
+    messaging_question_per_origin = get_messaging_question_per_origin_counts(**filters)
+    messaging_question_per_destination = get_messaging_question_per_destination_counts(**filters)
+    return {
+        "messaging_question_per_origin": messaging_question_per_origin,
+        "messaging_question_per_destination": messaging_question_per_destination,
+    }
+    
+    
+def inline_question_response():
+    responses_count = InlineQuestionResponse.objects.values(
+        question_text=F('inline_question__question__text'),
+        response_text=F('response__translated_text')
+    ).annotate(
+        response_count=Count('response')
+    )
+
+    question_texts_list = []
+    responses = []
+    for response in responses_count:
+        if response['question_text'] not in question_texts_list:
+            question_texts_list.append(response['question_text'])
+            responses.append({
+                "response_texts": [response['response_text']],
+                "response_counts": [response['response_count']]
+            })
+        else:
+            responses[question_texts_list.index(response['question_text'])]["response_texts"].append(response['response_text'])
+            responses[question_texts_list.index(response['question_text'])]["response_counts"].append(response['response_count'])
+            
+    return {
+        "counts": responses,
+        "labels": question_texts_list
+    }

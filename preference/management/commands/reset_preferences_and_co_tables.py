@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from preference.models import (
+        Age,
         FactoryFarm, 
         Organisation, 
         OrganisationSector, 
@@ -24,4 +25,5 @@ class Command(BaseCommand):
         Gender.objects.all().delete()
         Country.objects.all().delete()
         Preference.objects.all().delete()
+        Age.objects.all().delete()
         self.stdout.write(self.style.SUCCESS('Successfully reset preferences and co tables'))

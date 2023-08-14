@@ -1,5 +1,14 @@
 import pycountry
 
+country_mapping = {
+    'saudi': 'saudi arabia',
+    'saudi arabia': 'saudi arabia',
+    'uae': 'united arab emirates',
+    'united arab emirates': 'united arab emirates',
+    'uk': 'united kingdom',
+    'united kingdom': 'united kingdom',
+}
+    
 def country_name_from_aplha_code(alpha_3):
     iso_3_country_name = pycountry.countries.get(alpha_3=alpha_3)
     

@@ -5,7 +5,7 @@ from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import previous_dates, todays_date
-from common.utils.preferences import get_origin_and_destination_from_route
+from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
 from question.models import MessagingQuestion, MessagingQuestionResponse, MessagingQuestionStandard, MessagingQuestionText, MessagingResponse, MessagingResponseOptionText
 from preference.models import Preference
 from question.tasks import translate_and_clean_messaging_question_fields
@@ -60,8 +60,8 @@ def add_messaging_question_to_db(messaging_question):
         
         route_data = get_or_add_route_to_db(route)
         language_data = get_or_add_language_to_db(language)
-        origin_data = get_or_add_country_to_db(origin, "origin_data")
-        destination_data = get_or_add_country_to_db(destination, "destination_data")
+        origin_data = get_or_add_country_to_db(origin, source="origin")
+        destination_data = get_or_add_country_to_db(destination, source="destination")
         organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
         organisation_data = get_or_add_organisation_to_db(organisation)
         factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)

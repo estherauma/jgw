@@ -194,13 +194,52 @@ function exportStatsData(url, form, fileName='untitled_stats.xlsx') {
           .then((blob) => {
               const url = URL.createObjectURL(blob);
 
-              const fileName = fileName;
+              const finalFileName = fileName;
 
               const a = document.createElement('a');
               a.href = url;
-              a.download = fileName;
+              a.download = finalFileName;
               a.click();
               URL.revokeObjectURL(url);
           });
   })
+}
+
+
+function getRandomColorArray(length) {
+  const randomColors = [];
+  const letters = "0123456789ABCDEF";
+
+  for (let i = 0; i < length; i++) {
+    let color = "#";
+    for (let j = 0; j < 6; j++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    randomColors.push(color);
+  }
+
+  return randomColors;
+}
+
+function genericChartColors(extra_colors_length=5) {
+  return [
+    COLORS.appleGreen,
+    COLORS.navyBlue,
+    COLORS.skyBlue,
+    
+    COLORS.lightGray,
+    COLORS.mediumGray,
+    COLORS.darkGray,
+
+    COLORS.lightBlue,
+    COLORS.mediumBlue,
+    COLORS.darkBlue,
+
+    COLORS.mediumGreen,
+    COLORS.darkGreen,
+
+    COLORS.black,
+    COLORS.pink,
+    ...getRandomColorArray(extra_colors_length)
+  ]
 }
