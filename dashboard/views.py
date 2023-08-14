@@ -414,6 +414,7 @@ def notifications(request):
             'total_notifications': total_notifications
         })
 
+@login_required
 def summerberry_dashboard(request):
     jgwcache_entry = JGWCache.objects.filter(category='summerberry').first()
     context = { 'data': jgwcache_entry.data}
