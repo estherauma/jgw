@@ -10,6 +10,7 @@ from .views import (
 )
 
 
+app_name = "question"
 
 urlpatterns = [
     path("messaging/", messaging_question, name="messaging_question"),
