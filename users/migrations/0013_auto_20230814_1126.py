@@ -10,11 +10,11 @@ def create_user_and_role(apps, schema_editor):
         name="Summerberry",
     )
     user = User.objects.create_user(
-        email=os.getenv("SUMMERBERRY_DASHBOADRD_EMAIL"),
-        password=os.getenv("SUMMERBERRY_DASHBOADRD_PASSWORD"),
+        email=os.getenv("SUMMERBERRY_DASHBOARD_EMAIL"),
+        password=os.getenv("SUMMERBERRY_DASHBOARD_PASSWORD"),
         first_name="Summerberry",
         last_name="Dashboard Access",
-        is_active=False,
+        is_active=True,
         is_staff=False,
         receive_marketing_emails=False
     )
