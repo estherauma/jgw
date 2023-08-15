@@ -14,8 +14,8 @@ app_name = "question"
 
 urlpatterns = [
     path("messaging/", messaging_question, name="messaging_question"),
-    path("messaging/export_messaging_question_stats", export_messaging_question_stats, name="export_messaging_question_stats"),
+    path("messaging/export-messaging-question-stats", export_messaging_question_stats, name="export_messaging_question_stats"),
     
     path("inline/", inline_question, name="inline_question"),
-    path("inline/export_inline_question_stats", export_inline_question_stats, name="export_inline_question_stats"),
+    path("inline/export-inline-question-stats", export_inline_question_stats, name="export_inline_question_stats"),
 ]
