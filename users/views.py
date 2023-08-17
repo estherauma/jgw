@@ -70,7 +70,7 @@ def login_user(request):
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("dashboard:inline")
+                return redirect("preference:user_overview")
             else:
                 messages.error(request, "Can not log in with provided credentials!")
         else:

@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from dashboard.forms import OPERATORS
+from preference.models import FactoryFarm, Organisation
 
 ROLES = ["SCHEME", "FACTORY", "STAFF", "ADMIN"]
 STATUS = ["PENDING", "ACCEPTED", "SENT"]
@@ -38,13 +39,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     ROLE = models.TextChoices("Role", " ".join(ROLES))
 
     password = models.CharField(blank=True, max_length=128)
-    first_name = models.CharField(blank=False, null=False, max_length=128)
-    last_name = models.CharField(blank=False, null=False, max_length=128)
-    role = models.CharField(blank=False, null=True, choices=ROLE.choices, max_length=16)
-    scheme = models.ForeignKey(to="dashboard.Scheme", on_delete=models.DO_NOTHING, null=True, max_length=16)
-    factory = models.ForeignKey(to="dashboard.Factory", on_delete=models.DO_NOTHING, null=True, max_length=16)
+    first_name = models.CharField(blank=True, null=False, max_length=128)
+    last_name = models.CharField(blank=True, null=False, max_length=128)
+    role = models.CharField(blank=True, null=True, choices=ROLE.choices, max_length=16)
+    scheme = models.ForeignKey(to="dashboard.Scheme", on_delete=models.DO_NOTHING, null=True, max_length=16, blank=True)
     email = models.EmailField(null=False, blank=False, max_length=128, unique=True)
-    organisation = models.CharField(max_length=64, null=True, blank=False, choices=OPERATORS.items())
+    
+    factories = models.ManyToManyField(FactoryFarm, blank=True)
+    organisations = models.ManyToManyField(Organisation, blank=True)
+    
     is_staff = models.BooleanField(
         default=False,
         help_text="Designates whether the user can log into this admin site.",

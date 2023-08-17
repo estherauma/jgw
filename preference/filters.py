@@ -1,8 +1,12 @@
 from django.db.models import Manager as BaseManager, Q
 from typing import Any
 
+from users.utils import get_user_factories, get_user_organisations
+
+
 
 def preference_filtered_queryset(
+    current_user,
     queryset: BaseManager[Any],
     start_date=None,
     end_date=None,
@@ -10,7 +14,7 @@ def preference_filtered_queryset(
     origin_countries=None,
     organisations = None,
     schemes = None,
-    factory_farms = None,
+    factory_farms = None
 ):
     if destination_countries is None:
         destination_countries = []
@@ -27,6 +31,12 @@ def preference_filtered_queryset(
     if factory_farms is None:
         factory_farms = []
     
+    user_factories = get_user_factories(current_user)
+    user_orgs = get_user_organisations(current_user)
+    
+    queryset = queryset.filter(
+        Q(factory_farm__in = user_factories) | Q(organisation__in=user_orgs)
+    )
     
     if start_date and end_date:
         queryset = queryset.filter(api_created_at__range=(start_date, end_date))
