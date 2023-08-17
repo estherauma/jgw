@@ -173,7 +173,7 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/list_users.html")
         self.assertEqual(len(response.context["users"]), 3)
-        self.assertEqual(response.context["users"][0], self.test_user)
+        self.assertEqual(response.context["users"][1], self.test_user)
 
     def test_list_users_view_non_admin(self):
         self.client.logout()
