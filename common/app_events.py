@@ -200,6 +200,7 @@ class AppEvents(BaseAnalytics):
         df = pd.DataFrame(data)
 
         if not df.columns.empty:
+            df =  df.drop_duplicates(subset='event_date')
             df['event_date'] = pd.to_datetime(df['event_date'])
             df = df.set_index("event_date")
             date_range = pd.date_range(start=start_date, end=end_date)

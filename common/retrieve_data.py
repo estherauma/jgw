@@ -11,7 +11,7 @@ from django.db.models import Q
 import requests
 from langcodes import Language, LanguageTagError
 from pytz import country_names
-from common.custom_libs.pandas.pycountry import country_name_from_aplha_code
+from common.custom_libs.pycountry import country_name_from_aplha_code
 
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 
@@ -82,7 +82,7 @@ class JGWApi:
             clean = result.is_cleaned
             data = json.loads(result.data)
         else:
-            url = f"{self.base_url}{URLS.get(key)}"
+            url = f"{self.base_url}{URLS.get(key)}?startDate=2023-01-01&endDate=2023-07-31"
             
             response = self._get(url, {})
             if response and response.status_code == requests.codes.ok:
@@ -185,7 +185,7 @@ class JGWApi:
         groups = ["15-17","18-20" ,"21-30", "31-40", "41-50", "51-60", "60+"]
 
         def range_str_to_int(arg):
-            _ = ["Prefer not to answer", "prefer not to answer"]
+            _ = ["Prefer not to answer", "prefer not to answer", "prefernottoanswer"]
             if isinstance(arg, str):
                 temp = [i.replace("+", "") for i in arg.split("-")]
                 temp = [int(i) if (i and i not in _) else i for i in temp]
@@ -246,6 +246,7 @@ class JGWApi:
             "i don&#39;t want to answer.": "prefer not to answer",
             "prefer to answer": "prefer not to answer",
             "": "prefer not to answer",
+            "prefernottoanswer": "prefer not to answer",
             None: "prefer not to answer",
             "another": "other",
             "i don&#39;t feel comfortable answering":"prefer not to answer",

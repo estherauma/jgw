@@ -75,10 +75,10 @@
                     </ul>
                     <div>
                         {% if user.is_authenticated %}
-                            <a href="{% url 'dashboard:preferences' %}" class="btn btn-info navbar-btn">Go To Dashboard</a>
+                            <a href="{% url 'preference:user_overview' %}" class="btn btn-info navbar-btn">Go To Dashboard</a>
                             <a href="{% url 'users:logout_user' %}" class="btn btn-info navbar-btn">
                                 Logout
-                            </a
+                            </a>
                         {% else %}
                             <a href="{% url 'users:login_user' %}" class="btn btn-info navbar-btn">Login</a>
                             <a href="{% url 'dashboard:limited_data_home_page' %}" class="btn btn-info navbar-btn">Try Now</a>

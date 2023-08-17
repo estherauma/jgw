@@ -18,21 +18,21 @@
                 </li>
                 {% else %}
                 <li>
-                    <a href="{% url 'dashboard:preferences' %}">
+                    <a href="{% url 'preference:user_overview' %}">
                         <i data-feather="bar-chart-2"></i>
                         <span> Users Overview </span>
                     </a>
                 </li>
 
                 <li>
-                    <a href="{% url 'dashboard:inline' %}">
+                    <a href="{% url 'question:inline_question' %}">
                         <i data-feather="help-circle"></i>
                         <span> Inline Questions </span>
                     </a>
                 </li>
 
                 <li>
-                    <a href="{% url 'dashboard:messaging' %}">
+                    <a href="{% url 'question:messaging_question' %}">
                         <i data-feather="message-square"></i>
                         <span>Messaging Questions</span>
                     </a>

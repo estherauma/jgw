@@ -1,8 +1,9 @@
 from celery import shared_task
-from common.custom_libs.pandas.google_translate import pandas_translator_translate
+from common.custom_libs.google_translate import pandas_translator_translate
+from common.helpers.preference_helpers.age import normalize_age
 from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.logger import KunfuPandaLogger
-from preference.models import Gender, Language, SectorOfWork
+from preference.models import Age, Gender, Language, SectorOfWork
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
 
@@ -38,11 +39,21 @@ def translate_and_clean_sectors_of_work():
         sector_work.save()
     
     kunfu_panda_logger.info(f"{len(untranslated_sectors_of_work)} sector(s) of work translated")
-    
+ 
+def translate_and_clean_age():
+    untransalted_ages = Age.objects.filter(translated_range__isnull=True)
+    for age in untransalted_ages:
+        tranlated_range = pandas_translator_translate(age.range)
+        transformed_range = normalize_age(tranlated_range)
+        age.translated_range = transformed_range
+        age.save()
+        
+    kunfu_panda_logger.info(f"{len(untransalted_ages)} age(s) translated")   
     
 # @shared_task(name="translate_preferences_field")    
-def translate_and_clean_preferences_fields():
+def translate_and_clean_preferences_fields(key: str = None):
     translate_and_clean_gender()
     translate_and_clean_language()
     translate_and_clean_sectors_of_work()
+    translate_and_clean_age()
     

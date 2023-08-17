@@ -1,6 +1,6 @@
 
-from common.custom_libs.pandas.google_translate import pandas_translator_translate
-from question.models import InlineQuestionResponseText, MessagingResponseOptionText, MessagingQuestionText
+from common.custom_libs.google_translate import pandas_translator_translate
+from question.models import InlineQuestionResponseText, InlineQuestionText, MessagingResponseOptionText, MessagingQuestionText
 
 
 def translate_and_clean_messaging_question_question_fields():
@@ -24,6 +24,8 @@ def translate_and_clean_messaging_question_fields():
     translate_and_clean_messaging_question_response_option_fields()
     
 
+# inline question section
+
 def translate_and_clean_inline_question_response_fields():
     untranslated_response_texts = InlineQuestionResponseText.objects.filter(translated_text__isnull=True)
     for response_text in untranslated_response_texts:
@@ -31,6 +33,15 @@ def translate_and_clean_inline_question_response_fields():
         response_text.translated_text = translated_text
         response_text.save()
         
+def translate_and_clean_inline_question_question_fields():
+    untranslated_question_texts = InlineQuestionText.objects.filter(translated_text__isnull=True)
+    for question_text in untranslated_question_texts:
+        pandas_translated_text = pandas_translator_translate(question_text.text)
+        question_text.translated_text = pandas_translated_text
+        question_text.save()
+        
+        
 
 def translate_and_clean_inline_question_fields():
     translate_and_clean_inline_question_response_fields()
+    translate_and_clean_inline_question_question_fields()
