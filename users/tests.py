@@ -268,7 +268,6 @@ class AuthTests(TestCase):
             "role": "SCHEME",
             "scheme_id": Scheme.objects.first().id,
             "factory_id": Factory.objects.first().id,
-            "organisation": "Seasonal Worker Scheme - AG Recruitment",
         }
         invite = UserInvitations.objects.create(**invite_data)
         payload = {
