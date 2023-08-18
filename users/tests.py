@@ -103,7 +103,6 @@ class AuthTests(TestCase):
                 "role": "SCHEME",
                 "scheme": Scheme.objects.first().id,
                 "factory": Factory.objects.first().id,
-                # "organisation": "Seasonal Worker Scheme - AG Recruitment",
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -118,7 +117,6 @@ class AuthTests(TestCase):
                 "role": "SCHEME",
                 "scheme": Scheme.objects.first().id,
                 "factory": Factory.objects.first().id,
-                # "organisation": "Seasonal Worker Scheme - AG Recruitment",
             },
         )
         self.assertEqual(len(response.context["form"].errors.values()), 1)
@@ -180,7 +178,7 @@ class AuthTests(TestCase):
         self.client.login(email=self.test_user_2, password=self.test_pword)
 
         response = self.client.get(reverse("users:list_users"))
-        print(response)
+        
         self.assertEqual(response.status_code, 403)
  
 
@@ -190,7 +188,6 @@ class AuthTests(TestCase):
             "role": "SCHEME",
             "scheme_id": Scheme.objects.first().id,
             "factory_id": Factory.objects.first().id,
-            # "organisation": "Seasonal Worker Scheme - AG Recruitment",
         }
         invite = UserInvitations.objects.create(**invite_data)
         payload = {
@@ -209,7 +206,6 @@ class AuthTests(TestCase):
             "role": "SCHEME",
             "scheme_id": Scheme.objects.first().id,
             "factory_id": Factory.objects.first().id,
-            # "organisation": "Seasonal Worker Scheme - AG Recruitment",
         }
         invite = UserInvitations.objects.create(**invite_data)
         payload = {
@@ -274,6 +270,7 @@ class AuthTests(TestCase):
             "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
             "invite_id": invite.id,
         }
+        
         invite_token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
         response = self.client.post(
             reverse("users:set_password", args=(invite_token,)),

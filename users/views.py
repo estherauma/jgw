@@ -281,8 +281,11 @@ def set_password(request, token):
                     invite = UserInvitations.objects.values(
                         "email", "role", "scheme", "factory", "organisation"
                     ).get(id=invite_id)
-                    invite["scheme_id"], invite["factory_id"] = invite.pop("scheme"), invite.pop("factory")
-                    User.objects.create_user(**invite, password=password, is_active=True)
+                    user_obj = {
+                        'email': invite['email'], 
+                        'role': invite['scheme']
+                    }
+                    User.objects.create_user(**user_obj, password=password, is_active=True)
                 return redirect("users:login_user")
             else:
                 messages.error(request, "Error validating form!")
