@@ -23,7 +23,7 @@ from .forms import (
     UserMgtForm,
 )
 from .models import User, UserInvitations
-
+from users.templatetags.user_role_tags import has_group
 
 @login_required
 @admin_required
@@ -70,7 +70,10 @@ def login_user(request):
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("preference:user_overview")
+                if has_group(user, 'Summerberry'):
+                    return redirect("dashboard:summerberry-dashboard")
+                else:
+                    return redirect("preference:user_overview")
             else:
                 messages.error(request, "Can not log in with provided credentials!")
         else:
