@@ -116,9 +116,9 @@ class AuthTests(TestCase):
                 "email": "test@test.local",
                 "role": "SCHEME",
                 "scheme": Scheme.objects.first().id,
-                "factory": Factory.objects.first().id,
             },
         )
+        print(response.context["form"].errors)
         self.assertEqual(len(response.context["form"].errors.values()), 1)
         self.assertEqual(
             dict(response.context["form"].errors),
