@@ -2,7 +2,9 @@
 from typing import Any
 from django.db.models import Manager as BaseManager, Q
 
+
 def generic_question_filtered_queryset(
+    current_user,
     queryset: BaseManager[Any],
     start_date=None,
     end_date=None,

@@ -17,19 +17,28 @@ from question.repository.messaging_questions_standard import (
 def messaging_question(request):
     
     if request.method == 'GET':
-        filter_form = MessagingQuestionFilterForm()
-        total_messaging_questions = messaging_questions_count()
-        messaging_question_per_origin = get_messaging_question_per_origin_counts()
-        messaging_question_per_destination = get_messaging_question_per_destination_counts()
+        filter_form = MessagingQuestionFilterForm(request=request)
+        total_messaging_questions = messaging_questions_count(current_user = request.user)
+        messaging_question_per_origin = get_messaging_question_per_origin_counts(current_user = request.user)
+        messaging_question_per_destination = get_messaging_question_per_destination_counts(current_user = request.user)
         
     else:
-        filter_form = MessagingQuestionFilterForm(request.POST)
+        filter_form = MessagingQuestionFilterForm(request=request, data=request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
             
-        total_messaging_questions = messaging_questions_count(**filters)
-        messaging_question_per_origin = get_messaging_question_per_origin_counts(**filters)
-        messaging_question_per_destination = get_messaging_question_per_destination_counts(**filters)
+        total_messaging_questions = messaging_questions_count(
+            **filters,
+            current_user = request.user
+        )
+        messaging_question_per_origin = get_messaging_question_per_origin_counts(
+            **filters,
+            current_user = request.user
+        )
+        messaging_question_per_destination = get_messaging_question_per_destination_counts(
+            **filters,
+            current_user = request.user
+        )
     
 
     context = {
@@ -48,7 +57,7 @@ def messaging_question(request):
 
 def export_messaging_question_stats(request):
     if request.method == 'POST':
-        filter_form = MessagingQuestionFilterForm(request.POST)
+        filter_form = MessagingQuestionFilterForm(request=request, data=request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
 
@@ -68,24 +77,39 @@ def export_messaging_question_stats(request):
 def inline_question(request):
     
     if request.method == 'GET':
-        filter_form = InlineQuestionFilterForm()
-        total_inline_questions = inline_questions_count()
-        inline_question_per_origin = get_inline_question_per_origin_counts()
-        inline_question_per_destination = get_inline_question_per_destination_counts()
-        inline_question_per_organisation = get_inline_question_per_organisation_counts()
-        inline_question_per_language = get_inline_question_per_language_counts()
+        filter_form = InlineQuestionFilterForm(request=request)
+        total_inline_questions = inline_questions_count(current_user = request.user)
+        inline_question_per_origin = get_inline_question_per_origin_counts(current_user = request.user)
+        inline_question_per_destination = get_inline_question_per_destination_counts(current_user = request.user)
+        inline_question_per_organisation = get_inline_question_per_organisation_counts(current_user = request.user)
+        inline_question_per_language = get_inline_question_per_language_counts(current_user = request.user)
         inline_question_response_data = inline_question_response()
         
     else:
-        filter_form = InlineQuestionFilterForm(request.POST)
+        filter_form = InlineQuestionFilterForm(request=request, data=request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
             
-        total_inline_questions = inline_questions_count(**filters)
-        inline_question_per_origin = get_inline_question_per_origin_counts(**filters)
-        inline_question_per_destination = get_inline_question_per_destination_counts(**filters)
-        inline_question_per_organisation = get_inline_question_per_organisation_counts(**filters)
-        inline_question_per_language = get_inline_question_per_language_counts(**filters)
+        total_inline_questions = inline_questions_count(
+            **filters,
+            current_user = request.user
+        )
+        inline_question_per_origin = get_inline_question_per_origin_counts(
+            **filters,
+            current_user = request.user
+        )
+        inline_question_per_destination = get_inline_question_per_destination_counts(
+            **filters,
+            current_user = request.user
+        )
+        inline_question_per_organisation = get_inline_question_per_organisation_counts(
+            **filters,
+            current_user = request.user
+        )
+        inline_question_per_language = get_inline_question_per_language_counts(
+            **filters,
+            current_user = request.user
+        )
         inline_question_response_data = inline_question_response()
     
 
