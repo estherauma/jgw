@@ -194,7 +194,8 @@ function exportStatsData(url, form, fileName='untitled_stats.xlsx') {
           .then((blob) => {
               const url = URL.createObjectURL(blob);
 
-              const finalFileName = fileName;
+
+              const finalFileName = response.headers.get("filename") || fileName;
 
               const a = document.createElement('a');
               a.href = url;

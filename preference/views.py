@@ -81,7 +81,7 @@ def user_overview(request):
 def export_preference_stats(request):
     if request.method == 'POST':
         
-        filter_form = GenericFilterForm(request.POST)
+        filter_form = GenericFilterForm(request=request, data=request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
 
@@ -92,10 +92,10 @@ def export_preference_stats(request):
             organisations = get_all_organisations_list()
         
         export_dict = {
-            "all": preference_stats_for_export({**filters, 'organisations': organisations})
+            "all": preference_stats_for_export({**filters, 'organisations': organisations, 'current_user': request.user})
         }
         
         for organisation in organisations:
-            export_dict[organisation] = preference_stats_for_export({**filters, 'organisations': [organisation]})
+            export_dict[organisation] = preference_stats_for_export({**filters, 'organisations': [organisation], 'current_user': request.user})
             
-        return generate_and_export_excel(export_dict) 
+        return generate_and_export_excel(export_dict, 'preference_stats') 

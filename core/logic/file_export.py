@@ -4,7 +4,7 @@ from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 
-def generate_and_export_excel(data):
+def generate_and_export_excel(data, filename = "unititled"):
     # Create a new Excel workbook
     wb = openpyxl.Workbook()
 
@@ -39,12 +39,13 @@ def generate_and_export_excel(data):
     # Remove the default empty sheet
     del wb[wb.sheetnames[0]]
 
-    return generate_export_response(wb, 'output')
+    return generate_export_response(wb, filename)
 
 
 def generate_export_response(workbook, export_name):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename={export_name}.xlsx'
+    response['filename'] = f'{export_name}.xlsx'
     
     workbook.save(response)
     

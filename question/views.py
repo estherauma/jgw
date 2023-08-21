@@ -69,9 +69,13 @@ def export_messaging_question_stats(request):
         
         export_dict = {}
         for organisation in organisations:
-            export_dict[organisation.name] = question_stats_for_export({**filters, 'organisations': [organisation]})
+            export_dict[organisation] = question_stats_for_export({
+                **filters, 
+                'organisations': [organisation],
+                'current_user': request.user
+            })
             
-        return generate_and_export_excel(export_dict)
+        return generate_and_export_excel(export_dict, filename="messaging_question_stats")
     
     
 def inline_question(request):
@@ -129,30 +133,9 @@ def inline_question(request):
     )
     
     
-def export_messaging_question_stats(request):
-    if request.method == 'POST':
-        filter_form = MessagingQuestionFilterForm(request.POST)
-        if filter_form.is_valid():
-            filters = generic_filter_form_parser(filter_form)
-
-        organisations = filters.get('organisation', None)
-        
-        if organisations is None:
-            # TODO: otherwise , get all loggedin user's organisations
-            organisations = get_all_organisations_list()
-        
-        export_dict = {
-            # TODO: add all organisations stats to the export_dict
-        }
-        for organisation in organisations:
-            export_dict[organisation] = question_stats_for_export({**filters, 'organisations': [organisation]})
-            
-        return generate_and_export_excel(export_dict)
-    
-    
 def export_inline_question_stats(request):
     if request.method == 'POST':
-        filter_form = InlineQuestionFilterForm(request.POST)
+        filter_form = InlineQuestionFilterForm(request=request, data=request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
 
@@ -166,6 +149,10 @@ def export_inline_question_stats(request):
             # TODO: add all organisations stats to the export_dict
         }
         for organisation in organisations:
-            export_dict[organisation] = question_stats_for_export({**filters, 'organisations': [organisation]})
+            export_dict[organisation] = question_stats_for_export({
+                **filters, 
+                'organisations': [organisation],
+                "current_user": request.user
+            })
             
-        return generate_and_export_excel(export_dict)
+        return generate_and_export_excel(export_dict, filename="inline_question_stats")
