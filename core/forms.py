@@ -42,21 +42,21 @@ class GenericFilterForm(forms.Form):
             attrs={"type": "date"},
         )
     )
-
-    origin = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple(attrs={
-            "class": "form-select selectpicker", 
-            "data-live-search": "true", 
-            "id": "origin"
-        }),
-        required=False
-    )
     
     destination = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(attrs={
             "class": "form-select selectpicker", 
             "data-live-search": "true", 
             "id": "destination"
+        }),
+        required=False
+    )
+
+    origin = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker", 
+            "data-live-search": "true", 
+            "id": "origin"
         }),
         required=False
     )
