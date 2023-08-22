@@ -90,8 +90,6 @@ def get_inline_question_per_organisation_counts(**filters):
     
     organisation_counts = [count['count'] for count in organisation_counts_data]
     organisation_labels = [format_org_name_from_display(organisation['organisation__name']).upper() for organisation in organisation_counts_data]
-    print(organisation_labels)
-    print(organisation_counts)
     
     return {
             "counts": organisation_counts,
