@@ -3,6 +3,6 @@ const userOverviewForm = document.getElementById("user-overview-question-filter-
 const userOverviewExportButton = document.getElementById("export-user-overview-to-excel")
 
 userOverviewExportButton.addEventListener("click",function() {
-    const url = `${window.location.href}export_stats`
+    const url = `${window.location.href}export-stats`
     exportStatsData(url, userOverviewForm)
 })

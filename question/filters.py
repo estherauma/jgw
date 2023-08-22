@@ -2,7 +2,11 @@
 from typing import Any
 from django.db.models import Manager as BaseManager, Q
 
+from users.utils import get_user_factories, get_user_organisations
+
+
 def generic_question_filtered_queryset(
+    current_user,
     queryset: BaseManager[Any],
     start_date=None,
     end_date=None,
@@ -31,6 +35,14 @@ def generic_question_filtered_queryset(
     if question_texts is None:
         question_texts = []
     
+    # current user specific orgs and factories filters
+    user_factories = get_user_factories(current_user)
+    user_orgs = get_user_organisations(current_user)
+    
+    user_fact_farm_q = Q(preference__factory_farm__in=user_factories) | Q(factory_farm__in=user_factories)
+    user_org_q = Q(preference__organisation__in=user_orgs) | Q(organisation__in=user_orgs)
+    user_fact_and_org_q = user_fact_farm_q | user_org_q
+    queryset = queryset.filter(user_fact_and_org_q)
     
     if start_date and end_date:
         queryset = queryset.filter(api_created_at__range=(start_date, end_date))
@@ -48,7 +60,6 @@ def generic_question_filtered_queryset(
         queryset = queryset.filter(combined_origin_q)
         
     if organisations:
-        print(organisations)
         preference_organisation_q = Q(preference__organisation__name__in=organisations)
         current_model_dest_q = Q(organisation__name__in=organisations)
         combined_organisation_q = preference_organisation_q | current_model_dest_q

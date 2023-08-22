@@ -140,7 +140,6 @@ def preferences_by_organisation(**filters):
         queryset=Preference.objects.all(),
         **filters
     )
-    print("organisation_queryset::::---->",filters)
 
     organisation_counts = organisation_queryset.values('organisation__name').annotate(
         count=Count('organisation__name')

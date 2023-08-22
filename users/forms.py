@@ -32,7 +32,7 @@ class CreateUserForm(UserCreationForm):
 class UserMgtForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ("is_active", "scheme", "factory", "role")
+        fields = ("is_active", "scheme", "role")
 
     def __init__(self, *args, **kwargs):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
@@ -45,14 +45,13 @@ class UserMgtForm(forms.ModelForm):
 class InviteUserForm(forms.ModelForm):
     class Meta:
         model = UserInvitations
-        fields = ("email", "role", "scheme", "factory", "organisation")
+        fields = ("email", "role", "scheme")
 
     def __init__(self, *args, **kwargs):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control"
         self.fields["email"].label = "Email Address"
-        self.fields["factory"].label = "Factory/Farm"
 
     def clean(self):
         cleaned_data = super().clean()
