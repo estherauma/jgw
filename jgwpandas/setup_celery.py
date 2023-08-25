@@ -20,18 +20,7 @@ celery_app.conf.beat_schedule = {
         "task": "cache_bigquery_data",
         "schedule": crontab(minute=0, hour=0),  # everyday at midnight
     },
-    "load_all_bigquery_data_at_once": {
-        "task": "load_all_bigquery_data_at_once",
-        "schedule": crontab(minute=0, hour=23) ,  # run 11pm everyday
-    },
-    "translate-API-data": {
-        "task": "translate_to_eng",
-        "schedule": crontab(minute="*/5"),  # every five minutes
-    },
-    "generate-report": {
-        "task": "generate_report",
-        "schedule": crontab(minute="0", hour="0", day_of_week="friday"),
-    },
+    # TODO: ADD generate_report task at midnight
     "notify_admins_inactive_users": {
         "task": "notify_admins_inactive_users",
         "schedule": crontab(minute="0", hour="0", day_of_week="sunday"),

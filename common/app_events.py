@@ -79,7 +79,7 @@ class AppEvents(BaseAnalytics):
             
         return chapter_feedback_df
     
-    def bigquery_chapters_data(self, select_all=False,start_date=None, end_date=None):
+    def bigquery_chapters_data(self,start_date=None, end_date=None):
         chapters_query = f"""
                 SELECT 
                     DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date, 
@@ -94,30 +94,12 @@ class AppEvents(BaseAnalytics):
                     event_name, 
                     event_date
             """
-            
-        if select_all:
-            chapters_query = """
-                SELECT 
-                    DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date, 
-                    event_name AS chapters, 
-                    COUNT(DISTINCT user_pseudo_id) AS Users,
-                    COUNT(event_timestamp) AS Count
-                FROM 
-                    (SELECT * FROM `just-good-work.analytics_191478110.events_*`)
-                WHERE 
-                    event_name LIKE 'ChapterOpened%'
-                    GROUP BY 
-                    event_name, 
-                    event_date
-                """
         chapters_data_df = client.query(chapters_query).to_dataframe()
-
-        chapters_data_df['event_date'] = chapters_data_df['event_date'].apply(lambda x: x.strftime('%Y-%m-%d'))
         chapters_data_dict = chapters_data_df.to_dict('records')
         
         return chapters_data_dict
     
-    def bigquery_firstopen_homepage_data(self, select_all=False,start_date=None, end_date=None):
+    def bigquery_firstopen_homepage_data(self,start_date=None, end_date=None):
         bigquery_firstopen_homepage_query =f"""
                 SELECT 
                     COUNT(DISTINCT user_pseudo_id) as users,
@@ -131,35 +113,10 @@ class AppEvents(BaseAnalytics):
                 GROUP BY
                     event_date, event_name
             """
-        if select_all:
-            bigquery_firstopen_homepage_query = """
-                    SELECT 
-                        COUNT(DISTINCT user_pseudo_id) as users,
-                        COUNT(event_timestamp) AS count,
-                        DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
-                        event_name
-                    FROM 
-                        (SELECT * FROM `just-good-work.analytics_191478110.events_*`)
-                    WHERE 
-                        event_name in ('first_open', 'homepage')
-                    GROUP BY
-                        event_date, event_name
-                """
         bigquery_firstopen_homepage_df = client.query(bigquery_firstopen_homepage_query).to_dataframe()
-        bigquery_firstopen_homepage_df['event_date'] = bigquery_firstopen_homepage_df['event_date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-        print_pandas_df_in_table_format(bigquery_firstopen_homepage_df)
         bigquery_firstopen_homepage_df_dict = bigquery_firstopen_homepage_df.to_dict('records')
         
         return bigquery_firstopen_homepage_df_dict
-        
-    def bigquery_data(self, end_date=previous_dates(days=1), start_date=previous_dates(days=1), select_all=False):
-        bigquery_chapters_data = self.bigquery_chapters_data(start_date=start_date, end_date=end_date, select_all=select_all)
-        bigquery_firstopen_homepage_data = self.bigquery_firstopen_homepage_data(start_date=start_date, end_date=end_date, select_all=select_all)
-        
-        return {
-            "bigquery_chapters_data": bigquery_chapters_data,
-            "bigquery_firstopen_homepage_data": bigquery_firstopen_homepage_data
-        }
         
     def chapters_opened_data(self, start_date=None, end_date=None):
         chapters_data = list(BigQueryChaptersData.objects.filter(
@@ -242,7 +199,6 @@ class AppEvents(BaseAnalytics):
 
     def compute_stats(self, fields: list[str] = None, filters: QueryMap = None):
         data = self.get_df(filters)
-        save_as_excel(data["chapters"], "chapters.csv")
         _stats = {
             "chapters": data["chapters"].to_dict(orient="index"),
             "chapter_feedback": {

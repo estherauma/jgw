@@ -13,8 +13,9 @@ class TimestampedModel(models.Model):
 class BigQueryChaptersData(TimestampedModel):
     event_date = models.DateField()
     chapters = models.CharField(max_length=50)
-    users = models.IntegerField()
-    count = models.IntegerField()
+    users = models.IntegerField(default=0)
+    count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.chapters
@@ -25,9 +26,10 @@ class BigQueryFirstOpenHomepageData(TimestampedModel):
         event_name are :  homepage, first_open
     """
     event_date = models.DateField()
-    users = models.IntegerField()
-    count = models.IntegerField()
-    event_name = models.CharField(max_length=100)
+    users = models.IntegerField(default=0)
+    count = models.IntegerField(default=0)
+    event_name = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.event_name
