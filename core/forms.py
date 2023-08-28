@@ -9,15 +9,19 @@ class GenericFilterForm(forms.Form):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        self.fields['origin'].choices = [
+        origin_choices = [
             (country.name, country.name)
             for country in Country.objects.filter(is_origin=True)
         ]
+        origin_choices.sort()
+        self.fields['origin'].choices = origin_choices
         
-        self.fields['destination'].choices = [
+        destination_choices = [
             (country.name, country.name)
             for country in Country.objects.filter(is_destination=True)
         ]
+        destination_choices.sort()
+        self.fields['destination'].choices = destination_choices
 
 
         user_factories = get_user_factories(self.request.user)
@@ -42,21 +46,21 @@ class GenericFilterForm(forms.Form):
             attrs={"type": "date"},
         )
     )
-    
-    destination = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple(attrs={
-            "class": "form-select selectpicker", 
-            "data-live-search": "true", 
-            "id": "destination"
-        }),
-        required=False
-    )
 
     origin = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(attrs={
             "class": "form-select selectpicker", 
             "data-live-search": "true", 
             "id": "origin"
+        }),
+        required=False
+    )
+    
+    destination = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker", 
+            "data-live-search": "true", 
+            "id": "destination"
         }),
         required=False
     )
