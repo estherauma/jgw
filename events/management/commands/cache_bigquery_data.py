@@ -50,22 +50,23 @@ def add_bigquery_firstopen_homepage_data():
         start_date=start_date,
         end_date=end_date
     )
+    print(firstopen_homepage_data[0])
     
-    for fhd in firstopen_homepage_data:
-        item = change_dictionary_keys_lowercase(fhd)
+    # for fhd in firstopen_homepage_data:
+    #     item = change_dictionary_keys_lowercase(fhd)
 
-        instance, _ = BigQueryFirstOpenHomepageData.objects.get_or_create(
-            event_date=item.get('event_date')
-        )
-        instance.users=item.get('users')
-        instance.count=item.get('count')
-        instance.event_name=item.get('event_name')
-        instance.save()
+        # instance, _ = BigQueryFirstOpenHomepageData.objects.get_or_create(
+        #     event_date=item.get('event_date')
+        # )
+        # instance.users=item.get('users')
+        # instance.count=item.get('count')
+        # instance.event_name=item.get('event_name')
+        # instance.save()
 
 
 @transaction.atomic
 def add_biquery_data():
-    add_bigquery_chapters_data()
+    # add_bigquery_chapters_data()
     add_bigquery_firstopen_homepage_data()
 
     

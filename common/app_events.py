@@ -105,7 +105,8 @@ class AppEvents(BaseAnalytics):
                     COUNT(DISTINCT user_pseudo_id) as users,
                     COUNT(event_timestamp) AS count,
                     DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
-                    event_name
+                    event_name,
+                    event_params
                 FROM 
                     (SELECT * FROM `just-good-work.analytics_191478110.events_*` WHERE DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}')
                 WHERE 
