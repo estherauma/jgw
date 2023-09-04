@@ -81,19 +81,24 @@ class AppEvents(BaseAnalytics):
     
     def bigquery_chapters_data(self,start_date=None, end_date=None):
         chapters_query = f"""
-                SELECT 
-                    DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date, 
-                    event_name AS chapters, 
-                    COUNT(DISTINCT user_pseudo_id) AS users,
-                    COUNT(event_timestamp) AS count
-                FROM 
-                    (SELECT * FROM `just-good-work.analytics_191478110.events_*` WHERE DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}')
-                WHERE 
-                    event_name LIKE 'ChapterOpened%'
-                GROUP BY 
-                    event_name, 
-                    event_date
-            """
+            SELECT 
+                event_name, 
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'age') AS age,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'language') AS language,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'gender') AS gender,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'organisationSector') AS organisationSector,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'deviceId') AS deviceId,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'appId') AS appId,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'organisation') AS organisation,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'locale') AS locale,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destinationState') AS destinationState,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destination') AS destination,
+                -- age, language, gender, organisationSector, deviceId, appId, organisation, locale, destinationState, destination
+            FROM 
+                `just-good-work.analytics_191478110.events_*`
+            WHERE 
+                event_name LIKE 'ChapterOpened%' AND DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
+        """
         chapters_data_df = client.query(chapters_query).to_dataframe()
         chapters_data_dict = chapters_data_df.to_dict('records')
         

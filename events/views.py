@@ -1,9 +1,10 @@
 from django.shortcuts import render
 
-from events.repository.bigquery_chapters_data import get_firstopen_homepage_data, get_user_per_chapters
+from events.repository.bigquery_chapters_data import get_chapters_users, get_chapters_counts
 
 # Create your views here.
 def what_matters_to_workers(request):
-    get_user_per_chapters()
-    get_firstopen_homepage_data()
+    chapters_counts = get_chapters_counts()
+    chapters_users = get_chapters_users()
+    print(chapters_counts)
     return render(request, "events/what-matters-to-workers.html")

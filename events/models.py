@@ -3,6 +3,8 @@ from django.db import models
 
 from django.db import models
 
+from preference.models import Age, Country, Gender, Language, Organisation, OrganisationSector
+
 class TimestampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -41,3 +43,23 @@ class OneTimeEventJob(TimestampedModel):
 
     def __str__(self):
         return self.name
+    
+    
+    
+class ChaptersOpened(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    event_name = models.CharField(max_length=255)
+    organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    organisation_sector = models.ForeignKey(OrganisationSector, on_delete=models.SET_NULL, null=True, blank=True)
+    device_id = models.CharField(max_length=255, null=True, blank=True)
+    app_id = models.CharField(max_length=255, null=True, blank=True)
+    locale = models.CharField(max_length=255, null=True, blank=True)
+    destination_state = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='chapters_opened_destination_state')
+    destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='chapters_opened_destination')
+    
+    def __str__(self):
+        return f"ChaptersOpened {self.event_name}"

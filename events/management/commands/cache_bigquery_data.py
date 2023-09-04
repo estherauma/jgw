@@ -10,8 +10,9 @@ from events.models import BigQueryChaptersData, BigQueryFirstOpenHomepageData
 
 def add_bigquery_chapters_data():
     
-    start_date= APPLICATION_POSSIBLE_START_DATE
-    end_date= previous_dates()
+    # start_date= APPLICATION_POSSIBLE_START_DATE
+    start_date = previous_dates()
+    end_date = previous_dates()
     
     latest_query_chapter_data = BigQueryChaptersData.objects.last()
     if latest_query_chapter_data:
@@ -24,16 +25,19 @@ def add_bigquery_chapters_data():
         end_date=end_date
     )
     
-    for cd in chapters_data:
-        item = change_dictionary_keys_lowercase(cd)
+    for chapter_data in chapters_data[0:2]:
+        pass
+    
+    # for cd in chapters_data:
+    #     item = change_dictionary_keys_lowercase(cd)
         
-        instance, _ = BigQueryChaptersData.objects.get_or_create(
-            event_date=item.get('event_date')
-        )
-        instance.chapters=item.get('chapters')
-        instance.users=item.get('users')
-        instance.count=item.get('count')
-        instance.save()
+    #     instance, _ = BigQueryChaptersData.objects.get_or_create(
+    #         event_date=item.get('event_date')
+    #     )
+    #     instance.chapters=item.get('chapters')
+    #     instance.users=item.get('users')
+    #     instance.count=item.get('count')
+    #     instance.save()
 
 def add_bigquery_firstopen_homepage_data():
     
@@ -66,8 +70,8 @@ def add_bigquery_firstopen_homepage_data():
 
 @transaction.atomic
 def add_biquery_data():
-    # add_bigquery_chapters_data()
-    add_bigquery_firstopen_homepage_data()
+    add_bigquery_chapters_data()
+    # add_bigquery_firstopen_homepage_data()
 
     
 class Command(BaseCommand):

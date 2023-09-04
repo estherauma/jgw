@@ -68,3 +68,16 @@ This repository contains code for running analytics on data collected by the JGW
 
 To run tests, run `coverage run manage.py test`   
 To get coverage report, run `coverage report`
+
+
+SELECT
+  event_name,
+  IFNULL(MAX(IF(param.key = 'gender', param.value.string_value, NULL)), '') AS gender,
+  IFNULL(MAX(IF(param.key = 'age', CAST(param.value.int_value AS STRING), NULL)), '') AS age
+  IFNULL(MAX(IF(param.key = 'age', CAST(param.value.int_value AS STRING), NULL)), '') AS age
+FROM
+  `just-good-work.analytics_191478110.events_*` jgw_event, UNNEST(event_params) AS param
+WHERE
+  event_name LIKE 'ChapterOpened%'
+GROUP BY
+  event_name
