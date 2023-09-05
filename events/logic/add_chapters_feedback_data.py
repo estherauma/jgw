@@ -43,6 +43,12 @@ def fetch_chapters_feedback_from_api_to_db():
     kunfu_panda_logger.info(f'Added {len(chapters_feedback)} chapters feedback to the database')
     
     translate_and_clean_inline_question_fields()
-       
+
+non_required_fields = ['__v', 'deviceModel', 'appVersion', 'os', 'osVersion', 'seenTabWelcomeText', 'destinationRepository']
+feedback_standard_fields = [
+    '_id', 'deviceId', 'appId', 'locale', 'route', 'language',
+    'organisation', 'organisationSector', 'factoryFarm', 'createdAt',
+    'updatedAt', 'destination', 'destinationState',  'age', 'gender', 'sectors']  
+     
 def add_chapter_feedback_to_db(inline_question):
     print(inline_question)
