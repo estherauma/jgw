@@ -65,3 +65,9 @@ class ChaptersOpened(models.Model):
     
     def __str__(self):
         return f"ChaptersOpened {self.event_name}"
+    
+class ChaptersFeedback(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    event_created_at = models.DateTimeField(null=True, blank=True)
+    event_updated_at = models.DateTimeField(null=True, blank=True)

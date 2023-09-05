@@ -11,28 +11,28 @@ from common.helpers.model_helpers.preference import (
     get_or_add_organisation_to_db
 )
 from common.logger import KunfuPandaLogger
-from common.utils.date_utils import previous_dates, todays_date
+from common.utils.date_utils import todays_date
 from events.models import ChaptersOpened
+from preference.tasks import translate_and_clean_preferences_fields
 
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_opened_tasks.log")
 
 
 def fetch_chatpter_opened_from_api():
-    start_date= "2023-09-04"
-    end_date= "2023-09-05"
+    start_date= APPLICATION_POSSIBLE_START_DATE
+    end_date= todays_date()
     
     # get the last time preferences were fetched
-    # latest_chapter_opened = ChaptersOpened.objects.last()
-    # if latest_chapter_opened:
-    #     start_date = latest_chapter_opened.created_at.strftime("%Y-%m-%d")
+    latest_chapter_opened = ChaptersOpened.objects.last()
+    if latest_chapter_opened:
+        start_date = latest_chapter_opened.created_at.strftime("%Y-%m-%d")
         
     appEvents = AppEvents()
     chapters_events_result = appEvents.bigquery_chapters_data(
         start_date=start_date,
         end_date=end_date
     )
-    print(chapters_events_result, start_date, end_date)
     return chapters_events_result
 
 @transaction.atomic
@@ -51,7 +51,7 @@ def fetch_chapters_opened_data_from_api_to_db():
     kunfu_panda_logger.info(f'Added {len(chapters_opened)} chapters opened to the database')
     
     # call celery to the translate, gender, language and sector of work functions
-    # translate_and_clean_preferences_fields()
+    translate_and_clean_preferences_fields()
 
 def add_chapters_opened_to_db(chapters_feedback):
     

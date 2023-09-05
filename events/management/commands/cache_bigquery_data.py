@@ -5,6 +5,7 @@ from common.app_events import AppEvents
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.utils.date_utils import previous_dates
 from common.utils.dictionary_utils import change_dictionary_keys_lowercase
+from events.logic.add_chapters_feedback_data import fetch_chapters_feedback_from_api_to_db
 from events.logic.add_chapters_opened_data import fetch_chapters_opened_data_from_api_to_db
 from events.models import BigQueryChaptersData, BigQueryFirstOpenHomepageData
 
@@ -73,4 +74,6 @@ def add_biquery_data():
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # add_biquery_data()
-        fetch_chapters_opened_data_from_api_to_db()
+        
+        # fetch_chapters_opened_data_from_api_to_db()
+        fetch_chapters_feedback_from_api_to_db()
