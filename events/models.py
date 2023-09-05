@@ -49,6 +49,8 @@ class OneTimeEventJob(TimestampedModel):
 class ChaptersOpened(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    event_created_at = models.DateTimeField(null=True, blank=True)
+    event_updated_at = models.DateTimeField(null=True, blank=True)
     event_name = models.CharField(max_length=255)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)

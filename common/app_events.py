@@ -82,6 +82,7 @@ class AppEvents(BaseAnalytics):
     def bigquery_chapters_data(self,start_date=None, end_date=None):
         chapters_query = f"""
             SELECT 
+                DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
                 event_name, 
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'age') AS age,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'language') AS language,

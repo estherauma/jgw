@@ -11,7 +11,7 @@ from common.reports import get_SWS_report
 from dashboard.management.commands.add_contacts import add_new_contacts
 from dashboard.management.commands.add_genders import add_new_genders
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
-from events.logic.add_chapters_feedback_data import fetch_chapters_feedback_data_from_api_to_db
+from events.logic.add_chapters_opened_data import fetch_chapters_opened_data_from_api_to_db
 from jgwpandas.settings import EMAIL_HOST_USER
 import base64
 import requests
@@ -38,7 +38,7 @@ def fetch_data_from_jgw_api():
     fetch_preferences_from_api_to_db()
     fetch_inline_questions_from_api_to_db()
     fetch_messaging_questions_from_api_to_db()
-    fetch_chapters_feedback_data_from_api_to_db()
+    fetch_chapters_opened_data_from_api_to_db()
     
 @shared_task(name="get_jgw_data")
 def fetch_API_data():    
