@@ -94,5 +94,18 @@ class ChaptersFeedback(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     feedback_standard = models.ForeignKey(ChaptersFeedbackStandard, on_delete=models.CASCADE, null=True)
-    question = models.CharField(null=True, blank=True, max_length=255)
-    response = models.CharField(null=True, blank=True, max_length=255)
+    feedback_question = models.CharField(null=True, blank=True, max_length=255)
+    feedback_response = models.CharField(null=True, blank=True, max_length=255)
+    
+    
+class ChaptersFeedbackResponse(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    response = models.TextField()
+    translated_response = models.TextField(null=True, blank=True)
+    
+class ChaptersFeedbackQuestion(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    question = models.TextField()
+    question_response = models.TextField(null=True, blank=True)

@@ -1,12 +1,12 @@
 from django.db import transaction
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
-from common.helpers.model_helpers.preference import get_or_add_age_to_db, get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_gender_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
+from common.helpers.model_helpers.preference import add_sector_of_work_to_db, get_or_add_age_to_db, get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_gender_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
 from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
-from events.models import ChaptersFeedback, ChaptersFeedbackStandard
+from events.models import ChaptersFeedback, ChaptersFeedbackQuestion, ChaptersFeedbackResponse, ChaptersFeedbackStandard
 from preference.models import Preference
 from question.tasks import translate_and_clean_inline_question_fields
 
@@ -33,7 +33,7 @@ def fetch_chapters_feedback_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     chapters_feedback = fetch_chapters_feedback_from_api(jgw_api_client)
     
-    for chapter_feedback in chapters_feedback[0:1]:
+    for chapter_feedback in chapters_feedback:
         try:
             add_chapter_feedback_to_db(chapter_feedback)
         except Exception as e:
@@ -74,8 +74,6 @@ def add_chapter_feedback_to_db(chapter_feedback):
     standard_fields_dict = chapter_feedback_parts["standard_fields_dict"]
     
     feedback_data = chapter_feedback_parts["feedback_list"][0]
-    feedback_data_question = list(feedback_data.keys())[0]
-    feedback_data_question_answer = feedback_data.get(feedback_data_question)
     
     feedback_title = feedback_data.get("key")
     data_source_id = standard_fields_dict.get("_id")
@@ -90,53 +88,67 @@ def add_chapter_feedback_to_db(chapter_feedback):
     organisation_sector = standard_fields_dict.get('organisationSector')
     organisation = standard_fields_dict.get('organisation')
     factory_farm = standard_fields_dict.get('factoryFarm')
-    api_created_at = standard_fields_dict.get('createdAt'),
+    api_created_at = standard_fields_dict.get('createdAt')
     api_updated_at = standard_fields_dict.get('updatedAt')
     locale = standard_fields_dict.get('locale')
-    app_id = standard_fields_dict.get('appId')
     gender = standard_fields_dict.get('gender')
     age = standard_fields_dict.get('age')
-    sectors = standard_fields_dict.get('sectors')
-    
-    # # TODO: ADD SECTORS OFF WORK, preferences
+    sectors_of_work = standard_fields_dict.get('sectors')
     
     device_id = standard_fields_dict.get('deviceId')
     preference = Preference.objects.filter(device_id=device_id).first()
     
-    dd = {
+    # related fields 
+    organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
+    organisation_data = get_or_add_organisation_to_db(organisation)
+    factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
+    gender_data = get_or_add_gender_to_db(gender)
+    age_data = get_or_add_age_to_db(age)
+    language_data = get_or_add_language_to_db(language)
+    origin_data = get_or_add_country_to_db(origin, source="origin")
+    destination_data = get_or_add_country_to_db(destination, source="destination")
+    route_data = get_or_add_route_to_db(route)
         
+    data_params = {
+        "api_created_at": api_created_at,
+        "api_updated_at": api_updated_at,
+        "data_source_id": data_source_id,
+        "device_id": device_id,
+        "locale": locale,
+        "preference": preference,
+        "feedback_title": feedback_title,
+        "gender": gender_data,
+        "age": age_data,
+        "language": language_data,
+        "origin": origin_data,
+        "destination": destination_data,
+        "destination_state": destination_data,
+        "route": route_data,
+        "organisation_sector": organisation_sector_data,
+        "factory_farm": factory_farm_data,
+        "organisation": organisation_data
     }
     
-    # # related fields 
-    # organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
-    # organisation_data = get_or_add_organisation_to_db(organisation)
-    # factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
-    # gender_data = get_or_add_gender_to_db(gender)
-    # age_data = get_or_add_age_to_db(age)
-    # language_data = get_or_add_language_to_db(language)
-    # origin_data = get_or_add_country_to_db(origin, source="origin")
-    # destination_data = get_or_add_country_to_db(destination, source="destination")
-    # route_data = get_or_add_route_to_db(route)
-        
-    # data_params = {
-    #     "api_created_at": api_created_at,
-    #     "api_updated_at": api_updated_at,
-    #     "data_source_id": data_source_id,
-    #     "device_id": device_id,
-    #     "locale": locale,
-    #     "preference": preference,
-    #     # feedback_title
-    #     "gender": gender_data,
-    #     "age": age_data,
-    #     "language": language_data,
-    #     "origin": origin_data,
-    #     "destination": destination_data,
-    #     "destination_state": destination_data,
-    #     "route": route_data,
-    #     "organisation_sector": organisation_sector_data,
-    #     "factory_farm": factory_farm_data,
-    #     "organisation": organisation_data
-    #     # sectors_of_work
-    # }
-    # print(data_params)
+    chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
+    
+    feedback_data_value = feedback_data.get("value")
+    feedback_data_value_list = list(feedback_data_value.items())
+    
+    for feedback in feedback_data_value_list:
+        feedback_data_question = feedback[0]
+        feedback_data_question_answer = feedback[1]
+        feedback_response, _  = ChaptersFeedbackResponse.objects.get_or_create(response=feedback_data_question_answer)
+        feedback_question, _  = ChaptersFeedbackQuestion.objects.get_or_create(question=feedback_data_question)
+
+        ChaptersFeedback.objects.create(
+            feedback_standard = chapters_feedback_standard,
+            feedback_question = feedback_question,
+            feedback_response = feedback_response
+        )
+    
+    sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
+    for sec_of_work in sec_of_work_list:
+        chapters_feedback_standard.sectors_of_work.add(sec_of_work)
+
+    
     
