@@ -1,30 +1,30 @@
 from django.db import transaction
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
-from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
+from common.helpers.model_helpers.preference import get_or_add_age_to_db, get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_gender_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
 from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
-from events.models import ChaptersFeedback
+from events.models import ChaptersFeedback, ChaptersFeedbackStandard
 from preference.models import Preference
 from question.tasks import translate_and_clean_inline_question_fields
 
 
-kunfu_panda_logger = KunfuPandaLogger(log_file="logs/hapters_feedback_tasks.log")
+kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_feedback_tasks.log")
 
 def fetch_chapters_feedback_from_api(client):
     start_date = APPLICATION_POSSIBLE_START_DATE
     end_date = todays_date()
     
     # get the last time inline question were fetched
-    latest_chapters_feedback = ChaptersFeedback.objects.last()
+    latest_chapters_feedback = ChaptersFeedbackStandard.objects.last()
     if latest_chapters_feedback:
         start_date = latest_chapters_feedback.created_at.strftime("%Y-%m-%d")
         
     kunfu_panda_logger.info(f"Fetching chapters feedback from {start_date} to {end_date}")
         
-    return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
+    return client.get_data(f"/chapter-feedback?startDate={start_date}&endDate={end_date}")
 
         
 @transaction.atomic
@@ -33,7 +33,7 @@ def fetch_chapters_feedback_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     chapters_feedback = fetch_chapters_feedback_from_api(jgw_api_client)
     
-    for chapter_feedback in chapters_feedback:
+    for chapter_feedback in chapters_feedback[0:1]:
         try:
             add_chapter_feedback_to_db(chapter_feedback)
         except Exception as e:
@@ -44,11 +44,99 @@ def fetch_chapters_feedback_from_api_to_db():
     
     translate_and_clean_inline_question_fields()
 
-non_required_fields = ['__v', 'deviceModel', 'appVersion', 'os', 'osVersion', 'seenTabWelcomeText', 'destinationRepository']
+feedback_non_required_fields = ['__v', 'deviceModel', 'appVersion', 'os', 'osVersion', 'seenTabWelcomeText', 'destinationRepository']
 feedback_standard_fields = [
     '_id', 'deviceId', 'appId', 'locale', 'route', 'language',
     'organisation', 'organisationSector', 'factoryFarm', 'createdAt',
     'updatedAt', 'destination', 'destinationState',  'age', 'gender', 'sectors']  
+
+
+def separate_feedback_standard_fields_from_others(chapter_feedback):
+    feedback_list = []
+    standard_fields = {}
+    non_required_fields = {}
+
+    for obj_key, obj_value in chapter_feedback.items():
+        
+        if obj_key in feedback_standard_fields:
+            standard_fields[obj_key] = obj_value
+            
+        elif obj_key in feedback_non_required_fields:
+             non_required_fields[obj_key] = obj_value
+             
+        else:
+            feedback_list.append({"key":obj_key, "value": obj_value})
+    
+    return {"feedback_list": feedback_list, "standard_fields_dict": standard_fields}
      
-def add_chapter_feedback_to_db(inline_question):
-    print(inline_question)
+def add_chapter_feedback_to_db(chapter_feedback):
+    chapter_feedback_parts = separate_feedback_standard_fields_from_others(chapter_feedback)
+    standard_fields_dict = chapter_feedback_parts["standard_fields_dict"]
+    
+    feedback_data = chapter_feedback_parts["feedback_list"][0]
+    feedback_data_question = list(feedback_data.keys())[0]
+    feedback_data_question_answer = feedback_data.get(feedback_data_question)
+    
+    feedback_title = feedback_data.get("key")
+    data_source_id = standard_fields_dict.get("_id")
+    
+    if ChaptersFeedbackStandard.objects.filter(data_source_id=data_source_id).exists():
+        return
+    
+    route = standard_fields_dict.get('route') or NOT_SPECIFIED
+    origin= get_origin_and_destination_from_route(route).get('origin')
+    destination= get_origin_and_destination_from_route(route).get('destination')
+    language = standard_fields_dict.get('language')
+    organisation_sector = standard_fields_dict.get('organisationSector')
+    organisation = standard_fields_dict.get('organisation')
+    factory_farm = standard_fields_dict.get('factoryFarm')
+    api_created_at = standard_fields_dict.get('createdAt'),
+    api_updated_at = standard_fields_dict.get('updatedAt')
+    locale = standard_fields_dict.get('locale')
+    app_id = standard_fields_dict.get('appId')
+    gender = standard_fields_dict.get('gender')
+    age = standard_fields_dict.get('age')
+    sectors = standard_fields_dict.get('sectors')
+    
+    # # TODO: ADD SECTORS OFF WORK, preferences
+    
+    device_id = standard_fields_dict.get('deviceId')
+    preference = Preference.objects.filter(device_id=device_id).first()
+    
+    dd = {
+        
+    }
+    
+    # # related fields 
+    # organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
+    # organisation_data = get_or_add_organisation_to_db(organisation)
+    # factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
+    # gender_data = get_or_add_gender_to_db(gender)
+    # age_data = get_or_add_age_to_db(age)
+    # language_data = get_or_add_language_to_db(language)
+    # origin_data = get_or_add_country_to_db(origin, source="origin")
+    # destination_data = get_or_add_country_to_db(destination, source="destination")
+    # route_data = get_or_add_route_to_db(route)
+        
+    # data_params = {
+    #     "api_created_at": api_created_at,
+    #     "api_updated_at": api_updated_at,
+    #     "data_source_id": data_source_id,
+    #     "device_id": device_id,
+    #     "locale": locale,
+    #     "preference": preference,
+    #     # feedback_title
+    #     "gender": gender_data,
+    #     "age": age_data,
+    #     "language": language_data,
+    #     "origin": origin_data,
+    #     "destination": destination_data,
+    #     "destination_state": destination_data,
+    #     "route": route_data,
+    #     "organisation_sector": organisation_sector_data,
+    #     "factory_farm": factory_farm_data,
+    #     "organisation": organisation_data
+    #     # sectors_of_work
+    # }
+    # print(data_params)
+    
