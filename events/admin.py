@@ -15,6 +15,7 @@ from events.models import (
 admin.site.register(BigQueryChaptersData)
 admin.site.register(BigQueryFirstOpenHomepageData)
 admin.site.register(OneTimeEventJob)
+
 admin.site.register(ChaptersOpened)
 
 admin.site.register(ChaptersFeedbackStandard)

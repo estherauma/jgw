@@ -88,14 +88,9 @@ class ChaptersFeedbackStandard(models.Model):
     factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     sectors_of_work = models.ManyToManyField(SectorOfWork)
-
     
-class ChaptersFeedback(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    feedback_standard = models.ForeignKey(ChaptersFeedbackStandard, on_delete=models.CASCADE, null=True)
-    feedback_question = models.CharField(null=True, blank=True, max_length=255)
-    feedback_response = models.CharField(null=True, blank=True, max_length=255)
+    def __str__(self):
+        return self.data_source_id
     
     
 class ChaptersFeedbackResponse(models.Model):
@@ -104,8 +99,25 @@ class ChaptersFeedbackResponse(models.Model):
     response = models.TextField()
     translated_response = models.TextField(null=True, blank=True)
     
+    def __str__(self):
+        return self.response
+    
 class ChaptersFeedbackQuestion(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     question = models.TextField()
     question_response = models.TextField(null=True, blank=True)
+    
+    def __str__(self):
+        return self.question
+    
+    
+class ChaptersFeedback(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    feedback_standard = models.ForeignKey(ChaptersFeedbackStandard, on_delete=models.CASCADE, null=True)
+    feedback_question = models.ForeignKey(ChaptersFeedbackQuestion, on_delete=models.DO_NOTHING, null=True)
+    feedback_response = models.ForeignKey(ChaptersFeedbackResponse, on_delete=models.DO_NOTHING, null=True)
+    
+    def __str__(self):
+        return self.feedback_question.question

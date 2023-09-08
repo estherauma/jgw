@@ -39,6 +39,7 @@ def fetch_data_from_jgw_api():
     fetch_preferences_from_api_to_db()
     fetch_inline_questions_from_api_to_db()
     fetch_messaging_questions_from_api_to_db()
+    
     fetch_chapters_opened_data_from_api_to_db()
     fetch_chapters_feedback_from_api_to_db()
     
