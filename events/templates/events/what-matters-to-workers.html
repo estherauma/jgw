@@ -137,19 +137,7 @@
   chapterFeedBackGraph(chaptersFeedbackParams);
 
 
-  const chaptersOpenedParams = {
-    labels: ['ChapterOpened_1_7', 'Type of work available', 'Why come to work in the country'],
-    data: {
-      views: {
-        label: "Number of Views",
-        counts: [47, 21, 33, 45],
-      },
-      uniqueUsers: {
-        label: "Unique Users",
-        counts: [100, 13, 12, 6],
-      },
-    },
-  };
-  chaptersOpenedGraph(chaptersOpenedParams);
+  const chaptersOpened = {{ chapters_opened | safe }};
+  chaptersOpenedGraph(chaptersOpened);
 </script>
 {% endblock %}
