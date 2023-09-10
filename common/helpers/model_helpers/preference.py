@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from common.const.value_const import NOT_SPECIFIED
 from common.custom_libs.language_codes import get_language_name
 from common.custom_libs.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
@@ -88,3 +90,15 @@ def add_sector_of_work_to_db(sectors_of_work: list[str]) -> list[SectorOfWork]:
             sector_list.append(sector)
 
     return sector_list
+
+
+
+def get_countries_without_excluded_names(
+    filter,
+    countries_to_exclude=["test-state", "tstd", "tstl"]
+):
+    exclude_query = Q()
+    for country_name in countries_to_exclude:
+        exclude_query |= Q(name=country_name)
+    
+    return Country.objects.filter(**filter).exclude(exclude_query)

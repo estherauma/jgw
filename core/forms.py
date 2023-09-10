@@ -1,4 +1,5 @@
 from django import forms
+from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
 from preference.models import Country, FactoryFarm, Organisation
 from users.utils import get_user_factories, get_user_organisations
@@ -11,14 +12,18 @@ class GenericFilterForm(forms.Form):
 
         origin_choices = [
             (country.name, country.name)
-            for country in Country.objects.filter(is_origin=True)
+            for country in get_countries_without_excluded_names(
+                filter={"is_origin":True}
+            )
         ]
         origin_choices.sort()
         self.fields['origin'].choices = origin_choices
         
         destination_choices = [
             (country.name, country.name)
-            for country in Country.objects.filter(is_destination=True)
+            for country in get_countries_without_excluded_names(
+                filter={"is_destination":True}
+            )
         ]
         destination_choices.sort()
         self.fields['destination'].choices = destination_choices
