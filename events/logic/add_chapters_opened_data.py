@@ -16,7 +16,7 @@ from events.models import ChaptersOpened
 from preference.tasks import translate_and_clean_preferences_fields
 
 
-kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_opened_tasks.log")
+kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_opened.log")
 
 
 def fetch_chatpter_opened_from_api():

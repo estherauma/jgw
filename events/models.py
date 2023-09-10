@@ -106,7 +106,7 @@ class ChaptersFeedbackQuestion(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     question = models.TextField()
-    question_response = models.TextField(null=True, blank=True)
+    transalted_question = models.TextField(null=True, blank=True)
     
     def __str__(self):
         return self.question

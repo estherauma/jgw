@@ -91,17 +91,8 @@
     </div>
   </div>
 </div>
+
 <div class="row">
-  <div class="col-md-12 mb-3">
-    <div class="card h-100">
-      <div class="card-body">
-        <p class="chart-title">USER FEEDBACK - WAS THIS INFORMATION HELPFUL?</p>
-        <div class="chapters-feedback-graph-id-chart-box">
-          <div id="chapters-feedback-graph-id"></div>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="col-md-12 mb-3">
     <div class="card h-100">
       <div class="card-body">
@@ -116,24 +107,40 @@
   </div>
 </div>
 
+<div class="row">
+
+  <div class="col-md-12 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <p class="chart-title">USER FEEDBACK - WAS THIS INFORMATION HELPFUL?</p>
+        <div class="was-this-helpful-graph-id-chart-box">
+          <div id="was-this-helpful-graph-id"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <p class="chart-title">USER FEEDBACK - TELL US MORE</p>
+        <div class="tell-us-more-graph-id-chart-box">
+          <div id="tell-us-more-graph-id"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+</div>
+
 {% endblock content %} 
 {% block scripts %}
 <script src="{% static 'js/charts/bar/chapters_feedback_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/chapters_opened_graph.js' %}"></script>
 <script type="text/javascript">
-  const chaptersFeedbackParams = {
-    labels: ['Thinking about it', 'Why come to work in the country', 'Culture and community', 'Type of work available'],
-    data: {
-      smiles: {
-        label: "Smiles",
-        counts: [10, 20, 19, 4],
-      },
-      frowns: {
-        label: "Frowns",
-        counts: [44, 21, 12, 80],
-      },
-    },
-  };
+
+  const chaptersFeedbackParams = {{ chapters_feedback | safe }}
   chapterFeedBackGraph(chaptersFeedbackParams);
 
 

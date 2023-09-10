@@ -7,11 +7,12 @@ from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
 from events.models import ChaptersFeedback, ChaptersFeedbackQuestion, ChaptersFeedbackResponse, ChaptersFeedbackStandard
+from events.tasks import translate_and_clean_chapter_feedback_fields
 from preference.models import Preference
 from question.tasks import translate_and_clean_inline_question_fields
 
 
-kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_feedback_tasks.log")
+kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_feedback.log")
 
 def fetch_chapters_feedback_from_api(client):
     start_date = APPLICATION_POSSIBLE_START_DATE
@@ -42,7 +43,7 @@ def fetch_chapters_feedback_from_api_to_db():
             raise
     kunfu_panda_logger.info(f'Added {len(chapters_feedback)} chapters feedback to the database')
     
-    translate_and_clean_inline_question_fields()
+    translate_and_clean_chapter_feedback_fields()
 
 feedback_non_required_fields = ['__v', 'deviceModel', 'appVersion', 'os', 'osVersion', 'seenTabWelcomeText', 'destinationRepository']
 feedback_standard_fields = [

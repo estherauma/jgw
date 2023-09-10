@@ -1,6 +1,20 @@
 function chapterFeedBackGraph(feedbackParams) {
-  const data = feedbackParams["data"];
-  const labels = feedbackParams["labels"];
+  feedbackParams.map( (feedbackParam) => {
+    const question = feedbackParam["question"]
+    const data = feedbackParam["data"]
+
+    if (question === "tellUsMore") {
+      plotGraph("tell-us-more-graph-id", data, COLORS.skyBlue)
+    }
+    if (question === "wasThisHelpful") {
+      plotGraph("was-this-helpful-graph-id", data)
+    }
+  })
+}
+
+function plotGraph(id, feedbackParam, backgroundColor = COLORS.appleGreen) {
+  const data = feedbackParam["count"];
+  const labels = feedbackParam["response"];
 
   const chartConfig = {
     type: "bar",
@@ -8,15 +22,10 @@ function chapterFeedBackGraph(feedbackParams) {
       labels: labels,
       datasets: [
         {
-          data: data["smiles"]["counts"],
-          backgroundColor: COLORS.appleGreen,
+          data: data,
+          backgroundColor: backgroundColor,
           barThickness: 15,
-        },
-        {
-            data: data["frowns"]["counts"],
-            backgroundColor: COLORS.navyBlue,
-            barThickness: 15,
-          },
+        }
       ],
     },
     options: {
@@ -43,9 +52,5 @@ function chapterFeedBackGraph(feedbackParams) {
     },
   };
 
-  scrollableVerticalBarChart(
-    "chapters-feedback-graph-id", 
-    [...data["smiles"]["counts"], ...data["frowns"]["counts"]], 
-    chartConfig
-);
+  scrollableVerticalBarChart( id, data, chartConfig );
 }
