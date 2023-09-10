@@ -18,5 +18,5 @@ def get_chapters_opened():
 
     return {
         "labels": list(sums.keys()),
-        "values": list(sums.values())
+        "counts": list(sums.values())
     }

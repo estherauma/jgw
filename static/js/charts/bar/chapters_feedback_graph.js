@@ -13,8 +13,8 @@ function chapterFeedBackGraph(feedbackParams) {
 }
 
 function plotGraph(id, feedbackParam, backgroundColor = COLORS.appleGreen) {
-  const data = feedbackParam["count"];
-  const labels = feedbackParam["response"];
+  const data = feedbackParam["counts"];
+  const labels = feedbackParam["labels"];
 
   const chartConfig = {
     type: "bar",

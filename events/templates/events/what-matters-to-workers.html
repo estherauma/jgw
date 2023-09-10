@@ -27,7 +27,7 @@
         ></button>
       </div>
       <div class="modal-body">
-        <form method="post" id="inline-question-filter-form">
+        <form method="post" id="what-matters-to-workers-filter-form">
           {% csrf_token %} {{form|crispy}}
           <button type="submit" class="btn btn-primary">Submit</button>
           <a href="" class="btn btn-secondary">Reset</a>
@@ -67,7 +67,7 @@
                   <div class="dropdown-menu" aria-labelledby="export-menu">
                     <button
                       class="dropdown-item"
-                      id="export-inline-question-to-excel"
+                      id="export-what-matters-to-workers-to-excel"
                     >
                       Export to Excel
                     </button>
@@ -138,6 +138,8 @@
 {% block scripts %}
 <script src="{% static 'js/charts/bar/chapters_feedback_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/chapters_opened_graph.js' %}"></script>
+<script src="{% static 'js/app/what_matter_to_workers.js' %}"></script>
+
 <script type="text/javascript">
 
   const chaptersFeedbackParams = {{ chapters_feedback | safe }}

@@ -154,5 +154,5 @@ def export_inline_question_stats(request):
                 'organisations': [organisation],
                 "current_user": request.user
             })
-            
+        print(export_dict)
         return generate_and_export_excel(export_dict, filename="inline_question_stats")

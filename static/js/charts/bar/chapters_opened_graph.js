@@ -1,5 +1,5 @@
 function chaptersOpenedGraph(chaptersOpenedParams) {
-    const data = chaptersOpenedParams["values"];
+    const data = chaptersOpenedParams["counts"];
     const labels = chaptersOpenedParams["labels"];
   
     const chartConfig = {

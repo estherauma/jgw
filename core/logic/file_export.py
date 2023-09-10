@@ -18,6 +18,7 @@ def generate_and_export_excel(data, filename = "unititled"):
             title_cell.fill = PatternFill(start_color='F2F2F2', end_color='F2F2F2', fill_type='solid')
 
             ws.append(['', 'LABELS', 'COUNTS'])
+            print(value)
             labels =  value['labels']
             counts = value.get('counts')
 

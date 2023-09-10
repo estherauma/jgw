@@ -22,6 +22,6 @@ def get_chapters_feedback():
             feedback_dict[question]['response'].append(response)
             feedback_dict[question]['count'].append(count)
 
-    formatted_data = [{'question': key, 'data': {'response': val['response'], 'count': val['count']}} for key, val in feedback_dict.items()]
+    formatted_data = [{'question': key, 'data': {'labels': val['response'], 'counts': val['count']}} for key, val in feedback_dict.items()]
 
     return formatted_data
