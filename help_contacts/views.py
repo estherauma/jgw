@@ -1,3 +1,10 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def help_contact_clicks(request):
+    context = {}
+    return render(
+        request,
+        "help_contacts/help_contacts.html", 
+        context = context
+    )
