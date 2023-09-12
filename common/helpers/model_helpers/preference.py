@@ -95,7 +95,7 @@ def add_sector_of_work_to_db(sectors_of_work: list[str]) -> list[SectorOfWork]:
 
 def get_countries_without_excluded_names(
     filter,
-    countries_to_exclude=["test-state", "tstd", "tstl"]
+    countries_to_exclude=["test-state", "tstd", "tstl", "viet nam"]
 ):
     exclude_query = Q()
     for country_name in countries_to_exclude:
