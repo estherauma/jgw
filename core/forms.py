@@ -13,7 +13,7 @@ class GenericFilterForm(forms.Form):
         origin_choices = [
             (country.name, country.name)
             for country in get_countries_without_excluded_names(
-                filter={"is_origin":True}
+                filter={ "is_origin": True }
             )
         ]
         origin_choices.sort()
@@ -22,7 +22,7 @@ class GenericFilterForm(forms.Form):
         destination_choices = [
             (country.name, country.name)
             for country in get_countries_without_excluded_names(
-                filter={"is_destination":True}
+                filter={ "is_destination": True }
             )
         ]
         destination_choices.sort()
