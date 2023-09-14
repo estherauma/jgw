@@ -13,7 +13,7 @@ from question.tasks import translate_and_clean_messaging_question_fields
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/messaging_question_tasks.log")
 
-def fetch_messaging_question_from_api(client, start_date='2020-01-01', end_date='2023-06-26'):
+def fetch_messaging_question_from_api(client):
     start_date = APPLICATION_POSSIBLE_START_DATE
     end_date = todays_date()
     
