@@ -1,17 +1,18 @@
 from celery import shared_task
-from events.management.commands.cache_bigquery_data import add_biquery_data
-from events.models import OneTimeEventJob
+from common.custom_libs.google_translate import pandas_translator_translate
+from common.logger import KunfuPandaLogger
 
-@shared_task(name="cache_bigquery_data")
-def cache_bigquery_data():
-    add_biquery_data()
-    
+from events.models import ChaptersFeedbackResponse
 
-@shared_task(name="load_all_bigquery_data_at_once")
-def load_all_bigquery_data_at_once():
-    load_all_bigquery_data_at_once, created = OneTimeEventJob.objects.get_or_create(name="load_all_bigquery_data_at_once")
+
+kunfu_panda_logger = KunfuPandaLogger(log_file="logs/events_chapter_tasks.log")
+
+def translate_and_clean_chapter_feedback_fields():
+    chapters_feedback_response = ChaptersFeedbackResponse.objects.filter(translated_response__isnull=True)
     
-    if not load_all_bigquery_data_at_once.run:
-        add_biquery_data(select_all=True)
-        load_all_bigquery_data_at_once.run = True
-        load_all_bigquery_data_at_once.save()
+    for chapters_feedback in chapters_feedback_response:
+        transformed_name = pandas_translator_translate(chapters_feedback.response)
+        chapters_feedback.translated_response = transformed_name
+        chapters_feedback.save()
+    
+    kunfu_panda_logger.info(f"{len(chapters_feedback_response)} chapters feedback responses translated")
