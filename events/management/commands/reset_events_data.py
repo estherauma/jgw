@@ -4,6 +4,13 @@ from events.models import BigQueryChaptersData, BigQueryFirstOpenHomepageData, C
 
 
 class Command(BaseCommand):
+    """Deletes everything in the imported events tables
+
+    Args:
+        BaseCommand (BaseCommand): Django commands base class
+        
+    Returns: None
+    """
     def handle(self, *args, **options):
         ChaptersOpened.objects.all().delete()
         
