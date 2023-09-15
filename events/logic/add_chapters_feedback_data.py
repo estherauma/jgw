@@ -1,15 +1,14 @@
 from django.db import transaction
+
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.helpers.model_helpers.preference import add_sector_of_work_to_db, get_or_add_age_to_db, get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_gender_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
 from common.logger import KunfuPandaLogger
-
 from common.services.api_client import JustGoodWorkAPIClient
-from common.utils.date_utils import todays_date
+from common.utils.date_utils import parse_api_date, todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
 from events.models import ChaptersFeedback, ChaptersFeedbackQuestion, ChaptersFeedbackResponse, ChaptersFeedbackStandard
 from events.tasks import translate_and_clean_chapter_feedback_fields
 from preference.models import Preference
-from question.tasks import translate_and_clean_inline_question_fields
 
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_feedback.log")
@@ -109,10 +108,10 @@ def add_chapter_feedback_to_db(chapter_feedback):
     origin_data = get_or_add_country_to_db(origin, source="origin")
     destination_data = get_or_add_country_to_db(destination, source="destination")
     route_data = get_or_add_route_to_db(route)
-        
+    
     data_params = {
-        "api_created_at": api_created_at,
-        "api_updated_at": api_updated_at,
+        "api_created_at": parse_api_date(api_created_at),
+        "api_updated_at": parse_api_date(api_updated_at),
         "data_source_id": data_source_id,
         "device_id": device_id,
         "locale": locale,

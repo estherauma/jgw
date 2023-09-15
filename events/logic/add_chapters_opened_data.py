@@ -11,7 +11,7 @@ from common.helpers.model_helpers.preference import (
     get_or_add_organisation_to_db
 )
 from common.logger import KunfuPandaLogger
-from common.utils.date_utils import todays_date
+from common.utils.date_utils import date_to_datetime, todays_date
 from events.models import ChaptersOpened
 from preference.tasks import translate_and_clean_preferences_fields
 
@@ -81,7 +81,7 @@ def add_chapters_opened_to_db(chapters_feedback):
     ChaptersOpened.objects.get_or_create(
         event_name = event_name or NOT_SPECIFIED,
         organisation = organisation_data,
-        event_created_at = event_date,
+        event_created_at = date_to_datetime(event_date),
         age = age_data,
         language = language_data,
         gender = gender_data,
