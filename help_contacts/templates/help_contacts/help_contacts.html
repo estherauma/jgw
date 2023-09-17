@@ -71,9 +71,9 @@
     <div class="col-md-12 mb-3">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">Messaging question per origin</p>
-                <div class="messaging-question-origin-chart-id-chart-box">
-                    <div id="messaging-question-origin-chart-id"></div>
+                <p class="chart-title">Phonenumber clicks</p>
+                <div class="phonenumber-clicks-by-user-graph-id-chart-box">
+                    <div id="phonenumber-clicks-by-user-graph-id"></div>
                 </div>
             </div>
         </div>
@@ -82,9 +82,9 @@
     <div class="col-md-12">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">Messaging question per destination</p>
-                <div id="messaging-question-destination-chart-id-chart-box">
-                    <div id="messaging-question-destination-chart-id"></div>
+                <p class="chart-title">Email clicks</p>
+                <div class="email-clicks-by-user-graph-id-chart-box">
+                    <div id="email-clicks-by-user-graph-id"></div>
                 </div>
             </div>
         </div>
@@ -94,18 +94,14 @@
 {% endblock content %}
 
 {% block scripts %}
-{% comment %} <script src="{% static 'js/charts/bar/messaging_question_origin_graph.js' %}"></script>
-<script src="{% static 'js/charts/bar/messaging_question_destination_graph.js' %}"></script>
-<script src="{% static 'js/app/messaging_question.js' %}"></script>
+<script src="{% static 'js/charts/bar/phone_number_clicks_by_user.js' %}"></script>
+<script src="{% static 'js/charts/bar/email_clicks_by_user.js' %}"></script>
 <script type="text/javascript">
-    // get data from context
-    var originData = {{ messaging_question_per_origin|safe }};
-    var destinationData = {{ messaging_question_per_destination|safe }};
+    var phoneNumberClicksByUserData = {{ phone_number_clicks_by_user|safe }};
+    phoneNumberClicksByUser(phoneNumberClicksByUserData)
 
-    // plots the origin graph
-    messagingQuestionOriginChart(originData)
+    var emailClicksByUserData = {{ email_clicks_by_user|safe }};
+    emailClicksByUser(emailClicksByUserData)
 
-    // plots the origin graph
-    messagingQuestionDestinationChart(destinationData) {% endcomment %}
 </script>
 {% endblock %}
