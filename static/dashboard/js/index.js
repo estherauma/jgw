@@ -1,6 +1,11 @@
-$('#destination').multiselect(); 
-$('#origin').multiselect();
-$('#organisation').multiselect(); 
-$('#factory_farm').multiselect();
-$('#inline-question-select-id').multiselect();
-$('#messaging-question-select-id').multiselect();
+const generalMultiSelectConfig = {
+    maxHeight: 500,
+    enableFiltering: true,
+}
+
+$('#destination').multiselect({ ... generalMultiSelectConfig }); 
+$('#origin').multiselect({ ... generalMultiSelectConfig });
+$('#organisation').multiselect({ ... generalMultiSelectConfig }); 
+$('#factory_farm').multiselect({ ... generalMultiSelectConfig });
+$('#inline-question-select-id').multiselect({ ... generalMultiSelectConfig });
+$('#messaging-question-select-id').multiselect({ ... generalMultiSelectConfig });
