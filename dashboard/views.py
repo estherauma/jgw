@@ -23,6 +23,7 @@ from common.helpers.common import HELPERS, HelpersParameters
 from dashboard.models import Route
 from jgwpandas.settings import BASE_DIR
 from dashboard.models import JGWCache
+import pandas as pd
 
 
 from .forms import (
@@ -418,6 +419,17 @@ def notifications(request):
 
 @login_required
 def summerberry_dashboard(request):
+    if request.GET:
+        if 'startDate' in request.GET:
+            start_date = request.GET['startDate']
+            end_date = request.GET['endDate']
+            jgwcache_entry = JGWCache.objects.filter(category='summerberry').first()
+            #load the data into a dataframe
+            df = pd.DataFrame(jgwcache_entry.data)
+            # filter df by start and end date
+            df = df[(df['startDate'] >= start_date) & (df['startDate'] <= end_date)]
+            return JsonResponse(df.to_json(orient="records"), safe=False)
+
     jgwcache_entry = JGWCache.objects.filter(category='summerberry').first()
     context = { 'data': jgwcache_entry.data}
     return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
