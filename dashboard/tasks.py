@@ -11,6 +11,8 @@ from common.reports import get_SWS_report
 from dashboard.management.commands.add_contacts import add_new_contacts
 from dashboard.management.commands.add_genders import add_new_genders
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
+from events.logic.add_chapters_feedback_data import fetch_chapters_feedback_from_api_to_db
+from events.logic.add_chapters_opened_data import fetch_chapters_opened_data_from_api_to_db
 from jgwpandas.settings import EMAIL_HOST_USER
 import base64
 import requests
@@ -38,49 +40,13 @@ def fetch_data_from_jgw_api():
     fetch_inline_questions_from_api_to_db()
     fetch_messaging_questions_from_api_to_db()
     
+    fetch_chapters_opened_data_from_api_to_db()
+    fetch_chapters_feedback_from_api_to_db()
+    
 @shared_task(name="get_jgw_data")
-def fetch_API_data(category=None):
-    from common.retrieve_data import JGWApi as APIHelper
-
-    jgw_api = APIHelper()
-    if category is not None:
-        jgw_api.get_data(key=category)
-        return
-
-    for key in [
-        "inline",
-        "preferences",
-        "messaging",
-        "help_contacts",
-        "visa",
-        "joboffer",
-        "contract",
-        "beforeyougo",
-        "chapter_feedback",
-    ]:
-        jgw_api.get_data(key=key)
-    
-    # # add help contacts
-    add_new_genders()
-    
+def fetch_API_data():    
     # fetch data from api v2
     fetch_data_from_jgw_api()
-    
-    
-@shared_task(name="translate_to_eng")
-def translate_API_data():
-    def _doer(model, limit=50):
-        untranslated_text = model.objects.filter(translation__isnull=True)
-        if untranslated_text.exists():
-            objs = []
-            for obj in untranslated_text[:limit]:
-                obj.translation = translate_to_eng(obj.original_text)
-                objs.append(obj)
-            model.objects.bulk_update(objs, ["translation"])
-            
-
-    for model in [TranslatedQuestionText, TranslatedResponseText, TranslatedText]:
-        _doer(model)
 
 
 @shared_task(name="send_email_notification")
