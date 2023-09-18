@@ -1,10 +1,10 @@
 from django.db import transaction
-from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
 from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
-from common.utils.date_utils import previous_dates, todays_date
+from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
 from question.models import MessagingQuestion, MessagingQuestionResponse, MessagingQuestionStandard, MessagingQuestionText, MessagingResponse, MessagingResponseOptionText
 from preference.models import Preference
@@ -13,7 +13,7 @@ from question.tasks import translate_and_clean_messaging_question_fields
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/messaging_question_tasks.log")
 
-def fetch_messaging_question_from_api(client, start_date='2020-01-01', end_date='2023-06-26'):
+def fetch_messaging_question_from_api(client):
     start_date = APPLICATION_POSSIBLE_START_DATE
     end_date = todays_date()
     

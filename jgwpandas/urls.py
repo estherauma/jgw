@@ -31,10 +31,10 @@ urlpatterns = [
     # accounts
     path("accounts/", include("users.urls")),
     path("health/", health),
-    
-    path("__debug__/", include("debug_toolbar.urls")),
     path("question/", include("question.urls")),
     path("preference/", include("preference.urls")),
+    path("events/", include("events.urls")),
+    path("__debug__/", include("debug_toolbar.urls")),
 ]
 
 if settings.DEBUG:
