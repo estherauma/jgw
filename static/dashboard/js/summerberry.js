@@ -1,4 +1,79 @@
 $(document).ready(function () {
+    let columns = [
+        { data: 'name', title: 'Worker Name' },
+        { data: 'number', title: 'Worker Number' },
+        { data: 'startDate', title: 'Start Date' },
+        { data: 'registrationDate', title: 'Registration Date' },
+        { 
+            data: 'completedRegistration', 
+            title: 'Registration', 
+            render: function (data, type, row) {
+                if (data == 1) {
+                    return ' <span class="badge bg-success">Yes</span>';
+                } else {
+                    return '<span class="badge bg-danger">No</span>';
+                }
+            } 
+        },
+        { 
+            data: 'completedInduction', 
+            title: 'Induction',
+            render: function (data, type, row) {
+                if (data == 1) {
+                    return ' <span class="badge bg-success">Completed</span>';
+                } else {
+                    return '<span class="badge bg-danger">No</span>';
+                }
+            } 
+        },
+        { 
+            data: 'contractSigned', 
+            title: 'Contract Signed',
+            render: function (data, type, row) {
+                if (data == 1) {
+                    return ' <span class="badge bg-success">Yes</span>';
+                } else {
+                    return '<span class="badge bg-danger">No</span>';
+                }
+            } 
+        },
+        {
+            data: 'workerDirectiveSigned', 
+            title: 'Worker Directive Signed',
+            render: function (data, type, row) {
+                if (data == 'Yes') {
+                    return ' <span class="badge bg-success">Yes</span>';
+                } else if (data == 'No') {
+                    return '<span class="badge bg-danger">No</span>';
+                } else {
+                    return '<span class="badge bg-warning">None</span>';
+                }
+            } 
+        },
+        { 
+            data: 'hygieneSigned', 
+            title: 'Hygiene',
+            render: function (data, type, row) {
+                if (data == 1) {
+                    return ' <span class="badge bg-success">Yes</span>';
+                } else {
+                    return '<span class="badge bg-danger">No</span>';
+                }
+            }
+         },
+        {
+             data: 'medicalSigned', 
+             title: 'Medical',
+             render: function (data, type, row) {
+                if (data == 1) {
+                    return ' <span class="badge bg-success">Yes</span>';
+                } else {
+                    return '<span class="badge bg-danger">No</span>';
+                }
+            } 
+        },
+
+    ]
     $('#summerberry-dash').DataTable({
         ajax: '/summerberry-data',
         columnDefs: [
@@ -11,81 +86,7 @@ $(document).ready(function () {
                 orderData: [1, 0],
             }
         ],
-        columns: [
-            { data: 'name', title: 'Worker Name' },
-            { data: 'number', title: 'Worker Number' },
-            { data: 'startDate', title: 'Start Date' },
-            { data: 'registrationDate', title: 'Registration Date' },
-            { 
-                data: 'completedRegistration', 
-                title: 'Registration', 
-                render: function (data, type, row) {
-                    if (data == 1) {
-                        return ' <span class="badge bg-success">Yes</span>';
-                    } else {
-                        return '<span class="badge bg-danger">No</span>';
-                    }
-                } 
-            },
-            { 
-                data: 'completedInduction', 
-                title: 'Induction',
-                render: function (data, type, row) {
-                    if (data == 1) {
-                        return ' <span class="badge bg-success">Completed</span>';
-                    } else {
-                        return '<span class="badge bg-danger">No</span>';
-                    }
-                } 
-            },
-            { 
-                data: 'contractSigned', 
-                title: 'Contract Signed',
-                render: function (data, type, row) {
-                    if (data == 1) {
-                        return ' <span class="badge bg-success">Yes</span>';
-                    } else {
-                        return '<span class="badge bg-danger">No</span>';
-                    }
-                } 
-            },
-            {
-                data: 'workerDirectiveSigned', 
-                title: 'Worker Directive Signed',
-                render: function (data, type, row) {
-                    if (data == 'Yes') {
-                        return ' <span class="badge bg-success">Yes</span>';
-                    } else if (data == 'No') {
-                        return '<span class="badge bg-danger">No</span>';
-                    } else {
-                        return '<span class="badge bg-warning">None</span>';
-                    }
-                } 
-            },
-            { 
-                data: 'hygieneSigned', 
-                title: 'Hygiene',
-                render: function (data, type, row) {
-                    if (data == 1) {
-                        return ' <span class="badge bg-success">Yes</span>';
-                    } else {
-                        return '<span class="badge bg-danger">No</span>';
-                    }
-                }
-             },
-            {
-                 data: 'medicalSigned', 
-                 title: 'Medical',
-                 render: function (data, type, row) {
-                    if (data == 1) {
-                        return ' <span class="badge bg-success">Yes</span>';
-                    } else {
-                        return '<span class="badge bg-danger">No</span>';
-                    }
-                } 
-            },
-
-        ],
+        columns: columns,
         dom: 'Bfrtipl',
         buttons: [
             'excelHtml5',
@@ -131,81 +132,7 @@ $(document).ready(function () {
                             orderData: [1, 0],
                         }
                     ],
-                    columns: [
-                        { data: 'name', title: 'Worker Name' },
-                        { data: 'number', title: 'Worker Number' },
-                        { data: 'startDate', title: 'Start Date' },
-                        { data: 'registrationDate', title: 'Registration Date' },
-                        { 
-                            data: 'completedRegistration', 
-                            title: 'Registration', 
-                            render: function (data, type, row) {
-                                if (data == 1) {
-                                    return ' <span class="badge bg-success">Yes</span>';
-                                } else {
-                                    return '<span class="badge bg-danger">No</span>';
-                                }
-                            } 
-                        },
-                        { 
-                            data: 'completedInduction', 
-                            title: 'Induction',
-                            render: function (data, type, row) {
-                                if (data == 1) {
-                                    return ' <span class="badge bg-success">Completed</span>';
-                                } else {
-                                    return '<span class="badge bg-danger">No</span>';
-                                }
-                            } 
-                        },
-                        { 
-                            data: 'contractSigned', 
-                            title: 'Contract Signed',
-                            render: function (data, type, row) {
-                                if (data == 1) {
-                                    return ' <span class="badge bg-success">Yes</span>';
-                                } else {
-                                    return '<span class="badge bg-danger">No</span>';
-                                }
-                            } 
-                        },
-                        {
-                            data: 'workerDirectiveSigned', 
-                            title: 'Worker Directive Signed',
-                            render: function (data, type, row) {
-                                if (data == 'Yes') {
-                                    return ' <span class="badge bg-success">Yes</span>';
-                                } else if (data == 'No') {
-                                    return '<span class="badge bg-danger">No</span>';
-                                } else {
-                                    return '<span class="badge bg-warning">None</span>';
-                                }
-                            } 
-                        },
-                        { 
-                            data: 'hygieneSigned', 
-                            title: 'Hygiene',
-                            render: function (data, type, row) {
-                                if (data == 1) {
-                                    return ' <span class="badge bg-success">Yes</span>';
-                                } else {
-                                    return '<span class="badge bg-danger">No</span>';
-                                }
-                            }
-                         },
-                        {
-                             data: 'medicalSigned', 
-                             title: 'Medical',
-                             render: function (data, type, row) {
-                                if (data == 1) {
-                                    return ' <span class="badge bg-success">Yes</span>';
-                                } else {
-                                    return '<span class="badge bg-danger">No</span>';
-                                }
-                            } 
-                        },
-            
-                    ],
+                    columns: columns,
                     dom: 'Bfrtipl',
                     buttons: [
                         'excelHtml5',
