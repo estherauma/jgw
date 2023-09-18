@@ -419,6 +419,10 @@ def notifications(request):
 
 @login_required
 def summerberry_dashboard(request):
+    return render(request, template_name="dashboard/summerberry/dashboard.html")
+
+
+def get_summerberry_dashboard_data(request):
     if request.GET:
         if 'startDate' in request.GET:
             start_date = request.GET['startDate']
@@ -428,8 +432,10 @@ def summerberry_dashboard(request):
             df = pd.DataFrame(jgwcache_entry.data)
             # filter df by start and end date
             df = df[(df['startDate'] >= start_date) & (df['startDate'] <= end_date)]
-            return JsonResponse(df.to_json(orient="records"), safe=False)
-
-    jgwcache_entry = JGWCache.objects.filter(category='summerberry').first()
-    context = { 'data': jgwcache_entry.data}
-    return render(request, template_name="dashboard/summerberry/dashboard.html", context=context)
+            data = df.to_json(orient='records', index=True)
+            context = { 'data': json.loads(data)}
+        else:
+            jgwcache_entry = JGWCache.objects.filter(category='summerberry').first()
+            context = { 'data': jgwcache_entry.data}
+    return JsonResponse(context, safe=False)
+            

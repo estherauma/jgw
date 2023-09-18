@@ -26,4 +26,5 @@ urlpatterns = [
 
     # summerberry
     path('summerberry-dashboard', views.summerberry_dashboard, name='summerberry-dashboard'),
+    path('summerberry-data', views.get_summerberry_dashboard_data, name='summerberry-data'),
 ]

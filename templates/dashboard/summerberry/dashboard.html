@@ -52,63 +52,6 @@
                                 <th>Medical</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for worker in data %}
-                            <tr>
-                                <td>{{ worker.name }}</td>
-                                <td>{{ worker.employeeID }}</td>
-                                <td>{{ worker.startDate }}</td>
-                                <td>{{ worker.registrationDate }}</td>
-                                <td>
-                                    {% if worker.completedRegistration == 1 %}
-                                    <span class="badge bg-success">Yes</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">No</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if worker.completedInduction %}
-                                    <span class="badge bg-success">{{ worker.completedInduction }}</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">{{ worker.completedInduction }}</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if worker.contractSigned == 1 %}
-                                    <span class="badge bg-success">Yes</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">No</span>
-                                    {% endif %}
-                                </td>
-
-
-                                <td>
-                                    {% if worker.workerDirectiveSigned == 'Yes' %}
-                                    <span class="badge bg-success">{{ worker.workerDirectiveSigned }}</span>
-                                    {% elif worker.workerDirectiveSigned == 'No' %}
-                                    <span class="badge bg-danger">{{ worker.workerDirectiveSigned }}</span>
-                                            {% else %}
-                                    <span class="badge bg-warning">{{ worker.workerDirectiveSigned }}</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if worker.hygieneSigned == 1 %}
-                                    <span class="badge bg-success">Yes</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">No</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if worker.medicalSigned == 1 %}
-                                    <span class="badge bg-success">Yes</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">No</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-
-                        </tbody>
                     </table>
                 </div>
             </div>
