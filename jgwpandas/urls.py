@@ -33,6 +33,7 @@ urlpatterns = [
     path("health/", health),
     path("question/", include("question.urls")),
     path("preference/", include("preference.urls")),
+    path("help-contacts/", include("help_contacts.urls")),
     path("events/", include("events.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
 ]
