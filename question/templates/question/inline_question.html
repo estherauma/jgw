@@ -70,15 +70,17 @@
 <div class="row">
     <div class="col-md-12">
         <div class="row">
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <p class="chart-title">Organisation</p>
-                        <canvas id="inline-question-organisation-pie-chart-id"></canvas>
+            {% if user.is_authenticated %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <p class="chart-title">Organisation</p>
+                            <canvas id="inline-question-organisation-pie-chart-id"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-8 mb-3">
+            {% endif %}
+            <div class="{% if user.is_authenticated %} col-md-8 {% else %} col-md-12 {% endif %} mb-3">
                 <div class="card h-100">
                     <div class="card-body">
                         <p class="chart-title">SELECTED USER LANGUAGE</p>

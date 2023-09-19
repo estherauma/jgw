@@ -6,8 +6,6 @@
         <!--- Sidemenu -->
         <div id="sidebar-menu">
 
-
-            {% if user.is_authenticated %}
             <ul id="side-menu">
                 {% if request.user|has_group:"Summerberry" %}
                     <li>
@@ -32,7 +30,13 @@
                     </li>
 
                     <li>
-                        <a href="{% url 'question:messaging_question' %}">
+                        <a href="
+                        {% if user.is_authenticated %}
+                            {% url 'question:messaging_question' %}
+                        {% else %}
+                            {% url 'core:payment_required' %}
+                        {% endif %}
+                        ">
                             <i data-feather="message-square"></i>
                             <span>Messaging Questions</span>
                         </a>
@@ -44,14 +48,13 @@
                             <span>What Matters to Workers</span>
                         </a>
                     </li>
-
+                {% if user.is_staff %}
                     <li>
                         <a href="{% url 'dashboard:export_report' %}">
                             <i data-feather="external-link"></i>
                             <span>Export Report</span>
                         </a>
                     </li>
-                {% if user.is_staff %}
                     <li>
                         <a href="#sidebarUsers" data-bs-toggle="collapse">
                             <i data-feather="users"></i>
@@ -72,15 +75,15 @@
                 {% endif %}
 
                 {% endif %}
-                <li>
-                    <a href="{% url 'users:logout_user' %}">
-                        <i data-feather="log-out"></i>
-                        <span>Log out</span>
-                    </a>
-                </li>
+                {% if user.is_authenticated %}
+                    <li>
+                        <a href="{% url 'users:logout_user' %}">
+                            <i data-feather="log-out"></i>
+                            <span>Log out</span>
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
-
-            {% endif %}
             </ul>
         </div>
         <!-- End Sidebar -->

@@ -60,6 +60,10 @@ function buildFilterStateAlert(filterStateContainerId, data) {
 
 function drawChart(canvasId, data, chartConfig, noDataMessage = "No data available") {
   var canvas = document.getElementById(canvasId);
+  if (canvas == null) {
+    return console.error(`canvas id ${canvasId} does not exist`)
+  }
+
   var ctx = canvas.getContext('2d');
   var sum = data.reduce(function(a, b) { return a + b; }, 0);
   var parent = canvas.parentNode;
