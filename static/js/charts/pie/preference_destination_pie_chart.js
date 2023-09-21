@@ -8,7 +8,7 @@ function preferenceDestinationPieChart(preferenceDestinationData) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'My First Dataset',
+                label: 'Users',
                 data: data,
                 backgroundColor: genericChartColors(data.length),
                 barThickness: 15,

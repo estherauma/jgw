@@ -4,7 +4,7 @@ function inlineQustionOrganisationPieChart(orgChartData) {
     const chartData = {
         labels: labels,
         datasets: [{
-            label: 'My First Dataset',
+            label: 'Inline Questions',
             data: data,
             backgroundColor: genericChartColors(data.length)
         }]

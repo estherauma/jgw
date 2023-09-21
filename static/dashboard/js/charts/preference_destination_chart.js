@@ -8,7 +8,7 @@ function preferenceDestinationChart(preferenceDestinationData) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'My First Dataset',
+                label: 'Users',
                 data: data,
                 backgroundColor: [COLORS.darkBlue, COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue, COLORS.black],
                 barThickness: 15,
