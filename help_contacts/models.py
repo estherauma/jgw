@@ -1,17 +1,31 @@
 from django.db import models
 
-from preference.models import Preference
+from preference.models import Route
 
 # Create your models here.
 class HelpContact(models.Model):
+    CONTACT_CHOICES = [
+        ('email', 'Email'),
+        ('phone', 'Phone Number'),
+        ('web', 'Web Address'),
+    ]
+
+    contact_type = models.CharField(
+        max_length=10,
+        choices=CONTACT_CHOICES,
+        null=True,
+        blank=False
+    )
+    
     data_source_id = models.CharField(max_length=100)
-    deviceI_id = models.CharField(max_length=100)
+    device_id = models.CharField(max_length=100)
     app_id = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=100)
-    email = models.EmailField(blank=True)
+    locale = models.CharField(max_length=255, null=True, blank=False)
+    route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True)
+    contact_value = models.CharField(max_length=255, blank=False, null=True)
     createdAt = models.DateTimeField()
     updatedAt = models.DateTimeField()
     cleaned = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"phone: {self.phone_number} ------- email: {self.email}"
+        return f"{self.phone_number} : {self.email}"
