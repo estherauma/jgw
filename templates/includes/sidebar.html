@@ -30,16 +30,21 @@
                     </li>
 
                     <li>
-                        <a href="
                         {% if user.is_authenticated %}
-                            {% url 'question:messaging_question' %}
+                            <a href="{% url 'question:messaging_question' %}">
+                                <i data-feather="message-square"></i>
+                                <span>Messaging Questions</span>
+                            </a>
                         {% else %}
-                            {% url 'core:payment_required' %}
+                            <a
+                                href="{% url 'payment:payment_required' %}"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#make-payment-modal"
+                            >
+                                <i data-feather="message-square"></i>
+                                <span>Messaging Questions</span>
+                            </a>
                         {% endif %}
-                        ">
-                            <i data-feather="message-square"></i>
-                            <span>Messaging Questions</span>
-                        </a>
                     </li>
 
                     <li>

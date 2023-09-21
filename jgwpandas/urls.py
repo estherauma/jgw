@@ -35,6 +35,7 @@ urlpatterns = [
     path("preference/", include("preference.urls")),
     path("help-contacts/", include("help_contacts.urls")),
     path("events/", include("events.urls")),
+    path("payment/", include("payment.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
 ]
 

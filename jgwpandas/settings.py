@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     "preference",
     "checklist",
     "help_contacts",
-    "question"
+    "question",
+    "payment",
     
 ]
 
