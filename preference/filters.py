@@ -6,8 +6,8 @@ from users.utils import get_user_factories, get_user_organisations
 
 
 def preference_filtered_queryset(
-    current_user,
     queryset: BaseManager[Any],
+    current_user=None,
     start_date=None,
     end_date=None,
     destination_countries=None,

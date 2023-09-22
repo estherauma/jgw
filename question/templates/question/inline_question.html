@@ -41,26 +41,30 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="dropdown w-100">
-                                    <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
-                                        id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Export
-                                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                                    </a>
-        
-                                    <div class="dropdown-menu" aria-labelledby="export-menu">
-                                        <button  class="dropdown-item" id="export-inline-question-to-excel">Export to Excel</button>
+                        {% if user.is_authenticated %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="dropdown w-100">
+                                        <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                                            id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Export
+                                            <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                                        </a>
+            
+                                        <div class="dropdown-menu" aria-labelledby="export-menu">
+                                            <button  class="dropdown-item" id="export-inline-question-to-excel">Export to Excel</button>
+                                        </div>
+                                        
                                     </div>
-                                    
+                                </div>
+                                <div class="col-md-6">
+                                    <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
+                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
-                            </div>
-                        </div>
+                        {% else %}
+                            {% include 'includes/non_auth_banner_btns.html' %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -70,15 +74,17 @@
 <div class="row">
     <div class="col-md-12">
         <div class="row">
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <p class="chart-title">Organisation</p>
-                        <canvas id="inline-question-organisation-pie-chart-id"></canvas>
+            {% if user.is_authenticated %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <p class="chart-title">Organisation</p>
+                            <canvas id="inline-question-organisation-pie-chart-id"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-8 mb-3">
+            {% endif %}
+            <div class="{% if user.is_authenticated %} col-md-8 {% else %} col-md-12 {% endif %} mb-3">
                 <div class="card h-100">
                     <div class="card-body">
                         <p class="chart-title">SELECTED USER LANGUAGE</p>

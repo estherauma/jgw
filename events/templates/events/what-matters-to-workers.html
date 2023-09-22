@@ -48,6 +48,7 @@
             </div>
           </div>
           <div class="col-3">
+          {% if user.is_authenticated %}
             <div class="row">
               <div class="col-md-6">
                 <div class="dropdown w-100">
@@ -85,6 +86,9 @@
                 </button>
               </div>
             </div>
+          {% else %}
+            {% include 'includes/non_auth_banner_btns.html' %}
+          {% endif %}
           </div>
         </div>
       </div>

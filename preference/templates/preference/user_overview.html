@@ -39,6 +39,7 @@
                         </div>
                     </div>
                     <div class="col-3">
+                        {% if user.is_authenticated %}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="dropdown w-100">
@@ -59,6 +60,9 @@
                                 role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
                             </div>
                         </div>
+                        {% else %}
+                            {% include 'includes/non_auth_banner_btns.html' %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -109,16 +113,21 @@
 </div>
 
 <div class="row mb-3">
-    <div class="col-md-8">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">WORK CODE USAGE</p>
-                <div class="preference-work-code-usage-graph-id-chart-box">
-                    <div id="preference-work-code-usage-graph-id"></div>
+
+    {% if user.is_authenticated %}
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">WORK CODE USAGE</p>
+                    <div class="preference-work-code-usage-graph-id-chart-box">
+                        <div id="preference-work-code-usage-graph-id"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endif %}
+
+
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
