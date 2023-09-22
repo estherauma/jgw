@@ -297,7 +297,7 @@ function genderGraph(genderGraphData) {
     const chartData = {
         labels: labels,
         datasets: [{
-            label: 'user',
+            label: 'User',
             data: data,
             backgroundColor: [COLORS.darkBlue, COLORS.appleGreen,COLORS.skyBlue,COLORS.navyBlue, COLORS.black]
         }]
