@@ -29,7 +29,7 @@ def get_chapters_feedback():
     result = ChaptersFeedback.objects.values(
         'feedback_question__question',
         'feedback_response__translated_response'
-    ).annotate(count=Count('id'))    
+    ).annotate(count=Count('id')).order_by('-count')    
         
     feedback_dict = {}
     for item in result:

@@ -6,7 +6,7 @@ from events.models import ChaptersOpened
 
 
 def get_chapters_opened():
-    chapters_opened = ChaptersOpened.objects.values('event_name').annotate(count=Count('event_name'))
+    chapters_opened = ChaptersOpened.objects.values('event_name').annotate(count=Count('event_name')).order_by('-count')
     sums = {}
     for entry in chapters_opened:
         event_name = entry['event_name']

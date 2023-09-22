@@ -31,7 +31,7 @@ def get_inline_question_per_origin_counts(**filters):
         'origin__name'
     ).annotate(
         count=Count('origin__name')
-    ).order_by()
+    ).order_by('-count')
     
     origin_data = [count['count'] for count in origin_counts_data]
     origin_labels = [count['origin__name'].upper() for count in origin_counts_data if count['origin__name'] is not None]
@@ -58,7 +58,7 @@ def get_inline_question_per_destination_counts(**filters):
         'destination__name'
     ).annotate(
         count=Count('destination__name')
-    ).order_by()
+    ).order_by('-count')
     
     
     destination_data = [count['count'] for count in destination_counts_data]
@@ -86,7 +86,7 @@ def get_inline_question_per_organisation_counts(**filters):
         'organisation__name'
     ).annotate(
         count=Count('organisation__name')
-    ).order_by()
+    ).order_by('-count')
     
     organisation_counts = [count['count'] for count in organisation_counts_data]
     organisation_labels = [format_org_name_from_display(organisation['organisation__name']).upper() for organisation in organisation_counts_data]
@@ -113,7 +113,7 @@ def get_inline_question_per_language_counts(**filters):
         'language__translated_name'
     ).annotate(
         count=Count('language__translated_name')
-    ).order_by()
+    ).order_by('-count')
     
     language_counts = [count['count'] for count in language_counts_data]
     language_labels = [count['language__translated_name'].upper() for count in language_counts_data if count['language__translated_name'] is not None]
