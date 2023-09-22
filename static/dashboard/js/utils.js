@@ -60,6 +60,10 @@ function buildFilterStateAlert(filterStateContainerId, data) {
 
 function drawChart(canvasId, data, chartConfig, noDataMessage = "No data available") {
   var canvas = document.getElementById(canvasId);
+  if (canvas == null) {
+    return console.warn(`canvas id ${canvasId} does not exist`)
+  }
+
   var ctx = canvas.getContext('2d');
   var sum = data.reduce(function(a, b) { return a + b; }, 0);
   var parent = canvas.parentNode;
@@ -89,6 +93,9 @@ function drawChart(canvasId, data, chartConfig, noDataMessage = "No data availab
 
 function scrollableVerticalBarChart(containerId, data, chartConfig) {
   graphDiv = document.getElementById(containerId)
+  if (graphDiv == null) {
+    return console.warn(`containerId ${containerId} does not exist`)
+  }
   
   let canvas = document.createElement('canvas')
   let canvasId = `canvas-${containerId}`
@@ -243,4 +250,14 @@ function genericChartColors(extra_colors_length=5) {
     COLORS.pink,
     ...getRandomColorArray(extra_colors_length)
   ]
+}
+
+
+function exportStatsFn(btn, url) {
+  if (btn === null) {
+    return console.warn("no export btn")
+  }
+  btn.addEventListener("click",function() {
+    exportStatsData(url, userOverviewForm)
+  })
 }

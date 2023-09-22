@@ -6,8 +6,6 @@
         <!--- Sidemenu -->
         <div id="sidebar-menu">
 
-
-            {% if user.is_authenticated %}
             <ul id="side-menu">
                 {% if request.user|has_group:"Summerberry" %}
                     <li>
@@ -32,10 +30,21 @@
                     </li>
 
                     <li>
-                        <a href="{% url 'question:messaging_question' %}">
-                            <i data-feather="message-square"></i>
-                            <span>Messaging Questions</span>
-                        </a>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'question:messaging_question' %}">
+                                <i data-feather="message-square"></i>
+                                <span>Messaging Questions</span>
+                            </a>
+                        {% else %}
+                            <a
+                                href="{% url 'payment:payment_required' %}"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#make-payment-modal"
+                            >
+                                <i data-feather="message-square"></i>
+                                <span>Messaging Questions</span>
+                            </a>
+                        {% endif %}
                     </li>
 
                     <li>
@@ -44,14 +53,13 @@
                             <span>What Matters to Workers</span>
                         </a>
                     </li>
-
+                {% if user.is_admin %}
                     <li>
                         <a href="{% url 'dashboard:export_report' %}">
                             <i data-feather="external-link"></i>
                             <span>Export Report</span>
                         </a>
                     </li>
-                {% if user.is_admin %}
                     <li>
                         <a href="#sidebarUsers" data-bs-toggle="collapse">
                             <i data-feather="users"></i>
@@ -72,15 +80,15 @@
                 {% endif %}
 
                 {% endif %}
-                <li>
-                    <a href="{% url 'users:logout_user' %}">
-                        <i data-feather="log-out"></i>
-                        <span>Log out</span>
-                    </a>
-                </li>
+                {% if user.is_authenticated %}
+                    <li>
+                        <a href="{% url 'users:logout_user' %}">
+                            <i data-feather="log-out"></i>
+                            <span>Log out</span>
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
-
-            {% endif %}
             </ul>
         </div>
         <!-- End Sidebar -->
