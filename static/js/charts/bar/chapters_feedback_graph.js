@@ -3,9 +3,6 @@ function chapterFeedBackGraph(feedbackParams) {
     const question = feedbackParam["question"]
     const data = feedbackParam["data"]
 
-    if (question === "tellUsMore") {
-      plotGraph("tell-us-more-graph-id", data, COLORS.skyBlue)
-    }
     if (question === "wasThisHelpful") {
       plotGraph("was-this-helpful-graph-id", data)
     }
