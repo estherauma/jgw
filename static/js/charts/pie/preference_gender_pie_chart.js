@@ -4,7 +4,7 @@ function preferenceGenderPieChart(preferenceGenderGraphData) {
     const chartData = {
         labels: labels,
         datasets: [{
-            label: 'My First Dataset',
+            label: 'Users',
             data: data,
             backgroundColor: genericChartColors(data.length)
         }]

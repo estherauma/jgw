@@ -53,7 +53,7 @@
                             <span>What Matters to Workers</span>
                         </a>
                     </li>
-                {% if user.is_staff %}
+                {% if user.is_admin %}
                     <li>
                         <a href="{% url 'dashboard:export_report' %}">
                             <i data-feather="external-link"></i>
