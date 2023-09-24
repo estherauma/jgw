@@ -19,7 +19,7 @@ def get_messaging_question_per_origin_counts(**filters):
         'origin__name'
     ).annotate(
         count=Count('origin__name')
-    ).order_by()
+    ).order_by('-count')
     
     origin_data = [count['count'] for count in origin_counts_data]
     origin_labels = [count['origin__name'].upper() for count in origin_counts_data if count['origin__name'] is not None]
@@ -46,7 +46,7 @@ def get_messaging_question_per_destination_counts(**filters):
         'destination__name'
     ).annotate(
         count=Count('destination__name')
-    ).order_by()
+    ).order_by('-count')
     
     
     destination_data = [count['count'] for count in destination_counts_data]
@@ -84,7 +84,7 @@ def inline_question_response():
         response_text=F('response__translated_text')
     ).annotate(
         response_count=Count('response')
-    )
+    ).order_by('-response_count')
 
     question_texts_list = []
     responses = []

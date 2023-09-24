@@ -27,7 +27,7 @@ def preferences_by_age(**filters):
         **filters
     )
 
-    age_counts = preferences_age_queryset.values('age__translated_range').annotate(total=Count('id'))
+    age_counts = preferences_age_queryset.values('age__translated_range').annotate(total=Count('id')).order_by('-total')
     labels = [age['age__translated_range'].upper() for age in age_counts]
     counts = [age['total'] for age in age_counts]
     
@@ -70,7 +70,7 @@ def preferences_by_gender(**filters):
         **filters
     )
 
-    gender_counts = preferences_gender_queryset.values('gender__translated_name').annotate(total=Count('id'))
+    gender_counts = preferences_gender_queryset.values('gender__translated_name').annotate(total=Count('id')).order_by('-total')
 
     label_sums = defaultdict(int)
     for gender in gender_counts:
@@ -91,7 +91,7 @@ def preferences_by_origin(**filters):
         **filters
     )
 
-    origin_counts = preferences_origin_queryset.values('origin__name').annotate(total=Count('id'))
+    origin_counts = preferences_origin_queryset.values('origin__name').annotate(total=Count('id')).order_by('-total')
 
     labels = [origin['origin__name'].upper() for origin in origin_counts if origin['origin__name'] is not None]
     counts = [origin['total'] for origin in origin_counts]
@@ -107,7 +107,7 @@ def preferences_by_destination(**filters):
         **filters
     )
 
-    destination_counts = preferences_destination_queryset.values('destination__name').annotate(total=Count('id'))
+    destination_counts = preferences_destination_queryset.values('destination__name').annotate(total=Count('id')).order_by('-total')
 
     labels = [destination['destination__name'].upper() for destination in destination_counts]
     counts = [destination['total'] for destination in destination_counts]
@@ -124,7 +124,7 @@ def preferences_by_language(**filters):
         **filters
     )
 
-    language_counts = preferences_language_queryset.values('language__translated_name').annotate(total=Count('id'))
+    language_counts = preferences_language_queryset.values('language__translated_name').annotate(total=Count('id')).order_by('-total')
 
     labels = [destination['language__translated_name'].upper() for destination in language_counts]
     counts = [destination['total'] for destination in language_counts]
@@ -143,7 +143,7 @@ def preferences_by_organisation(**filters):
 
     organisation_counts = organisation_queryset.values('organisation__name').annotate(
         count=Count('organisation__name')
-    ).order_by()
+    ).order_by('-count')
 
     labels = [format_org_name_from_display(organisation['organisation__name']).upper() for organisation in organisation_counts]
     counts = [organisation['count'] for organisation in organisation_counts]
