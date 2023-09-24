@@ -11,8 +11,10 @@ def normalize_country_name(country: str) -> str:
         'united kingdom': 'united kingdom',
         'zzz': 'other - the rest of the world',
         'viet nam':'vietnam',
+        'vnm': 'vietnam',
         '': NOT_SPECIFIED,
         ' ': NOT_SPECIFIED,
+        'null': NOT_SPECIFIED
     }
     
     if country is None:

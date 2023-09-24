@@ -35,6 +35,7 @@ def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
             country_instance = Country.objects.create(
                 code= country_code,
                 name= real_country_name,
+                api_value = country_name,
                 is_origin=is_origin,
                 is_destination=is_destination
             )
