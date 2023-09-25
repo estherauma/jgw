@@ -216,3 +216,33 @@ class AppEvents(BaseAnalytics):
         total_installs = data["total_installs"].to_dict(orient="records")[0]
         _stats.update(total_installs)
         return _stats
+    
+    def bigquery_SWS_PASI_events(self, start_date=None, end_date=None):
+        SWS_PASI_events_query = f"""
+        SELECT 
+            event_timestamp,
+            user_pseudo_id,
+            event_bundle_sequence_id,
+            DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+            event_name,
+            (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'age') AS age,
+            (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'language') AS language,
+            (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'gender') AS gender,
+            (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'deviceId') AS deviceId,
+            (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'appId') AS appId,
+            (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'organisation') AS organisation,
+            (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'locale') AS locale,
+            (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destination') AS destination,
+            -- age, language, gender, deviceId, appId, organisation, destination
+        FROM 
+            `just-good-work.analytics_191478110.events_*`
+        WHERE 
+            event_name like "%PASI_SeasonalWorkerScheme_%" 
+            AND 
+            DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
+        """
+        
+        SWS_PASI_events_df = client.query(SWS_PASI_events_query).to_dataframe()
+        SWS_PASI_events_dict = SWS_PASI_events_df.to_dict('records')
+        
+        return SWS_PASI_events_dict
