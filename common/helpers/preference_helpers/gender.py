@@ -23,6 +23,7 @@ def normalize_gender_name(gender: str):
         "i do not want to answer.": prefer_not_to_answer,
         "do not want to answer": prefer_not_to_answer,
         "do not want to answer.": prefer_not_to_answer,
+        "i will not answer": prefer_not_to_answer,
         "likes to answer": prefer_not_to_answer,
         "no answer": prefer_not_to_answer,
         "i don&#39;t want to answer": prefer_not_to_answer,
