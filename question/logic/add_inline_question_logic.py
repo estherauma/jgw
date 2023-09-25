@@ -27,7 +27,24 @@ def fetch_inline_question_from_api(client):
     return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
 
 
-list_fields = ['language', 'locale', 'deviceId', 'createdAt', 'updatedAt', '_id', 'appId', 'route', 'organisation', 'factoryFarm', '__v']
+list_fields = [
+    'language', 
+    'locale', 
+    'deviceId', 
+    'createdAt',
+    'updatedAt', 
+    '_id', 
+    'appId', 
+    'route', 
+    'organisation', 
+    'factoryFarm', 
+    '__v',
+    'appVersion',
+    'os',
+    'osVersion',
+    'deviceModel',
+]
+
 def separate_inline_question_standard_fields_from_others(inline_question_dict):
     other_fields = []
     standard_fields = {}

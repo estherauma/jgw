@@ -140,6 +140,8 @@
     var languageData = {{ inline_question_per_language|safe }};
     var organisationData = {{ inline_question_per_organisation|safe }};
     var responseData  = {{ inline_question_response_data | safe }}
+    var eachInlineQuestionResponse = {{ each_inline_question_response | safe }}
+    console.log(eachInlineQuestionResponse)
 
     // plots the origin graph
     inlineQuestionOriginGraph(originData)
