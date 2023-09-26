@@ -8,6 +8,6 @@ from events.logic.add_sws_pasi_data import fetch_sws_pasi_events_from_api_to_db
 class Command(BaseCommand):
     def handle(self, *args, **options):
         
-        fetch_chapters_opened_data_from_api_to_db()
-        fetch_chapters_feedback_from_api_to_db()
+        # fetch_chapters_opened_data_from_api_to_db()
+        # fetch_chapters_feedback_from_api_to_db()
         fetch_sws_pasi_events_from_api_to_db()

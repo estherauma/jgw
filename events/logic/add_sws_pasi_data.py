@@ -55,21 +55,18 @@ def format_org_name(org_name: str):
         return org_name
 
 def add_sws_pasi_events_to_db(sws_pasi_event):
+    event_name = sws_pasi_event.get("event_name")
     timestamp = sws_pasi_event.get('event_timestamp')
     user_pseudo_id = sws_pasi_event.get('user_pseudo_id')
     event_bundle_sequence_id = sws_pasi_event.get('event_bundle_sequence_id')
     
-    constructed_event_id = f"{timestamp}-{user_pseudo_id}-{event_bundle_sequence_id}"
-    if SwsPasiEvent.objects.filter(constructed_event_id=constructed_event_id).exists():
-        return
+    constructed_event_id = f"{event_name}-{timestamp}-{user_pseudo_id}-{event_bundle_sequence_id}"
         
-    event_name = sws_pasi_event.get("event_name")
     event_date = sws_pasi_event.get("event_date")
         
     age = sws_pasi_event.get("age")
     language = sws_pasi_event.get("language")
     gender = sws_pasi_event.get("gender")
-    organisation = sws_pasi_event.get("organisation")
     destination = sws_pasi_event.get("destination")
     
     device_id = sws_pasi_event.get("deviceId")
