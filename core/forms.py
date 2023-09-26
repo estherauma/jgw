@@ -11,7 +11,7 @@ class GenericFilterForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         origin_choices = [
-            (country.name, country.name)
+            (country.name, country.name.capitalize())
             for country in get_countries_without_excluded_names(
                 filter={ "is_origin": True }
             )
@@ -20,7 +20,7 @@ class GenericFilterForm(forms.Form):
         self.fields['origin'].choices = origin_choices
         
         destination_choices = [
-            (country.name, country.name)
+            (country.name, country.name.capitalize())
             for country in get_countries_without_excluded_names(
                 filter={ "is_destination": True }
             )
