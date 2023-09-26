@@ -121,3 +121,23 @@ class ChaptersFeedback(models.Model):
     
     def __str__(self):
         return self.feedback_question.question
+    
+class SwsPasiEvent(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    constructed_event_id = models.CharField(max_length=255)
+    event_name = models.CharField(max_length=255)
+    event_created_at = models.DateTimeField(null=True, blank=True)
+    age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    device_id = models.CharField(max_length=255, null=True, blank=True)
+    app_id = models.CharField(max_length=255, null=True, blank=True)
+    organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='sws_pasi_destination')
+    
+    def __str__(self) -> str:
+        return self.event_name
+    
+    
+    
