@@ -122,6 +122,27 @@
             </div>
         </div>
     </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Inline Question Responses</p>
+                <form method="post" id="all-inline-question-filter-form">
+                    {{inline_question_only_form|crispy}}
+                </form>
+
+                <div class="row mb-6" id="inline-questions-dynamic-section">
+                    <div class="col-md-12">
+                        <div>Select Questions to see their responses</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock content %}
@@ -132,6 +153,7 @@
 <script src="{% static 'js/charts/bar/inline_question_language_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/inline_question_responses_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/inline_question_organisation_pie_chart.js' %}"></script>
+<script src="{% static 'js/charts/bar//inline_question_graph.js' %}"></script>
 <script src="{% static 'js/app/inline_question.js' %}"></script>
 <script type="text/javascript">
     // get data from context
@@ -140,8 +162,7 @@
     var languageData = {{ inline_question_per_language|safe }};
     var organisationData = {{ inline_question_per_organisation|safe }};
     var responseData  = {{ inline_question_response_data | safe }}
-    var eachInlineQuestionResponse = {{ each_inline_question_response | safe }}
-    console.log(eachInlineQuestionResponse)
+    var alInlineQuestionResponse = {{ each_inline_question_response | safe }}
 
     // plots the origin graph
     inlineQuestionOriginGraph(originData)
@@ -152,5 +173,52 @@
     inlineQustionOrganisationPieChart(organisationData)
 
     inlineQuestionLanguageGraph(languageData)
+
+    function handleInlineQuestionsChange() {
+        var selectElement = document.getElementById('all-inline-question-select-id');
+        var selectedOptions = [];
+        for (var i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].selected) {
+                selectedOptions.push(selectElement.options[i].value);
+            }
+        }
+        const questionsToPlot = filterObjectByArrayKeys(alInlineQuestionResponse , selectedOptions)
+
+        const inlineQuestiionsSection = document.getElementById("inline-questions-dynamic-section")
+        inlineQuestiionsSection.innerHTML = "";
+
+        for (let [key, value] of Object.entries(questionsToPlot)) {
+            const result = {key, value}
+
+            const containerDiv = document.createElement("div")
+            containerDiv.classList.add("col-md-4");
+
+            // create title
+            const title = document.createElement("p")
+            title.innerHTML = key
+            title.classList.add("chart-title");
+
+            // create canvas
+            const canvasId = `${key}-id`
+            const canvasDiv = document.createElement("div")
+            canvasDiv.id = canvasId
+
+            // here
+            const chartboxDiv = document.createElement("div")
+            chartboxDiv.classList.add(`${canvasId}-chart-box`);
+            chartboxDiv.classList.add("inline-questions-chart-box")
+
+            chartboxDiv.appendChild(canvasDiv)
+
+            // append canvas and title
+            containerDiv.appendChild(title)
+            containerDiv.appendChild(chartboxDiv)
+            
+            inlineQuestiionsSection.appendChild(containerDiv);
+
+            // canvasId
+            inlineQuestionGraph(value, canvasId)
+        }
+    }
 </script>
 {% endblock %}

@@ -66,6 +66,11 @@
     overflow-y: scroll;
 }
 
+.inline-questions-chart-box {
+    max-height: 150px !important; 
+    margin-bottom: 32px;
+}
+
 .generic-chart-box::-webkit-scrollbar {
     width: 6px;
 }

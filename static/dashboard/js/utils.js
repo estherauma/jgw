@@ -261,3 +261,12 @@ function exportStatsFn(btn, url) {
     exportStatsData(url, userOverviewForm)
   })
 }
+
+function filterObjectByArrayKeys(obj, filters) {
+  return filters.reduce((result, key) => {
+      if (obj.hasOwnProperty(key)) {
+          result[key] = obj[key];
+      }
+      return result;
+  }, {});
+}
