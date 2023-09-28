@@ -92,15 +92,18 @@
 </div>
 
 <div class="row mb-3">
-    <div class="col-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">USER PER DESTINATION COUNTRY</p>
-                    <canvas id="preference-destination-pie-chart-id"></canvas>
+    {% if user.role != 'SCHEME' %}
+        <div class="col-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">USER PER DESTINATION COUNTRY</p>
+                        <canvas id="preference-destination-pie-chart-id"></canvas>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-8">
+    {% endif %}
+
+    <div class="{% if user.role != 'SCHEME' %} col-8 {% else %} col-12 {% endif %}">
         <div class="card h-100">
             <div class="card-body">
                 <p class="chart-title">SELECTED USER LANGUAGE</p>
