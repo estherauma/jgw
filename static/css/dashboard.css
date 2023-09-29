@@ -68,7 +68,15 @@
 
 .inline-questions-chart-box {
     max-height: 150px !important; 
-    margin-bottom: 32px;
+}
+
+
+.inline-question-container-div {
+    border: 1px solid;
+    min-height: 270px;
+    padding: 16px;
+    margin-right: 50px;
+    margin-left: 50px;
 }
 
 .generic-chart-box::-webkit-scrollbar {
