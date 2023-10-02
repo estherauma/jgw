@@ -3,7 +3,7 @@ from django.db import models
 
 from django.db import models
 
-from preference.models import Age, Country, FactoryFarm, Gender, Language, Organisation, OrganisationSector, Route, SectorOfWork
+from preference.models import Age, Country, CountryState, FactoryFarm, Gender, Language, Organisation, OrganisationSector, Route, SectorOfWork
 
 class TimestampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -60,7 +60,7 @@ class ChaptersOpened(models.Model):
     device_id = models.CharField(max_length=255, null=True, blank=True)
     app_id = models.CharField(max_length=255, null=True, blank=True)
     locale = models.CharField(max_length=255, null=True, blank=True)
-    destination_state = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='chapters_opened_destination_state')
+    destination_state = models.ForeignKey(CountryState, on_delete=models.SET_NULL, null=True, blank=True, related_name='chapters_opened_destination_state')
     destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='chapters_opened_destination')
     
     def __str__(self):
