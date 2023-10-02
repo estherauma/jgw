@@ -2,8 +2,19 @@ from django.shortcuts import render
 from core.filters import generic_filter_form_parser
 from core.logic.file_export import generate_and_export_excel
 from preference.repository.preference_repository import get_all_organisations_list
-from question.forms import InlineQuestionFilterForm, InlineQuestionOnlyFilterForm, MessagingQuestionFilterForm
-from question.repository.inline_questions_standard import each_inline_question_response, get_inline_question_per_destination_counts, get_inline_question_per_language_counts, get_inline_question_per_organisation_counts, get_inline_question_per_origin_counts, inline_questions_count
+from question.forms import (
+    InlineQuestionFilterForm, 
+    InlineQuestionOnlyFilterForm, 
+    MessagingQuestionFilterForm
+)
+from question.repository.inline_questions_standard import (
+    each_inline_question_response, 
+    get_inline_question_per_destination_counts, 
+    get_inline_question_per_language_counts, 
+    get_inline_question_per_organisation_counts, 
+    get_inline_question_per_origin_counts, 
+    inline_questions_count
+)
 from question.repository.messaging_questions_standard import (
     get_messaging_question_per_destination_counts, 
     get_messaging_question_per_origin_counts,
