@@ -2,7 +2,7 @@ from django.db.models import Count, Case, When, F
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from question.filters import generic_question_filtered_queryset
 
-from question.models import InlineQuestionStandard
+from question.models import InlineQuestionResponse, InlineQuestionStandard
 
 
 def inline_questions_count(**filters):
@@ -122,3 +122,31 @@ def get_inline_question_per_language_counts(**filters):
             "counts": language_counts,
             "labels": language_labels,
         }
+
+
+def each_inline_question_response():
+    inline_questions_with_responses = InlineQuestionResponse.objects.values(
+        "inline_question__question__translated_text",
+        "response__translated_text"
+    ).annotate(
+        num_responses=Count("response__translated_text")
+    )
+    result_dict = {}
+    for inline_questions_with_response in inline_questions_with_responses:
+        question_text = inline_questions_with_response.get("inline_question__question__translated_text") 
+        response_text = inline_questions_with_response.get("response__translated_text")
+        response_count = inline_questions_with_response.get("num_responses")
+        
+        question_in_result_dict = result_dict.get(question_text)
+        
+        if question_in_result_dict:
+            question_in_result_dict.get("labels").append(response_text)
+            question_in_result_dict.get("counts").append(response_count)
+        else:
+            result_dict[question_text] = {
+                "labels": [response_text],
+                "counts": [response_count] 
+            }
+            
+        
+    return result_dict
