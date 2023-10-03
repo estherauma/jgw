@@ -10,7 +10,9 @@ from preference.models import (
         Language,
         Gender,
         Country,
-        Age
+        Age,
+        LocationOfPotentialWork,
+        CountryState,
     )
 
 class SectorOfWorkTabularAdminDisplay(admin.ModelAdmin):
@@ -37,3 +39,5 @@ admin.site.register(Language, LanguageTabularAdminDisplay)
 admin.site.register(Gender, GenderTabularAdminDisplay)
 admin.site.register(Country)
 admin.site.register(Age)
+admin.site.register(LocationOfPotentialWork)
+admin.site.register(CountryState)

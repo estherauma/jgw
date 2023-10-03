@@ -3,6 +3,8 @@ from django.db import models
 # Create your models here.
 from django.db import models
 
+from common.const.value_const import NOT_SPECIFIED
+
 class SectorOfWork(models.Model):
     name = models.CharField(max_length=255)
     translated_name = models.CharField(max_length=255, null=True, blank=True)
@@ -37,18 +39,10 @@ class Organisation(models.Model):
 
     def __str__(self):
         return self.name
-
-class CountryState(models.Model):
-    name = models.CharField(max_length=255)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f'{self.name}'
     
 class LocationOfPotentialWork(models.Model):
     name = models.CharField(max_length=255)
+    code = models.CharField(max_length=20, null=True, blank=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -62,6 +56,16 @@ class Country(models.Model):
     api_value = models.CharField(max_length=255, null=True, blank=False)
     is_origin = models.BooleanField(default=False)
     is_destination = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f'{self.name}'
+
+class CountryState(models.Model):
+    name = models.CharField(max_length=255, default=NOT_SPECIFIED)
+    country = models.ForeignKey(Country, on_delete=models.DO_NOTHING,null=True, blank=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

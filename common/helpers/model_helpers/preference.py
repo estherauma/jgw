@@ -19,17 +19,23 @@ def get_or_add_organisation_to_db(organisation_name: str) -> Organisation:
 def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
     return get_or_create_model_instance(FactoryFarm, factory_farm)
 
-def get_or_add_country_state_to_db(country_state_name: str) -> CountryState:
-    country_state_instance, _ = Country.objects.get_or_create(
-        name = country_state_instance
-    )
-    return country_state_instance
+def get_or_add_country_state_to_db(country_state_name: str, country) -> CountryState:
+    params = {"name":country_state_name or NOT_SPECIFIED, "country": country}
+    country_instance, _ = CountryState.objects.get_or_create(**params)
+    return country_instance
+
 
 def get_or_add_location_of_potential_work_to_db(
-    location_of_potential_work: str
+    country_name: str
 ) -> LocationOfPotentialWork:
+    country_name = normalize_country_name(country_name)
+    
+    country_code = aplha_code_from_country_name(country_name).lower() or NOT_SPECIFIED
+    real_country_name = country_name_from_aplha_code(country_code).lower() or NOT_SPECIFIED
+    
     location_of_potential_work_instance, _ = LocationOfPotentialWork.objects.get_or_create(
-        name = location_of_potential_work
+        name = real_country_name,
+        code = country_code
     )
     return location_of_potential_work_instance
 
