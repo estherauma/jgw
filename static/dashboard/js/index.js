@@ -3,8 +3,8 @@ const generalMultiSelectConfig = {
     enableFiltering: true,
 }
 
-$('#destination').multiselect({ ... generalMultiSelectConfig }); 
-$('#origin').multiselect({ ... generalMultiSelectConfig });
+$('#destination').multiselect({ ... generalMultiSelectConfig, enableClickableOptGroups: true }); 
+$('#origin').multiselect({ ... generalMultiSelectConfig, enableClickableOptGroups: true });
 $('#organisation').multiselect({ ... generalMultiSelectConfig }); 
 $('#factory_farm').multiselect({ ... generalMultiSelectConfig });
 $('#inline-question-select-id').multiselect({ ... generalMultiSelectConfig });

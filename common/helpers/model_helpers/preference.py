@@ -123,4 +123,4 @@ def get_countries_without_excluded_names(
     for country_name in countries_to_exclude:
         exclude_query |= Q(name=country_name)
     
-    return Country.objects.filter(**filter).exclude(exclude_query)
+    return Country.objects.filter(**filter).exclude(exclude_query).order_by('name')
