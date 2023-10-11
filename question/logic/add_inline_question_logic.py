@@ -1,4 +1,5 @@
 from django.db import transaction
+import re
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
 from common.logger import KunfuPandaLogger
@@ -27,22 +28,33 @@ def fetch_inline_question_from_api(client):
     return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
 
 
-list_fields = [
-    'language', 
-    'locale', 
-    'deviceId', 
-    'createdAt',
-    'updatedAt', 
-    '_id', 
-    'appId', 
-    'route', 
-    'organisation', 
-    'factoryFarm', 
-    '__v',
-    'appVersion',
-    'os',
-    'osVersion',
-    'deviceModel',
+unwanted_fields = ['_id',
+ 'deviceId',
+ 'appId',
+ 'locale',
+ 'route',
+ 'organisation',
+ 'organisationSector',
+ 'factoryFarm',
+ 'createdAt',
+ 'updatedAt',
+ '__v',
+ 'age',
+ 'appVersion',
+ 'deviceModel',
+ 'os',
+ 'osVersion',
+ 'questionKey',
+ 'questionSection',
+ 'questionText',
+ 'questionValue',
+ 'sectors',
+ 'seenTabWelcomeText',
+ 'destinationRepository',
+ 'destination',
+ 'destinationState',
+ 'gender',
+ 'language'
 ]
 
 def separate_inline_question_standard_fields_from_others(inline_question_dict):
@@ -50,12 +62,22 @@ def separate_inline_question_standard_fields_from_others(inline_question_dict):
     standard_fields = {}
 
     for obj_key, obj_value in inline_question_dict.items():
-        if obj_key in list_fields:
+        if obj_key in unwanted_fields:
             standard_fields[obj_key] = obj_value
-        if obj_key not in list_fields:
+        if obj_key not in unwanted_fields:
             other_fields.append({"key":obj_key, "value": obj_value})
     
     return {"responses_list": other_fields, "standard_fields_dict": standard_fields}
+
+def format_inline_question_response_text(text):
+    inline_question_text = text
+    if isinstance(text, str):
+        if text == 'undefined' or text == '' or text == ' ' or text is None:
+            inline_question_text = NOT_SPECIFIED
+
+        cleaned_text = re.sub(r'<br/>', '', inline_question_text)
+        return cleaned_text
+    return text
 
         
 @transaction.atomic
@@ -129,7 +151,7 @@ def add_inline_question_to_db(inline_question):
     #  get or create inline question text
     for response_list in responses_list:
         inline_question_text, _ = InlineQuestionText.objects.get_or_create(
-            text = response_list.get('key')
+            text = format_inline_question_response_text(response_list.get('key'))
         )
         
         inline_question = InlineQuestion.objects.create(
@@ -139,7 +161,7 @@ def add_inline_question_to_db(inline_question):
         
         # create inline question response 
         inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
-            text = response_list.get('value') or NOT_SPECIFIED
+            text = format_inline_question_response_text(response_list.get('value')) or NOT_SPECIFIED
         )
         InlineQuestionResponse.objects.create(
             inline_question = inline_question,
