@@ -2,7 +2,7 @@ from django import forms
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
 from preference.models import Country, FactoryFarm, Organisation
-from users.utils import get_user_factories, get_user_organisations
+from users.utils import get_user_destinations, get_user_factories, get_user_organisations
 
 
 class GenericFilterForm(forms.Form):
@@ -25,6 +25,12 @@ class GenericFilterForm(forms.Form):
                 filter={ "is_destination": True }
             )
         ]
+        
+        destination_choices = [
+            (country.name, country.name.capitalize())
+            for country in get_user_destinations(self.request.user)
+        ]
+        
         destination_choices.sort()
         self.fields['destination'].choices = destination_choices
 
