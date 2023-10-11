@@ -151,7 +151,7 @@ def add_inline_question_to_db(inline_question):
     #  get or create inline question text
     for response_list in responses_list:
         inline_question_text, _ = InlineQuestionText.objects.get_or_create(
-            text = response_list.get('key')
+            text = format_inline_question_response_text(response_list.get('key'))
         )
         
         inline_question = InlineQuestion.objects.create(
