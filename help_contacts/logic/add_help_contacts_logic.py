@@ -39,7 +39,6 @@ def fetch_help_contacts_from_api_to_db():
         try:
             add_help_contacts_to_db(help_contact)
         except Exception as e:
-            print('An error occurred during preference creation:', str(e))
             transaction.set_rollback(True)
             raise
     kunfu_panda_logger.info(f'Added {len(help_contacts)} help contacts to the database')

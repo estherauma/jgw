@@ -3,7 +3,6 @@ from common.const.value_const import NOT_SPECIFIED
 
 from preference.models import Country, Route
 
-# Create your models here.
 class HelpContact(models.Model):
     CONTACT_CHOICES = [
         ('email', 'Email'),
