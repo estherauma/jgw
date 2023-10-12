@@ -15,6 +15,7 @@ from preference.repository.preference_repository import (
     preferences_by_origin, 
     preferences_count
 )
+from users.utils import get_user_organisations
 
 
 def user_overview(request):
@@ -90,10 +91,11 @@ def export_preference_stats(request):
             filters = generic_filter_form_parser(filter_form)
 
         organisations = filters.get('organisation', None)
-        
         if organisations is None:
-            # TODO: otherwise , get all loggedin user's organisations
-            organisations = get_all_organisations_list()
+            user_orgs = get_user_organisations(request.user)
+            organisations = [getattr(org, 'name') for org in user_orgs]
+                
+            
         
         export_dict = {
             "all": preference_stats_for_export({**filters, 'organisations': organisations, 'current_user': request.user})
