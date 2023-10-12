@@ -14,6 +14,7 @@ from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedRespons
 from events.logic.add_chapters_feedback_data import fetch_chapters_feedback_from_api_to_db
 from events.logic.add_chapters_opened_data import fetch_chapters_opened_data_from_api_to_db
 from events.logic.add_sws_pasi_data import fetch_sws_pasi_events_from_api_to_db
+from help_contacts.logic.add_help_contacts_logic import fetch_help_contacts_from_api_to_db
 from jgwpandas.settings import EMAIL_HOST_USER
 import base64
 import requests
@@ -44,6 +45,8 @@ def fetch_data_from_jgw_api():
     fetch_chapters_opened_data_from_api_to_db()
     fetch_chapters_feedback_from_api_to_db()
     fetch_sws_pasi_events_from_api_to_db()
+    
+    fetch_help_contacts_from_api_to_db()
     
 @shared_task(name="get_jgw_data")
 def fetch_API_data():    

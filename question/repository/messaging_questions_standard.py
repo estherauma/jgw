@@ -67,15 +67,6 @@ def messaging_questions_count(**filters):
     )
         
     return messaging_questions_count_queryset.count()
-
-
-def question_stats_for_export(filters):
-    messaging_question_per_origin = get_messaging_question_per_origin_counts(**filters)
-    messaging_question_per_destination = get_messaging_question_per_destination_counts(**filters)
-    return {
-        "messaging_question_per_origin": messaging_question_per_origin,
-        "messaging_question_per_destination": messaging_question_per_destination,
-    }
     
     
 def inline_question_response():
@@ -102,4 +93,13 @@ def inline_question_response():
     return {
         "counts": responses,
         "labels": question_texts_list
+    }
+
+
+def messaging_question_stats_for_export(filters):
+    messaging_question_per_origin = get_messaging_question_per_origin_counts(**filters)
+    messaging_question_per_destination = get_messaging_question_per_destination_counts(**filters)
+    return {
+        "responses_per_origin": messaging_question_per_origin,
+        "responses_per_destination": messaging_question_per_destination,
     }

@@ -150,3 +150,12 @@ def each_inline_question_response():
             
         
     return result_dict
+
+
+def inline_question_stats_for_export(filters):
+    inline_question_per_origin = get_inline_question_per_origin_counts(**filters)
+    inline_question_per_destination = get_inline_question_per_destination_counts(**filters)
+    return {
+        "responses_per_origin": inline_question_per_origin,
+        "responses_per_destination": inline_question_per_destination,
+    }
