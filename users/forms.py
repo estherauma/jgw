@@ -4,6 +4,8 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 
+from preference.models import Country
+
 from .models import User, UserInvitations
 
 
@@ -132,3 +134,27 @@ class UpdateUserProfileForm(ModelForm):
             if field == 'receive_marketing_emails':
                 self.fields[field].widget.attrs["class"] = "form-check-input"
 
+
+class UserAdminForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'email', 
+            'password', 
+            'first_name', 
+            'last_name', 
+            'role', 
+            'scheme', 
+            'factories', 
+            'organisations', 
+            'destinations', 
+            'is_staff', 
+            'is_superuser',
+            'is_active', 
+            'receive_marketing_emails'
+            ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.fields['destinations'].queryset = Country.objects.filter(is_destination=True)
