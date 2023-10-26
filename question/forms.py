@@ -4,15 +4,16 @@ from core.forms import GenericFilterForm
 from question.models import InlineQuestionText, MessagingQuestionText
 
 
+current_inline_questions =  [
+    (inline_question.text, inline_question.title_text or inline_question.text) 
+    for inline_question in InlineQuestionText.objects.all()
+]
+
 class InlineQuestionFilterForm(GenericFilterForm):    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        self.fields["question_texts"].choices = [
-            (inline_question.text, inline_question.text) 
-            for inline_question in InlineQuestionText.objects.all()
-        ]
-
+        self.fields["question_texts"].choices = current_inline_questions
     question_texts = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(attrs={
             "class": "form-select selectpicker", 
@@ -45,10 +46,7 @@ class InlineQuestionOnlyFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        self.fields["inline_questions"].choices = [
-            (inline_question.text, inline_question.text) 
-            for inline_question in InlineQuestionText.objects.all()
-        ]
+        self.fields["inline_questions"].choices = current_inline_questions
 
     inline_questions = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(attrs={
