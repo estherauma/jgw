@@ -1,14 +1,17 @@
 from django.http import HttpResponse
 import openpyxl
 from openpyxl.styles import Font, PatternFill
-from openpyxl.utils import get_column_letter
 
+from common.utils.preferences import replace_seasonal_worker_scheme
 
 def generate_and_export_excel(data, filename = "unititled"):
     # Create a new Excel workbook
     wb = openpyxl.Workbook()
 
     for sheet_name, data_dict in data.items():
+        sheet_name = replace_seasonal_worker_scheme(sheet_name)
+        if len(sheet_name) > 31:
+            sheet_name = sheet_name[:31]
         ws = wb.create_sheet(title=sheet_name)
 
         for key, value in data_dict.items():
