@@ -1,7 +1,7 @@
 from django.db.models import Manager as BaseManager, Q
 from typing import Any
 
-from users.utils import get_user_factories, get_user_organisations
+from users.utils import get_user_destinations, get_user_factories, get_user_organisations
 
 
 
@@ -33,9 +33,10 @@ def preference_filtered_queryset(
     
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
+    user_destinations = get_user_destinations(current_user)
     
     queryset = queryset.filter(
-        Q(factory_farm__in = user_factories) | Q(organisation__in=user_orgs)
+        Q(organisation__in=user_orgs) | Q(factory_farm__in = user_factories) | Q(destination__in=user_destinations)
     )
     
     if start_date and end_date:

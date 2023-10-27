@@ -253,11 +253,23 @@ function genericChartColors(extra_colors_length=5) {
 }
 
 
-function exportStatsFn(btn, url) {
+function exportStatsFn({ btnId, url, formId} ) {
+  const btn = document.getElementById(btnId)
+  
   if (btn === null) {
     return console.warn("no export btn")
   }
+  const form = document.getElementById(formId)
   btn.addEventListener("click",function() {
-    exportStatsData(url, userOverviewForm)
+    exportStatsData(url, form)
   })
+}
+
+function filterObjectByArrayKeys(obj, filters) {
+  return filters.reduce((result, key) => {
+      if (obj.hasOwnProperty(key)) {
+          result[key] = obj[key];
+      }
+      return result;
+  }, {});
 }

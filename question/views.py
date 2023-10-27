@@ -1,16 +1,28 @@
 from django.shortcuts import render
 from core.filters import generic_filter_form_parser
 from core.logic.file_export import generate_and_export_excel
-from preference.repository.preference_repository import get_all_organisations_list
-from question.forms import InlineQuestionFilterForm, MessagingQuestionFilterForm
-from question.repository.inline_questions_standard import get_inline_question_per_destination_counts, get_inline_question_per_language_counts, get_inline_question_per_organisation_counts, get_inline_question_per_origin_counts, inline_questions_count
+from question.forms import (
+    InlineQuestionFilterForm, 
+    InlineQuestionOnlyFilterForm, 
+    MessagingQuestionFilterForm
+)
+from question.repository.inline_questions_standard import (
+    each_inline_question_response, 
+    get_inline_question_per_destination_counts, 
+    get_inline_question_per_language_counts, 
+    get_inline_question_per_organisation_counts, 
+    get_inline_question_per_origin_counts,
+    inline_question_stats_for_export, 
+    inline_questions_count
+)
 from question.repository.messaging_questions_standard import (
     get_messaging_question_per_destination_counts, 
     get_messaging_question_per_origin_counts,
     inline_question_response,
-    messaging_questions_count,
-    question_stats_for_export
+    messaging_question_stats_for_export,
+    messaging_questions_count
 )
+from users.utils import get_user_organisations
 
 
 
@@ -64,12 +76,18 @@ def export_messaging_question_stats(request):
         organisations = filters.get('organisation', None)
         
         if organisations is None:
-            # otherwise , get all loggedin user's organisations
-            organisations = get_all_organisations_list()
+            user_orgs = get_user_organisations(request.user)
+            organisations = [getattr(org, 'name') for org in user_orgs]
         
-        export_dict = {}
+        export_dict = {
+            "all": messaging_question_stats_for_export({
+                **filters, 
+                'organisations': organisations, 
+                'current_user': request.user
+            })
+        }
         for organisation in organisations:
-            export_dict[organisation] = question_stats_for_export({
+            export_dict[organisation] = messaging_question_stats_for_export({
                 **filters, 
                 'organisations': [organisation],
                 'current_user': request.user
@@ -125,6 +143,8 @@ def inline_question(request):
         "inline_question_per_language": inline_question_per_language,
         "inline_question_response_data": inline_question_response_data,
         'filter_form': filter_form,
+        "each_inline_question_response": each_inline_question_response(),
+        "inline_question_only_form": InlineQuestionOnlyFilterForm(),
     }
     return render(
         request,
@@ -142,17 +162,26 @@ def export_inline_question_stats(request):
         organisations = filters.get('organisation', None)
         
         if organisations is None:
-            # TODO: otherwise , get all loggedin user's organisations
-            organisations = get_all_organisations_list()
-        
+            user_orgs = get_user_organisations(request.user)
+            organisations = [getattr(org, 'name') for org in user_orgs]
+            
         export_dict = {
-            # TODO: add all organisations stats to the export_dict
+            "all": inline_question_stats_for_export({
+                **filters, 
+                'organisations': organisations, 
+                'current_user': request.user
+            })
         }
+                
         for organisation in organisations:
-            export_dict[organisation] = question_stats_for_export({
+            export_dict[organisation] = inline_question_stats_for_export({
                 **filters, 
                 'organisations': [organisation],
                 "current_user": request.user
             })
-        print(export_dict)
+            print({
+                    **filters, 
+                    'organisations': [organisation],
+                    "current_user": request.user
+                })
         return generate_and_export_excel(export_dict, filename="inline_question_stats")

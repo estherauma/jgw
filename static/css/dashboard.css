@@ -66,6 +66,19 @@
     overflow-y: scroll;
 }
 
+.inline-questions-chart-box {
+    max-height: 150px !important; 
+}
+
+
+.inline-question-container-div {
+    border: 1px solid;
+    min-height: 270px;
+    padding: 16px;
+    margin-right: 50px;
+    margin-left: 50px;
+}
+
 .generic-chart-box::-webkit-scrollbar {
     width: 6px;
 }

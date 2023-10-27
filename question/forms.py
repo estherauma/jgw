@@ -39,3 +39,23 @@ class MessagingQuestionFilterForm(GenericFilterForm):
         }),
         required=False
     )
+    
+
+class InlineQuestionOnlyFilterForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.fields["inline_questions"].choices = [
+            (inline_question.text, inline_question.text) 
+            for inline_question in InlineQuestionText.objects.all()
+        ]
+
+    inline_questions = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker", 
+            "data-live-search": "true", 
+            "id": "all-inline-question-select-id",
+            "onchange": "handleInlineQuestionsChange()",
+        }),
+        required=False
+    )

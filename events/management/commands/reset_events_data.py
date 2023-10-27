@@ -1,6 +1,15 @@
 from django.core.management.base import BaseCommand
 
-from events.models import BigQueryChaptersData, BigQueryFirstOpenHomepageData, ChaptersFeedback, ChaptersFeedbackQuestion, ChaptersFeedbackResponse, ChaptersFeedbackStandard, ChaptersOpened
+from events.models import (
+    BigQueryChaptersData, 
+    BigQueryFirstOpenHomepageData, 
+    ChaptersFeedback, 
+    ChaptersFeedbackQuestion, 
+    ChaptersFeedbackResponse, 
+    ChaptersFeedbackStandard, 
+    ChaptersOpened,
+    SwsPasiEvent,
+)
 
 
 class Command(BaseCommand):
@@ -21,3 +30,5 @@ class Command(BaseCommand):
         
         BigQueryFirstOpenHomepageData.objects.all().delete()
         BigQueryChaptersData.objects.all().delete()
+        
+        SwsPasiEvent.objects.all().delete()

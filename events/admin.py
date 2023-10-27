@@ -8,9 +8,15 @@ from events.models import (
     ChaptersFeedbackResponse,
     ChaptersFeedbackStandard, 
     ChaptersOpened, 
-    OneTimeEventJob
+    OneTimeEventJob,
+    SwsPasiEvent,
 )
 
+
+class SwsPasiEventTabularAdminDisplay(admin.ModelAdmin):
+    list_display = ['event_name']
+    search_fields = ['event_name']  
+    
 # Register your models here.
 admin.site.register(BigQueryChaptersData)
 admin.site.register(BigQueryFirstOpenHomepageData)
@@ -22,3 +28,4 @@ admin.site.register(ChaptersFeedbackStandard)
 admin.site.register(ChaptersFeedback)
 admin.site.register(ChaptersFeedbackResponse)
 admin.site.register(ChaptersFeedbackQuestion)
+admin.site.register(SwsPasiEvent, SwsPasiEventTabularAdminDisplay)

@@ -3,6 +3,7 @@ from core.filters import generic_filter_form_parser
 
 from core.forms import GenericFilterForm
 from core.logic.file_export import generate_and_export_excel
+from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
 from preference.repository.preference_repository import (
     get_all_organisations_list,
     preference_stats_for_export,
@@ -14,6 +15,7 @@ from preference.repository.preference_repository import (
     preferences_by_origin, 
     preferences_count
 )
+from users.utils import get_user_organisations
 
 
 def user_overview(request):
@@ -60,7 +62,9 @@ def user_overview(request):
             **filters,
             current_user = request.user
         )
-        
+    
+    total_dynamic_link_usage = get_total_dynamic_link_usage(current_user=request.user)
+    
     context = {
         'filter_form': filter_form,
         'total_user_overview_responses': total_user_overview_responses,
@@ -70,6 +74,7 @@ def user_overview(request):
         'preferences_per_destination_country': preferences_per_destination_country_responses,
         'preferences_selected_user_language': preferences_by_language_responses,
         'work_code_usage': preferences_by_organisation_responses,
+        "total_dynamic_link_usage": total_dynamic_link_usage
     }
     return render(
         request, 
@@ -86,10 +91,11 @@ def export_preference_stats(request):
             filters = generic_filter_form_parser(filter_form)
 
         organisations = filters.get('organisation', None)
-        
         if organisations is None:
-            # TODO: otherwise , get all loggedin user's organisations
-            organisations = get_all_organisations_list()
+            user_orgs = get_user_organisations(request.user)
+            organisations = [getattr(org, 'name') for org in user_orgs]
+                
+            
         
         export_dict = {
             "all": preference_stats_for_export({**filters, 'organisations': organisations, 'current_user': request.user})

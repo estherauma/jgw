@@ -2,7 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from dashboard.forms import OPERATORS
-from preference.models import FactoryFarm, Organisation
+from preference.models import Country, FactoryFarm, Organisation
 
 ROLES = ["SCHEME", "FACTORY", "STAFF", "ADMIN"]
 STATUS = ["PENDING", "ACCEPTED", "SENT"]
@@ -47,6 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     factories = models.ManyToManyField(FactoryFarm, blank=True)
     organisations = models.ManyToManyField(Organisation, blank=True)
+    destinations = models.ManyToManyField(Country, blank=True)
     
     is_staff = models.BooleanField(
         default=False,
