@@ -132,7 +132,12 @@ class Preference(models.Model):
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
     origin = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='origin')
     destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='destination')
-    destination_state = models.ForeignKey(CountryState, on_delete=models.SET_NULL, null=True, blank=True, related_name='destination_state')
+    destination_state = models.ForeignKey(
+        CountryState, 
+        on_delete=models.SET_NULL, 
+        null=True, blank=True, 
+        related_name='destination_state'
+    )
     route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True)
     
     sectors_of_work = models.ManyToManyField(SectorOfWork)
