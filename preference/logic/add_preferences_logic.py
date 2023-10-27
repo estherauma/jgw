@@ -88,7 +88,7 @@ def add_preference_to_db(preference):
         language_data = get_or_add_language_to_db(language)
         origin_data = get_or_add_country_to_db(origin, source="origin")
         destination_data = get_or_add_country_to_db(destination, source="destination")
-        destination_state_data = get_or_add_country_state_to_db(destination_state, destination_data)
+        destination_state_data = get_or_add_country_state_to_db(destination_state)
         route_data = get_or_add_route_to_db(route)
         
         new_preference = Preference.objects.create(

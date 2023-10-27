@@ -50,7 +50,18 @@ def translate_and_clean_age():
         
     kunfu_panda_logger.info(f"{len(untransalted_ages)} age(s) translated")   
     
-# @shared_task(name="translate_preferences_field")    
+def attach_countries_to_state():
+    # loop through states without countries
+    
+    #  get countries from the API(must be https)
+    # https://sapi.justgood.work/api/v2/appconfig/app_config_v3/vanilla?encrypted=false
+    
+    # check if the country exists in the object from the API config
+        
+    # link it to the country
+
+    pass   
+
 def translate_and_clean_preferences_fields(key: str = None):
     translate_and_clean_gender()
     translate_and_clean_language()

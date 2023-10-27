@@ -19,9 +19,8 @@ def get_or_add_organisation_to_db(organisation_name: str) -> Organisation:
 def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
     return get_or_create_model_instance(FactoryFarm, factory_farm)
 
-def get_or_add_country_state_to_db(country_state_name: str, country) -> CountryState:
-    params = {"name":country_state_name or NOT_SPECIFIED, "country": country}
-    country_instance, _ = CountryState.objects.get_or_create(**params)
+def get_or_add_country_state_to_db(country_state_name: str) -> CountryState:
+    country_instance, _ = CountryState.objects.get_or_create(name=country_state_name or NOT_SPECIFIED)
     return country_instance
 
 

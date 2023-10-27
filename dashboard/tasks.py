@@ -21,6 +21,7 @@ import requests
 import json
 
 from preference.logic.add_preferences_logic import fetch_preferences_from_api_to_db
+from preference.tasks import attach_countries_to_state
 from question.logic.add_inline_question_logic import fetch_inline_questions_from_api_to_db
 from question.logic.add_messaging_question_logic import fetch_messaging_questions_from_api_to_db
 from common.logger import KunfuPandaLogger
@@ -47,6 +48,9 @@ def fetch_data_from_jgw_api():
     fetch_sws_pasi_events_from_api_to_db()
     
     fetch_help_contacts_from_api_to_db()
+    
+    # should always come last
+    attach_countries_to_state()
     
 @shared_task(name="get_jgw_data")
 def fetch_API_data():    
