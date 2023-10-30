@@ -3,7 +3,8 @@ from common.custom_libs.google_translate import pandas_translator_translate
 from common.helpers.preference_helpers.age import normalize_age
 from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.logger import KunfuPandaLogger
-from preference.models import Age, Gender, Language, SectorOfWork
+from common.services.api_client import JustGoodWorkAPIClient
+from preference.models import Age, Country, CountryState, Gender, Language, SectorOfWork
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
 
@@ -51,16 +52,20 @@ def translate_and_clean_age():
     kunfu_panda_logger.info(f"{len(untransalted_ages)} age(s) translated")   
     
 def attach_countries_to_state():
-    # loop through states without countries
+    jgw_api_client = JustGoodWorkAPIClient()
+    app_config = jgw_api_client.get_data(f"/appconfig/app_config_v3/vanilla?encrypted=false")
+    destinations = app_config.get("destinations")
     
-    #  get countries from the API(must be https)
-    # https://sapi.justgood.work/api/v2/appconfig/app_config_v3/vanilla?encrypted=false
-    
-    # check if the country exists in the object from the API config
+    for destination in destinations:
+        country_name = destination.get("countryName").lower()
+        country_states = destination.get("states")
         
-    # link it to the country
+        if country_states and len(country_states) > 0:
+            country_db_obj = Country.objects.filter(name=country_name)
+            for country_state in country_states:
+                state_db_obj = CountryState.objects.filter(name=country_name)
+                print(state_db_obj)
 
-    pass   
 
 def translate_and_clean_preferences_fields(key: str = None):
     translate_and_clean_gender()
