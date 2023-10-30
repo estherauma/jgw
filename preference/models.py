@@ -65,6 +65,7 @@ class Country(models.Model):
 class CountryState(models.Model):
     name = models.CharField(max_length=255, default=NOT_SPECIFIED)
     country = models.ForeignKey(Country, on_delete=models.DO_NOTHING,null=True, blank=True, related_name="country_states")
+    full_name = models.CharField(max_length=255, null=True, blank=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -61,10 +61,22 @@ def attach_countries_to_state():
         country_states = destination.get("states")
         
         if country_states and len(country_states) > 0:
-            country_db_obj = Country.objects.filter(name=country_name)
+            country_db_obj = Country.objects.filter(name=country_name).first()
+            if not country_db_obj:
+                return None
+            
             for country_state in country_states:
-                state_db_obj = CountryState.objects.filter(name=country_name)
-                print(state_db_obj)
+                state_db_obj = CountryState.objects.filter(
+                    name__iexact=country_state.get("key"),
+                    country = None
+                ).first()
+                if not state_db_obj:
+                    return None
+                
+                state_db_obj.country = country_db_obj
+                if state_db_obj.full_name is None:
+                    state_db_obj.full_name = country_state.get("defaultName")
+                state_db_obj.save()
 
 
 def translate_and_clean_preferences_fields(key: str = None):

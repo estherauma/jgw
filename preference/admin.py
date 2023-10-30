@@ -40,4 +40,10 @@ admin.site.register(Gender, GenderTabularAdminDisplay)
 admin.site.register(Country)
 admin.site.register(Age)
 admin.site.register(LocationOfPotentialWork)
-admin.site.register(CountryState)
+
+
+
+@admin.register(CountryState)
+class CountryStateList(admin.ModelAdmin):
+    list_display = ['name', 'full_name', 'country']
+    search_fields = ['name', 'full_name']  

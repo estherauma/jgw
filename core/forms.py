@@ -27,7 +27,7 @@ class GenericFilterForm(forms.Form):
         ):
             country_states = CountryState.objects.filter(country=country)
                 
-            countries.append((country.name.capitalize(), [(state.name.capitalize(), state.name) for state in country_states]))
+            countries.append((country.name.capitalize(), [(state.name, state.full_name.capitalize()) for state in country_states]))
         return countries
 
         
