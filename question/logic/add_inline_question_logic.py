@@ -24,7 +24,6 @@ def fetch_inline_question_from_api(client):
         start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
         
     kunfu_panda_logger.info(f"Fetching inline questions from {start_date} to {end_date}")
-        
     return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
 
 
@@ -149,21 +148,45 @@ def add_inline_question_to_db(inline_question):
     )
     
     #  get or create inline question text
-    for response_list in responses_list:
+    if 'questionKey' in inline_question:
         inline_question_text, _ = InlineQuestionText.objects.get_or_create(
-            text = format_inline_question_response_text(response_list.get('key'))
+            text = format_inline_question_response_text(inline_question.get('questionKey')),
         )
+        inline_question_text.title_text = inline_question.get('questionText')
+        inline_question_text.save()
         
-        inline_question = InlineQuestion.objects.create(
+        created_inline_question = InlineQuestion.objects.create(
             question = inline_question_text,
             inline_question_standard = inline_question_standard
         )
         
         # create inline question response 
         inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
-            text = format_inline_question_response_text(response_list.get('value')) or NOT_SPECIFIED
+            text = format_inline_question_response_text(inline_question.get('questionValue')) or NOT_SPECIFIED
         )
+        inline_question_text.title_text = inline_question.get('questionText')
+        inline_question_text.save()
+        
         InlineQuestionResponse.objects.create(
-            inline_question = inline_question,
+            inline_question = created_inline_question,
             response = inline_question_response_text
         )
+    else:
+        for response_list in responses_list:
+            inline_question_text, _ = InlineQuestionText.objects.get_or_create(
+                text = format_inline_question_response_text(response_list.get('key'))
+            )
+            
+            created_inline_question = InlineQuestion.objects.create(
+                question = inline_question_text,
+                inline_question_standard = inline_question_standard
+            )
+            
+            # create inline question response 
+            inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
+                text = format_inline_question_response_text(response_list.get('value')) or NOT_SPECIFIED
+            )
+            InlineQuestionResponse.objects.create(
+                inline_question = created_inline_question,
+                response = inline_question_response_text
+            )
