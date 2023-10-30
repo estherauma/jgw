@@ -12,6 +12,7 @@ from question.repository.inline_questions_standard import (
     get_inline_question_per_language_counts, 
     get_inline_question_per_organisation_counts, 
     get_inline_question_per_origin_counts,
+    inline_question_responses_count,
     inline_question_stats_for_export, 
     inline_questions_count
 )
@@ -100,12 +101,16 @@ def inline_question(request):
     
     if request.method == 'GET':
         filter_form = InlineQuestionFilterForm(request=request)
+        total_inline_question_responses = inline_question_responses_count(current_user = request.user)
         total_inline_questions = inline_questions_count(current_user = request.user)
         inline_question_per_origin = get_inline_question_per_origin_counts(current_user = request.user)
         inline_question_per_destination = get_inline_question_per_destination_counts(current_user = request.user)
         inline_question_per_organisation = get_inline_question_per_organisation_counts(current_user = request.user)
         inline_question_per_language = get_inline_question_per_language_counts(current_user = request.user)
         inline_question_response_data = inline_question_response()
+        each_inline_question_response_data = each_inline_question_response(
+            current_user = request.user
+        )
         
     else:
         filter_form = InlineQuestionFilterForm(request=request, data=request.POST)
@@ -133,17 +138,26 @@ def inline_question(request):
             current_user = request.user
         )
         inline_question_response_data = inline_question_response()
+        total_inline_question_responses = inline_question_responses_count(
+            **filters,
+            current_user = request.user
+        )
+        each_inline_question_response_data = each_inline_question_response(
+            **filters,
+            current_user = request.user
+        )
     
 
     context = {
         "total_inline_questions": total_inline_questions,
+        "total_inline_question_responses": total_inline_question_responses,
         "inline_question_per_origin": inline_question_per_origin,
         "inline_question_per_destination": inline_question_per_destination,
         "inline_question_per_organisation": inline_question_per_organisation,
         "inline_question_per_language": inline_question_per_language,
         "inline_question_response_data": inline_question_response_data,
         'filter_form': filter_form,
-        "each_inline_question_response": each_inline_question_response(),
+        "each_inline_question_response": each_inline_question_response_data,
         "inline_question_only_form": InlineQuestionOnlyFilterForm(),
     }
     return render(
@@ -179,9 +193,4 @@ def export_inline_question_stats(request):
                 'organisations': [organisation],
                 "current_user": request.user
             })
-            print({
-                    **filters, 
-                    'organisations': [organisation],
-                    "current_user": request.user
-                })
         return generate_and_export_excel(export_dict, filename="inline_question_stats")
