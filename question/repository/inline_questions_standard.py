@@ -1,6 +1,6 @@
 from django.db.models import Count, Case, When, F
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
-from question.filters import generic_question_filtered_queryset
+from question.filters import generic_question_filtered_queryset, question_response_filtered_queryset
 
 from question.models import InlineQuestionResponse, InlineQuestionStandard
 
@@ -124,8 +124,12 @@ def get_inline_question_per_language_counts(**filters):
         }
 
 
-def each_inline_question_response():
-    inline_questions_with_responses = InlineQuestionResponse.objects.values(
+def each_inline_question_response(**filters):
+    inline_question_responses = question_response_filtered_queryset(
+        queryset = InlineQuestionResponse.objects.all(), 
+        **filters
+    )
+    inline_questions_with_responses = inline_question_responses.values(
         "inline_question__question__translated_text",
         "response__translated_text"
     ).annotate(
@@ -151,6 +155,15 @@ def each_inline_question_response():
         
     return result_dict
 
+def inline_question_responses_count(**filters):
+    
+    inline_question_responses = question_response_filtered_queryset(
+        queryset = InlineQuestionResponse.objects.all(), 
+        **filters
+    )
+    inline_question_responses_count_queryset = inline_question_responses.count()
+    
+    return inline_question_responses_count_queryset
 
 def inline_question_stats_for_export(filters):
     inline_question_per_origin = get_inline_question_per_origin_counts(**filters)
