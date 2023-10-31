@@ -21,14 +21,23 @@ class GenericFilterForm(forms.Form):
         self.fields["organisation"].choices = [ (org.name, org.name) for org in user_orgs ]
         
     def get_countries(self, countries_filter):
-        countries = []
-        for country in get_countries_without_excluded_names(
+        if "is_origin" in countries_filter:
+            return [ (country.name, country.name.capitalize()) for country in get_countries_without_excluded_names(
             filter=countries_filter
-        ):
-            country_states = CountryState.objects.filter(country=country)
+            )]
+        else:
+            countries = []
+            for country in get_countries_without_excluded_names(
+                filter=countries_filter
+            ):
+                country_states = CountryState.objects.filter(country=country)
+                states_list = [(state.name, state.full_name.capitalize()) for state in country_states]
                 
-            countries.append((country.name.capitalize(), [(state.name, state.full_name.capitalize()) for state in country_states]))
-        return countries
+                countries.append((
+                    country.name.capitalize(), 
+                    states_list if len(states_list) > 0 else [(country.name, country.name.capitalize())],
+                ))
+            return countries
 
         
     start_date = forms.DateField(
