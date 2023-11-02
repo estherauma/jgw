@@ -10,7 +10,8 @@ from preference.models import (
         Language,
         Gender,
         Country,
-        Age
+        Age,
+        TextTranslations
     )
 
 class SectorOfWorkTabularAdminDisplay(admin.ModelAdmin):
@@ -37,3 +38,6 @@ admin.site.register(Language, LanguageTabularAdminDisplay)
 admin.site.register(Gender, GenderTabularAdminDisplay)
 admin.site.register(Country)
 admin.site.register(Age)
+@admin.register(TextTranslations)
+class TextTranslationsTable(admin.ModelAdmin):
+    list_display = ['original_text', 'translated_text']

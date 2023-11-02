@@ -1,14 +1,16 @@
 from django.db import transaction
 import re
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
+from common.custom_libs.google_translate import pandas_translator_translate
 from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_factory_farm_to_db, get_or_add_language_to_db, get_or_add_organisation_sector_to_db, get_or_add_organisation_to_db, get_or_add_route_to_db
 from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
+from preference.utils import format_text_for_db
 from question.models import InlineQuestion, InlineQuestionResponse, InlineQuestionResponseText, InlineQuestionStandard, InlineQuestionText
-from preference.models import Preference
+from preference.models import Preference, TextTranslations
 from question.tasks import translate_and_clean_inline_question_fields
 
 
@@ -161,9 +163,23 @@ def add_inline_question_to_db(inline_question):
         )
         
         # create inline question response 
+        qn_resp_text = format_inline_question_response_text(inline_question.get('questionValue')) or NOT_SPECIFIED
+        if isinstance(qn_resp_text, dict) and "amount" in qn_resp_text:
+            qn_resp_text = qn_resp_text.get("amount")
+        
+        text_translations, _ = TextTranslations.objects.get_or_create(original_text=format_text_for_db(qn_resp_text))
+        if not text_translations.translated_text:
+            resp_translated = format_text_for_db(pandas_translator_translate(qn_resp_text))
+            text_translations.translated_text = resp_translated
+            qn_resp_text = resp_translated
+            text_translations.save()
+        else:
+            qn_resp_text = text_translations.translated_text
+                
         inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
-            text = format_inline_question_response_text(inline_question.get('questionValue')) or NOT_SPECIFIED
+            translated_text = qn_resp_text
         )
+            
         inline_question_text.title_text = inline_question.get('questionText')
         inline_question_text.save()
         
@@ -183,9 +199,25 @@ def add_inline_question_to_db(inline_question):
             )
             
             # create inline question response 
+            resp_text = format_inline_question_response_text(response_list.get('value')) or NOT_SPECIFIED
+            if isinstance(resp_text, dict) and "amount" in resp_text:
+                resp_text = resp_text.get("amount") 
+            
+            
+            text_translations, _ = TextTranslations.objects.get_or_create(original_text=format_text_for_db(resp_text))
+            if not text_translations.translated_text:
+                resp_translated = format_text_for_db(pandas_translator_translate(resp_text))
+                text_translations.translated_text = resp_translated
+                resp_text = resp_translated
+                text_translations.save()
+            else:
+                resp_text = text_translations.translated_text
+                
             inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
-                text = format_inline_question_response_text(response_list.get('value')) or NOT_SPECIFIED
+                translated_text = resp_text
             )
+                
+                
             InlineQuestionResponse.objects.create(
                 inline_question = created_inline_question,
                 response = inline_question_response_text
