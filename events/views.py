@@ -21,10 +21,17 @@ def what_matters_to_workers(request):
 def export_what_matters_to_workers_stats(request):
     if request.method == 'POST':
         
-        chapters_feedback = get_chapters_feedback()
-        
+        chapters_feedback_breakdown = get_chapters_feedback()
+        chapters_feedback = {}
+        for fb in chapters_feedback_breakdown:
+            question = fb.get("question")
+            data = fb.get("data")
+            
+            if question == "wasThisHelpful":
+                chapters_feedback = data
+                
         export_dict = {
-            "chapters opened": { "what_matters_to_workers": get_chapters_opened() },
-            "chapters feedbck": { "was_this_helpful":chapters_feedback[1]["data"] }
+            "chapters": { "what_matters_to_workers": get_chapters_opened(), "was_this_helpful": chapters_feedback },
+            "chapters feedback breakdown": { "was_this_helpful": chapters_feedback_breakdown[1]["data"] }
         }
         return generate_and_export_excel(export_dict, filename="what_matters_to_workers_stats")

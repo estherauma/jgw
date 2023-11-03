@@ -37,7 +37,8 @@ def generate_and_export_excel(data, filename = "unititled"):
                 except:
                     pass
             adjusted_width = (max_length + 2) * 1.2
-            ws.column_dimensions[column_cells[0].column_letter].width = adjusted_width
+            new_with = 30 if adjusted_width > 30 else adjusted_width
+            ws.column_dimensions[column_cells[0].column_letter].width = new_with
 
     # Remove the default empty sheet
     del wb[wb.sheetnames[0]]
