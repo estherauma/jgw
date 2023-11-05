@@ -5,10 +5,12 @@ from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIF
 from common.helpers.model_helpers.preference import (
     add_sector_of_work_to_db,
     get_or_add_age_to_db,
+    get_or_add_country_state_to_db,
     get_or_add_country_to_db,
     get_or_add_factory_farm_to_db,
     get_or_add_gender_to_db,
     get_or_add_language_to_db,
+    get_or_add_location_of_potential_work_to_db,
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
     get_or_add_route_to_db
@@ -79,13 +81,14 @@ def add_preference_to_db(preference):
         organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
         organisation_data = get_or_add_organisation_to_db(organisation)
         factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
-        location_of_potential_work_data = get_or_add_country_to_db(location_of_potential_work, source="destination")
+        location_of_potential_work_data = get_or_add_location_of_potential_work_to_db(location_of_potential_work)
+        
         gender_data = get_or_add_gender_to_db(gender)
         age_data = get_or_add_age_to_db(age)
         language_data = get_or_add_language_to_db(language)
         origin_data = get_or_add_country_to_db(origin, source="origin")
         destination_data = get_or_add_country_to_db(destination, source="destination")
-        destination_state_data = get_or_add_country_to_db(destination_state, source="destination")
+        destination_state_data = get_or_add_country_state_to_db(destination_state)
         route_data = get_or_add_route_to_db(route)
         
         new_preference = Preference.objects.create(

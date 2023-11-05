@@ -6,7 +6,7 @@ from common.custom_libs.pycountry import aplha_code_from_country_name, country_n
 from common.helpers.model_helpers.get_create import get_or_create_model_instance
 from common.helpers.preference_helpers.country import normalize_country_name
 from common.helpers.preference_helpers.organisation import normalize_organisation_name
-from preference.models import Age, Country, FactoryFarm, Gender, Language, Organisation, OrganisationSector, Route, SectorOfWork
+from preference.models import Age, Country, CountryState, FactoryFarm, Gender, Language, LocationOfPotentialWork, Organisation, OrganisationSector, Route, SectorOfWork
 
 
 def get_or_add_organisation_sector_to_db(organisation_sector: str) -> OrganisationSector:
@@ -18,6 +18,26 @@ def get_or_add_organisation_to_db(organisation_name: str) -> Organisation:
 
 def get_or_add_factory_farm_to_db(factory_farm: str) -> FactoryFarm:
     return get_or_create_model_instance(FactoryFarm, factory_farm)
+
+def get_or_add_country_state_to_db(country_state_name: str) -> CountryState:
+    country_instance, _ = CountryState.objects.get_or_create(name=country_state_name or NOT_SPECIFIED)
+    return country_instance
+
+
+def get_or_add_location_of_potential_work_to_db(
+    country_name: str
+) -> LocationOfPotentialWork:
+    country_name = normalize_country_name(country_name)
+    
+    country_code = aplha_code_from_country_name(country_name).lower() or NOT_SPECIFIED
+    real_country_name = country_name_from_aplha_code(country_code).lower() or NOT_SPECIFIED
+    
+    location_of_potential_work_instance, _ = LocationOfPotentialWork.objects.get_or_create(
+        name = real_country_name,
+        code = country_code
+    )
+    return location_of_potential_work_instance
+
 
 def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
     country_name = normalize_country_name(country_name)
@@ -102,4 +122,4 @@ def get_countries_without_excluded_names(
     for country_name in countries_to_exclude:
         exclude_query |= Q(name=country_name)
     
-    return Country.objects.filter(**filter).exclude(exclude_query)
+    return Country.objects.filter(**filter).exclude(exclude_query).order_by('name')

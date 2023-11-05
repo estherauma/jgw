@@ -132,14 +132,18 @@ def question_response_filtered_queryset(
         queryset = queryset.filter(inline_question__inline_question_standard__preference__api_created_at__range=(start_date, end_date))
         
     if destination_countries:
-        preference_dest_q = Q(inline_question__inline_question_standard__preference__destination__name__in=destination_countries)
-        current_model_dest_q = Q(inline_question__inline_question_standard__destination__name__in=destination_countries)
+        preference_dest_q = Q(inline_question__inline_question_standard__preference__destination__name__in=destination_countries) \
+            | Q(inline_question__inline_question_standard__preference__destination__country_states__name__in=destination_countries)
+        current_model_dest_q = Q(inline_question__inline_question_standard__destination__name__in=destination_countries) \
+            | Q(inline_question__inline_question_standard__destination__country_states__name__in=destination_countries)
         combined_dest_q = preference_dest_q | current_model_dest_q
         queryset = queryset.filter(combined_dest_q)
         
     if origin_countries:
-        preference_origin_q = Q(inline_question__inline_question_standard__preference__origin__name__in=origin_countries)
-        current_model_dest_q = Q(inline_question__inline_question_standard__origin__name__in=origin_countries)
+        preference_origin_q = Q(inline_question__inline_question_standard__preference__origin__name__in=origin_countries)\
+            | Q(inline_question__inline_question_standard__preference__origin__country_states__name__in=destination_countries)
+        current_model_dest_q = Q(inline_question__inline_question_standard__origin__name__in=origin_countries)\
+            | Q(inline_question__inline_question_standard__origin__country_states__name__in=destination_countries)
         combined_origin_q = preference_origin_q | current_model_dest_q
         queryset = queryset.filter(combined_origin_q)
         

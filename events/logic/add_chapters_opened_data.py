@@ -3,7 +3,8 @@ from common.app_events import AppEvents
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 
 from common.helpers.model_helpers.preference import (
-    get_or_add_age_to_db, 
+    get_or_add_age_to_db,
+    get_or_add_country_state_to_db, 
     get_or_add_country_to_db, 
     get_or_add_gender_to_db, 
     get_or_add_language_to_db, 
@@ -73,7 +74,7 @@ def add_chapters_opened_to_db(chapters_feedback):
     language_data = get_or_add_language_to_db(language)
     destination_data = get_or_add_country_to_db(destination, source="destination")
     age_data = get_or_add_age_to_db(age)
-    destination_state_data = get_or_add_country_to_db(destination_state, source="destination")
+    destination_state_data = get_or_add_country_state_to_db(destination_state)
     organisation_data = get_or_add_organisation_to_db(organisation)
     gender_data = get_or_add_gender_to_db(gender)
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
