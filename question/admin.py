@@ -25,8 +25,8 @@ class InlineQuestionResponseTextAdminDisplay(admin.ModelAdmin):
 admin.site.register(InlineQuestionResponse)
 @admin.register(InlineQuestionResponseText)
 class InlineQuestionResponseTextAdminDislay(admin.ModelAdmin):
-    list_display = ['text', 'translated_text']
-    search_fields = ['text', 'translated_text']
+    list_display = ['translated_text']
+    search_fields = ['translated_text']
 
 admin.site.register(MessagingQuestionStandard)
 admin.site.register(MessagingQuestion)

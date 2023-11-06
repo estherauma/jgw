@@ -149,3 +149,9 @@ class Preference(models.Model):
     def __str__(self):
         return f"Preference {self.id}"
         
+        
+class TextTranslations(models.Model):
+    original_text = models.TextField()
+    translated_text = models.TextField(null=True, blank=True)
+    
+    
