@@ -11,7 +11,9 @@ from preference.models import (
         Gender,
         Country,
         Age,
-        TextTranslations
+        TextTranslations,
+        LocationOfPotentialWork,
+        CountryState,
     )
 
 class SectorOfWorkTabularAdminDisplay(admin.ModelAdmin):
@@ -41,3 +43,10 @@ admin.site.register(Age)
 @admin.register(TextTranslations)
 class TextTranslationsTable(admin.ModelAdmin):
     list_display = ['original_text', 'translated_text']
+    
+admin.site.register(LocationOfPotentialWork)
+
+@admin.register(CountryState)
+class CountryStateList(admin.ModelAdmin):
+    list_display = ['name', 'full_name', 'country']
+    search_fields = ['name', 'full_name']  

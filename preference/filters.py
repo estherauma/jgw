@@ -43,11 +43,13 @@ def preference_filtered_queryset(
         queryset = queryset.filter(api_created_at__range=(start_date, end_date))
         
     if destination_countries:
-        current_model_dest_q = Q(destination__name__in=destination_countries)
+        current_model_dest_q = Q(destination__name__in=destination_countries) \
+            | Q(destination__country_states__name__in=destination_countries)
         queryset = queryset.filter(current_model_dest_q)
         
     if origin_countries:
-        current_model_dest_q = Q(origin__name__in=origin_countries)
+        current_model_dest_q = Q(origin__name__in=origin_countries) \
+            | Q(origin__country_states__name__in=origin_countries)
         queryset = queryset.filter(current_model_dest_q)
         
     if organisations:

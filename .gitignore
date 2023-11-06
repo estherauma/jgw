@@ -167,3 +167,4 @@ manual_clean.py
 /*summerberry_data.json
 /logs/*
 dataframes/common/*.xlsx
+.idea

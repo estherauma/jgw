@@ -3,7 +3,8 @@ from common.custom_libs.google_translate import pandas_translator_translate
 from common.helpers.preference_helpers.age import normalize_age
 from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.logger import KunfuPandaLogger
-from preference.models import Age, Gender, Language, SectorOfWork
+from common.services.api_client import JustGoodWorkAPIClient
+from preference.models import Age, Country, CountryState, Gender, Language, SectorOfWork
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
 
@@ -50,7 +51,34 @@ def translate_and_clean_age():
         
     kunfu_panda_logger.info(f"{len(untransalted_ages)} age(s) translated")   
     
-# @shared_task(name="translate_preferences_field")    
+def attach_countries_to_state():
+    jgw_api_client = JustGoodWorkAPIClient()
+    app_config = jgw_api_client.get_data(f"/appconfig/app_config_v3/vanilla?encrypted=false")
+    destinations = app_config.get("destinations")
+    
+    for destination in destinations:
+        country_name = destination.get("countryName").lower()
+        country_states = destination.get("states")
+        
+        if country_states and len(country_states) > 0:
+            country_db_obj = Country.objects.filter(name=country_name).first()
+            if not country_db_obj:
+                return None
+            
+            for country_state in country_states:
+                state_db_obj = CountryState.objects.filter(
+                    name__iexact=country_state.get("key"),
+                    country = None
+                ).first()
+                if not state_db_obj:
+                    return None
+                
+                state_db_obj.country = country_db_obj
+                if state_db_obj.full_name is None:
+                    state_db_obj.full_name = country_state.get("defaultName")
+                state_db_obj.save()
+
+
 def translate_and_clean_preferences_fields(key: str = None):
     translate_and_clean_gender()
     translate_and_clean_language()

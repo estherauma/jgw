@@ -3,6 +3,8 @@ from django.db import models
 # Create your models here.
 from django.db import models
 
+from common.const.value_const import NOT_SPECIFIED
+
 class SectorOfWork(models.Model):
     name = models.CharField(max_length=255)
     translated_name = models.CharField(max_length=255, null=True, blank=True)
@@ -38,6 +40,15 @@ class Organisation(models.Model):
     def __str__(self):
         return self.name
     
+class LocationOfPotentialWork(models.Model):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=20, null=True, blank=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f'{self.name}'
 
 class Country(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True, unique=True)
@@ -45,6 +56,17 @@ class Country(models.Model):
     api_value = models.CharField(max_length=255, null=True, blank=False)
     is_origin = models.BooleanField(default=False)
     is_destination = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f'{self.name}'
+
+class CountryState(models.Model):
+    name = models.CharField(max_length=255, default=NOT_SPECIFIED)
+    country = models.ForeignKey(Country, on_delete=models.DO_NOTHING,null=True, blank=True, related_name="country_states")
+    full_name = models.CharField(max_length=255, null=True, blank=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -105,13 +127,18 @@ class Preference(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    location_of_potential_work = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
+    location_of_potential_work = models.ForeignKey(LocationOfPotentialWork, on_delete=models.SET_NULL, null=True, blank=True)
     gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
     age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
     origin = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='origin')
     destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='destination')
-    destination_state = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name='destination_state')
+    destination_state = models.ForeignKey(
+        CountryState, 
+        on_delete=models.SET_NULL, 
+        null=True, blank=True, 
+        related_name='destination_state'
+    )
     route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True)
     
     sectors_of_work = models.ManyToManyField(SectorOfWork)

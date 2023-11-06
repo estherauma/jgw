@@ -164,3 +164,7 @@
 .location-table-wrapper{
     margin: auto 0;
 }
+
+.multiselect-container {
+    min-width: 300px;
+}

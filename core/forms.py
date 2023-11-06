@@ -1,8 +1,8 @@
 from django import forms
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
-from preference.models import Country, FactoryFarm, Organisation
-from users.utils import get_user_destinations, get_user_factories, get_user_organisations
+from preference.models import Country, CountryState, FactoryFarm, Organisation
+from users.utils import get_user_factories, get_user_organisations, get_user_destinations
 
 
 class GenericFilterForm(forms.Form):
@@ -10,29 +10,8 @@ class GenericFilterForm(forms.Form):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        origin_choices = [
-            (country.name, country.name.capitalize())
-            for country in get_countries_without_excluded_names(
-                filter={ "is_origin": True }
-            )
-        ]
-        origin_choices.sort()
-        self.fields['origin'].choices = origin_choices
-        
-        destination_choices = [
-            (country.name, country.name.capitalize())
-            for country in get_countries_without_excluded_names(
-                filter={ "is_destination": True }
-            )
-        ]
-        
-        destination_choices = [
-            (country.name, country.name.capitalize())
-            for country in get_user_destinations(self.request.user)
-        ]
-        
-        destination_choices.sort()
-        self.fields['destination'].choices = destination_choices
+        self.fields['origin'].choices = self.get_countries({ "is_origin": True })
+        self.fields['destination'].choices = self.get_countries({ "is_destination": True })
 
 
         user_factories = get_user_factories(self.request.user)
@@ -40,6 +19,21 @@ class GenericFilterForm(forms.Form):
         
         self.fields["factory_farm"].choices = [ (farm.name, farm.name) for farm in user_factories ]
         self.fields["organisation"].choices = [ (org.name, org.name) for org in user_orgs ]
+        
+    def get_countries(self, countries_filter):
+        countries = []
+        for country in get_countries_without_excluded_names(
+            filter=countries_filter
+        ):
+            country_states = CountryState.objects.filter(country=country)
+            states_list = [(state.name, state.full_name.capitalize()) for state in country_states]
+            
+            countries.append((
+                country.name.capitalize(), 
+                states_list if len(states_list) > 0 else [(country.name, country.name.capitalize())],
+            ))
+        return countries
+
         
     start_date = forms.DateField(
         label='Start Date',
