@@ -20,10 +20,11 @@ from .forms import (
     RequestPasswordResetForm,
     SetPasswordForm,
     UpdateUserProfileForm,
-    UserMgtForm,
+    UserMgtForm, CreateNewUserForm,
 )
 from .models import User, UserInvitations
 from users.templatetags.user_role_tags import has_group
+
 
 @login_required
 @admin_required
@@ -200,7 +201,7 @@ def profile(request):
                 messages.info(request, "Profile updated successfully!")
             else:
                 messages.error(request, "Error validating form!")
-                
+
         if request.GET.get('tab') == 'password':
             old_password = request.POST.get('old_password')
             new_password = request.POST.get('new_password')
@@ -218,7 +219,7 @@ def profile(request):
                 messages.error(request, 'New password and confirm password do not match!')
 
     form = UpdateUserProfileForm(initial={
-        "first_name": profile.first_name, 
+        "first_name": profile.first_name,
         "last_name": profile.last_name,
         "email": profile.email,
         'receive_marketing_emails': profile.receive_marketing_emails,
@@ -282,7 +283,7 @@ def set_password(request, token):
                         "email", "role", "scheme", "factory", "organisation"
                     ).get(id=invite_id)
                     user_obj = {
-                        'email': invite['email'], 
+                        'email': invite['email'],
                         'role': invite['scheme']
                     }
                     User.objects.create_user(**user_obj, password=password, is_active=True)
@@ -353,3 +354,22 @@ def verify_email_change(request, token):
     except User.DoesNotExist:
         messages.error(request, "User account not found!")
     return redirect("users:login_user")
+
+
+@login_required
+@admin_required
+def create_new_user(request):
+    if request.method == 'POST':
+        form = CreateNewUserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.is_active = True
+            user.save()
+            form.save_m2m()  # Save the many-to-many relationships
+            messages.success(request, "User created successfully!")
+            return redirect("users:create_new_user")
+    else:
+        form = CreateNewUserForm()
+
+    return render(request, "users/create_user.html", context={"form": form})

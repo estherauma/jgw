@@ -4,7 +4,7 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 
-from preference.models import Country
+from preference.models import Country, Organisation, FactoryFarm
 
 from .models import User, UserInvitations
 
@@ -158,3 +158,45 @@ class UserAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         self.fields['destinations'].queryset = Country.objects.filter(is_destination=True)
+
+
+class CreateNewUserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        self.fields['destinations'].choices = [
+            (country.id, country.name.capitalize()) for country in Country.objects.all()
+        ]
+        self.fields["factories"].choices = [(farm.id, farm.name) for farm in FactoryFarm.objects.all()]
+        self.fields["organisations"].choices = [(org.id, org.name) for org in Organisation.objects.all()]
+
+    organisations = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker",
+            "data-live-search": "true",
+            "id": "create-new-user-organisations-id"
+        }),
+        required=False
+    )
+    factories = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker",
+            "data-live-search": "true",
+            "id": "create-new-user-factory-farms-id"
+        }),
+        required=False
+    )
+    destinations = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-select selectpicker",
+            "data-live-search": "true",
+            "id": "create-new-user-destinations-id"
+        }),
+        required=False
+    )
+    password = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'password', 'organisations', 'factories', 'destinations']
