@@ -168,7 +168,36 @@ def inline_question_responses_count(**filters):
 def inline_question_stats_for_export(filters):
     inline_question_per_origin = get_inline_question_per_origin_counts(**filters)
     inline_question_per_destination = get_inline_question_per_destination_counts(**filters)
+    each_inline_question_response_data = each_inline_question_response(**filters)
     return {
         "responses_per_origin": inline_question_per_origin,
         "responses_per_destination": inline_question_per_destination,
+        **each_inline_question_response_data
+    }
+    
+    
+def inline_question_response():
+    responses_count = InlineQuestionResponse.objects.values(
+        question_text=F('inline_question__question__text'),
+        response_text=F('response__translated_text')
+    ).annotate(
+        response_count=Count('response')
+    ).order_by('-response_count')
+
+    question_texts_list = []
+    responses = []
+    for response in responses_count:
+        if response['question_text'] not in question_texts_list:
+            question_texts_list.append(response['question_text'])
+            responses.append({
+                "response_texts": [response['response_text']],
+                "response_counts": [response['response_count']]
+            })
+        else:
+            responses[question_texts_list.index(response['question_text'])]["response_texts"].append(response['response_text'])
+            responses[question_texts_list.index(response['question_text'])]["response_counts"].append(response['response_count'])
+            
+    return {
+        "counts": responses,
+        "labels": question_texts_list
     }

@@ -12,6 +12,7 @@ from question.repository.inline_questions_standard import (
     get_inline_question_per_language_counts, 
     get_inline_question_per_organisation_counts, 
     get_inline_question_per_origin_counts,
+    inline_question_response,
     inline_question_responses_count,
     inline_question_stats_for_export, 
     inline_questions_count
@@ -19,7 +20,6 @@ from question.repository.inline_questions_standard import (
 from question.repository.messaging_questions_standard import (
     get_messaging_question_per_destination_counts, 
     get_messaging_question_per_origin_counts,
-    inline_question_response,
     messaging_question_stats_for_export,
     messaging_questions_count
 )
