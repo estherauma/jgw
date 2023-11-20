@@ -4,6 +4,7 @@ from core.filters import generic_filter_form_parser
 from core.forms import GenericFilterForm
 from core.logic.file_export import generate_and_export_excel
 from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
+from preference.models import SwsCountry
 from preference.repository.preference_repository import (
     get_all_organisations_list,
     preference_stats_for_export,
@@ -47,6 +48,9 @@ def user_overview(request):
         )
 
     total_dynamic_link_usage = get_total_dynamic_link_usage(current_user=request.user)
+    is_user_countries_in_sws = SwsCountry.objects.filter(
+        country__in=get_user_destinations(request.user)
+    ).exists()
 
     context = {
         "filter_form": filter_form,
@@ -58,6 +62,7 @@ def user_overview(request):
         "preferences_selected_user_language": preferences_by_language_responses,
         "work_code_usage": preferences_by_organisation_responses,
         "total_dynamic_link_usage": total_dynamic_link_usage,
+        "is_user_countries_in_sws": is_user_countries_in_sws,
     }
     return render(request, "preference/user_overview.html", context=context)
 
