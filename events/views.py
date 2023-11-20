@@ -8,30 +8,28 @@ from events.repository.chapters_opened_repository import get_chapters_opened
 def what_matters_to_workers(request):
     chapters_opened = get_chapters_opened()
     chapters_feedback = get_chapters_feedback()
-    
-    context ={
-        "chapters_opened": chapters_opened,
-        "chapters_feedback": chapters_feedback
-    }
+
+    context = {"chapters_opened": chapters_opened, "chapters_feedback": chapters_feedback}
     return render(request, "events/what-matters-to-workers.html", context=context)
 
 
-
-    
 def export_what_matters_to_workers_stats(request):
-    if request.method == 'POST':
-        
+    if request.method == "POST":
+
         chapters_feedback_breakdown = get_chapters_feedback()
         chapters_feedback = {}
         for fb in chapters_feedback_breakdown:
             question = fb.get("question")
             data = fb.get("data")
-            
+
             if question == "wasThisHelpful":
                 chapters_feedback = data
-                
+
         export_dict = {
-            "chapters": { "what_matters_to_workers": get_chapters_opened(), "was_this_helpful": chapters_feedback },
-            "chapters feedback breakdown": { "was_this_helpful": chapters_feedback_breakdown[1]["data"] }
+            "chapters": {
+                "what_matters_to_workers": get_chapters_opened(),
+                "was_this_helpful": chapters_feedback,
+            },
+            "chapters feedback breakdown": {"was_this_helpful": chapters_feedback_breakdown[1]["data"]},
         }
         return generate_and_export_excel(export_dict, filename="what_matters_to_workers_stats")
