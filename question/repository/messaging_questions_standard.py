@@ -67,33 +67,6 @@ def messaging_questions_count(**filters):
     )
         
     return messaging_questions_count_queryset.count()
-    
-    
-def inline_question_response():
-    responses_count = InlineQuestionResponse.objects.values(
-        question_text=F('inline_question__question__text'),
-        response_text=F('response__translated_text')
-    ).annotate(
-        response_count=Count('response')
-    ).order_by('-response_count')
-
-    question_texts_list = []
-    responses = []
-    for response in responses_count:
-        if response['question_text'] not in question_texts_list:
-            question_texts_list.append(response['question_text'])
-            responses.append({
-                "response_texts": [response['response_text']],
-                "response_counts": [response['response_count']]
-            })
-        else:
-            responses[question_texts_list.index(response['question_text'])]["response_texts"].append(response['response_text'])
-            responses[question_texts_list.index(response['question_text'])]["response_counts"].append(response['response_count'])
-            
-    return {
-        "counts": responses,
-        "labels": question_texts_list
-    }
 
 
 def messaging_question_stats_for_export(filters):
