@@ -84,7 +84,6 @@ class InlineQuestion(models.Model):
 
 
 class InlineQuestionResponseText(models.Model):
-    original_text = models.TextField(max_length=255, blank=True, null=True)
     translated_text = models.TextField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
