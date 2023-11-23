@@ -3,9 +3,7 @@ from core.filters import generic_filter_form_parser
 
 from core.forms import GenericFilterForm
 from core.logic.file_export import generate_and_export_excel
-from preference.models import SwsCountry
 from preference.repository.preference_repository import (
-    get_all_organisations_list,
     preference_stats_for_export,
     preferences_by_age,
     preferences_by_destination,
@@ -15,7 +13,7 @@ from preference.repository.preference_repository import (
     preferences_by_origin,
     preferences_count,
 )
-from users.utils import get_user_organisations, get_user_destinations
+from users.utils import get_user_organisations
 
 
 def user_overview(request):
@@ -46,9 +44,7 @@ def user_overview(request):
             **filters, current_user=request.user
         )
 
-    is_user_countries_in_sws = SwsCountry.objects.filter(
-        country__in=get_user_destinations(request.user)
-    ).exists()
+    has_orgs = len(get_user_organisations(request.user)) > 0
 
     context = {
         "filter_form": filter_form,
@@ -59,7 +55,7 @@ def user_overview(request):
         "preferences_per_destination_country": preferences_per_destination_country_responses,
         "preferences_selected_user_language": preferences_by_language_responses,
         "work_code_usage": preferences_by_organisation_responses,
-        "is_user_countries_in_sws": is_user_countries_in_sws,
+        "has_orgs": has_orgs,
     }
     return render(request, "preference/user_overview.html", context=context)
 
