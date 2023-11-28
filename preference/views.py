@@ -44,8 +44,6 @@ def user_overview(request):
             **filters, current_user=request.user
         )
 
-    has_orgs = len(get_user_organisations(request.user)) > 0
-
     context = {
         "filter_form": filter_form,
         "total_user_overview_responses": total_user_overview_responses,
@@ -55,7 +53,7 @@ def user_overview(request):
         "preferences_per_destination_country": preferences_per_destination_country_responses,
         "preferences_selected_user_language": preferences_by_language_responses,
         "work_code_usage": preferences_by_organisation_responses,
-        "has_orgs": has_orgs,
+        "has_orgs": len(get_user_organisations(request.user)) > 0,
     }
     return render(request, "preference/user_overview.html", context=context)
 
