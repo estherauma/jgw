@@ -119,7 +119,7 @@
 
 <div class="row mb-3">
 
-    {% if user.is_authenticated %}
+    {% if has_orgs or user.is_superuser %}
         <div class="col-md-8">
             <div class="card h-100">
                 <div class="card-body">
