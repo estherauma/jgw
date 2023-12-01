@@ -21,6 +21,7 @@ from events.models import (
     ChaptersFeedbackQuestion,
     ChaptersFeedbackResponse,
     ChaptersFeedbackStandard,
+    Chapter,
 )
 from events.tasks import translate_and_clean_chapter_feedback_fields
 from preference.models import Preference
@@ -112,9 +113,7 @@ def separate_feedback_standard_fields_from_others(chapter_feedback):
 def add_chapter_feedback_to_db(chapter_feedback):
     chapter_feedback_parts = separate_feedback_standard_fields_from_others(chapter_feedback)
     standard_fields_dict = chapter_feedback_parts["standard_fields_dict"]
-
     feedback_data = chapter_feedback_parts["feedback_list"][0]
-
     feedback_title = feedback_data.get("key")
     data_source_id = standard_fields_dict.get("_id")
 
@@ -170,9 +169,10 @@ def add_chapter_feedback_to_db(chapter_feedback):
     }
 
     chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
-
+    print(feedback_data)
     feedback_data_value = feedback_data.get("value")
     feedback_data_value_list = list(feedback_data_value.items())
+    feedback_data_key = feedback_data.get("key")
 
     for feedback in feedback_data_value_list:
         feedback_data_question = feedback[0]
@@ -182,10 +182,13 @@ def add_chapter_feedback_to_db(chapter_feedback):
         )
         feedback_question, _ = ChaptersFeedbackQuestion.objects.get_or_create(question=feedback_data_question)
 
+        chapter_instance, _ = Chapter.objects.get_or_create(number_key=feedback_data_key)
+
         ChaptersFeedback.objects.create(
             feedback_standard=chapters_feedback_standard,
             feedback_question=feedback_question,
             feedback_response=feedback_response,
+            chapter = chapter_instance
         )
 
     sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)

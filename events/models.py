@@ -172,7 +172,7 @@ class ChaptersFeedback(models.Model):
     feedback_standard = models.ForeignKey(ChaptersFeedbackStandard, on_delete=models.CASCADE, null=True)
     feedback_question = models.ForeignKey(ChaptersFeedbackQuestion, on_delete=models.DO_NOTHING, null=True)
     feedback_response = models.ForeignKey(ChaptersFeedbackResponse, on_delete=models.DO_NOTHING, null=True)
-    # chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True, blank=False)
+    chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True, blank=False)
 
     def __str__(self):
         return self.feedback_question.question
