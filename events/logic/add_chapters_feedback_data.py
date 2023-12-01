@@ -169,7 +169,6 @@ def add_chapter_feedback_to_db(chapter_feedback):
     }
 
     chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
-    print(feedback_data)
     feedback_data_value = feedback_data.get("value")
     feedback_data_value_list = list(feedback_data_value.items())
     feedback_data_key = feedback_data.get("key")
