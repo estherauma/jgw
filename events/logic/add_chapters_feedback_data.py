@@ -16,6 +16,7 @@ from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import parse_api_date, todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
+from events.logic.process_chapters import is_chapter_feedback_key
 from events.models import (
     ChaptersFeedback,
     ChaptersFeedbackQuestion,
@@ -110,12 +111,17 @@ def separate_feedback_standard_fields_from_others(chapter_feedback):
     return {"feedback_list": feedback_list, "standard_fields_dict": standard_fields}
 
 
-def add_chapter_feedback_to_db(chapter_feedback):
+def add_chapter_feedback_to_db(chapter_feedback):    
     chapter_feedback_parts = separate_feedback_standard_fields_from_others(chapter_feedback)
     standard_fields_dict = chapter_feedback_parts["standard_fields_dict"]
     feedback_data = chapter_feedback_parts["feedback_list"][0]
     feedback_title = feedback_data.get("key")
     data_source_id = standard_fields_dict.get("_id")
+    
+    feedback_data_key = feedback_data.get("key")
+    
+    if not is_chapter_feedback_key(feedback_data_key):
+        return
 
     if ChaptersFeedbackStandard.objects.filter(data_source_id=data_source_id).exists():
         return
@@ -171,7 +177,6 @@ def add_chapter_feedback_to_db(chapter_feedback):
     chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
     feedback_data_value = feedback_data.get("value")
     feedback_data_value_list = list(feedback_data_value.items())
-    feedback_data_key = feedback_data.get("key")
 
     for feedback in feedback_data_value_list:
         feedback_data_question = feedback[0]

@@ -10,17 +10,13 @@ def get_chapters_from_chapter_feedback(chapter_feedback_dictionary):
     return {key: chapter_feedback_dictionary[key] for key in filtered_keys}
 
 
-def process_chapter_feedback(chapter_feedback_dictionary):
-    print("chapter_feedback_dictionary:::", chapter_feedback_dictionary)
-    pass
+def is_chapter_feedback(chapter_feedback_dictionary):
+    return len(get_chapters_from_chapter_feedback(chapter_feedback_dictionary)) > 0
 
-
-cp_feedback = {
-    "_id": "64f2237b636a8f3d130d4c2c",
-    "deviceId": "481aad5608104cc4",
-    "1_5": {"wasThisHelpful": "smile"},
-    "__v": 0,
-    "1_1": {"wasThisHelpful": "fake"},
-    "1_7": {"wasThisHelpful": "smile"},
-}
-print(get_chapters_from_chapter_feedback(cp_feedback))
+def is_chapter_feedback_key(input_string: str):
+    pattern = r'^\d+_\d+$'
+    
+    if re.match(pattern, input_string):
+        return True
+    else:
+        return False
