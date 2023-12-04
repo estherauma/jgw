@@ -3,7 +3,6 @@ from core.filters import generic_filter_form_parser
 
 from core.forms import GenericFilterForm
 from core.logic.file_export import generate_and_export_excel
-from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
 from preference.repository.preference_repository import (
     preference_stats_for_export,
     preferences_by_age,
@@ -54,12 +53,14 @@ def user_overview(request):
         "preferences_per_destination_country": preferences_per_destination_country_responses,
         "preferences_selected_user_language": preferences_by_language_responses,
         "work_code_usage": preferences_by_organisation_responses,
+        "has_orgs": len(get_user_organisations(request.user)) > 0,
     }
     return render(request, "preference/user_overview.html", context=context)
 
 
 def export_preference_stats(request):
     if request.method == "POST":
+
         filter_form = GenericFilterForm(request=request, data=request.POST)
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
