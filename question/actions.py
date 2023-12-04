@@ -4,7 +4,7 @@ from django.http import HttpResponse
 import openpyxl
 
 
-def export_unique_questions(self, request, queryset):
+def export_responses(self, request, queryset):
     """Exports questions unique by the route and question text"""
     
     unique_by_route_and_question_text_qs = queryset.select_related(

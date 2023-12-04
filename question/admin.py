@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from question.actions import export_unique_questions
+from question.actions import export_responses
 from question.models import (
     MessagingResponse,
     InlineQuestion,
@@ -31,7 +31,7 @@ class InlineQuestionResponseTextAdminDisplay(admin.ModelAdmin):
 @admin.register(InlineQuestion)
 class InlineQuestionAdmin(admin.ModelAdmin):
     list_display = ["question_text", "question_title_text", "question_route"]
-    actions = [export_unique_questions]
+    actions = [export_responses]
 
     @classmethod
     def question_title_text(cls, obj):
