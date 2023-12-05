@@ -17,10 +17,12 @@ from common.helpers.model_helpers.preference import (
 )
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
-from common.utils.date_utils import previous_dates, todays_date
+from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
+from common.utils.helpers import can_use_cached_data
 from preference.models import Preference
 from preference.tasks import translate_and_clean_preferences_fields
+from scripts.load_dev_data import PreferenceDataCache
 
 
 
@@ -28,7 +30,10 @@ kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
 
 
 def fetch_preferences_from_api(client):
-    start_date= APPLICATION_POSSIBLE_START_DATE
+    if can_use_cached_data:
+        return PreferenceDataCache().get_data()
+    
+    # start_date= APPLICATION_POSSIBLE_START_DATE
     end_date= todays_date()
     
     # get the last time preferences were fetched
@@ -36,7 +41,7 @@ def fetch_preferences_from_api(client):
     if latest_preference:
         start_date = latest_preference.created_at.strftime("%Y-%m-%d")
         
-    return client.get_data(f"/preferences?startDate={start_date}&endDate={end_date}")
+    return client.get_data(f"/preferences?startDate={end_date}&endDate={end_date}")
 
 
 @transaction.atomic
