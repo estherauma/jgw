@@ -60,12 +60,25 @@ class OneTimeEventJob(TimestampedModel):
         return self.name
 
 
+class Chapter(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    number_key = models.CharField(max_length=10)
+    chapter_text = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return self.number_key
+
+
 class ChaptersOpened(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     event_created_at = models.DateTimeField(null=True, blank=True)
     event_updated_at = models.DateTimeField(null=True, blank=True)
     event_name = models.CharField(max_length=255)
+    chapter = models.ForeignKey(
+        Chapter, null=True, blank=True, on_delete=models.SET_NULL, related_name="chapter_opened_chapters"
+    )
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
@@ -133,16 +146,6 @@ class ChaptersFeedbackStandard(models.Model):
 
     def __str__(self):
         return self.data_source_id
-
-
-class Chapter(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    number_key = models.CharField(max_length=10)
-    chapter_text = models.CharField(max_length=255, null=True, blank=True)
-
-    def __str__(self):
-        return self.number_key
 
 
 class ChaptersFeedbackResponse(models.Model):
