@@ -172,10 +172,27 @@ class ChaptersFeedbackQuestion(models.Model):
 class ChaptersFeedback(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    feedback_standard = models.ForeignKey(ChaptersFeedbackStandard, on_delete=models.CASCADE, null=True)
-    feedback_question = models.ForeignKey(ChaptersFeedbackQuestion, on_delete=models.DO_NOTHING, null=True)
-    feedback_response = models.ForeignKey(ChaptersFeedbackResponse, on_delete=models.DO_NOTHING, null=True)
-    chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True, blank=False)
+    feedback_standard = models.ForeignKey(
+        ChaptersFeedbackStandard,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="chapterfeedback_feedback_standards",
+    )
+    feedback_question = models.ForeignKey(
+        ChaptersFeedbackQuestion,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        related_name="chapterfeedback_feedback_questions",
+    )
+    feedback_response = models.ForeignKey(
+        ChaptersFeedbackResponse,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        related_name="chapterfeedback_feedback_responses",
+    )
+    chapter = models.ForeignKey(
+        Chapter, on_delete=models.SET_NULL, null=True, blank=False, related_name="chapterfeedback_chapters"
+    )
 
     def __str__(self):
         return self.feedback_question.question
