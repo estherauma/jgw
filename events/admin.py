@@ -1,5 +1,5 @@
 from django.contrib import admin
-from events.actions import links_click
+from events.actions import download_links_click
 
 from events.models import (
     BigQueryChaptersData,
@@ -43,4 +43,4 @@ admin.site.register(Chapter, ChapterAdminDisplay)
 @admin.register(LinksClickEvent)
 class LinksClickEventAdmin(admin.ModelAdmin):
     list_display = ["event_name", "link"]
-    actions = [links_click]
+    actions = [download_links_click]

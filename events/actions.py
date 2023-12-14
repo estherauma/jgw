@@ -2,7 +2,7 @@ from django.http import HttpResponse
 import openpyxl
 
 
-def links_click(self, request, queryset):
+def download_links_click(self, request, queryset):
     links_clicks = queryset.values("event_name", "link", "event_date")
     response = HttpResponse(content_type="application/ms-excel")
     response["Content-Disposition"] = "attachment; filename=links-click-data.xlsx"
