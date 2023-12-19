@@ -2,8 +2,9 @@ import os
 import numpy as np
 import pandas as pd
 
-def save_as_excel(df, file_name='file'):
-    excel_writer = pd.ExcelWriter(f'{file_name}.xlsx', engine='openpyxl')
+
+def save_as_excel(df, file_name="file"):
+    excel_writer = pd.ExcelWriter(f"{file_name}.xlsx", engine="openpyxl")
     df.to_excel(excel_writer, index=False)
     excel_writer.close()
 
@@ -20,7 +21,7 @@ def dictionary_from_two_lists(labels, values):
         values (_list_): to be used as values
 
     Returns:
-        _type_: returns a dictionary 
+        _type_: returns a dictionary
     """
     new_dict = {}
 
@@ -29,3 +30,7 @@ def dictionary_from_two_lists(labels, values):
         new_dict[label] = value
 
     return new_dict
+
+
+def can_use_cached_data():
+    return os.environ.get("DEBUG") and os.environ.get("DATA_FROM_FILE")
