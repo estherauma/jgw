@@ -23,7 +23,6 @@ from users.utils import get_user_organisations
 
 
 def messaging_question(request):
-
     if request.method == "GET":
         filter_form = MessagingQuestionFilterForm(request=request)
         total_messaging_questions = messaging_questions_count(current_user=request.user)
@@ -80,7 +79,6 @@ def export_messaging_question_stats(request):
 
 
 def inline_question(request):
-
     if request.method == "GET":
         filter_form = InlineQuestionFilterForm(request=request)
         total_inline_question_responses = inline_question_responses_count(current_user=request.user)

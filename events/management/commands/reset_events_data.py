@@ -9,6 +9,7 @@ from events.models import (
     ChaptersFeedbackStandard, 
     ChaptersOpened,
     SwsPasiEvent,
+    Chapter,
 )
 
 
@@ -27,6 +28,7 @@ class Command(BaseCommand):
         ChaptersFeedback.objects.all().delete()
         ChaptersFeedbackResponse.objects.all().delete()
         ChaptersFeedbackQuestion.objects.all().delete()
+        Chapter.objects.all().delete()
         
         BigQueryFirstOpenHomepageData.objects.all().delete()
         BigQueryChaptersData.objects.all().delete()
