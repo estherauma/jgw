@@ -4,6 +4,7 @@ from events.repository.bigquery_chapters_feedback_repository import get_chapters
 
 from events.repository.chapters_opened_repository import get_chapters_opened
 
+
 # Create your views here.
 def what_matters_to_workers(request):
     chapters_opened = get_chapters_opened()
@@ -15,7 +16,6 @@ def what_matters_to_workers(request):
 
 def export_what_matters_to_workers_stats(request):
     if request.method == "POST":
-
         chapters_feedback_breakdown = get_chapters_feedback()
         chapters_feedback = {}
         for fb in chapters_feedback_breakdown:
