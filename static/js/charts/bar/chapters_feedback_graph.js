@@ -1,35 +1,34 @@
 function chapterFeedBackGraph(feedbackParams) {
-  feedbackParams.map( (feedbackParam) => {
-    const question = feedbackParam["question"]
-    const data = feedbackParam["data"]
-
-    if (question === "wasThisHelpful") {
-      plotGraph("was-this-helpful-graph-id", data)
-    }
-  })
-}
-
-function plotGraph(id, feedbackParam, backgroundColor = COLORS.appleGreen) {
-  const data = feedbackParam["counts"];
-  const labels = feedbackParam["labels"];
+  const labels = feedbackParams.map(item => item.number_key);
+  const frownsData = feedbackParams.map(item => item.frowns);
+  const smilesData = feedbackParams.map(item => item.smiles);
+  const data = [...smilesData, ...frownsData]
 
   const chartConfig = {
-    type: "bar",
+    type: 'bar',
     data: {
       labels: labels,
       datasets: [
         {
-          data: data,
-          backgroundColor: backgroundColor,
+          label: 'Frowns',
+          data: frownsData,
+          backgroundColor: COLORS.navyBlue,
           barThickness: 15,
-        }
-      ],
+      },{
+        label: 'Smiles',
+        data: smilesData,
+        backgroundColor: COLORS.appleGreen,
+        barThickness: 15,
+      }
+    ]
     },
     options: {
       indexAxis: "y",
       scales: {
+        x:{ stacked: true },
         y: {
           beginAtZero: true,
+          stacked: true,
           grid: {
             drawBorder: false,
             display: false,
@@ -40,7 +39,7 @@ function plotGraph(id, feedbackParam, backgroundColor = COLORS.appleGreen) {
       responsive: true,
       plugins: {
         legend: {
-          display: false,
+          display: true,
         },
         scrollbar: {
           enabled: true,
@@ -49,5 +48,5 @@ function plotGraph(id, feedbackParam, backgroundColor = COLORS.appleGreen) {
     },
   };
 
-  scrollableVerticalBarChart( id, data, chartConfig );
+  scrollableVerticalBarChart( "was-this-helpful-graph-id", data, chartConfig )
 }
