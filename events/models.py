@@ -216,3 +216,14 @@ class SwsPasiEvent(models.Model):
 
     def __str__(self) -> str:
         return self.event_name
+
+
+class LinksClickEvent(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    event_date = models.DateField()
+    event_name = models.CharField(max_length=100)
+    link = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self) -> str:
+        return self.link

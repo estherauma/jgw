@@ -52,7 +52,7 @@ event_to_title = {
     "ChapterOpened_3_6": "Complaints and grievances",
     "ChapterOpened_3_7": "Resignation and dismisal",
     "ChapterOpened_3_8": "Trade Unions",
-    "ChapterOpened_3_9": "Accomodation"
+    "ChapterOpened_3_9": "Accomodation",
 }
 
 
@@ -60,11 +60,11 @@ class AppEvents(BaseAnalytics):
     def __init__(self, filters: QueryMap = None) -> None:
         self.raw_df, self.cleaned = self.get_data(filters=filters), True
         self.export_csv_name = "app_events.csv"
-    
+
     def _get_chapters_feedback_data(self, start_date=None, end_date=None):
         chapter_feedback, clean = api.get_data(key="chapter_feedback")
         chapter_feedback_df = pd.DataFrame.from_records(chapter_feedback)
-        
+
         if start_date and end_date:
             time_range = f"{start_date},{end_date}"
             chapter_feedback_df = self.filter_by_timeRange(time_range=time_range, df=chapter_feedback_df)
@@ -72,14 +72,16 @@ class AppEvents(BaseAnalytics):
         new_column_names = {i.replace("ChapterOpened_", ""): v for i, v in event_to_title.items()}
         chapter_feedback_df = chapter_feedback_df.rename(columns=new_column_names)
         chapter_feedback_df = chapter_feedback_df.fillna("")
-        
+
         if not chapter_feedback_df.empty:
-            columns_in_new_column_names_and_chapter_feedback_df = [col for col in new_column_names.values() if col in chapter_feedback_df.columns]
+            columns_in_new_column_names_and_chapter_feedback_df = [
+                col for col in new_column_names.values() if col in chapter_feedback_df.columns
+            ]
             chapter_feedback_df = chapter_feedback_df[columns_in_new_column_names_and_chapter_feedback_df]
-            
+
         return chapter_feedback_df
-    
-    def bigquery_chapters_data(self,start_date=None, end_date=None):
+
+    def bigquery_chapters_data(self, start_date=None, end_date=None):
         chapters_query = f"""
             SELECT 
                 DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
@@ -101,12 +103,12 @@ class AppEvents(BaseAnalytics):
                 event_name LIKE 'ChapterOpened%' AND DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
         """
         chapters_data_df = client.query(chapters_query).to_dataframe()
-        chapters_data_dict = chapters_data_df.to_dict('records')
-        
+        chapters_data_dict = chapters_data_df.to_dict("records")
+
         return chapters_data_dict
-    
-    def bigquery_firstopen_homepage_data(self,start_date=None, end_date=None):
-        bigquery_firstopen_homepage_query =f"""
+
+    def bigquery_firstopen_homepage_data(self, start_date=None, end_date=None):
+        bigquery_firstopen_homepage_query = f"""
                 SELECT 
                     COUNT(DISTINCT user_pseudo_id) as users,
                     COUNT(event_timestamp) AS count,
@@ -121,77 +123,75 @@ class AppEvents(BaseAnalytics):
                     event_date, event_name
             """
         bigquery_firstopen_homepage_df = client.query(bigquery_firstopen_homepage_query).to_dataframe()
-        bigquery_firstopen_homepage_df_dict = bigquery_firstopen_homepage_df.to_dict('records')
-        
+        bigquery_firstopen_homepage_df_dict = bigquery_firstopen_homepage_df.to_dict("records")
+
         return bigquery_firstopen_homepage_df_dict
-        
+
     def chapters_opened_data(self, start_date=None, end_date=None):
-        chapters_data = list(BigQueryChaptersData.objects.filter(
-                event_date__range=[start_date, end_date]
-        ).values('chapters', 'users', 'count'))
-        
+        chapters_data = list(
+            BigQueryChaptersData.objects.filter(event_date__range=[start_date, end_date]).values(
+                "chapters", "users", "count"
+            )
+        )
+
         chapters_df = pd.DataFrame(chapters_data)
 
         if not chapters_df.columns.empty:
-            chapters_df = chapters_df.rename(columns={'users': 'Users', 'count': 'Count', 'chapters': 'chapters'})
+            chapters_df = chapters_df.rename(
+                columns={"users": "Users", "count": "Count", "chapters": "chapters"}
+            )
             chapters_df["chapters"] = chapters_df["chapters"].replace(event_to_title)
             chapters_df = chapters_df.set_index("chapters")
 
         chapters_df = chapters_df.groupby(level=0).sum()
         if len(chapters_df.columns):
-            chapters_df.sort_values(by='Count', ascending=False, inplace=True)
+            chapters_df.sort_values(by="Count", ascending=False, inplace=True)
 
         return chapters_df
-    
+
     def total_intalls_data(self, start_date=None, end_date=None):
         total_installs_data = BigQueryFirstOpenHomepageData.objects.filter(
-                event_date__range=[start_date, end_date],
-                event_name='first_open'
-        ).aggregate(
-            users=Coalesce(Sum('users'), Value(0)), 
-            count=Coalesce(Sum('count'), Value(0))
-        )
-        total_installs_df = pd.DataFrame({'total_installs': [total_installs_data.get("users")]})
-        
+            event_date__range=[start_date, end_date], event_name="first_open"
+        ).aggregate(users=Coalesce(Sum("users"), Value(0)), count=Coalesce(Sum("count"), Value(0)))
+        total_installs_df = pd.DataFrame({"total_installs": [total_installs_data.get("users")]})
+
         return total_installs_df
-    
+
     def get_first_open_home_page(self, event_name, start_date=None, end_date=None):
         data = BigQueryFirstOpenHomepageData.objects.filter(
-                event_date__range=[start_date, end_date],
-                event_name=event_name
-        ).values('event_date', 'users')
+            event_date__range=[start_date, end_date], event_name=event_name
+        ).values("event_date", "users")
 
         df = pd.DataFrame(data)
 
         if not df.columns.empty:
-            df =  df.drop_duplicates(subset='event_date')
-            df['event_date'] = pd.to_datetime(df['event_date'])
+            df = df.drop_duplicates(subset="event_date")
+            df["event_date"] = pd.to_datetime(df["event_date"])
             df = df.set_index("event_date")
             date_range = pd.date_range(start=start_date, end=end_date)
             df = df.reindex(date_range)
-            df = df['users'].fillna(0)
-            df.index = df.index.strftime('%b %d')
+            df = df["users"].fillna(0)
+            df.index = df.index.strftime("%b %d")
 
-        return df      
+        return df
 
     def get_data(self, filters: QueryMap = None, start=None, end=None):
         end_date = end if end else previous_dates(days=1)
         start_date = start if start else end_date
         if filters is not None and not isinstance(filters, str):
             start_date = TIME_RANGE.get(filters.get("time_range"))
-            
+
         # total installs data
         installs = self.total_intalls_data(start_date=start_date, end_date=end_date)
 
         # chapters_opened_data
         chapters_df = self.chapters_opened_data(start_date=start_date, end_date=end_date)
-        
+
         # chapter_feedback_df
         chapter_feedback_df = self._get_chapters_feedback_data()
-              
+
         return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
-    
-        
+
     def query_to_dataframe(self, query):
         return client.query(query).to_dataframe()
 
@@ -216,7 +216,7 @@ class AppEvents(BaseAnalytics):
         total_installs = data["total_installs"].to_dict(orient="records")[0]
         _stats.update(total_installs)
         return _stats
-    
+
     def bigquery_SWS_PASI_events(self, start_date=None, end_date=None):
         SWS_PASI_events_query = f"""
         SELECT 
@@ -241,8 +241,28 @@ class AppEvents(BaseAnalytics):
             AND 
             DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
         """
-        
+
         SWS_PASI_events_df = client.query(SWS_PASI_events_query).to_dataframe()
-        SWS_PASI_events_dict = SWS_PASI_events_df.to_dict('records')
-        
+        SWS_PASI_events_dict = SWS_PASI_events_df.to_dict("records")
+
         return SWS_PASI_events_dict
+
+    def bigquery_links_click_event(self, start_date=None, end_date=None):
+        links_click_query = f"""
+            SELECT
+                    DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+                    event_name, 
+                    (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'link') AS link,
+                    -- age, language, gender, organisationSector, deviceId, appId, organisation, locale, destinationState, destination
+            FROM 
+                `just-good-work.analytics_191478110.events_*` 
+            WHERE 
+                event_name in ("Sub_Chapter_link", "partner_Chapter_link", "message_link", "Emergency_help_link") 
+            AND 
+                DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
+        """
+
+        links_click_event_df = client.query(links_click_query).to_dataframe()
+        links_click_event_dict = links_click_event_df.to_dict("records")
+
+        return links_click_event_dict

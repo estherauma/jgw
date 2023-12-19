@@ -13,6 +13,7 @@ from dashboard.management.commands.add_genders import add_new_genders
 from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
 from events.logic.add_chapters_feedback_data import fetch_chapters_feedback_from_api_to_db
 from events.logic.add_chapters_opened_data import fetch_chapters_opened_data_from_api_to_db
+from events.logic.add_links_click_data import fetch_links_click_events_from_api_to_db
 from events.logic.add_sws_pasi_data import fetch_sws_pasi_events_from_api_to_db
 from help_contacts.logic.add_help_contacts_logic import fetch_help_contacts_from_api_to_db
 from jgwpandas.settings import EMAIL_HOST_USER
@@ -30,6 +31,7 @@ from dashboard.models import JGWCache
 
 client = translate.Client()
 
+
 def translate_to_eng(text, client=client):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
@@ -38,22 +40,26 @@ def translate_to_eng(text, client=client):
         return result["translatedText"]
     return text
 
+
 def fetch_data_from_jgw_api():
     fetch_preferences_from_api_to_db()
     fetch_inline_questions_from_api_to_db()
     fetch_messaging_questions_from_api_to_db()
-    
+
     fetch_chapters_opened_data_from_api_to_db()
     fetch_chapters_feedback_from_api_to_db()
     fetch_sws_pasi_events_from_api_to_db()
-    
+
     fetch_help_contacts_from_api_to_db()
-    
+
+    fetch_links_click_events_from_api_to_db()
+
     # should always come last
     attach_countries_to_state()
-    
+
+
 @shared_task(name="get_jgw_data")
-def fetch_API_data():    
+def fetch_API_data():
     # fetch data from api v2
     fetch_data_from_jgw_api()
 
@@ -96,6 +102,7 @@ def clean_data(category):
         result.save()
     return
 
+
 @shared_task(name="fetch_summerberry_data")
 def summerberry_data():
     logger = KunfuPandaLogger(log_file="logs/summerberry-api.log")
@@ -106,9 +113,8 @@ def summerberry_data():
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": "Basic " + base64.b64encode(
-            (auth_api_username + ":" + auth_api_password).encode("utf-8")
-        ).decode("utf-8")
+        "Authorization": "Basic "
+        + base64.b64encode((auth_api_username + ":" + auth_api_password).encode("utf-8")).decode("utf-8"),
     }
     response = requests.get(auth_api_url, headers=headers)
     if response.status_code != 200:
