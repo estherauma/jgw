@@ -6,14 +6,27 @@ from django.core.management import call_command
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
-from preference.management.commands.reset_preferences_and_co_tables import reset_preferences_and_dependant_tables
-from question.management.commands.reset_inline_question_tables_and_co import reset_inline_questions_and_dependant_tabels
+from preference.management.commands.reset_preferences_and_co_tables import (
+    reset_preferences_and_dependant_tables,
+)
+from question.management.commands.reset_inline_question_tables_and_co import (
+    reset_inline_questions_and_dependant_tabels,
+)
 from question.models import InlineQuestionStandard
 
 
 class JsonFileDataCache(ABC):
     def __init__(self, file_name):
         self.file_name = file_name
+        self.directory = "dev/data"
+        self.create_directory_if_not_exists()
+
+    def create_directory_if_not_exists(self):
+        if not os.path.exists(self.directory):
+            os.makedirs(self.directory)
+            print(f"Directory '{self.directory}' created.")
+        else:
+            print(f"Directory '{self.directory}' already exists.")
 
     def get_data(self):
         if os.path.exists(self.file_name):
@@ -62,8 +75,7 @@ def run():
     # preferences
     reset_preferences_and_dependant_tables()
     PreferenceDataCache().get_data()
-    
+
     # add inline questions
     reset_inline_questions_and_dependant_tabels()
     InlineQuestionDataCache().get_data()
-
