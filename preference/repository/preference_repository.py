@@ -5,10 +5,10 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from preference.filters import preference_filtered_queryset
 from preference.models import Organisation, Preference
+from users.utils import get_user_organisations
 
 
 def preferences_count(**filters):
-
     queryset = Preference.objects.all()
 
     preferences_count_queryset = preference_filtered_queryset(queryset=queryset, **filters)
@@ -17,7 +17,6 @@ def preferences_count(**filters):
 
 
 def preferences_by_age(**filters):
-
     preferences_age_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
 
     age_counts = (
@@ -126,7 +125,8 @@ def preferences_by_language(**filters):
 
 
 def preferences_by_organisation(**filters):
-    organisation_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
+    user_orgs = get_user_organisations(filters["current_user"])
+    organisation_queryset = Preference.objects.filter(organisation__in=user_orgs)
 
     organisation_counts = (
         organisation_queryset.values("organisation__name")
