@@ -8,13 +8,15 @@ from question.models import (
     InlineQuestionResponseText,
 )
 
+def reset_inline_questions_and_dependant_tabels():
+    InlineQuestionStandard.objects.all().delete()
+    InlineQuestion.objects.all().delete()
+    InlineQuestionText.objects.all().delete()
+    InlineQuestionResponse.objects.all().delete()
+    InlineQuestionResponseText.objects.all().delete()
+    
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        InlineQuestionStandard.objects.all().delete()
-        InlineQuestion.objects.all().delete()
-        InlineQuestionText.objects.all().delete()
-        InlineQuestionResponse.objects.all().delete()
-        InlineQuestionResponseText.objects.all().delete()
-
+        reset_inline_questions_and_dependant_tabels()
         self.stdout.write(self.style.SUCCESS("Successfully reset questions tables and co tables"))

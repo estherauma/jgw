@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0021_linksclickevent'),
-        ('events', '0022_auto_20231211_0626'),
+        ("events", "0021_linksclickevent"),
+        ("events", "0022_auto_20231211_0626"),
     ]
 
-    operations = [
-    ]
+    operations = []

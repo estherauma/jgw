@@ -1,7 +1,5 @@
 from django.db import transaction
 import re
-import os
-from django.core.management import call_command
 
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.custom_libs.google_translate import pandas_translator_translate
@@ -17,6 +15,7 @@ from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
+from common.utils.helpers import can_use_cached_data
 from preference.utils import format_text_for_db
 from question.models import (
     InlineQuestion,
@@ -33,18 +32,19 @@ kunfu_panda_logger = KunfuPandaLogger(log_file="logs/inline_question_tasks.log")
 
 
 def fetch_inline_question_from_api(client):
-    if not os.environ.get("DATA_FROM_FILE"):
-        start_date = APPLICATION_POSSIBLE_START_DATE
-        end_date = todays_date()
+    if can_use_cached_data:
+        return InlineQuestionDataCache().get_data()
 
-        # get the last time inline question were fetched
-        latest_inlinequestion = InlineQuestionStandard.objects.last()
-        if latest_inlinequestion:
-            start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
+    start_date = APPLICATION_POSSIBLE_START_DATE
+    end_date = todays_date()
 
-        kunfu_panda_logger.info(f"Fetching inline questions from {start_date} to {end_date}")
-        return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
-    return InlineQuestionDataCache().get_data()
+    # get the last time inline question were fetched
+    latest_inlinequestion = InlineQuestionStandard.objects.last()
+    if latest_inlinequestion:
+        start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
+
+    kunfu_panda_logger.info(f"Fetching inline questions from {start_date} to {end_date}")
+    return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
 
 
 unwanted_fields = [
@@ -108,9 +108,6 @@ def fetch_inline_questions_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     inline_questions = fetch_inline_question_from_api(jgw_api_client)
 
-    # clear db if data from file
-    if not os.environ.get("DATA_FROM_FILE"):
-        call_command("reset_inline_question_tables_and_co")
     for inline_question in inline_questions:
         try:
             add_inline_question_to_db(inline_question)

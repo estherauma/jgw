@@ -168,4 +168,5 @@ manual_clean.py
 /logs/*
 dataframes/common/*.xlsx
 .idea
+dev/data
 /dev/data
