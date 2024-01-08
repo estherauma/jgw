@@ -199,4 +199,4 @@ class CreateNewUserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password', 'organisations', 'factories', 'destinations']
+        fields = ['first_name', 'last_name', 'email', 'password', 'role', 'organisations', 'factories', 'destinations']
