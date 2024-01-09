@@ -51,12 +51,16 @@ def fetch_help_contacts_from_api_to_db():
 
 
 def get_contact_value_and_type(help_contact_dict):
-    if help_contact_dict.get("email"):
-        return {"contact_value": help_contact_dict.get("email"), "contact_type": "email"}
-    elif help_contact_dict.get("phoneNumber"):
-        return {"contact_value": help_contact_dict.get("phoneNumber"), "contact_type": "phone"}
-    else:
-        return {"contact_value": NOT_SPECIFIED, "contact_type": NOT_SPECIFIED}
+    email = help_contact_dict.get("email")
+    phone_number = help_contact_dict.get("phoneNumber")
+
+    if email:
+        return {"contact_value": email, "contact_type": "email"}
+
+    if phone_number:
+        return {"contact_value": phone_number, "contact_type": "phone"}
+
+    return {"contact_value": NOT_SPECIFIED, "contact_type": NOT_SPECIFIED}
 
 
 def add_help_contacts_to_db(help_contact):
