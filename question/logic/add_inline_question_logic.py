@@ -14,7 +14,10 @@ from common.helpers.model_helpers.preference import (
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
-from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
+from common.helpers.preference_helpers.country import (
+    get_data_destination,
+    get_data_origin,
+)
 from common.utils.helpers import can_use_cached_data
 from preference.utils import format_text_for_db
 from question.models import (
@@ -32,7 +35,7 @@ kunfu_panda_logger = KunfuPandaLogger(log_file="logs/inline_question_tasks.log")
 
 
 def fetch_inline_question_from_api(client):
-    if can_use_cached_data:
+    if can_use_cached_data():
         return InlineQuestionDataCache().get_data()
 
     start_date = APPLICATION_POSSIBLE_START_DATE
@@ -75,6 +78,7 @@ unwanted_fields = [
     "destinationState",
     "gender",
     "language",
+    "location_of_potential_work",
 ]
 
 
@@ -104,7 +108,6 @@ def format_inline_question_response_text(text):
 
 @transaction.atomic
 def fetch_inline_questions_from_api_to_db():
-
     jgw_api_client = JustGoodWorkAPIClient()
     inline_questions = fetch_inline_question_from_api(jgw_api_client)
 
@@ -121,7 +124,6 @@ def fetch_inline_questions_from_api_to_db():
 
 
 def add_inline_question_to_db(inline_question):
-
     if isinstance(inline_question, str):
         return
 
@@ -134,8 +136,15 @@ def add_inline_question_to_db(inline_question):
     responses_list = standard_and_other_fields.get("responses_list")
 
     route = standard_fields_dict.get("route") or NOT_SPECIFIED
-    origin = get_origin_and_destination_from_route(route).get("origin")
-    destination = get_origin_and_destination_from_route(route).get("destination")
+
+    location_of_potential_work = standard_and_other_fields.get("location_of_potential_work")
+    origin = get_data_origin(route=route, api_origin=standard_fields_dict.get("locale"))
+    destination = get_data_destination(
+        route=route,
+        api_destination=standard_fields_dict.get("destination"),
+        location_of_potential_work=location_of_potential_work,
+    )
+
     language = standard_fields_dict.get("language")
     organisation_sector = standard_fields_dict.get("organisationSector")
     organisation = standard_fields_dict.get("organisation")

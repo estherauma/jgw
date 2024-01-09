@@ -17,7 +17,10 @@ from common.helpers.model_helpers.preference import (
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import todays_date
-from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
+from common.helpers.preference_helpers.country import (
+    get_data_destination,
+    get_data_origin,
+)
 from common.utils.helpers import can_use_cached_data
 from preference.models import Preference
 from preference.tasks import translate_and_clean_preferences_fields
@@ -28,7 +31,7 @@ kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
 
 
 def fetch_preferences_from_api(client):
-    if can_use_cached_data:
+    if can_use_cached_data():
         return PreferenceDataCache().get_data()
 
     start_date = APPLICATION_POSSIBLE_START_DATE
@@ -75,8 +78,14 @@ def add_preference_to_db(preference):
     age = preference.get("age")
     language = preference.get("language")
     route = preference.get("route") or NOT_SPECIFIED
-    origin = get_origin_and_destination_from_route(route).get("origin")
-    destination = get_origin_and_destination_from_route(route).get("destination")
+
+    origin = get_data_origin(route=route, api_origin=preference.get("locale"))
+    destination = get_data_destination(
+        route=route,
+        api_destination=preference.get("destination"),
+        location_of_potential_work=location_of_potential_work,
+    )
+
     destination_state = preference.get("destinationState")
 
     # related fields
@@ -90,6 +99,7 @@ def add_preference_to_db(preference):
     language_data = get_or_add_language_to_db(language)
     origin_data = get_or_add_country_to_db(origin, source="origin")
     destination_data = get_or_add_country_to_db(destination, source="destination")
+    api_destination_data = get_or_add_country_to_db(preference.get("destination"), source="destination")
     destination_state_data = get_or_add_country_state_to_db(destination_state)
     route_data = get_or_add_route_to_db(route)
 
@@ -111,6 +121,7 @@ def add_preference_to_db(preference):
         organisation_sector=organisation_sector_data,
         factory_farm=factory_farm_data,
         organisation=organisation_data,
+        api_destination=api_destination_data,
     )
 
     # Create SectorsOfWork instances and associate them with the preference
