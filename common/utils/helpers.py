@@ -33,4 +33,4 @@ def dictionary_from_two_lists(labels, values):
 
 
 def can_use_cached_data():
-    return os.environ.get("DEBUG") and os.environ.get("DATA_FROM_FILE")
+    return os.environ.get("DEBUG") == True and os.environ.get("DATA_FROM_FILE") == True

@@ -15,7 +15,10 @@ from common.helpers.model_helpers.preference import (
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
 from common.utils.date_utils import parse_api_date, todays_date
-from common.helpers.preference_helpers.country import get_origin_and_destination_from_route
+from common.helpers.preference_helpers.country import (
+    get_data_destination,
+    get_data_origin,
+)
 from events.logic.process_chapters import is_chapter_feedback_key
 from events.models import (
     ChaptersFeedback,
@@ -47,7 +50,6 @@ def fetch_chapters_feedback_from_api(client):
 
 @transaction.atomic
 def fetch_chapters_feedback_from_api_to_db():
-
     jgw_api_client = JustGoodWorkAPIClient()
     chapters_feedback = fetch_chapters_feedback_from_api(jgw_api_client)
 
@@ -86,6 +88,7 @@ feedback_standard_fields = [
     "updatedAt",
     "destination",
     "destinationState",
+    "location_of_potential_work",
     "age",
     "gender",
     "sectors",
@@ -98,7 +101,6 @@ def separate_feedback_standard_fields_from_others(chapter_feedback):
     non_required_fields = {}
 
     for obj_key, obj_value in chapter_feedback.items():
-
         if obj_key in feedback_standard_fields:
             standard_fields[obj_key] = obj_value
 
@@ -111,15 +113,15 @@ def separate_feedback_standard_fields_from_others(chapter_feedback):
     return {"feedback_list": feedback_list, "standard_fields_dict": standard_fields}
 
 
-def add_chapter_feedback_to_db(chapter_feedback):    
+def add_chapter_feedback_to_db(chapter_feedback):
     chapter_feedback_parts = separate_feedback_standard_fields_from_others(chapter_feedback)
     standard_fields_dict = chapter_feedback_parts["standard_fields_dict"]
     feedback_data = chapter_feedback_parts["feedback_list"][0]
     feedback_title = feedback_data.get("key")
     data_source_id = standard_fields_dict.get("_id")
-    
+
     feedback_data_key = feedback_data.get("key")
-    
+
     if not is_chapter_feedback_key(feedback_data_key):
         return
 
@@ -127,8 +129,15 @@ def add_chapter_feedback_to_db(chapter_feedback):
         return
 
     route = standard_fields_dict.get("route") or NOT_SPECIFIED
-    origin = get_origin_and_destination_from_route(route).get("origin")
-    destination = get_origin_and_destination_from_route(route).get("destination")
+
+    location_of_potential_work = standard_fields_dict.get("location_of_potential_work")
+    origin = get_data_origin(route=route, api_origin=standard_fields_dict.get("locale"))
+    destination = get_data_destination(
+        route=route,
+        api_destination=standard_fields_dict.get("destination"),
+        location_of_potential_work=location_of_potential_work,
+    )
+
     language = standard_fields_dict.get("language")
     organisation_sector = standard_fields_dict.get("organisationSector")
     organisation = standard_fields_dict.get("organisation")
@@ -192,7 +201,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
             feedback_standard=chapters_feedback_standard,
             feedback_question=feedback_question,
             feedback_response=feedback_response,
-            chapter = chapter_instance
+            chapter=chapter_instance,
         )
 
     sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)

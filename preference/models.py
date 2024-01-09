@@ -149,6 +149,9 @@ class Preference(models.Model):
     destination = models.ForeignKey(
         Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="destination"
     )
+    api_destination = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="api_destination"
+    )
     destination_state = models.ForeignKey(
         CountryState, on_delete=models.SET_NULL, null=True, blank=True, related_name="destination_state"
     )
