@@ -34,11 +34,17 @@ def preference_filtered_queryset(
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
 
-    queryset = queryset.filter(
-        Q(organisation__in=user_orgs)
-        | Q(factory_farm__in=user_factories)
-        | Q(destination__in=user_destinations)
-    )
+    combined_orgs_fact_dest_filter = Q()
+    if user_orgs:
+        combined_orgs_fact_dest_filter &= Q(organisation__in=user_orgs)
+
+    if user_factories:
+        combined_orgs_fact_dest_filter &= Q(factory_farm__in=user_factories)
+
+    if user_destinations:
+        combined_orgs_fact_dest_filter &= Q(destination__in=user_destinations)
+
+    queryset = queryset.filter(combined_orgs_fact_dest_filter)
 
     if start_date and end_date:
         queryset = queryset.filter(api_created_at__range=(start_date, end_date))
