@@ -125,8 +125,7 @@ def preferences_by_language(**filters):
 
 
 def preferences_by_organisation(**filters):
-    user_orgs = get_user_organisations(filters["current_user"])
-    organisation_queryset = Preference.objects.filter(organisation__in=user_orgs)
+    organisation_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
 
     organisation_counts = (
         organisation_queryset.values("organisation__name")
