@@ -26,27 +26,25 @@ def preferences_by_age(**filters):
     )
     labels = [age["age__translated_range"].upper() for age in age_counts]
     counts = [age["total"] for age in age_counts]
-
     group_mapping = {
-        "60+": ["60+", "60+"],
+        "60+": ["60+"],
         "51-60": ["51-60"],
-        "41-50": ["41-50"],
-        "31-40": ["31-35", "36-40", "31-40", "36 - 40"],
-        "21-30": ["21-25", "21-30"],
-        "18-20": ["15-18", "15-20", "18-20", "19-20"],
+        "41-50": ["41-50", "40+"],
+        "31-40": ["31-35", "36-40", "31-40", "36 - 40", "31 - 35"],
+        "21-30": ["21-25", "21-30", "26-30", "21 - 25"],
+        "18-20": ["15-18", "15-20", "18-20", "19-20", "15 - 20"],
         "15-17": ["15-17"],
     }
 
     combined_values = {group: 0 for group in group_mapping}
     combined_values["PREFER NOT TO ANSWER"] = 0
-
     for label, value in zip(labels, counts):
         for group, label_list in group_mapping.items():
             if label in label_list:
                 combined_values[group] += value
                 break
         else:
-            if label == "PREFER NOT TO ANSWER":
+            if label == "PREFER NOT TO ANSWER" or label == "PREFERNOTTOANSWER":
                 combined_values["PREFER NOT TO ANSWER"] += value
     final_labels = []
     final_counts = []
