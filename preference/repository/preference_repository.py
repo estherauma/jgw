@@ -112,11 +112,22 @@ def preferences_by_language(**filters):
 
     language_counts = (
         preferences_language_queryset.values("language__translated_name")
+        .annotate(
+            translated_name=Case(
+                When(
+                    language__translated_name="burma",
+                    then=Value("burmese"),
+                ),
+                default=F("language__translated_name"),
+                output_field=CharField(),
+            )
+        )
+        .values("translated_name")
         .annotate(total=Count("id"))
         .order_by("-total")
     )
 
-    labels = [destination["language__translated_name"].upper() for destination in language_counts]
+    labels = [destination["translated_name"].upper() for destination in language_counts]
     counts = [destination["total"] for destination in language_counts]
 
     return {"labels": labels, "counts": counts}
