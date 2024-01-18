@@ -143,12 +143,6 @@ def preferences_by_language(**filters):
         .order_by("-total")
     )
 
-    #     "burma": "burmese",
-    # "": "mandarin",
-    # "": "indonesian",
-    # "": "malay",
-    # "unknown language [qf]": "filipino",
-
     labels = [destination["translated_name"].upper() for destination in language_counts]
     counts = [destination["total"] for destination in language_counts]
 
