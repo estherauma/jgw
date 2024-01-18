@@ -34,39 +34,36 @@ def preference_filtered_queryset(
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
 
-    combined_orgs_fact_dest_filter = Q()
+    preference_filters_q_object = Q()
+
     if user_orgs:
-        combined_orgs_fact_dest_filter &= Q(organisation__in=user_orgs)
+        preference_filters_q_object &= Q(organisation__in=user_orgs)
 
     if user_factories:
-        combined_orgs_fact_dest_filter &= Q(factory_farm__in=user_factories)
+        preference_filters_q_object &= Q(factory_farm__in=user_factories)
 
     if user_destinations:
-        combined_orgs_fact_dest_filter &= Q(destination__in=user_destinations)
-
-    queryset = queryset.filter(combined_orgs_fact_dest_filter)
+        preference_filters_q_object &= Q(destination__in=user_destinations)
 
     if start_date and end_date:
-        queryset = queryset.filter(api_created_at__range=(start_date, end_date))
+        preference_filters_q_object &= Q(api_created_at__range=(start_date, end_date))
 
     if destination_countries:
         current_model_dest_q = Q(destination__name__in=destination_countries) | Q(
             destination__country_states__name__in=destination_countries
         )
-        queryset = queryset.filter(current_model_dest_q)
+        preference_filters_q_object &= current_model_dest_q
 
     if origin_countries:
-        current_model_dest_q = Q(origin__name__in=origin_countries) | Q(
+        current_model_origin_q = Q(origin__name__in=origin_countries) | Q(
             origin__country_states__name__in=origin_countries
         )
-        queryset = queryset.filter(current_model_dest_q)
+        preference_filters_q_object &= current_model_origin_q
 
     if organisations:
-        current_model_dest_q = Q(organisation__name__in=organisations)
-        queryset = queryset.filter(current_model_dest_q)
+        preference_filters_q_object &= Q(organisation__name__in=organisations)
 
     if factory_farms:
-        current_model_dest_q = Q(factory_farm__name__in=factory_farms)
-        queryset = queryset.filter(current_model_dest_q)
+        preference_filters_q_object &= Q(factory_farm__name__in=factory_farms)
 
-    return queryset
+    return queryset.filter(preference_filters_q_object)

@@ -31,47 +31,55 @@ def generic_question_filtered_queryset(
         factory_farms = []
 
     # current user specific orgs and factories filters
+
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
 
-    user_fact_farm_q = Q(preference__factory_farm__in=user_factories) | Q(factory_farm__in=user_factories)
-    user_org_q = Q(preference__organisation__in=user_orgs) | Q(organisation__in=user_orgs)
-    user_destination_q = Q(preference__destination__in=user_destinations) | Q(
-        destination__in=user_destinations
-    )
+    generic_question_filters_q_object = Q()
 
-    user_fact_and_org_q = user_org_q | user_fact_farm_q | user_destination_q
-    queryset = queryset.filter(user_fact_and_org_q)
+    if user_orgs:
+        user_org_q = Q(preference__organisation__in=user_orgs) | Q(organisation__in=user_orgs)
+        generic_question_filters_q_object &= user_org_q
+
+    if user_factories:
+        user_fact_farm_q = Q(preference__factory_farm__in=user_factories) | Q(factory_farm__in=user_factories)
+        generic_question_filters_q_object &= user_fact_farm_q
+
+    if user_destinations:
+        user_destination_q = Q(preference__destination__in=user_destinations) | Q(
+            destination__in=user_destinations
+        )
+        generic_question_filters_q_object &= user_destination_q
 
     if start_date and end_date:
-        queryset = queryset.filter(api_created_at__range=(start_date, end_date))
+        generic_question_filters_q_object &= Q(api_created_at__range=(start_date, end_date))
 
     if destination_countries:
-        preference_dest_q = Q(preference__destination__name__in=destination_countries)
-        current_model_dest_q = Q(destination__name__in=destination_countries)
-        combined_dest_q = preference_dest_q | current_model_dest_q
-        queryset = queryset.filter(combined_dest_q)
+        preference_dest_q = Q(preference__destination__name__in=destination_countries) | Q(
+            destination__name__in=destination_countries
+        )
+        generic_question_filters_q_object &= preference_dest_q
 
     if origin_countries:
-        preference_origin_q = Q(preference__origin__name__in=origin_countries)
-        current_model_dest_q = Q(origin__name__in=origin_countries)
-        combined_origin_q = preference_origin_q | current_model_dest_q
-        queryset = queryset.filter(combined_origin_q)
+        preference_origin_q = Q(preference__origin__name__in=origin_countries) | Q(
+            origin__name__in=origin_countries
+        )
+        generic_question_filters_q_object &= preference_origin_q
 
     if organisations:
-        preference_organisation_q = Q(preference__organisation__name__in=organisations)
-        current_model_dest_q = Q(organisation__name__in=organisations)
-        combined_organisation_q = preference_organisation_q | current_model_dest_q
-        queryset = queryset.filter(combined_organisation_q)
+        preference_organisation_q = Q(preference__organisation__name__in=organisations) | Q(
+            organisation__name__in=organisations
+        )
+        generic_question_filters_q_object &= preference_organisation_q
 
     if factory_farms:
-        preference_factory_farm_q = Q(preference__factory_farm__name__in=factory_farms)
-        current_model_dest_q = Q(factory_farm__name__in=factory_farms)
-        combined_factory_farm_q = preference_factory_farm_q | current_model_dest_q
-        queryset = queryset.filter(combined_factory_farm_q)
+        preference_factory_farm_q = Q(preference__factory_farm__name__in=factory_farms) | Q(
+            factory_farm__name__in=factory_farms
+        )
+        generic_question_filters_q_object &= preference_factory_farm_q
 
-    return queryset
+    return queryset.filter(generic_question_filters_q_object)
 
 
 def question_response_filtered_queryset(
@@ -105,21 +113,29 @@ def question_response_filtered_queryset(
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
 
-    user_fact_farm_q = Q(
-        inline_question__inline_question_standard__preference__factory_farm__in=user_factories
-    ) | Q(inline_question__inline_question_standard__factory_farm__in=user_factories)
-    user_org_q = Q(inline_question__inline_question_standard__preference__organisation__in=user_orgs) | Q(
-        inline_question__inline_question_standard__organisation__in=user_orgs
-    )
-    user_destination_q = Q(
-        inline_question__inline_question_standard__preference__destination__in=user_destinations
-    ) | Q(inline_question__inline_question_standard__destination__in=user_destinations)
+    question_response_filters_q_object = Q()
 
-    user_fact_and_org_q = user_org_q | user_fact_farm_q | user_destination_q
-    queryset = queryset.filter(user_fact_and_org_q)
+    if user_factories:
+        user_fact_farm_q = Q(
+            inline_question__inline_question_standard__preference__factory_farm__in=user_factories
+        ) | Q(inline_question__inline_question_standard__factory_farm__in=user_factories)
+
+        question_response_filters_q_object &= user_fact_farm_q
+
+    if user_orgs:
+        user_org_q = Q(inline_question__inline_question_standard__preference__organisation__in=user_orgs) | Q(
+            inline_question__inline_question_standard__organisation__in=user_orgs
+        )
+        question_response_filters_q_object &= user_org_q
+
+    if user_destinations:
+        user_destination_q = Q(
+            inline_question__inline_question_standard__preference__destination__in=user_destinations
+        ) | Q(inline_question__inline_question_standard__destination__in=user_destinations)
+        question_response_filters_q_object &= user_destination_q
 
     if start_date and end_date:
-        queryset = queryset.filter(
+        question_response_filters_q_object &= Q(
             inline_question__inline_question_standard__preference__api_created_at__range=(
                 start_date,
                 end_date,
@@ -138,7 +154,7 @@ def question_response_filtered_queryset(
             inline_question__inline_question_standard__destination__country_states__name__in=destination_countries
         )
         combined_dest_q = preference_dest_q | current_model_dest_q
-        queryset = queryset.filter(combined_dest_q)
+        question_response_filters_q_object &= combined_dest_q
 
     if origin_countries:
         preference_origin_q = Q(
@@ -152,7 +168,7 @@ def question_response_filtered_queryset(
             inline_question__inline_question_standard__origin__country_states__name__in=destination_countries
         )
         combined_origin_q = preference_origin_q | current_model_dest_q
-        queryset = queryset.filter(combined_origin_q)
+        question_response_filters_q_object &= combined_origin_q
 
     if organisations:
         preference_organisation_q = Q(
@@ -162,7 +178,7 @@ def question_response_filtered_queryset(
             inline_question__inline_question_standard__organisation__name__in=organisations
         )
         combined_organisation_q = preference_organisation_q | current_model_dest_q
-        queryset = queryset.filter(combined_organisation_q)
+        question_response_filters_q_object &= combined_organisation_q
 
     if factory_farms:
         preference_factory_farm_q = Q(
@@ -172,6 +188,6 @@ def question_response_filtered_queryset(
             inline_question__inline_question_standard__factory_farm__name__in=factory_farms
         )
         combined_factory_farm_q = preference_factory_farm_q | current_model_dest_q
-        queryset = queryset.filter(combined_factory_farm_q)
+        question_response_filters_q_object &= combined_factory_farm_q
 
-    return queryset
+    return queryset.filter(question_response_filters_q_object)
