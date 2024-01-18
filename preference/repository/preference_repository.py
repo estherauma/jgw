@@ -118,6 +118,22 @@ def preferences_by_language(**filters):
                     language__translated_name="burma",
                     then=Value("burmese"),
                 ),
+                When(
+                    language__translated_name="unknown language [qc]",
+                    then=Value("mandarin"),
+                ),
+                When(
+                    language__translated_name="unknown language [hq]",
+                    then=Value("indonesian"),
+                ),
+                When(
+                    language__translated_name="unknown language [qm]",
+                    then=Value("malay"),
+                ),
+                When(
+                    language__translated_name="unknown language [qf]",
+                    then=Value("filipino"),
+                ),
                 default=F("language__translated_name"),
                 output_field=CharField(),
             )
@@ -126,6 +142,12 @@ def preferences_by_language(**filters):
         .annotate(total=Count("id"))
         .order_by("-total")
     )
+
+    #     "burma": "burmese",
+    # "": "mandarin",
+    # "": "indonesian",
+    # "": "malay",
+    # "unknown language [qf]": "filipino",
 
     labels = [destination["translated_name"].upper() for destination in language_counts]
     counts = [destination["total"] for destination in language_counts]
