@@ -27,6 +27,7 @@ function inlineQuestionLanguageGraph(langaugeData) {
             maintainAspectRatio: false,
             responsive: true,
             plugins: {
+                ...externalPluginsConfigDataTables(),
                 legend: {
                     display: false
                 },
@@ -34,7 +35,8 @@ function inlineQuestionLanguageGraph(langaugeData) {
                     enabled: true
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels],
     }
 
     scrollableVerticalBarChart('inline-question-language-graph-id', data, chartConfig)

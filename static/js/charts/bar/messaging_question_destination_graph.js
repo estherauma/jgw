@@ -32,6 +32,7 @@ function messagingQuestionDestinationChart(originChartData) {
             maintainAspectRatio: false,
             responsive: true,
             plugins: {
+                ...externalPluginsConfigDataTables(),
                 legend: {
                     display: false
                 },
@@ -39,7 +40,8 @@ function messagingQuestionDestinationChart(originChartData) {
                     enabled: true
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels],
     }
     scrollableVerticalBarChart('messaging-question-destination-chart-id', data, originChartConfig)
 }

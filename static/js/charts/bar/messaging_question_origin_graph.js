@@ -27,6 +27,7 @@ function messagingQuestionOriginChart(originChartData) {
             maintainAspectRatio: false,
             responsive: true,
             plugins: {
+                ...externalPluginsConfigDataTables(),
                 legend: {
                     display: false
                 },
@@ -34,7 +35,8 @@ function messagingQuestionOriginChart(originChartData) {
                     enabled: true
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels],
     }
     scrollableVerticalBarChart('messaging-question-origin-chart-id', data, originChartConfig)
 }

@@ -27,6 +27,7 @@ function inlineQuestionOriginGraph(chartData) {
             maintainAspectRatio: false,
             responsive: true,
             plugins: {
+                ...externalPluginsConfigDataTables(),
                 legend: {
                     display: false
                 },
@@ -34,7 +35,8 @@ function inlineQuestionOriginGraph(chartData) {
                     enabled: true
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels],
     }
 
     scrollableVerticalBarChart('inline-question-destination-graph-id', data, chartConfig)
