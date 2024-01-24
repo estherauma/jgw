@@ -47,7 +47,7 @@ def user_overview(request):
 
     pasi_downloads = (
         get_total_dynamic_link_usage(current_user=request.user)
-        if request.user and request.user.role == "SCHEME"
+        if not request.user.is_anonymous and request.user.role == "SCHEME"
         else 0
     )
 
