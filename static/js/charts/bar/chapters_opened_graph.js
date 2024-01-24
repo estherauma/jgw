@@ -28,6 +28,7 @@ function chaptersOpenedGraph(chaptersOpenedParams) {
         maintainAspectRatio: false,
         responsive: true,
         plugins: {
+          ...externalPluginsConfigDataTables(),
           legend: {
             display: false,
           },
@@ -36,6 +37,7 @@ function chaptersOpenedGraph(chaptersOpenedParams) {
           },
         },
       },
+      plugins: [ChartDataLabels],
     };
   
     scrollableVerticalBarChart(

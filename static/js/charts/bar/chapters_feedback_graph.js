@@ -1,31 +1,32 @@
 function chapterFeedBackGraph(feedbackParams) {
-  const labels = feedbackParams.map(item => item.number_key);
-  const frownsData = feedbackParams.map(item => item.frowns);
-  const smilesData = feedbackParams.map(item => item.smiles);
-  const data = [...smilesData, ...frownsData]
+  const labels = feedbackParams.map((item) => item.number_key);
+  const frownsData = feedbackParams.map((item) => item.frowns);
+  const smilesData = feedbackParams.map((item) => item.smiles);
+  const data = [...smilesData, ...frownsData];
 
   const chartConfig = {
-    type: 'bar',
+    type: "bar",
     data: {
       labels: labels,
       datasets: [
         {
-          label: 'Frowns',
+          label: "Frowns",
           data: frownsData,
           backgroundColor: COLORS.navyBlue,
           barThickness: 15,
-      },{
-        label: 'Smiles',
-        data: smilesData,
-        backgroundColor: COLORS.appleGreen,
-        barThickness: 15,
-      }
-    ]
+        },
+        {
+          label: "Smiles",
+          data: smilesData,
+          backgroundColor: COLORS.appleGreen,
+          barThickness: 15,
+        },
+      ],
     },
     options: {
       indexAxis: "y",
       scales: {
-        x:{ stacked: true },
+        x: { stacked: true },
         y: {
           beginAtZero: true,
           stacked: true,
@@ -48,5 +49,5 @@ function chapterFeedBackGraph(feedbackParams) {
     },
   };
 
-  scrollableVerticalBarChart( "was-this-helpful-graph-id", data, chartConfig )
+  scrollableVerticalBarChart("was-this-helpful-graph-id", data, chartConfig);
 }

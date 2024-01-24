@@ -3,6 +3,7 @@ from django.db.models import Case, When, Value, CharField, F, Count
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
+from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset
 from preference.models import Organisation, Preference
 from users.utils import get_user_organisations
@@ -13,7 +14,7 @@ def preferences_count(**filters):
 
     preferences_count_queryset = preference_filtered_queryset(queryset=queryset, **filters)
 
-    return preferences_count_queryset.count()
+    return format_thousands_with_commas(preferences_count_queryset.count())
 
 
 def preferences_by_age(**filters):

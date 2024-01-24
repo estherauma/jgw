@@ -31,6 +31,7 @@ function inlineQuestionGraph(inlineQuestionData, inlineQuestionCanvasId) {
             maintainAspectRatio: false,
             responsive: true,
             plugins: {
+                ...externalPluginsConfigDataTables(),
                 legend: {
                     display: false
                 },
@@ -38,7 +39,8 @@ function inlineQuestionGraph(inlineQuestionData, inlineQuestionCanvasId) {
                     enabled: true
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels],
     }
 
     scrollableVerticalBarChart(inlineQuestionCanvasId, data, originChartConfig);
