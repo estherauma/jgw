@@ -23,31 +23,6 @@
                     </li>
 
                     <li>
-                        <a href="{% url 'question:inline_question' %}">
-                            <i data-feather="help-circle"></i>
-                            <span> Inline Questions </span>
-                        </a>
-                    </li>
-
-                    <li>
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'question:messaging_question' %}">
-                                <i data-feather="message-square"></i>
-                                <span>Messaging Questions</span>
-                            </a>
-                        {% else %}
-                            <a
-                                href="{% url 'payment:payment_required' %}"
-                                data-bs-toggle="modal" 
-                                data-bs-target="#make-payment-modal"
-                            >
-                                <i data-feather="message-square"></i>
-                                <span>Messaging Questions</span>
-                            </a>
-                        {% endif %}
-                    </li>
-
-                    <li>
                         <a href="{% url 'events:what_matters_to_workers' %}">
                             <i data-feather="activity"></i>
                             <span>What Matters to Workers</span>
