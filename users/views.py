@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from preference.models import Language
 
 from users.tasks import send_email_notification
 
@@ -20,7 +21,8 @@ from .forms import (
     RequestPasswordResetForm,
     SetPasswordForm,
     UpdateUserProfileForm,
-    UserMgtForm, CreateNewUserForm,
+    UserMgtForm,
+    CreateNewUserForm,
 )
 from .models import User, UserInvitations
 from users.templatetags.user_role_tags import has_group
@@ -71,7 +73,7 @@ def login_user(request):
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                if has_group(user, 'Summerberry'):
+                if has_group(user, "Summerberry"):
                     return redirect("dashboard:summerberry-dashboard")
                 else:
                     return redirect("preference:user_overview")
@@ -191,7 +193,7 @@ def profile(request):
 
     if request.method == "POST":
         form = UpdateUserProfileForm(request.POST or None, instance=request.user)
-        if not request.GET.get('tab') or request.GET.get('tab') == 'profile':
+        if not request.GET.get("tab") or request.GET.get("tab") == "profile":
             if form.is_valid():
                 profile.first_name = form.cleaned_data.get("first_name")
                 profile.last_name = form.cleaned_data.get("last_name")
@@ -202,29 +204,31 @@ def profile(request):
             else:
                 messages.error(request, "Error validating form!")
 
-        if request.GET.get('tab') == 'password':
-            old_password = request.POST.get('old_password')
-            new_password = request.POST.get('new_password')
-            confirm_password = request.POST.get('confirm_password')
+        if request.GET.get("tab") == "password":
+            old_password = request.POST.get("old_password")
+            new_password = request.POST.get("new_password")
+            confirm_password = request.POST.get("confirm_password")
             if new_password == confirm_password:
                 if request.user.check_password(old_password):
                     request.user.set_password(new_password)
                     request.user.save()
-                    messages.success(request, 'Password successfully changed!')
+                    messages.success(request, "Password successfully changed!")
                     logout(request)
                     return redirect("users:login_user")
                 else:
-                    messages.error(request, 'Old password does not match!')
+                    messages.error(request, "Old password does not match!")
             else:
-                messages.error(request, 'New password and confirm password do not match!')
+                messages.error(request, "New password and confirm password do not match!")
 
-    form = UpdateUserProfileForm(initial={
-        "first_name": profile.first_name,
-        "last_name": profile.last_name,
-        "email": profile.email,
-        'receive_marketing_emails': profile.receive_marketing_emails,
-    })
-    context = {"profile": profile, 'form': form}
+    form = UpdateUserProfileForm(
+        initial={
+            "first_name": profile.first_name,
+            "last_name": profile.last_name,
+            "email": profile.email,
+            "receive_marketing_emails": profile.receive_marketing_emails,
+        }
+    )
+    context = {"profile": profile, "form": form}
     return render(request, template_name="users/profile.html", context=context)
 
 
@@ -282,10 +286,7 @@ def set_password(request, token):
                     invite = UserInvitations.objects.values(
                         "email", "role", "scheme", "factory", "organisation"
                     ).get(id=invite_id)
-                    user_obj = {
-                        'email': invite['email'],
-                        'role': invite['scheme']
-                    }
+                    user_obj = {"email": invite["email"], "role": invite["scheme"]}
                     User.objects.create_user(**user_obj, password=password, is_active=True)
                 return redirect("users:login_user")
             else:
@@ -359,14 +360,27 @@ def verify_email_change(request, token):
 @login_required
 @admin_required
 def create_new_user(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = CreateNewUserForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
+            user.set_password(form.cleaned_data["password"])
             user.is_active = True
+
+            excepted_languages = form.cleaned_data.get("excepted_languages", [])
+            langs_from_ids = Language.objects.filter(id__in=excepted_languages).values_list(
+                "translated_name", flat=True
+            )
+            all_langs = Language.objects.filter(translated_name__in=langs_from_ids)
+
             user.save()
             form.save_m2m()  # Save the many-to-many relationships
+            
+            new_user = User.objects.filter(id=user.id).first()
+            new_user.excepted_languages.clear()
+            for lang in all_langs:
+                new_user.excepted_languages.add(lang)
+
             messages.success(request, "User created successfully!")
             return redirect("users:create_new_user")
     else:
