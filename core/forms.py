@@ -1,7 +1,7 @@
 from django import forms
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
-from preference.models import Country, CountryState, FactoryFarm, Organisation
+from preference.models import CountryState
 from users.utils import get_user_factories, get_user_organisations, get_user_destinations
 
 

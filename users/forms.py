@@ -3,8 +3,10 @@ from django.forms import ModelForm
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+from django.db.models import Case, When, Value, CharField, F
+from django.db import transaction
 
-from preference.models import Country, Organisation, FactoryFarm
+from preference.models import Country, Language, Organisation, FactoryFarm
 
 from .models import User, UserInvitations
 
@@ -121,6 +123,7 @@ class ChangeEmailForm(forms.Form):
         required=True, widget=forms.EmailInput(attrs={"placeholder": "New Email Address"})
     )
 
+
 class UpdateUserProfileForm(ModelForm):
     class Meta:
         model = User
@@ -131,7 +134,7 @@ class UpdateUserProfileForm(ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control"
 
-            if field == 'receive_marketing_emails':
+            if field == "receive_marketing_emails":
                 self.fields[field].widget.attrs["class"] = "form-check-input"
 
 
@@ -139,64 +142,118 @@ class UserAdminForm(forms.ModelForm):
     class Meta:
         model = User
         fields = [
-            'email', 
-            'password', 
-            'first_name', 
-            'last_name', 
-            'role', 
-            'scheme', 
-            'factories', 
-            'organisations', 
-            'destinations', 
-            'is_staff', 
-            'is_superuser',
-            'is_active', 
-            'receive_marketing_emails'
-            ]
+            "email",
+            "password",
+            "first_name",
+            "last_name",
+            "role",
+            "scheme",
+            "factories",
+            "organisations",
+            "destinations",
+            "excepted_languages",
+            "is_staff",
+            "is_superuser",
+            "is_active",
+            "receive_marketing_emails",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        self.fields['destinations'].queryset = Country.objects.filter(is_destination=True)
+
+        self.fields["destinations"].queryset = Country.objects.filter(is_destination=True)
 
 
 class CreateNewUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
-        self.fields['first_name'].required = True
-        self.fields['last_name'].required = True
-        self.fields['destinations'].choices = [
+
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+        self.fields["destinations"].choices = [
             (country.id, country.name.capitalize()) for country in Country.objects.all()
         ]
         self.fields["factories"].choices = [(farm.id, farm.name) for farm in FactoryFarm.objects.all()]
         self.fields["organisations"].choices = [(org.id, org.name) for org in Organisation.objects.all()]
+        self.fields["excepted_languages"].choices = [
+            (language.id, language.translated_name.capitalize())
+            for language in self.get_unique_langaues_list()
+        ]
+
+    def get_unique_langaues_list(self):
+        lang_list = []
+        language_list = (
+            Language.objects.annotate(
+                new_translated_name=Case(
+                    When(
+                        translated_name="burma",
+                        then=Value("burmese"),
+                    ),
+                    default=F("translated_name"),
+                    output_field=CharField(),
+                )
+            )
+            .values_list("new_translated_name", flat=True)
+            .distinct()
+        )
+        for language in language_list:
+            lang = Language.objects.filter(translated_name=language).first()
+            lang_list.append(lang)
+        return lang_list
 
     organisations = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple(attrs={
-            "class": "form-select selectpicker",
-            "data-live-search": "true",
-            "id": "create-new-user-organisations-id"
-        }),
-        required=False
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "create-new-user-organisations-id",
+            }
+        ),
+        required=False,
     )
     factories = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple(attrs={
-            "class": "form-select selectpicker",
-            "data-live-search": "true",
-            "id": "create-new-user-factory-farms-id"
-        }),
-        required=False
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "create-new-user-factory-farms-id",
+            }
+        ),
+        required=False,
     )
     destinations = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple(attrs={
-            "class": "form-select selectpicker",
-            "data-live-search": "true",
-            "id": "create-new-user-destinations-id"
-        }),
-        required=False
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "create-new-user-destinations-id",
+            }
+        ),
+        required=False,
     )
-    password = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
+    excepted_languages = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "excepted-languages-search-id",
+            }
+        ),
+        required=False,
+    )
+    password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password', 'role', 'organisations', 'factories', 'destinations']
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+            "role",
+            "organisations",
+            "factories",
+            "destinations",
+            "excepted_languages",
+        ]
