@@ -367,8 +367,8 @@ def create_new_user(request):
             user.set_password(form.cleaned_data["password"])
             user.is_active = True
 
-            excepted_languages = form.cleaned_data.get("excepted_languages", [])
-            langs_from_ids = Language.objects.filter(id__in=excepted_languages).values_list(
+            user_languages = form.cleaned_data.get("user_languages", [])
+            langs_from_ids = Language.objects.filter(id__in=user_languages).values_list(
                 "translated_name", flat=True
             )
             all_langs = Language.objects.filter(translated_name__in=langs_from_ids)
@@ -377,9 +377,9 @@ def create_new_user(request):
             form.save_m2m()  # Save the many-to-many relationships
             
             new_user = User.objects.filter(id=user.id).first()
-            new_user.excepted_languages.clear()
+            new_user.user_languages.clear()
             for lang in all_langs:
-                new_user.excepted_languages.add(lang)
+                new_user.user_languages.add(lang)
 
             messages.success(request, "User created successfully!")
             return redirect("users:create_new_user")
