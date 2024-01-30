@@ -25,9 +25,9 @@ def get_user_destinations(user):
     return user.destinations.all()
 
 
-def get_user_excepted_languages(user):
+def get_user_languages(user):
     if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
         return []
 
-    excepted_languages_list = user.excepted_languages.all()
-    return excepted_languages_list
+    user_languages_list = user.user_languages.all()
+    return user_languages_list

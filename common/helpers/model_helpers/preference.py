@@ -5,6 +5,7 @@ from common.custom_libs.language_codes import get_language_name
 from common.custom_libs.pycountry import aplha_code_from_country_name, country_name_from_aplha_code
 from common.helpers.model_helpers.get_create import get_or_create_model_instance
 from common.helpers.preference_helpers.country import normalize_country_name
+from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.language import normalize_laguage_name
 from common.helpers.preference_helpers.organisation import normalize_organisation_name
 from preference.models import (
@@ -90,7 +91,7 @@ def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
 
 
 def get_or_add_gender_to_db(gender: str) -> Gender:
-    return get_or_create_model_instance(Gender, gender)
+    return get_or_create_model_instance(Gender, normalize_gender_name(gender))
 
 
 def get_or_add_age_to_db(age_range: str) -> Age:

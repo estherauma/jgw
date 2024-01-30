@@ -151,7 +151,7 @@ class UserAdminForm(forms.ModelForm):
             "factories",
             "organisations",
             "destinations",
-            "excepted_languages",
+            "user_languages",
             "is_staff",
             "is_superuser",
             "is_active",
@@ -176,7 +176,7 @@ class CreateNewUserForm(forms.ModelForm):
         ]
         self.fields["factories"].choices = [(farm.id, farm.name) for farm in FactoryFarm.objects.all()]
         self.fields["organisations"].choices = [(org.id, org.name) for org in Organisation.objects.all()]
-        self.fields["excepted_languages"].choices = [
+        self.fields["user_languages"].choices = [
             (language.id, language.translated_name.capitalize())
             for language in self.get_unique_langaues_list()
         ]
@@ -232,7 +232,7 @@ class CreateNewUserForm(forms.ModelForm):
         ),
         required=False,
     )
-    excepted_languages = forms.MultipleChoiceField(
+    user_languages = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
             attrs={
                 "class": "form-select selectpicker",
@@ -255,5 +255,5 @@ class CreateNewUserForm(forms.ModelForm):
             "organisations",
             "factories",
             "destinations",
-            "excepted_languages",
+            "user_languages",
         ]

@@ -50,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     factories = models.ManyToManyField(FactoryFarm, blank=True)
     organisations = models.ManyToManyField(Organisation, blank=True)
     destinations = models.ManyToManyField(Country, blank=True)
-    excepted_languages = models.ManyToManyField(Language, blank=True)
+    user_languages = models.ManyToManyField(Language, blank=True)
 
     is_staff = models.BooleanField(
         default=False,

@@ -21,7 +21,7 @@ def normalize_country_name(country: str) -> str:
     if country is None:
         return NOT_SPECIFIED.lower()
 
-    normalized_country = country_mapping.get(country.lower(), country)
+    normalized_country = country_mapping.get(country.lower().strip(), country.strip())
 
     if not normalized_country.strip():
         normalized_country = NOT_SPECIFIED

@@ -3,7 +3,7 @@ from typing import Any
 
 from users.utils import (
     get_user_destinations,
-    get_user_excepted_languages,
+    get_user_languages,
     get_user_factories,
     get_user_organisations,
 )
@@ -38,7 +38,7 @@ def preference_filtered_queryset(
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
-    user_excepted_languages = get_user_excepted_languages(current_user)
+    user_languages = get_user_languages(current_user)
 
     preference_filters_q_object = Q()
 
@@ -51,8 +51,8 @@ def preference_filtered_queryset(
     if user_destinations:
         preference_filters_q_object &= Q(destination__in=user_destinations)
 
-    if user_excepted_languages:
-        preference_filters_q_object &= ~Q(language__in=user_excepted_languages)
+    if user_languages:
+        preference_filters_q_object &= Q(language__in=user_languages)
 
     if start_date and end_date:
         preference_filters_q_object &= Q(api_created_at__range=(start_date, end_date))
