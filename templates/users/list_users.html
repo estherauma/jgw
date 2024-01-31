@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-striped m-2 mb-0">
+                <table class="table m-2 mb-0">
                     <thead>
                         <tr>
                             <th>EMAIL ADDRESS</th>
@@ -32,8 +32,15 @@
                     </thead>
                     <tbody>
                         {% for user in users %}
-                        <tr>
+                        <tr class="{% if not user.is_active %} striped-row {% endif %}">
                             <td>{{user.email}}</td>
+                            <td>
+                                {% if user.is_active == True %}
+                                Active
+                                {% elif user.is_active == False %}
+                                <span class="text-danger">In Active</span>
+                                {% endif %}
+                            </td>
                             <td class="">
                                 <div class="dropdown">
                                     <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"

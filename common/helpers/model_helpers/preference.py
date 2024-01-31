@@ -1,4 +1,5 @@
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, CharField, F
+from django.db import transaction
 
 from common.const.value_const import NOT_SPECIFIED
 from common.custom_libs.language_codes import get_language_name
@@ -133,3 +134,25 @@ def get_countries_without_excluded_names(
         exclude_query |= Q(name=country_name)
 
     return Country.objects.filter(**filter).exclude(exclude_query).order_by("name")
+
+
+def get_unique_langaues_list():
+    lang_list = []
+    language_list = (
+        Language.objects.annotate(
+            new_translated_name=Case(
+                When(
+                    translated_name="burma",
+                    then=Value("burmese"),
+                ),
+                default=F("translated_name"),
+                output_field=CharField(),
+            )
+        )
+        .values_list("new_translated_name", flat=True)
+        .distinct()
+    )
+    for language in language_list:
+        lang = Language.objects.filter(translated_name=language).first()
+        lang_list.append(lang)
+    return lang_list

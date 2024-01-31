@@ -168,3 +168,8 @@
 .multiselect-container {
     min-width: 300px;
 }
+
+.striped-row {
+    background-color: #f3f7f9;
+    border-color: #dee2e6;
+}
