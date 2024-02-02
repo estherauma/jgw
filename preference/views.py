@@ -72,7 +72,7 @@ def export_preference_stats(request):
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
 
-        organisations = filters.get("organisation", None)
+        organisations = filters.get("organisations", None)
         if organisations is None:
             user_orgs = get_user_organisations(request.user)
             organisations = [getattr(org, "name") for org in user_orgs]
