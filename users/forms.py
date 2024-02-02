@@ -3,10 +3,9 @@ from django.forms import ModelForm
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from django.db.models import Case, When, Value, CharField, F
-from django.db import transaction
+from common.helpers.model_helpers.preference import get_unique_langaues_list
 
-from preference.models import Country, Language, Organisation, FactoryFarm
+from preference.models import Country, Organisation, FactoryFarm
 
 from .models import User, UserInvitations
 
@@ -177,30 +176,8 @@ class CreateNewUserForm(forms.ModelForm):
         self.fields["factories"].choices = [(farm.id, farm.name) for farm in FactoryFarm.objects.all()]
         self.fields["organisations"].choices = [(org.id, org.name) for org in Organisation.objects.all()]
         self.fields["user_languages"].choices = [
-            (language.id, language.translated_name.capitalize())
-            for language in self.get_unique_langaues_list()
+            (language.id, language.translated_name.capitalize()) for language in get_unique_langaues_list()
         ]
-
-    def get_unique_langaues_list(self):
-        lang_list = []
-        language_list = (
-            Language.objects.annotate(
-                new_translated_name=Case(
-                    When(
-                        translated_name="burma",
-                        then=Value("burmese"),
-                    ),
-                    default=F("translated_name"),
-                    output_field=CharField(),
-                )
-            )
-            .values_list("new_translated_name", flat=True)
-            .distinct()
-        )
-        for language in language_list:
-            lang = Language.objects.filter(translated_name=language).first()
-            lang_list.append(lang)
-        return lang_list
 
     organisations = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(

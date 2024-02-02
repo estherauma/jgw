@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from common.helpers.model_helpers.preference import get_unique_langaues_list
 from common.utils.auth import admin_required
 
 import jwt
@@ -12,6 +13,7 @@ from django.http import HttpResponseRedirect
 from preference.models import Language
 
 from users.tasks import send_email_notification
+from users.utils import get_user_destinations, get_user_factories, get_user_organisations
 
 from .forms import (
     ChangeEmailForm,
@@ -31,7 +33,7 @@ from users.templatetags.user_role_tags import has_group
 @login_required
 @admin_required
 def list_users(request):
-    users = User.objects.all()
+    users = User.objects.all().order_by("-id")
     return render(request, "users/list_users.html", context={"users": users})
 
 
@@ -220,6 +222,15 @@ def profile(request):
             else:
                 messages.error(request, "New password and confirm password do not match!")
 
+    current_user = request.user
+
+    user_factories = get_user_factories(current_user)
+    user_organisations = get_user_organisations(current_user)
+    user_destinations = get_user_destinations(current_user)
+    user_languages = (
+        get_unique_langaues_list() if current_user.is_superuser else current_user.user_languages.all()
+    )
+
     form = UpdateUserProfileForm(
         initial={
             "first_name": profile.first_name,
@@ -228,7 +239,14 @@ def profile(request):
             "receive_marketing_emails": profile.receive_marketing_emails,
         }
     )
-    context = {"profile": profile, "form": form}
+    context = {
+        "profile": profile,
+        "form": form,
+        "user_factories": user_factories,
+        "user_organisations": user_organisations,
+        "user_destinations": user_destinations,
+        "user_languages": user_languages,
+    }
     return render(request, template_name="users/profile.html", context=context)
 
 
@@ -375,7 +393,7 @@ def create_new_user(request):
 
             user.save()
             form.save_m2m()  # Save the many-to-many relationships
-            
+
             new_user = User.objects.filter(id=user.id).first()
             new_user.user_languages.clear()
             for lang in all_langs:
