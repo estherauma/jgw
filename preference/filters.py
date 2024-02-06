@@ -42,14 +42,25 @@ def preference_filtered_queryset(
 
     preference_filters_q_object = Q()
 
-    if user_orgs:
+    # organisation filter
+    if organisations:
+        preference_filters_q_object &= Q(organisation__name__in=organisations)
+    else:
         preference_filters_q_object &= Q(organisation__in=user_orgs)
 
+    # organisation factories
     if user_factories:
         preference_filters_q_object &= Q(factory_farm__in=user_factories)
+    else:
+        preference_filters_q_object &= Q(factory_farm__name__in=factory_farms)
 
-    if user_destinations:
-        preference_filters_q_object &= Q(destination__in=user_destinations)
+    # destinations
+    if destination_countries:
+        current_model_dest_q = Q(destination__name__in=destination_countries)
+        preference_filters_q_object &= current_model_dest_q
+    else:
+        user_destination_q = Q(destination__in=user_destinations)
+        preference_filters_q_object &= user_destination_q
 
     if user_languages:
         preference_filters_q_object &= Q(language__in=user_languages)
@@ -57,22 +68,10 @@ def preference_filtered_queryset(
     if start_date and end_date:
         preference_filters_q_object &= Q(api_created_at__range=(start_date, end_date))
 
-    if destination_countries:
-        current_model_dest_q = Q(destination__name__in=destination_countries) | Q(
-            destination__country_states__name__in=destination_countries
-        )
-        preference_filters_q_object &= current_model_dest_q
-
     if origin_countries:
         current_model_origin_q = Q(origin__name__in=origin_countries) | Q(
             origin__country_states__name__in=origin_countries
         )
         preference_filters_q_object &= current_model_origin_q
-
-    if organisations:
-        preference_filters_q_object &= Q(organisation__name__in=organisations)
-
-    if factory_farms:
-        preference_filters_q_object &= Q(factory_farm__name__in=factory_farms)
 
     return queryset.filter(preference_filters_q_object)
