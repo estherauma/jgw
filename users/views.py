@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta, timezone
-from common.helpers.model_helpers.preference import get_unique_langaues_list
+from common.helpers.model_helpers.preference import (
+    get_unique_langaues_list,
+    make_language_queryset_list_unique,
+)
 from common.utils.auth import admin_required
 
 import jwt
@@ -227,8 +230,11 @@ def profile(request):
     user_factories = get_user_factories(current_user)
     user_organisations = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
+
     user_languages = (
-        get_unique_langaues_list() if current_user.is_superuser else current_user.user_languages.all()
+        get_unique_langaues_list()
+        if current_user.is_superuser
+        else make_language_queryset_list_unique(current_user.user_languages.all())
     )
 
     form = UpdateUserProfileForm(
