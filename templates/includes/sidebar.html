@@ -21,13 +21,6 @@
                             <span> Users Overview </span>
                         </a>
                     </li>
-
-                    <li>
-                        <a href="{% url 'events:what_matters_to_workers' %}">
-                            <i data-feather="activity"></i>
-                            <span>What Matters to Workers</span>
-                        </a>
-                    </li>
                 {% if user.is_admin or user.is_superuser %}
                     <li>
                         <a href="{% url 'dashboard:export_report' %}">
