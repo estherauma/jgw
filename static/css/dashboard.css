@@ -173,3 +173,7 @@
     background-color: #f3f7f9;
     border-color: #dee2e6;
 }
+
+body.modal-open {
+    padding-right: 15px !important;
+}
