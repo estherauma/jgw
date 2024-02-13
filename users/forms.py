@@ -151,6 +151,7 @@ class UserAdminForm(forms.ModelForm):
             "organisations",
             "destinations",
             "user_languages",
+            "exluded_origin_countries",
             "is_staff",
             "is_superuser",
             "is_active",
@@ -171,7 +172,10 @@ class CreateNewUserForm(forms.ModelForm):
         self.fields["first_name"].required = True
         self.fields["last_name"].required = True
         self.fields["destinations"].choices = [
-            (country.id, country.name.capitalize()) for country in Country.objects.all()
+            (country.id, country.name.capitalize()) for country in Country.objects.filter(is_destination=True)
+        ]
+        self.fields["exluded_origin_countries"].choices = [
+            (country.id, country.name.capitalize()) for country in Country.objects.filter(is_origin=True)
         ]
         self.fields["factories"].choices = [(farm.id, farm.name) for farm in FactoryFarm.objects.all()]
         self.fields["organisations"].choices = [(org.id, org.name) for org in Organisation.objects.all()]
@@ -209,6 +213,16 @@ class CreateNewUserForm(forms.ModelForm):
         ),
         required=False,
     )
+    exluded_origin_countries = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "create-new-user-excluded-origin-countries-id",
+            }
+        ),
+        required=False,
+    )
     user_languages = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
             attrs={
@@ -233,4 +247,5 @@ class CreateNewUserForm(forms.ModelForm):
             "factories",
             "destinations",
             "user_languages",
+            "exluded_origin_countries",
         ]
