@@ -145,7 +145,6 @@ class UserAdminForm(forms.ModelForm):
             "password",
             "first_name",
             "last_name",
-            "role",
             "scheme",
             "factories",
             "organisations",
@@ -154,6 +153,7 @@ class UserAdminForm(forms.ModelForm):
             "is_staff",
             "is_superuser",
             "is_active",
+            "groups",
             "receive_marketing_emails",
         ]
 
@@ -228,7 +228,6 @@ class CreateNewUserForm(forms.ModelForm):
             "last_name",
             "email",
             "password",
-            "role",
             "organisations",
             "factories",
             "destinations",
