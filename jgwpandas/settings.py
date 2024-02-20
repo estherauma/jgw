@@ -48,13 +48,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
     "rest_framework",
     "crispy_forms",
     "crispy_bootstrap5",
     "debug_toolbar",
     "django_extensions",
-    
     "core",
     "events",
     "dashboard",
@@ -64,7 +62,6 @@ INSTALLED_APPS = [
     "help_contacts",
     "question",
     "payment",
-    
 ]
 
 MIDDLEWARE = [
@@ -80,7 +77,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "jgwpandas.urls"
-MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -92,7 +89,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "common.custom_context_processor.export_buttons_config_list"
+                "common.custom_context_processor.export_buttons_config_list",
+                "core.pre_processors.env_variables.expose_template_env_variables",
             ],
         },
     },
@@ -112,7 +110,7 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
-        "DISABLE_SERVER_SIDE_CURSORS": True
+        "DISABLE_SERVER_SIDE_CURSORS": True,
     }
 }
 
