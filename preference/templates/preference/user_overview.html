@@ -32,7 +32,7 @@
         <div class="widget-rounded-circle card">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="{% if user.is_superuser %} col-9 {% else %} col-11 {% endif %}">
                         <div class="row">
                             <div class="col-3">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{total_user_overview_responses}}</span></h3>
@@ -46,11 +46,34 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="col-1 d-flex align-items-center">
+                    <div class="{% if user.is_superuser %} col-3 {% else %} col-1 d-flex align-items-center {% endif %}">
                         {% if user.is_authenticated %}
-                            <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter
-                            </button>
+                            {% if user.is_superuser %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="dropdown w-100">
+                                            <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                                                id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Export
+                                                <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                                            </a>
+        
+                                            <div class="dropdown-menu" aria-labelledby="export-menu">
+                                                <button  class="dropdown-item" id="export-user-overview-to-excel">Export to Excel</button>
+                                            </div>
+        
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
+                                        role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
+                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter
+                                </button>
+                            {% endif %}
                         {% else %}
                             {% include 'includes/non_auth_banner_btns.html' %}
                         {% endif %}
