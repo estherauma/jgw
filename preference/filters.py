@@ -73,7 +73,7 @@ def preference_filtered_queryset(
         preference_filters_q_object &= Q(language__in=user_languages)
 
     if user_exluded_origin_countries and not origin_countries:
-        preference_filters_q_object &= ~Q(destination__in=user_exluded_origin_countries)
+        preference_filters_q_object &= ~Q(origin__in=user_exluded_origin_countries)
 
     if origin_countries:
         preference_filters_q_object &= Q(origin__name__in=origin_countries)
