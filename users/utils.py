@@ -31,3 +31,11 @@ def get_user_languages(user):
 
     user_languages_list = user.user_languages.all()
     return user_languages_list
+
+
+def get_user_exluded_origin_countries(user):
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+        return []
+
+    user_exluded_origin_countries = user.exluded_origin_countries.all()
+    return user_exluded_origin_countries

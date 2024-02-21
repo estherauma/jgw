@@ -15,3 +15,4 @@ $('#create-new-user-destinations-id').multiselect({ ... generalMultiSelectConfig
 $('#create-new-user-factory-farms-id').multiselect({ ... generalMultiSelectConfig });
 $('#create-new-user-organisations-id').multiselect({ ... generalMultiSelectConfig });
 $('#excepted-languages-search-id').multiselect({ ... generalMultiSelectConfig });
+$('#create-new-user-excluded-origin-countries-id').multiselect({ ... generalMultiSelectConfig });
