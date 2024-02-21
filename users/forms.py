@@ -154,6 +154,7 @@ class UserAdminForm(forms.ModelForm):
             "is_staff",
             "is_superuser",
             "is_active",
+            "groups",
             "receive_marketing_emails",
         ]
 

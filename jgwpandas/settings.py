@@ -48,13 +48,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
+    # installed packages (3rd party)
     "rest_framework",
     "crispy_forms",
     "crispy_bootstrap5",
     "debug_toolbar",
     "django_extensions",
-    
+    "waffle",
+    # added/developed packages
     "core",
     "events",
     "dashboard",
@@ -64,7 +65,6 @@ INSTALLED_APPS = [
     "help_contacts",
     "question",
     "payment",
-    
 ]
 
 MIDDLEWARE = [
@@ -77,10 +77,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "waffle.middleware.WaffleMiddleware",
 ]
 
 ROOT_URLCONF = "jgwpandas.urls"
-MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -92,7 +93,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "common.custom_context_processor.export_buttons_config_list"
+                "common.custom_context_processor.export_buttons_config_list",
             ],
         },
     },
@@ -112,7 +113,7 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
-        "DISABLE_SERVER_SIDE_CURSORS": True
+        "DISABLE_SERVER_SIDE_CURSORS": True,
     }
 }
 
@@ -243,3 +244,5 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+TEMPLATE_CONTEXT_PROCESSORS = "django.template.context_processors.request"

@@ -1,5 +1,7 @@
 {% load user_role_tags %}
 {% load static %}
+{% load waffle_tags %}
+
 <div class="left-side-menu">
 
     <div class="h-100" data-simplebar>
@@ -18,14 +20,22 @@
                     <li>
                         <a href="{% url 'preference:user_overview' %}">
                             <i data-feather="bar-chart-2"></i>
-                            <span> Users Overview </span>
+                            <span> Users overview </span>
                         </a>
                     </li>
+                    {% flag 'can_view_what_matters_to_workers_page' %}
+                        <li>
+                            <a href="{% url 'events:what_matters_to_workers' %}">
+                                <i data-feather="bar-chart-2"></i>
+                                <span>What matters to workers</span>
+                            </a>
+                        </li>
+                    {% endflag %}
                 {% if user.is_admin or user.is_superuser %}
                     <li>
                         <a href="{% url 'dashboard:export_report' %}">
                             <i data-feather="external-link"></i>
-                            <span>Export Report</span>
+                            <span>Export reports</span>
                         </a>
                     </li>
                     <li>
