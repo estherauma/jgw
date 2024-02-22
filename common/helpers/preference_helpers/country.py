@@ -30,16 +30,22 @@ def normalize_country_name(country: str) -> str:
 
 
 def get_origin_and_destination_from_route(route: str) -> dict[str, str]:
+
     if route == NOT_SPECIFIED:
         return {"origin": NOT_SPECIFIED, "destination": NOT_SPECIFIED}
-    else:
-        origin, destination = route.split(" -> ")
-        return {"origin": origin, "destination": destination}
+
+    origin, destination = route.split(" -> ")
+    return {"origin": origin, "destination": destination}
 
 
 def get_data_origin(route, api_origin):
-    origin_from_route = get_origin_and_destination_from_route(route).get("origin")
-    return origin_from_route if origin_from_route != "not specified" else api_origin
+    if api_origin:
+        return api_origin
+
+    if route:
+        return get_origin_and_destination_from_route(route).get("origin")
+
+    return NOT_SPECIFIED
 
 
 def get_data_destination(route, api_destination, location_of_potential_work):
@@ -51,3 +57,5 @@ def get_data_destination(route, api_destination, location_of_potential_work):
 
     if route:
         return get_origin_and_destination_from_route(route).get("destination")
+
+    return NOT_SPECIFIED

@@ -23,10 +23,17 @@ class Command(BaseCommand):
             testers_group.permissions.add(permission)
 
         # initialize testers feature tag
-        tag_name = "can_view_what_matters_to_workers_page"
+        flags_list = [
+            "can_view_what_matters_to_workers_page",
+            "can_view_messaging_questions_page",
+            "can_view_inline_questions_page",
+        ]
 
         WaffleFlag = get_waffle_flag_model()
-        testers_flag, _ = WaffleFlag.objects.get_or_create(name=tag_name, superusers=True)
-        testers_flag.groups.add(testers_group)
+        for flag_name in flags_list:
+            created_flag, _ = WaffleFlag.objects.get_or_create(name=flag_name, superusers=True)
+            created_flag.groups.add(testers_group)
 
-        self.stdout.write(self.style.SUCCESS(f'Testers feature flag "{tag_name}" initialized successfully.'))
+            self.stdout.write(
+                self.style.SUCCESS(f'Testers feature flag "{flag_name}" initialized successfully.')
+            )

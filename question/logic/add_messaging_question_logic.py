@@ -11,7 +11,7 @@ from common.helpers.model_helpers.preference import (
 from common.helpers.preference_helpers.country import get_data_destination, get_data_origin
 from common.logger import KunfuPandaLogger
 
-from common.services.api_client import JustGoodWorkAPIClient
+from common.services.api_client import JustGoodWorkAPIClient, MessagingAPIClient
 from common.utils.date_utils import todays_date
 from question.models import (
     MessagingQuestion,
@@ -28,11 +28,10 @@ from question.tasks import translate_and_clean_messaging_question_fields
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/messaging_question_tasks.log")
 
 
-def fetch_messaging_question_from_api(client):
-    start_date = APPLICATION_POSSIBLE_START_DATE
-    end_date = todays_date()
+def fetch_legacy_messaging_question_from_api(client):
+    start_date = "2020-11-01"
+    end_date = "2022-11-31"
 
-    # get the last time inline question were fetched
     latest_inlinequestion = MessagingQuestionStandard.objects.last()
     if latest_inlinequestion:
         start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
@@ -40,10 +39,31 @@ def fetch_messaging_question_from_api(client):
     return client.get_data(f"/messaging-questions?startDate={start_date}&endDate={end_date}")
 
 
+def fetch_messaging_question_from_api(client):
+    start_date = "2023-11-01"
+    end_date = todays_date()
+
+    # get the last time inline question were fetched
+    latest_inlinequestion = MessagingQuestionStandard.objects.last()
+    if latest_inlinequestion:
+        start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
+
+    return client.get_data(f"/question-responses?startDate={start_date}&endDate={end_date}")
+
+
 @transaction.atomic
 def fetch_messaging_questions_from_api_to_db():
-    jgw_api_client = JustGoodWorkAPIClient()
-    messaging_questions = fetch_messaging_question_from_api(jgw_api_client)
+    messaging_questions = []
+
+    # legacy
+    lagacy_jgw_api_client = JustGoodWorkAPIClient()
+    legacy_messaging_questions_resp = fetch_legacy_messaging_question_from_api(lagacy_jgw_api_client)
+    messaging_questions.extend(legacy_messaging_questions_resp)
+
+    # new
+    jgw_api_client = MessagingAPIClient()
+    messaging_questions_resp = fetch_messaging_question_from_api(jgw_api_client)
+    messaging_questions.extend(messaging_questions_resp)
 
     for messaging_question in messaging_questions:
         try:
@@ -63,9 +83,10 @@ def add_messaging_question_to_db(messaging_question):
         return
 
     route = messaging_question.get("route")
-
     location_of_potential_work = messaging_question.get("location_of_potential_work")
-    origin = get_data_origin(route=route, api_origin=messaging_question.get("locale"))
+    origin = get_data_origin(
+        route=route, api_origin=messaging_question.get("origin") or messaging_question.get("locale")
+    )
     destination = get_data_destination(
         route=route,
         api_destination=messaging_question.get("destination"),
@@ -76,7 +97,6 @@ def add_messaging_question_to_db(messaging_question):
     language = messaging_question.get("language")
     organisation = messaging_question.get("organisation")
     factory_farm = messaging_question.get("factoryFarm")
-
     route_data = get_or_add_route_to_db(route)
     language_data = get_or_add_language_to_db(language)
     origin_data = get_or_add_country_to_db(origin, source="origin")
@@ -110,7 +130,7 @@ def add_messaging_question_to_db(messaging_question):
 
     #  create messaging question text
     messaging_question_text = messaging_question.get("questionText")
-    if messaging_question_text is not None and len(messaging_question_text) > 0:
+    if messaging_question_text and isinstance(messaging_question_text, list):
         messaging_question_text = messaging_question_text[0]
 
     messaging_question_text_object, _ = MessagingQuestionText.objects.get_or_create(
@@ -121,30 +141,37 @@ def add_messaging_question_to_db(messaging_question):
         question=messaging_question_text_object, messaging_question_standard=messaging_question_standard
     )
 
-    question_responses = messaging_question.get("questionResponse")
-
-    if isinstance(question_responses, str):
-        messaging_question_response_option_object, _ = MessagingResponseOptionText.objects.get_or_create(
-            option=question_responses,
-        )
-
-        new_question_response = MessagingResponse.objects.create(
-            option=messaging_question_response_option_object, value=question_responses
-        )
-        messaging_question_response = MessagingQuestionResponse.objects.create(
-            messaging_question=new_messaging_question,
-        )
-        messaging_question_response.responses.add(new_question_response)
-
-    if isinstance(question_responses, list):
-        messaging_question_response = MessagingQuestionResponse.objects.create(
-            messaging_question=new_messaging_question,
-        )
-        for response_option in question_responses:
+    # saving responses from the legacy system
+    question_responses = (
+        messaging_question.get("questionResponse")
+        or messaging_question.get("questionValue")
+        or messaging_question.get("questionvalue")
+    )
+    if question_responses:
+        if isinstance(question_responses, str):
             messaging_question_response_option_object, _ = MessagingResponseOptionText.objects.get_or_create(
-                option=response_option.get("value"),
+                option=question_responses,
             )
+
             new_question_response = MessagingResponse.objects.create(
-                option=messaging_question_response_option_object, value=response_option.get("isChecked")
+                option=messaging_question_response_option_object, value=question_responses
+            )
+            messaging_question_response = MessagingQuestionResponse.objects.create(
+                messaging_question=new_messaging_question,
             )
             messaging_question_response.responses.add(new_question_response)
+
+        if isinstance(question_responses, list):
+            messaging_question_response = MessagingQuestionResponse.objects.create(
+                messaging_question=new_messaging_question,
+            )
+            for response_option in question_responses:
+                messaging_question_response_option_object, _ = (
+                    MessagingResponseOptionText.objects.get_or_create(
+                        option=response_option.get("value"),
+                    )
+                )
+                new_question_response = MessagingResponse.objects.create(
+                    option=messaging_question_response_option_object, value=response_option.get("isChecked")
+                )
+                messaging_question_response.responses.add(new_question_response)
