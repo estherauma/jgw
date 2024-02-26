@@ -36,12 +36,12 @@
                         <div class="row">
                             <div class="col-3">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{total_user_overview_responses}}</span></h3>
-                                <h5 class="text-muted">NEW USERS</h5>
+                                <h5 class="text-muted general-title-text">New Users</h5>
                             </div>
                             {% if not user.is_anonymous and user.role == "SCHEME" %}
                             <div class="col-3">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{pasi_downloads}}</span></h3>
-                                <h5 class="text-muted">DOWNLOADS</h5>
+                                <h5 class="text-muted general-title-text">Downloads</h5>
                             </div>
                             {% endif %}
                         </div>
@@ -88,7 +88,7 @@
     <div class="col-md-8">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">USERS BY ORIGIN COUNTRY</p>
+                <p class="chart-title">users by origin country</p>
                 <div class="preference-origin-graph-id-chart-box">
                     <div id="preference-origin-graph-id"></div>
                 </div>
@@ -120,7 +120,7 @@
     <div class="{% if user.role != 'SCHEME' %} col-8 {% else %} col-12 {% endif %}">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">SELECTED USERS LANGUAGE</p>
+                <p class="chart-title">selected users language</p>
                 <div class="preference-language-graph-id-chart-box">
                     <div id="preference-language-graph-id"></div>
                 </div>
@@ -135,7 +135,7 @@
         <div class="col-md-8">
             <div class="card h-100">
                 <div class="card-body">
-                    <p class="chart-title">WORK CODE USAGE</p>
+                    <p class="chart-title">work code usage</p>
                     <div class="preference-work-code-usage-graph-id-chart-box">
                         <div id="preference-work-code-usage-graph-id"></div>
                     </div>
@@ -154,6 +154,18 @@
         </div>
     </div>
 </div>
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="chart-title">Users By Month</p>
+                <canvas id="preference-monthly-cumulative-users-graph-id"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
@@ -162,6 +174,7 @@
 <script src="{% static 'js/charts/bar/preference_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/preference_work-code-usage_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_destination_pie_chart.js' %}"></script>
+<script src="{% static 'js/charts/line/preferences_monthly_users.js' %}"></script>
 <script src="{% static 'js/app/user_overview.js' %}"></script>
 <script type="text/javascript">
     // get data from context
@@ -171,6 +184,7 @@
     var destinationData = {{ preferences_per_destination_country | safe }};
     var languageData = {{ preferences_selected_user_language | safe }};
     var workCodeData = {{ work_code_usage | safe }};
+    var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
 
     // plots the age piechart
     preferenceAgePieChart(ageData)
@@ -189,5 +203,8 @@
 
     // plots the work code usage graph
     preferenceWorkCodeUsageGraph(workCodeData)
+
+    // preferenceMonthlyUsersChart
+    preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData)
 </script>
 {% endblock %}

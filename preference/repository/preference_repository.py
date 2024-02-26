@@ -1,5 +1,6 @@
 from collections import defaultdict
 from django.db.models import Case, When, Value, CharField, F, Count
+from django.db.models.functions import TruncMonth
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
@@ -200,4 +201,23 @@ def preference_stats_for_export(filters):
         "preferences_per_destination_country": preferences_per_destination_country_responses,
         "preferences_selected_user_language": preferences_by_language_responses,
         "work_code_usage": preferences_by_organisation_responses,
+    }
+
+
+def cumulative_new_users(**filters):
+    cumulative_new_users_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
+
+    data = (
+        cumulative_new_users_queryset.annotate(month=TruncMonth("api_created_at"))
+        .values("month")
+        .annotate(new_users=Count("id"))
+        .order_by("month")
+    )
+
+    labels = [entry["month"].strftime("%b, %Y") for entry in data]
+    values = [entry["new_users"] for entry in data]
+
+    return {
+        "labels": labels,
+        "counts": values,
     }
