@@ -10,7 +10,7 @@ function preferenceLanguageGraph(langaugeData) {
         {
           label: "PREFERENCES",
           data: data,
-          backgroundColor: COLORS.navyBlue,
+          backgroundColor: COLORS.skyBlue,
           barThickness: 15,
         },
       ],

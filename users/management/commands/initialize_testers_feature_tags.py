@@ -27,11 +27,13 @@ class Command(BaseCommand):
             "can_view_what_matters_to_workers_page",
             "can_view_messaging_questions_page",
             "can_view_inline_questions_page",
+            "can_view_new_monthly_users_chart",
+            "can_view_get_users_by_country_state_chart",
         ]
 
         WaffleFlag = get_waffle_flag_model()
         for flag_name in flags_list:
-            created_flag, _ = WaffleFlag.objects.get_or_create(name=flag_name, superusers=True)
+            created_flag, created = WaffleFlag.objects.get_or_create(name=flag_name, superusers=True)
             created_flag.groups.add(testers_group)
 
             self.stdout.write(

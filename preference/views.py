@@ -6,6 +6,7 @@ from core.logic.file_export import generate_and_export_excel
 from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
 from preference.repository.preference_repository import (
     get_cumulative_monthly_new_users,
+    get_users_by_country_state,
     preference_stats_for_export,
     preferences_by_age,
     preferences_by_destination,
@@ -29,6 +30,7 @@ def user_overview(request):
         preferences_by_language_responses = preferences_by_language(current_user=request.user)
         preferences_by_organisation_responses = preferences_by_organisation(current_user=request.user)
         pref_cumulative_new_users = get_cumulative_monthly_new_users(current_user=request.user)
+        users_by_country_state = get_users_by_country_state(current_user=request.user)
 
     else:
         filter_form = GenericFilterForm(request=request, data=request.POST)
@@ -47,6 +49,7 @@ def user_overview(request):
             **filters, current_user=request.user
         )
         pref_cumulative_new_users = get_cumulative_monthly_new_users(**filters, current_user=request.user)
+        users_by_country_state = get_users_by_country_state(**filters, current_user=request.user)
 
     pasi_downloads = (
         get_total_dynamic_link_usage(current_user=request.user)
@@ -66,6 +69,7 @@ def user_overview(request):
         "has_orgs": len(get_user_organisations(request.user)) > 0,
         "pasi_downloads": pasi_downloads,
         "pref_cumulative_monthly_new_users": pref_cumulative_new_users,
+        "users_by_country_state": users_by_country_state,
     }
     return render(request, "preference/user_overview.html", context=context)
 
