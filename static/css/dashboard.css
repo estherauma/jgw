@@ -55,9 +55,16 @@
 }
 
 .chart-title {
-    color: #6E768E;
     text-align: center;
-    text-transform: uppercase;
+    text-transform: capitalize;
+    font-size: 17px;
+    color: var(--ct-text-muted)!important;
+}
+
+.general-title-text {
+    text-transform: capitalize;
+    font-size: 17px;
+    color: var(--ct-text-muted)!important;
 }
 
 .generic-chart-box {

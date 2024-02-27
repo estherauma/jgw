@@ -1,6 +1,4 @@
 function inlineQuestionGraph(inlineQuestionData, inlineQuestionCanvasId) {
-
-    console.log(inlineQuestionData)
     
     const data = inlineQuestionData.counts
     const labels = inlineQuestionData.labels
