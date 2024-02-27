@@ -27,6 +27,7 @@ class Command(BaseCommand):
             "can_view_what_matters_to_workers_page",
             "can_view_messaging_questions_page",
             "can_view_inline_questions_page",
+            "can_view_new_monthly_users_chart",
         ]
 
         WaffleFlag = get_waffle_flag_model()
@@ -34,6 +35,7 @@ class Command(BaseCommand):
             created_flag, _ = WaffleFlag.objects.get_or_create(name=flag_name, superusers=True)
             created_flag.groups.add(testers_group)
 
-            self.stdout.write(
-                self.style.SUCCESS(f'Testers feature flag "{flag_name}" initialized successfully.')
-            )
+            if created_flag:
+                self.stdout.write(
+                    self.style.SUCCESS(f'Testers feature flag "{flag_name}" initialized successfully.')
+                )

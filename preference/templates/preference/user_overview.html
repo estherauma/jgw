@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% load static %}
+{% load waffle_tags %}
 
 <!-- title -->
 {% block title %} User Overview {% endblock title %}
@@ -155,16 +156,18 @@
     </div>
 </div>
 
-<div class="row mb-3">
-    <div class="col-md-12">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">users by month</p>
-                <canvas id="preference-monthly-cumulative-users-graph-id"></canvas>
+{% flag 'can_view_new_monthly_users_chart' %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">users by month</p>
+                    <canvas id="preference-monthly-cumulative-users-graph-id"></canvas>
+                </div>
             </div>
         </div>
     </div>
-</div>
+{% endflag %}
 
 {% endblock content %}
 {% block scripts %}
