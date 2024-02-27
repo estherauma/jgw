@@ -20,7 +20,7 @@ def get_messaging_question_per_origin_counts(**filters):
 
     origin_data = [count["count"] for count in origin_counts_data]
     origin_labels = [
-        count["origin__name"].upper() for count in origin_counts_data if count["origin__name"] is not None
+        count["origin__name"].title() for count in origin_counts_data if count["origin__name"] is not None
     ]
 
     return {
@@ -46,7 +46,7 @@ def get_messaging_question_per_destination_counts(**filters):
 
     destination_data = [count["count"] for count in destination_counts_data]
     destination_labels = [
-        count["destination__name"].upper()
+        count["destination__name"].title()
         for count in destination_counts_data
         if count["destination__name"] is not None
     ]

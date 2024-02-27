@@ -37,7 +37,7 @@
                     <div class="col-9">
                         <div class="text-start">
                             <h3 class="text-dark"><span data-plugin="counterup">{{total_inline_question_responses}}</span></h3>
-                            <h5 class="text-muted">TOTAL QUESTION RESPONSES</h5>
+                            <h5 class="text-muted global-text-style">total question responses</h5>
                         </div>
                     </div>
                     <div class="col-3">
@@ -78,7 +78,7 @@
                 <div class="col-md-4 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
-                            <p class="chart-title">Organisation</p>
+                            <p class="chart-title">organisation</p>
                             <canvas id="inline-question-organisation-pie-chart-id"></canvas>
                         </div>
                     </div>
@@ -87,7 +87,7 @@
             <div class="{% if user.is_authenticated %} col-md-8 {% else %} col-md-12 {% endif %} mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <p class="chart-title">SELECTED USER LANGUAGE</p>
+                        <p class="chart-title">selected user language</p>
                         <div class="inline-question-language-graph-id-chart-box">
                             <div id="inline-question-language-graph-id"></div>
                         </div>
@@ -100,7 +100,7 @@
     <div class="col-md-8 mb-3">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">Responses per Origin Country</p>
+                <p class="chart-title">responses per origin country</p>
                 <div class="inline-question-destination-graph-id-chart-box">
                     <div id="inline-question-destination-graph-id"></div>
                 </div>
@@ -110,7 +110,7 @@
     <div class="col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">Responses per destination Country</p>
+                <p class="chart-title">responses per destination country</p>
                 <div class="scrollable-table-container" onscroll="stopScrollPropagation(event)">
                     <table class="table" id="inline-question-origin-table-id">
                         <thead>
@@ -129,7 +129,7 @@
     <div class="col-md-12">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">Inline Question Responses</p>
+                <p class="chart-title">inline question responses</p>
                 <form method="post" id="all-inline-question-filter-form">
                     {{inline_question_only_form|crispy}}
                 </form>
