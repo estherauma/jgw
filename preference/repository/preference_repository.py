@@ -222,3 +222,23 @@ def get_cumulative_monthly_new_users(**filters):
         "labels": labels,
         "counts": values,
     }
+
+
+def get_users_by_country_state(**filters):
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+
+    preferences_count_by_state = (
+        filtered_queryset.values("destination_state__name")
+        .annotate(users_count=Count("id"))
+        .order_by("destination_state__name")
+    )
+
+    # Create separate lists for labels and counts
+    labels = [entry["destination_state__name"].title() for entry in preferences_count_by_state]
+    counts = [entry["users_count"] for entry in preferences_count_by_state]
+
+    return {
+        "labels": labels,
+        "counts": counts,
+    }
