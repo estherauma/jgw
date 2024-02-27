@@ -26,7 +26,7 @@ def preferences_by_age(**filters):
         .annotate(total=Count("id"))
         .order_by("-total")
     )
-    labels = [age["age__translated_range"].upper() for age in age_counts]
+    labels = [age["age__translated_range"].title() for age in age_counts]
     counts = [age["total"] for age in age_counts]
     group_mapping = {
         "60+": ["60+"],
@@ -39,15 +39,15 @@ def preferences_by_age(**filters):
     }
 
     combined_values = {group: 0 for group in group_mapping}
-    combined_values["PREFER NOT TO ANSWER"] = 0
+    combined_values["PREFER NOT TO ANSWER".title()] = 0
     for label, value in zip(labels, counts):
         for group, label_list in group_mapping.items():
             if label in label_list:
                 combined_values[group] += value
                 break
         else:
-            if label == "PREFER NOT TO ANSWER" or label == "PREFERNOTTOANSWER":
-                combined_values["PREFER NOT TO ANSWER"] += value
+            if label == "PREFER NOT TO ANSWER".title() or label == "PREFERNOTTOANSWER".title():
+                combined_values["PREFER NOT TO ANSWER".title()] += value
     final_labels = []
     final_counts = []
     for group, value in combined_values.items():
@@ -68,7 +68,7 @@ def preferences_by_gender(**filters):
 
     label_sums = defaultdict(int)
     for gender in gender_counts:
-        normalized_label = normalize_gender_name(gender["gender__translated_name"]).upper()
+        normalized_label = normalize_gender_name(gender["gender__translated_name"]).title()
         label_sums[normalized_label] += gender["total"]
 
     summed_labels = list(label_sums.keys())
@@ -85,7 +85,7 @@ def preferences_by_origin(**filters):
     )
 
     labels = [
-        origin["origin__name"].upper() for origin in origin_counts if origin["origin__name"] is not None
+        origin["origin__name"].title() for origin in origin_counts if origin["origin__name"] is not None
     ]
     counts = [origin["total"] for origin in origin_counts]
 
@@ -103,7 +103,7 @@ def preferences_by_destination(**filters):
         .order_by("-total")
     )
 
-    labels = [destination["destination__name"].upper() for destination in destination_counts]
+    labels = [destination["destination__name"].title() for destination in destination_counts]
     counts = [destination["total"] for destination in destination_counts]
 
     return {"labels": labels, "counts": counts}
@@ -145,7 +145,7 @@ def preferences_by_language(**filters):
         .order_by("-total")
     )
 
-    labels = [destination["translated_name"].upper() for destination in language_counts]
+    labels = [destination["translated_name"].title() for destination in language_counts]
     counts = [destination["total"] for destination in language_counts]
 
     return {"labels": labels, "counts": counts}
@@ -173,7 +173,7 @@ def preferences_by_organisation(**filters):
     )
 
     labels = [
-        format_org_name_from_display(organisation["organisation_name"]).upper()
+        format_org_name_from_display(organisation["organisation_name"]).title()
         for organisation in organisation_counts
     ]
     counts = [organisation["count"] for organisation in organisation_counts]
