@@ -15,7 +15,7 @@ class JustGoodWorkAPIClient:
         if response.status_code == 200:
             return response.json()["data"]
         else:
-            return None
+            return []
 
 
 class MessagingAPIClient:
@@ -33,4 +33,4 @@ class MessagingAPIClient:
         if response.status_code == 200:
             return response.json()["data"]
         else:
-            return None
+            return []
