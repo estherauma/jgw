@@ -204,11 +204,12 @@ def preference_stats_for_export(filters):
     }
 
 
-def cumulative_new_users(**filters):
-    cumulative_new_users_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
+def get_cumulative_monthly_new_users(**filters):
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
 
     data = (
-        cumulative_new_users_queryset.annotate(month=TruncMonth("api_created_at"))
+        filtered_queryset.annotate(month=TruncMonth("api_created_at"))
         .values("month")
         .annotate(new_users=Count("id"))
         .order_by("month")
