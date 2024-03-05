@@ -29,6 +29,7 @@ class Command(BaseCommand):
             "can_view_inline_questions_page",
             "can_view_new_monthly_users_chart",
             "can_view_get_users_by_country_state_chart",
+            "users-by-sector-graph-id",
         ]
 
         WaffleFlag = get_waffle_flag_model()

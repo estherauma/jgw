@@ -1,4 +1,5 @@
 from django.contrib import admin
+from preference.forms import SectorsOfWorkMapperForm
 
 from preference.models import (
     FactoryFarm,
@@ -11,6 +12,7 @@ from preference.models import (
     Gender,
     Country,
     Age,
+    SectorsOfWorkMapper,
     TextTranslations,
     LocationOfPotentialWork,
     CountryState,
@@ -64,3 +66,9 @@ class CountryStateList(admin.ModelAdmin):
 @admin.register(SwsCountry)
 class SwsCountryAdmin(admin.ModelAdmin):
     list_display = ["country"]
+
+
+@admin.register(SectorsOfWorkMapper)
+class SectorsOfWorkMapperAdmin(admin.ModelAdmin):
+    form = SectorsOfWorkMapperForm
+    list_display = ["mapper"]

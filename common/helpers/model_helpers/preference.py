@@ -1,5 +1,6 @@
 from django.db.models import Q, Case, When, Value, CharField, F
 from django.db import transaction
+from typing import Union
 
 from common.const.value_const import NOT_SPECIFIED
 from common.custom_libs.language_codes import get_language_name
@@ -111,18 +112,22 @@ def get_or_add_route_to_db(route_name: str) -> Route:
     return get_or_create_model_instance(Route, route_name)
 
 
-def add_sector_of_work_to_db(sectors_of_work: list[str]) -> list[SectorOfWork]:
+def add_sector_of_work_to_db(sectors_of_work: Union[str, list[str]]) -> list[SectorOfWork]:
     sector_list = []
 
-    # Check if sectors_of_work is empty
     if not sectors_of_work:
         sector, _ = SectorOfWork.objects.get_or_create(name=NOT_SPECIFIED)
         sector_list.append(sector)
-    else:
-        for sector_name in sectors_of_work:
-            sector, _ = SectorOfWork.objects.get_or_create(name=sector_name)
-            sector_list.append(sector)
+        return sector_list
 
+    if isinstance(sectors_of_work, str):
+        sector, _ = SectorOfWork.objects.get_or_create(name=sectors_of_work.strip().lower())
+        sector_list.append(sector)
+        return sector_list
+
+    for sector_name in sectors_of_work:
+        sector, _ = SectorOfWork.objects.get_or_create(name=sector_name.strip().lower())
+        sector_list.append(sector)
     return sector_list
 
 

@@ -14,7 +14,7 @@ class SectorOfWork(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.translated_name
 
 
 class OrganisationSector(models.Model):
@@ -178,3 +178,13 @@ class SwsCountry(models.Model):
 
     def __str__(self):
         return self.country.name
+
+
+class SectorsOfWorkMapper(models.Model):
+    sector = models.ForeignKey(
+        SectorOfWork, on_delete=models.SET_NULL, null=True, blank=True, related_name="sectors_of_work"
+    )
+    mapper = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.sector.translated_name

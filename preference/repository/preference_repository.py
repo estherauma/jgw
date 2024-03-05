@@ -6,7 +6,7 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset
-from preference.models import Organisation, Preference
+from preference.models import Organisation, Preference, SectorOfWork, SectorsOfWorkMapper
 from users.utils import get_user_organisations
 
 
@@ -162,6 +162,10 @@ def preferences_by_organisation(**filters):
                     organisation__name__in=["placeuk", "seasonal worker scheme - placeuk"],
                     then=Value("PlaceUk"),
                 ),
+                When(
+                    organisation__name__icontains="hops",
+                    then=Value("seasonal worker scheme - hops"),
+                ),
                 default=F("organisation__name"),
                 output_field=CharField(),
             )
@@ -176,6 +180,7 @@ def preferences_by_organisation(**filters):
         format_org_name_from_display(organisation["organisation_name"]).title()
         for organisation in organisation_counts
     ]
+
     counts = [organisation["count"] for organisation in organisation_counts]
 
     return {"labels": labels, "counts": counts}
@@ -242,3 +247,57 @@ def get_users_by_country_state(**filters):
         "labels": labels,
         "counts": counts,
     }
+
+
+def get_preferences_by_sectors(**filters):
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+
+    sectors_of_work_mapper_instances = SectorsOfWorkMapper.objects.all()
+
+    case_list = [
+        {
+            "then_value": sof.mapper.lower(),
+            "match_list": [
+                instance.sector.translated_name
+                for instance in sectors_of_work_mapper_instances
+                if instance.mapper == sof.mapper
+            ],
+        }
+        for sof in sectors_of_work_mapper_instances
+    ]
+
+    when_list = [
+        When(sectors_of_work__translated_name__in=case["match_list"], then=Value(case["then_value"]))
+        for case in case_list
+    ]
+
+    aggregated_data = (
+        filtered_queryset.annotate(
+            sectors_of_work__translated_name=Case(
+                *when_list,
+                default=F("sectors_of_work__translated_name"),
+                output_field=CharField(),
+            ),
+        )
+        .values("sectors_of_work__translated_name")
+        .annotate(count=Count("id"))
+    )
+
+    sector_counts = {}
+
+    for entry in aggregated_data:
+        sector_name = entry["sectors_of_work__translated_name"]
+        count = entry["count"]
+
+        if sector_name in sector_counts:
+            sector_counts[sector_name.trim()] += count
+        else:
+            sector_counts[sector_name] = count
+
+    labels = list(sector_counts.keys())
+    count = list(sector_counts.values())
+
+    result_dict = {"labels": labels, "counts": count}
+
+    return result_dict

@@ -113,8 +113,7 @@ def summerberry_data():
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": "Basic "
-        + base64.b64encode((auth_api_username + ":" + auth_api_password).encode("utf-8")).decode("utf-8"),
+        "Authorization": f"Basic {base64.b64encode((auth_api_username + ':' + auth_api_password).encode('utf-8')).decode('utf-8')}",
     }
     response = requests.get(auth_api_url, headers=headers)
     if response.status_code != 200:
