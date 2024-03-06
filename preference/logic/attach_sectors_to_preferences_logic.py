@@ -29,7 +29,7 @@ def attach_sectors_to_preferences():
                 preference_instance.sectors_of_work.add(sec_of_work)
 
 
-def strigified_sectors_of_work_to_list():
+def stringified_sectors_of_work_to_list():
     preference_instances = Preference.objects.annotate(
         name_length=Length("sectors_of_work__translated_name")
     ).filter(name_length__lt=2)

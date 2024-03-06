@@ -8,7 +8,7 @@ from common.services.api_client import JustGoodWorkAPIClient
 from preference.logic.attach_sectors_to_preferences_logic import (
     attach_sectors_to_preferences,
     clean_sectors_of_work,
-    strigified_sectors_of_work_to_list,
+    stringified_sectors_of_work_to_list,
 )
 from preference.models import Age, Country, CountryState, Gender, Language, SectorOfWork
 
@@ -97,5 +97,5 @@ def translate_and_clean_preferences_fields(key: str = None):
 
     # clean up sectors of work
     attach_sectors_to_preferences()
-    strigified_sectors_of_work_to_list()
+    stringified_sectors_of_work_to_list()
     clean_sectors_of_work()
