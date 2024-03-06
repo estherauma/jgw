@@ -10,10 +10,10 @@ class SectorsOfWorkMapperForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        already_existing_mappers = SectorsOfWorkMapper.objects.values_list(
-            "sector__translated_name", flat=True
-        )
+        sectors_of_work = SectorsOfWorkMapper.objects.all()
 
-        self.fields["sector"].queryset = SectorOfWork.objects.exclude(
-            translated_name__in=already_existing_mappers
+        existing_sectors_list = [sector_of_work.mapper.lower() for sector_of_work in sectors_of_work]
+
+        self.fields["sectors"].queryset = SectorOfWork.objects.exclude(
+            translated_name__in=existing_sectors_list
         ).distinct("translated_name")

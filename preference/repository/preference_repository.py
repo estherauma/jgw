@@ -255,21 +255,20 @@ def get_preferences_by_sectors(**filters):
 
     sectors_of_work_mapper_instances = SectorsOfWorkMapper.objects.all()
 
-    case_list = [
+    initial_case_list = [
         {
             "then_value": sof.mapper.lower(),
-            "match_list": [
-                instance.sector.translated_name
-                for instance in sectors_of_work_mapper_instances
-                if instance.mapper == sof.mapper
-            ],
+            "match_list": [sec.translated_name for sec in sof.sectors.all()],
         }
         for sof in sectors_of_work_mapper_instances
     ]
 
+    case_list = [initial_case for initial_case in initial_case_list if initial_case["match_list"]]
+
     when_list = [
         When(sectors_of_work__translated_name__in=case["match_list"], then=Value(case["then_value"]))
         for case in case_list
+        if case["match_list"]
     ]
 
     aggregated_data = (

@@ -17,14 +17,14 @@ def attach_sectors_to_preferences():
 
     for preference_instance in preferences_without_sectors_of_work:
 
-        the_id = preference_instance.data_source_id
+        data_source_id = preference_instance.data_source_id
 
-        preference_from_mongo_db = get_preference_from_mongo_db(the_id)
+        preference_data = get_preference_from_mongo_db(data_source_id)
 
-        if preference_from_mongo_db:
+        if preference_data:
             preference_instance.sectors_of_work.clear()
 
-            sec_of_work_list = add_sector_of_work_to_db(preference_from_mongo_db["final_sectors"])
+            sec_of_work_list = add_sector_of_work_to_db(preference_data["final_sectors"])
             for sec_of_work in sec_of_work_list:
                 preference_instance.sectors_of_work.add(sec_of_work)
 
@@ -34,34 +34,30 @@ def strigified_sectors_of_work_to_list():
         name_length=Length("sectors_of_work__translated_name")
     ).filter(name_length__lt=2)
 
-    for preference_instance in preference_instances:
-        preference_instance.sectors_of_work.clear()
+    for preference in preference_instances:
+        preference.sectors_of_work.clear()
 
-        the_id = preference_instance.data_source_id
-        preference_from_mongo_db = get_preference_from_mongo_db(the_id)
+        data_source_id = preference.data_source_id
+        preference_from_mongo_db = get_preference_from_mongo_db(data_source_id)
 
         sec_of_work_list = add_sector_of_work_to_db(preference_from_mongo_db["final_sectors"])
         for sec_of_work in sec_of_work_list:
-            preference_instance.sectors_of_work.add(sec_of_work)
+            preference.sectors_of_work.add(sec_of_work)
 
-    sectors_of_work_to_delete = SectorOfWork.objects.annotate(name_length=Length("name")).filter(
-        name_length__lt=2
-    )
-    sectors_of_work_to_delete.delete()
+    SectorOfWork.objects.annotate(name_length=Length("name")).filter(name_length__lt=2).delete()
 
 
 def clean_sectors_of_work():
     sectors_of_work = SectorOfWork.objects.all()
     for sector_of_work in sectors_of_work:
-
-        if sector_of_work and not sector_of_work.translated_name:
-            sector_of_work.translated_name = (
-                sector_of_work.name.strip().lower().replace("&amp;", "and").replace("&", "and")
-            )
-        else:
-            sector_of_work.translated_name = (
-                sector_of_work.translated_name.strip().lower().replace("&amp;", "and").replace("&", "and")
-            )
+        cleaned_name = (
+            sector_of_work.name
+            if sector_of_work and not sector_of_work.translated_name
+            else sector_of_work.translated_name
+        )
+        sector_of_work.translated_name = (
+            cleaned_name.strip().lower().replace("&amp;", "and").replace("&", "and")
+        )
 
         sector_of_work.save()
 

@@ -181,10 +181,8 @@ class SwsCountry(models.Model):
 
 
 class SectorsOfWorkMapper(models.Model):
-    sector = models.ForeignKey(
-        SectorOfWork, on_delete=models.SET_NULL, null=True, blank=True, related_name="sectors_of_work"
-    )
     mapper = models.CharField(max_length=255)
+    sectors = models.ManyToManyField(SectorOfWork)
 
     def __str__(self):
-        return self.sector.translated_name
+        return self.mapper
