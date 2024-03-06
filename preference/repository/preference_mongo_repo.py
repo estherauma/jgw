@@ -8,7 +8,7 @@ def get_preferences_record(collection, query, projection):
 
 
 def process_sectors_data(record):
-    return record.get("sectors") or record.get("sectorsOfWork") or []
+    return record.get("sectors") or record.get("sectorsOfWork") or record.get("sectorOfWork") or []
 
 
 def get_preference_from_mongo_db(preference_mong_id):
@@ -24,7 +24,7 @@ def get_preference_from_mongo_db(preference_mong_id):
 
     # filter conditions
     query = {"_id": ObjectId(preference_mong_id)}
-    projection = {"sectors": 1, "sectorsOfWork": 1}
+    projection = {"sectors": 1, "sectorsOfWork": 1, "sectorOfWork": 1}
 
     preferences_record = get_preferences_record(preferences_col, query, projection)
     preferences_v2_record = get_preferences_record(v2_preferences_col, query, projection)
