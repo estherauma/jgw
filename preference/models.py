@@ -14,7 +14,7 @@ class SectorOfWork(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.translated_name
 
 
 class OrganisationSector(models.Model):
@@ -178,3 +178,11 @@ class SwsCountry(models.Model):
 
     def __str__(self):
         return self.country.name
+
+
+class SectorsOfWorkMapper(models.Model):
+    mapper = models.CharField(max_length=255)
+    sectors = models.ManyToManyField(SectorOfWork)
+
+    def __str__(self):
+        return self.mapper

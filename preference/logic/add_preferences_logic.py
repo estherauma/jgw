@@ -73,6 +73,8 @@ def add_preference_to_db(preference):
     organisation = preference.get("organisation")
     factory_farm = preference.get("factoryFarm")
     sectors_of_work = preference.get("sectorsOfWork")
+    sector_of_work_list = preference.get("sectorOfWork")
+    sectors = preference.get("sectors")
     location_of_potential_work = preference.get("location_of_potential_work")
     gender = preference.get("gender")
     age = preference.get("age")
@@ -125,7 +127,16 @@ def add_preference_to_db(preference):
     )
 
     # Create SectorsOfWork instances and associate them with the preference
+    final_sectors_of_work = None
+    if sector_of_work_list:
+        final_sectors_of_work = sector_of_work_list
 
-    sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
+    if sectors_of_work:
+        final_sectors_of_work = sectors_of_work
+
+    if sectors:
+        final_sectors_of_work = sectors
+
+    sec_of_work_list = add_sector_of_work_to_db(final_sectors_of_work)
     for sec_of_work in sec_of_work_list:
         new_preference.sectors_of_work.add(sec_of_work)

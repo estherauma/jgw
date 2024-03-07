@@ -16,10 +16,10 @@ celery_app.conf.beat_schedule = {
         "task": "get_jgw_data",
         "schedule": crontab(minute=0, hour=0),  # everyday at midnight
     },
-    "cache_bigquery_data": {
-        "task": "cache_bigquery_data",
-        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
-    },
+    # "cache_bigquery_data": {
+    #     "task": "cache_bigquery_data",
+    #     "schedule": crontab(minute=0, hour=0),  # everyday at midnight
+    # },
     # TODO: ADD generate_report task at midnight
     "notify_admins_inactive_users": {
         "task": "notify_admins_inactive_users",
@@ -28,5 +28,5 @@ celery_app.conf.beat_schedule = {
     "fetch-summerberry-data": {
         "task": "fetch_summerberry_data",
         "schedule": crontab(minute=0, hour=0),  # everyday at midnight
-    }
+    },
 }
