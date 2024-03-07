@@ -35,12 +35,16 @@ class LanguageTabularAdminDisplay(admin.ModelAdmin):
     search_fields = ["translated_name", "name", "code"]
 
 
+class PreferenceTabularAdminDisplay(admin.ModelAdmin):
+    list_display = ["id", "gender", "origin", "destination", "age", "is_missing_sector_cleaned"]
+
+
 # Register your models here.
 admin.site.register(SectorOfWork, SectorOfWorkTabularAdminDisplay)
 admin.site.register(OrganisationSector)
 admin.site.register(FactoryFarm)
 admin.site.register(Organisation)
-admin.site.register(Preference)
+admin.site.register(Preference, PreferenceTabularAdminDisplay)
 admin.site.register(Route)
 admin.site.register(Language, LanguageTabularAdminDisplay)
 admin.site.register(Gender, GenderTabularAdminDisplay)

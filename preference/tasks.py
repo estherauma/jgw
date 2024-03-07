@@ -96,6 +96,10 @@ def translate_and_clean_preferences_fields(key: str = None):
     translate_and_clean_age()
 
     # clean up sectors of work
-    attach_sectors_to_preferences()
+    attach_sectors_to_preferences()  # may get untranslated sectors of work from db around here
+    translate_and_clean_sectors_of_work()  # translate
+
     stringified_sectors_of_work_to_list()
+    translate_and_clean_sectors_of_work()  # translate
+
     clean_sectors_of_work()
