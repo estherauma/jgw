@@ -246,3 +246,6 @@ INTERNAL_IPS = [
 ]
 
 TEMPLATE_CONTEXT_PROCESSORS = "django.template.context_processors.request"
+
+
+ADMIN_SITE_HEADER = "FiftyEight"

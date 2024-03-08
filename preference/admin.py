@@ -20,36 +20,44 @@ from preference.models import (
 )
 
 
+@admin.register(SectorOfWork)
 class SectorOfWorkTabularAdminDisplay(admin.ModelAdmin):
     list_display = ["name", "translated_name", "translated_to"]
     search_fields = ["translated_name", "name"]
 
 
+@admin.register(Gender)
 class GenderTabularAdminDisplay(admin.ModelAdmin):
     list_display = ["name", "translated_name", "translated_to"]
     search_fields = ["translated_name", "name"]
 
 
+@admin.register(Language)
 class LanguageTabularAdminDisplay(admin.ModelAdmin):
     list_display = ["code", "name", "translated_name", "translated_to"]
     search_fields = ["translated_name", "name", "code"]
 
 
+@admin.register(Preference)
 class PreferenceTabularAdminDisplay(admin.ModelAdmin):
-    list_display = ["id", "gender", "origin", "destination", "age", "is_missing_sector_cleaned"]
+    list_display = [
+        "id",
+        "get_translated_name",
+        "get_origin_name",
+        "destination",
+        "age_translated_name",
+        "is_missing_sector_cleaned",
+    ]
+    search_fields = ["gender__translated_name", "origin__name", "destination__name"]
 
+    def get_translated_name(self, obj):
+        return obj.gender.translated_name if obj.gender else None
 
-# Register your models here.
-admin.site.register(SectorOfWork, SectorOfWorkTabularAdminDisplay)
-admin.site.register(OrganisationSector)
-admin.site.register(FactoryFarm)
-admin.site.register(Organisation)
-admin.site.register(Preference, PreferenceTabularAdminDisplay)
-admin.site.register(Route)
-admin.site.register(Language, LanguageTabularAdminDisplay)
-admin.site.register(Gender, GenderTabularAdminDisplay)
-admin.site.register(Country)
-admin.site.register(Age)
+    def age_translated_name(self, obj):
+        return obj.age.translated_range if obj.age else None
+
+    def get_origin_name(self, obj):
+        return obj.origin.name if obj.origin else None
 
 
 @admin.register(TextTranslations)
@@ -76,3 +84,34 @@ class SwsCountryAdmin(admin.ModelAdmin):
 class SectorsOfWorkMapperAdmin(admin.ModelAdmin):
     form = SectorsOfWorkMapperForm
     list_display = ["mapper"]
+
+
+# Register your models here.
+@admin.register(OrganisationSector)
+class OrganisationSectorAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(FactoryFarm)
+class FactoryFarmAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Organisation)
+class OrganisationAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Route)
+class RouteAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Country)
+class CountryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Age)
+class AgeAdmin(admin.ModelAdmin):
+    pass
