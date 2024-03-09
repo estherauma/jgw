@@ -53,10 +53,10 @@ def fetch_preferences_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     preferences = fetch_preferences_from_api(jgw_api_client) or []
 
-    preferences_to_create = [create_preference_object(preference) for preference in preferences]
-    Preference.objects.bulk_create(preferences_to_create, batch_size=BATCH_SIZE, ignore_conflicts=True)
+    preferences_objects = [create_preference_object(preference) for preference in preferences]
+    Preference.objects.bulk_create(preferences_objects, batch_size=BATCH_SIZE, ignore_conflicts=True)
 
-    kunfu_panda_logger.info(f"Added {len(preferences_to_create)} preferences to the database")
+    kunfu_panda_logger.info(f"Added {len(preferences_objects)} preferences to the database")
 
     # call celery to the translate, gender, language, and sector of work functions
     translate_and_clean_preferences_fields()

@@ -46,7 +46,7 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
         "get_translated_name",
         "get_origin_name",
         "destination",
-        "age_translated_name",
+        "get_age_translated_name",
         "is_missing_sector_cleaned",
     ]
     search_fields = [
@@ -60,7 +60,7 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
     def get_translated_name(self, obj):
         return obj.gender.translated_name if obj.gender else None
 
-    def age_translated_name(self, obj):
+    def get_age_translated_name(self, obj):
         return obj.age.translated_range if obj.age else None
 
     def get_origin_name(self, obj):
@@ -96,29 +96,35 @@ class SectorsOfWorkMapperAdmin(admin.ModelAdmin):
 # Register your models here.
 @admin.register(OrganisationSector)
 class OrganisationSectorAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ["name"]
+    list_display = ["name", "created_at", "updated_at"]
 
 
 @admin.register(FactoryFarm)
 class FactoryFarmAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ["name"]
+    list_display = ["name", "created_at", "updated_at"]
 
 
 @admin.register(Organisation)
 class OrganisationAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ["name"]
+    list_display = ["name", "created_at", "updated_at"]
 
 
 @admin.register(Route)
 class RouteAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ["name"]
+    list_display = ["name", "created_at", "updated_at"]
 
 
 @admin.register(Country)
 class CountryAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ["name", "is_origin", "code", "api_value"]
+    list_display = ["name", "code", "api_value", "is_origin", "is_destination", "created_at", "updated_at"]
 
 
 @admin.register(Age)
 class AgeAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ["range", "translated_range", "translated_to"]
+    list_display = ["range", "translated_range", "translated_to", "created_at", "updated_at"]
