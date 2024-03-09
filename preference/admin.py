@@ -42,13 +42,20 @@ class LanguageTabularAdminDisplay(admin.ModelAdmin):
 class PreferenceTabularAdminDisplay(admin.ModelAdmin):
     list_display = [
         "id",
+        "created_at",
         "get_translated_name",
         "get_origin_name",
         "destination",
         "age_translated_name",
         "is_missing_sector_cleaned",
     ]
-    search_fields = ["gender__translated_name", "origin__name", "destination__name"]
+    search_fields = [
+        "created_at",
+        "gender__translated_name",
+        "origin__name",
+        "destination__name",
+        "is_missing_sector_cleaned",
+    ]
 
     def get_translated_name(self, obj):
         return obj.gender.translated_name if obj.gender else None
