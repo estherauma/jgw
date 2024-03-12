@@ -234,7 +234,8 @@ def get_users_by_country_state(**filters):
     filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
 
     preferences_count_by_state = (
-        filtered_queryset.values("destination_state__name")
+        filtered_queryset.exclude(destination_state__name="not specified")
+        .values("destination_state__name")
         .annotate(users_count=Count("id"))
         .order_by("destination_state__name")
     )
