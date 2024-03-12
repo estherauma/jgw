@@ -45,26 +45,24 @@ def fetch_preferences_from_api(client):
     return client.get_data(f"/preferences?startDate={start_date}&endDate={end_date}")
 
 
+BATCH_SIZE = 10000
+
+
 @transaction.atomic
 def fetch_preferences_from_api_to_db():
     jgw_api_client = JustGoodWorkAPIClient()
     preferences = fetch_preferences_from_api(jgw_api_client) or []
 
-    for preference in preferences:
-        try:
-            add_preference_to_db(preference)
-        except Exception as e:
-            kunfu_panda_logger.error(f"An error occurred during preference creation: {str(e)}")
-            transaction.set_rollback(True)
-            raise
+    preferences_objects = [create_preference_object(preference) for preference in preferences]
+    Preference.objects.bulk_create(preferences_objects, batch_size=BATCH_SIZE, ignore_conflicts=True)
 
-    kunfu_panda_logger.info(f"Added {len(preferences)} preferences to the database")
+    kunfu_panda_logger.info(f"Added {len(preferences_objects)} preferences to the database")
 
-    # call celery to the translate, gender, language and sector of work functions
+    # call celery to the translate, gender, language, and sector of work functions
     translate_and_clean_preferences_fields()
 
 
-def add_preference_to_db(preference):
+def create_preference_object(preference):
     # check if already exists
     if Preference.objects.filter(data_source_id=preference.get("_id")).exists():
         return
@@ -73,6 +71,8 @@ def add_preference_to_db(preference):
     organisation = preference.get("organisation")
     factory_farm = preference.get("factoryFarm")
     sectors_of_work = preference.get("sectorsOfWork")
+    sector_of_work_list = preference.get("sectorOfWork")
+    sectors = preference.get("sectors")
     location_of_potential_work = preference.get("location_of_potential_work")
     gender = preference.get("gender")
     age = preference.get("age")
@@ -103,7 +103,7 @@ def add_preference_to_db(preference):
     destination_state_data = get_or_add_country_state_to_db(destination_state)
     route_data = get_or_add_route_to_db(route)
 
-    new_preference = Preference.objects.create(
+    new_preference = Preference(
         data_source_id=preference.get("_id"),
         device_id=preference.get("deviceId"),
         locale=preference.get("locale"),
@@ -125,7 +125,18 @@ def add_preference_to_db(preference):
     )
 
     # Create SectorsOfWork instances and associate them with the preference
+    final_sectors_of_work = None
+    if sector_of_work_list:
+        final_sectors_of_work = sector_of_work_list
 
-    sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
-    for sec_of_work in sec_of_work_list:
-        new_preference.sectors_of_work.add(sec_of_work)
+    if sectors_of_work:
+        final_sectors_of_work = sectors_of_work
+
+    if sectors:
+        final_sectors_of_work = sectors
+
+    sec_of_work_list = add_sector_of_work_to_db(final_sectors_of_work)
+    new_preference.save()
+    new_preference.sectors_of_work.set(sec_of_work_list)
+
+    return new_preference

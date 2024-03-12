@@ -1,5 +1,6 @@
 """jgwpandas URL Configuration
 """
+
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
@@ -10,6 +11,10 @@ from django.db import connection
 from django.http import JsonResponse
 from django.conf import settings
 from django.conf.urls.static import static
+
+from django.conf import settings
+
+admin.site.site_header = settings.ADMIN_SITE_HEADER
 
 
 @api_view(["GET"])

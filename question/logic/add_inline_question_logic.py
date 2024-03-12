@@ -34,20 +34,33 @@ from scripts.load_dev_data import InlineQuestionDataCache
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/inline_question_tasks.log")
 
 
-def fetch_inline_question_from_api(client):
-    if can_use_cached_data():
-        return InlineQuestionDataCache().get_data()
+def fetch_legacy_inline_question_from_api(client):
+    start_date = APPLICATION_POSSIBLE_START_DATE
+    end_date = todays_date()
+
+    # get the last time inline question were fetched
+    latest_inlinequestion = (
+        InlineQuestionStandard.objects.filter(api_version="v1").order_by("-created_at").first()
+    )
+    if latest_inlinequestion:
+        start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
+
+    return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
+
+
+def fetch_inline_question_v2_from_api(client):
 
     start_date = APPLICATION_POSSIBLE_START_DATE
     end_date = todays_date()
 
     # get the last time inline question were fetched
-    latest_inlinequestion = InlineQuestionStandard.objects.last()
+    latest_inlinequestion = (
+        InlineQuestionStandard.objects.filter(api_version="v2").order_by("-created_at").first()
+    )
     if latest_inlinequestion:
         start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
 
-    kunfu_panda_logger.info(f"Fetching inline questions from {start_date} to {end_date}")
-    return client.get_data(f"/inlinequestions?startDate={start_date}&endDate={end_date}")
+    return client.get_data(f"/inlinequestionsv2?startDate={start_date}&endDate={end_date}")
 
 
 unwanted_fields = [
@@ -106,20 +119,120 @@ def format_inline_question_response_text(text):
     return text
 
 
+def new_inline_questions_logic(jgw_api_client):
+    inline_questions_v2 = fetch_inline_question_v2_from_api(jgw_api_client)
+
+    for inline_question_v2 in inline_questions_v2:
+        if isinstance(inline_question_v2, str):
+            return
+
+        if InlineQuestionStandard.objects.filter(data_source_id=inline_question_v2.get("_id")).exists():
+            return
+
+        preference = Preference.objects.filter(device_id=inline_question_v2.get("deviceId")).first()
+
+        origin = get_data_origin(
+            route=inline_question_v2.get("route") or NOT_SPECIFIED,
+            api_origin=inline_question_v2.get("locale"),
+        )
+        destination = get_data_destination(
+            route=inline_question_v2.get("route") or NOT_SPECIFIED,
+            api_destination=inline_question_v2.get("destination"),
+            location_of_potential_work=inline_question_v2.get("location_of_potential_work"),
+        )
+
+        route_data = get_or_add_route_to_db(inline_question_v2.get("route") or NOT_SPECIFIED)
+        language_data = get_or_add_language_to_db(inline_question_v2.get("language"))
+        origin_data = get_or_add_country_to_db(origin, source="origin")
+        destination_data = get_or_add_country_to_db(destination, source="destination")
+        organisation_sector_data = get_or_add_organisation_sector_to_db(
+            inline_question_v2.get("organisationSector")
+        )
+        organisation_data = get_or_add_organisation_to_db(inline_question_v2.get("organisation"))
+        factory_farm_data = get_or_add_factory_farm_to_db(inline_question_v2.get("factoryFarm"))
+
+        new_inline_question_standard = InlineQuestionStandard.objects.create(
+            data_source_id=inline_question_v2.get("_id"),
+            device_id=inline_question_v2.get("deviceId"),
+            preference=preference,
+            app_id=inline_question_v2.get("appId"),
+            locale=inline_question_v2.get("locale"),
+            route=route_data,
+            language=language_data,
+            origin=origin_data,
+            destination=destination_data,
+            organisation_sector=organisation_sector_data,
+            organisation=organisation_data,
+            factory_farm=factory_farm_data,
+            api_created_at=inline_question_v2.get("createdAt"),
+            api_updated_at=inline_question_v2.get("updatedAt"),
+            api_version="v2",
+        )
+
+        inline_question_text, _ = InlineQuestionText.objects.get_or_create(
+            text=format_inline_question_response_text(inline_question_v2.get("questionKey")),
+        )
+        inline_question_text.title_text = inline_question_v2.get("questionText")
+        inline_question_text.save()
+
+        created_inline_question = InlineQuestion.objects.create(
+            question=inline_question_text, inline_question_standard=new_inline_question_standard
+        )
+
+        # create inline question response
+        qn_resp_text = (
+            format_inline_question_response_text(inline_question_v2.get("questionValue")) or NOT_SPECIFIED
+        )
+        if isinstance(qn_resp_text, dict) and "amount" in qn_resp_text:
+            qn_resp_text = qn_resp_text.get("amount")
+
+        text_translations, _ = TextTranslations.objects.get_or_create(
+            original_text=format_text_for_db(qn_resp_text)
+        )
+        if not text_translations.translated_text:
+            resp_translated = format_text_for_db(pandas_translator_translate(qn_resp_text))
+            text_translations.translated_text = resp_translated
+            qn_resp_text = resp_translated
+            text_translations.save()
+        else:
+            qn_resp_text = text_translations.translated_text
+
+        inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
+            translated_text=qn_resp_text
+        )
+
+        inline_question_text.title_text = inline_question_v2.get("questionText")
+        inline_question_text.save()
+
+        InlineQuestionResponse.objects.create(
+            inline_question=created_inline_question, response=inline_question_response_text
+        )
+
+    kunfu_panda_logger.info(f"Added {len(inline_questions_v2)} inline questions v2 to the database")
+
+
+def legacy_inline_questions_logic(jgw_api_client):
+    legacy_inline_questions = fetch_legacy_inline_question_from_api(jgw_api_client)
+
+    for inline_question in legacy_inline_questions:
+        add_inline_question_to_db(inline_question)
+
+    kunfu_panda_logger.info(f"Added {len(legacy_inline_questions)} inline questions v1 to the database")
+
+
 @transaction.atomic
 def fetch_inline_questions_from_api_to_db():
+
     jgw_api_client = JustGoodWorkAPIClient()
-    inline_questions = fetch_inline_question_from_api(jgw_api_client)
 
-    for inline_question in inline_questions:
-        try:
-            add_inline_question_to_db(inline_question)
-        except Exception as e:
-            print("An error occurred during inline questions creation:", str(e))
-            transaction.set_rollback(True)
-            raise
-    kunfu_panda_logger.info(f"Added {len(inline_questions)} inline questions to the database")
+    # legacy
 
+    legacy_inline_questions_logic(jgw_api_client)
+
+    # new inline question logic
+    new_inline_questions_logic(jgw_api_client)
+
+    # start translation
     translate_and_clean_inline_question_fields()
 
 
@@ -127,10 +240,10 @@ def add_inline_question_to_db(inline_question):
     if isinstance(inline_question, str):
         return
 
-    standard_and_other_fields = separate_inline_question_standard_fields_from_others(inline_question)
-
     if InlineQuestionStandard.objects.filter(data_source_id=inline_question.get("_id")).exists():
         return
+
+    standard_and_other_fields = separate_inline_question_standard_fields_from_others(inline_question)
 
     standard_fields_dict = standard_and_other_fields.get("standard_fields_dict")
     responses_list = standard_and_other_fields.get("responses_list")
@@ -177,6 +290,7 @@ def add_inline_question_to_db(inline_question):
         factory_farm=factory_farm_data,
         api_created_at=standard_fields_dict.get("createdAt"),
         api_updated_at=standard_fields_dict.get("updatedAt"),
+        api_version="v1",
     )
 
     #  get or create inline question text

@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% load static %}
+{% load waffle_tags %}
 
 <!-- title -->
 {% block title %} Messaging Questions {% endblock title %}
@@ -34,12 +35,14 @@
         <div class="widget-rounded-circle card">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-9">
-                        <div class="text-start">
-                            <h3 class="text-dark"><span data-plugin="counterup">{{total_messaging_questions}}</span></h3>
-                            <h5 class="text-muted">MESSAGING/SPOT QUESTIONS</h5>
+                    <!-- {% flag 'can_view_total_messaging_questions_count_on_messaging_page' %} -->
+                        <div class="col-9">
+                            <div class="text-start">
+                                <h3 class="text-dark"><span data-plugin="counterup">{{total_messaging_questions}}</span></h3>
+                                <h5 class="text-muted global-text-style">messaging/spot questions</h5>
+                            </div>
                         </div>
-                    </div>
+                    <!-- {% endflag %} -->
                     <div class="col-3">
                         <div class="row">
                             <div class="col-md-6">
@@ -68,27 +71,30 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12 mb-3">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">Messaging question per origin</p>
-                <div class="messaging-question-origin-chart-id-chart-box">
-                    <div id="messaging-question-origin-chart-id"></div>
+    {% flag 'can_view_messaging_question_per_origin_on_messaging_page' %}
+        <div class="col-md-12 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">messaging question per origin</p>
+                    <div class="messaging-question-origin-chart-id-chart-box">
+                        <div id="messaging-question-origin-chart-id"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="col-md-12">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">Messaging question per destination</p>
-                <div id="messaging-question-destination-chart-id-chart-box">
-                    <div id="messaging-question-destination-chart-id"></div>
+    {% endflag %}
+    {% flag 'can_view_messaging_question_per_destination_on_messaging_page' %}
+        <div class="col-md-12">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">messaging question per destination</p>
+                    <div id="messaging-question-destination-chart-id-chart-box">
+                        <div id="messaging-question-destination-chart-id"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endflag %}
 </div>
 
 {% endblock content %}

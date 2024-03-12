@@ -14,7 +14,7 @@ class SectorOfWork(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.translated_name
 
 
 class OrganisationSector(models.Model):
@@ -110,9 +110,6 @@ class Gender(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"{self.name} - {self.translated_name}"
-
 
 class Age(models.Model):
     range = models.CharField(max_length=255)
@@ -163,6 +160,7 @@ class Preference(models.Model):
     )
     factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    is_missing_sector_cleaned = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Preference {self.id}"
@@ -178,3 +176,11 @@ class SwsCountry(models.Model):
 
     def __str__(self):
         return self.country.name
+
+
+class SectorsOfWorkMapper(models.Model):
+    mapper = models.CharField(max_length=255)
+    sectors = models.ManyToManyField(SectorOfWork)
+
+    def __str__(self):
+        return self.mapper

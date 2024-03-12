@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% load static %}
+{% load waffle_tags %}
 
 <!-- title -->
 {% block title %} User Overview {% endblock title %}
@@ -34,14 +35,16 @@
                 <div class="row">
                     <div class="{% if user.is_superuser %} col-9 {% else %} col-11 {% endif %}">
                         <div class="row">
+                            {% flag 'can_view_new_users_total_count' %}
                             <div class="col-3">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{total_user_overview_responses}}</span></h3>
-                                <h5 class="text-muted">NEW USERS</h5>
+                                <h5 class="text-muted general-title-text">New Users</h5>
                             </div>
+                            {% endflag %}
                             {% if not user.is_anonymous and user.role == "SCHEME" %}
                             <div class="col-3">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{pasi_downloads}}</span></h3>
-                                <h5 class="text-muted">DOWNLOADS</h5>
+                                <h5 class="text-muted general-title-text">Downloads</h5>
                             </div>
                             {% endif %}
                         </div>
@@ -84,76 +87,133 @@
     </div>
 </div>
 
+
 <div class="row mb-3">
-    <div class="col-md-8">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">USERS BY ORIGIN COUNTRY</p>
-                <div class="preference-origin-graph-id-chart-box">
-                    <div id="preference-origin-graph-id"></div>
+    {% flag 'can_view_users_by_origin_country_chart' %}
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">users by origin country</p>
+                    <div class="preference-origin-graph-id-chart-box">
+                        <div id="preference-origin-graph-id"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">Users By Gender</p>
-                <canvas id="preference-gender-pie-chart-id"></canvas>
+    {% endflag %}
+
+    {% flag 'can_view_users_by_gender_chart' %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">users by gender</p>
+                    <canvas id="preference-gender-pie-chart-id"></canvas>
+                </div>
             </div>
         </div>
-    </div>
+    {% endflag %}
 </div>
 
 <div class="row mb-3">
-    {% if user.role != 'SCHEME' %}
-        <div class="col-4">
+    {% if user.role != 'SCHEME' or user.is_superuser%}
+        {% flag 'can_view_users_by_destination_country_chart' %}
+            <div class="col-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">users by destination country</p>
+                            <canvas id="preference-destination-pie-chart-id"></canvas>
+                    </div>
+                </div>
+            </div>
+        {% endflag %}
+    {% endif %}
+    
+    {% flag 'can_view_selected_users_language_chart' %}
+        <div class="{% if user.role != 'SCHEME' or user.is_superuser %} col-8 {% else %} col-12 {% endif %}">
             <div class="card h-100">
                 <div class="card-body">
-                    <p class="chart-title">USERS BY DESTINATION COUNTRY</p>
-                        <canvas id="preference-destination-pie-chart-id"></canvas>
+                    <p class="chart-title">selected users language</p>
+                    <div class="preference-language-graph-id-chart-box">
+                        <div id="preference-language-graph-id"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    {% endif %}
-
-    <div class="{% if user.role != 'SCHEME' %} col-8 {% else %} col-12 {% endif %}">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">SELECTED USERS LANGUAGE</p>
-                <div class="preference-language-graph-id-chart-box">
-                    <div id="preference-language-graph-id"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% endflag %}
 </div>
 
 <div class="row mb-3">
 
     {% if has_orgs or user.is_superuser %}
-        <div class="col-md-8">
-            <div class="card h-100">
-                <div class="card-body">
-                    <p class="chart-title">WORK CODE USAGE</p>
-                    <div class="preference-work-code-usage-graph-id-chart-box">
-                        <div id="preference-work-code-usage-graph-id"></div>
+        {% flag 'can_view_work_code_usage_chart' %}
+            <div class="col-md-8">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="chart-title">work code usage</p>
+                        <div class="preference-work-code-usage-graph-id-chart-box">
+                            <div id="preference-work-code-usage-graph-id"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        {% endflag %}
     {% endif %}
 
-
+    {% flag 'can_view_users_by_age_chart' %}
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <p class="chart-title">Users By Age</p>
+                <p class="chart-title">users by age</p>
                 <canvas id="preference-age-graph-id"></canvas>
             </div>
         </div>
     </div>
+    {% endflag %}
 </div>
+
+{% flag 'can_view_new_monthly_users_chart' %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">users by month</p>
+                    <canvas id="preference-monthly-cumulative-users-graph-id"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endflag %}
+
+{% flag 'can_view_get_users_by_country_state_chart' %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">users by state</p>
+                    <div class="users-by-country-state-graph-id-chart-box">
+                        <div id="users-by-country-state-graph-id"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endflag %}
+
+{% flag 'can_view_get_users_by_sector_chart' %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">users by sectors</p>
+                    <div class="users-by-sector-graph-id-chart-box">
+                        <div id="users-by-sector-graph-id"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endflag %}
+
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
@@ -162,6 +222,9 @@
 <script src="{% static 'js/charts/bar/preference_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/preference_work-code-usage_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_destination_pie_chart.js' %}"></script>
+<script src="{% static 'js/charts/line/preferences_monthly_users.js' %}"></script>
+<script src="{% static 'js/charts/bar/users_by_country_state.js' %}"></script>
+<script src="{% static 'js/charts/bar/user_by_sector_graph.js' %}"></script>
 <script src="{% static 'js/app/user_overview.js' %}"></script>
 <script type="text/javascript">
     // get data from context
@@ -171,6 +234,9 @@
     var destinationData = {{ preferences_per_destination_country | safe }};
     var languageData = {{ preferences_selected_user_language | safe }};
     var workCodeData = {{ work_code_usage | safe }};
+    var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
+    var usersByCountryStateChartData = {{ users_by_country_state | safe }};
+    var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
 
     // plots the age piechart
     preferenceAgePieChart(ageData)
@@ -189,5 +255,15 @@
 
     // plots the work code usage graph
     preferenceWorkCodeUsageGraph(workCodeData)
+
+    // preferenceMonthlyUsersChart
+    preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData)
+
+    // users by country state graph
+    usersByCountryStateChart(usersByCountryStateChartData)
+
+    // users by sectors chart data
+    usersBySectorsChart(usersBySectorsChartData)
+
 </script>
 {% endblock %}

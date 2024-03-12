@@ -1,11 +1,12 @@
 from collections import defaultdict
 from django.db.models import Case, When, Value, CharField, F, Count
+from django.db.models.functions import TruncMonth
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset
-from preference.models import Organisation, Preference
+from preference.models import Organisation, Preference, SectorOfWork, SectorsOfWorkMapper
 from users.utils import get_user_organisations
 
 
@@ -25,7 +26,7 @@ def preferences_by_age(**filters):
         .annotate(total=Count("id"))
         .order_by("-total")
     )
-    labels = [age["age__translated_range"].upper() for age in age_counts]
+    labels = [age["age__translated_range"].title() for age in age_counts]
     counts = [age["total"] for age in age_counts]
     group_mapping = {
         "60+": ["60+"],
@@ -38,15 +39,15 @@ def preferences_by_age(**filters):
     }
 
     combined_values = {group: 0 for group in group_mapping}
-    combined_values["PREFER NOT TO ANSWER"] = 0
+    combined_values["PREFER NOT TO ANSWER".title()] = 0
     for label, value in zip(labels, counts):
         for group, label_list in group_mapping.items():
             if label in label_list:
                 combined_values[group] += value
                 break
         else:
-            if label == "PREFER NOT TO ANSWER" or label == "PREFERNOTTOANSWER":
-                combined_values["PREFER NOT TO ANSWER"] += value
+            if label == "PREFER NOT TO ANSWER".title() or label == "PREFERNOTTOANSWER".title():
+                combined_values["PREFER NOT TO ANSWER".title()] += value
     final_labels = []
     final_counts = []
     for group, value in combined_values.items():
@@ -67,7 +68,7 @@ def preferences_by_gender(**filters):
 
     label_sums = defaultdict(int)
     for gender in gender_counts:
-        normalized_label = normalize_gender_name(gender["gender__translated_name"]).upper()
+        normalized_label = normalize_gender_name(gender["gender__translated_name"]).title()
         label_sums[normalized_label] += gender["total"]
 
     summed_labels = list(label_sums.keys())
@@ -84,7 +85,7 @@ def preferences_by_origin(**filters):
     )
 
     labels = [
-        origin["origin__name"].upper() for origin in origin_counts if origin["origin__name"] is not None
+        origin["origin__name"].title() for origin in origin_counts if origin["origin__name"] is not None
     ]
     counts = [origin["total"] for origin in origin_counts]
 
@@ -102,7 +103,7 @@ def preferences_by_destination(**filters):
         .order_by("-total")
     )
 
-    labels = [destination["destination__name"].upper() for destination in destination_counts]
+    labels = [destination["destination__name"].title() for destination in destination_counts]
     counts = [destination["total"] for destination in destination_counts]
 
     return {"labels": labels, "counts": counts}
@@ -144,7 +145,7 @@ def preferences_by_language(**filters):
         .order_by("-total")
     )
 
-    labels = [destination["translated_name"].upper() for destination in language_counts]
+    labels = [destination["translated_name"].title() for destination in language_counts]
     counts = [destination["total"] for destination in language_counts]
 
     return {"labels": labels, "counts": counts}
@@ -161,6 +162,10 @@ def preferences_by_organisation(**filters):
                     organisation__name__in=["placeuk", "seasonal worker scheme - placeuk"],
                     then=Value("PlaceUk"),
                 ),
+                When(
+                    organisation__name__icontains="hops",
+                    then=Value("seasonal worker scheme - hops"),
+                ),
                 default=F("organisation__name"),
                 output_field=CharField(),
             )
@@ -172,9 +177,10 @@ def preferences_by_organisation(**filters):
     )
 
     labels = [
-        format_org_name_from_display(organisation["organisation_name"]).upper()
+        format_org_name_from_display(organisation["organisation_name"]).title()
         for organisation in organisation_counts
     ]
+
     counts = [organisation["count"] for organisation in organisation_counts]
 
     return {"labels": labels, "counts": counts}
@@ -201,3 +207,96 @@ def preference_stats_for_export(filters):
         "preferences_selected_user_language": preferences_by_language_responses,
         "work_code_usage": preferences_by_organisation_responses,
     }
+
+
+def get_cumulative_monthly_new_users(**filters):
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+
+    data = (
+        filtered_queryset.annotate(month=TruncMonth("api_created_at"))
+        .values("month")
+        .annotate(new_users=Count("id"))
+        .order_by("month")
+    )
+
+    labels = [entry["month"].strftime("%b, %Y") for entry in data]
+    values = [entry["new_users"] for entry in data]
+
+    return {
+        "labels": labels,
+        "counts": values,
+    }
+
+
+def get_users_by_country_state(**filters):
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+
+    preferences_count_by_state = (
+        filtered_queryset.values("destination_state__name")
+        .annotate(users_count=Count("id"))
+        .order_by("destination_state__name")
+    )
+
+    # Create separate lists for labels and counts
+    labels = [entry["destination_state__name"].title() for entry in preferences_count_by_state]
+    counts = [entry["users_count"] for entry in preferences_count_by_state]
+
+    return {
+        "labels": labels,
+        "counts": counts,
+    }
+
+
+def get_preferences_by_sectors(**filters):
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+
+    sectors_of_work_mapper_instances = SectorsOfWorkMapper.objects.all()
+
+    initial_case_list = [
+        {
+            "then_value": sof.mapper.lower(),
+            "match_list": [sec.translated_name for sec in sof.sectors.all()],
+        }
+        for sof in sectors_of_work_mapper_instances
+    ]
+
+    case_list = [initial_case for initial_case in initial_case_list if initial_case["match_list"]]
+
+    when_list = [
+        When(sectors_of_work__translated_name__in=case["match_list"], then=Value(case["then_value"]))
+        for case in case_list
+        if case["match_list"]
+    ]
+
+    aggregated_data = (
+        filtered_queryset.annotate(
+            sectors_of_work__translated_name=Case(
+                *when_list,
+                default=F("sectors_of_work__translated_name"),
+                output_field=CharField(),
+            ),
+        )
+        .values("sectors_of_work__translated_name")
+        .annotate(count=Count("id"))
+    )
+
+    sector_counts = {}
+
+    for entry in aggregated_data:
+        sector_name = entry["sectors_of_work__translated_name"]
+        count = entry["count"]
+
+        if sector_name in sector_counts:
+            sector_counts[sector_name.trim()] += count
+        else:
+            sector_counts[sector_name] = count
+
+    labels = list(sector_counts.keys())
+    count = list(sector_counts.values())
+
+    result_dict = {"labels": labels, "counts": count}
+
+    return result_dict

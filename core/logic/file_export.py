@@ -4,7 +4,8 @@ from openpyxl.styles import Font, PatternFill
 
 from common.utils.preferences import replace_seasonal_worker_scheme
 
-def generate_and_export_excel(data, filename = "unititled"):
+
+def generate_and_export_excel(data, filename="unititled"):
     # Create a new Excel workbook
     wb = openpyxl.Workbook()
 
@@ -15,17 +16,17 @@ def generate_and_export_excel(data, filename = "unititled"):
         ws = wb.create_sheet(title=sheet_name)
 
         for key, value in data_dict.items():
-            ws.append(['', ''])
-            title_cell = ws.cell(row=ws.max_row + 1, column=1, value=key.replace("_", " ").upper())
+            ws.append(["", ""])
+            title_cell = ws.cell(row=ws.max_row + 1, column=1, value=key.replace("_", " ").title())
             title_cell.font = Font(bold=True)
-            title_cell.fill = PatternFill(start_color='F2F2F2', end_color='F2F2F2', fill_type='solid')
+            title_cell.fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
 
-            ws.append(['', 'LABELS', 'COUNTS'])
-            labels =  value['labels']
-            counts = value.get('counts')
+            ws.append(["", "LABELS", "COUNTS"])
+            labels = value["labels"]
+            counts = value.get("counts")
 
             for label, count in zip(labels, counts):
-                ws.append(['', label, count])
+                ws.append(["", label, count])
 
         # Adjust column widths
         for column_cells in ws.columns:
@@ -47,10 +48,10 @@ def generate_and_export_excel(data, filename = "unititled"):
 
 
 def generate_export_response(workbook, export_name):
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename={export_name}.xlsx'
-    response['filename'] = f'{export_name}.xlsx'
-    
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f"attachment; filename={export_name}.xlsx"
+    response["filename"] = f"{export_name}.xlsx"
+
     workbook.save(response)
-    
+
     return response

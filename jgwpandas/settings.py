@@ -48,11 +48,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # installed packages (3rd party)
     "rest_framework",
     "crispy_forms",
     "crispy_bootstrap5",
     "debug_toolbar",
     "django_extensions",
+    "waffle",
+    # added/developed packages
     "core",
     "events",
     "dashboard",
@@ -74,6 +77,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "waffle.middleware.WaffleMiddleware",
 ]
 
 ROOT_URLCONF = "jgwpandas.urls"
@@ -90,7 +94,6 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "common.custom_context_processor.export_buttons_config_list",
-                "core.pre_processors.env_variables.expose_template_env_variables",
             ],
         },
     },
@@ -241,3 +244,8 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+TEMPLATE_CONTEXT_PROCESSORS = "django.template.context_processors.request"
+
+
+ADMIN_SITE_HEADER = "FiftyEight"

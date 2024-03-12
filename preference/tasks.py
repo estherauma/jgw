@@ -5,6 +5,11 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.language import non_translatable_languages
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
+from preference.logic.attach_sectors_to_preferences_logic import (
+    attach_sectors_to_preferences,
+    clean_sectors_of_work,
+    stringified_sectors_of_work_to_list,
+)
 from preference.models import Age, Country, CountryState, Gender, Language, SectorOfWork
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/preference_tasks.log")
@@ -89,3 +94,12 @@ def translate_and_clean_preferences_fields(key: str = None):
     translate_and_clean_language()
     translate_and_clean_sectors_of_work()
     translate_and_clean_age()
+
+    # clean up sectors of work
+    attach_sectors_to_preferences()  # may get untranslated sectors of work from db around here
+    translate_and_clean_sectors_of_work()  # translate
+
+    stringified_sectors_of_work_to_list()
+    translate_and_clean_sectors_of_work()  # translate
+
+    clean_sectors_of_work()
