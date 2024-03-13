@@ -57,13 +57,15 @@
 .chart-title {
     text-align: center;
     text-transform: capitalize;
-    font-size: 15px;
+    font-size: 18px;
+    font-weight: 400;
     color: var(--ct-text-muted)!important;
 }
 
 .general-title-text {
     text-transform: capitalize;
-    font-size: 15px;
+    font-size: 18px;
+    font-weight: 400;
     color: var(--ct-text-muted)!important;
 }
 
