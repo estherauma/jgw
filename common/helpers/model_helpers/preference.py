@@ -156,6 +156,7 @@ def get_unique_langaues_list():
         )
         .values_list("new_translated_name", flat=True)
         .distinct()
+        .order_by("new_translated_name")
     )
     for language in language_list:
         lang = Language.objects.filter(translated_name=language).first()
