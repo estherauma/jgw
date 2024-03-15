@@ -10,14 +10,14 @@ class GenericFilterForm(forms.Form):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
-        self.fields["origin"].choices = self.get_countries({"is_origin": True})
-        self.fields["destination"].choices = self.get_countries({"is_destination": True})
+        self.fields["origin"].choices = sorted(self.get_countries({"is_origin": True}))
+        self.fields["destination"].choices = sorted(self.get_countries({"is_destination": True}))
 
         user_factories = get_user_factories(self.request.user)
         user_orgs = get_user_organisations(self.request.user)
 
-        self.fields["factory_farm"].choices = [(farm.name, farm.name) for farm in user_factories]
-        self.fields["organisation"].choices = [(org.name, org.name) for org in user_orgs]
+        self.fields["factory_farm"].choices = sorted([(farm.name, farm.name) for farm in user_factories])
+        self.fields["organisation"].choices = sorted([(org.name, org.name) for org in user_orgs])
 
     def get_countries(self, countries_filter):
         countries = []

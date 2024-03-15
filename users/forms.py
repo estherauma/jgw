@@ -173,13 +173,19 @@ class CreateNewUserForm(forms.ModelForm):
         self.fields["first_name"].required = True
         self.fields["last_name"].required = True
         self.fields["destinations"].choices = [
-            (country.id, country.name.capitalize()) for country in Country.objects.filter(is_destination=True)
+            (country.id, country.name.capitalize())
+            for country in Country.objects.filter(is_destination=True).order_by("name")
         ]
         self.fields["exluded_origin_countries"].choices = [
-            (country.id, country.name.capitalize()) for country in Country.objects.filter(is_origin=True)
+            (country.id, country.name.capitalize())
+            for country in Country.objects.filter(is_origin=True).order_by("name")
         ]
-        self.fields["factories"].choices = [(farm.id, farm.name) for farm in FactoryFarm.objects.all()]
-        self.fields["organisations"].choices = [(org.id, org.name) for org in Organisation.objects.all()]
+        self.fields["factories"].choices = [
+            (farm.id, farm.name) for farm in FactoryFarm.objects.all().order_by("name")
+        ]
+        self.fields["organisations"].choices = [
+            (org.id, org.name) for org in Organisation.objects.all().order_by("name")
+        ]
         self.fields["user_languages"].choices = [
             (language.id, language.translated_name.capitalize()) for language in get_unique_langaues_list()
         ]
