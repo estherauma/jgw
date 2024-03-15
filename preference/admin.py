@@ -22,8 +22,8 @@ from preference.models import (
 
 @admin.register(SectorOfWork)
 class SectorOfWorkTabularAdminDisplay(admin.ModelAdmin):
-    list_display = ["name", "translated_name", "translated_to"]
-    search_fields = ["translated_name", "name"]
+    list_display = ["created_at", "name", "translated_name", "translated_to", "is_disabled"]
+    search_fields = ["translated_name", "name", "is_disabled"]
 
 
 @admin.register(Gender)

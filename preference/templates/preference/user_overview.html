@@ -144,20 +144,18 @@
 
 <div class="row mb-3">
 
-    {% if has_orgs or user.is_superuser %}
-        {% flag 'can_view_work_code_usage_chart' %}
-            <div class="col-md-8">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <p class="chart-title">work code usage</p>
-                        <div class="preference-work-code-usage-graph-id-chart-box">
-                            <div id="preference-work-code-usage-graph-id"></div>
-                        </div>
+    {% flag 'can_view_work_code_usage_chart' %}
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">work code usage</p>
+                    <div class="preference-work-code-usage-graph-id-chart-box">
+                        <div id="preference-work-code-usage-graph-id"></div>
                     </div>
                 </div>
             </div>
-        {% endflag %}
-    {% endif %}
+        </div>
+    {% endflag %}
 
     {% flag 'can_view_users_by_age_chart' %}
     <div class="col-md-4">

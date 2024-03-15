@@ -78,4 +78,5 @@ def preference_filtered_queryset(
     if origin_countries:
         preference_filters_q_object &= Q(origin__name__in=origin_countries)
 
+    # exclude disabled sectors of work
     return queryset.filter(preference_filters_q_object)

@@ -10,6 +10,7 @@ class SectorOfWork(models.Model):
     name = models.CharField(max_length=255)
     translated_name = models.CharField(max_length=255, null=True, blank=True)
     translated_to = models.CharField(max_length=255, default="en")
+    is_disabled = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

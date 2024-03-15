@@ -254,7 +254,7 @@ def get_preferences_by_sectors(**filters):
     queryset = Preference.objects.all()
     filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
 
-    sectors_of_work_mapper_instances = SectorsOfWorkMapper.objects.all()
+    sectors_of_work_mapper_instances = SectorsOfWorkMapper.objects.exclude(sectors__is_disabled=True)
 
     initial_case_list = [
         {
@@ -273,7 +273,8 @@ def get_preferences_by_sectors(**filters):
     ]
 
     aggregated_data = (
-        filtered_queryset.annotate(
+        filtered_queryset.exclude(sectors_of_work__is_disabled=True)
+        .annotate(
             sectors_of_work__translated_name=Case(
                 *when_list,
                 default=F("sectors_of_work__translated_name"),
