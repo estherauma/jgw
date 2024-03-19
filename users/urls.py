@@ -15,7 +15,7 @@ from .views import (
     request_password_reset,
     set_password,
     verify_email_change,
-    create_new_user
+    create_or_edit_user,
 )
 
 app_name = "users"
@@ -32,7 +32,8 @@ urlpatterns = [
     path("request_password_reset/", request_password_reset, name="request_password_reset"),
     path("set_password/<str:token>", set_password, name="set_password"),
     path("profile/", profile, name="profile"),
-    path("verify/email/<str:token>", verify_email_change, name='verify_email'),
-    path("change_email/", change_email_address, name='change_email'),
-    path("create_new_user/", create_new_user, name='create_new_user'),
+    path("verify/email/<str:token>", verify_email_change, name="verify_email"),
+    path("change_email/", change_email_address, name="change_email"),
+    path("create_or_edit_user/", create_or_edit_user, name="create_user"),
+    path("create_or_edit_user/<int:user_id>", create_or_edit_user, name="edit_user"),
 ]

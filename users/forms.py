@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import ModelForm
+from django.db.models import F
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
@@ -255,4 +256,50 @@ class CreateNewUserForm(forms.ModelForm):
             "destinations",
             "user_languages",
             "exluded_origin_countries",
+        ]
+
+
+class EditUserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+        instance = kwargs.get("instance")
+        if instance:
+            # destination
+            self.fields["destinations"].initial = instance.destinations.all().values_list("id", flat=True)
+
+            self.fields["factories"].initial = instance.factories.all().values_list("id", flat=True)
+            self.fields["organisations"].initial = instance.organisations.all().values_list("id", flat=True)
+
+            unique_languages = [
+                (language.id, language.translated_name.capitalize())
+                for language in get_unique_langaues_list()
+            ]
+            print("unique", unique_languages)
+            # self.fields["user_languages"].initial = [lang.id for lang in unique_languages]
+        # self.fields["user_languages"] = (14, "coolest")
+
+    user_languages = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "excepted-languages-search-id",
+            }
+        ),
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "organisations",
+            "factories",
+            "destinations",
+            "user_languages",
+            "exluded_origin_countries",
+            # "groups",
         ]
