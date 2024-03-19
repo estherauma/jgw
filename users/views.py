@@ -395,7 +395,6 @@ def create_user(request):
     form = CreateNewUserForm()
     if request.method == "POST":
         form = CreateNewUserForm(request.POST)
-        print(form)
         if form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data["password"])
@@ -424,6 +423,22 @@ def create_user(request):
 def update_user(request, user_id):
     user = get_object_or_404(User, pk=user_id)
     form = EditUserForm(request.POST or None, instance=user)
-    print(user)
-    messages.success(request, "User updated successfully!")
+    if request.method == "POST":
+        user = form.save(commit=False)
+
+        user_languages = form.cleaned_data.get("user_languages", [])
+        langs_from_ids = Language.objects.filter(id__in=user_languages).values_list(
+            "translated_name", flat=True
+        )
+        all_langs = Language.objects.filter(translated_name__in=langs_from_ids)
+
+        user.save()
+        form.save_m2m()  # Save the many-to-many relationships
+
+        edited_user = User.objects.filter(id=user.id).first()
+        edited_user.user_languages.clear()
+        for lang in all_langs:
+            edited_user.user_languages.add(lang)
+
+        messages.success(request, "User updated successfully!")
     return render(request, "users/create_user.html", context={"form": form})

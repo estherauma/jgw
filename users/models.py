@@ -51,7 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     organisations = models.ManyToManyField(Organisation, blank=True)
     destinations = models.ManyToManyField(Country, blank=True)
     user_languages = models.ManyToManyField(Language, blank=True)
-    exluded_origin_countries = models.ManyToManyField(Country, blank=True, related_name="excluded_origins")
+    excluded_origin_countries = models.ManyToManyField(Country, blank=True, related_name="excluded_origins")
 
     is_staff = models.BooleanField(
         default=False,

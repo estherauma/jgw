@@ -152,7 +152,7 @@ class UserAdminForm(forms.ModelForm):
             "organisations",
             "destinations",
             "user_languages",
-            "exluded_origin_countries",
+            "excluded_origin_countries",
             "is_staff",
             "is_superuser",
             "is_active",
@@ -177,7 +177,7 @@ class CreateNewUserForm(forms.ModelForm):
             (country.id, country.name.capitalize())
             for country in Country.objects.filter(is_destination=True).order_by("name")
         ]
-        self.fields["exluded_origin_countries"].choices = [
+        self.fields["excluded_origin_countries"].choices = [
             (country.id, country.name.capitalize())
             for country in Country.objects.filter(is_origin=True).order_by("name")
         ]
@@ -221,7 +221,7 @@ class CreateNewUserForm(forms.ModelForm):
         ),
         required=False,
     )
-    exluded_origin_countries = forms.MultipleChoiceField(
+    excluded_origin_countries = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
             attrs={
                 "class": "form-select selectpicker",
@@ -255,40 +255,56 @@ class CreateNewUserForm(forms.ModelForm):
             "factories",
             "destinations",
             "user_languages",
-            "exluded_origin_countries",
+            "excluded_origin_countries",
         ]
 
 
 class EditUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        super().__init__(*args, **kwargs)
+        super(EditUserForm, self).__init__(*args, **kwargs)
 
-        instance = kwargs.get("instance")
-        if instance:
-            # destination
-            self.fields["destinations"].initial = instance.destinations.all().values_list("id", flat=True)
+        # destination
+        self.fields["destinations"].choices = [
+            (country.id, country.name.capitalize())
+            for country in Country.objects.filter(is_destination=True).order_by("name")
+        ]
+        self.fields["destinations"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["destinations"].widget.attrs["id"] = "edit-user-destinations-id"
+        self.fields["destinations"].widget.attrs["data-live-search"] = "true"
 
-            self.fields["factories"].initial = instance.factories.all().values_list("id", flat=True)
-            self.fields["organisations"].initial = instance.organisations.all().values_list("id", flat=True)
+        # language
+        self.fields["user_languages"].choices = [
+            (language.id, language.translated_name.capitalize()) for language in get_unique_langaues_list()
+        ]
+        self.fields["user_languages"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["user_languages"].widget.attrs["id"] = "edit-user-languages-id"
+        self.fields["user_languages"].widget.attrs["data-live-search"] = "true"
 
-            unique_languages = [
-                (language.id, language.translated_name.capitalize())
-                for language in get_unique_langaues_list()
-            ]
-            print("unique", unique_languages)
-            # self.fields["user_languages"].initial = [lang.id for lang in unique_languages]
-        # self.fields["user_languages"] = (14, "coolest")
+        # organisations
+        self.fields["organisations"].choices = [
+            (org.id, org.name) for org in Organisation.objects.all().order_by("name")
+        ]
+        self.fields["organisations"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["organisations"].widget.attrs["id"] = "edit-user-organisations-id"
+        self.fields["organisations"].widget.attrs["data-live-search"] = "true"
 
-    user_languages = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple(
-            attrs={
-                "class": "form-select selectpicker",
-                "data-live-search": "true",
-                "id": "excepted-languages-search-id",
-            }
-        ),
-    )
+        # factories
+        self.fields["factories"].choices = [
+            (farm.id, farm.name) for farm in FactoryFarm.objects.all().order_by("name")
+        ]
+        self.fields["factories"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["factories"].widget.attrs["id"] = "edit-user-factories-id"
+        self.fields["factories"].widget.attrs["data-live-search"] = "true"
+
+        # excluded_origin_countries
+        self.fields["excluded_origin_countries"].choices = [
+            (country.id, country.name.capitalize())
+            for country in Country.objects.filter(is_origin=True).order_by("name")
+        ]
+        self.fields["excluded_origin_countries"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["excluded_origin_countries"].widget.attrs["id"] = "edit-user-exluded-origin-countries-id"
+        self.fields["excluded_origin_countries"].widget.attrs["data-live-search"] = "true"
 
     class Meta:
         model = User
@@ -296,10 +312,10 @@ class EditUserForm(forms.ModelForm):
             "first_name",
             "last_name",
             "email",
+            "destinations",
+            "user_languages",
             "organisations",
             "factories",
             "destinations",
-            "user_languages",
-            "exluded_origin_countries",
-            # "groups",
+            "excluded_origin_countries",
         ]
