@@ -24,3 +24,4 @@ $('#edit-user-languages-id').multiselect({ ... generalMultiSelectConfig });
 $('#edit-user-organisations-id').multiselect({ ... generalMultiSelectConfig });
 $('#edit-user-factories-id').multiselect({ ... generalMultiSelectConfig });
 $('#edit-user-exluded-origin-countries-id').multiselect({ ... generalMultiSelectConfig });
+$('#user-groups-id').multiselect({ ... generalMultiSelectConfig });

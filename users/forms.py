@@ -171,8 +171,6 @@ class CreateNewUserForm(forms.ModelForm):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
-        self.fields["first_name"].required = True
-        self.fields["last_name"].required = True
         self.fields["destinations"].choices = [
             (country.id, country.name.capitalize())
             for country in Country.objects.filter(is_destination=True).order_by("name")
@@ -190,6 +188,11 @@ class CreateNewUserForm(forms.ModelForm):
         self.fields["user_languages"].choices = [
             (language.id, language.translated_name.capitalize()) for language in get_unique_langaues_list()
         ]
+
+        # groups
+        self.fields["groups"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["groups"].widget.attrs["id"] = "user-groups-id"
+        self.fields["groups"].widget.attrs["data-live-search"] = "true"
 
     organisations = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
@@ -242,6 +245,7 @@ class CreateNewUserForm(forms.ModelForm):
         required=False,
     )
     password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
 
     class Meta:
         model = User
@@ -250,13 +254,21 @@ class CreateNewUserForm(forms.ModelForm):
             "last_name",
             "email",
             "password",
-            "role",
+            "password2",
             "organisations",
             "factories",
             "destinations",
             "user_languages",
             "excluded_origin_countries",
+            "groups",
         ]
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords do not match")
+        return password2
 
 
 class EditUserForm(forms.ModelForm):
@@ -306,6 +318,11 @@ class EditUserForm(forms.ModelForm):
         self.fields["excluded_origin_countries"].widget.attrs["id"] = "edit-user-exluded-origin-countries-id"
         self.fields["excluded_origin_countries"].widget.attrs["data-live-search"] = "true"
 
+        # groups
+        self.fields["groups"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["groups"].widget.attrs["id"] = "user-groups-id"
+        self.fields["groups"].widget.attrs["data-live-search"] = "true"
+
     class Meta:
         model = User
         fields = [
@@ -318,4 +335,5 @@ class EditUserForm(forms.ModelForm):
             "factories",
             "destinations",
             "excluded_origin_countries",
+            "groups",
         ]

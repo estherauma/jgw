@@ -19,7 +19,11 @@ class AuthTests(TestCase):
         self.test_pword = "12t32thome"
         self.test_scheme = Scheme.objects.create(name="Test_Scheme")
         self.test_user = User.objects.create_user(
-            email=self.test_email, password=self.test_pword, is_active=True, scheme=self.test_scheme, is_staff=True
+            email=self.test_email,
+            password=self.test_pword,
+            is_active=True,
+            scheme=self.test_scheme,
+            is_staff=True,
         )
         self.client.login(email=self.test_user, password=self.test_pword)
         self.factory = Factory.objects.create(name="Test_Factory")
@@ -28,7 +32,10 @@ class AuthTests(TestCase):
             payload={"exp": expiry, "user_id": self.test_user.id}, key=settings.SECRET_KEY
         )
         self.test_user_2 = User.objects.create_user(
-            email="test2@test.com", password=self.test_pword, is_active=True, scheme=self.test_scheme, 
+            email="test2@test.com",
+            password=self.test_pword,
+            is_active=True,
+            scheme=self.test_scheme,
         )
 
     def test_authorisation(self):
@@ -57,7 +64,7 @@ class AuthTests(TestCase):
         """
         response = self.client.post(
             reverse("users:create_user"),
-            {"email": self.test_email, "password1": self.test_pword, "password2": ""},
+            {"email": self.test_email, "password": self.test_pword, "password2": ""},
         )
         form_errors = dict(response.context["form"].errors)
         self.assertTrue(bool(form_errors))
@@ -94,7 +101,7 @@ class AuthTests(TestCase):
         self.assertTemplateUsed(response, "users/invite_user.html")
         self.assertIsInstance(response.context["form"], InviteUserForm)
 
-    @patch('users.tasks.send_email_notification.delay')
+    @patch("users.tasks.send_email_notification.delay")
     def test_invite_user_OK(self, mock_send_email):
         response = self.client.post(
             reverse("users:invite_user"),
@@ -139,7 +146,7 @@ class AuthTests(TestCase):
         new_user = User.objects.get(email="test2@test.local")
         self.assertTrue(new_user.is_active)
 
-    @patch('users.tasks.send_email_notification.delay')
+    @patch("users.tasks.send_email_notification.delay")
     def test_activate_user_OK(self, mock_send_email):
         new_user = User.objects.create_user(email="test2@test.local", password=self.test_pword)
         response = self.client.get(reverse("users:activate_account", args=(new_user.id,)))
@@ -148,7 +155,7 @@ class AuthTests(TestCase):
         self.assertTrue(new_user.is_active)
         self.assertRedirects(response, "/accounts/")
 
-    @patch('users.tasks.send_email_notification.delay')
+    @patch("users.tasks.send_email_notification.delay")
     def test_deactivate_user_OK(self, mock_send_email):
         new_user = User.objects.create_user(
             email="test2@test.local", password=self.test_pword, is_active=True
@@ -177,9 +184,8 @@ class AuthTests(TestCase):
         self.client.login(email=self.test_user_2, password=self.test_pword)
 
         response = self.client.get(reverse("users:list_users"))
-        
+
         self.assertEqual(response.status_code, 403)
- 
 
     def test_verify_invite_view_OK(self):
         invite_data = {
@@ -243,7 +249,7 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/")
 
-    @patch('users.tasks.send_email_notification.delay')
+    @patch("users.tasks.send_email_notification.delay")
     def test_request_password_reset_OK(self, mock_send_email):
         response = self.client.post(reverse("users:request_password_reset"), {"email": self.test_email})
         self.assertEqual(response.status_code, 200)
@@ -269,7 +275,7 @@ class AuthTests(TestCase):
             "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
             "invite_id": invite.id,
         }
-        
+
         invite_token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
         response = self.client.post(
             reverse("users:set_password", args=(invite_token,)),
@@ -341,7 +347,7 @@ class AuthTests(TestCase):
         self.assertTemplateUsed(response, "users/change_email.html")
         self.assertIsInstance(response.context["form"], ChangeEmailForm)
 
-    @patch('users.tasks.send_email_notification.delay')
+    @patch("users.tasks.send_email_notification.delay")
     def test_change_email_OK(self, mock_send_email):
         response = self.client.post(reverse("users:change_email"), {"new_email": "newEmail@test.local"})
         self.assertEqual(response.status_code, 200)
