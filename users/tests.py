@@ -55,7 +55,7 @@ class AuthTests(TestCase):
             reverse("users:create_user"),
             {"email": "test2@test.local", "password1": self.test_pword, "password2": self.test_pword},
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("users:login_user"))
 
     def test_signup_form_validation(self):
@@ -64,7 +64,7 @@ class AuthTests(TestCase):
         """
         response = self.client.post(
             reverse("users:create_user"),
-            {"email": self.test_email, "password": self.test_pword, "password2": ""},
+            {"email": self.test_email, "password1": self.test_pword, "password2": ""},
         )
         form_errors = dict(response.context["form"].errors)
         self.assertTrue(bool(form_errors))
@@ -169,7 +169,7 @@ class AuthTests(TestCase):
     def test_create_user_view_renders_correctly(self):
         response = self.client.get(reverse("users:create_user"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/create_user.html")
+        self.assertTemplateUsed(response, "users/sign_up.html")
         self.assertIsInstance(response.context["form"], CreateUserForm)
 
     def test_list_users_view_renders_correctly(self):

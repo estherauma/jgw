@@ -34,6 +34,6 @@ urlpatterns = [
     path("profile/", profile, name="profile"),
     path("verify/email/<str:token>", verify_email_change, name="verify_email"),
     path("change_email/", change_email_address, name="change_email"),
-    path("create_or_edit_user/", create_or_edit_user, name="create_user"),
+    path("create_or_edit_user/", create_or_edit_user, name="create_user_from_admin"),
     path("create_or_edit_user/<int:user_id>", create_or_edit_user, name="edit_user"),
 ]
