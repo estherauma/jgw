@@ -58,6 +58,9 @@
                                             Activate
                                             {% endif %}
                                         </a>
+                                        <a class="dropdown-item" href="{% url 'users:edit_user' user_id=user.id %}">
+                                            Edit
+                                        </a>
                                     </div>
                                 </div>
                             </td>

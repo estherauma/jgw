@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import ModelForm
+from django.db.models import F
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
@@ -151,7 +152,7 @@ class UserAdminForm(forms.ModelForm):
             "organisations",
             "destinations",
             "user_languages",
-            "exluded_origin_countries",
+            "excluded_origin_countries",
             "is_staff",
             "is_superuser",
             "is_active",
@@ -170,13 +171,11 @@ class CreateNewUserForm(forms.ModelForm):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
-        self.fields["first_name"].required = True
-        self.fields["last_name"].required = True
         self.fields["destinations"].choices = [
             (country.id, country.name.capitalize())
             for country in Country.objects.filter(is_destination=True).order_by("name")
         ]
-        self.fields["exluded_origin_countries"].choices = [
+        self.fields["excluded_origin_countries"].choices = [
             (country.id, country.name.capitalize())
             for country in Country.objects.filter(is_origin=True).order_by("name")
         ]
@@ -189,6 +188,11 @@ class CreateNewUserForm(forms.ModelForm):
         self.fields["user_languages"].choices = [
             (language.id, language.translated_name.capitalize()) for language in get_unique_langaues_list()
         ]
+
+        # groups
+        self.fields["groups"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["groups"].widget.attrs["id"] = "user-groups-id"
+        self.fields["groups"].widget.attrs["data-live-search"] = "true"
 
     organisations = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
@@ -220,7 +224,7 @@ class CreateNewUserForm(forms.ModelForm):
         ),
         required=False,
     )
-    exluded_origin_countries = forms.MultipleChoiceField(
+    excluded_origin_countries = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
             attrs={
                 "class": "form-select selectpicker",
@@ -241,6 +245,7 @@ class CreateNewUserForm(forms.ModelForm):
         required=False,
     )
     password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
 
     class Meta:
         model = User
@@ -249,10 +254,86 @@ class CreateNewUserForm(forms.ModelForm):
             "last_name",
             "email",
             "password",
-            "role",
+            "password2",
             "organisations",
             "factories",
             "destinations",
             "user_languages",
-            "exluded_origin_countries",
+            "excluded_origin_countries",
+            "groups",
+        ]
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords do not match")
+        return password2
+
+
+class EditUserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super(EditUserForm, self).__init__(*args, **kwargs)
+
+        # destination
+        self.fields["destinations"].choices = [
+            (country.id, country.name.capitalize())
+            for country in Country.objects.filter(is_destination=True).order_by("name")
+        ]
+        self.fields["destinations"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["destinations"].widget.attrs["id"] = "edit-user-destinations-id"
+        self.fields["destinations"].widget.attrs["data-live-search"] = "true"
+
+        # language
+        self.fields["user_languages"].choices = [
+            (language.id, language.translated_name.capitalize()) for language in get_unique_langaues_list()
+        ]
+        self.fields["user_languages"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["user_languages"].widget.attrs["id"] = "edit-user-languages-id"
+        self.fields["user_languages"].widget.attrs["data-live-search"] = "true"
+
+        # organisations
+        self.fields["organisations"].choices = [
+            (org.id, org.name) for org in Organisation.objects.all().order_by("name")
+        ]
+        self.fields["organisations"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["organisations"].widget.attrs["id"] = "edit-user-organisations-id"
+        self.fields["organisations"].widget.attrs["data-live-search"] = "true"
+
+        # factories
+        self.fields["factories"].choices = [
+            (farm.id, farm.name) for farm in FactoryFarm.objects.all().order_by("name")
+        ]
+        self.fields["factories"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["factories"].widget.attrs["id"] = "edit-user-factories-id"
+        self.fields["factories"].widget.attrs["data-live-search"] = "true"
+
+        # excluded_origin_countries
+        self.fields["excluded_origin_countries"].choices = [
+            (country.id, country.name.capitalize())
+            for country in Country.objects.filter(is_origin=True).order_by("name")
+        ]
+        self.fields["excluded_origin_countries"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["excluded_origin_countries"].widget.attrs["id"] = "edit-user-exluded-origin-countries-id"
+        self.fields["excluded_origin_countries"].widget.attrs["data-live-search"] = "true"
+
+        # groups
+        self.fields["groups"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["groups"].widget.attrs["id"] = "user-groups-id"
+        self.fields["groups"].widget.attrs["data-live-search"] = "true"
+
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "destinations",
+            "user_languages",
+            "organisations",
+            "factories",
+            "destinations",
+            "excluded_origin_countries",
+            "groups",
         ]

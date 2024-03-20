@@ -3,7 +3,7 @@ from typing import Any
 
 from users.utils import (
     get_user_destinations,
-    get_user_exluded_origin_countries,
+    get_user_excluded_origin_countries,
     get_user_languages,
     get_user_factories,
     get_user_organisations,
@@ -40,7 +40,7 @@ def preference_filtered_queryset(
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
     user_languages = get_user_languages(current_user)
-    user_exluded_origin_countries = get_user_exluded_origin_countries(current_user)
+    user_excluded_origin_countries = get_user_excluded_origin_countries(current_user)
 
     preference_filters_q_object = Q()
 
@@ -72,8 +72,8 @@ def preference_filtered_queryset(
     if user_languages:
         preference_filters_q_object &= Q(language__in=user_languages)
 
-    if user_exluded_origin_countries and not origin_countries:
-        preference_filters_q_object &= ~Q(origin__in=user_exluded_origin_countries)
+    if user_excluded_origin_countries and not origin_countries:
+        preference_filters_q_object &= ~Q(origin__in=user_excluded_origin_countries)
 
     if origin_countries:
         preference_filters_q_object &= Q(origin__name__in=origin_countries)

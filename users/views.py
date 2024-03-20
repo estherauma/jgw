@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from preference.models import Language
@@ -21,6 +21,7 @@ from users.utils import get_user_destinations, get_user_factories, get_user_orga
 from .forms import (
     ChangeEmailForm,
     CreateUserForm,
+    EditUserForm,
     InviteUserForm,
     LoginForm,
     RequestPasswordResetForm,
@@ -383,7 +384,15 @@ def verify_email_change(request, token):
 
 @login_required
 @admin_required
-def create_new_user(request):
+def create_or_edit_user(request, user_id=None):
+    if user_id:
+        return update_user(request, user_id)
+    else:
+        return create_user(request)
+
+
+def create_user(request):
+    form = CreateNewUserForm()
     if request.method == "POST":
         form = CreateNewUserForm(request.POST)
         if form.is_valid():
@@ -406,8 +415,30 @@ def create_new_user(request):
                 new_user.user_languages.add(lang)
 
             messages.success(request, "User created successfully!")
-            return redirect("users:create_new_user")
-    else:
-        form = CreateNewUserForm()
+            return redirect("users:create_user")
 
+    return render(request, "users/create_user.html", context={"form": form})
+
+
+def update_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    form = EditUserForm(request.POST or None, instance=user)
+    if request.method == "POST":
+        user = form.save(commit=False)
+
+        user_languages = form.cleaned_data.get("user_languages", [])
+        langs_from_ids = Language.objects.filter(id__in=user_languages).values_list(
+            "translated_name", flat=True
+        )
+        all_langs = Language.objects.filter(translated_name__in=langs_from_ids)
+
+        user.save()
+        form.save_m2m()  # Save the many-to-many relationships
+
+        edited_user = User.objects.filter(id=user.id).first()
+        edited_user.user_languages.clear()
+        for lang in all_langs:
+            edited_user.user_languages.add(lang)
+
+        messages.success(request, "User updated successfully!")
     return render(request, "users/create_user.html", context={"form": form})
