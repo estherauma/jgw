@@ -46,7 +46,7 @@
                     <div class="col-3">
                         {% if user.is_authenticated %}
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-6 button-margin">
                                     <div class="dropdown w-100">
                                         <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
                                             id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -60,7 +60,7 @@
                                         
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6 button-margin">
                                     <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
                                     role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
                                 </div>
@@ -74,23 +74,22 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-md-12">
-        <div class="row">
+<div class="chart-container">
+  
             {% if user.is_authenticated %}
                 {% flag 'can_view_organisation_chart_on_inline_question_page'%}
-                <div class="col-md-4 mb-3">
+                <div class="chart-column-width">
                     <div class="card h-100">
                         <div class="card-body">
                             <p class="chart-title">organisation</p>
-                            <canvas id="inline-question-organisation-pie-chart-id"></canvas>
+                            <canvas id="inline-question-organisation-pie-chart-id" class="canvas-chart"></canvas>
                         </div>
                     </div>
                 </div>
                 {% endflag %}
             {% endif %}
             {% flag 'can_view_selected_user_language_chart_on_inline_question_page' %}
-                <div class="{% if user.is_authenticated %} col-md-8 {% else %} col-md-12 {% endif %} mb-3">
+                <div class="chart-column-width">
                     <div class="card h-100">
                         <div class="card-body">
                             <p class="chart-title">selected user language</p>
@@ -101,10 +100,9 @@
                     </div>
                 </div>
             {% endflag %}
-        </div>
-    </div>
+
     {% flag 'can_view_responses_per_origin_country_chart_on_inline_question_page' %}
-        <div class="col-md-8 mb-3">
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">responses per origin country</p>
@@ -116,7 +114,7 @@
         </div>
     {% endflag %}
     {% flag 'can_view_responses_per_destination_country_chart_on_inline_question_page' %}
-        <div class="col-md-4 mb-3">
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">responses per destination country</p>
@@ -132,11 +130,10 @@
             </div>
         </div>
     {% endflag %}
-    </div>
-</div>
+
 {% flag 'can_view_inline_question_responses_chart_on_inline_question_page' %}
-    <div class="row">
-        <div class="col-md-12">
+   
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">inline question responses</p>
@@ -154,7 +151,9 @@
             </div>
         </div>
     </div>
+
 {% endflag %}
+</div>
 
 {% endblock content %}
 
@@ -184,6 +183,19 @@
     inlineQustionOrganisationPieChart(organisationData)
 
     inlineQuestionLanguageGraph(languageData)
+
+    // Count the number of flex items
+    const chartContainer = document.querySelector('.chart-container');
+    const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
+    const numColumns = chartColumns.length;
+
+    // Check if the number of columns is odd
+    if (numColumns % 2 !== 0) {
+        // If odd, set the width of the last column to 100%
+        const lastColumn = chartColumns[numColumns - 1];
+        lastColumn.style.flex = '0 0 100%';
+        lastColumn.style.maxWidth = '100%';
+    }
 
     function handleInlineQuestionsChange() {
         var selectElement = document.getElementById('all-inline-question-select-id');

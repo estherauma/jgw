@@ -53,7 +53,7 @@
                         {% if user.is_authenticated %}
                             {% if user.is_superuser %}
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 button-margin">
                                         <div class="dropdown w-100">
                                             <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
                                                 id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -67,7 +67,7 @@
         
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 button-margin">
                                         <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
                                         role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
                                     </div>
@@ -87,10 +87,10 @@
     </div>
 </div>
 
-
-<div class="row mb-3">
+<div class="chart-container">
+    
     {% flag 'can_view_users_by_origin_country_chart' %}
-        <div class="col-md-8">
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">users by origin country</p>
@@ -103,33 +103,33 @@
     {% endflag %}
 
     {% flag 'can_view_users_by_gender_chart' %}
-        <div class="col-md-4">
+        
+        <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body" >
                     <p class="chart-title">users by gender</p>
-                    <canvas id="preference-gender-pie-chart-id"></canvas>
+                    <canvas id="preference-gender-pie-chart-id" class="canvas-chart"></canvas>
                 </div>
             </div>
         </div>
+           
     {% endflag %}
-</div>
-
-<div class="row mb-3">
+    
     {% if user.role != 'SCHEME' or user.is_superuser%}
         {% flag 'can_view_users_by_destination_country_chart' %}
-            <div class="col-4">
+            <div class="chart-column-width">
                 <div class="card h-100">
                     <div class="card-body">
                         <p class="chart-title">users by destination country</p>
-                            <canvas id="preference-destination-pie-chart-id"></canvas>
+                            <canvas id="preference-destination-pie-chart-id" class="canvas-chart"></canvas>
                     </div>
                 </div>
             </div>
         {% endflag %}
     {% endif %}
-    
+        
     {% flag 'can_view_selected_users_language_chart' %}
-        <div class="{% if user.role != 'SCHEME' or user.is_superuser %} col-8 {% else %} col-12 {% endif %}">
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">selected users language</p>
@@ -140,12 +140,9 @@
             </div>
         </div>
     {% endflag %}
-</div>
-
-<div class="row mb-3">
 
     {% flag 'can_view_work_code_usage_chart' %}
-        <div class="col-md-8">
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">work code usage</p>
@@ -158,33 +155,18 @@
     {% endflag %}
 
     {% flag 'can_view_users_by_age_chart' %}
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <p class="chart-title">users by age</p>
-                <canvas id="preference-age-graph-id"></canvas>
-            </div>
-        </div>
-    </div>
-    {% endflag %}
-</div>
-
-{% flag 'can_view_new_monthly_users_chart' %}
-    <div class="row mb-3">
-        <div class="col-md-12">
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
-                    <p class="chart-title">users by month</p>
-                    <canvas id="preference-monthly-cumulative-users-graph-id"></canvas>
+                    <p class="chart-title">users by age</p>
+                    <canvas id="preference-age-graph-id" class="canvas-chart"></canvas>
                 </div>
             </div>
         </div>
-    </div>
-{% endflag %}
+    {% endflag %} 
 
-{% flag 'can_view_get_users_by_country_state_chart' %}
-    <div class="row mb-3">
-        <div class="col-md-12">
+    {% flag 'can_view_get_users_by_country_state_chart' %}
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">users by state</p>
@@ -194,12 +176,10 @@
                 </div>
             </div>
         </div>
-    </div>
-{% endflag %}
+    {% endflag %}
 
-{% flag 'can_view_get_users_by_sector_chart' %}
-    <div class="row mb-3">
-        <div class="col-md-12">
+    {% flag 'can_view_get_users_by_sector_chart' %}
+        <div class="chart-column-width">
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">users by sectors</p>
@@ -209,9 +189,20 @@
                 </div>
             </div>
         </div>
-    </div>
-{% endflag %}
-
+    {% endflag %}
+</div>
+<div class="row">
+    {% flag 'can_view_new_monthly_users_chart' %}
+        <div class="col-md-12 user-by-month">
+             <div class="card h-100">
+                <div class="card-body">
+                    <p class="chart-title">users by month</p>
+                    <canvas id="preference-monthly-cumulative-users-graph-id" class="canvas-user-by-month"></canvas>
+                </div>
+            </div>
+        </div>
+    {% endflag %}
+</div>
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
@@ -262,6 +253,19 @@
 
     // users by sectors chart data
     usersBySectorsChart(usersBySectorsChartData)
+
+    // Count the number of flex items
+    const chartContainer = document.querySelector('.chart-container');
+    const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
+    const numColumns = chartColumns.length;
+
+    // Check if the number of columns is odd
+    if (numColumns % 2 !== 0) {
+        // If odd, set the width of the last column to 100%
+        const lastColumn = chartColumns[numColumns - 1];
+        lastColumn.style.flex = '0 0 100%';
+        lastColumn.style.maxWidth = '100%';
+    }
 
 </script>
 {% endblock %}
