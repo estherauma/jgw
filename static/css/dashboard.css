@@ -190,3 +190,36 @@
 body.modal-open {
     padding-right: 15px !important;
 }
+
+.button-margin{
+    margin-top: 15px !important;
+}
+
+.chart-column-width{
+    width: 49% !important;
+}
+
+.canvas-chart{
+    max-height: 550px;
+}
+.canvas-user-by-month{
+    max-height: 550px;
+    margin-top: 100px;
+}
+
+.chart-container{
+    display: flex !important;
+    flex-wrap: wrap !important;
+    row-gap: 20px !important;
+    justify-content: space-between !important;
+}
+
+.user-by-month{
+    margin-top: 20px;
+}
+
+@media (max-width: 1200px) {
+    .chart-column-width{
+        width: 100% !important;
+    }
+}
