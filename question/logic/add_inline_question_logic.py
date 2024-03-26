@@ -92,6 +92,7 @@ unwanted_fields = [
     "gender",
     "language",
     "location_of_potential_work",
+    "origin",
 ]
 
 

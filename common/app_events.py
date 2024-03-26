@@ -96,7 +96,10 @@ class AppEvents(BaseAnalytics):
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'locale') AS locale,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destinationState') AS destinationState,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destination') AS destination,
-                -- age, language, gender, organisationSector, deviceId, appId, organisation, locale, destinationState, destination
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'factoryFarm') AS factoryFarm,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'origin') AS origin,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'location_of_potential_work') AS location_of_potential_work,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'route') AS route
             FROM 
                 `just-good-work.analytics_191478110.events_*`
             WHERE 

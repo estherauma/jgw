@@ -7,14 +7,17 @@ from common.helpers.model_helpers.preference import (
     get_or_add_age_to_db,
     get_or_add_country_state_to_db,
     get_or_add_country_to_db,
+    get_or_add_factory_farm_to_db,
     get_or_add_gender_to_db,
     get_or_add_language_to_db,
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
 )
+from common.helpers.preference_helpers.country import get_data_destination, get_data_origin
 from common.logger import KunfuPandaLogger
 from common.utils.date_utils import date_to_datetime, todays_date
 from events.models import Chapter, ChaptersOpened
+from preference.models import Preference
 from preference.tasks import translate_and_clean_preferences_fields
 
 
@@ -68,19 +71,35 @@ def add_chapters_opened_to_db(chapters_feedback):
     organisation_sector = chapters_feedback.get("organisationSector")
     organisation = chapters_feedback.get("organisation")
     destination_state = chapters_feedback.get("destinationState")
-    destination = chapters_feedback.get("destination")
 
-    deviceI_id = chapters_feedback.get("deviceId")
+    device_id = chapters_feedback.get("deviceId")
     app_id = chapters_feedback.get("appId")
-    locale = chapters_feedback.get("locale")
+    route = chapters_feedback.get("route")
+    location_of_potential_work = chapters_feedback.get("location_of_potential_work")
+    factory_farm = chapters_feedback.get("factoryFarm")
+
+    origin = get_data_origin(
+        route=route, api_origin=chapters_feedback.get("locale") or chapters_feedback.get("origin")
+    )
+    destination = get_data_destination(
+        route=route,
+        api_destination=chapters_feedback.get("destination"),
+        location_of_potential_work=location_of_potential_work,
+    )
 
     language_data = get_or_add_language_to_db(language)
-    destination_data = get_or_add_country_to_db(destination, source="destination")
     age_data = get_or_add_age_to_db(age)
     destination_state_data = get_or_add_country_state_to_db(destination_state)
     organisation_data = get_or_add_organisation_to_db(organisation)
     gender_data = get_or_add_gender_to_db(gender)
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
+
+    origin_data = get_or_add_country_to_db(origin, source="origin")
+    destination_data = get_or_add_country_to_db(destination, source="destination")
+    factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
+
+    # save the related preference,
+    preference = Preference.objects.filter(device_id=device_id).first()
 
     chapter_opened, _ = ChaptersOpened.objects.get_or_create(
         event_name=event_name or NOT_SPECIFIED,
@@ -90,11 +109,13 @@ def add_chapters_opened_to_db(chapters_feedback):
         language=language_data,
         gender=gender_data,
         organisation_sector=organisation_sector_data,
-        device_id=deviceI_id,
+        device_id=device_id,
         app_id=app_id,
-        locale=locale,
         destination_state=destination_state_data,
         destination=destination_data,
+        origin=origin_data,
+        preference=preference,
+        factory_farm=factory_farm_data,
     )
     chapter, _ = Chapter.objects.get_or_create(
         number_key=get_chapter_number_from_name(chapter_opened.event_name)

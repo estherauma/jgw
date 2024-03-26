@@ -79,7 +79,7 @@ def create_preference_object(preference):
     language = preference.get("language")
     route = preference.get("route") or NOT_SPECIFIED
 
-    origin = get_data_origin(route=route, api_origin=preference.get("locale"))
+    origin = get_data_origin(route=route, api_origin=preference.get("locale") or preference.get("origin"))
     destination = get_data_destination(
         route=route,
         api_destination=preference.get("destination"),

@@ -12,6 +12,7 @@ from preference.models import (
     Language,
     Organisation,
     OrganisationSector,
+    Preference,
     Route,
     SectorOfWork,
 )
@@ -88,7 +89,6 @@ class ChaptersOpened(models.Model):
     )
     device_id = models.CharField(max_length=255, null=True, blank=True)
     app_id = models.CharField(max_length=255, null=True, blank=True)
-    locale = models.CharField(max_length=255, null=True, blank=True)
     destination_state = models.ForeignKey(
         CountryState,
         on_delete=models.SET_NULL,
@@ -98,6 +98,24 @@ class ChaptersOpened(models.Model):
     )
     destination = models.ForeignKey(
         Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="chapters_opened_destination"
+    )
+
+    preference = models.ForeignKey(
+        Preference,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="chapters_opened_preference",
+    )
+    factory_farm = models.ForeignKey(
+        FactoryFarm,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="chapters_opened_factory_farm",
+    )
+    origin = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="chapters_opened_origin"
     )
 
     def __str__(self):
