@@ -1,5 +1,8 @@
 from django.db import transaction
 import re
+import requests
+import json
+
 
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.custom_libs.google_translate import pandas_translator_translate
@@ -13,6 +16,7 @@ from common.helpers.model_helpers.preference import (
 )
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
+
 from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import (
     get_data_destination,
@@ -235,6 +239,10 @@ def fetch_inline_questions_from_api_to_db():
     # start translation
     translate_and_clean_inline_question_fields()
 
+    #fetch questions keys and names data
+    fetch_questions_key_and_name_from_api()
+
+
 
 def add_inline_question_to_db(inline_question):
     if isinstance(inline_question, str):
@@ -366,3 +374,64 @@ def add_inline_question_to_db(inline_question):
             InlineQuestionResponse.objects.create(
                 inline_question=created_inline_question, response=inline_question_response_text
             )
+
+
+def fetch_questions_key_and_name_from_api():
+    start_date = APPLICATION_POSSIBLE_START_DATE
+    end_date = todays_date()   
+    try:
+        url= f"https://staging-api.justgood.work/api/v2/appcontent/query-documents?type=message&startDate={start_date}&endDate={end_date}"
+        response=requests.get(url)
+        if response.status_code == 200:
+            questions_data=response.json()
+            kunfu_panda_logger.info("Successfully fetched questions data from the API")
+            filtered_questions = filter_questions_key_and_name_data(questions_data)
+            filtered_questions_keys= filter_questions_keys_and_questions(filtered_questions)
+            kunfu_panda_logger.info(filtered_questions_keys)
+            return filtered_questions_keys
+        else:
+            kunfu_panda_logger.error("Error fetching questions data from the API")
+            return None
+    except Exception as e:
+        kunfu_panda_logger.error("Error fetching questions data from the API")
+        return None
+    
+def filter_questions_key_and_name_data(questions_data):
+    filtered_questions = []
+
+    for item in questions_data.get('data', []):
+        for content in item.get('pageContent', []):
+            if content.get('type') == 'questions':
+                filtered_questions.append(content)
+    
+    kunfu_panda_logger.info(f"Total found {len(filtered_questions)} questions data")
+    return filtered_questions
+
+def filter_questions_keys_and_questions(filtered_questions):
+    filtered_questions_keys_info = []
+
+    for question in filtered_questions:
+        question_info = {
+            "question": question.get("question"),
+            "questionEnglish": question.get("questionEnglish"),
+            "key": question.get("key")
+        }
+        filtered_questions_keys_info.append(question_info)
+    kunfu_panda_logger.info(filtered_questions_keys_info)
+    return filtered_questions_keys_info
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
