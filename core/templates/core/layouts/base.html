@@ -105,6 +105,18 @@
         <!-- Custom generic charts -->
         <script src="{% static 'dashboard/js/charts/bar.js' %}"></script>
 
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_id }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            const g4Id = "{{ google_analytics_id|escapejs }}"
+
+            gtag('config', g4Id);
+        </script>
+
         {% block scripts %}{% endblock scripts %}
     </body>
 </html>
