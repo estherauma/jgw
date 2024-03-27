@@ -13,6 +13,7 @@ def get_chapters_opened(**filters):
     chapters_opened = (
         chapters_opened_queryset.values("event_name").annotate(count=Count("event_name")).order_by("-count")
     )
+
     sums = {}
     for entry in chapters_opened:
         event_name = entry["event_name"]

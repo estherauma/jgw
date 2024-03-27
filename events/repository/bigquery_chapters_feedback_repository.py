@@ -22,5 +22,4 @@ def get_chapters_feedback(**filters):
             Case(When(feedback_response__translated_response="smile", then=1), output_field=IntegerField())
         ),
     )
-
-    return chapters_feedback_data
+    return list(chapters_feedback_data)

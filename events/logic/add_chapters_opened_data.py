@@ -101,7 +101,7 @@ def add_chapters_opened_to_db(chapters_feedback):
     # save the related preference,
     preference = Preference.objects.filter(device_id=device_id).first()
 
-    chapter_opened, _ = ChaptersOpened.objects.get_or_create(
+    chapter_opened = ChaptersOpened.objects.create(
         event_name=event_name or NOT_SPECIFIED,
         organisation=organisation_data,
         event_created_at=date_to_datetime(event_date),

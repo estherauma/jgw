@@ -118,13 +118,13 @@ def generic_chapters_feedback_filtered_queryset(
 
     chapters_feedback_filters_q_object = Q()
 
-    # date range filter
+    # # date range filter
     if start_date and end_date:
         chapters_feedback_filters_q_object &= Q(
-            feedback_standard__api_updated_at__range=(start_date, end_date)
+            feedback_standard__api_created_at__range=(start_date, end_date)
         )
 
-    # organisation filter
+    # # organisation filter
     if user_orgs:
         user_org_q = Q(feedback_standard__preference__organisation__in=user_orgs) | Q(
             feedback_standard__organisation__in=user_orgs
