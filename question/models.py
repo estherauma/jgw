@@ -103,6 +103,14 @@ class InlineQuestionResponse(models.Model):
         return f"{self.inline_question.question.text} -> {self.response.translated_text}"
 
 
+class InlineQuestionAndKeysMatch(models.Model):
+    inline_question=models.TextField(max_length=255)
+    inline_question_key=models.TextField(max_length=255)
+
+    def __str__(self) -> str:
+        return f"{self.inline_question} -> {self.inline_question_key}"
+
+
 class MessagingQuestionStandard(models.Model):
     data_source_id = models.CharField(max_length=24)
     device_id = models.CharField(max_length=255, blank=True, null=True)
@@ -213,3 +221,5 @@ class MessagingQuestionResponse(models.Model):
     responses = models.ManyToManyField(MessagingResponse)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    

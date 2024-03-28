@@ -8,6 +8,7 @@ from question.models import (
     InlineQuestionStandard,
     InlineQuestionText,
     InlineQuestionResponseText,
+    InlineQuestionAndKeysMatch,
     MessagingQuestion,
     MessagingQuestionResponse,
     MessagingQuestionStandard,
@@ -48,6 +49,12 @@ class InlineQuestionAdmin(admin.ModelAdmin):
             if obj.inline_question_standard.preference
             else "not specified"
         )
+    
+
+@admin.register(InlineQuestionAndKeysMatch)
+class InlineQuestionAndKeysMatchAdmin(admin.ModelAdmin):
+    list_display = ["inline_question","inline_question_key"]
+    search_fields = ["inline_question"]
 
 
 admin.site.register(InlineQuestionResponse)

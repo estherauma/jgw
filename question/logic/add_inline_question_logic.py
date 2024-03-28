@@ -26,6 +26,7 @@ from common.utils.helpers import can_use_cached_data
 from preference.utils import format_text_for_db
 from question.models import (
     InlineQuestion,
+    InlineQuestionAndKeysMatch,
     InlineQuestionResponse,
     InlineQuestionResponseText,
     InlineQuestionStandard,
@@ -387,7 +388,9 @@ def fetch_questions_key_and_name_from_api():
             kunfu_panda_logger.info("Successfully fetched questions data from the API")
             filtered_questions = filter_questions_key_and_name_data(questions_data)
             filtered_questions_keys= filter_questions_keys_and_questions(filtered_questions)
+            save_filtered_questions_and_keys(filtered_questions_keys)
             kunfu_panda_logger.info(filtered_questions_keys)
+            kunfu_panda_logger.info(f" Found {len(filtered_questions_keys)} matches ")
             return filtered_questions_keys
         else:
             kunfu_panda_logger.error("Error fetching questions data from the API")
@@ -400,11 +403,11 @@ def filter_questions_key_and_name_data(questions_data):
     filtered_questions = []
 
     for item in questions_data.get('data', []):
-        for content in item.get('pageContent', []):
-            if content.get('type') == 'questions':
-                filtered_questions.append(content)
+        if item.get('language', '').startswith('en'):
+            for content in item.get('pageContent', []):
+                if content.get('type') == 'questions':
+                    filtered_questions.append(content)
     
-    kunfu_panda_logger.info(f"Total found {len(filtered_questions)} questions data")
     return filtered_questions
 
 def filter_questions_keys_and_questions(filtered_questions):
@@ -413,12 +416,22 @@ def filter_questions_keys_and_questions(filtered_questions):
     for question in filtered_questions:
         question_info = {
             "question": question.get("question"),
-            "questionEnglish": question.get("questionEnglish"),
             "key": question.get("key")
         }
         filtered_questions_keys_info.append(question_info)
-    kunfu_panda_logger.info(filtered_questions_keys_info)
     return filtered_questions_keys_info
+
+def save_filtered_questions_and_keys(filtered_questions_keys):
+    try:
+        for question_info in filtered_questions_keys:
+            InlineQuestionAndKeysMatch.objects.get_or_create(
+                inline_question=question_info["question"],
+                inline_question_key=question_info["key"]
+            )
+        kunfu_panda_logger.info("Filtered questions and their keys saved to the database")
+    except Exception as e:
+        kunfu_panda_logger.error("Error saving filtered questions and their keys to the database")
+        kunfu_panda_logger.error(str(e))
 
 
 
