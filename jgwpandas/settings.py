@@ -159,15 +159,10 @@ LOGIN_URL = "/accounts/login/"
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
+STATIC_ROOT = os.path.join(PROJECT_ROOT, "staticfiles")
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
-CACHE_DIR = os.path.join(PROJECT_ROOT, "static/assets/data/")
 CELERY_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, os.pardir, "celery/"))
-
-for i in [CACHE_DIR, CELERY_DIR]:
-    if not os.path.exists(i):
-        os.makedirs(i)
 
 
 # Configure Django App for Heroku.
