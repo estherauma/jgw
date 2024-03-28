@@ -16,9 +16,13 @@ from common.utils.helpers import save_as_excel
 from events.models import BigQueryChaptersData, BigQueryFirstOpenHomepageData
 
 api = JGWApi()
-client = bigquery.Client()
+
 QueryMap = Dict[str, list[str]]
 TIME_RANGE = {f"{n} Days": get_start_date(days=n, format="%Y-%m-%d") for n in [7, 30, 55]}
+
+
+def google_client_instance():
+    return bigquery.Client()
 
 
 event_to_title = {
@@ -102,7 +106,7 @@ class AppEvents(BaseAnalytics):
             WHERE 
                 event_name LIKE 'ChapterOpened%' AND DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
         """
-        chapters_data_df = client.query(chapters_query).to_dataframe()
+        chapters_data_df = google_client_instance().query(chapters_query).to_dataframe()
         chapters_data_dict = chapters_data_df.to_dict("records")
 
         return chapters_data_dict
@@ -122,7 +126,9 @@ class AppEvents(BaseAnalytics):
                 GROUP BY
                     event_date, event_name
             """
-        bigquery_firstopen_homepage_df = client.query(bigquery_firstopen_homepage_query).to_dataframe()
+        bigquery_firstopen_homepage_df = (
+            google_client_instance().query(bigquery_firstopen_homepage_query).to_dataframe()
+        )
         bigquery_firstopen_homepage_df_dict = bigquery_firstopen_homepage_df.to_dict("records")
 
         return bigquery_firstopen_homepage_df_dict
@@ -193,7 +199,7 @@ class AppEvents(BaseAnalytics):
         return {"chapters": chapters_df, "chapter_feedback": chapter_feedback_df, "total_installs": installs}
 
     def query_to_dataframe(self, query):
-        return client.query(query).to_dataframe()
+        return google_client_instance().query(query).to_dataframe()
 
     def replace_chapter_names(self, df) -> pd.DataFrame:
         if "Event Name" in df.columns:
@@ -242,7 +248,7 @@ class AppEvents(BaseAnalytics):
             DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
         """
 
-        SWS_PASI_events_df = client.query(SWS_PASI_events_query).to_dataframe()
+        SWS_PASI_events_df = google_client_instance().query(SWS_PASI_events_query).to_dataframe()
         SWS_PASI_events_dict = SWS_PASI_events_df.to_dict("records")
 
         return SWS_PASI_events_dict
@@ -262,7 +268,7 @@ class AppEvents(BaseAnalytics):
                 DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
         """
 
-        links_click_event_df = client.query(links_click_query).to_dataframe()
+        links_click_event_df = google_client_instance().query(links_click_query).to_dataframe()
         links_click_event_dict = links_click_event_df.to_dict("records")
 
         return links_click_event_dict
