@@ -4,9 +4,7 @@ from functools import reduce
 from typing import Dict
 
 import pandas as pd
-from common.utils.helpers import save_as_excel 
-
-from jgwpandas.settings import CACHE_DIR
+from common.utils.helpers import save_as_excel
 
 from .retrieve_data import demographic_cols
 
