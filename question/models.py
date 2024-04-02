@@ -105,11 +105,17 @@ class InlineQuestionResponse(models.Model):
 
 class InlineQuestionAndKeysMatch(models.Model):
     inline_question=models.TextField(max_length=255)
-    inline_question_key=models.TextField(max_length=255)
+    inline_question_key=models.TextField(max_length=255,null=True)
+    custom_lang = models.CharField(max_length=5, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.inline_question} -> {self.inline_question_key}"
 
+class FollowUpQuestion(models.Model):
+    inline_question = models.ForeignKey(InlineQuestionAndKeysMatch, on_delete=models.CASCADE, related_name="inline_question_follow_question")
+    followup_question=models.TextField(max_length=255)
+    followup_question_key=models.TextField(max_length=255,null=True)
+    custom_lang = models.CharField(max_length=5, null=True, blank=True)
 
 class MessagingQuestionStandard(models.Model):
     data_source_id = models.CharField(max_length=24)

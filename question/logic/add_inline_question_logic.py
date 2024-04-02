@@ -23,8 +23,10 @@ from common.helpers.preference_helpers.country import (
     get_data_origin,
 )
 from common.utils.helpers import can_use_cached_data
+from common.utils.strings import space_separated_to_camel_case
 from preference.utils import format_text_for_db
 from question.models import (
+    FollowUpQuestion,
     InlineQuestion,
     InlineQuestionAndKeysMatch,
     InlineQuestionResponse,
@@ -380,58 +382,107 @@ def add_inline_question_to_db(inline_question):
 def fetch_questions_key_and_name_from_api():
     start_date = APPLICATION_POSSIBLE_START_DATE
     end_date = todays_date()   
-    try:
-        url= f"https://staging-api.justgood.work/api/v2/appcontent/query-documents?type=message&startDate={start_date}&endDate={end_date}"
-        response=requests.get(url)
-        if response.status_code == 200:
-            questions_data=response.json()
-            kunfu_panda_logger.info("Successfully fetched questions data from the API")
-            filtered_questions = filter_questions_key_and_name_data(questions_data)
-            filtered_questions_keys= filter_questions_keys_and_questions(filtered_questions)
-            save_filtered_questions_and_keys(filtered_questions_keys)
-            kunfu_panda_logger.info(filtered_questions_keys)
-            kunfu_panda_logger.info(f" Found {len(filtered_questions_keys)} matches ")
-            return filtered_questions_keys
-        else:
-            kunfu_panda_logger.error("Error fetching questions data from the API")
-            return None
-    except Exception as e:
-        kunfu_panda_logger.error("Error fetching questions data from the API")
-        return None
-    
+    url= f"https://staging-api.justgood.work/api/v2/appcontent/query-documents?type=create_content_area&startDate={start_date}&endDate={end_date}"
+    response=requests.get(url)
+    if response.status_code == 200:
+        questions_data=response.json()
+        kunfu_panda_logger.info("Successfully fetched questions data from the API")
+        filtered_questions = filter_questions_key_and_name_data(questions_data)
+        save_filtered_questions_and_keys(filtered_questions)
+        translate_inq()
+        update_inline_question_text_with_mapper()
+        kunfu_panda_logger.info(f" Found {len(filtered_questions)} matches ")
+        return filtered_questions  
+
+def update_inline_question_text_with_mapper():
+    question_texts = InlineQuestionText.objects.all()
+    for question_text in question_texts:
+        inqm = InlineQuestionAndKeysMatch.objects.filter(
+            inline_question_key = question_text.text
+        ).first() 
+        if inqm:
+            question_text.title_text = inqm.inline_question
+            question_text.save()
+        
+        fq = FollowUpQuestion.objects.filter(
+            followup_question_key = question_text.text
+        ).first()
+        if fq:
+            question_text.title_text = fq.followup_question
+            question_text.save()
+
+
 def filter_questions_key_and_name_data(questions_data):
-    filtered_questions = []
+    english_questions = []
+    other_languages_questions = []
 
     for item in questions_data.get('data', []):
         if item.get('language', '').startswith('en'):
             for content in item.get('pageContent', []):
-                if content.get('type') == 'questions':
-                    filtered_questions.append(content)
-    
-    return filtered_questions
+                if content and content.get('type') == 'questions':
+                    english_questions.append({**content, **{"custom_lang": "en"}})
+        
 
-def filter_questions_keys_and_questions(filtered_questions):
-    filtered_questions_keys_info = []
+        else:
+            for content in item.get('pageContent', []):
+                if content and content.get('type') == 'questions':
+                    other_languages_questions.append(content)
+            
+    return [*english_questions, *other_languages_questions]
 
-    for question in filtered_questions:
-        question_info = {
-            "question": question.get("question"),
-            "key": question.get("key")
-        }
-        filtered_questions_keys_info.append(question_info)
-    return filtered_questions_keys_info
 
-def save_filtered_questions_and_keys(filtered_questions_keys):
-    try:
-        for question_info in filtered_questions_keys:
-            InlineQuestionAndKeysMatch.objects.get_or_create(
-                inline_question=question_info["question"],
-                inline_question_key=question_info["key"]
+def translate_inq():
+    iqkms = InlineQuestionAndKeysMatch.objects.filter(custom_lang__isnull=True)
+    for iqkm in iqkms:
+        ptt = pandas_translator_translate(iqkm.inline_question)
+        iqkm.inline_question = ptt
+        iqkm.custom_lang = 'en'
+        iqkm.save()
+
+    fqs = FollowUpQuestion.objects.filter(custom_lang__isnull=True)
+    for fq in fqs:
+        ptt = pandas_translator_translate(fq.followup_question)
+        fq.followup_question = ptt
+        fq.custom_lang = 'en'
+        fq.save()
+
+
+def save_filtered_questions_and_keys(filtered_questions):
+
+    for question_info in filtered_questions:
+        question_info_key =  question_info.get("key")
+        question_info_text = question_info["question"]
+        custom_lang = question_info.get("custom_lang")  
+
+        question_mapper = InlineQuestionAndKeysMatch.objects.filter(
+            inline_question_key=question_info_key
+            ).first()
+        if not question_mapper:
+            question_mapper = InlineQuestionAndKeysMatch.objects.create(
+                inline_question=question_info_text,
+                inline_question_key=question_info_key,
+                custom_lang = custom_lang
             )
-        kunfu_panda_logger.info("Filtered questions and their keys saved to the database")
-    except Exception as e:
-        kunfu_panda_logger.error("Error saving filtered questions and their keys to the database")
-        kunfu_panda_logger.error(str(e))
+        
+        question_info_options = question_info.get("options")
+        for question_info_option in question_info_options:
+            option_follow_up_question = question_info_option.get("followUpQuestion")
+            if option_follow_up_question:
+                follow_up_question_key = option_follow_up_question.get("key")
+                follow_up_question_text = option_follow_up_question.get("question")
+                fqe = FollowUpQuestion.objects.filter(
+                    inline_question__inline_question = question_info_text,
+                    followup_question_key = follow_up_question_key
+                )
+                
+                if not fqe:
+                    FollowUpQuestion.objects.create(
+                        inline_question = question_mapper,
+                        followup_question = follow_up_question_text,
+                        followup_question_key = follow_up_question_key,
+                        custom_lang = custom_lang
+                    )
+
 
 
 
