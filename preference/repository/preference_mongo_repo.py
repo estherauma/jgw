@@ -9,7 +9,7 @@ def process_sectors_data(record):
     return {**record, "final_sectors_of_work": sectors_of_work, "string_id": str(obj_id) if obj_id else None}
 
 
-def get_preference_from_mongo_db(mongodb_manager, preference_mong_ids):
+def get_preference_from_mongo_db(mongodb_manager, preference_mong_ids, extra_projection_fields={}):
     # dbs
     jgw_live_db = mongodb_manager.get_database("jgw_live")
 
@@ -19,7 +19,7 @@ def get_preference_from_mongo_db(mongodb_manager, preference_mong_ids):
     v3_preferences_col = jgw_live_db["v3_preferences"]
 
     query = {"_id": {"$in": preference_mong_ids}}
-    projection = {"sectors": 1, "sectorsOfWork": 1, "sectorOfWork": 1}
+    projection = {"sectors": 1, "sectorsOfWork": 1, "sectorOfWork": 1, **extra_projection_fields}
 
     preferences_record = get_preferences_record(preferences_col, query, projection)
     preferences_v2_record = get_preferences_record(v2_preferences_col, query, projection)

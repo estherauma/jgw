@@ -10,6 +10,7 @@ from common.helpers.model_helpers.preference import (
     get_or_add_gender_to_db,
     get_or_add_language_to_db,
     get_or_add_location_of_potential_work_to_db,
+    get_or_add_organisation_access_code,
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
     get_or_add_route_to_db,
@@ -87,6 +88,7 @@ def create_preference_object(preference):
     )
 
     destination_state = preference.get("destinationState")
+    organisation_access_code = preference.get("organisationAccessCode")
 
     # related fields
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
@@ -102,6 +104,7 @@ def create_preference_object(preference):
     api_destination_data = get_or_add_country_to_db(preference.get("destination"), source="destination")
     destination_state_data = get_or_add_country_state_to_db(destination_state)
     route_data = get_or_add_route_to_db(route)
+    organisation_access_code_data = get_or_add_organisation_access_code(organisation_access_code)
 
     new_preference = Preference(
         data_source_id=preference.get("_id"),
@@ -122,6 +125,7 @@ def create_preference_object(preference):
         factory_farm=factory_farm_data,
         organisation=organisation_data,
         api_destination=api_destination_data,
+        organisation_access_code=organisation_access_code_data,
     )
 
     # Create SectorsOfWork instances and associate them with the preference
