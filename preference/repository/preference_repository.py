@@ -6,8 +6,7 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset
-from preference.models import Organisation, Preference, SectorOfWork, SectorsOfWorkMapper
-from users.utils import get_user_organisations
+from preference.models import Organisation, Preference, SectorsOfWorkMapper
 
 
 def preferences_count(**filters):
@@ -302,3 +301,18 @@ def get_preferences_by_sectors(**filters):
     result_dict = {"labels": labels, "counts": count}
 
     return result_dict
+
+
+def get_sws_workcodes_with_access_code(**filters):
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+
+    queryset_data = (
+        filtered_queryset.values(
+            organisation_name=F("organisation__name"), access_code=F("organisation_access_code__code")
+        )
+        .annotate(access_code_count=Count("organisation_access_code"))
+        .filter(organisation_access_code__isnull=False)
+    )
+
+    return list(queryset_data)
