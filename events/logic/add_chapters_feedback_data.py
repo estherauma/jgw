@@ -133,7 +133,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
 
     location_of_potential_work = standard_fields_dict.get("location_of_potential_work")
     origin = get_data_origin(
-        route=route, api_origin=standard_fields_dict.get("locale") or standard_fields_dict.get("locale")
+        route=route, api_origin=standard_fields_dict.get("locale") or standard_fields_dict.get("origin")
     )
     destination = get_data_destination(
         route=route,
