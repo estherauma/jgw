@@ -1,8 +1,4 @@
 from django.core.management.base import BaseCommand
-
-from preference.logic.attach_orgnisation_accesscode_to_preferences_logic import (
-    attach_orgnisation_accesscode_to_preferences,
-)
 from preference.logic.attach_sectors_to_preferences_logic import (
     attach_sectors_to_preferences,
     clean_sectors_of_work,

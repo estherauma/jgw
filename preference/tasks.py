@@ -5,8 +5,8 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.language import non_translatable_languages
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
-from preference.logic.attach_orgnisation_accesscode_to_preferences_logic import (
-    attach_orgnisation_accesscode_to_preferences,
+from preference.logic.attach_organisation_accesscode_to_preferences_logic import (
+    attach_organisation_accesscode_to_preferences,
 )
 from preference.logic.attach_sectors_to_preferences_logic import (
     attach_sectors_to_preferences,
@@ -107,4 +107,4 @@ def translate_and_clean_preferences_fields(key: str = None):
 
     clean_sectors_of_work()
 
-    attach_orgnisation_accesscode_to_preferences()
+    attach_organisation_accesscode_to_preferences()

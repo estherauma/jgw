@@ -16,7 +16,7 @@ def mongodb_pref_by_id(dictionary_list, target_id):
     return None
 
 
-def attach_orgnisation_workcode_to_preferences():
+def attach_organisation_accesscode_to_preferences():
     """
     This retrieves organisation access codes from mongodb database
     and attaches/assign them to preferences in the pandas postgreSQL database.
