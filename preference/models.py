@@ -123,6 +123,15 @@ class Age(models.Model):
         return self.range
 
 
+class OrganisationAccessCode(models.Model):
+    code = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.code
+
+
 class Preference(models.Model):
     data_source_id = models.CharField(max_length=255)
     device_id = models.CharField(max_length=255)
@@ -154,17 +163,21 @@ class Preference(models.Model):
         CountryState, on_delete=models.SET_NULL, null=True, blank=True, related_name="destination_state"
     )
     route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True)
-
-    sectors_of_work = models.ManyToManyField(SectorOfWork)
+    sectors_of_work = models.ManyToManyField(SectorOfWork, related_name="pref_sectors_of_work")
     organisation_sector = models.ForeignKey(
         OrganisationSector, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    organisation_access_code = models.ForeignKey(
+        OrganisationAccessCode,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pref_org_access_code",
     )
     factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     is_missing_sector_cleaned = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Preference {self.id}"
+    is_missing_accesscode_cleaned = models.BooleanField(default=False)
 
 
 class TextTranslations(models.Model):
