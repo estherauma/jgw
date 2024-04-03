@@ -92,6 +92,7 @@ feedback_standard_fields = [
     "age",
     "gender",
     "sectors",
+    "origin",
 ]
 
 
@@ -131,7 +132,9 @@ def add_chapter_feedback_to_db(chapter_feedback):
     route = standard_fields_dict.get("route") or NOT_SPECIFIED
 
     location_of_potential_work = standard_fields_dict.get("location_of_potential_work")
-    origin = get_data_origin(route=route, api_origin=standard_fields_dict.get("locale"))
+    origin = get_data_origin(
+        route=route, api_origin=standard_fields_dict.get("locale") or standard_fields_dict.get("origin")
+    )
     destination = get_data_destination(
         route=route,
         api_destination=standard_fields_dict.get("destination"),

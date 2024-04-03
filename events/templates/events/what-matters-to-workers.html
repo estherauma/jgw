@@ -28,7 +28,7 @@
       </div>
       <div class="modal-body">
         <form method="post" id="what-matters-to-workers-filter-form">
-          {% csrf_token %} {{form|crispy}}
+          {% csrf_token %} {{filter_form|crispy}}
           <button type="submit" class="btn btn-primary">Submit</button>
           <a href="" class="btn btn-secondary">Reset</a>
         </form>

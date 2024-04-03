@@ -10,8 +10,10 @@ class MongoDBConnectionManager:
     uri = os.environ.get("JGW_MONGO_CLIENT_URI")
 
     def __init__(self):
-
-        client_params = {"tlsCAFile": certifi.where()}
+        if os.getenv("DEBUG") == "False":
+            client_params = {"tlsCAFile": certifi.where()}
+        else:
+            client_params = {}
 
         try:
             self.client = MongoClient(self.uri, maxPoolSize=10, connectTimeoutMS=60000, **client_params)

@@ -1,13 +1,19 @@
 from django.db.models import Count, F
 from common.helpers.preference_helpers.events import events_name_patterns_to_replace
+from events.filters import generic_chapters_opened_filtered_queryset
 
 from events.models import ChaptersOpened
 
 
-def get_chapters_opened():
-    chapters_opened = (
-        ChaptersOpened.objects.values("event_name").annotate(count=Count("event_name")).order_by("-count")
+def get_chapters_opened(**filters):
+    chapters_opened_queryset = generic_chapters_opened_filtered_queryset(
+        queryset=ChaptersOpened.objects.all(), **filters
     )
+
+    chapters_opened = (
+        chapters_opened_queryset.values("event_name").annotate(count=Count("event_name")).order_by("-count")
+    )
+
     sums = {}
     for entry in chapters_opened:
         event_name = entry["event_name"]
