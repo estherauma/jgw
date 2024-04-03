@@ -1,50 +1,41 @@
+{% extends "layouts/main_base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <title>Just Good Work</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta content="The Just Good Work data platform offers information, data and insights about migrant labour" name="description" />
-        <meta content="FiftyEight" name="author" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-W7SGS7PETK"></script>
-        <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+{% block main_base_head %}
+    <meta charset="utf-8" />
+    <title>Just Good Work</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="The Just Good Work data platform offers information, data and insights about migrant labour" name="description" />
+    <meta content="FiftyEight" name="author" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-        gtag('config', 'G-W7SGS7PETK');
-        </script>
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'themes/modern/images/favicon.ico' %}">
 
-        <!-- App favicon -->
-        <link rel="shortcut icon" href="{% static 'themes/modern/images/favicon.ico' %}">
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="{% static 'themes/landing/css/bootstrap.min.css' %}" type="text/css">
 
-        <!-- Bootstrap core CSS -->
-        <link rel="stylesheet" href="{% static 'themes/landing/css/bootstrap.min.css' %}" type="text/css">
+    <!--Material Icon -->
+    <link rel="stylesheet" type="text/css" href="{% static 'themes/landing/css/materialdesignicons.min.css' %}" />
 
-        <!--Material Icon -->
-        <link rel="stylesheet" type="text/css" href="{% static 'themes/landing/css/materialdesignicons.min.css' %}" />
+    <!-- Custom  sCss -->
+    <link rel="stylesheet" type="text/css" href="{% static 'themes/landing/css/style.css' %}" />
 
-        <!-- Custom  sCss -->
-        <link rel="stylesheet" type="text/css" href="{% static 'themes/landing/css/style.css' %}" />
+    <style>
+        .eu-logo-container {
+            padding-top: 21px;
+            padding-left: 8px;
+            color: #000000;
+        }
+        
+        .eu-logo-title {
+            display: block;
+            font-weight: 800;
+        }
+    </style>
+{% endblock main_base_head %}
 
-        <style>
-            .eu-logo-container {
-                padding-top: 21px;
-                padding-left: 8px;
-                color: #000000;
-            }
-            
-            .eu-logo-title {
-                display: block;
-                font-weight: 800;
-            }
-        </style>
-
-    </head>
+{% block main_base_body %}
     <body data-bs-spy="scroll" data-bs-target=".navbar" data-bs-offset="78">
         <!--Navbar Start-->
         <nav class="navbar navbar-expand-lg fixed-top navbar-custom sticky-dark" id="sticky">
@@ -130,4 +121,4 @@
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             {% block scripts %}{% endblock scripts %}
     </body>
-</html>
+{% endblock main_base_body %}
