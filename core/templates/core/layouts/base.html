@@ -1,42 +1,42 @@
+{% extends "layouts/main_base.html" %}
 {% load static %}
-<!DOCTYPE html>
 
-    <head>
+{% block main_base_head %}
+    <meta charset="utf-8" />
+    <title>{% block title %} {% endblock %} | JGW Data Dashboards</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="The Just Good Work data platform offers information, data and insights about migrant labour." name="description" />
+    <meta content="FiftyEight" name="author" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'themes/modern/images/favicon.ico' %}">
 
-        <meta charset="utf-8" />
-        <title>{% block title %} {% endblock %} | JGW Data Dashboards</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta content="The Just Good Work data platform offers information, data and insights about migrant labour." name="description" />
-        <meta content="FiftyEight" name="author" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <!-- App favicon -->
-        <link rel="shortcut icon" href="{% static 'themes/modern/images/favicon.ico' %}">
+    <!-- plugin css -->
+    <link href="{% static 'themes/modern/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css' %}" rel="stylesheet" type="text/css" />
 
-        <!-- plugin css -->
-        <link href="{% static 'themes/modern/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css' %}" rel="stylesheet" type="text/css" />
-
-        <!-- Bootstrap css -->
-        <link rel="stylesheet" href="{% static 'themes/modern/css/bootstrap.min.css' %}" type="text/css">
-        <!-- App css -->
-        <link rel="stylesheet" href="{% static 'themes/modern/css/app.min.css' %}" type="text/css" id="app-style">
-        <!-- icons -->
-        <link rel="stylesheet" href="{% static 'themes/modern/css/icons.min.css' %}" type="text/css">
-        <link rel="stylesheet" href="{% static 'themes/modern/css/custom.css' %}" type="text/css" id="app-style">
-        <!-- Head js -->
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="{% static 'themes/modern/css/bootstrap.min.css' %}" type="text/css">
+    <!-- App css -->
+    <link rel="stylesheet" href="{% static 'themes/modern/css/app.min.css' %}" type="text/css" id="app-style">
+    <!-- icons -->
+    <link rel="stylesheet" href="{% static 'themes/modern/css/icons.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'themes/modern/css/custom.css' %}" type="text/css" id="app-style">
+    <!-- Head js -->
 
 
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/xcode.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/xcode.min.css" />
 
-        <!-- custom styles -->
-        <link rel="stylesheet" href="{% static 'css/dashboard.css' %} " />
-        <link rel="stylesheet" href="{% static 'dashboard/css/bootstrap-multiselect.css' %} " />
-        
-        <style>
-            {% block styles %}{% endblock %}
-        </style>
-    </head>
+    <!-- custom styles -->
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %} " />
+    <link rel="stylesheet" href="{% static 'dashboard/css/bootstrap-multiselect.css' %} " />
 
+    <style>
+        {% block styles %}{% endblock %}
+    </style>
+{% endblock main_base_head %}
+
+{% block main_base_body %}
     <body  data-layout-mode="detached" data-theme="light" data-topbar-color="dark" data-menu-position="fixed" data-leftbar-color="light" data-leftbar-size='default' data-sidebar-user='true'>
 
         <!-- Begin page -->
@@ -46,7 +46,7 @@
             {% include 'includes/make_payment_modal.html' %}
 
             <!-- show side bar only for logged-in users -->
-           
+        
             <!-- Topbar Start -->
             {% include 'includes/topbar.html' %}
             <!-- end Topbar -->
@@ -104,19 +104,6 @@
 
         <!-- Custom generic charts -->
         <script src="{% static 'dashboard/js/charts/bar.js' %}"></script>
-
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_id }}"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            const g4Id = "{{ google_analytics_id|escapejs }}"
-
-            gtag('config', g4Id);
-        </script>
-
         {% block scripts %}{% endblock scripts %}
     </body>
-</html>
+{% endblock main_base_body %}

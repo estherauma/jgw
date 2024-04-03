@@ -94,6 +94,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "common.custom_utils_context_preprocessors.google_analytics_id",
                 "common.custom_context_processor.export_buttons_config_list",
             ],
         },
