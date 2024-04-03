@@ -1,5 +1,8 @@
 from django.db import transaction
 import re
+import requests
+import json
+
 
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 from common.custom_libs.google_translate import pandas_translator_translate
@@ -13,15 +16,19 @@ from common.helpers.model_helpers.preference import (
 )
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
+
 from common.utils.date_utils import todays_date
 from common.helpers.preference_helpers.country import (
     get_data_destination,
     get_data_origin,
 )
 from common.utils.helpers import can_use_cached_data
+from common.utils.strings import space_separated_to_camel_case
 from preference.utils import format_text_for_db
 from question.models import (
+    FollowUpQuestion,
     InlineQuestion,
+    InlineQuestionAndKeysMatch,
     InlineQuestionResponse,
     InlineQuestionResponseText,
     InlineQuestionStandard,
@@ -236,6 +243,10 @@ def fetch_inline_questions_from_api_to_db():
     # start translation
     translate_and_clean_inline_question_fields()
 
+    #fetch questions keys and names data
+    fetch_questions_key_and_name_from_api()
+
+
 
 def add_inline_question_to_db(inline_question):
     if isinstance(inline_question, str):
@@ -367,3 +378,125 @@ def add_inline_question_to_db(inline_question):
             InlineQuestionResponse.objects.create(
                 inline_question=created_inline_question, response=inline_question_response_text
             )
+
+
+def fetch_questions_key_and_name_from_api():
+    start_date = APPLICATION_POSSIBLE_START_DATE
+    end_date = todays_date()   
+    url= f"https://staging-api.justgood.work/api/v2/appcontent/query-documents?type=create_content_area&startDate={start_date}&endDate={end_date}"
+    response=requests.get(url)
+    if response.status_code == 200:
+        questions_data=response.json()
+        kunfu_panda_logger.info("Successfully fetched questions data from the API")
+        filtered_questions = filter_questions_key_and_name_data(questions_data)
+        save_filtered_questions_and_keys(filtered_questions)
+        translate_inq()
+        update_inline_question_text_with_mapper()
+        kunfu_panda_logger.info(f" Found {len(filtered_questions)} matches ")
+        return filtered_questions  
+
+def update_inline_question_text_with_mapper():
+    question_texts = InlineQuestionText.objects.all()
+    for question_text in question_texts:
+        inqm = InlineQuestionAndKeysMatch.objects.filter(
+            inline_question_key = question_text.text
+        ).first() 
+        if inqm:
+            question_text.title_text = inqm.inline_question
+            question_text.save()
+        
+        fq = FollowUpQuestion.objects.filter(
+            followup_question_key = question_text.text
+        ).first()
+        if fq:
+            question_text.title_text = fq.followup_question
+            question_text.save()
+
+
+def filter_questions_key_and_name_data(questions_data):
+    english_questions = []
+    other_languages_questions = []
+
+    for item in questions_data.get('data', []):
+        if item.get('language', '').startswith('en'):
+            for content in item.get('pageContent', []):
+                if content and content.get('type') == 'questions':
+                    english_questions.append({**content, **{"custom_lang": "en"}})
+        
+
+        else:
+            for content in item.get('pageContent', []):
+                if content and content.get('type') == 'questions':
+                    other_languages_questions.append(content)
+            
+    return [*english_questions, *other_languages_questions]
+
+
+def translate_inq():
+    iqkms = InlineQuestionAndKeysMatch.objects.filter(custom_lang__isnull=True)
+    for iqkm in iqkms:
+        ptt = pandas_translator_translate(iqkm.inline_question)
+        iqkm.inline_question = ptt
+        iqkm.custom_lang = 'en'
+        iqkm.save()
+
+    fqs = FollowUpQuestion.objects.filter(custom_lang__isnull=True)
+    for fq in fqs:
+        ptt = pandas_translator_translate(fq.followup_question)
+        fq.followup_question = ptt
+        fq.custom_lang = 'en'
+        fq.save()
+
+
+def save_filtered_questions_and_keys(filtered_questions):
+
+    for question_info in filtered_questions:
+        question_info_key =  question_info.get("key")
+        question_info_text = question_info["question"]
+        custom_lang = question_info.get("custom_lang")  
+
+        question_mapper = InlineQuestionAndKeysMatch.objects.filter(
+            inline_question_key=question_info_key
+            ).first()
+        if not question_mapper:
+            question_mapper = InlineQuestionAndKeysMatch.objects.create(
+                inline_question=question_info_text,
+                inline_question_key=question_info_key,
+                custom_lang = custom_lang
+            )
+        
+        question_info_options = question_info.get("options")
+        for question_info_option in question_info_options:
+            option_follow_up_question = question_info_option.get("followUpQuestion")
+            if option_follow_up_question:
+                follow_up_question_key = option_follow_up_question.get("key")
+                follow_up_question_text = option_follow_up_question.get("question")
+                fqe = FollowUpQuestion.objects.filter(
+                    inline_question__inline_question = question_info_text,
+                    followup_question_key = follow_up_question_key
+                )
+                
+                if not fqe:
+                    FollowUpQuestion.objects.create(
+                        inline_question = question_mapper,
+                        followup_question = follow_up_question_text,
+                        followup_question_key = follow_up_question_key,
+                        custom_lang = custom_lang
+                    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

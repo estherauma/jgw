@@ -2,12 +2,14 @@ from django.contrib import admin
 
 from question.actions import export_responses
 from question.models import (
+    FollowUpQuestion,
     MessagingResponse,
     InlineQuestion,
     InlineQuestionResponse,
     InlineQuestionStandard,
     InlineQuestionText,
     InlineQuestionResponseText,
+    InlineQuestionAndKeysMatch,
     MessagingQuestion,
     MessagingQuestionResponse,
     MessagingQuestionStandard,
@@ -48,7 +50,20 @@ class InlineQuestionAdmin(admin.ModelAdmin):
             if obj.inline_question_standard.preference
             else "not specified"
         )
+    
 
+@admin.register(InlineQuestionAndKeysMatch)
+class InlineQuestionAndKeysMatchAdmin(admin.ModelAdmin):
+    list_display = ["inline_question","inline_question_key", "custom_lang"]
+    search_fields = ["inline_question", "inline_question_key"]
+
+@admin.register(FollowUpQuestion)
+class FollowUpQuestionAdmin(admin.ModelAdmin):
+    list_display = ["followup_question_key", "followup_question", "inline_question_text", "custom_lang"]
+    search_fields = ["followup_question_key", "followup_question"]
+
+    def inline_question_text(cls, obj):
+        return obj.inline_question.inline_question
 
 admin.site.register(InlineQuestionResponse)
 admin.site.register(InlineQuestionStandard)

@@ -18,3 +18,8 @@ def camel_case_to_space_separated(input_str):
 
 def format_thousands_with_commas(number):
     return f"{number:,}"
+
+def space_separated_to_camel_case(input_str):
+    words = input_str.split()
+    camel_case_string = words[0].lower() + ''.join(word.capitalize() for word in words[1:])
+    return camel_case_string
