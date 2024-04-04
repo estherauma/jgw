@@ -4,19 +4,19 @@ $(document).ready(function () {
         { data: 'number', title: 'Worker Number' },
         { data: 'startDate', title: 'Start Date' },
         { data: 'registrationDate', title: 'Registration Date' },
-        { 
-            data: 'completedRegistration', 
-            title: 'Registration', 
+        {
+            data: 'completedRegistration',
+            title: 'Registration',
             render: function (data, type, row) {
                 if (data == 1) {
                     return ' <span class="badge bg-success">Yes</span>';
                 } else {
                     return '<span class="badge bg-danger">No</span>';
                 }
-            } 
+            }
         },
-        { 
-            data: 'completedInduction', 
+        {
+            data: 'completedInduction',
             title: 'Induction',
             render: function (data, type, row) {
                 if (data == 1) {
@@ -24,10 +24,10 @@ $(document).ready(function () {
                 } else {
                     return '<span class="badge bg-danger">No</span>';
                 }
-            } 
+            }
         },
-        { 
-            data: 'contractSigned', 
+        {
+            data: 'contractSigned',
             title: 'Contract Signed',
             render: function (data, type, row) {
                 if (data == 1) {
@@ -35,10 +35,10 @@ $(document).ready(function () {
                 } else {
                     return '<span class="badge bg-danger">No</span>';
                 }
-            } 
+            }
         },
         {
-            data: 'workerDirectiveSigned', 
+            data: 'workerDirectiveSigned',
             title: 'Worker Directive Signed',
             render: function (data, type, row) {
                 if (data == 'Yes') {
@@ -48,10 +48,10 @@ $(document).ready(function () {
                 } else {
                     return '<span class="badge bg-warning">None</span>';
                 }
-            } 
+            }
         },
-        { 
-            data: 'hygieneSigned', 
+        {
+            data: 'hygieneSigned',
             title: 'Hygiene',
             render: function (data, type, row) {
                 if (data == 1) {
@@ -60,17 +60,30 @@ $(document).ready(function () {
                     return '<span class="badge bg-danger">No</span>';
                 }
             }
-         },
+        },
         {
-             data: 'medicalSigned', 
-             title: 'Medical',
-             render: function (data, type, row) {
+            data: 'medicalSigned',
+            title: 'Medical',
+            render: function (data, type, row) {
                 if (data == 1) {
                     return ' <span class="badge bg-success">Yes</span>';
                 } else {
                     return '<span class="badge bg-danger">No</span>';
                 }
-            } 
+            }
+        },
+        {
+            data: 'hasAllergies',
+            title: 'Has allergies',
+            render: function (data, type, row) {
+                if (data == 1) {
+                    return ' <span class="badge bg-success">Yes</span>';
+                } else if (data == null || data == undefined) {
+                    return ' <span class="badge bg-warning">Not specified</span>';
+                } else {
+                    return '<span class="badge bg-danger">No</span>';
+                }
+            }
         },
 
     ]
