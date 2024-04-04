@@ -19,6 +19,7 @@ from preference.models import (
     Language,
     LocationOfPotentialWork,
     Organisation,
+    OrganisationAccessCode,
     OrganisationSector,
     Route,
     SectorOfWork,
@@ -185,3 +186,17 @@ def make_language_queryset_list_unique(language_list):
         lang = Language.objects.filter(translated_name=language).first()
         lang_list.append(lang)
     return lang_list
+
+
+def get_or_add_organisation_access_code(access_code: str) -> OrganisationAccessCode:
+    model = OrganisationAccessCode
+    value = access_code.strip()
+
+    instances = model.objects.filter(code=value)
+    if instances.exists():
+        # Handle the case when the record(s) exist
+        instance = instances.first()
+    else:
+        # Create a new 'model' object with the desired name
+        instance = model.objects.create(code=value)
+    return instance

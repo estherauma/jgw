@@ -240,6 +240,7 @@
     var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
     var usersByCountryStateChartData = {{ users_by_country_state | safe }};
     var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
+    var swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
 
     var workCodeUsageParams = [
     {
@@ -372,6 +373,9 @@
     usersBySectorsChart(usersBySectorsChartData)
     // Organisation work code stack bar chart
     workCodeUsageStackBar(workCodeUsageParams)
+
+    // TODO: add to chart : swsWorkcodesWithAccessCode
+    console.log(swsWorkcodesWithAccessCode)
 
     // Count the number of flex items
     const chartContainer = document.querySelector('.chart-container');
