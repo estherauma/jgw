@@ -146,19 +146,6 @@
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">work code usage</p>
-                    <div class="preference-work-code-usage-graph-id-chart-box">
-                        <div id="preference-work-code-usage-graph-id"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
-
-    {% flag 'can_view_work_code_usage_chart' %}
-        <div class="chart-column-width">
-            <div class="card h-100">
-                <div class="card-body">
-                    <p class="chart-title">work code usage stack bar</p>
                     <div class="organisation-work-code-usage-graph-id-chart-box">
                         <div id="organisation-work-code-usage-graph-id" style="margin-top: 50px;"></div>
                     </div>
@@ -242,109 +229,6 @@
     var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
     var swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
 
-    var workCodeUsageParams = [
-    {
-        'organisation_name': 'seasonal  worker scheme - concordia',
-        'access_code': 'not specified', 
-        'access_code_count': 1413
-    }, 
-    {
-        'organisation_name': 'seasonal worker scheme - sws generic', 
-        'access_code': 'swsg287-', 
-        'access_code_count': 1
-    }, 
-    {   
-        'organisation_name': 'not specified', 
-        'access_code': 'pfsws34', 
-        'access_code_count': 2
-    }, 
-    {
-        'organisation_name': 'placeuk', 
-        'access_code': 'not specified', 
-        'access_code_count': 1
-    }, 
-    {
-        'organisation_name': 'not specified', 
-        'access_code': 'csws62', 
-        'access_code_count': 1
-    }, 
-    {
-        'organisation_name': 'seasonal worker scheme - sws generic', 
-        'access_code': 'swsg287', 
-        'access_code_count': 170
-    }, 
-    {
-        'organisation_name': 'seasonal worker scheme - agri-hr', 
-        'access_code': 'aghrsws23', 
-        'access_code_count': 90
-    }, 
-    {
-        'organisation_name': 'seasonal  worker scheme - concordia', 
-        'access_code': 'csws61', 
-        'access_code_count': 147
-    }, 
-    {
-        'organisation_name': 'seasonal worker scheme - placeuk', 
-        'access_code': 'not specified', 
-        'access_code_count': 36
-    }, 
-    // {
-    //     'organisation_name': 'not specified', 
-    //     'access_code': 'not specified', 
-    //     'access_code_count': 39158
-    // }, 
-    {
-        'organisation_name': 'not specified', 
-        'access_code': 'swsg287', 
-        'access_code_count': 1
-    }, 
-    {
-        'organisation_name': 'evergreen', 
-        'access_code': 'not specified', 
-        'access_code_count': 70
-    }, 
-    {
-        'organisation_name': 'evergreen', 
-        'access_code': 'aghrsws24', 
-        'access_code_count': 1
-    }, 
-    {
-        'organisation_name': 'seasonal worker scheme - ethero', 
-        'access_code': 'ethsws24', 
-        'access_code_count': 2
-    }, 
-    {
-        'organisation_name': 'seasonal worker scheme  - hops', 
-        'access_code': 'not specified', 
-        'access_code_count': 3
-    }, 
-    {
-        'organisation_name': 'seasonal worker scheme - pro-force', 
-        'access_code': 'pfsws34', 
-        'access_code_count': 186
-    }, 
-    {
-        'organisation_name': 'seasonal worker scheme - ag recruitment', 
-        'access_code': 'agrsws71', 
-        'access_code_count': 1
-    }, 
-    {
-        'organisation_name': 'evergreen', 
-        'access_code': 'evergreen23', 
-        'access_code_count': 3
-    }, 
-    {
-        'organisation_name': 'world wide fruit', 
-        'access_code': 'wwfruit81', 
-        'access_code_count': 1
-    }, 
-    {
-        'organisation_name': 'kali farms', 
-        'access_code': 'not specified', 
-        'access_code_count': 1
-    }
-] 
-
     // plots the age piechart
     preferenceAgePieChart(ageData)
 
@@ -372,10 +256,7 @@
     // users by sectors chart data
     usersBySectorsChart(usersBySectorsChartData)
     // Organisation work code stack bar chart
-    workCodeUsageStackBar(workCodeUsageParams)
-
-    // TODO: add to chart : swsWorkcodesWithAccessCode
-    console.log(swsWorkcodesWithAccessCode)
+    workCodeUsageStackBar(swsWorkcodesWithAccessCode)
 
     // Count the number of flex items
     const chartContainer = document.querySelector('.chart-container');
