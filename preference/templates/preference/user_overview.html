@@ -147,7 +147,7 @@
                 <div class="card-body">
                     <p class="chart-title">work code usage</p>
                     <div class="organisation-work-code-usage-graph-id-chart-box">
-                        <div id="organisation-work-code-usage-graph-id" style="margin-top: 50px;"></div>
+                        <div id="organisation-work-code-usage-graph-id"></div>
                     </div>
                 </div>
             </div>
@@ -227,7 +227,9 @@
     var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
     var usersByCountryStateChartData = {{ users_by_country_state | safe }};
     var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
-    var swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
+    const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
+
+    console.log("Work Code",swsWorkcodesWithAccessCode);
 
     // plots the age piechart
     preferenceAgePieChart(ageData)
