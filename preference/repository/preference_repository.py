@@ -311,8 +311,8 @@ def get_sws_workcodes_with_access_code(**filters):
         filtered_queryset.values(
             organisation_name=F("organisation__name"), access_code=F("organisation_access_code__code")
         )
+        .exclude(organisation__name__in=["not specified"])
         .annotate(access_code_count=Count("organisation_access_code"))
         .filter(organisation_access_code__isnull=False)
     )
-
     return list(queryset_data)

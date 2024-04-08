@@ -146,8 +146,8 @@
             <div class="card h-100">
                 <div class="card-body">
                     <p class="chart-title">work code usage</p>
-                    <div class="preference-work-code-usage-graph-id-chart-box">
-                        <div id="preference-work-code-usage-graph-id"></div>
+                    <div class="organisation-work-code-usage-graph-id-chart-box">
+                        <div id="organisation-work-code-usage-graph-id"></div>
                     </div>
                 </div>
             </div>
@@ -213,6 +213,7 @@
 <script src="{% static 'js/charts/pie/preference_destination_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/line/preferences_monthly_users.js' %}"></script>
 <script src="{% static 'js/charts/bar/users_by_country_state.js' %}"></script>
+<script src="{% static 'js/charts/bar/work_code_usage_stack_bar.js' %}"></script>
 <script src="{% static 'js/charts/bar/user_by_sector_graph.js' %}"></script>
 <script src="{% static 'js/app/user_overview.js' %}"></script>
 <script type="text/javascript">
@@ -226,7 +227,9 @@
     var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
     var usersByCountryStateChartData = {{ users_by_country_state | safe }};
     var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
-    var swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
+    const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
+
+    console.log("Work Code",swsWorkcodesWithAccessCode);
 
     // plots the age piechart
     preferenceAgePieChart(ageData)
@@ -254,9 +257,8 @@
 
     // users by sectors chart data
     usersBySectorsChart(usersBySectorsChartData)
-
-    // TODO: add to chart : swsWorkcodesWithAccessCode
-    console.log(swsWorkcodesWithAccessCode)
+    // Organisation work code stack bar chart
+    workCodeUsageStackBar(swsWorkcodesWithAccessCode)
 
     // Count the number of flex items
     const chartContainer = document.querySelector('.chart-container');
