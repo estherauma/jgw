@@ -188,15 +188,22 @@ def make_language_queryset_list_unique(language_list):
     return lang_list
 
 
+# TODO: add default value if access_code doesn't exists
+# take note that this doesn't seems to change when the parameter is None.
 def get_or_add_organisation_access_code(access_code: str) -> OrganisationAccessCode:
     model = OrganisationAccessCode
-    value = access_code.strip()
 
-    instances = model.objects.filter(code=value)
+    access_code_value = access_code
+    if not access_code:
+        access_code_value = NOT_SPECIFIED
+
+    final_access_code = access_code_value.strip()
+
+    instances = model.objects.filter(code=final_access_code)
     if instances.exists():
         # Handle the case when the record(s) exist
         instance = instances.first()
     else:
         # Create a new 'model' object with the desired name
-        instance = model.objects.create(code=value)
+        instance = model.objects.create(code=final_access_code)
     return instance

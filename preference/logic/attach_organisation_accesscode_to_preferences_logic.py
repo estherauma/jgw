@@ -1,4 +1,3 @@
-from common.const.value_const import NOT_SPECIFIED
 from common.helpers.model_helpers.preference import get_or_add_organisation_access_code
 from common.logger import KunfuPandaLogger
 from common.services.mongodb_manager import MongoDBConnectionManager
@@ -47,9 +46,7 @@ def attach_organisation_accesscode_to_preferences():
             preference_instance.is_missing_accesscode_cleaned = True
 
             if preference_data:
-                organisation_access_code_from_mongo = (
-                    preference_data.get("organisationAccessCode") or NOT_SPECIFIED
-                )
+                organisation_access_code_from_mongo = preference_data.get("organisationAccessCode")
 
                 organisation_access_code_data = get_or_add_organisation_access_code(
                     organisation_access_code_from_mongo
