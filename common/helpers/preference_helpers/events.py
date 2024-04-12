@@ -20,37 +20,37 @@ from common.const.value_const import NOT_SPECIFIED
 #     return normalize_event_name
 
 events_name_patterns_to_replace = {
-    "ChapterOpened_1_1": "Thinking about it", # Looking for a job?
-    "ChapterOpened_1_2": "Why come to work in the country", # Questions for Agents / Recruiters
-    "ChapterOpened_1_3": "Culture and community", # Your skills and qualifications
-    "ChapterOpened_1_4": "Type of work available", # Fees and charges
-    "ChapterOpened_1_5": "Your skills and qualifications", # Culture and Religion
+    "ChapterOpened_1_1": "Thinking about it", 
+    "ChapterOpened_1_2": "Why come to work in the country", 
+    "ChapterOpened_1_3": "Culture and community", 
+    "ChapterOpened_1_4": "Type of work available",
+    "ChapterOpened_1_5": "Your skills and qualifications", 
     "ChapterOpened_2_1": "Application process",
-    "ChapterOpened_2_10": "Agents", # Changing jobs
-    "ChapterOpened_2_11": "Travel", # Raising a Grievance
+    "ChapterOpened_2_10": "Agents", 
+    "ChapterOpened_2_11": "Travel", 
     "ChapterOpened_2_12": "Immigration", 
     "ChapterOpened_2_2": "Fees and charges",
     "ChapterOpened_2_3": "Equality",
-    "ChapterOpened_2_4": "Immigration and visa requirements", # Your contract and rights
-    "ChapterOpened_2_5": "Visa fees and costs", # working conditions
-    "ChapterOpened_2_6": "Contract and rights", # Pre-Employment Training
-    "ChapterOpened_2_7": "Medical screening", # Your Personal Documents
-    "ChapterOpened_2_8": "Pre employment training", # Time off and Holidays
-    "ChapterOpened_2_9": "Your personal documents", # Working Conditions
-    "ChapterOpened_3_1": "Employment status", # Arrival
-    "ChapterOpened_3_10": "Universal credits and other benefits", # Medical
-    "ChapterOpened_3_11": "Personal", # Places of worship
-    "ChapterOpened_3_12": "Transport", # Leaving The UAE
-    "ChapterOpened_3_13": "Everyday life", # Leaving Malaysia
+    "ChapterOpened_2_4": "Immigration and visa requirements", 
+    "ChapterOpened_2_5": "Visa fees and costs", 
+    "ChapterOpened_2_6": "Contract and rights", 
+    "ChapterOpened_2_7": "Medical screening", 
+    "ChapterOpened_2_8": "Pre employment training", 
+    "ChapterOpened_2_9": "Your personal documents", 
+    "ChapterOpened_3_1": "Employment status", 
+    "ChapterOpened_3_10": "Universal credits and other benefits", 
+    "ChapterOpened_3_11": "Personal", 
+    "ChapterOpened_3_12": "Transport", 
+    "ChapterOpened_3_13": "Everyday life", 
     "ChapterOpened_3_14": "Medical care",
-    "ChapterOpened_3_2": "Pay", # Managing your money
-    "ChapterOpened_3_3": "Working hours", # Your contract and visa
-    "ChapterOpened_3_4": "Holidays and sick leave", # work
+    "ChapterOpened_3_2": "Pay", 
+    "ChapterOpened_3_3": "Working hours", 
+    "ChapterOpened_3_4": "Holidays and sick leave", 
     "ChapterOpened_3_5": "Health and safety", 
-    "ChapterOpened_3_6": "Complaints and grievances", # wages
-    "ChapterOpened_3_7": "Resignation and dismisal", # Time Off and Holidays
-    "ChapterOpened_3_8": "Trade Unions", # Resignation and Dismissal
-    "ChapterOpened_3_9": "Accomodation", # Personal
+    "ChapterOpened_3_6": "Complaints and grievances", 
+    "ChapterOpened_3_7": "Resignation and dismisal", 
+    "ChapterOpened_3_8": "Trade Unions", 
+    "ChapterOpened_3_9": "Accomodation", 
     "ChapterOpened_about_jgw":"About Just Good Work",
     "ChapterOpened_pp":"Privacy Policy",
     "ChapterOpened_1_7":"Domestic Workers",
