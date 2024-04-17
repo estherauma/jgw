@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
 from core.logic.file_export import generate_and_export_excel
 from question.forms import InlineQuestionFilterForm, InlineQuestionOnlyFilterForm, MessagingQuestionFilterForm
@@ -23,26 +24,17 @@ from users.utils import get_user_organisations
 
 
 def messaging_question(request):
-    if request.method == "GET":
-        filter_form = MessagingQuestionFilterForm(request=request)
-        total_messaging_questions = messaging_questions_count(current_user=request.user)
-        messaging_question_per_origin = get_messaging_question_per_origin_counts(current_user=request.user)
-        messaging_question_per_destination = get_messaging_question_per_destination_counts(
-            current_user=request.user
-        )
+    form_filter_params = get_form_filter_params(request=request, form_class=MessagingQuestionFilterForm)
+    filters = form_filter_params["filters"]
+    filter_form = form_filter_params["filter_form"]
 
-    else:
-        filter_form = MessagingQuestionFilterForm(request=request, data=request.POST)
-        if filter_form.is_valid():
-            filters = generic_filter_form_parser(filter_form)
-
-        total_messaging_questions = messaging_questions_count(**filters, current_user=request.user)
-        messaging_question_per_origin = get_messaging_question_per_origin_counts(
-            **filters, current_user=request.user
-        )
-        messaging_question_per_destination = get_messaging_question_per_destination_counts(
-            **filters, current_user=request.user
-        )
+    total_messaging_questions = messaging_questions_count(**filters, current_user=request.user)
+    messaging_question_per_origin = get_messaging_question_per_origin_counts(
+        **filters, current_user=request.user
+    )
+    messaging_question_per_destination = get_messaging_question_per_destination_counts(
+        **filters, current_user=request.user
+    )
 
     context = {
         "total_messaging_questions": total_messaging_questions,

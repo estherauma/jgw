@@ -1,2 +1,3 @@
 NOT_SPECIFIED = "not specified"
 APPLICATION_POSSIBLE_START_DATE = "2019-01-01"
+SESSION_FILTERS_KEY = "session_filters"
