@@ -1,3 +1,4 @@
+from django.http import QueryDict
 from django.shortcuts import render
 from core.filters import generic_filter_form_parser
 
@@ -22,42 +23,35 @@ from users.utils import get_user_organisations
 
 
 def user_overview(request):
-    if request.method == "GET":
-        filter_form = GenericFilterForm(request=request)
-        total_user_overview_responses = preferences_count(current_user=request.user)
-        preferences_per_origin_country_responses = preferences_by_origin(current_user=request.user)
-        preferences_per_destination_country_responses = preferences_by_destination(current_user=request.user)
-        preferences_by_age_responses = preferences_by_age(current_user=request.user)
-        preferences_by_gender_responses = preferences_by_gender(current_user=request.user)
-        preferences_by_language_responses = preferences_by_language(current_user=request.user)
-        preferences_by_organisation_responses = preferences_by_organisation(current_user=request.user)
-        pref_cumulative_new_users = get_cumulative_monthly_new_users(current_user=request.user)
-        users_by_country_state = get_users_by_country_state(current_user=request.user)
-        preferences_by_sectors = get_preferences_by_sectors(current_user=request.user)
-        sws_workcodes_with_access_code = get_sws_workcodes_with_access_code(current_user=request.user)
-
-    else:
-        filter_form = GenericFilterForm(request=request, data=request.POST)
-        if filter_form.is_valid():
+    print("Request-------->",request.POST)
+    
+    # filterFormat={'start_date': None, 'end_date': None, 'destination_countries': ['malaysia'], 'origin_countries': [], 'organisations': [], 'factory_farms': []}
+    cccc=dict_to_querydict(request.POST)
+    print("gdgdhdjdfjjj------>",cccc)
+    
+    filter_form = GenericFilterForm(request=request, data=request.POST)
+    if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
+            print("filters------->", filters)
 
-        total_user_overview_responses = preferences_count(**filters, current_user=request.user)
-        preferences_per_origin_country_responses = preferences_by_origin(**filters, current_user=request.user)
-        preferences_per_destination_country_responses = preferences_by_destination(
-            **filters, current_user=request.user
-        )
-        preferences_by_age_responses = preferences_by_age(**filters, current_user=request.user)
-        preferences_by_gender_responses = preferences_by_gender(**filters, current_user=request.user)
-        preferences_by_language_responses = preferences_by_language(**filters, current_user=request.user)
-        preferences_by_organisation_responses = preferences_by_organisation(
-            **filters, current_user=request.user
-        )
-        pref_cumulative_new_users = get_cumulative_monthly_new_users(**filters, current_user=request.user)
-        users_by_country_state = get_users_by_country_state(**filters, current_user=request.user)
-        preferences_by_sectors = get_preferences_by_sectors(**filters, current_user=request.user)
-        sws_workcodes_with_access_code = get_sws_workcodes_with_access_code(
-            **filters, current_user=request.user
-        )
+
+    total_user_overview_responses = preferences_count(**filters, current_user=request.user)
+    preferences_per_origin_country_responses = preferences_by_origin(**filters, current_user=request.user)
+    preferences_per_destination_country_responses = preferences_by_destination(
+        **filters, current_user=request.user
+    )
+    preferences_by_age_responses = preferences_by_age(**filters, current_user=request.user)
+    preferences_by_gender_responses = preferences_by_gender(**filters, current_user=request.user)
+    preferences_by_language_responses = preferences_by_language(**filters, current_user=request.user)
+    preferences_by_organisation_responses = preferences_by_organisation(
+        **filters, current_user=request.user
+    )
+    pref_cumulative_new_users = get_cumulative_monthly_new_users(**filters, current_user=request.user)
+    users_by_country_state = get_users_by_country_state(**filters, current_user=request.user)
+    preferences_by_sectors = get_preferences_by_sectors(**filters, current_user=request.user)
+    sws_workcodes_with_access_code = get_sws_workcodes_with_access_code(
+        **filters, current_user=request.user
+    )
 
     pasi_downloads = (
         get_total_dynamic_link_usage(current_user=request.user)
@@ -107,3 +101,24 @@ def export_preference_stats(request):
             )
 
         return generate_and_export_excel(export_dict, "preference_stats")
+
+def dict_to_querydict(data):
+    """
+    Convert a dictionary to a QueryDict object.
+    
+    Args:
+    - data (dict): The dictionary to convert.
+    
+    Returns:
+    - QueryDict: The resulting QueryDict object.
+    """
+    query_dict = QueryDict('', mutable=True)  # Create an empty QueryDict
+    
+    for key, value in data.items():
+        if isinstance(value, list):
+            for item in value:
+                query_dict.appendlist(key, item)
+        else:
+            query_dict[key] = value
+            
+    return query_dict
