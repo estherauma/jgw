@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from core.filters import generic_filter_form_parser
+from common.utils.request import get_form_filter_params
 from core.logic.file_export import generate_and_export_excel
 from events.forms import EventsDataFilterForm
 from events.repository.bigquery_chapters_feedback_repository import get_chapters_feedback
@@ -9,17 +9,12 @@ from events.repository.chapters_opened_repository import get_chapters_opened
 
 # Create your views here.
 def what_matters_to_workers(request):
-    if request.method == "GET":
-        filter_form = EventsDataFilterForm(request=request)
-        chapters_opened = get_chapters_opened(current_user=request.user)
-        chapters_feedback = get_chapters_feedback(current_user=request.user)
-    else:
-        filter_form = EventsDataFilterForm(request=request, data=request.POST)
-        if filter_form.is_valid():
-            filters = generic_filter_form_parser(filter_form)
+    form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
+    filters = form_filter_params["filters"]
+    filter_form = form_filter_params["filter_form"]
 
-        chapters_opened = get_chapters_opened(**filters, current_user=request.user)
-        chapters_feedback = get_chapters_feedback(**filters, current_user=request.user)
+    chapters_opened = get_chapters_opened(**filters, current_user=request.user)
+    chapters_feedback = get_chapters_feedback(**filters, current_user=request.user)
 
     context = {
         "chapters_opened": chapters_opened,
