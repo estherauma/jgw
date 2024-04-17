@@ -1,4 +1,3 @@
-from django.http import QueryDict
 from django.middleware.csrf import get_token
 from common.const.value_const import SESSION_FILTERS_KEY
 from common.utils.preferences import dict_to_querydict
