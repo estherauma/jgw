@@ -20,6 +20,7 @@ def get_form_filter_params(request, form_class):
     if filter_form.is_valid():
         filters = generic_filter_form_parser(filter_form)
 
-        save_session(request=request, key=SESSION_FILTERS_KEY, data=dict(post_data))
+        if dict(post_data):
+            save_session(request=request, key=SESSION_FILTERS_KEY, data=dict(post_data))
 
     return {"filters": filters, "filter_form": filter_form}
