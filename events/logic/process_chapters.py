@@ -44,18 +44,24 @@ def filter_chapters_data_from_JGW_api(chapters_data):
             language = item.get('language')
             page_title = item.get('pageTitle')
             uid = item.get('uid').replace('.', '_')
-            filtered_chapter_data.append({'language': language, 'pageTitle': page_title, 'uid': uid})
-            update_chapter_table_with_chapter_tittle(filtered_chapter_data)
-    print("FilteredChapterTiltle=====>",filtered_chapter_data)          
+            filtered_chapter_data.append({'language': language, 'pageTitle': page_title, 'uid': uid})     
     return filtered_chapter_data              
 
-def update_chapter_table_with_chapter_tittle(filtered_chapter_data):
-    for item in filtered_chapter_data:
-        key = item['uid']
-        language = item['language']
-        title = item['pageTitle']
+from events.models import Chapter, Country
+
+def update_chapter_table_with_chapter_tittle(chapter_tittle_match_to_chapter_ids):
+    for item in chapter_tittle_match_to_chapter_ids:
+        key = item['key']
+        destination_name = item['destination']
+        title = item['chapter_text']
         
-        matching_chapters = Chapter.objects.filter(number_key=key, language=language)
+        destination_country = Country.objects.filter(name=destination_name).first()
+        
+        if destination_country is None:
+            print(f"Country {destination_name} not found in the database")
+            continue
+        
+        matching_chapters = Chapter.objects.filter(number_key=key, destination=destination_country)
         
         if matching_chapters.exists():
             for chapter_title_key_match in matching_chapters:

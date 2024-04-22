@@ -22,8 +22,8 @@ class SwsPasiEventTabularAdminDisplay(admin.ModelAdmin):
 
 
 class ChapterAdminDisplay(admin.ModelAdmin):
-    list_display = ["number_key", "chapter_text","language","destination"]
-    search_fields = ["number_key", "chapter_text","language"]
+    list_display = ["number_key", "chapter_text","destination"]
+    search_fields = ["number_key", "chapter_text"]
 
 
 # Register your models here.

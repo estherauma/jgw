@@ -198,7 +198,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
         )
         feedback_question, _ = ChaptersFeedbackQuestion.objects.get_or_create(question=feedback_data_question)
 
-        chapter_instance, _ = Chapter.objects.get_or_create(number_key=feedback_data_key,destination=destination_data,language=language)
+        chapter_instance, _ = Chapter.objects.get_or_create(number_key=feedback_data_key,destination=destination_data)
 
         ChaptersFeedback.objects.create(
             feedback_standard=chapters_feedback_standard,
