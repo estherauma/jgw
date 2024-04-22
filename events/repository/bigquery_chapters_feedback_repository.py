@@ -14,7 +14,7 @@ def get_chapters_feedback(**filters):
         **filters
     )
 
-    chapters_feedback_data = chapters_opened_queryset.values(number_key=F("chapter__number_key")).annotate(
+    chapters_feedback_data = chapters_opened_queryset.values(number_key=F("chapter__number_key"),chapter_text=F("chapter__chapter_text")).annotate(
         frowns=Count(
             Case(When(feedback_response__translated_response="frown", then=1), output_field=IntegerField())
         ),
@@ -22,4 +22,5 @@ def get_chapters_feedback(**filters):
             Case(When(feedback_response__translated_response="smile", then=1), output_field=IntegerField())
         ),
     )
+
     return list(chapters_feedback_data)
