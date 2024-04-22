@@ -66,11 +66,14 @@ class Chapter(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     number_key = models.CharField(max_length=100)
     chapter_text = models.CharField(max_length=255, null=True, blank=True)
+    language = models.CharField(max_length=100, null=True, blank=False)
+    destination = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="chapter_tittle_opened_destination"
+    )
 
     def __str__(self):
         return self.number_key
-
-
+    
 class ChaptersOpened(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

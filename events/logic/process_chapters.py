@@ -38,25 +38,30 @@ def fetch_chapters_data_from_JGW_api():
         return None
     
 def filter_chapters_data_from_JGW_api(chapters_data):
-    filtered_data=[]
+    filtered_chapter_data=[]
     for item in chapters_data.get('data', []):
         if item.get('language', '').startswith('en'):    
             language = item.get('language')
             page_title = item.get('pageTitle')
-            uid = item.get('uid')
-            filtered_data.append({'language': language, 'pageTitle': page_title, 'uid': uid})
-           
-                    
-    print("filtered data",{len(filtered_data)})
+            uid = item.get('uid').replace('.', '_')
+            filtered_chapter_data.append({'language': language, 'pageTitle': page_title, 'uid': uid})
+            update_chapter_table_with_chapter_tittle(filtered_chapter_data)
+    print("FilteredChapterTiltle=====>",filtered_chapter_data)          
+    return filtered_chapter_data              
 
-    return filtered_data              
-
-def update_chapter_table_with_chapter_tittle():
-    for key, title in chapter_tittle_match_to_chapter_ids.items():
-        if Chapter.objects.filter(number_key=key).exists():
-            chapter = Chapter.objects.get(number_key=key)
-            chapter.chapter_text = title
-            chapter.save()
-            print(f"Updated chapter {key} with title: {title}")
+def update_chapter_table_with_chapter_tittle(filtered_chapter_data):
+    for item in filtered_chapter_data:
+        key = item['uid']
+        language = item['language']
+        title = item['pageTitle']
+        
+        matching_chapters = Chapter.objects.filter(number_key=key, language=language)
+        
+        if matching_chapters.exists():
+            for chapter_title_key_match in matching_chapters:
+                chapter_title_key_match.chapter_text = title
+                chapter_title_key_match.save()
+            
+                print(f"Updated chapter {key} with title: {title}")
         else:
             print(f"Chapter {key} not found in the database")
