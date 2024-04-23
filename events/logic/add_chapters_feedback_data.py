@@ -93,6 +93,11 @@ feedback_standard_fields = [
     "gender",
     "sectors",
     "origin",
+    "immigrationStatus",
+    "organisationCode",
+    "organisationAccessCode",
+    "registrationToken",
+    "version"
 ]
 
 
