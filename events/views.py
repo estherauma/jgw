@@ -4,7 +4,10 @@ from core.logic.file_export import generate_and_export_excel
 from events.forms import EventsDataFilterForm
 from events.repository.bigquery_chapters_feedback_repository import get_chapters_feedback
 
-from events.repository.chapters_opened_repository import get_chapters_opened
+from events.repository.chapters_opened_repository import (
+    get_chapters_opened,
+    get_chapters_opened_unique_by_users,
+)
 
 
 # Create your views here.
@@ -14,10 +17,12 @@ def what_matters_to_workers(request):
     filter_form = form_filter_params["filter_form"]
 
     chapters_opened = get_chapters_opened(**filters, current_user=request.user)
+    chapters_opened_by_unique_user = get_chapters_opened_unique_by_users(**filters, current_user=request.user)
     chapters_feedback = get_chapters_feedback(**filters, current_user=request.user)
 
     context = {
         "chapters_opened": chapters_opened,
+        "chapters_opened_by_unique_user": chapters_opened_by_unique_user,
         "chapters_feedback": chapters_feedback,
         "filter_form": filter_form,
     }

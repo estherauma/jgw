@@ -103,8 +103,12 @@
         <p class="chart-title">
           what matters to workers (where people spend time in the app)
         </p>
+        <button id="chapters-pened-btn" class="btn btn-sm btn-primary bg-jgw-deep-blue my-2">Show by unique users</button>
         <div class="chapters-opened-graph-id-chart-box">
           <div id="chapters-opened-graph-id"></div>
+        </div>
+        <div class="chapters-opened-by-unique-users-graph-id-chart-box display-hidden">
+          <div id="chapters-opened-by-unique-users-graph-id"></div>
         </div>
       </div>
     </div>
@@ -132,12 +136,21 @@
 <script src="{% static 'js/app/what_matter_to_workers.js' %}"></script>
 
 <script type="text/javascript">
+  $("#chapters-pened-btn").click(function(){
+    $(".chapters-opened-by-unique-users-graph-id-chart-box, .chapters-opened-graph-id-chart-box").toggleClass("display-hidden");
+     let buttonText = $(this).text() === "Show by unique users" ? "Show by total view" : "Show by unique users";
+     $(this).text(buttonText);
+  });
 
   const chaptersFeedbackParams = {{ chapters_feedback | safe }}
   chapterFeedBackGraph(chaptersFeedbackParams);
 
-
   const chaptersOpened = {{ chapters_opened | safe }};
-  chaptersOpenedGraph(chaptersOpened);
+  chaptersOpenedGraph(chaptersOpened, "chapters-opened-graph-id");
+
+  const chaptersOpenedUniqueUsers = {{ chapters_opened_by_unique_user | safe }};
+  chaptersOpenedGraph(chaptersOpenedUniqueUsers, "chapters-opened-by-unique-users-graph-id");
+
+  
 </script>
 {% endblock %}

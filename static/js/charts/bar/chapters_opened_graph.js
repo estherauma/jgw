@@ -1,4 +1,4 @@
-function chaptersOpenedGraph(chaptersOpenedParams) {
+function chaptersOpenedGraph(chaptersOpenedParams, graphId) {
     const data = chaptersOpenedParams["counts"];
     const labels = chaptersOpenedParams["labels"];
   
@@ -41,7 +41,7 @@ function chaptersOpenedGraph(chaptersOpenedParams) {
     };
   
     scrollableVerticalBarChart(
-      "chapters-opened-graph-id", 
+      graphId, 
       data, 
       chartConfig
   );
