@@ -12,7 +12,7 @@ from events.models import (
     LinksClickEvent,
     OneTimeEventJob,
     SwsPasiEvent,
-    Chapter,
+    Chapter
 )
 
 
@@ -22,7 +22,8 @@ class SwsPasiEventTabularAdminDisplay(admin.ModelAdmin):
 
 
 class ChapterAdminDisplay(admin.ModelAdmin):
-    list_display = ["number_key", "chapter_text"]
+    list_display = ["number_key", "chapter_text","destination"]
+    search_fields = ["number_key", "chapter_text"]
 
 
 # Register your models here.
@@ -34,6 +35,8 @@ admin.site.register(ChaptersFeedback)
 admin.site.register(ChaptersFeedbackQuestion)
 admin.site.register(SwsPasiEvent, SwsPasiEventTabularAdminDisplay)
 admin.site.register(Chapter, ChapterAdminDisplay)
+
+
 
 
 @admin.register(LinksClickEvent)
