@@ -31,15 +31,17 @@ def what_matters_to_workers(request):
 
 def export_what_matters_to_workers_stats(request):
     if request.method == "POST":
-        chapters_feedback = get_chapters_feedback()
-
+        form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
+        filters = form_filter_params["filters"]
+        chapters_feedback = get_chapters_feedback(current_user=request.user,**filters)
         smiles_count = [cf.get("smiles") for cf in chapters_feedback]
         frowns_counts = [cf.get("frowns") for cf in chapters_feedback]
-        labels = [cf.get("number_key") for cf in chapters_feedback]
+        labels = [cf.get("chapter_text") for cf in chapters_feedback]
 
+        chapters_opened = get_chapters_opened(current_user=request.user, **filters)
         export_dict = {
             "chapters": {
-                "what_matters_to_workers": get_chapters_opened(),
+                "what_matters_to_workers": chapters_opened,
                 "user_feedback_smiles": {"labels": labels, "counts": smiles_count},
                 "user_feedback_frowns": {"labels": labels, "counts": frowns_counts},
             },
