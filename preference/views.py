@@ -46,7 +46,6 @@ def user_overview(request):
         if not request.user.is_anonymous and request.user.role == "SCHEME"
         else 0
     )
-
     context = {
         "filter_form": filter_form,
         "total_user_overview_responses": total_user_overview_responses,

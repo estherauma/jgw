@@ -1,6 +1,9 @@
 function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData) {
   const labels = preferenceMonthlyUsersChartData["labels"];
   const data = preferenceMonthlyUsersChartData["counts"];
+  const cummulativeCounts = preferenceMonthlyUsersChartData["cummulative_counts"];
+
+  console.log(cummulativeCounts)
 
     const originChartConfig = {
       type: "line",
@@ -8,12 +11,21 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData) {
         labels: labels,
         datasets: [
           {
-            label: "Users",
+            label: "Users per Month",
             data: data,
             backgroundColor: COLORS.skyBlue,
             borderColor: COLORS.navyBlue, 
             borderWidth: 2, 
             fill: 'start' ,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          },
+          {
+            label: "Cumulative users",
+            data: cummulativeCounts,
+            backgroundColor: COLORS.lightGreen,
+            borderColor: COLORS.green,
+            borderWidth: 2,
             pointRadius: 5,
             pointHoverRadius: 7
           },
@@ -37,7 +49,7 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData) {
         plugins: {
           ...externalPluginsConfigDataTables(),
           legend: {
-            display: false,
+            display: true,
           },
           scrollbar: {
             enabled: true,

@@ -222,10 +222,9 @@ def get_cumulative_monthly_new_users(**filters):
     labels = [entry["month"].strftime("%b, %Y") for entry in data]
     values = [entry["new_users"] for entry in data]
 
-    return {
-        "labels": labels,
-        "counts": values,
-    }
+    cummulative_counts = [sum(values[: i + 1]) for i in range(len(values))]
+
+    return {"labels": labels, "counts": values, "cummulative_counts": cummulative_counts}
 
 
 def get_users_by_country_state(**filters):
