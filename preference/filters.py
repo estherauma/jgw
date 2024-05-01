@@ -1,6 +1,6 @@
 from django.db.models import Manager as BaseManager, Q
 from typing import Any
-
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from users.utils import (
     get_user_destinations,
     get_user_excluded_origin_countries,
@@ -21,6 +21,10 @@ def preference_filtered_queryset(
     schemes=None,
     factory_farms=None,
 ):
+    
+    if start_date is None:
+        start_date = APPLICATION_POSSIBLE_START_DATE
+        
     if destination_countries is None:
         destination_countries = []
 
