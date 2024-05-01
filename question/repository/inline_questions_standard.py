@@ -127,22 +127,26 @@ def each_inline_question_response(**filters):
         queryset=InlineQuestionResponse.objects.all(), **filters
     )
     inline_questions_with_responses = inline_question_responses.values(
-        "inline_question__question__translated_text", "response__translated_text"
+        "inline_question__question__translated_text","inline_question__question__title_text", "response__translated_text"
     ).annotate(num_responses=Count("response__translated_text"))
+
     result_dict = {}
     for inline_questions_with_response in inline_questions_with_responses:
-        question_text = inline_questions_with_response.get("inline_question__question__translated_text")
+        title_text = inline_questions_with_response.get("inline_question__question__title_text")
+        translated_text = inline_questions_with_response.get("inline_question__question__translated_text")
         response_text = inline_questions_with_response.get("response__translated_text")
         response_count = inline_questions_with_response.get("num_responses")
+
+        question_text = translated_text
 
         question_in_result_dict = result_dict.get(question_text)
 
         if question_in_result_dict:
-            question_in_result_dict.get("labels").append(response_text)
+            question_in_result_dict.get("labels").append(response_text.capitalize())
             question_in_result_dict.get("counts").append(response_count)
         else:
-            result_dict[question_text] = {"labels": [response_text], "counts": [response_count]}
-
+            result_dict[question_text] = {"labels": [response_text.capitalize()], "counts": [response_count],"title":title_text if title_text else translated_text}
+    
     return result_dict
 
 
