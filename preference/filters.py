@@ -1,4 +1,5 @@
 from django.db.models import Manager as BaseManager, Q
+from datetime import datetime
 from typing import Any
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from users.utils import (
@@ -21,9 +22,10 @@ def preference_filtered_queryset(
     schemes=None,
     factory_farms=None,
 ):
-    
     if start_date is None:
         start_date = APPLICATION_POSSIBLE_START_DATE
+    if end_date is None:
+        end_date = datetime.now().date()
         
     if destination_countries is None:
         destination_countries = []
