@@ -38,20 +38,21 @@ def generic_question_filtered_queryset(
 
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
+    print(user_orgs)
     user_destinations = get_user_destinations(current_user)
 
     generic_question_filters_q_object = Q()
 
     if user_orgs:
-        user_org_q = Q(preference__organisation__in=user_orgs) | Q(organisation__in=user_orgs)
+        user_org_q = Q(organisation__in=user_orgs)
         generic_question_filters_q_object &= user_org_q
 
     if user_factories:
-        user_fact_farm_q = Q(preference__factory_farm__in=user_factories) | Q(factory_farm__in=user_factories)
+        user_fact_farm_q = Q(factory_farm__in=user_factories)
         generic_question_filters_q_object &= user_fact_farm_q
 
     if user_destinations:
-        user_destination_q = Q(preference__destination__in=user_destinations) | Q(
+        user_destination_q = Q(
             destination__in=user_destinations
         )
         generic_question_filters_q_object &= user_destination_q
@@ -60,25 +61,25 @@ def generic_question_filtered_queryset(
         generic_question_filters_q_object &= Q(api_created_at__range=(start_date, end_date))
 
     if destination_countries:
-        preference_dest_q = Q(preference__destination__name__in=destination_countries) | Q(
+        preference_dest_q = Q(
             destination__name__in=destination_countries
         )
         generic_question_filters_q_object &= preference_dest_q
 
     if origin_countries:
-        preference_origin_q = Q(preference__origin__name__in=origin_countries) | Q(
+        preference_origin_q = Q(
             origin__name__in=origin_countries
         )
         generic_question_filters_q_object &= preference_origin_q
 
     if organisations:
-        preference_organisation_q = Q(preference__organisation__name__in=organisations) | Q(
+        preference_organisation_q = Q(
             organisation__name__in=organisations
         )
         generic_question_filters_q_object &= preference_organisation_q
 
     if factory_farms:
-        preference_factory_farm_q = Q(preference__factory_farm__name__in=factory_farms) | Q(
+        preference_factory_farm_q = Q(
             factory_farm__name__in=factory_farms
         )
         generic_question_filters_q_object &= preference_factory_farm_q
