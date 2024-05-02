@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 from django.db.models import Manager as BaseManager, Q
 
@@ -15,6 +16,9 @@ def generic_chapters_opened_filtered_queryset(
     schemes=None,
     factory_farms=None,
 ):
+    if end_date is None:
+        end_date = datetime.now().date()
+        
     if destination_countries is None:
         destination_countries = []
 
