@@ -59,3 +59,20 @@ class Inline(BaseAnalytics):
         }
         
         return _stats
+    
+
+def convert_question_key_to_readable_string(string):
+    # Split the string at each uppercase letter
+    words = []
+    current_word = ''
+    for char in string:
+        if char.isupper() and current_word:
+            words.append(current_word)
+            current_word = char.lower()
+        else:
+            current_word += char
+    if current_word:
+        words.append(current_word)
+
+    # Capitalize the first letter of each word and join them with spaces
+    return ' '.join(word.capitalize() for word in words)

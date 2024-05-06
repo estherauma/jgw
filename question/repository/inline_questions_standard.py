@@ -1,5 +1,6 @@
 from django.db.models import Count, Case, When, F
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
+from common.inline import convert_question_key_to_readable_string
 from common.utils.strings import format_thousands_with_commas
 from question.filters import generic_question_filtered_queryset, question_response_filtered_queryset
 
@@ -137,6 +138,10 @@ def each_inline_question_response(**filters):
         response_text = inline_questions_with_response.get("response__translated_text")
         response_count = inline_questions_with_response.get("num_responses")
 
+        if not title_text:
+            title_text = convert_question_key_to_readable_string(translated_text)
+
+
         question_text = translated_text
 
         question_in_result_dict = result_dict.get(question_text)
@@ -145,7 +150,7 @@ def each_inline_question_response(**filters):
             question_in_result_dict.get("labels").append(response_text.capitalize())
             question_in_result_dict.get("counts").append(response_count)
         else:
-            result_dict[question_text] = {"labels": [response_text.capitalize()], "counts": [response_count],"title":title_text if title_text else translated_text}
+            result_dict[question_text] = {"labels": [response_text.capitalize()], "counts": [response_count],"title":title_text}
     
     return result_dict
 
