@@ -189,69 +189,81 @@
     const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
     const numColumns = chartColumns.length;
 
-    // Check if the number of columns is odd
+  
     if (numColumns % 2 !== 0) {
-        // If odd, set the width of the last column to 100%
         const lastColumn = chartColumns[numColumns - 1];
         lastColumn.style.flex = '0 0 100%';
         lastColumn.style.maxWidth = '100%';
     }
 
     function handleInlineQuestionsChange() {
-        var selectElement = document.getElementById('all-inline-question-select-id');
-        
-        var selectedOptions = [];
+    var selectElement = document.getElementById('all-inline-question-select-id');
+    var selectedOptions = [];
+
+    const inlineQuestionsSection = document.getElementById("inline-questions-dynamic-section");
+    inlineQuestionsSection.innerHTML = "";
+
+    const questionsToPlot = {};
+    if (selectElement.value === 'select_all' && selectElement.options[0].selected) {
         for (var i = 0; i < selectElement.options.length; i++) {
-            if (selectElement.options[i].selected) {
+            selectedOptions.push(selectElement.options[i].value);
+        }
+        Object.keys(alInlineQuestionResponse).forEach(key => {
+            questionsToPlot[key] = alInlineQuestionResponse[key];
+        });
+    } else if (selectElement.value === 'select_all' && !selectElement.options[0].selected) {
+  
+        selectedOptions = []; 
+    } else {
+  
+        for (var i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].selected && selectElement.options[i].value !== 'select_all') {
                 selectedOptions.push(selectElement.options[i].value);
             }
         }
-        
-        const questionsToPlot = {};
         Object.keys(alInlineQuestionResponse).forEach(key => {
             const title = alInlineQuestionResponse[key].title;
             if (selectedOptions.includes(title)) {
-            questionsToPlot[key] = alInlineQuestionResponse[key];
+                questionsToPlot[key] = alInlineQuestionResponse[key];
             }
         });
-
-        const inlineQuestiionsSection = document.getElementById("inline-questions-dynamic-section")
-        inlineQuestiionsSection.innerHTML = "";
-
-        for (let [key, value] of Object.entries(questionsToPlot)) {
-            const result = {key, value}
-
-            const containerDiv = document.createElement("div")
-            containerDiv.classList.add("col-md-3");
-            containerDiv.classList.add("mb-3");
-            containerDiv.classList.add("inline-question-container-div")
-
-            // create title
-            const title = document.createElement("p")
-            title.innerHTML = value.title
-            title.classList.add("chart-title");
-
-            // create canvas
-            const canvasId = `${key}-id`
-            const canvasDiv = document.createElement("div")
-            canvasDiv.id = canvasId
-
-            // create chat box element
-            const chartboxDiv = document.createElement("div")
-            chartboxDiv.classList.add(`${canvasId}-chart-box`);
-            chartboxDiv.classList.add("inline-questions-chart-box")
-
-            chartboxDiv.appendChild(canvasDiv)
-
-            // append canvas and title
-            containerDiv.appendChild(title)
-            containerDiv.appendChild(chartboxDiv)
-            
-            inlineQuestiionsSection.appendChild(containerDiv);
-
-            // canvasId
-            inlineQuestionGraph(value, canvasId)
-        }
     }
+
+    // Render charts for the selected options
+    for (let [key, value] of Object.entries(questionsToPlot)) {
+        const containerDiv = document.createElement("div");
+        containerDiv.classList.add("col-md-3");
+        containerDiv.classList.add("mb-3");
+        containerDiv.classList.add("inline-question-container-div");
+
+        // create title
+        const title = document.createElement("p");
+        title.innerHTML = value.title;
+        title.classList.add("chart-title");
+
+        // create canvas
+        const canvasId = `${key}-id`;
+        const canvasDiv = document.createElement("div");
+        canvasDiv.id = canvasId;
+
+        // create chat box element
+        const chartboxDiv = document.createElement("div");
+        chartboxDiv.classList.add(`${canvasId}-chart-box`);
+        chartboxDiv.classList.add("inline-questions-chart-box");
+        chartboxDiv.appendChild(canvasDiv);
+
+        // append canvas and title
+        containerDiv.appendChild(title);
+        containerDiv.appendChild(chartboxDiv);
+
+        inlineQuestionsSection.appendChild(containerDiv);
+
+        // canvasId
+        inlineQuestionGraph(value, canvasId);
+    }
+}
+
+
+    
 </script>
 {% endblock %}

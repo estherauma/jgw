@@ -26,7 +26,7 @@ class InlineQuestionOnlyFilterForm(forms.Form):
         inline_question_choices = kwargs.pop('inline_question_choices', [])
         super().__init__(*args, **kwargs)
 
-        self.fields["inline_questions"].choices = current_inline_questions(inline_question_choices)
+        self.fields["inline_questions"].choices = [("select_all", "Select All")] + current_inline_questions(inline_question_choices)
 
     inline_questions = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
