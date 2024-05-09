@@ -43,6 +43,7 @@ class LanguageTabularAdminDisplay(admin.ModelAdmin):
 class PreferenceTabularAdminDisplay(admin.ModelAdmin):
     list_display = [
         "id",
+        "data_source_id",
         "created_at",
         "get_translated_name",
         "get_origin_name",
@@ -54,6 +55,7 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
     ]
     search_fields = [
         "created_at",
+        "data_source_id",
         "gender__translated_name",
         "origin__name",
         "destination__name",
