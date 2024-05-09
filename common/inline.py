@@ -59,3 +59,26 @@ class Inline(BaseAnalytics):
         }
         
         return _stats
+    
+
+def convert_question_key_to_readable_string(string):
+    words = []
+    current_word = ''
+    prev_char_upper = False  # Flag to track if the previous character was uppercase
+
+    for char in string:
+        if char.isupper() and current_word:
+            if prev_char_upper:
+                current_word += char  # Append the uppercase character to the current word
+            else:
+                words.append(current_word)
+                current_word = char.lower()
+        else:
+            current_word += char
+        prev_char_upper = char.isupper()
+
+    if current_word:
+        words.append(current_word)
+
+    return ' '.join(word.capitalize() for word in words)
+

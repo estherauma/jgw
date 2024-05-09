@@ -199,13 +199,21 @@
 
     function handleInlineQuestionsChange() {
         var selectElement = document.getElementById('all-inline-question-select-id');
+        
         var selectedOptions = [];
         for (var i = 0; i < selectElement.options.length; i++) {
             if (selectElement.options[i].selected) {
                 selectedOptions.push(selectElement.options[i].value);
             }
         }
-        const questionsToPlot = filterObjectByArrayKeys(alInlineQuestionResponse , selectedOptions)
+        
+        const questionsToPlot = {};
+        Object.keys(alInlineQuestionResponse).forEach(key => {
+            const title = alInlineQuestionResponse[key].title;
+            if (selectedOptions.includes(title)) {
+            questionsToPlot[key] = alInlineQuestionResponse[key];
+            }
+        });
 
         const inlineQuestiionsSection = document.getElementById("inline-questions-dynamic-section")
         inlineQuestiionsSection.innerHTML = "";
