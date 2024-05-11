@@ -76,15 +76,27 @@ def preferences_by_gender(**filters):
     return {"labels": summed_labels, "counts": summed_counts}
 
 
+
 def preferences_by_origin(**filters):
     preferences_origin_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
 
+    preferences_origin_queryset = preferences_origin_queryset.annotate(
+        normalized_origin=Case(
+            When(origin__name__iexact='phillippines', then=Value('Philippines')),
+            When(origin__name__iexact='philippines', then=Value('Philippines')),
+            default=F('origin__name'),
+            output_field=CharField(),
+        )
+    )
+
     origin_counts = (
-        preferences_origin_queryset.values("origin__name").annotate(total=Count("id")).order_by("-total")
+        preferences_origin_queryset.values("normalized_origin")
+        .annotate(total=Count("id"))
+        .order_by("-total")
     )
 
     labels = [
-        origin["origin__name"].title() for origin in origin_counts if origin["origin__name"] is not None
+        origin["normalized_origin"].title() for origin in origin_counts if origin["normalized_origin"] is not None
     ]
     counts = [origin["total"] for origin in origin_counts]
 
