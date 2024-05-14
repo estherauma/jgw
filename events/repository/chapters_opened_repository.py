@@ -1,5 +1,4 @@
 from django.db.models import Count, F
-from common.helpers.preference_helpers.events import events_name_patterns_to_replace
 from events.filters import generic_chapters_opened_filtered_queryset
 
 from events.models import Chapter, ChaptersOpened
@@ -7,20 +6,23 @@ from events.models import Chapter, ChaptersOpened
 
 def get_chapters_opened_unique_by_users(**filters):
     chapters_opened_queryset = generic_chapters_opened_filtered_queryset(
-        queryset=ChaptersOpened.objects.all(), **filters
+        queryset=ChaptersOpened.objects.exclude(device_id__isnull=True), **filters
     )
 
     chapters_opened = (
-        chapters_opened_queryset.exclude(device_id__isnull=True)
-        .values("chapter__chapter_text", "chapter__number_key", "device_id")
+        chapters_opened_queryset.annotate(
+            chapter_text=F('chapter__chapter_text'),
+            number_key=F('chapter__number_key')
+        )
+        .values("chapter_text", "number_key", "device_id")
         .annotate(count=Count("id"))
         .order_by("-count")
     )
 
     sums = {}
     for entry in chapters_opened:
-        chapter_text = entry["chapter__chapter_text"]
-        number_key = entry["chapter__number_key"]
+        chapter_text = entry["chapter_text"]
+        number_key = entry["number_key"]
         count = entry["count"]
 
         if number_key:
@@ -33,10 +35,8 @@ def get_chapters_opened_unique_by_users(**filters):
         else:
             sums[chapter_text] = count
 
-    sorted_sums = dict(sorted(sums.items(), key=lambda x: x[1], reverse=True))
+    sorted_sums = {key: value for key, value in sorted(sums.items(), key=lambda item: item[1], reverse=True) if key is not None}
 
-    if None in sorted_sums:
-        del sorted_sums[None]
     return {"labels": list(sorted_sums.keys()), "counts": list(sorted_sums.values())}
 
 def get_chapters_opened(**filters):
@@ -56,14 +56,15 @@ def get_chapters_opened(**filters):
         chapter_text = entry["chapter__chapter_text"]
         number_key = entry["chapter__number_key"]
         count = entry["count"]
+
         if number_key:
             chapter = Chapter.objects.filter(number_key=number_key, destination__name='malaysia').first()
             if chapter:
                 chapter_text = chapter.chapter_text
-        if chapter_text in sums:
-            sums[chapter_text] += count
-        else:
-            sums[chapter_text] = count
+
+        sums.setdefault(chapter_text, 0)
+        sums[chapter_text] += count
+
     if None in sums:
         del sums[None]
 

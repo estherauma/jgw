@@ -1,33 +1,27 @@
-from collections import defaultdict
-from django.db.models import Count, Sum, Q, Count, Case, When, IntegerField, F
-from django.db.models import Value, CharField
+from django.db.models import Count,Q, Count, Case, When, F
+from django.db.models import CharField
 
 from events.filters import generic_chapters_feedback_filtered_queryset
-from events.models import Chapter, ChaptersFeedback, ChaptersFeedbackStandard
-
+from events.models import ChaptersFeedback
 
 def get_chapters_feedback(**filters):
-    """Aggregates chapters feedback and returns a dictionary"""
-    chapters_opened_queryset = generic_chapters_feedback_filtered_queryset(
-        queryset=ChaptersFeedback.objects.select_related("feedback_response", "chapter").filter(
+    chapters_feedback_queryset = generic_chapters_feedback_filtered_queryset(
+        queryset=ChaptersFeedback.objects.filter(
             feedback_response__translated_response__in=["frown", "smile"]
-        ),
+        ).select_related("feedback_response", "chapter"),
         **filters
     )
 
-    chapters_feedback_data = chapters_opened_queryset.values(
+    chapters_feedback_data = chapters_feedback_queryset.values(
         chapter_text=Case(
             When(chapter__chapter_text__isnull=True, then=F("chapter__number_key")),
             default=F("chapter__chapter_text"),
             output_field=CharField()
-        ),number_key=F("chapter__number_key")
+        ),
+        number_key=F("chapter__number_key")
     ).annotate(
-        frowns=Count(
-            Case(When(feedback_response__translated_response="frown", then=1), output_field=IntegerField())
-        ),
-        smiles=Count(
-            Case(When(feedback_response__translated_response="smile", then=1), output_field=IntegerField())
-        ),
+        frowns=Count('id', filter=Q(feedback_response__translated_response="frown")),
+        smiles=Count('id', filter=Q(feedback_response__translated_response="smile"))
     )
 
     return list(chapters_feedback_data)
