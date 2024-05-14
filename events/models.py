@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Index
 
 
 from django.db import models
@@ -122,6 +123,13 @@ class ChaptersOpened(models.Model):
 
     def __str__(self):
         return f"ChaptersOpened {self.event_name}"
+    class Meta:
+        indexes = [
+            Index(fields=['event_name']),
+            Index(fields=['chapter']),
+            Index(fields=['device_id']),
+            Index(fields=['destination']),
+        ]
 
 
 class ChaptersFeedbackStandard(models.Model):
