@@ -40,7 +40,7 @@ def fetch_chatpter_opened_from_api():
 
 def get_chapter_number_from_name(chapter_name):
     matches = re.search(r"ChapterOpened_(\d+_\d+)", chapter_name)
-    return matches.group(1) if matches else chapter_name
+    return matches[1] if matches else chapter_name
 
 
 @transaction.atomic
@@ -118,7 +118,7 @@ def add_chapters_opened_to_db(chapters_feedback):
         factory_farm=factory_farm_data,
     )
     chapter, _ = Chapter.objects.get_or_create(
-        number_key=get_chapter_number_from_name(chapter_opened.event_name)
+        number_key=get_chapter_number_from_name(chapter_opened.event_name),destination=destination_data
     )
     chapter_opened.chapter = chapter
     chapter_opened.save()
