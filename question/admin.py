@@ -57,6 +57,11 @@ class InlineQuestionAndKeysMatchAdmin(admin.ModelAdmin):
     list_display = ["inline_question","inline_question_key", "custom_lang"]
     search_fields = ["inline_question", "inline_question_key"]
 
+@admin.register(InlineQuestionStandard)
+class InlineQuestionStandardAdmin(admin.ModelAdmin):
+    list_display = ["id","data_source_id","device_id","destination", "organisation"]
+    search_fields = ["id","data_source_id","device_id"]
+
 @admin.register(FollowUpQuestion)
 class FollowUpQuestionAdmin(admin.ModelAdmin):
     list_display = ["followup_question_key", "followup_question", "inline_question_text", "custom_lang"]
@@ -66,7 +71,7 @@ class FollowUpQuestionAdmin(admin.ModelAdmin):
         return obj.inline_question.inline_question
 
 admin.site.register(InlineQuestionResponse)
-admin.site.register(InlineQuestionStandard)
+# admin.site.register(InlineQuestionStandard)
 admin.site.register(MessagingQuestionStandard)
 admin.site.register(MessagingQuestion)
 admin.site.register(MessagingResponse)
