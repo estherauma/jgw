@@ -127,10 +127,10 @@ def each_inline_question_response(**filters):
     inline_question_responses = question_response_filtered_queryset(
         queryset=InlineQuestionResponse.objects.all(), **filters
     )
+    inline_question_responses = inline_question_responses.exclude(response__translated_text="not specified")
     inline_questions_with_responses = inline_question_responses.values(
         "inline_question__question__translated_text","inline_question__question__title_text", "response__translated_text"
     ).annotate(num_responses=Count("response__translated_text"))
-
     result_dict = {}
     for inline_questions_with_response in inline_questions_with_responses:
         title_text = inline_questions_with_response.get("inline_question__question__title_text")
