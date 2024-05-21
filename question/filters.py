@@ -152,18 +152,13 @@ def question_response_filtered_queryset(
         )
 
     if destination_countries:
-        preference_dest_q = Q(
-            inline_question__inline_question_standard__preference__destination__name__in=destination_countries
-        ) | Q(
-            inline_question__inline_question_standard__preference__destination__country_states__name__in=destination_countries
-        )
         current_model_dest_q = Q(
             inline_question__inline_question_standard__destination__name__in=destination_countries
         ) | Q(
             inline_question__inline_question_standard__destination__country_states__name__in=destination_countries
         )
-        combined_dest_q = preference_dest_q | current_model_dest_q
-        question_response_filters_q_object &= combined_dest_q
+       
+        question_response_filters_q_object &= current_model_dest_q
 
     if origin_countries:
         preference_origin_q = Q(
@@ -180,14 +175,10 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= combined_origin_q
 
     if organisations:
-        preference_organisation_q = Q(
-            inline_question__inline_question_standard__preference__organisation__name__in=organisations
-        )
         current_model_dest_q = Q(
             inline_question__inline_question_standard__organisation__name__in=organisations
         )
-        combined_organisation_q = preference_organisation_q | current_model_dest_q
-        question_response_filters_q_object &= combined_organisation_q
+        question_response_filters_q_object &= current_model_dest_q
 
     if factory_farms:
         preference_factory_farm_q = Q(
