@@ -71,7 +71,6 @@ class FollowUpQuestionAdmin(admin.ModelAdmin):
         return obj.inline_question.inline_question
 
 admin.site.register(InlineQuestionResponse)
-# admin.site.register(InlineQuestionStandard)
 admin.site.register(MessagingQuestionStandard)
 admin.site.register(MessagingQuestion)
 admin.site.register(MessagingResponse)
