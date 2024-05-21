@@ -20,25 +20,25 @@ def get_chapters_opened_unique_by_users(**filters):
     )
 
     sums = {}
+    chapter_lookup = {
+        chapter.number_key: chapter.chapter_text
+        for chapter in Chapter.objects.filter(destination__name='malaysia')
+    }
+
     for entry in chapters_opened:
         chapter_text = entry["chapter_text"]
         number_key = entry["number_key"]
         count = entry["count"]
 
         if number_key:
-            chapter = Chapter.objects.filter(number_key=number_key, destination__name='malaysia').first()
-            if chapter:
-                chapter_text = chapter.chapter_text
+            chapter_text = chapter_lookup.get(number_key, chapter_text)
 
-        if chapter_text in sums:
-            sums[chapter_text] += count
-        else:
-            sums[chapter_text] = count
+        sums.setdefault(chapter_text, 0)
+        sums[chapter_text] += count
 
     sorted_sums = {key: value for key, value in sorted(sums.items(), key=lambda item: item[1], reverse=True) if key is not None}
 
     return {"labels": list(sorted_sums.keys()), "counts": list(sorted_sums.values())}
-
 def get_chapters_opened(**filters):
     chapters_opened_queryset = generic_chapters_opened_filtered_queryset(
         queryset=ChaptersOpened.objects.all(), **filters
@@ -52,15 +52,18 @@ def get_chapters_opened(**filters):
     )
 
     sums = {}
+    chapter_lookup = {
+        chapter.number_key: chapter.chapter_text
+        for chapter in Chapter.objects.filter(destination__name='malaysia')
+    }
+
     for entry in chapters_opened:
         chapter_text = entry["chapter__chapter_text"]
         number_key = entry["chapter__number_key"]
         count = entry["count"]
 
         if number_key:
-            chapter = Chapter.objects.filter(number_key=number_key, destination__name='malaysia').first()
-            if chapter:
-                chapter_text = chapter.chapter_text
+            chapter_text = chapter_lookup.get(number_key, chapter_text)
 
         sums.setdefault(chapter_text, 0)
         sums[chapter_text] += count
