@@ -3,7 +3,7 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData) {
   const data = preferenceMonthlyUsersChartData["counts"];
   const cummulativeCounts = preferenceMonthlyUsersChartData["cummulative_counts"];
 
-  console.log(cummulativeCounts)
+
 
     const originChartConfig = {
       type: "line",
@@ -11,7 +11,7 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData) {
         labels: labels,
         datasets: [
           {
-            label: "Users per Month",
+            label: "New Users per Month",
             data: data,
             backgroundColor: COLORS.skyBlue,
             borderColor: COLORS.navyBlue, 
@@ -21,7 +21,7 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData) {
             pointHoverRadius: 7
           },
           {
-            label: "Cumulative users",
+            label: "Cumulative New Users",
             data: cummulativeCounts,
             backgroundColor: COLORS.lightGreen,
             borderColor: COLORS.green,

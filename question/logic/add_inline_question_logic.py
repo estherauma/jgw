@@ -433,19 +433,19 @@ def filter_questions_key_and_name_data(questions_data):
 
 
 def translate_inq():
-    iqkms = InlineQuestionAndKeysMatch.objects.filter(custom_lang__isnull=True)
-    for iqkm in iqkms:
-        ptt = pandas_translator_translate(iqkm.inline_question)
-        iqkm.inline_question = ptt
-        iqkm.custom_lang = 'en'
-        iqkm.save()
+    inline_questions_key_matches = InlineQuestionAndKeysMatch.objects.filter(custom_lang__isnull=True)
+    for inline_questions_key_match in inline_questions_key_matches:
+        pandas_translator_inline_question_key_match = pandas_translator_translate(inline_questions_key_match.inline_question)
+        inline_questions_key_match.inline_question = pandas_translator_inline_question_key_match
+        inline_questions_key_match.custom_lang = 'en'
+        inline_questions_key_match.save()
 
-    fqs = FollowUpQuestion.objects.filter(custom_lang__isnull=True)
-    for fq in fqs:
-        ptt = pandas_translator_translate(fq.followup_question)
-        fq.followup_question = ptt
-        fq.custom_lang = 'en'
-        fq.save()
+    followup_questions = FollowUpQuestion.objects.filter(custom_lang__isnull=True)
+    for followup_question in followup_questions:
+        pandas_translator_followup = pandas_translator_translate(followup_question.followup_question)
+        followup_question.followup_question = pandas_translator_followup
+        followup_question.custom_lang = 'en'
+        followup_question.save()
 
 
 def save_filtered_questions_and_keys(filtered_questions):
