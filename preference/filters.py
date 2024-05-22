@@ -52,7 +52,7 @@ def preference_filtered_queryset(
 
     # date range filter
     if start_date and end_date:
-        preference_filters_q_object &= Q(api_created_at__range=(start_date, end_date))
+        preference_filters_q_object &= Q(api_created_at__date__range=(start_date, end_date))
 
     # organisation filter
     if organisations:
