@@ -159,7 +159,8 @@ def inline_question_responses_count(**filters):
     inline_question_responses = question_response_filtered_queryset(
         queryset=InlineQuestionResponse.objects.all(), **filters
     )
-    inline_question_responses_count_queryset = inline_question_responses.count()
+    inline_question_responses_filtered = inline_question_responses.exclude(response__translated_text="not specified")
+    inline_question_responses_count_queryset = inline_question_responses_filtered.count()
 
     return format_thousands_with_commas(inline_question_responses_count_queryset)
 
