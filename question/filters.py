@@ -138,9 +138,7 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= user_org_q
 
     if user_destinations:
-        user_destination_q = Q(
-            inline_question__inline_question_standard__preference__destination__in=user_destinations
-        ) | Q(inline_question__inline_question_standard__destination__in=user_destinations)
+        user_destination_q = Q(inline_question__inline_question_standard__destination__in=user_destinations)
         question_response_filters_q_object &= user_destination_q
 
     if start_date and end_date:

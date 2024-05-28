@@ -16,22 +16,27 @@ def inline_questions_count(**filters):
 
 
 def get_inline_question_per_origin_counts(**filters):
-    queryset = generic_question_filtered_queryset(queryset=InlineQuestionStandard.objects.all(), **filters)
+    queryset = question_response_filtered_queryset(
+        queryset=InlineQuestionResponse.objects.all(), **filters
+    )
+    queryset = queryset.exclude(response__translated_text="not specified")
 
     origin_counts_data = (
         queryset.annotate(
             origin_name=Case(
-                When(preference__isnull=False, then=F("preference__origin__name")), default=F("origin__name")
+                When(inline_question__inline_question_standard__preference__isnull=False, 
+                     then=F("inline_question__inline_question_standard__preference__origin__name")),
+                default=F("inline_question__inline_question_standard__origin__name")
             )
         )
-        .values("origin__name")
-        .annotate(count=Count("origin__name"))
+        .values("origin_name")
+        .annotate(count=Count("origin_name"))
         .order_by("-count")
     )
 
     origin_data = [count["count"] for count in origin_counts_data]
     origin_labels = [
-        count["origin__name"].title() for count in origin_counts_data if count["origin__name"] is not None
+        count["origin_name"].title() for count in origin_counts_data if count["origin_name"] is not None
     ]
 
     return {
@@ -39,27 +44,26 @@ def get_inline_question_per_origin_counts(**filters):
         "labels": origin_labels,
     }
 
-
 def get_inline_question_per_destination_counts(**filters):
-    queryset = generic_question_filtered_queryset(queryset=InlineQuestionStandard.objects.all(), **filters)
-
+    queryset = question_response_filtered_queryset(
+        queryset=InlineQuestionResponse.objects.all(), **filters
+    )
+    queryset = queryset.exclude(response__translated_text="not specified")
+    
     destination_counts_data = (
         queryset.annotate(
-            destination_name=Case(
-                When(preference__isnull=False, then=F("preference__destination__name")),
-                default=F("destination__name"),
-            )
+            destination_name=F("inline_question__inline_question_standard__destination__name")
         )
-        .values("destination__name")
-        .annotate(count=Count("destination__name"))
+        .values("destination_name")
+        .annotate(count=Count("destination_name"))
         .order_by("-count")
     )
 
     destination_data = [count["count"] for count in destination_counts_data]
     destination_labels = [
-        count["destination__name"].title()
+        count["destination_name"].title()
         for count in destination_counts_data
-        if count["destination__name"] is not None
+        if count["destination_name"] is not None
     ]
 
     return {
@@ -69,23 +73,23 @@ def get_inline_question_per_destination_counts(**filters):
 
 
 def get_inline_question_per_organisation_counts(**filters):
-    queryset = generic_question_filtered_queryset(queryset=InlineQuestionStandard.objects.all(), **filters)
-
+    queryset = question_response_filtered_queryset(
+        queryset=InlineQuestionResponse.objects.all(), **filters
+    )
+    queryset = queryset.exclude(response__translated_text="not specified")
+    
     organisation_counts_data = (
         queryset.annotate(
-            origin_name=Case(
-                When(preference__isnull=False, then=F("preference__organisation__name")),
-                default=F("organisation__name"),
-            )
+            organisation_name=F("inline_question__inline_question_standard__organisation__name")
         )
-        .values("organisation__name")
-        .annotate(count=Count("organisation__name"))
+        .values("organisation_name")
+        .annotate(count=Count("organisation_name"))
         .order_by("-count")
     )
 
     organisation_counts = [count["count"] for count in organisation_counts_data]
     organisation_labels = [
-        format_org_name_from_display(organisation["organisation__name"]).title()
+        format_org_name_from_display(organisation["organisation_name"]).title()
         for organisation in organisation_counts_data
     ]
 
@@ -95,26 +99,28 @@ def get_inline_question_per_organisation_counts(**filters):
     }
 
 
+from django.db.models import Case, Count, F, When
+
 def get_inline_question_per_language_counts(**filters):
-    queryset = generic_question_filtered_queryset(queryset=InlineQuestionStandard.objects.all(), **filters)
+    queryset = question_response_filtered_queryset(
+        queryset=InlineQuestionResponse.objects.all(), **filters
+    )
+    queryset = queryset.exclude(response__translated_text="not specified")
 
     language_counts_data = (
         queryset.annotate(
-            origin_name=Case(
-                When(preference__isnull=False, then=F("preference__language__translated_name")),
-                default=F("language__translated_name"),
+            language_name=F("inline_question__inline_question_standard__language__translated_name"),
             )
-        )
-        .values("language__translated_name")
-        .annotate(count=Count("language__translated_name"))
+        .values("language_name")
+        .annotate(count=Count("language_name"))
         .order_by("-count")
     )
 
     language_counts = [count["count"] for count in language_counts_data]
     language_labels = [
-        count["language__translated_name"].title()
+        count["language_name"].title()
         for count in language_counts_data
-        if count["language__translated_name"] is not None
+        if count["language_name"] is not None
     ]
 
     return {
