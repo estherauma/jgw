@@ -5,7 +5,7 @@ from preference.models import Preference, SectorOfWork
 def preferences_data_url(client):
 
     start_date = "2023-10-01"
-    end_date = "2024-02-01"
+    end_date = "2024-03-31"
 
     return client.get_data(f"/preferences?startDate={start_date}&endDate={end_date}")
 
