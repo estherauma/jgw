@@ -42,7 +42,6 @@ def generic_question_filtered_queryset(
 
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
-    print(user_orgs)
     user_destinations = get_user_destinations(current_user)
 
     generic_question_filters_q_object = Q()
@@ -116,7 +115,6 @@ def question_response_filtered_queryset(
 
     if factory_farms is None:
         factory_farms = []
-
     # current user specific orgs and factories filters
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
@@ -132,7 +130,7 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= user_fact_farm_q
 
     if user_orgs:
-        user_org_q = Q(inline_question__inline_question_standard__preference__organisation__in=user_orgs) | Q(
+        user_org_q = Q(
             inline_question__inline_question_standard__organisation__in=user_orgs
         )
         question_response_filters_q_object &= user_org_q
@@ -143,7 +141,7 @@ def question_response_filtered_queryset(
 
     if start_date and end_date:
         question_response_filters_q_object &= Q(
-            inline_question__inline_question_standard__preference__api_created_at__range=(
+            inline_question__inline_question_standard__api_created_at__range=(
                 start_date,
                 end_date,
             )
@@ -173,10 +171,13 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= combined_origin_q
 
     if organisations:
-        current_model_dest_q = Q(
-            inline_question__inline_question_standard__organisation__name__in=organisations
-        )
-        question_response_filters_q_object &= current_model_dest_q
+        if "evergreen" in organisations:
+            question_response_filters_q_object &= Q(organisation_inline_question="evergreen")
+        elif "not specified" in organisations:
+            question_response_filters_q_object &= Q(organisation_inline_question="myvoice")
+        else:
+            current_model_dest_q = Q(inline_question__inline_question_standard__organisation__name__in=organisations)
+            question_response_filters_q_object &= current_model_dest_q
 
     if factory_farms:
         preference_factory_farm_q = Q(

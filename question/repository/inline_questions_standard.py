@@ -1,6 +1,6 @@
 from django.db.models import Count, Case, When, F
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
-from common.inline import convert_question_key_to_readable_string
+from common.inline import convert_question_key_to_readable_string,convert_to_camel_case
 from common.utils.strings import format_thousands_with_commas
 from question.filters import generic_question_filtered_queryset, question_response_filtered_queryset
 
@@ -23,11 +23,8 @@ def get_inline_question_per_origin_counts(**filters):
 
     origin_counts_data = (
         queryset.annotate(
-            origin_name=Case(
-                When(inline_question__inline_question_standard__preference__isnull=False, 
-                     then=F("inline_question__inline_question_standard__preference__origin__name")),
-                default=F("inline_question__inline_question_standard__origin__name")
-            )
+            origin_name=F("inline_question__inline_question_standard__origin__name")
+            
         )
         .values("origin_name")
         .annotate(count=Count("origin_name"))
@@ -156,7 +153,7 @@ def each_inline_question_response(**filters):
             question_in_result_dict.get("labels").append(response_text.capitalize())
             question_in_result_dict.get("counts").append(response_count)
         else:
-            result_dict[question_text] = {"labels": [response_text.capitalize()], "counts": [response_count],"title":title_text}
+            result_dict[convert_to_camel_case(question_text)] = {"labels": [response_text.capitalize()], "counts": [response_count],"title":title_text}
     
     return result_dict
 
