@@ -171,13 +171,17 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= combined_origin_q
 
     if organisations:
+        organisation_q_objects = Q()
         if "evergreen" in organisations:
-            question_response_filters_q_object &= Q(organisation_inline_question="evergreen")
-        elif "not specified" in organisations:
-            question_response_filters_q_object &= Q(organisation_inline_question="myvoice")
-        else:
-            current_model_dest_q = Q(inline_question__inline_question_standard__organisation__name__in=organisations)
-            question_response_filters_q_object &= current_model_dest_q
+            organisation_q_objects |= Q(organisation_inline_question="evergreen")
+        if "not specified" in organisations:
+            organisation_q_objects |= Q(organisation_inline_question="myvoice")
+        
+        other_organisations = [org for org in organisations if org not in {"evergreen", "not specified"}]
+        if other_organisations:
+            organisation_q_objects |= Q(inline_question__inline_question_standard__organisation__name__in=other_organisations)
+        
+        question_response_filters_q_object &= organisation_q_objects
 
     if factory_farms:
         preference_factory_farm_q = Q(
