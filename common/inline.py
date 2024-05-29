@@ -62,23 +62,28 @@ class Inline(BaseAnalytics):
     
 
 def convert_question_key_to_readable_string(string):
-    words = []
-    current_word = ''
-    prev_char_upper = False  # Flag to track if the previous character was uppercase
+        words = []
+        current_word = ''
+        prev_char_upper = False  # Flag to track if the previous character was uppercase
 
-    for char in string:
-        if char.isupper() and current_word:
-            if prev_char_upper:
-                current_word += char  # Append the uppercase character to the current word
+        for char in string:
+            if char.isupper() and current_word:
+                if prev_char_upper:
+                    current_word += char  # Append the uppercase character to the current word
+                else:
+                    words.append(current_word)
+                    current_word = char.lower()
             else:
-                words.append(current_word)
-                current_word = char.lower()
-        else:
-            current_word += char
-        prev_char_upper = char.isupper()
+                current_word += char
+            prev_char_upper = char.isupper()
 
-    if current_word:
-        words.append(current_word)
+        if current_word:
+            words.append(current_word)
 
-    return ' '.join(word.capitalize() for word in words)
+        return ' '.join(word.capitalize() for word in words)
+
+def convert_to_camel_case(text):
+        words = text.split()
+        camel_case = words[0].lower() + ''.join(word.capitalize() for word in words[1:])
+        return camel_case
 
