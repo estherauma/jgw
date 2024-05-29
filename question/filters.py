@@ -130,10 +130,17 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= user_fact_farm_q
 
     if user_orgs:
-        user_org_q = Q(
-            inline_question__inline_question_standard__organisation__in=user_orgs
-        )
-        question_response_filters_q_object &= user_org_q
+        organisation_q_objects = Q()
+        user_org_names = [org.name for org in user_orgs]
+        if "evergreen" in user_org_names:
+            organisation_q_objects |= Q(organisation_inline_question="evergreen")
+        if "not specified" in user_org_names:
+            organisation_q_objects |= Q(organisation_inline_question="myvoice")
+        
+        other_organisations = [org for org in user_org_names if org not in {"evergreen", "not specified"}]
+        if other_organisations:
+            organisation_q_objects |= Q(inline_question__inline_question_standard__organisation__name__in=other_organisations)
+        question_response_filters_q_object &= organisation_q_objects
 
     if user_destinations:
         user_destination_q = Q(inline_question__inline_question_standard__destination__in=user_destinations)
@@ -150,8 +157,6 @@ def question_response_filtered_queryset(
     if destination_countries:
         current_model_dest_q = Q(
             inline_question__inline_question_standard__destination__name__in=destination_countries
-        ) | Q(
-            inline_question__inline_question_standard__destination__country_states__name__in=destination_countries
         )
        
         question_response_filters_q_object &= current_model_dest_q
