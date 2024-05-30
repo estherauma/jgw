@@ -20,18 +20,11 @@ def get_chapters_opened_unique_by_users(**filters):
     )
 
     sums = {}
-    chapter_lookup = {
-        chapter.number_key: chapter.chapter_text
-        for chapter in Chapter.objects.filter(destination__name='malaysia')
-    }
 
     for entry in chapters_opened:
         chapter_text = entry["chapter_text"]
         number_key = entry["number_key"]
         count = entry["count"]
-
-        if number_key:
-            chapter_text = chapter_lookup.get(number_key, chapter_text)
 
         sums.setdefault(chapter_text, 0)
         sums[chapter_text] += count
@@ -52,18 +45,10 @@ def get_chapters_opened(**filters):
     )
 
     sums = {}
-    chapter_lookup = {
-        chapter.number_key: chapter.chapter_text
-        for chapter in Chapter.objects.filter(destination__name='malaysia')
-    }
 
     for entry in chapters_opened:
         chapter_text = entry["chapter__chapter_text"]
-        number_key = entry["chapter__number_key"]
         count = entry["count"]
-
-        if number_key:
-            chapter_text = chapter_lookup.get(number_key, chapter_text)
 
         sums.setdefault(chapter_text, 0)
         sums[chapter_text] += count
