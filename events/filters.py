@@ -52,39 +52,39 @@ def generic_chapters_opened_filtered_queryset(
 
     # organisation filter
     if user_orgs:
-        user_org_q = Q(preference__organisation__in=user_orgs) | Q(organisation__in=user_orgs)
+        user_org_q = Q(organisation__in=user_orgs)
         chapters_opened_filters_q_object &= user_org_q
 
     if user_factories:
-        user_fact_farm_q = Q(preference__factory_farm__in=user_factories) | Q(factory_farm__in=user_factories)
+        user_fact_farm_q = Q(factory_farm__in=user_factories)
         chapters_opened_filters_q_object &= user_fact_farm_q
 
     if user_destinations:
-        user_destination_q = Q(preference__destination__in=user_destinations) | Q(
+        user_destination_q = Q(
             destination__in=user_destinations
         )
         chapters_opened_filters_q_object &= user_destination_q
 
     if destination_countries:
-        preference_dest_q = Q(preference__destination__name__in=destination_countries) | Q(
+        preference_dest_q = Q(
             destination__name__in=destination_countries
         )
         chapters_opened_filters_q_object &= preference_dest_q
 
     if origin_countries:
-        preference_origin_q = Q(preference__origin__name__in=origin_countries) | Q(
+        preference_origin_q = Q(
             origin__name__in=origin_countries
         )
         chapters_opened_filters_q_object &= preference_origin_q
 
     if organisations:
-        preference_organisation_q = Q(preference__organisation__name__in=organisations) | Q(
+        preference_organisation_q = Q(
             organisation__name__in=organisations
         )
         chapters_opened_filters_q_object &= preference_organisation_q
 
     if factory_farms:
-        preference_factory_farm_q = Q(preference__factory_farm__name__in=factory_farms) | Q(
+        preference_factory_farm_q = Q(
             factory_farm__name__in=factory_farms
         )
         chapters_opened_filters_q_object &= preference_factory_farm_q
@@ -134,45 +134,41 @@ def generic_chapters_feedback_filtered_queryset(
 
     # # organisation filter
     if user_orgs:
-        user_org_q = Q(feedback_standard__preference__organisation__in=user_orgs) | Q(
+        user_org_q = Q(
             feedback_standard__organisation__in=user_orgs
         )
         chapters_feedback_filters_q_object &= user_org_q
 
     if user_factories:
-        user_fact_farm_q = Q(feedback_standard__preference__factory_farm__in=user_factories) | Q(
+        user_fact_farm_q = Q(
             feedback_standard__factory_farm__in=user_factories
         )
         chapters_feedback_filters_q_object &= user_fact_farm_q
 
     if user_destinations:
-        user_destination_q = Q(feedback_standard__preference__destination__in=user_destinations) | Q(
+        user_destination_q =  Q(
             feedback_standard__destination__in=user_destinations
         )
         chapters_feedback_filters_q_object &= user_destination_q
 
     if destination_countries:
-        preference_dest_q = Q(feedback_standard__preference__destination__name__in=destination_countries) | Q(
+        preference_dest_q =  Q(
             feedback_standard__destination__name__in=destination_countries
         )
         chapters_feedback_filters_q_object &= preference_dest_q
 
     if origin_countries:
-        preference_origin_q = Q(feedback_standard__preference__origin__name__in=origin_countries) | Q(
+        preference_origin_q =  Q(
             feedback_standard__origin__name__in=origin_countries
         )
         chapters_feedback_filters_q_object &= preference_origin_q
 
     if organisations:
-        preference_organisation_q = Q(
-            feedback_standard__preference__organisation__name__in=organisations
-        ) | Q(feedback_standard__organisation__name__in=organisations)
+        preference_organisation_q = Q(feedback_standard__organisation__name__in=organisations)
         chapters_feedback_filters_q_object &= preference_organisation_q
 
     if factory_farms:
-        preference_factory_farm_q = Q(
-            feedback_standard__preference__factory_farm__name__in=factory_farms
-        ) | Q(feedback_standard__factory_farm__name__in=factory_farms)
+        preference_factory_farm_q = Q(feedback_standard__factory_farm__name__in=factory_farms)
         chapters_feedback_filters_q_object &= preference_factory_farm_q
 
     return queryset.filter(chapters_feedback_filters_q_object)
