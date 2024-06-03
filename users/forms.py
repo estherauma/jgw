@@ -148,6 +148,8 @@ class UserAdminForm(forms.ModelForm):
             "last_name",
             "role",
             "scheme",
+            "start_date",
+            "end_date",
             "factories",
             "organisations",
             "destinations",
@@ -193,6 +195,9 @@ class CreateNewUserForm(forms.ModelForm):
         self.fields["groups"].widget.attrs["class"] = "form-select selectpicker"
         self.fields["groups"].widget.attrs["id"] = "user-groups-id"
         self.fields["groups"].widget.attrs["data-live-search"] = "true"
+
+        self.fields["start_date"].widget = forms.DateInput(attrs={"class": "form-control", "type": "date"})
+        self.fields["end_date"].widget = forms.DateInput(attrs={"class": "form-control", "type": "date"})
 
     organisations = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
@@ -255,6 +260,8 @@ class CreateNewUserForm(forms.ModelForm):
             "email",
             "password",
             "password2",
+            "start_date",
+            "end_date",
             "organisations",
             "factories",
             "destinations",
@@ -323,12 +330,17 @@ class EditUserForm(forms.ModelForm):
         self.fields["groups"].widget.attrs["id"] = "user-groups-id"
         self.fields["groups"].widget.attrs["data-live-search"] = "true"
 
+        self.fields["start_date"].widget = forms.DateInput(attrs={"class": "form-control", "type": "date"})
+        self.fields["end_date"].widget = forms.DateInput(attrs={"class": "form-control", "type": "date"})
+
     class Meta:
         model = User
         fields = [
             "first_name",
             "last_name",
             "email",
+            "start_date",
+            "end_date",
             "destinations",
             "user_languages",
             "organisations",

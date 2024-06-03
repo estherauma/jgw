@@ -8,6 +8,8 @@ from users.utils import (
     get_user_languages,
     get_user_factories,
     get_user_organisations,
+    get_user_start_date,
+    get_user_end_date
 )
 
 
@@ -22,10 +24,11 @@ def preference_filtered_queryset(
     schemes=None,
     factory_farms=None,
 ):
-    if start_date is None:
-        start_date = APPLICATION_POSSIBLE_START_DATE
-    if end_date is None:
-        end_date = datetime.now().date()
+    user_start_date = get_user_start_date(current_user)
+    user_end_date = get_user_end_date(current_user)
+
+    final_start_date = max(start_date, user_start_date) if start_date and user_start_date else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
+    final_end_date = min(end_date, user_end_date) if end_date and user_end_date else (end_date or user_end_date or datetime.now().date())
         
     if destination_countries is None:
         destination_countries = []
@@ -50,9 +53,7 @@ def preference_filtered_queryset(
 
     preference_filters_q_object = Q()
 
-    # date range filter
-    if start_date and end_date:
-        preference_filters_q_object &= Q(api_created_at__date__range=(start_date, end_date))
+    preference_filters_q_object &= Q(api_created_at__date__range=(final_start_date, final_end_date))
 
     # organisation filter
     if organisations:
