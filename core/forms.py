@@ -1,8 +1,10 @@
+from datetime import datetime
 from django import forms
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
 from preference.models import CountryState
-from users.utils import get_user_factories, get_user_organisations, get_user_destinations
+from users.utils import get_user_factories, get_user_organisations, get_user_destinations,get_user_start_date,get_user_end_date
 
 
 class GenericFilterForm(forms.Form):
@@ -18,6 +20,16 @@ class GenericFilterForm(forms.Form):
 
         self.fields["factory_farm"].choices = sorted([(farm.name, farm.name) for farm in user_factories])
         self.fields["organisation"].choices = sorted([(org.name, org.name) for org in user_orgs])
+
+        user_start_date = get_user_start_date(self.request.user) or APPLICATION_POSSIBLE_START_DATE
+        user_end_date = get_user_end_date(self.request.user) or datetime.now().date()
+
+        if user_start_date:
+            self.fields["start_date"].widget.attrs["min"] = user_start_date
+            self.fields["end_date"].widget.attrs["min"] = user_start_date
+        if user_end_date:
+            self.fields["start_date"].widget.attrs["max"] = user_end_date
+            self.fields["end_date"].widget.attrs["max"] = user_end_date
 
     def get_countries(self, countries_filter):
         countries = []
