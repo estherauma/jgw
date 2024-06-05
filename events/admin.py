@@ -25,13 +25,20 @@ class ChapterAdminDisplay(admin.ModelAdmin):
     list_display = ["number_key", "chapter_text","destination"]
     search_fields = ["number_key", "chapter_text"]
 
-
+@admin.register(ChaptersFeedbackStandard)
+class ChaptersFeedbackStandardAdminDisplay(admin.ModelAdmin):
+    list_display = ["api_created_at", "data_source_id","destination","feedback_title"]
+    search_fields = ["api_created_at", "data_source_id","destination","feedback_title"]
+    ordering = ["-api_created_at"]
+@admin.register(ChaptersFeedback)
+class ChaptersFeedbackAdminDisplay(admin.ModelAdmin):
+    list_display = ["feedback_standard", "feedback_question","feedback_response","chapter"]
+    search_fields = ["feedback_standard", "feedback_question","feedback_response","chapter"]
+    ordering = ["-feedback_standard"]
 # Register your models here.
 admin.site.register(BigQueryChaptersData)
 admin.site.register(BigQueryFirstOpenHomepageData)
 admin.site.register(OneTimeEventJob)
-admin.site.register(ChaptersFeedbackStandard)
-admin.site.register(ChaptersFeedback)
 admin.site.register(ChaptersFeedbackQuestion)
 admin.site.register(SwsPasiEvent, SwsPasiEventTabularAdminDisplay)
 admin.site.register(Chapter, ChapterAdminDisplay)
@@ -67,3 +74,4 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
 class ChaptersFeedbackResponseAdmin(admin.ModelAdmin):
     search_fields = ["response", "translated_response"]
     list_display = ["created_at", "response", "translated_response"]
+    ordering= ["created_at"]

@@ -105,7 +105,6 @@ def separate_feedback_standard_fields_from_others(chapter_feedback):
     feedback_list = []
     standard_fields = {}
     non_required_fields = {}
-
     for obj_key, obj_value in chapter_feedback.items():
         if obj_key in feedback_standard_fields:
             standard_fields[obj_key] = obj_value
@@ -115,23 +114,16 @@ def separate_feedback_standard_fields_from_others(chapter_feedback):
 
         else:
             feedback_list.append({"key": obj_key, "value": obj_value})
-
+            
     return {"feedback_list": feedback_list, "standard_fields_dict": standard_fields}
 
 
 def add_chapter_feedback_to_db(chapter_feedback):
     chapter_feedback_parts = separate_feedback_standard_fields_from_others(chapter_feedback)
     standard_fields_dict = chapter_feedback_parts["standard_fields_dict"]
-    feedback_data = chapter_feedback_parts["feedback_list"][0]
-    feedback_title = feedback_data.get("key")
-    data_source_id = standard_fields_dict.get("_id")
-
-    feedback_data_key = feedback_data.get("key")
-
-    if not is_chapter_feedback_key(feedback_data_key):
-        return
-
-    if ChaptersFeedbackStandard.objects.filter(data_source_id=data_source_id).exists():
+    feedback_list = chapter_feedback_parts["feedback_list"]
+    
+    if not feedback_list:
         return
 
     route = standard_fields_dict.get("route") or NOT_SPECIFIED
@@ -171,47 +163,58 @@ def add_chapter_feedback_to_db(chapter_feedback):
     destination_data = get_or_add_country_to_db(destination, source="destination")
     route_data = get_or_add_route_to_db(route)
 
-    data_params = {
-        "api_created_at": parse_api_date(api_created_at),
-        "api_updated_at": parse_api_date(api_updated_at),
-        "data_source_id": data_source_id,
-        "device_id": device_id,
-        "locale": locale,
-        "preference": preference,
-        "feedback_title": feedback_title,
-        "gender": gender_data,
-        "age": age_data,
-        "language": language_data,
-        "origin": origin_data,
-        "destination": destination_data,
-        "destination_state": destination_data,
-        "route": route_data,
-        "organisation_sector": organisation_sector_data,
-        "factory_farm": factory_farm_data,
-        "organisation": organisation_data,
-    }
+    for feedback_data in feedback_list:
+        feedback_data_key = feedback_data.get("key")
 
-    chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
-    feedback_data_value = feedback_data.get("value")
-    feedback_data_value_list = list(feedback_data_value.items())
+        if not is_chapter_feedback_key(feedback_data_key):
+            continue
 
-    for feedback in feedback_data_value_list:
-        feedback_data_question = feedback[0]
-        feedback_data_question_answer = feedback[1]
-        feedback_response, _ = ChaptersFeedbackResponse.objects.get_or_create(
-            response=feedback_data_question_answer
-        )
-        feedback_question, _ = ChaptersFeedbackQuestion.objects.get_or_create(question=feedback_data_question)
+        feedback_title = feedback_data.get("key")
+        feedback_data_value = feedback_data.get("value")
+        feedback_data_value_list = list(feedback_data_value.items())
+        print("Feedback_data====>",feedback_data_key)
+        print("Feedback_data_value_list===>",feedback_data_value_list)
 
-        chapter_instance, _ = Chapter.objects.get_or_create(number_key=feedback_data_key,destination=destination_data)
+        data_params = {
+            "api_created_at": parse_api_date(api_created_at),
+            "api_updated_at": parse_api_date(api_updated_at),
+            "data_source_id": standard_fields_dict.get("_id"),
+            "device_id": device_id,
+            "locale": locale,
+            "preference": preference,
+            "feedback_title": feedback_title,
+            "gender": gender_data,
+            "age": age_data,
+            "language": language_data,
+            "origin": origin_data,
+            "destination": destination_data,
+            "destination_state": destination_data,
+            "route": route_data,
+            "organisation_sector": organisation_sector_data,
+            "factory_farm": factory_farm_data,
+            "organisation": organisation_data,
+        }
 
-        ChaptersFeedback.objects.create(
-            feedback_standard=chapters_feedback_standard,
-            feedback_question=feedback_question,
-            feedback_response=feedback_response,
-            chapter=chapter_instance,
-        )
+        chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
 
-    sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
-    for sec_of_work in sec_of_work_list:
-        chapters_feedback_standard.sectors_of_work.add(sec_of_work)
+        for feedback in feedback_data_value_list:
+            print("TrueFeedbacjk==>",feedback)
+            feedback_data_question = feedback[0]
+            feedback_data_question_answer = feedback[1]
+            feedback_response, _ = ChaptersFeedbackResponse.objects.get_or_create(
+                response=feedback_data_question_answer
+            )
+            feedback_question, _ = ChaptersFeedbackQuestion.objects.get_or_create(question=feedback_data_question)
+
+            chapter_instance, _ = Chapter.objects.get_or_create(number_key=feedback_data_key, destination=destination_data)
+
+            ChaptersFeedback.objects.create(
+                feedback_standard=chapters_feedback_standard,
+                feedback_question=feedback_question,
+                feedback_response=feedback_response,
+                chapter=chapter_instance,
+            )
+
+        sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
+        for sec_of_work in sec_of_work_list:
+            chapters_feedback_standard.sectors_of_work.add(sec_of_work)
