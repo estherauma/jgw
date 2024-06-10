@@ -3,6 +3,7 @@
 
 from django.urls import path
 from .views import (
+    export_messaging_question_data,
     messaging_question, 
     export_messaging_question_stats, 
     export_inline_question_stats,
@@ -15,6 +16,7 @@ app_name = "question"
 urlpatterns = [
     path("messaging/", messaging_question, name="messaging_question"),
     path("messaging/export-messaging-question-stats", export_messaging_question_stats, name="export_messaging_question_stats"),
+    path("messaging/export-messaging-question-data/", export_messaging_question_data, name="export_messaging_question_data"),
     
     path("inline/", inline_question, name="inline_question"),
     path("inline/export-inline-question-stats", export_inline_question_stats, name="export_inline_question_stats"),

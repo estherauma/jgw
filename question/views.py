@@ -1,4 +1,8 @@
 from django.shortcuts import render
+from django.utils import timezone
+from django.http import HttpResponse
+from openpyxl import Workbook
+from openpyxl.styles import Alignment,Font
 from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
 from core.logic.file_export import generate_and_export_excel
@@ -15,6 +19,7 @@ from question.repository.inline_questions_standard import (
     inline_questions_count,
 )
 from question.repository.messaging_questions_standard import (
+    get_all_messaging_question_responses_data,
     get_messaging_question_per_destination_counts,
     get_messaging_question_per_origin_counts,
     messaging_question_stats_for_export,
@@ -48,6 +53,7 @@ def messaging_question(request):
 def export_messaging_question_stats(request):
     if request.method == "POST":
         filter_form = MessagingQuestionFilterForm(request=request, data=request.POST)
+        
         if filter_form.is_valid():
             filters = generic_filter_form_parser(filter_form)
 
@@ -132,3 +138,73 @@ def export_inline_question_stats(request):
                 {**filters, "organisations": [organisation], "current_user": request.user}
             )
         return generate_and_export_excel(export_dict, filename="inline_question_stats")
+    
+def export_messaging_question_data(request):
+    start_date = '2024-01-01'
+    end_date = '2024-05-31'
+    messaging_data = get_all_messaging_question_responses_data(start_date=start_date, end_date=end_date)
+
+    wb = Workbook()
+    ws = wb.active
+
+    heading = f"Messaging Question Report for All Routes from the Period Starting {start_date} to {end_date}"
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=15)
+    heading_cell = ws.cell(row=2, column=1, value=heading)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
+
+    headers = [
+        'API Created At',
+        'API Updated At',
+        'Data Source ID',
+        'Device ID',
+        'App ID',
+        'Locale',
+        'Route',
+        'Language',
+        'Origin',
+        'Destination',
+        'Organisation Sector',
+        'Factory Farm',
+        'Organisation',
+        'Question',
+        'Responses'
+    ]
+
+    for idx, header in enumerate(headers, start=1):
+        ws.cell(row=4, column=idx, value=header)
+
+    for idx, data in enumerate(messaging_data, start=5):
+        api_created_at = timezone.localtime(data['api_created_at']).strftime('%Y-%m-%d %H:%M:%S')
+        api_updated_at = timezone.localtime(data['api_updated_at']).strftime('%Y-%m-%d %H:%M:%S')
+        route_value = data['route'].name if data['route'] else None
+        language_value = data['language'].name if data['language'] else None
+        origin_value = data['origin'].name if data['origin'] else None
+        destination_value = data['destination'].name if data['destination'] else None
+        organisation_sector_value = data['organisation_sector'].name if data['organisation_sector'] else None
+        factory_farm_value = data['factory_farm'].name if data['factory_farm'] else None
+        organisation_value = data['organisation'].name if data['organisation'] else None
+        question_value = data['question'] if data['question'] else None
+
+        ws.cell(row=idx, column=1, value=api_created_at)
+        ws.cell(row=idx, column=2, value=api_updated_at)
+        ws.cell(row=idx, column=3, value=data['data_source_id'])
+        ws.cell(row=idx, column=4, value=data['device_id'])
+        ws.cell(row=idx, column=5, value=data['app_id'])
+        ws.cell(row=idx, column=6, value=data['locale'])
+        ws.cell(row=idx, column=7, value=route_value)
+        ws.cell(row=idx, column=8, value=language_value)
+        ws.cell(row=idx, column=9, value=origin_value)
+        ws.cell(row=idx, column=10, value=destination_value)
+        ws.cell(row=idx, column=11, value=organisation_sector_value)
+        ws.cell(row=idx, column=12, value=factory_farm_value)
+        ws.cell(row=idx, column=13, value=organisation_value)
+        ws.cell(row=idx, column=14, value=question_value)
+        ws.cell(row=idx, column=15, value=', '.join(data['responses']))
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=messaging_question_data.xlsx'
+
+    wb.save(response)
+
+    return response
