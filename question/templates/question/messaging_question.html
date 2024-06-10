@@ -54,7 +54,8 @@
                                     </a>
         
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
-                                        <button  class="dropdown-item" id="export-messaging-question-to-excel">Export to Excel</button>
+                                        <button class="dropdown-item" onclick="exportMessagingQuestionData()">Export Messaging Question Data to Excel</button>
+                                        <button  class="dropdown-item" id="export-messaging-question-to-excel">Export Messaging Question Statistics to Excel</button>
                                     </div>
                                     
                                 </div>
@@ -113,5 +114,29 @@
 
     // plots the origin graph
     messagingQuestionDestinationChart(destinationData)
+
+    function exportMessagingQuestionData() {
+        $.ajax({
+            url: "{% url 'question:export_messaging_question_data' %}",
+            method: "GET",
+            xhrFields: {
+                responseType: 'blob' 
+            },
+            success: function(response) {
+                var url = window.URL.createObjectURL(response);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = "messaging_question_data.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            },
+            error: function(xhr, status, error) {
+                console.error("Error exporting messaging question data:", error);
+            }
+        });
+    }
+
 </script>
 {% endblock %}

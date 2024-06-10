@@ -69,11 +69,20 @@ class FollowUpQuestionAdmin(admin.ModelAdmin):
 
     def inline_question_text(cls, obj):
         return obj.inline_question.inline_question
+@admin.register(MessagingQuestionStandard)
+class MessagingQuestionStandardAdmin(admin.ModelAdmin):
+    list_display = ["api_created_at", "data_source_id", "device_id", "question_id","route","factory_farm","destination","organisation_sector"]
+    search_fields = ["api_created_at", "data_source_id", "device_id", "question_id","route","factory_farm","destination","organisation_sector"]
+    ordering=["-api_created_at"]
+
+@admin.register(MessagingQuestionResponse)
+class MessagingQuestionResponseAdmin(admin.ModelAdmin):
+    list_display = ["messaging_question", "created_at", "updated_at"]
+    search_fields = ["messaging_question"]
+    ordering = ['-created_at']
 
 admin.site.register(InlineQuestionResponse)
-admin.site.register(MessagingQuestionStandard)
 admin.site.register(MessagingQuestion)
 admin.site.register(MessagingResponse)
 admin.site.register(MessagingResponseOptionText)
-admin.site.register(MessagingQuestionResponse)
 admin.site.register(MessagingQuestionText)
