@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0027_rename_exluded_origin_countries_user_excluded_origin_countries'),
+        ('users', '0012_user_receive_marketing_emails'),
     ]
 
     operations = [

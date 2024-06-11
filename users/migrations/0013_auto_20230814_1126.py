@@ -2,6 +2,7 @@
 
 from django.db import migrations
 from django.contrib.auth.models import Group, Permission
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from users.models import User
 import os
 
@@ -51,7 +52,7 @@ def undo_create_user_and_role(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0012_user_receive_marketing_emails'),
+        ('users', '0028_auto_20240603_0753'),
     ]
 
     operations = [
