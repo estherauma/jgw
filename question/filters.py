@@ -3,7 +3,7 @@ from typing import Any
 from django.db.models import Manager as BaseManager, Q
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 
-from users.utils import get_user_destinations, get_user_factories, get_user_organisations
+from users.utils import get_user_destinations, get_user_factories, get_user_organisations,get_user_start_date,get_user_end_date
 
 
 def generic_question_filtered_queryset(
@@ -37,8 +37,6 @@ def generic_question_filtered_queryset(
 
     if factory_farms is None:
         factory_farms = []
-
-    # current user specific orgs and factories filters
 
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
@@ -101,6 +99,12 @@ def question_response_filtered_queryset(
     schemes=None,
     factory_farms=None,
 ):
+    user_start_date = get_user_start_date(current_user)
+    user_end_date = get_user_end_date(current_user)
+
+    final_start_date = max(start_date, user_start_date) if start_date and user_start_date else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
+    final_end_date = min(end_date, user_end_date) if end_date and user_end_date else (end_date or user_end_date or datetime.now().date())
+
     if destination_countries is None:
         destination_countries = []
 
@@ -115,12 +119,19 @@ def question_response_filtered_queryset(
 
     if factory_farms is None:
         factory_farms = []
-    # current user specific orgs and factories filters
+
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
 
     question_response_filters_q_object = Q()
+
+    question_response_filters_q_object &= Q(
+            inline_question__inline_question_standard__api_created_at__range=(
+                final_start_date,
+                final_end_date,
+            )
+        )
 
     if user_factories:
         user_fact_farm_q = Q(
@@ -145,14 +156,6 @@ def question_response_filtered_queryset(
     if user_destinations:
         user_destination_q = Q(inline_question__inline_question_standard__destination__in=user_destinations)
         question_response_filters_q_object &= user_destination_q
-
-    if start_date and end_date:
-        question_response_filters_q_object &= Q(
-            inline_question__inline_question_standard__api_created_at__range=(
-                start_date,
-                end_date,
-            )
-        )
 
     if destination_countries:
         current_model_dest_q = Q(

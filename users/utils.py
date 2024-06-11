@@ -39,3 +39,13 @@ def get_user_excluded_origin_countries(user):
 
     user_excluded_origin_countries = user.excluded_origin_countries.all()
     return user_excluded_origin_countries
+
+def get_user_start_date(user):
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+        return None
+    return user.start_date
+
+def get_user_end_date(user):
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+        return None
+    return user.end_date

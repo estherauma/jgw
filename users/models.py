@@ -47,6 +47,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     email = models.EmailField(null=False, blank=False, max_length=128, unique=True)
 
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
     factories = models.ManyToManyField(FactoryFarm, blank=True)
     organisations = models.ManyToManyField(Organisation, blank=True)
     destinations = models.ManyToManyField(Country, blank=True)
