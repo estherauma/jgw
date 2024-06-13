@@ -172,8 +172,6 @@ def add_chapter_feedback_to_db(chapter_feedback):
         feedback_title = feedback_data.get("key")
         feedback_data_value = feedback_data.get("value")
         feedback_data_value_list = list(feedback_data_value.items())
-        print("Feedback_data====>",feedback_data_key)
-        print("Feedback_data_value_list===>",feedback_data_value_list)
 
         data_params = {
             "api_created_at": parse_api_date(api_created_at),
@@ -198,7 +196,6 @@ def add_chapter_feedback_to_db(chapter_feedback):
         chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
 
         for feedback in feedback_data_value_list:
-            print("TrueFeedbacjk==>",feedback)
             feedback_data_question = feedback[0]
             feedback_data_question_answer = feedback[1]
             feedback_response, _ = ChaptersFeedbackResponse.objects.get_or_create(
