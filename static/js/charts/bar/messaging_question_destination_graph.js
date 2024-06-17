@@ -29,6 +29,11 @@ function messagingQuestionDestinationChart(originChartData) {
                     }
                 },
             },
+            layout: {
+                padding: {
+                    right: 50,
+                }
+            },
             maintainAspectRatio: false,
             responsive: true,
             plugins: {

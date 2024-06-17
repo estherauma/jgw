@@ -35,6 +35,11 @@ function workCodeUsageStackBar(workCodeUsageParams) {
             },
           },
         },
+        layout: {
+          padding: {
+              right: 50,
+          }
+        },
         maintainAspectRatio: false,
         responsive: true,
         plugins: {

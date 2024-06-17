@@ -24,6 +24,11 @@ function inlineQuestionLanguageGraph(langaugeData) {
                     }
                 },
             },
+            layout: {
+                padding: {
+                    right: 50,
+                }
+            },
             maintainAspectRatio: false,
             responsive: true,
             plugins: {
@@ -40,5 +45,5 @@ function inlineQuestionLanguageGraph(langaugeData) {
     }
 
     scrollableVerticalBarChart('inline-question-language-graph-id', data, chartConfig)
-
+    
 }
