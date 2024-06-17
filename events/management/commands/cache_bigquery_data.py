@@ -26,6 +26,7 @@ class Command(BaseCommand):
 
         if "all" in data_types:
             for func_name, func in events_data_functions.items():
+                try:
                     func()
                     CommandLog.objects.create(command_name=f'cache_bigquery_data - {func_name}', command_status=True,error='None', data_fetch='Events')
                 except Exception as e:
