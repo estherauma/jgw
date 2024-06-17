@@ -216,15 +216,21 @@ body.modal-open {
 .user-by-month{
     margin-top: 20px;
 }
+.status{
+    padding-left: 30px;
+}
+.table-title{
+    text-align: center;
+}
+.large-symbol {
+    font-size: 1.0rem;
+}
 
 @media (max-width: 1200px) {
     .chart-column-width{
         width: 100% !important;
     }
 }
-
-
-/* (new) CSS for truncating text and displaying tooltip */
  
 .chart-title {
     white-space: normal; 
