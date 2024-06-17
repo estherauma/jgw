@@ -25,6 +25,11 @@ function chaptersOpenedGraph(chaptersOpenedParams, graphId) {
             },
           },
         },
+        layout: {
+          padding: {
+              right: 50,
+          }
+        },
         maintainAspectRatio: false,
         responsive: true,
         plugins: {

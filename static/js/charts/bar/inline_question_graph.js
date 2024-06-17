@@ -26,6 +26,12 @@ function inlineQuestionGraph(inlineQuestionData, inlineQuestionCanvasId) {
                     }
                 },
             },
+            layout: {
+                padding: {
+                    right: 30,
+                    bottom: 20,
+                }
+            },
             maintainAspectRatio: false,
             responsive: true,
             plugins: {

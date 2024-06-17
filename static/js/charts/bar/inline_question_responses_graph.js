@@ -63,6 +63,11 @@ function inlineQuestionResponsesGraph(responseData) {
           stacked: true,
         },
       },
+      layout: {
+        padding: {
+            right: 50,
+        }
+      },
       plugins: {
         legend: {
           display: false,
@@ -79,4 +84,6 @@ function inlineQuestionResponsesGraph(responseData) {
 
   const ctx = canvas.getContext("2d");
   const chart = new Chart(ctx, chartConfig);
+
+  
 }

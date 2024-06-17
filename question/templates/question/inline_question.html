@@ -196,6 +196,13 @@
         lastColumn.style.maxWidth = '100%';
     }
 
+    function truncateText(text, maxLength) { 
+        if (text.length > maxLength) {
+            return `<span class="tooltip-title" title="${text}">${text.substring(0, maxLength)}...</span>`;
+        }
+        return text;
+    }
+
     function handleInlineQuestionsChange() {
     var selectElement = document.getElementById('all-inline-question-select-id');
     var selectedOptions = [];
@@ -229,39 +236,54 @@
         });
     }
 
-    // Render charts for the selected options
+    
     for (let [key, value] of Object.entries(questionsToPlot)) {
         const containerDiv = document.createElement("div");
         containerDiv.classList.add("col-md-3");
         containerDiv.classList.add("mb-3");
         containerDiv.classList.add("inline-question-container-div");
 
-        // create title
-        const title = document.createElement("p");
-        title.innerHTML = value.title;
-        title.classList.add("chart-title");
+   
+            const title = document.createElement("p");
+            title.innerHTML = truncateText(value.title, 90); 
+            title.classList.add("chart-title");
 
-        // create canvas
+       
         const canvasId = `${key}-id`;
         const canvasDiv = document.createElement("div");
         canvasDiv.id = canvasId;
 
-        // create chat box element
+        
         const chartboxDiv = document.createElement("div");
         chartboxDiv.classList.add(`${canvasId}-chart-box`);
         chartboxDiv.classList.add("inline-questions-chart-box");
         chartboxDiv.appendChild(canvasDiv);
 
-        // append canvas and title
+        
         containerDiv.appendChild(title);
         containerDiv.appendChild(chartboxDiv);
 
         inlineQuestionsSection.appendChild(containerDiv);
 
-        // canvasId
+       
         inlineQuestionGraph(value, canvasId);
     }
+     
+    initializeTooltips();
 }
+
+
+function initializeTooltips() {
+    const tooltipElements = document.querySelectorAll('.tooltip-title');
+    tooltipElements.forEach(function(elem) {
+        new bootstrap.Tooltip(elem);
+    });
+}
+
+
+document.addEventListener("DOMContentLoaded", function() { 
+    initializeTooltips();
+});
 
 
     

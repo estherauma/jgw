@@ -44,6 +44,11 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData) {
             },
           },
         },
+        layout: {
+          padding: {
+              right: 50,
+          }
+        },
         maintainAspectRatio: true,
         responsive: true,
         plugins: {

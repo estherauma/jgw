@@ -26,6 +26,11 @@ function usersBySectorsChart(usersBySectorsChartChartData) {
             },
           },
         },
+        layout: {
+          padding: {
+              right: 50,
+          }
+        },
         maintainAspectRatio: false,
         responsive: true,
         plugins: {
