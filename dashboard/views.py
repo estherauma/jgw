@@ -244,6 +244,11 @@ def messaging_question_stats(request):
     form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
     return render(request, "dashboard/messaging.html", {"form": form})
 
+@login_required()
+def data_pipeline_stats(request):
+    form = FilterForm(initial={"time_range": f"{get_start_date(days=30)}, {TODAY}"})
+    return render(request, "dashboard/pipeline-status.html", {"form": form})
+
 
 @login_required()
 def help_contacts_stats(request):

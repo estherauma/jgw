@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from pipeline.models import CommandLog
 
 from preference.logic.add_preferences_logic import fetch_preferences_from_api_to_db
 
@@ -6,5 +7,10 @@ from preference.logic.add_preferences_logic import fetch_preferences_from_api_to
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        fetch_preferences_from_api_to_db()
-        self.stdout.write(self.style.SUCCESS('Successfully fetched preferences from api and added to db'))
+        try:
+            fetch_preferences_from_api_to_db()
+            CommandLog.objects.create(command_name='add_preferences_from_api',data_fetch='Preferences',error='None',command_status=True)
+            self.stdout.write(self.style.SUCCESS('Successfully fetched preferences from api and added to db'))
+        except Exception as e:
+            CommandLog.objects.create(command_name='add_preferences_from_api',data_fetch='Preferences',error=e, command_status=False)
+            self.stdout.write(self.style.ERROR(f'Error fetching preferences from api: {e}'))

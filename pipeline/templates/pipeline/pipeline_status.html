@@ -1,0 +1,101 @@
+{% extends 'core/layouts/base.html' %}
+{% load crispy_forms_tags %}
+
+{% load static %}
+{% load waffle_tags %}
+
+<!-- title -->
+{% block title %} Data Pipeline {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="widget-rounded-circle card">
+            <div class="card-body">
+                <div class="row">
+                        <div class="col-6">
+                            <div class="text-start mt-3">
+                                <h5 class="text-muted global-text-style">Pipeline Execution In The Past 30 days</h5>
+                            </div>
+                        </div>
+                        {% if user.is_authenticated %}
+                        <div class="col-6 text-end">
+                            <div class="d-inline-block me-3">
+                                <h5 class="text-muted global-text-style">Total Count</h5>
+                                <button class="btn btn-primary waves-effect text-center bg-jgw-deep-blue me-3">{{logsCount}}</button>
+                            </div>
+                            <div class="d-inline-block me-3">
+                                <h5 class="text-muted global-text-style">Successful</h5>
+                                <button class="btn btn-success waves-effect text-center me-3">{{successfulCount}}</button>
+                            </div>
+                            <div class="d-inline-block">
+                                <h5 class="text-muted global-text-style">Failed</h5>
+                                <button class="btn btn-danger waves-effect text-center">{{failedCount}}</button>
+                            </div>
+                        </div>
+                            
+                        {% else %}
+                            {% include 'includes/non_auth_banner_btns.html' %}
+                        {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="widget-rounded-circle card">
+            <div class="card-body">
+                <div class="row">
+                        <div class="col-12">
+                            <div class="text-start">
+                                <h5 class="text-muted global-text-style table-title">The table below show list of data pipeline execution</h5>
+                            </div>
+                        </div>
+                    <div class="col-12">
+                            <div class="row">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>No:</th>
+                                            <th>Command Name</th>
+                                            <th>Executed At</th>
+                                            <th>Data Fetch</th>
+                                            <th>Error</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in logs %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>{{ log.command_name }}</td>
+                                                <td>{{ log.executed_at }}</td>
+                                                <td>{{ log.data_fetch }}</td>
+                                                <td>{{ log.error }}</td>
+                                                <td>
+                                                    {{ log.command_status|yesno:"Success,Failure" }}
+                                                    {% if log.command_status %}
+                                                        <span title="Success"  class="text-success status large-symbol">&#10004;</span>
+                                                    {% else %}
+                                                        <span title="Failure" class="text-danger status large-symbol">&#10006;</span>
+                                                    {% endif %}
+                                                    
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

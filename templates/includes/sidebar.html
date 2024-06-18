@@ -19,7 +19,7 @@
                 {% else %}
                     <li>
                         <a href="{% url 'preference:user_overview' %}">
-                            <i data-feather="bar-chart-2"></i>
+                            <i data-feather="home"></i>
                             <span> Users overview </span>
                         </a>
                     </li>
@@ -62,6 +62,12 @@
                     {% endflag %}
 
                 {% if user.is_admin or user.is_superuser %}
+                    <li>
+                        <a href="{% url 'pipeline:pipeline_status' %}">
+                            <i data-feather="database"></i>
+                            <span>Data Pipeline</span>
+                        </a>
+                    </li>
                     <li>
                         <a href="{% url 'dashboard:export_report' %}">
                             <i data-feather="external-link"></i>

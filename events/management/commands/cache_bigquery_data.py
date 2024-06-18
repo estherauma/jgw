@@ -4,6 +4,7 @@ from events.logic.add_chapters_feedback_data import fetch_chapters_feedback_from
 from events.logic.add_chapters_opened_data import fetch_chapters_opened_data_from_api_to_db
 from events.logic.add_sws_pasi_data import fetch_sws_pasi_events_from_api_to_db
 from events.logic.add_links_click_data import fetch_links_click_events_from_api_to_db
+from pipeline.models import CommandLog
 
 
 class Command(BaseCommand):
@@ -24,12 +25,20 @@ class Command(BaseCommand):
             return
 
         if "all" in data_types:
-            for func in events_data_functions.values():
-                func()
+            for func_name, func in events_data_functions.items():
+                try:
+                    func()
+                    CommandLog.objects.create(command_name=f'cache_bigquery_data - {func_name}', command_status=True,error='None', data_fetch='Events')
+                except Exception as e:
+                    CommandLog.objects.create(command_name=f'cache_bigquery_data - {func_name}', command_status=False,error=e, data_fetch='Events')
             return
 
         for data_type in data_types:
             if data_type in events_data_functions:
-                events_data_functions[data_type]()
+                try:
+                    events_data_functions[data_type]()
+                    CommandLog.objects.create(command_name=f'cache_bigquery_data - {data_type}', command_status=True,error='None', data_fetch='Events')
+                except Exception as e:
+                    CommandLog.objects.create(command_name=f'cache_bigquery_data - {data_type}', command_status=False,error=e, data_fetch='Events')
             else:
-                print(f"Unknown data type: {data_type}")
+                self.stdout.write(self.style.ERROR(f"Unknown data type: {data_type}"))
