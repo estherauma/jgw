@@ -140,8 +140,8 @@ def export_inline_question_stats(request):
         return generate_and_export_excel(export_dict, filename="inline_question_stats")
     
 def export_messaging_question_data(request):
-    start_date = '2024-01-01'
-    end_date = '2024-05-31'
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
     messaging_data = get_all_messaging_question_responses_data(start_date=start_date, end_date=end_date)
 
     wb = Workbook()
