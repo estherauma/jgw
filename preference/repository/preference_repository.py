@@ -242,10 +242,8 @@ def get_cumulative_monthly_new_users(**filters):
 def get_users_by_country_state(**filters):
     queryset = Preference.objects.all()
     filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
-
     preferences_count_by_state = (
-        filtered_queryset.exclude(destination_state__name="not specified")
-        .values("destination_state__name")
+        filtered_queryset.values("destination_state__name")
         .annotate(users_count=Count("id"))
         .order_by("destination_state__name")
     )
