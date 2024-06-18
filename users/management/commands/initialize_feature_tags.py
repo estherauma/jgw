@@ -19,6 +19,7 @@ class Command(BaseCommand):
         # initialize user groups features tag
         flags_list = [
             {"condition": "testers", "tag": "can_view_what_matters_to_workers_page"},
+            {"condition": "testers", "tag": "can_view_messaging_question_report_export_button"},
             {"condition": "testers", "tag": "can_view_messaging_questions_page"},
             {"condition": "testers", "tag": "can_view_inline_questions_page"},
             {"condition": "testers", "tag": "can_view_new_monthly_users_chart"},
