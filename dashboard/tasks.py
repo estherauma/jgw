@@ -20,6 +20,7 @@ from jgwpandas.settings import EMAIL_HOST_USER
 import base64
 import requests
 import json
+from pipeline.models import CommandLog
 
 from preference.logic.add_preferences_logic import fetch_preferences_from_api_to_db
 from preference.tasks import attach_countries_to_state
@@ -42,20 +43,60 @@ def translate_to_eng(text, client=client):
 
 
 def fetch_data_from_jgw_api():
-    fetch_preferences_from_api_to_db()
-    fetch_inline_questions_from_api_to_db()
-    fetch_messaging_questions_from_api_to_db()
+    try:
+        fetch_preferences_from_api_to_db()
+        CommandLog.objects.create(command_name='add_preferences_from_api',data_fetch='Preferences',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='add_preferences_from_api',data_fetch='Preferences',error=e, command_status=False)
 
-    fetch_chapters_opened_data_from_api_to_db()
-    fetch_chapters_feedback_from_api_to_db()
-    fetch_sws_pasi_events_from_api_to_db()
+    try:
+        fetch_inline_questions_from_api_to_db()
+        CommandLog.objects.create(command_name='add_inline_question_from_api',data_fetch='Inline questions',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='add_inline_question_from_api', command_status=False,error=e, data_fetch='Inline questions')
 
-    fetch_help_contacts_from_api_to_db()
+    try:
+        fetch_messaging_questions_from_api_to_db()
+        CommandLog.objects.create(command_name='add_messaging_question_from_api',data_fetch='Messsaging questions',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='add_messaging_question_from_api',data_fetch='Messaging questions',error=e, command_status=False)
+    
+    try:
+        fetch_chapters_opened_data_from_api_to_db()
+        CommandLog.objects.create(command_name='cache_bigquery_data - chapters_opened',data_fetch='Events',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='cache_bigquery_data - chapters_opened',data_fetch='Events',error=e, command_status=False)
 
-    fetch_links_click_events_from_api_to_db()
+    try:
+        fetch_chapters_feedback_from_api_to_db()
+        CommandLog.objects.create(command_name='cache_bigquery_data - chapters_feedback',data_fetch='Events',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='cache_bigquery_data - chapters_feedback',data_fetch='Events',error=e, command_status=False)
+    
+    try:
+        fetch_sws_pasi_events_from_api_to_db()
+        CommandLog.objects.create(command_name='cache_bigquery_data - sws_pasi_events',data_fetch='Events',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='cache_bigquery_data - sws_pasi_events',data_fetch='Events',error=e, command_status=False)
+    
+    try:
+        fetch_help_contacts_from_api_to_db()
+        CommandLog.objects.create(command_name='add_help_contacts_from_api',data_fetch='Help contacts',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='add_help_contacts_from_api',data_fetch='Help contacts',error=e, command_status=False)
+    
+    try:
+        fetch_links_click_events_from_api_to_db()
+        CommandLog.objects.create(command_name='add_link_clicks_data',data_fetch='Link clicks',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='add_link_clicks_data',data_fetch='Link clicks',error=e, command_status=False)
 
     # should always come last
-    attach_countries_to_state()
+    try:
+        attach_countries_to_state()
+        CommandLog.objects.create(command_name='attach_countries_to_state',data_fetch='Country names',error='None',command_status=True)
+    except Exception as e:
+        CommandLog.objects.create(command_name='attach_countries_to_state',data_fetch='Country names',error=e, command_status=False)
 
 
 @shared_task(name="get_jgw_data")
