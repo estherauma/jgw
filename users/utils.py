@@ -49,3 +49,8 @@ def get_user_end_date(user):
     if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
         return None
     return user.end_date
+
+def get_user_group(user):
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+        return []
+    return list(user.groups.values_list('name', flat=True))

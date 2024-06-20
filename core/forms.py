@@ -4,7 +4,7 @@ from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
 from preference.models import CountryState
-from users.utils import get_user_factories, get_user_organisations, get_user_destinations,get_user_start_date,get_user_end_date
+from users.utils import get_user_factories, get_user_group, get_user_organisations, get_user_destinations,get_user_start_date,get_user_end_date
 
 
 class GenericFilterForm(forms.Form):
@@ -17,9 +17,13 @@ class GenericFilterForm(forms.Form):
 
         user_factories = get_user_factories(self.request.user)
         user_orgs = get_user_organisations(self.request.user)
+        user_group = get_user_group(self.request.user)
 
         self.fields["factory_farm"].choices = sorted([(farm.name, farm.name) for farm in user_factories])
         self.fields["organisation"].choices = sorted([(org.name, org.name) for org in user_orgs])
+
+        if "SWSConfig" in user_group:
+            self.fields["organisation"].widget.attrs["disabled"] = True
 
         user_start_date = get_user_start_date(self.request.user) or APPLICATION_POSSIBLE_START_DATE
         user_end_date = get_user_end_date(self.request.user) or datetime.now().date()
@@ -92,6 +96,7 @@ class GenericFilterForm(forms.Form):
     )
 
     factory_farm = forms.MultipleChoiceField(
+        label="Factory / Farm",
         widget=forms.SelectMultiple(
             attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "factory_farm"}
         ),
