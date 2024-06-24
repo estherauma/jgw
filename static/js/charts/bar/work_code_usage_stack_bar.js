@@ -1,6 +1,6 @@
 function workCodeUsageStackBar(workCodeUsageParams) {
     const organizations = [...new Set(workCodeUsageParams.map(item => item.organisation_name))];
-    const accessCodes = [...new Set(workCodeUsageParams.map(item => item.access_code))];
+    const accessCodes = [...new Set(workCodeUsageParams.map(item => item.mapped_access_code))];
     
     const accessCodeColors = accessCodes.reduce((acc, accessCode, index) => {
         acc[accessCode] = Object.values(COLORS)[index % Object.keys(COLORS).length];
