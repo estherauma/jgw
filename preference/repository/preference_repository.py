@@ -1,6 +1,7 @@
 from collections import defaultdict
 from django.db.models import Case, When, Value, CharField, F, Count
 from django.db.models.functions import TruncMonth
+from common.const.value_const import ACCESS_CODE_MAPPING
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
@@ -316,12 +317,24 @@ def get_sws_workcodes_with_access_code(**filters):
     queryset = Preference.objects.all()
     filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
 
+    whens = [When(organisation_access_code__code=key, then=Value(value)) for key, value in ACCESS_CODE_MAPPING.items()]
+
     queryset_data = (
-        filtered_queryset.values(
-            organisation_name=F("organisation__name"), access_code=F("organisation_access_code__code")
+        filtered_queryset
+        .values(
+            organisation_name=F("organisation__name"),
+            access_code=F("organisation_access_code__code")
         )
         .exclude(organisation__name__in=["not specified"])
-        .annotate(access_code_count=Count("organisation_access_code"))
+        .annotate(
+            access_code_count=Count("organisation_access_code"),
+            mapped_access_code=Case(
+                *whens,
+                default=F("organisation_access_code__code"),
+                output_field=CharField()
+            )
+        )
         .filter(organisation_access_code__isnull=False)
     )
+
     return list(queryset_data)
