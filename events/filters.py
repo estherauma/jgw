@@ -3,7 +3,7 @@ from typing import Any
 from django.db.models import Manager as BaseManager, Q
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 
-from users.utils import get_user_destinations, get_user_factories, get_user_organisations,get_user_start_date,get_user_end_date
+from users.utils import get_user_destinations, get_user_factories, get_user_group, get_user_organisations,get_user_start_date,get_user_end_date
 
 
 def generic_chapters_opened_filtered_queryset(
@@ -19,6 +19,7 @@ def generic_chapters_opened_filtered_queryset(
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
+    user_group = get_user_group(current_user)
 
     final_start_date = max(start_date, user_start_date) if start_date and user_start_date else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
     final_end_date = min(end_date, user_end_date) if end_date and user_end_date else (end_date or user_end_date or datetime.now().date())
@@ -46,8 +47,11 @@ def generic_chapters_opened_filtered_queryset(
 
     chapters_opened_filters_q_object &= Q(event_created_at__range=(final_start_date, final_end_date))
 
-    if user_orgs:
+    if user_orgs and "MyVoiceConfig" not in user_group:
         user_org_q = Q(organisation__in=user_orgs)
+        chapters_opened_filters_q_object &= user_org_q
+    elif "MyVoiceConfig" in user_group:
+        user_org_q = Q(destination__in=user_destinations)
         chapters_opened_filters_q_object &= user_org_q
 
     if user_factories:
