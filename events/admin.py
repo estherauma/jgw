@@ -27,7 +27,7 @@ class ChapterAdminDisplay(admin.ModelAdmin):
 
 @admin.register(ChaptersFeedbackStandard)
 class ChaptersFeedbackStandardAdminDisplay(admin.ModelAdmin):
-    list_display = ["api_created_at", "data_source_id","destination","feedback_title"]
+    list_display = ["api_created_at", "data_source_id","destination","feedback_title","organisation"]
     search_fields = ["api_created_at", "data_source_id","destination","feedback_title"]
     ordering = ["-api_created_at"]
 @admin.register(ChaptersFeedback)
