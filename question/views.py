@@ -159,6 +159,7 @@ def export_messaging_question_data(request):
         'Data Source ID',
         'Device ID',
         'App ID',
+        'Message ID',
         'Locale',
         'Route',
         'Language',
@@ -191,16 +192,17 @@ def export_messaging_question_data(request):
         ws.cell(row=idx, column=3, value=data['data_source_id'])
         ws.cell(row=idx, column=4, value=data['device_id'])
         ws.cell(row=idx, column=5, value=data['app_id'])
-        ws.cell(row=idx, column=6, value=data['locale'])
-        ws.cell(row=idx, column=7, value=route_value)
-        ws.cell(row=idx, column=8, value=language_value)
-        ws.cell(row=idx, column=9, value=origin_value)
-        ws.cell(row=idx, column=10, value=destination_value)
-        ws.cell(row=idx, column=11, value=organisation_sector_value)
-        ws.cell(row=idx, column=12, value=factory_farm_value)
-        ws.cell(row=idx, column=13, value=organisation_value)
-        ws.cell(row=idx, column=14, value=question_value)
-        ws.cell(row=idx, column=15, value=', '.join(data['responses']))
+        ws.cell(row=idx, column=6, value=data['message_id'])
+        ws.cell(row=idx, column=7, value=data['locale'])
+        ws.cell(row=idx, column=8, value=route_value)
+        ws.cell(row=idx, column=9, value=language_value)
+        ws.cell(row=idx, column=10, value=origin_value)
+        ws.cell(row=idx, column=11, value=destination_value)
+        ws.cell(row=idx, column=12, value=organisation_sector_value)
+        ws.cell(row=idx, column=13, value=factory_farm_value)
+        ws.cell(row=idx, column=14, value=organisation_value)
+        ws.cell(row=idx, column=15, value=question_value)
+        ws.cell(row=idx, column=16, value=', '.join(data['responses']))
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=messaging_question_data.xlsx'

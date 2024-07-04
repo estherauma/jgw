@@ -106,6 +106,7 @@ def get_all_messaging_question_responses_data(start_date, end_date):
         data.append({
             'api_created_at': standard.api_created_at,
             'api_updated_at': standard.api_updated_at,
+            'message_id':standard.message_id,
             'data_source_id': standard.data_source_id,
             'device_id': standard.device_id,
             'app_id': standard.app_id,
