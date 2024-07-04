@@ -60,11 +60,11 @@
                     <h5 class="modal-title" id="deleteResourceModalLabel{{ resource.id }}">Confirm Deletion</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body text-center">
+                <div class="modal-body text-center ">
                     <p>Are you sure you want to delete "{{ resource.title }}"?</p>
                 </div>
-                <div class="modal-footer text-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn bg-jgw-deep-blue text-white" data-bs-dismiss="modal">Cancel</button>
                     <form action="{% url 'other_resource:delete_resource' resource.id %}" method="post">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger">Delete</button>
