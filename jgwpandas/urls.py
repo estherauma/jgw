@@ -39,6 +39,7 @@ urlpatterns = [
     path("question/", include("question.urls")),
     path("preference/", include("preference.urls")),
     path('pipeline/', include('pipeline.urls')),
+    path('other-resource/', include('other_resource.urls')),
     path("help-contacts/", include("help_contacts.urls")),
     path("events/", include("events.urls")),
     path("payment/", include("payment.urls")),

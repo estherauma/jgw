@@ -61,6 +61,15 @@
                         </li>
                     {% endflag %}
 
+                    {% flag 'can_view_inline_questions_page' %}
+                        <li>
+                            <a href="{% url 'other_resource:other_resource' %}">
+                                <i data-feather="help-circle"></i>
+                                <span> Other Resources</span>
+                            </a>
+                        </li>
+                    {% endflag %}
+
                 {% if user.is_admin or user.is_superuser %}
                     <li>
                         <a href="{% url 'pipeline:pipeline_status' %}">

@@ -65,7 +65,8 @@ INSTALLED_APPS = [
     "help_contacts",
     "question",
     "payment",
-    "pipeline"
+    "pipeline",
+    "other_resource"
 ]
 
 MIDDLEWARE = [
