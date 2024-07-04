@@ -422,6 +422,7 @@ def create_user(request):
 
 def update_user(request, user_id):
     user = get_object_or_404(User, pk=user_id)
+    print("USER",user)
     form = EditUserForm(request.POST or None, instance=user)
     if request.method == "POST":
         user = form.save(commit=False)
