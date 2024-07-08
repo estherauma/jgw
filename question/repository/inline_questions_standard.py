@@ -1,3 +1,5 @@
+from datetime import datetime
+from django.db.models import Q
 from django.db.models import Count, Case, When, F
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.inline import convert_question_key_to_readable_string,convert_to_camel_case
@@ -208,3 +210,55 @@ def inline_question_response():
             )
 
     return {"counts": responses, "labels": question_texts_list}
+
+
+def get_all_inline_question_responses_data(start_date, end_date):
+    start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+    end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+
+    responses = InlineQuestionResponse.objects.filter(
+        created_at__range=(start_date_obj, end_date_obj)
+    ).exclude(
+        Q(inline_question__question__text='not specified')
+    ).select_related(
+        'inline_question__inline_question_standard',
+        'inline_question__question',
+        'inline_question__inline_question_standard__route',
+        'inline_question__inline_question_standard__language',
+        'inline_question__inline_question_standard__origin',
+        'inline_question__inline_question_standard__destination',
+        'inline_question__inline_question_standard__organisation_sector',
+        'inline_question__inline_question_standard__organisation'
+    ).values(
+        'inline_question__inline_question_standard__device_id',
+        'created_at',
+        'updated_at',
+        'inline_question__inline_question_standard__language__name',
+        'inline_question__inline_question_standard__origin__name',
+        'inline_question__inline_question_standard__destination__name',
+        'inline_question__inline_question_standard__organisation_sector__name',
+        'inline_question__inline_question_standard__organisation__name',
+        'inline_question__inline_question_standard__route__name',
+        'inline_question__question__text',
+        'inline_question__question__title_text',
+        'response__translated_text'
+    )
+
+    data = []
+    for response in responses:
+        data.append({
+            'device_id': response['inline_question__inline_question_standard__device_id'],
+            'created_at': response['created_at'].strftime('%Y-%m-%d'),
+            'updated_at': response['updated_at'].strftime('%Y-%m-%d'),
+            'language': response['inline_question__inline_question_standard__language__name'],
+            'origin': response['inline_question__inline_question_standard__origin__name'],
+            'destination': response['inline_question__inline_question_standard__destination__name'],
+            'organisation_sector': response['inline_question__inline_question_standard__organisation_sector__name'],
+            'organisation': response['inline_question__inline_question_standard__organisation__name'],
+            'route': response['inline_question__inline_question_standard__route__name'],
+            'question_key': response['inline_question__question__text'],
+            'title_text': response['inline_question__question__title_text'],
+            'response': response['response__translated_text'],
+        })
+
+    return data

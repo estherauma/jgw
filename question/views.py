@@ -9,6 +9,7 @@ from core.logic.file_export import generate_and_export_excel
 from question.forms import InlineQuestionFilterForm, InlineQuestionOnlyFilterForm, MessagingQuestionFilterForm
 from question.repository.inline_questions_standard import (
     each_inline_question_response,
+    get_all_inline_question_responses_data,
     get_inline_question_per_destination_counts,
     get_inline_question_per_language_counts,
     get_inline_question_per_organisation_counts,
@@ -99,7 +100,6 @@ def inline_question(request):
     each_inline_question_response_data_list = [{"key": key, "title": value["title"]} for key, value in each_inline_question_response_data.items()]
 
     inline_question_choices = [{"key":item['key'], "title":item['title']} for item in each_inline_question_response_data_list]
-
     context = {
         "total_inline_questions": total_inline_questions,
         "total_inline_question_responses": total_inline_question_responses,
@@ -206,6 +206,68 @@ def export_messaging_question_data(request):
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=messaging_question_data.xlsx'
+
+    wb.save(response)
+
+    return response
+
+def export_inline_question_data(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    inline_data = get_all_inline_question_responses_data(start_date=start_date, end_date=end_date)
+
+    wb = Workbook()
+    ws = wb.active
+
+    heading = f"Inline Question Report for All Routes from the Period Starting {start_date} to {end_date}"
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=10)
+    heading_cell = ws.cell(row=2, column=1, value=heading)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
+
+    headers = [
+        'Created At',
+        'Updated At',
+        'Device ID',
+        'Language',
+        'Origin',
+        'Destination',
+        'Organisation Sector',
+        'Organisation',
+        'Route',
+        'Question Key',
+        'Question',
+        'Response'
+    ]
+
+    for idx, header in enumerate(headers, start=1):
+        ws.cell(row=4, column=idx, value=header)
+
+    for idx, data in enumerate(inline_data, start=5):
+        created_at = data['created_at']
+        updated_at = data['updated_at']
+        route_value = data['route'] if data['route'] else None
+        language_value = data['language'] if data['language'] else None
+        origin_value = data['origin'] if data['origin'] else None
+        destination_value = data['destination'] if data['destination'] else None
+        organisation_sector_value = data['organisation_sector'] if data['organisation_sector'] else None
+        organisation_value = data['organisation'] if data['organisation'] else None
+
+        ws.cell(row=idx, column=1, value=created_at)
+        ws.cell(row=idx, column=2, value=updated_at)
+        ws.cell(row=idx, column=3, value=data['device_id'])
+        ws.cell(row=idx, column=4, value=language_value)
+        ws.cell(row=idx, column=5, value=origin_value)
+        ws.cell(row=idx, column=6, value=destination_value)
+        ws.cell(row=idx, column=7, value=organisation_sector_value)
+        ws.cell(row=idx, column=8, value=organisation_value)
+        ws.cell(row=idx, column=9, value=route_value)
+        ws.cell(row=idx, column=10, value=data['question_key'])
+        ws.cell(row=idx, column=11, value=data['title_text'])
+        ws.cell(row=idx, column=12, value=data['response'])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=inline_question_data.xlsx'
 
     wb.save(response)
 

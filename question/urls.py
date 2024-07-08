@@ -3,6 +3,7 @@
 
 from django.urls import path
 from .views import (
+    export_inline_question_data,
     export_messaging_question_data,
     messaging_question, 
     export_messaging_question_stats, 
@@ -20,4 +21,5 @@ urlpatterns = [
     
     path("inline/", inline_question, name="inline_question"),
     path("inline/export-inline-question-stats", export_inline_question_stats, name="export_inline_question_stats"),
+    path('inline/export_inline_question_data/', export_inline_question_data, name='export_inline_question_data'),
 ]
