@@ -66,13 +66,36 @@
                   </a>
 
                   <div class="dropdown-menu" aria-labelledby="export-menu">
-                    <button
-                      class="dropdown-item"
-                      id="export-what-matters-to-workers-to-excel"
-                    >
-                      Export to Excel
-                    </button>
+                    
+                    <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#export-date-modal">Export Link Clicks Data to Excel</button>
+                    <button class="dropdown-item"id="export-what-matters-to-workers-to-excel"> Export Events Data Statistics to Excel </button>
+                    
                   </div>
+                  <div class="modal fade" id="export-date-modal" tabindex="-1" role="dialog" aria-labelledby="export-date-modal-label">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header table-title">
+                                <h4 class="modal-title table-title" id="export-date-modal-label">Select Date Range</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="export-date-form">
+                                    <div class="mb-3 ">
+                                        <label for="start-date" class="form-label">Start Date</label>
+                                        <input type="date" class="form-control" id="start-date" name="start_date" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="end-date" class="form-label">End Date</label>
+                                        <input type="date" class="form-control" id="end-date" name="end_date" required>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">Export</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
                 </div>
               </div>
               <div class="col-md-6">
@@ -151,6 +174,42 @@
   const chaptersOpenedUniqueUsers = {{ chapters_opened_by_unique_user | safe }};
   chaptersOpenedGraph(chaptersOpenedUniqueUsers, "chapters-opened-by-unique-users-graph-id");
 
+document.getElementById('export-date-form').addEventListener('submit', function(event) {
+  event.preventDefault();
+  var startDate = document.getElementById('start-date').value;
+  var endDate = document.getElementById('end-date').value;
+
+  exportLinkClicksData(startDate, endDate);
+});
+
+function exportLinkClicksData(startDate, endDate) {
+  $.ajax({
+      url: "{% url 'events:export_link_clicks_data' %}",
+      method: "GET",
+      data: {
+          start_date: startDate,
+          end_date: endDate
+      },
+      xhrFields: {
+          responseType: 'blob'
+      },
+      success: function(response) {
+          var url = window.URL.createObjectURL(response);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "Link_clicks_data_report.xlsx";
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+          $('#export-date-modal').modal('hide');
+      },
+      error: function(xhr, status, error) {
+          console.error("Error exporting messaging question data:", error);
+      }
+  });
+
+}
   
 </script>
 {% endblock %}
