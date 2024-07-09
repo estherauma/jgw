@@ -1,7 +1,11 @@
+from openpyxl.styles import Alignment,Font
+from django.http import HttpResponse
 from django.shortcuts import render
+from openpyxl import Workbook
 from common.utils.request import get_form_filter_params
 from core.logic.file_export import generate_and_export_excel
 from events.forms import EventsDataFilterForm
+from events.models import LinksClickEvent
 from events.repository.bigquery_chapters_feedback_repository import get_chapters_feedback
 
 from events.repository.chapters_opened_repository import (
@@ -47,3 +51,40 @@ def export_what_matters_to_workers_stats(request):
             },
         }
         return generate_and_export_excel(export_dict, filename="what_matters_to_workers_stats")
+
+def export_link_clicks_data(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    link_clicks = LinksClickEvent.objects.filter(
+        event_date__range=(start_date, end_date)
+    ).values(
+        'event_date',
+        'event_name',
+        'link'
+    )
+
+    wb = Workbook()
+    ws = wb.active
+
+    heading = f"Link Clicks Report for the Period Starting {start_date} to {end_date}"
+    heading_cell = ws.cell(row=2, column=1, value=heading)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=3)
+
+    headers = ['Event Date', 'Event Name', 'Link']
+    for col, header in enumerate(headers, start=1):
+        ws.cell(row=3, column=col, value=header)
+
+    for row, click in enumerate(link_clicks, start=4):
+        ws.cell(row=row, column=1, value=click['event_date'].strftime('%Y-%m-%d'))
+        ws.cell(row=row, column=2, value=click['event_name'])
+        ws.cell(row=row, column=3, value=click['link'])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=link_clicks_data.xlsx'
+
+    wb.save(response)
+
+    return response
