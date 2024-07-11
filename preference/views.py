@@ -100,7 +100,7 @@ def export_returning_users_to_excel(request):
     ws = wb.active
     ws.title = "Returning Users"
 
-    heading = "Returning Users"
+    heading = "Report Showing Details of Returned Users"
     ws.append([])
     ws.append([heading])
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=10)
@@ -111,7 +111,7 @@ def export_returning_users_to_excel(request):
 
     headers = [
         "Original Device ID", "ID", "Data Source ID", "Device ID", "Locale", "App ID", "Cleaned",
-        "API Created At", "API Updated At","Location of Potential Work",
+        "API Created At", "API Updated At", "Location of Potential Work",
         "Gender", "Age Range", "Language", "Origin", "Destination", "API Destination",
         "Destination State", "Route", "Organisation Sector", "Organisation Access Code",
         "Factory Farm", "Organisation"
@@ -126,8 +126,8 @@ def export_returning_users_to_excel(request):
             row = [
                 "",  
                 pref['id'], pref['data_source_id'], pref['device_id'], pref['locale'], pref['app_id'], pref['cleaned'],
-                pref['api_created_at'], pref['api_updated_at'],pref['location_of_potential_work__name'], pref['gender__translated_name'],
-                pref['age__range'],pref['language__name'], pref['origin__name'], pref['destination__name'],
+                pref['api_created_at'], pref['api_updated_at'], pref['location_of_potential_work__name'], pref['gender__translated_name'],
+                pref['age__range'], pref['language__name'], pref['origin__name'], pref['destination__name'],
                 pref['api_destination__name'], pref['destination_state__name'], pref['route__name'],
                 pref['organisation_sector__name'], pref['organisation_access_code__code'],
                 pref['factory_farm__name'], pref['organisation__name']
