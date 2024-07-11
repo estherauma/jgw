@@ -44,18 +44,22 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
     list_display = [
         "id",
         "data_source_id",
+        "device_id",
         "created_at",
         "get_translated_name",
         "get_origin_name",
         "destination",
+        "organisation",
         "get_age_translated_name",
         "is_missing_sector_cleaned",
         "get_org_workcode",
         "is_missing_accesscode_cleaned",
     ]
     search_fields = [
+        "id",
         "created_at",
         "data_source_id",
+        "device_id",
         "gender__translated_name",
         "origin__name",
         "destination__name",
