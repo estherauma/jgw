@@ -344,6 +344,10 @@ def get_sws_workcodes_with_access_code(**filters):
 def get_returning_users_grouped_by_original_device_id():
     preferences_with_length = Preference.objects.annotate(
         device_id_length=Length('device_id')
+    ).select_related(
+        'location_of_potential_work', 'gender', 'age', 'language', 'origin', 
+        'destination', 'api_destination', 'destination_state', 'route', 
+        'organisation_sector', 'organisation_access_code', 'factory_farm', 'organisation'
     )
 
     original_device_id_annotation = Case(
@@ -359,32 +363,35 @@ def get_returning_users_grouped_by_original_device_id():
         original_device_id=original_device_id_annotation
     )
 
-    grouped_preferences_query = preferences_with_original_id.values('original_device_id').annotate(
+    grouped_preferences_query = preferences_with_original_id.values(
+        'original_device_id'
+    ).annotate(
         count=Count('id')
-    ).filter(count__gt=1).order_by('original_device_id')
+    ).filter(
+        count__gt=1
+    ).order_by(
+        'original_device_id'
+    )
 
+    related_preferences = preferences_with_original_id.filter(
+        original_device_id__in=[item['original_device_id'] for item in grouped_preferences_query]
+    ).values(
+        'original_device_id', 'id', 'data_source_id', 'device_id', 'locale', 'app_id', 'cleaned', 
+        'api_created_at', 'api_updated_at', 'location_of_potential_work__name', 
+        'gender__translated_name', 'age__range', 'language__name', 'origin__name', 
+        'destination__name', 'api_destination__name', 'destination_state__name', 
+        'route__name', 'organisation_sector__name', 'organisation_access_code__code', 
+        'factory_farm__name', 'organisation__name'
+    )
     grouped_preferences = {}
-    for pref in grouped_preferences_query:
+    for pref in related_preferences:
         original_device_id = pref['original_device_id']
         if original_device_id not in grouped_preferences:
             grouped_preferences[original_device_id] = []
-
-        related_preferences = preferences_with_original_id.filter(
-            original_device_id=original_device_id
-        ).values(
-            'id', 'data_source_id', 'device_id', 'locale', 'app_id', 'cleaned', 
-            'api_created_at', 'api_updated_at',
-            'location_of_potential_work__name', 'gender__translated_name', 'age__range', 
-            'language__name', 'origin__name', 'destination__name', 
-            'api_destination__name', 'destination_state__name', 'route__name', 
-            'organisation_sector__name', 'organisation_access_code__code', 
-            'factory_farm__name', 'organisation__name'
-        )
-        grouped_preferences[original_device_id].extend(related_preferences)
+        grouped_preferences[original_device_id].append(pref)
 
     for original_device_id, preferences in grouped_preferences.items():
         for pref in preferences:
             pref['api_created_at'] = pref['api_created_at'].strftime('%Y-%m-%d %H:%M:%S')
             pref['api_updated_at'] = pref['api_updated_at'].strftime('%Y-%m-%d %H:%M:%S')
-    print(len(grouped_preferences))
     return grouped_preferences
