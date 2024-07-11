@@ -1,6 +1,11 @@
 from django.shortcuts import render
 from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
+from openpyxl.styles import Alignment,Font
+
+import openpyxl
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
 
 from core.forms import GenericFilterForm
 from core.logic.file_export import generate_and_export_excel
@@ -8,6 +13,7 @@ from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_lin
 from preference.repository.preference_repository import (
     get_cumulative_monthly_new_users,
     get_preferences_by_sectors,
+    get_returning_users_grouped_by_original_device_id,
     get_sws_workcodes_with_access_code,
     get_users_by_country_state,
     preference_stats_for_export,
@@ -40,7 +46,6 @@ def user_overview(request):
     users_by_country_state = get_users_by_country_state(**filters, current_user=request.user)
     preferences_by_sectors = get_preferences_by_sectors(**filters, current_user=request.user)
     sws_workcodes_with_access_code = get_sws_workcodes_with_access_code(**filters, current_user=request.user)
-
     pasi_downloads = (
         get_total_dynamic_link_usage(current_user=request.user)
         if not request.user.is_anonymous and request.user.role == "SCHEME"
@@ -88,3 +93,62 @@ def export_preference_stats(request):
             )
 
         return generate_and_export_excel(export_dict, "preference_stats")
+
+def export_returning_users_to_excel(request):
+    returning_users = get_returning_users_grouped_by_original_device_id()
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Returning Users"
+
+    heading = "Returning Users"
+    ws.append([])
+    ws.append([heading])
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=10)
+    heading_cell = ws.cell(row=2, column=1)
+    heading_cell.font = Font(size=14, bold=True)
+    heading_cell.alignment = Alignment(horizontal='center')
+    ws.append([])
+
+    headers = [
+        "Original Device ID", "ID", "Data Source ID", "Device ID", "Locale", "App ID", "Cleaned",
+        "API Created At", "API Updated At","Location of Potential Work",
+        "Gender", "Age Range", "Language", "Origin", "Destination", "API Destination",
+        "Destination State", "Route", "Organisation Sector", "Organisation Access Code",
+        "Factory Farm", "Organisation"
+    ]
+    ws.append(headers)
+
+    for original_device_id, preferences in returning_users.items():
+        ws.append([original_device_id] + [""] * (len(headers) - 1))
+        ws.merge_cells(start_row=ws.max_row, start_column=1, end_row=ws.max_row, end_column=len(headers))
+
+        for pref in preferences:
+            row = [
+                "",  
+                pref['id'], pref['data_source_id'], pref['device_id'], pref['locale'], pref['app_id'], pref['cleaned'],
+                pref['api_created_at'], pref['api_updated_at'],pref['location_of_potential_work__name'], pref['gender__translated_name'],
+                pref['age__range'],pref['language__name'], pref['origin__name'], pref['destination__name'],
+                pref['api_destination__name'], pref['destination_state__name'], pref['route__name'],
+                pref['organisation_sector__name'], pref['organisation_access_code__code'],
+                pref['factory_farm__name'], pref['organisation__name']
+            ]
+            ws.append(row)
+
+        ws.append([])
+
+    for col_num, col in enumerate(ws.columns, 1):
+        max_length = 0
+        column = get_column_letter(col_num)
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=returning_users.xlsx'
+    wb.save(response)
+    return response

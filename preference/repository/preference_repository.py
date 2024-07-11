@@ -1,5 +1,7 @@
 from collections import defaultdict
 from django.db.models import Case, When, Value, CharField, F, Count
+from django.db.models.functions import Cast,Substr,Length
+from django.db.models import Q
 from django.db.models.functions import TruncMonth
 from common.const.value_const import ACCESS_CODE_MAPPING
 from common.helpers.preference_helpers.gender import normalize_gender_name
@@ -338,3 +340,51 @@ def get_sws_workcodes_with_access_code(**filters):
     )
 
     return list(queryset_data)
+
+def get_returning_users_grouped_by_original_device_id():
+    preferences_with_length = Preference.objects.annotate(
+        device_id_length=Length('device_id')
+    )
+
+    original_device_id_annotation = Case(
+        When(device_id__startswith='jgw-vanilla-', device_id_length__gte=49, then=Substr('device_id', 13, 36)),
+        When(device_id__startswith='jgw-vanilla-', then=Substr('device_id', 13, 16)),
+        When(device_id__startswith='jgw-', device_id_length__gte=41, then=Substr('device_id', 5, 36)),
+        When(device_id__startswith='jgw-', then=Substr('device_id', 5, 16)),
+        default=F('device_id'),
+        output_field=CharField()
+    )
+
+    preferences_with_original_id = preferences_with_length.annotate(
+        original_device_id=original_device_id_annotation
+    )
+
+    grouped_preferences_query = preferences_with_original_id.values('original_device_id').annotate(
+        count=Count('id')
+    ).filter(count__gt=1).order_by('original_device_id')
+
+    grouped_preferences = {}
+    for pref in grouped_preferences_query:
+        original_device_id = pref['original_device_id']
+        if original_device_id not in grouped_preferences:
+            grouped_preferences[original_device_id] = []
+
+        related_preferences = preferences_with_original_id.filter(
+            original_device_id=original_device_id
+        ).values(
+            'id', 'data_source_id', 'device_id', 'locale', 'app_id', 'cleaned', 
+            'api_created_at', 'api_updated_at',
+            'location_of_potential_work__name', 'gender__translated_name', 'age__range', 
+            'language__name', 'origin__name', 'destination__name', 
+            'api_destination__name', 'destination_state__name', 'route__name', 
+            'organisation_sector__name', 'organisation_access_code__code', 
+            'factory_farm__name', 'organisation__name'
+        )
+        grouped_preferences[original_device_id].extend(related_preferences)
+
+    for original_device_id, preferences in grouped_preferences.items():
+        for pref in preferences:
+            pref['api_created_at'] = pref['api_created_at'].strftime('%Y-%m-%d %H:%M:%S')
+            pref['api_updated_at'] = pref['api_updated_at'].strftime('%Y-%m-%d %H:%M:%S')
+    print(len(grouped_preferences))
+    return grouped_preferences
