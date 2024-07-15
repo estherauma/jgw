@@ -395,3 +395,27 @@ def get_returning_users_grouped_by_original_device_id():
             pref['api_created_at'] = pref['api_created_at'].strftime('%Y-%m-%d %H:%M:%S')
             pref['api_updated_at'] = pref['api_updated_at'].strftime('%Y-%m-%d %H:%M:%S')
     return grouped_preferences
+
+def extract_preference_for_export(start_date, end_date):
+    preferences_data = Preference.objects.filter(
+        api_created_at__range=[start_date, end_date]
+    ).values(
+        'data_source_id',
+        'device_id',
+        'locale',
+        'app_id',
+        'api_created_at',
+        'api_updated_at',
+        'location_of_potential_work__name',
+        'gender__translated_name',
+        'age__range',
+        'language__name',
+        'origin__name',
+        'destination__name',
+        'route__name',
+        'organisation_sector__name',
+        'organisation_access_code__code',
+        'factory_farm__name',
+        'organisation__name'
+    )
+    return preferences_data

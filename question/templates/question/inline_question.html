@@ -61,21 +61,15 @@
                                             <div class="modal-dialog modal-dialog-centered" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header table-title">
-                                                        <h4 class="modal-title table-title" id="export-date-modal-label">Select Date Range</h4>
+                                                        <h4 class="modal-title table-title" id="export-date-modal-label">Select Date Range For Data Export</h4>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <form id="export-date-form">
-                                                            <div class="mb-3 ">
-                                                                <label for="start-date" class="form-label">Start Date</label>
-                                                                <input type="date" class="form-control" id="start-date" name="start_date" required>
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="end-date" class="form-label">End Date</label>
-                                                                <input type="date" class="form-control" id="end-date" name="end_date" required>
-                                                            </div>
+                                                        <form method="post" action="{% url 'question:export_inline_question_data' %}" id="export-date-form">
+                                                            {% csrf_token %}
+                                                            {{ date_range_form|crispy }}
                                                             <div class="text-center">
-                                                                <button type="submit" class="btn btn-primary">Export</button>
+                                                                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Export</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -309,42 +303,6 @@ document.addEventListener("DOMContentLoaded", function() {
     initializeTooltips();
 });
 
-document.getElementById('export-date-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        var startDate = document.getElementById('start-date').value;
-        var endDate = document.getElementById('end-date').value;
-
-        exportMessagingQuestionData(startDate, endDate);
-    });
-
-    function exportMessagingQuestionData(startDate, endDate) {
-        $.ajax({
-            url: "{% url 'question:export_inline_question_data' %}",
-            method: "GET",
-            data: {
-                start_date: startDate,
-                end_date: endDate
-            },
-            xhrFields: {
-                responseType: 'blob'
-            },
-            success: function(response) {
-                var url = window.URL.createObjectURL(response);
-                var a = document.createElement("a");
-                a.href = url;
-                a.download = "Inline_question_data_report.xlsx";
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
-                $('#export-date-modal').modal('hide');
-            },
-            error: function(xhr, status, error) {
-                console.error("Error exporting messaging question data:", error);
-            }
-        });
-
-    }
     
 </script>
 {% endblock %}

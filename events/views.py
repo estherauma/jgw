@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from openpyxl import Workbook
 from common.utils.request import get_form_filter_params
+from core.forms import DateRangeForm
 from core.logic.file_export import generate_and_export_excel
 from events.forms import EventsDataFilterForm
 from events.models import LinksClickEvent
@@ -20,6 +21,8 @@ def what_matters_to_workers(request):
     filters = form_filter_params["filters"]
     filter_form = form_filter_params["filter_form"]
 
+    date_range_form = DateRangeForm()
+
     chapters_opened = get_chapters_opened(**filters, current_user=request.user)
     chapters_opened_by_unique_user = get_chapters_opened_unique_by_users(**filters, current_user=request.user)
     chapters_feedback = get_chapters_feedback(**filters, current_user=request.user)
@@ -29,6 +32,7 @@ def what_matters_to_workers(request):
         "chapters_opened_by_unique_user": chapters_opened_by_unique_user,
         "chapters_feedback": chapters_feedback,
         "filter_form": filter_form,
+        "date_range_form": date_range_form,
     }
     return render(request, "events/what-matters-to-workers.html", context=context)
 
@@ -53,8 +57,8 @@ def export_what_matters_to_workers_stats(request):
         return generate_and_export_excel(export_dict, filename="what_matters_to_workers_stats")
 
 def export_link_clicks_data(request):
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
+    start_date = request.POST.get('start_date')
+    end_date = request.POST.get('end_date')
     
     link_clicks = LinksClickEvent.objects.filter(
         event_date__range=(start_date, end_date)

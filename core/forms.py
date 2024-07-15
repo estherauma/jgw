@@ -102,3 +102,22 @@ class GenericFilterForm(forms.Form):
         ),
         required=False,
     )
+
+
+class DateRangeForm(forms.Form):
+    start_date = forms.DateField(
+        label="Start Date",
+        required=True,
+        widget=forms.DateInput(
+            format=("%Y-%m-%d"),
+            attrs={"type": "date",'class': 'form-control',},
+        ),
+    )
+    end_date = forms.DateField(
+        label="End Date",
+        required=True,
+        widget=forms.DateInput(
+            format=("%Y-%m-%d"),
+            attrs={"type": "date",'class': 'form-control',},
+        ),
+    )
