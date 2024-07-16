@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
 from openpyxl.styles import Alignment,Font
@@ -7,11 +7,13 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
 
-from core.forms import GenericFilterForm
+from core.forms import GenericFilterForm,DateRangeForm
 from core.logic.file_export import generate_and_export_excel
 from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
 from help_contacts.repository.help_contacts_data import get_help_contacts_between_dates
+from preference.models import Preference
 from preference.repository.preference_repository import (
+    extract_preference_for_export,
     get_cumulative_monthly_new_users,
     get_preferences_by_sectors,
     get_returning_users_grouped_by_original_device_id,
@@ -33,6 +35,7 @@ def user_overview(request):
     form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
     filters = form_filter_params["filters"]
     filter_form = form_filter_params["filter_form"]
+    date_range_form = DateRangeForm()
 
     total_user_overview_responses = preferences_count(**filters, current_user=request.user)
     preferences_per_origin_country_responses = preferences_by_origin(**filters, current_user=request.user)
@@ -54,6 +57,7 @@ def user_overview(request):
     )
     context = {
         "filter_form": filter_form,
+        "date_range_form": date_range_form,
         "total_user_overview_responses": total_user_overview_responses,
         "preferences_by_age": preferences_by_age_responses,
         "preferences_by_gender": preferences_by_gender_responses,
@@ -156,48 +160,117 @@ def export_returning_users_to_excel(request):
 
 
 def export_help_contacts_data(request):
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    inline_data = get_help_contacts_between_dates(start_date=start_date, end_date=end_date)
+    if request.method == 'POST':
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        inline_data = get_help_contacts_between_dates(start_date=start_date, end_date=end_date)
 
-    wb = openpyxl.Workbook()
-    ws = wb.active
+        wb = openpyxl.Workbook()
+        ws = wb.active
 
-    heading = f"Help Contacts Report for All Routes from the Period Starting {start_date} to {end_date}"
-    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=10)
-    heading_cell = ws.cell(row=2, column=1, value=heading)
-    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
-    heading_cell.font = Font(bold=True)
+        heading = f"Help Contacts Report for All Routes from the Period Starting {start_date} to {end_date}"
+        ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=10)
+        heading_cell = ws.cell(row=2, column=1, value=heading)
+        heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+        heading_cell.font = Font(bold=True)
 
-    headers = [
-        'Created At',
-        'Device ID',
-        'Contact Type',
-        'Contact',
-        'Origin',
-        'Destination',
-        'Locale',
-    ]
+        headers = [
+            'Created At',
+            'Device ID',
+            'Contact Type',
+            'Contact',
+            'Origin',
+            'Destination',
+            'Locale',
+        ]
 
-    for idx, header in enumerate(headers, start=1):
-        ws.cell(row=4, column=idx, value=header)
+        for idx, header in enumerate(headers, start=1):
+            ws.cell(row=4, column=idx, value=header)
 
-    for idx, data in enumerate(inline_data, start=5):
-        created_at = data['api_created_at']
-        origin_value = data['origin__name'] if data['origin__name'] else None
-        destination_value = data['destination__name'] if data['destination__name'] else None
+        for idx, data in enumerate(inline_data, start=5):
+            created_at = data['api_created_at']
+            origin_value = data['origin__name'] if data['origin__name'] else None
+            destination_value = data['destination__name'] if data['destination__name'] else None
 
-        ws.cell(row=idx, column=1, value=created_at.strftime('%Y-%m-%d'))
-        ws.cell(row=idx, column=2, value=data['device_id'])
-        ws.cell(row=idx, column=3, value=data['contact_type'])
-        ws.cell(row=idx, column=4, value=data['translated_contact_value'])
-        ws.cell(row=idx, column=5, value=origin_value)
-        ws.cell(row=idx, column=6, value=destination_value)
-        ws.cell(row=idx, column=7, value=data['locale'])
+            ws.cell(row=idx, column=1, value=created_at.strftime('%Y-%m-%d'))
+            ws.cell(row=idx, column=2, value=data['device_id'])
+            ws.cell(row=idx, column=3, value=data['contact_type'])
+            ws.cell(row=idx, column=4, value=data['translated_contact_value'])
+            ws.cell(row=idx, column=5, value=origin_value)
+            ws.cell(row=idx, column=6, value=destination_value)
+            ws.cell(row=idx, column=7, value=data['locale'])
 
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=Help_contacts_data.xlsx'
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=Help_contacts_data.xlsx'
 
-    wb.save(response)
+        wb.save(response)
 
-    return response
+        return response
+    
+    return HttpResponse(status=405)
+
+
+def export_preferences_data(request):
+    if request.method =='POST':
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+
+        preferences_data=extract_preference_for_export(start_date,end_date)
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+
+        heading = f"Preferences Report from {start_date} to {end_date}"
+        ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=9)
+        heading_cell = ws.cell(row=2, column=1, value=heading)
+        heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+        heading_cell.font = Font(bold=True)
+
+        headers = [
+            'Data Source ID',
+            'Device ID',
+            'Locale',
+            'App ID',
+            'Api Created At',
+            'API Updated At',
+            'Location of Potential Work',
+            'Gender',
+            'Age Range',
+            'Language',
+            'Origin',
+            'Destination',
+            'Route',
+            'Organisation Sector',
+            'Organisation Access Code',
+            'Factory Farm',
+            'Organisation',
+        ]
+
+        for idx, header in enumerate(headers, start=1):
+            ws.cell(row=4, column=idx, value=header)
+
+        for idx, data in enumerate(preferences_data, start=5):
+            ws.cell(row=idx, column=1, value=data['data_source_id'])
+            ws.cell(row=idx, column=2, value=data['device_id'])
+            ws.cell(row=idx, column=3, value=data['locale'])
+            ws.cell(row=idx, column=4, value=data['app_id'])
+            ws.cell(row=idx, column=5, value=data['api_created_at'].strftime('%Y-%m-%d'))
+            ws.cell(row=idx, column=6, value=data['api_updated_at'].strftime('%Y-%m-%d'))
+            ws.cell(row=idx, column=7, value=data['location_of_potential_work__name'])
+            ws.cell(row=idx, column=8, value=data['gender__translated_name'])
+            ws.cell(row=idx, column=9, value=data['age__range'])
+            ws.cell(row=idx, column=10, value=data['language__name'])
+            ws.cell(row=idx, column=11, value=data['origin__name'])
+            ws.cell(row=idx, column=12, value=data['destination__name'])
+            ws.cell(row=idx, column=13, value=data['route__name'])
+            ws.cell(row=idx, column=14, value=data['organisation_sector__name'])
+            ws.cell(row=idx, column=15, value=data['organisation_access_code__code'])
+            ws.cell(row=idx, column=16, value=data['factory_farm__name'])
+            ws.cell(row=idx, column=17, value=data['organisation__name'])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="preferences_report_{start_date}_to_{end_date}.xlsx"'
+        wb.save(response)
+        
+        return response
+    return HttpResponse(status=405)
