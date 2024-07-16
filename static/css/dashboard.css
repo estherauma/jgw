@@ -247,6 +247,7 @@ body.modal-open {
   
   #organisation-work-code-usage-graph-id {
     min-width: 550px !important;
+    min-height: 400px;
   }
 
 .resource-link-margin{
