@@ -2,39 +2,45 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 
-from other_resource.forms import EditResourceForm, OtherResourceForm
+from other_resource.forms import EditResourceForm
 from .models import OtherResource
-from users.utils import get_user_organisations
+from django.contrib.auth.models import Group
+from users.utils import get_user_group
 
 @login_required
 def other_resource_view(request):
-    user = request.user
-    user_organisations = get_user_organisations(user)
+    user=request.user
+    user_group=get_user_group(user)
+    print(user_group)
     if request.method == 'POST':
-        if 'delete_resource_id' in request.POST:
-            resource_id = request.POST.get('delete_resource_id')
-            resource = get_object_or_404(OtherResource, pk=resource_id)
-            resource.delete()
-            return redirect('other_resource:other_resource')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        link = request.POST.get('link')
+        group_id = request.POST.get('group')
 
-        form = OtherResourceForm(request.POST, user=user)
-        if form.is_valid():
-            form.save()
-            return redirect('other_resource:other_resource')
+        group = Group.objects.get(id=group_id) if group_id else None
+
+        OtherResource.objects.create(
+            title=title,
+            description=description,
+            link=link,
+            group=group,
+        )
+        return redirect('other_resource:other_resource') 
+
+    groups = Group.objects.all()
+    if user.is_superuser:
+        resources = OtherResource.objects.all()
     else:
-        form = OtherResourceForm(user=user)
-
-    resources = OtherResource.objects.filter(organisation__in=user_organisations)
-    context = {
-        'form': form,
-        'resources': resources,
-        'organisations': user_organisations,
-    }
-    return render(request, 'other_resource.html', context)
+        resources = OtherResource.objects.filter(group__name__in=user_group)
+    return render(request, 'other_resource.html', {'groups': groups, 'resources': resources})
 
 @login_required
 def edit_resource(request, resource_id):
     resource = get_object_or_404(OtherResource, pk=resource_id)
+    groups = Group.objects.all()
+
+    print("GROUPS",groups)
 
     if request.method == 'POST':
         form = EditResourceForm(request.POST, instance=resource)
@@ -47,7 +53,7 @@ def edit_resource(request, resource_id):
     context = {
         'form': form,
         'resource': resource,
-        'organisations': get_user_organisations(request.user),
+        'groups': groups,
     }
 
     return render(request, 'edit_resource.html', context)
