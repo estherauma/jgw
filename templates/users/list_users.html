@@ -23,17 +23,46 @@
                     </a>
                 </div>
             </div>
-            <div class="table-responsive">
+            <div class="table-responsive ">
+                <div class="m-3 mb-0">
+                    <form method="GET" action="">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <input type="text" name="search" class="form-control" placeholder="Search by name" value="{{ request.GET.search }}">
+                            </div>
+                            <div class="col-md-5">
+                                <select name="group" class="form-control">
+                                    <option value="">All Group Memembership(s)</option>
+                                    {% for group in groups %}
+                                        <option value="{{ group.id }}" {% if request.GET.group == group.id|stringformat:"s" %}selected{% endif %}>{{ group.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">Filter</i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
                 <table class="table m-2 mb-0">
                     <thead>
                         <tr>
-                            <th>EMAIL ADDRESS</th>
+                            <th>Name</th>
+                            <th>Email Address</th>
+                            <th>Group Memembership(s)</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for user in users %}
                         <tr class="{% if not user.is_active %} striped-row {% endif %}">
+                            <td>{{user.first_name}} {{user.last_name}}</td>
                             <td>{{user.email}}</td>
+                            <td>
+                                {% for group in user.groups.all %}
+                                    {{ group.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
                             <td>
                                 {% if user.is_active == True %}
                                 Active

@@ -4,6 +4,7 @@ from common.helpers.model_helpers.preference import (
     make_language_queryset_list_unique,
 )
 from common.utils.auth import admin_required
+from django.db.models import Q
 
 import jwt
 from django.conf import settings
@@ -14,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from preference.models import Language
+from django.contrib.auth.models import Group
 
 from users.tasks import send_email_notification
 from users.utils import get_user_destinations, get_user_factories, get_user_organisations
@@ -37,8 +39,24 @@ from users.templatetags.user_role_tags import has_group
 @login_required
 @admin_required
 def list_users(request):
-    users = User.objects.all().order_by("-id")
-    return render(request, "users/list_users.html", context={"users": users})
+    search_query = request.GET.get('search', '')
+    group_id = request.GET.get('group', '')
+
+    users = User.objects.all()
+
+    if search_query:
+        users = users.filter(
+            Q(first_name__icontains=search_query) | 
+            Q(last_name__icontains=search_query)
+        )
+
+    if group_id:
+        users = users.filter(groups__id=group_id)
+
+    users = users.order_by("-id")
+    groups = Group.objects.all() 
+
+    return render(request, "users/list_users.html", context={"users": users, "groups": groups})
 
 
 @login_required
