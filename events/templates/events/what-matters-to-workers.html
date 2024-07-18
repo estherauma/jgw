@@ -30,7 +30,7 @@
         <form method="post" id="what-matters-to-workers-filter-form">
           {% csrf_token %} {{filter_form|crispy}}
           <button type="submit" class="btn btn-primary">Submit</button>
-          <a href="" class="btn btn-secondary">Reset</a>
+          <a href="" class="btn btn-secondary" id="reset-button">Reset</a>
         </form>
       </div>
     </div>
