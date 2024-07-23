@@ -18,28 +18,28 @@
                     </p>
                 </div>
                 <div class="col-sm-12 col-md-6" style="text-align: right;">
-                    <a class="btn btn-primary" href="{% url 'users:invite_user' %}">
+                    <a class="btn bg-jgw-deep-blue text-white" href="{% url 'users:invite_user' %}">
                         Invite User
                     </a>
                 </div>
             </div>
-            <div class="table-responsive ">
+            <div class="table-responsive">
                 <div class="m-3 mb-0">
                     <form method="GET" action="">
                         <div class="row">
                             <div class="col-md-5">
-                                <input type="text" name="search" class="form-control" placeholder="Search by name" value="{{ request.GET.search }}">
+                                <input type="text" name="search" class="form-control" placeholder="Search by name" value="{{ search_query }}">
                             </div>
                             <div class="col-md-5">
                                 <select name="group" class="form-control">
                                     <option value="">All Group Memembership(s)</option>
                                     {% for group in groups %}
-                                        <option value="{{ group.id }}" {% if request.GET.group == group.id|stringformat:"s" %}selected{% endif %}>{{ group.name }}</option>
+                                        <option value="{{ group.id }}" {% if group_id == group.id|stringformat:"s" %}selected{% endif %}>{{ group.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100">Filter</i></button>
+                                <button type="submit" class="btn btn-primary w-100 bg-jgw-deep-blue">Filter <i class="fa fa-filter"></i></button>
                             </div>
                         </div>
                     </form>
@@ -56,40 +56,35 @@
                     <tbody>
                         {% for user in users %}
                         <tr class="{% if not user.is_active %} striped-row {% endif %}">
-                            <td>{{user.first_name}} {{user.last_name}}</td>
-                            <td>{{user.email}}</td>
+                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                            <td>{{ user.email }}</td>
                             <td>
                                 {% for group in user.groups.all %}
                                     {{ group.name }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
                             </td>
                             <td>
-                                {% if user.is_active == True %}
+                                {% if user.is_active %}
                                 Active
-                                {% elif user.is_active == False %}
-                                <span class="text-danger">In Active</span>
+                                {% else %}
+                                <span class="text-danger">Inactive</span>
                                 {% endif %}
                             </td>
                             <td class="">
                                 <div class="dropdown">
-                                    <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
+                                    <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="mdi mdi-dots-vertical text-dark"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                        <a class="dropdown-item" href="{% url 'users:manage_user' id=user.id %}">
-                                            Manage
-                                        </a>
-                                        <a class="dropdown-item" href="{% url 'users:activate_account' id=user.id %}">
-                                            {% if user.is_active == True %}
+                                        <a class="dropdown-item" href="{% url 'users:manage_user' user.id %}">Manage</a>
+                                        <a class="dropdown-item" href="{% url 'users:activate_account' user.id %}">
+                                            {% if user.is_active %}
                                             Deactivate
-                                            {% elif user.is_active == False %}
+                                            {% else %}
                                             Activate
                                             {% endif %}
                                         </a>
-                                        <a class="dropdown-item" href="{% url 'users:edit_user' user_id=user.id %}">
-                                            Edit
-                                        </a>
+                                        <a class="dropdown-item" href="{% url 'users:edit_user' user_id=user.id %}">Edit</a>
                                     </div>
                                 </div>
                             </td>
@@ -97,6 +92,35 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <nav aria-label="Page navigation" class="m-2">
+                    <ul class="pagination justify-content-end">
+                        {% if users.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ users.previous_page_number }}&search={{ search_query }}&group={{ group_id }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% for num in users.paginator.page_range %}
+                            {% if users.number == num %}
+                                <li class="page-item active">
+                                    <a class="page-link bg-jgw-deep-blue" href="#">{{ num }}</a>
+                                </li>
+                            {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}&search={{ search_query }}&group={{ group_id }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if users.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ users.next_page_number }}&search={{ search_query }}&group={{ group_id }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

@@ -16,6 +16,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from preference.models import Language
 from django.contrib.auth.models import Group
+from django.core.paginator import Paginator
 
 from users.tasks import send_email_notification
 from users.utils import get_user_destinations, get_user_factories, get_user_organisations
@@ -41,6 +42,7 @@ from users.templatetags.user_role_tags import has_group
 def list_users(request):
     search_query = request.GET.get('search', '')
     group_id = request.GET.get('group', '')
+    page_number = request.GET.get('page', 1)
 
     users = User.objects.all()
 
@@ -54,9 +56,20 @@ def list_users(request):
         users = users.filter(groups__id=group_id)
 
     users = users.order_by("-id")
-    groups = Group.objects.all() 
+    groups = Group.objects.all()
 
-    return render(request, "users/list_users.html", context={"users": users, "groups": groups})
+    paginator = Paginator(users, 10) 
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'users': page_obj,
+        'groups': groups,
+        'paginator': paginator,
+        'search_query': search_query,
+        'group_id': group_id
+    }
+
+    return render(request, "users/list_users.html", context)
 
 
 @login_required
