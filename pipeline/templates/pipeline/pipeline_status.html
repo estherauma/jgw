@@ -50,47 +50,78 @@
         <div class="widget-rounded-circle card">
             <div class="card-body">
                 <div class="row">
-                        <div class="col-12">
-                            <div class="text-start">
-                                <h5 class="text-muted global-text-style table-title">The table below show list of data pipeline execution</h5>
+                    <div class="col-12">
+                        <div class="text-start">
+                            <h5 class="text-muted global-text-style table-title">The table below show list of data pipeline execution</h5>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="row">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No:</th>
+                                        <th>Command Name</th>
+                                        <th>Executed At</th>
+                                        <th>Data Fetch</th>
+                                        <th>Error</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in logs %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ log.command_name }}</td>
+                                            <td>{{ log.executed_at }}</td>
+                                            <td>{{ log.data_fetch }}</td>
+                                            <td>{{ log.error }}</td>
+                                            <td>
+                                                {{ log.command_status|yesno:"Success,Failure" }}
+                                                {% if log.command_status %}
+                                                    <span title="Success"  class="text-success status large-symbol">&#10004;</span>
+                                                {% else %}
+                                                    <span title="Failure" class="text-danger status large-symbol">&#10006;</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination justify-content-end">
+                                        {% if logs.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ logs.previous_page_number }}" aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                        {% for num in logs.paginator.page_range %}
+                                            {% if logs.number == num %}
+                                                <li class="page-item active">
+                                                    <a class="page-link bg-jgw-deep-blue" href="#">{{ num }}</a>
+                                                </li>
+                                            {% elif num > logs.number|add:'-3' and num < logs.number|add:'3' %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if logs.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ logs.next_page_number }}" aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
-                    <div class="col-12">
-                            <div class="row">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>No:</th>
-                                            <th>Command Name</th>
-                                            <th>Executed At</th>
-                                            <th>Data Fetch</th>
-                                            <th>Error</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for log in logs %}
-                                            <tr>
-                                                <td>{{ forloop.counter }}</td>
-                                                <td>{{ log.command_name }}</td>
-                                                <td>{{ log.executed_at }}</td>
-                                                <td>{{ log.data_fetch }}</td>
-                                                <td>{{ log.error }}</td>
-                                                <td>
-                                                    {{ log.command_status|yesno:"Success,Failure" }}
-                                                    {% if log.command_status %}
-                                                        <span title="Success"  class="text-success status large-symbol">&#10004;</span>
-                                                    {% else %}
-                                                        <span title="Failure" class="text-danger status large-symbol">&#10006;</span>
-                                                    {% endif %}
-                                                    
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        
                     </div>
                 </div>
             </div>
