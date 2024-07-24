@@ -157,7 +157,7 @@ def export_messaging_question_data(request):
     wb = Workbook()
     ws = wb.active
 
-    heading = f"Messaging Question Report for All Routes from the Period Starting {start_date} to {end_date}"
+    heading = f"Messaging Question Report for the Period Starting {start_date} to {end_date}"
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=15)
     heading_cell = ws.cell(row=2, column=1, value=heading)
     heading_cell.alignment = Alignment(horizontal="center", vertical="center")
