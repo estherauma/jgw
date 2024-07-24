@@ -212,12 +212,9 @@ def inline_question_response():
     return {"counts": responses, "labels": question_texts_list}
 
 
-def get_all_inline_question_responses_data(start_date, end_date):
-    start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
-    end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
-
-    responses = InlineQuestionResponse.objects.filter(
-        created_at__range=(start_date_obj, end_date_obj)
+def get_all_inline_question_responses_data(**filters):
+    responses = question_response_filtered_queryset(
+        queryset=InlineQuestionResponse.objects.all(), **filters
     ).exclude(
         Q(inline_question__question__text='not specified')
     ).select_related(
