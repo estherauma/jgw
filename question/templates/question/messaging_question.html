@@ -55,31 +55,10 @@
         
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
                                         {% flag 'can_view_messaging_question_report_export_button' %}
-                                            <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#export-date-modal">Export Messaging Question Data to Excel</button>
+                                            <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">Export Messaging Question Data Report to Excel</a>
                                         {% endflag %}
                                         <button  class="dropdown-item" id="export-messaging-question-to-excel">Export Messaging Question Statistics to Excel</button>
-                                    </div>
-
-                                    <div class="modal fade" id="export-date-modal" tabindex="-1" role="dialog" aria-labelledby="export-date-modal-label">
-                                        <div class="modal-dialog modal-dialog-centered" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header table-title">
-                                                    <h4 class="modal-title table-title" id="export-date-modal-label">Select Date Range For Data Export</h4>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form method="post" action="{% url 'question:export_messaging_question_data' %}" id="export-date-form">
-                                                        {% csrf_token %}
-                                                        {{ date_range_form|crispy }}
-                                                        <div class="text-center">
-                                                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Export</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
+                                    </div>                                    
                                 </div>
                             </div>
                             <div class="col-md-6 button-margin">

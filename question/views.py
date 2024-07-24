@@ -147,9 +147,12 @@ def export_inline_question_stats(request):
         return generate_and_export_excel(export_dict, filename="inline_question_stats")
     
 def export_messaging_question_data(request):
-    start_date = request.POST.get('start_date')
-    end_date = request.POST.get('end_date')
-    messaging_data = get_all_messaging_question_responses_data(start_date=start_date, end_date=end_date)
+    form_filter_params = get_form_filter_params(request=request, form_class=MessagingQuestionFilterForm)
+    filters = form_filter_params["filters"]
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    messaging_data = get_all_messaging_question_responses_data(**filters,current_user=request.user)
 
     wb = Workbook()
     ws = wb.active
@@ -185,14 +188,6 @@ def export_messaging_question_data(request):
     for idx, data in enumerate(messaging_data, start=5):
         api_created_at = timezone.localtime(data['api_created_at']).strftime('%Y-%m-%d %H:%M:%S')
         api_updated_at = timezone.localtime(data['api_updated_at']).strftime('%Y-%m-%d %H:%M:%S')
-        route_value = data['route'].name if data['route'] else None
-        language_value = data['language'].name if data['language'] else None
-        origin_value = data['origin'].name if data['origin'] else None
-        destination_value = data['destination'].name if data['destination'] else None
-        organisation_sector_value = data['organisation_sector'].name if data['organisation_sector'] else None
-        factory_farm_value = data['factory_farm'].name if data['factory_farm'] else None
-        organisation_value = data['organisation'].name if data['organisation'] else None
-        question_value = data['question'] if data['question'] else None
 
         ws.cell(row=idx, column=1, value=api_created_at)
         ws.cell(row=idx, column=2, value=api_updated_at)
@@ -201,15 +196,15 @@ def export_messaging_question_data(request):
         ws.cell(row=idx, column=5, value=data['app_id'])
         ws.cell(row=idx, column=6, value=data['message_id'])
         ws.cell(row=idx, column=7, value=data['locale'])
-        ws.cell(row=idx, column=8, value=route_value)
-        ws.cell(row=idx, column=9, value=language_value)
-        ws.cell(row=idx, column=10, value=origin_value)
-        ws.cell(row=idx, column=11, value=destination_value)
-        ws.cell(row=idx, column=12, value=organisation_sector_value)
-        ws.cell(row=idx, column=13, value=factory_farm_value)
-        ws.cell(row=idx, column=14, value=organisation_value)
-        ws.cell(row=idx, column=15, value=question_value)
-        ws.cell(row=idx, column=16, value=', '.join(data['responses']))
+        ws.cell(row=idx, column=8, value=data['route'])
+        ws.cell(row=idx, column=9, value=data['language'])
+        ws.cell(row=idx, column=10, value=data['origin'])
+        ws.cell(row=idx, column=11, value=data['destination'])
+        ws.cell(row=idx, column=12, value=data['organisation_sector'])
+        ws.cell(row=idx, column=13, value=data['factory_farm'])
+        ws.cell(row=idx, column=14, value=data['organisation'])
+        ws.cell(row=idx, column=15, value=data['question'])
+        ws.cell(row=idx, column=16, value=data['responses'])
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=messaging_question_data.xlsx'

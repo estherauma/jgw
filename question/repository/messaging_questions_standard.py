@@ -73,52 +73,45 @@ def messaging_question_stats_for_export(filters):
         "responses_per_destination": messaging_question_per_destination,
     }
 
-def get_all_messaging_question_responses_data(start_date, end_date):
-    start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
-    end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
-
-    responses = MessagingQuestionResponse.objects.filter(
-        messaging_question__messaging_question_standard__api_created_at__range=(start_date_obj, end_date_obj)
-    ).select_related(
-        'messaging_question__messaging_question_standard', 
-        'messaging_question__question', 
-        'messaging_question__messaging_question_standard__route',
-        'messaging_question__messaging_question_standard__language',
-        'messaging_question__messaging_question_standard__origin',
-        'messaging_question__messaging_question_standard__destination',
-        'messaging_question__messaging_question_standard__organisation_sector',
-        'messaging_question__messaging_question_standard__factory_farm',
-        'messaging_question__messaging_question_standard__organisation'
+def get_all_messaging_question_responses_data(**filters):
+    queryset = generic_question_filtered_queryset(queryset=MessagingQuestionStandard.objects.all(), **filters).select_related(
+        'route', 'language', 'origin', 'destination', 'organisation_sector', 'factory_farm', 'organisation'
     ).prefetch_related(
-        'responses__option'
+        'question_standard',
+        'question_standard__messagingquestionresponse_set__responses__option' 
     )
 
     data = []
-    for response in responses:
-        if response.messaging_question is None:
-            continue
-        standard = response.messaging_question.messaging_question_standard
-        question_text = response.messaging_question.question.translated_text if response.messaging_question.question else None
-        if not question_text:
-            continue
-        response_texts = [res.option.translated_option for res in response.responses.all()]
+    for standard in queryset:
+        for messaging_question in standard.question_standard.all():
+            if not messaging_question.question:
+                continue
+            question_text = messaging_question.question.translated_text
+            responses = []
+            for response in messaging_question.messagingquestionresponse_set.all():
+                for option in response.responses.all():
+                    response_text = option.option.translated_option
+                    responses.append(response_text)
+            if not question_text:
+                continue
+            
+            data.append({
+                'api_created_at': standard.api_created_at,
+                'api_updated_at': standard.api_updated_at,
+                'message_id': standard.message_id,
+                'data_source_id': standard.data_source_id,
+                'device_id': standard.device_id,
+                'app_id': standard.app_id,
+                'locale': standard.locale,
+                'route': standard.route.name if standard.route else None,
+                'language': standard.language.name if standard.language else None,
+                'origin': standard.origin.name if standard.origin else None,
+                'destination': standard.destination.name if standard.destination else None,
+                'organisation_sector': standard.organisation_sector.name if standard.organisation_sector else None,
+                'factory_farm': standard.factory_farm.name if standard.factory_farm else None,
+                'organisation': standard.organisation.name if standard.organisation else None,
+                'question': question_text,
+                'responses': response_text,
+            })
 
-        data.append({
-            'api_created_at': standard.api_created_at,
-            'api_updated_at': standard.api_updated_at,
-            'message_id':standard.message_id,
-            'data_source_id': standard.data_source_id,
-            'device_id': standard.device_id,
-            'app_id': standard.app_id,
-            'locale': standard.locale,
-            'route': standard.route,
-            'language': standard.language,
-            'origin': standard.origin,
-            'destination': standard.destination,
-            'organisation_sector': standard.organisation_sector,
-            'factory_farm': standard.factory_farm,
-            'organisation': standard.organisation,
-            'question': question_text,
-            'responses': response_texts,
-        })
     return data
