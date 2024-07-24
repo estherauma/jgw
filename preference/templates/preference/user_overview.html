@@ -56,28 +56,9 @@
                                             </a>
         
                                             <div class="dropdown-menu" aria-labelledby="export-menu">
-                                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#export-date-modal-preferences">Export Preferences Data Report to Excel</button>
+                                                <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">Export Preferences Data Report to Excel</a>
                                                 <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#export-date-modal">Export Help Contacts Data Report to Excel</button>
                                                 <button  class="dropdown-item" id="export-user-overview-to-excel">Export Preferences Statistics to Excel</button>
-                                            </div>
-                                            <div class="modal fade" id="export-date-modal-preferences" tabindex="-1" role="dialog" aria-labelledby="export-date-modal-preferences-label">
-                                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header table-title">
-                                                            <h4 class="modal-title table-title" id="export-date-modal-preferences-label">Select Date Range for Preferences Export</h4>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form method="post" action="{% url 'preference:export_preferences' %}" id="export-date-form-preferences">
-                                                                {% csrf_token %}
-                                                                {{ date_range_form|crispy }}
-                                                                <div class="text-center">
-                                                                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Export</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </div>
                                             <div class="modal fade" id="export-date-modal" tabindex="-1" role="dialog" aria-labelledby="export-date-modal-label">
                                                 <div class="modal-dialog modal-dialog-centered" role="document">
