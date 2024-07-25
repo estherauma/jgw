@@ -64,32 +64,10 @@
                     Export
                     <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
                   </a>
-
                   <div class="dropdown-menu" aria-labelledby="export-menu">
-                    
-                    <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#export-date-modal">Export Link Clicks Data to Excel</button>
+                    <a class="dropdown-item" href="{% url 'events:export_link_clicks_data' %}?export=true">Export Link Clicks Data Report to Excel</a>
                     <button class="dropdown-item"id="export-what-matters-to-workers-to-excel"> Export Events Data Statistics to Excel </button>
-                    
                   </div>
-                  <div class="modal fade" id="export-date-modal" tabindex="-1" role="dialog" aria-labelledby="export-date-modal-label">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header table-title">
-                                <h4 class="modal-title table-title" id="export-date-modal-label">Select Date Range For Link Cicks Export</h4>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="post" action="{% url 'events:export_link_clicks_data' %}" id="export-date-form">
-                                  {% csrf_token %}
-                                  {{ date_range_form|crispy }}
-                                  <div class="text-center">
-                                      <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Export</button>
-                                  </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div> 
                 </div>
               </div>
               <div class="col-md-6">

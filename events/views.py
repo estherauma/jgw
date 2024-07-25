@@ -57,8 +57,10 @@ def export_what_matters_to_workers_stats(request):
         return generate_and_export_excel(export_dict, filename="what_matters_to_workers_stats")
 
 def export_link_clicks_data(request):
-    start_date = request.POST.get('start_date')
-    end_date = request.POST.get('end_date')
+    form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
+    filters = form_filter_params["filters"]
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
     
     link_clicks = LinksClickEvent.objects.filter(
         event_date__range=(start_date, end_date)
