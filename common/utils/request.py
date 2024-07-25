@@ -13,13 +13,19 @@ def get_form_filter_params(request, form_class):
     session_filters_query_dict = dict_to_querydict(session_filters)
     post_data = request.POST
 
-    filter_param = post_data if dict(post_data) else session_filters_query_dict
-
-    filter_form = form_class(request=request, data=filter_param)
-    if filter_form.is_valid():
-        filters = generic_filter_form_parser(filter_form)
-
-        if dict(post_data):
-            save_session(request=request, key=SESSION_FILTERS_KEY, data=dict(post_data))
-
+    if 'reset' in post_data:
+        session_filters ={}
+        save_session(request=request, key=SESSION_FILTERS_KEY, data=session_filters)
+        filter_form = form_class(request=request)
+        filters = {}
+    else:
+        filter_param = post_data if dict(post_data) else session_filters_query_dict
+        filter_form = form_class(request=request, data=filter_param)
+        if filter_form.is_valid():
+            filters = generic_filter_form_parser(filter_form)
+            
+            if dict(post_data):
+                save_session(request=request, key=SESSION_FILTERS_KEY, data=dict(post_data))
+        else:
+            filters = {}
     return {"filters": filters, "filter_form": filter_form}
