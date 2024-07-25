@@ -160,54 +160,57 @@ def export_returning_users_to_excel(request):
 
 
 def export_help_contacts_data(request):
-    if request.method == 'POST':
-        start_date = request.POST.get('start_date')
-        end_date = request.POST.get('end_date')
-        inline_data = get_help_contacts_between_dates(start_date=start_date, end_date=end_date)
+    form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
+    filters = form_filter_params["filters"]
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+    inline_data = get_help_contacts_between_dates(**filters, current_user=request.user)
 
-        wb = openpyxl.Workbook()
-        ws = wb.active
+    wb = openpyxl.Workbook()
+    ws = wb.active
 
-        heading = f"Help Contacts Report for All Routes from the Period Starting {start_date} to {end_date}"
-        ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=10)
-        heading_cell = ws.cell(row=2, column=1, value=heading)
-        heading_cell.alignment = Alignment(horizontal="center", vertical="center")
-        heading_cell.font = Font(bold=True)
+    if start_date and end_date:
+        heading = f"Help Contacts Report for the Period Starting {start_date} to {end_date}"
+    else:
+        heading = "Help Contacts Report for all time"
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=10)
+    heading_cell = ws.cell(row=2, column=1, value=heading)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
 
-        headers = [
-            'Created At',
-            'Device ID',
-            'Contact Type',
-            'Contact',
-            'Origin',
-            'Destination',
-            'Locale',
-        ]
+    headers = [
+        'Created At',
+        'Device ID',
+        'Contact Type',
+        'Contact',
+        'Origin',
+        'Destination',
+        'Locale',
+    ]
 
-        for idx, header in enumerate(headers, start=1):
-            ws.cell(row=4, column=idx, value=header)
+    for idx, header in enumerate(headers, start=1):
+        ws.cell(row=4, column=idx, value=header)
 
-        for idx, data in enumerate(inline_data, start=5):
-            created_at = data['api_created_at']
-            origin_value = data['origin__name'] if data['origin__name'] else None
-            destination_value = data['destination__name'] if data['destination__name'] else None
+    for idx, data in enumerate(inline_data, start=5):
+        created_at = data['api_created_at']
+        origin_value = data['origin__name'] if data['origin__name'] else None
+        destination_value = data['destination__name'] if data['destination__name'] else None
 
-            ws.cell(row=idx, column=1, value=created_at.strftime('%Y-%m-%d'))
-            ws.cell(row=idx, column=2, value=data['device_id'])
-            ws.cell(row=idx, column=3, value=data['contact_type'])
-            ws.cell(row=idx, column=4, value=data['translated_contact_value'])
-            ws.cell(row=idx, column=5, value=origin_value)
-            ws.cell(row=idx, column=6, value=destination_value)
-            ws.cell(row=idx, column=7, value=data['locale'])
+        ws.cell(row=idx, column=1, value=created_at.strftime('%Y-%m-%d'))
+        ws.cell(row=idx, column=2, value=data['device_id'])
+        ws.cell(row=idx, column=3, value=data['contact_type'])
+        ws.cell(row=idx, column=4, value=data['translated_contact_value'])
+        ws.cell(row=idx, column=5, value=origin_value)
+        ws.cell(row=idx, column=6, value=destination_value)
+        ws.cell(row=idx, column=7, value=data['locale'])
 
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=Help_contacts_data.xlsx'
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=Help_contacts_data.xlsx'
 
-        wb.save(response)
+    wb.save(response)
 
-        return response
+    return response
     
-    return HttpResponse(status=405)
 
 
 def export_preferences_data(request):
