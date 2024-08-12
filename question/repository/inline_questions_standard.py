@@ -136,6 +136,7 @@ def each_inline_question_response(**filters):
     inline_questions_with_responses = inline_question_responses.values(
         "inline_question__question__translated_text","inline_question__question__title_text", "response__translated_text"
     ).annotate(num_responses=Count("response__translated_text"))
+
     result_dict = {}
     for inline_questions_with_response in inline_questions_with_responses:
         title_text = inline_questions_with_response.get("inline_question__question__title_text")
@@ -146,14 +147,13 @@ def each_inline_question_response(**filters):
         if not title_text:
             title_text = convert_question_key_to_readable_string(translated_text)
 
-
         question_text = translated_text
-
-        question_in_result_dict = result_dict.get(question_text)
+        camel_case_question_text = convert_to_camel_case(question_text)
+        question_in_result_dict = result_dict.get(camel_case_question_text)
 
         if question_in_result_dict:
-            question_in_result_dict.get("labels").append(response_text.capitalize())
-            question_in_result_dict.get("counts").append(response_count)
+            question_in_result_dict["labels"].append(response_text.capitalize())
+            question_in_result_dict["counts"].append(response_count)
         else:
             result_dict[convert_to_camel_case(question_text)] = {"labels": [response_text.capitalize()], "counts": [response_count],"title":title_text}
     
