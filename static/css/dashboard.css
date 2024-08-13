@@ -253,3 +253,44 @@ body.modal-open {
 .resource-link-margin{
     margin-right: 15px
 }
+
+.info-tooltip {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #193560;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000;
+    text-align: center;
+    width: max-content;
+    max-width: 300px;
+}
+
+.info-tooltip i {
+    margin-right: 8px;
+}
+
+.chart:hover .info-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tooltip-arrow {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #193560;
+}
+
