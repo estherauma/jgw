@@ -94,16 +94,26 @@
 <div class="row">
   <div class="col-md-12 mb-3">
     <div class="card h-100">
-      <div class="card-body">
+      <div class="card-body chart">
         <p class="chart-title">
           what matters to workers (where people spend time in the app)
         </p>
         <button id="chapters-pened-btn" class="btn btn-sm btn-primary bg-jgw-deep-blue my-2">Show by unique users</button>
         <div class="chapters-opened-graph-id-chart-box">
           <div id="chapters-opened-graph-id"></div>
+          <div class="info-tooltip">
+            <i class="fas fa-info-circle"></i>
+            What Matters to Workers: What issues are jobseekers or workers interested in / trying to find out information about? Shows total views of a section by default, or select unique users to see how many individuals visited that section.
+            <div class="tooltip-arrow"></div>
+        </div>
         </div>
         <div class="chapters-opened-by-unique-users-graph-id-chart-box display-hidden">
           <div id="chapters-opened-by-unique-users-graph-id"></div>
+          <div class="info-tooltip">
+            <i class="fas fa-info-circle"></i>
+            What Matters to Workers: What issues are jobseekers or workers interested in / trying to find out information about? Select total views to see how many individuals visited that section.
+          <div class="tooltip-arrow"></div>
+        </div>
         </div>
       </div>
     </div>
@@ -114,10 +124,14 @@
 
   <div class="col-md-12 mb-3">
     <div class="card h-100">
-      <div class="card-body">
+      <div class="card-body chart">
         <p class="chart-title">user feedback - was this information helpful?</p>
         <div class="was-this-helpful-graph-id-chart-box">
           <div id="was-this-helpful-graph-id"></div>
+          <div class="info-tooltip">
+            <i class="fas fa-info-circle"></i>
+            User Feedback: Shows responses from users to the question “Was this information helpful?” at the bottom of each section.
+          <div class="tooltip-arrow"></div>
         </div>
       </div>
     </div>
