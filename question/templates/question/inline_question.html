@@ -79,9 +79,14 @@
                 {% flag 'can_view_organisation_chart_on_inline_question_page'%}
                 <div class="chart-column-width">
                     <div class="card h-100">
-                        <div class="card-body">
+                        <div class="card-body chart">
                             <p class="chart-title">organisation</p>
                             <canvas id="inline-question-organisation-pie-chart-id" class="canvas-chart"></canvas>
+                            <div class="info-tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                Inline Questions: Organisation: Question responses by users who have logged into the app using an organisation QR Code or Link.
+                                <div class="tooltip-arrow"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -90,10 +95,15 @@
             {% flag 'can_view_selected_user_language_chart_on_inline_question_page' %}
                 <div class="chart-column-width">
                     <div class="card h-100">
-                        <div class="card-body">
+                        <div class="card-body chart">
                             <p class="chart-title">selected user language</p>
                             <div class="inline-question-language-graph-id-chart-box">
                                 <div id="inline-question-language-graph-id"></div>
+                                <div class="info-tooltip">
+                                    <i class="fas fa-info-circle"></i>
+                                    Selected User Language: Number of Question responses by users of that language
+                                    <div class="tooltip-arrow"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -103,10 +113,15 @@
     {% flag 'can_view_responses_per_origin_country_chart_on_inline_question_page' %}
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">responses per origin country</p>
                     <div class="inline-question-destination-graph-id-chart-box">
                         <div id="inline-question-destination-graph-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Responses per Origin country: Home country of users who have responded to questions in the filtered timeframe
+                            <div class="tooltip-arrow"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -115,7 +130,7 @@
     {% flag 'can_view_responses_per_destination_country_chart_on_inline_question_page' %}
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">responses per destination country</p>
                     <div class="scrollable-table-container" onscroll="stopScrollPropagation(event)">
                         <table class="table" id="inline-question-origin-table-id">
@@ -124,6 +139,11 @@
                             <tbody>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Responses per Destination Country: Country users working in or looking for work in who have responded to questions in the filtered timeframe.
+                        <div class="tooltip-arrow"></div>
                     </div>
                 </div>
             </div>
@@ -134,7 +154,7 @@
    
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">inline question responses</p>
                     <form method="post" id="all-inline-question-filter-form">
                         {{inline_question_only_form|crispy}}
@@ -143,6 +163,11 @@
                     <div class="row mb-6 px-5 py-2" id="inline-questions-dynamic-section">
                         <div class="col-md-12">
                             <div>Select Questions to see their responses</div>
+                        </div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Inline Question Responses: Responses from users to questions which sit alongside content in Just Good Work.
+                            <div class="tooltip-arrow"></div>
                         </div>
                     </div>
 

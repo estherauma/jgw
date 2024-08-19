@@ -87,10 +87,15 @@
     {% flag 'can_view_users_by_origin_country_chart' %}
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">users by origin country</p>
                     <div class="preference-origin-graph-id-chart-box">
                         <div id="preference-origin-graph-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Users by Origin Country: Users select the country they are from when they first use the app.
+                            <div class="tooltip-arrow"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -101,9 +106,14 @@
         
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body" >
+                <div class="card-body chart" >
                     <p class="chart-title">users by gender</p>
                     <canvas id="preference-gender-pie-chart-id" class="canvas-chart"></canvas>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Users by Gender: Users select their gender when they first use the app. 
+                        <div class="tooltip-arrow"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,9 +124,13 @@
         {% flag 'can_view_users_by_destination_country_chart' %}
             <div class="chart-column-width">
                 <div class="card h-100">
-                    <div class="card-body">
+                    <div class="card-body chart">
                         <p class="chart-title">users by destination country</p>
                             <canvas id="preference-destination-pie-chart-id" class="canvas-chart"></canvas>
+                            <div class="info-tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                Users by Destination Country: Users choose the country they are working in or looking for work in.
+                            </div>
                     </div>
                 </div>
             </div>
@@ -126,10 +140,15 @@
     {% flag 'can_view_selected_users_language_chart' %}
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">Users by Language</p>
                     <div class="preference-language-graph-id-chart-box">
                         <div id="preference-language-graph-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Users by Language: Users choose their language when they first use the app.
+                            <div class="tooltip-arrow"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -139,11 +158,16 @@
     {% flag 'can_view_work_code_usage_chart' %}
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">work code usage</p>
                     <div class="chart-container ">
                         <div class="organisation-work-code-usage-graph-id-chart-box">
                             <div id="organisation-work-code-usage-graph-id"></div>
+                            <div class="info-tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                Work Code Usage: Users who have logged into the app using an organisation QR Code or Link.
+                                <div class="tooltip-arrow"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -154,9 +178,14 @@
     {% flag 'can_view_users_by_age_chart' %}
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">users by age</p>
                     <canvas id="preference-age-graph-id" class="canvas-chart"></canvas>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Users by Age: Users select their age then they first use the app. 
+                        <div class="tooltip-arrow"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,10 +194,15 @@
     {% flag 'can_view_get_users_by_country_state_chart' %}
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">users by state</p>
                     <div class="users-by-country-state-graph-id-chart-box">
                         <div id="users-by-country-state-graph-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Users by State: Users select the state they are working in when they first use the app. 
+                            <div class="tooltip-arrow"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -178,10 +212,15 @@
     {% flag 'can_view_get_users_by_sector_chart' %}
         <div class="chart-column-width">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">users by sectors</p>
                     <div class="users-by-sector-graph-id-chart-box">
                         <div id="users-by-sector-graph-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Users by Sector: Users select one or more sectors they are working in or looking for work in when they first use the app.
+                            <div class="tooltip-arrow"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -192,9 +231,14 @@
     {% flag 'can_view_new_monthly_users_chart' %}
         <div class="col-md-12 user-by-month">
              <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body chart">
                     <p class="chart-title">New Users by Month</p>
                     <canvas id="preference-monthly-cumulative-users-graph-id" class="canvas-user-by-month"></canvas>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        New Users by Month: Cumulative new users in the filtered timeframe. 
+                        <div class="tooltip-arrow"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -260,13 +304,10 @@
     const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
     const numColumns = chartColumns.length;
 
-    // Check if the number of columns is odd
     if (numColumns % 2 !== 0) {
-        // If odd, set the width of the last column to 100%
         const lastColumn = chartColumns[numColumns - 1];
         lastColumn.style.flex = '0 0 100%';
         lastColumn.style.maxWidth = '100%';
     }
-
 </script>
 {% endblock %}
