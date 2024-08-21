@@ -220,6 +220,8 @@ def get_all_inline_question_responses_data(**filters):
     ).select_related(
         'inline_question__inline_question_standard',
         'inline_question__question',
+        'inline_question__inline_question_standard__api_created_at',
+        'inline_question__inline_question_standard__api_updated_at',
         'inline_question__inline_question_standard__route',
         'inline_question__inline_question_standard__language',
         'inline_question__inline_question_standard__origin',
@@ -228,8 +230,8 @@ def get_all_inline_question_responses_data(**filters):
         'inline_question__inline_question_standard__organisation'
     ).values(
         'inline_question__inline_question_standard__device_id',
-        'created_at',
-        'updated_at',
+        'inline_question__inline_question_standard__api_created_at',
+        'inline_question__inline_question_standard__api_updated_at',
         'inline_question__inline_question_standard__language__name',
         'inline_question__inline_question_standard__origin__name',
         'inline_question__inline_question_standard__destination__name',
@@ -245,8 +247,8 @@ def get_all_inline_question_responses_data(**filters):
     for response in responses:
         data.append({
             'device_id': response['inline_question__inline_question_standard__device_id'],
-            'created_at': response['created_at'].strftime('%Y-%m-%d'),
-            'updated_at': response['updated_at'].strftime('%Y-%m-%d'),
+            'created_at': response['inline_question__inline_question_standard__api_created_at'].strftime('%Y-%m-%d'),
+            'updated_at': response['inline_question__inline_question_standard__api_updated_at'].strftime('%Y-%m-%d'),
             'language': response['inline_question__inline_question_standard__language__name'],
             'origin': response['inline_question__inline_question_standard__origin__name'],
             'destination': response['inline_question__inline_question_standard__destination__name'],
