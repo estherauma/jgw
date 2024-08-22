@@ -2,6 +2,7 @@ from django.db.models import Manager as BaseManager, Q
 from datetime import datetime
 from typing import Any
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from preference.models import SectorOfWork
 from users.utils import (
     get_user_destinations,
     get_user_excluded_origin_countries,
@@ -23,6 +24,7 @@ def preference_filtered_queryset(
     organisations=None,
     schemes=None,
     factory_farms=None,
+    sector_of_work=None,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -45,6 +47,10 @@ def preference_filtered_queryset(
     if factory_farms is None:
         factory_farms = []
 
+    if sector_of_work:
+        sectors = SectorOfWork.objects.filter(sectorsofworkmapper__mapper__in=sector_of_work).distinct()
+        queryset = queryset.filter(sectors_of_work__in=sectors)
+
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
@@ -55,21 +61,18 @@ def preference_filtered_queryset(
 
     preference_filters_q_object &= Q(api_created_at__date__range=(final_start_date, final_end_date))
 
-    # organisation filter
     if organisations:
         preference_filters_q_object &= Q(organisation__name__in=organisations)
 
     if user_orgs and not organisations:
         preference_filters_q_object &= Q(organisation__in=user_orgs)
 
-    # organisation factories
     if factory_farms:
         preference_filters_q_object &= Q(factory_farm__name__in=factory_farms)
 
     if user_factories and not factory_farms:
         preference_filters_q_object &= Q(factory_farm__in=user_factories)
 
-    # destinations
     if destination_countries:
         preference_filters_q_object &= Q(destination__name__in=destination_countries)
 
@@ -85,5 +88,4 @@ def preference_filtered_queryset(
     if origin_countries:
         preference_filters_q_object &= Q(origin__name__in=origin_countries)
 
-    # exclude disabled sectors of work
     return queryset.filter(preference_filters_q_object)

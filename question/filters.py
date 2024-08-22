@@ -16,6 +16,7 @@ def generic_question_filtered_queryset(
     organisations=None,
     schemes=None,
     factory_farms=None,
+    sector_of_work=None
 ):
     if start_date is None:
         start_date = APPLICATION_POSSIBLE_START_DATE
@@ -85,6 +86,9 @@ def generic_question_filtered_queryset(
         )
         generic_question_filters_q_object &= preference_factory_farm_q
 
+    if sector_of_work:
+        pass
+
     return queryset.filter(generic_question_filters_q_object)
 
 
@@ -98,6 +102,7 @@ def question_response_filtered_queryset(
     organisations=None,
     schemes=None,
     factory_farms=None,
+    sector_of_work=None
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -200,5 +205,8 @@ def question_response_filtered_queryset(
         )
         combined_factory_farm_q = preference_factory_farm_q | current_model_dest_q
         question_response_filters_q_object &= combined_factory_farm_q
+
+    if sector_of_work:
+        pass
 
     return queryset.filter(question_response_filters_q_object)

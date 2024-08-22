@@ -3,7 +3,7 @@ from django import forms
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
-from preference.models import CountryState
+from preference.models import CountryState,SectorsOfWorkMapper
 from users.utils import get_user_factories, get_user_group, get_user_organisations, get_user_destinations,get_user_start_date,get_user_end_date
 
 
@@ -34,6 +34,8 @@ class GenericFilterForm(forms.Form):
         if user_end_date:
             self.fields["start_date"].widget.attrs["max"] = user_end_date
             self.fields["end_date"].widget.attrs["max"] = user_end_date
+
+        self.fields["sector_of_work"].choices = sorted([(sector_mapper.mapper, sector_mapper.mapper) for sector_mapper in SectorsOfWorkMapper.objects.all()])
 
     def get_countries(self, countries_filter):
         countries = []
@@ -103,6 +105,13 @@ class GenericFilterForm(forms.Form):
         required=False,
     )
 
+    sector_of_work = forms.MultipleChoiceField(
+        label="Sector of Work",
+        widget=forms.SelectMultiple(
+            attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "sector_of_work"}
+        ),
+        required=False,
+    )
 
 class DateRangeForm(forms.Form):
     start_date = forms.DateField(
