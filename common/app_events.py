@@ -275,3 +275,23 @@ class AppEvents(BaseAnalytics):
         links_click_event_dict = links_click_event_df.to_dict("records")
 
         return links_click_event_dict
+    
+    def bigquery_telephone_click_event(self, start_date=None, end_date=None):
+        telephone_click_query = f"""
+            SELECT
+                    DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+                    event_name, 
+                    (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'link') AS link,
+                    -- age, language, gender, organisationSector, deviceId, appId, organisation, locale, destinationState, destination
+            FROM 
+                `just-good-work.analytics_191478110.events_*` 
+            WHERE 
+                event_name in ("message_tel", "partner_Chapter_tel", "Emergency_help_tel")
+            AND 
+                DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
+        """
+
+        telephone_click_event_df = google_client_instance().query(telephone_click_query).to_dataframe()
+        telephone_click_event_dict = telephone_click_event_df.to_dict("records")
+
+        return telephone_click_event_dict
