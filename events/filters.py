@@ -175,3 +175,18 @@ def generic_chapters_feedback_filtered_queryset(
         chapters_feedback_filters_q_object &= preference_factory_farm_q
 
     return queryset.filter(chapters_feedback_filters_q_object)
+
+def filter_bigquery_homepage_event_data(queryset, **filters):
+    if filters.get('start_date'):
+        queryset = queryset.filter(event_date__gte=filters['start_date'])
+
+    if filters.get('end_date'):
+        queryset = queryset.filter(event_date__lte=filters['end_date'])
+
+    if filters.get('destination_countries'):
+        queryset = queryset.filter(destination__name__in=filters['destination_countries'])
+
+    if filters.get('organisations'):
+        queryset = queryset.filter(organisation__name__in=filters['organisations'])
+
+    return queryset

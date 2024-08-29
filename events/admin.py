@@ -3,6 +3,7 @@ from events.actions import download_links_click
 
 from events.models import (
     BigQueryChaptersData,
+    BigqueryHomepageEventData,
     BigQueryFirstOpenHomepageData,
     ChaptersFeedback,
     ChaptersFeedbackQuestion,
@@ -50,6 +51,11 @@ admin.site.register(Chapter, ChapterAdminDisplay)
 class LinksClickEventAdmin(admin.ModelAdmin):
     list_display = ["event_name", "link"]
     actions = [download_links_click]
+
+@admin.register(BigqueryHomepageEventData)
+class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
+    list_display = ["event_date", "device_id","app_id","language","locale","destination","age","organisation","organisation_code"]
+    ordering = ["event_date"]
 
 
 @admin.register(ChaptersOpened)

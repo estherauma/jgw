@@ -255,3 +255,29 @@ class LinksClickEvent(models.Model):
 
     def __str__(self) -> str:
         return self.link
+    
+class TelephoneClickEvent(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    event_date = models.DateField()
+    event_name = models.CharField(max_length=100)
+    link = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self) -> str:
+        return self.link
+
+class BigqueryHomepageEventData(models.Model):
+    event_date = models.DateField()
+    device_id = models.CharField(max_length=255, null=True, blank=True)
+    app_id = models.CharField(max_length=255, null=True, blank=True)
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
+    locale = models.CharField(max_length=255, null=True, blank=True)
+    destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="homepage_event_destination")
+    age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    organisation_code = models.CharField(max_length=255, null=True, blank=True)
+
+
+    def __str__(self):
+        return f"Homepage Event on {self.event_date} for Device {self.device_id}"

@@ -275,3 +275,50 @@ class AppEvents(BaseAnalytics):
         links_click_event_dict = links_click_event_df.to_dict("records")
 
         return links_click_event_dict
+    
+    def bigquery_telephone_click_event(self, start_date=None, end_date=None):
+        telephone_click_query = f"""
+            SELECT
+                    DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+                    event_name, 
+                    (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'link') AS link,
+                    -- age, language, gender, organisationSector, deviceId, appId, organisation, locale, destinationState, destination
+            FROM 
+                `just-good-work.analytics_191478110.events_*` 
+            WHERE 
+                event_name in ("message_tel", "partner_Chapter_tel", "Emergency_help_tel")
+            AND 
+                DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
+        """
+
+        telephone_click_event_df = google_client_instance().query(telephone_click_query).to_dataframe()
+        telephone_click_event_dict = telephone_click_event_df.to_dict("records")
+
+        return telephone_click_event_dict
+
+    def bigquery_homepage_data(self, start_date=None, end_date=None):
+        bigquery_homepage_query = f"""
+            SELECT 
+                DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'deviceId') AS deviceId,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'appId') AS appId,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'language') AS language,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'locale') AS locale,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'destination') AS destination,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'age') AS age,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'gender') AS gender,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'organisation') AS organisation,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'organisationCode') AS organisationCode 
+
+            FROM `just-good-work.analytics_191478110.events_*` 
+
+            WHERE event_name='homepage'
+            AND 
+            DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
+            """
+        bigquery_homepage_df = (
+            google_client_instance().query(bigquery_homepage_query).to_dataframe()
+        )
+        bigquery_homepage_df_dict = bigquery_homepage_df.to_dict("records")
+
+        return bigquery_homepage_df_dict
