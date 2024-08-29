@@ -19,6 +19,8 @@ from events.repository.chapters_opened_repository import (
 def what_matters_to_workers(request):
     form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
     filters = form_filter_params["filters"]
+
+    print("FILTERS",filters)
     filter_form = form_filter_params["filter_form"]
 
     date_range_form = DateRangeForm()
