@@ -310,7 +310,7 @@ def get_preferences_by_sectors(**filters):
     labels = list(sector_counts.keys())
     count = list(sector_counts.values())
 
-    result_dict = {"labels": [label.capitalize() for label in labels], "counts": count}
+    result_dict = {"labels": [label.capitalize() for label in labels if label is not None], "counts": count}
 
     return result_dict
 
