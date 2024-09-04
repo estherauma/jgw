@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any
 from django.db.models import Manager as BaseManager, Q
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from preference.models import SectorOfWork
 
 from users.utils import get_user_destinations, get_user_factories, get_user_group, get_user_organisations,get_user_start_date,get_user_end_date
 
@@ -16,6 +17,7 @@ def generic_chapters_opened_filtered_queryset(
     organisations=None,
     schemes=None,
     factory_farms=None,
+    sector_of_work=None
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -88,6 +90,9 @@ def generic_chapters_opened_filtered_queryset(
         )
         chapters_opened_filters_q_object &= preference_factory_farm_q
 
+    if sector_of_work:
+        pass
+
     return queryset.filter(chapters_opened_filters_q_object)
 
 
@@ -101,6 +106,7 @@ def generic_chapters_feedback_filtered_queryset(
     organisations=None,
     schemes=None,
     factory_farms=None,
+    sector_of_work=None
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -173,6 +179,9 @@ def generic_chapters_feedback_filtered_queryset(
     if factory_farms:
         preference_factory_farm_q = Q(feedback_standard__factory_farm__name__in=factory_farms)
         chapters_feedback_filters_q_object &= preference_factory_farm_q
+    
+    if sector_of_work:
+        pass
 
     return queryset.filter(chapters_feedback_filters_q_object)
 

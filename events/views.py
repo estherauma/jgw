@@ -6,7 +6,7 @@ from common.utils.request import get_form_filter_params
 from core.forms import DateRangeForm
 from core.logic.file_export import generate_and_export_excel
 from events.forms import EventsDataFilterForm
-from events.models import LinksClickEvent
+from events.models import LinksClickEvent, TelephoneClickEvent
 from events.repository.bigquery_chapters_feedback_repository import get_chapters_feedback
 from events.repository.bigquery_homepage_events_repository import get_monthly_active_user_count
 
@@ -20,6 +20,8 @@ from events.repository.chapters_opened_repository import (
 def what_matters_to_workers(request):
     form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
     filters = form_filter_params["filters"]
+
+    print("FILTERS",filters)
     filter_form = form_filter_params["filter_form"]
 
     date_range_form = DateRangeForm()
@@ -91,6 +93,45 @@ def export_link_clicks_data(request):
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=link_clicks_data.xlsx'
+
+    wb.save(response)
+
+    return response
+
+def export_telephone_clicks_data(request):
+    form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
+    filters = form_filter_params["filters"]
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+    
+    telephone_clicks = TelephoneClickEvent.objects.filter(
+        event_date__range=(start_date, end_date)
+    ).values(
+        'event_date',
+        'event_name',
+        'link'
+    )
+
+    wb = Workbook()
+    ws = wb.active
+
+    heading = f"Telephone Clicks Report for the Period Starting {start_date} to {end_date}"
+    heading_cell = ws.cell(row=2, column=1, value=heading)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=3)
+
+    headers = ['Event Date', 'Event Name', 'Link']
+    for col, header in enumerate(headers, start=1):
+        ws.cell(row=3, column=col, value=header)
+
+    for row, click in enumerate(telephone_clicks, start=4):
+        ws.cell(row=row, column=1, value=click['event_date'].strftime('%Y-%m-%d'))
+        ws.cell(row=row, column=2, value=click['event_name'])
+        ws.cell(row=row, column=3, value=click['link'])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=telephone_clicks_data.xlsx'
 
     wb.save(response)
 

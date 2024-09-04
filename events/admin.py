@@ -10,6 +10,7 @@ from events.models import (
     ChaptersFeedbackResponse,
     ChaptersFeedbackStandard,
     ChaptersOpened,
+    TelephoneClickEvent,
     LinksClickEvent,
     OneTimeEventJob,
     SwsPasiEvent,
@@ -57,6 +58,10 @@ class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
     list_display = ["event_date", "device_id","app_id","language","locale","destination","age","organisation","organisation_code"]
     ordering = ["event_date"]
 
+@admin.register(TelephoneClickEvent)
+class TelephoneClickEventAdmin(admin.ModelAdmin):
+    list_display = ["event_name", "link"]
+    actions = [download_links_click]
 
 @admin.register(ChaptersOpened)
 class ChaptersOpenedAdmin(admin.ModelAdmin):
