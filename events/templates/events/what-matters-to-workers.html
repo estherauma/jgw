@@ -138,27 +138,10 @@
   </div>
 </div>
 
-<div class="row">
-
-      <div class="col-md-12 user-by-month">
-           <div class="card h-100">
-              <div class="card-body chart">
-                  <p class="chart-title">Monthly Active Users</p>
-                  <canvas id="monthly-active-users-graph-id" class="canvas-user-by-month"></canvas>
-                  <div class="info-tooltip">
-                      <i class="fas fa-info-circle"></i>
-                      Monthly Active Users
-                      <div class="tooltip-arrow"></div>
-                  </div>
-              </div>
-          </div>
-      </div>
-
 {% endblock content %} 
 {% block scripts %}
 <script src="{% static 'js/charts/bar/chapters_feedback_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/chapters_opened_graph.js' %}"></script>
-<script src="{% static 'js/charts/line/active_users_monthly_stat.js' %}"></script>
 <script src="{% static 'js/app/what_matter_to_workers.js' %}"></script>
 
 <script type="text/javascript">
@@ -176,8 +159,5 @@
 
   const chaptersOpenedUniqueUsers = {{ chapters_opened_by_unique_user | safe }};
   chaptersOpenedGraph(chaptersOpenedUniqueUsers, "chapters-opened-by-unique-users-graph-id");
-
-  const monthlyActiveUserCountData = {{monthly_active_user_count | safe}}
-  monthlyActiveUsersChart(monthlyActiveUserCountData,"monthly-active-users-graph-id");
 </script>
 {% endblock %}

@@ -27,17 +27,13 @@ def what_matters_to_workers(request):
     chapters_opened = get_chapters_opened(**filters, current_user=request.user)
     chapters_opened_by_unique_user = get_chapters_opened_unique_by_users(**filters, current_user=request.user)
     chapters_feedback = get_chapters_feedback(**filters, current_user=request.user)
-    monthly_active_users =get_monthly_active_user_count(**filters,current_user=request.user)
-
-    print(filters)
 
     context = {
         "chapters_opened": chapters_opened,
         "chapters_opened_by_unique_user": chapters_opened_by_unique_user,
         "chapters_feedback": chapters_feedback,
         "filter_form": filter_form,
-        "date_range_form": date_range_form,
-        "monthly_active_user_count":monthly_active_users
+        "date_range_form": date_range_form
     }
     return render(request, "events/what-matters-to-workers.html", context=context)
 
