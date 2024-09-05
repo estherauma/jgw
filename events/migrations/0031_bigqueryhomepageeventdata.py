@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('preference', '0034_preference_is_missing_accesscode_cleaned'),
-        ('events', '0029_auto_20240514_0629'),
+        ('events', '0030_telephoneclickevent'),
     ]
 
     operations = [
