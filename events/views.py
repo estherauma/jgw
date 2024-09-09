@@ -8,6 +8,7 @@ from core.logic.file_export import generate_and_export_excel
 from events.forms import EventsDataFilterForm
 from events.models import LinksClickEvent, TelephoneClickEvent
 from events.repository.bigquery_chapters_feedback_repository import get_chapters_feedback
+from events.repository.bigquery_homepage_events_repository import get_monthly_active_user_count
 
 from events.repository.chapters_opened_repository import (
     get_chapters_opened,
@@ -34,7 +35,7 @@ def what_matters_to_workers(request):
         "chapters_opened_by_unique_user": chapters_opened_by_unique_user,
         "chapters_feedback": chapters_feedback,
         "filter_form": filter_form,
-        "date_range_form": date_range_form,
+        "date_range_form": date_range_form
     }
     return render(request, "events/what-matters-to-workers.html", context=context)
 

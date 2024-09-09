@@ -227,8 +227,8 @@
         </div>
     {% endflag %}
 </div>
+{% flag 'can_view_new_monthly_users_chart' %}
 <div class="row">
-    {% flag 'can_view_new_monthly_users_chart' %}
         <div class="col-md-12 user-by-month">
              <div class="card h-100">
                 <div class="card-body chart">
@@ -242,8 +242,25 @@
                 </div>
             </div>
         </div>
-    {% endflag %}
 </div>
+{% endflag %}
+{% flag 'can_view_monthly_active_users_chart' %}
+<div class="row">
+    <div class="col-md-12 user-by-month">
+            <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">Monthly Active Users</p>
+                <canvas id="monthly-active-users-graph-id" class="canvas-user-by-month"></canvas>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    Monthly Active Users: Users who accessed the app within the filtered timeframe
+                    <div class="tooltip-arrow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
@@ -257,6 +274,7 @@
 <script src="{% static 'js/charts/bar/work_code_usage_stack_bar.js' %}"></script>
 <script src="{% static 'js/charts/bar/user_by_sector_graph.js' %}"></script>
 <script src="{% static 'js/app/user_overview.js' %}"></script>
+<script src="{% static 'js/charts/line/active_users_monthly_stat.js' %}"></script>
 <script type="text/javascript">
     // get data from context
     var ageData = {{ preferences_by_age | safe }};
@@ -269,6 +287,7 @@
     var usersByCountryStateChartData = {{ users_by_country_state | safe }};
     var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
     const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
+    const monthlyActiveUserCountData = {{monthly_active_user_count | safe}}
 
     // plots the age piechart
     preferenceAgePieChart(ageData)
@@ -298,6 +317,8 @@
     usersBySectorsChart(usersBySectorsChartData)
     // Organisation work code stack bar chart
     workCodeUsageStackBar(swsWorkcodesWithAccessCode)
+
+    monthlyActiveUsersChart(monthlyActiveUserCountData);
 
     // Count the number of flex items
     const chartContainer = document.querySelector('.chart-container');

@@ -314,6 +314,20 @@ def get_preferences_by_sectors(**filters):
 
     return result_dict
 
+def get_user_counts_by_origin_destination():
+    user_counts = (
+        Preference.objects.exclude(origin__isnull=True, destination__isnull=True)
+        .values('origin__name', 'destination__name')
+        .annotate(user_count=Count('id'))
+    )
+
+    heatmap_data = [
+        {"origin": entry["origin__name"], "destination": entry["destination__name"], "count": entry["user_count"]}
+        for entry in user_counts
+    ]
+
+    return heatmap_data
+
 
 def get_sws_workcodes_with_access_code(**filters):
     queryset = Preference.objects.all()

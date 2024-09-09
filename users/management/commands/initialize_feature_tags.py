@@ -29,6 +29,7 @@ class Command(BaseCommand):
             {"condition": "testers", "tag": "can_view_new_monthly_users_chart"},
             {"condition": "testers", "tag": "can_view_get_users_by_country_state_chart"},
             {"condition": "testers", "tag": "can_view_get_users_by_sector_chart"},
+            {"condition": "everyone", "tag": "can_view_monthly_active_users_chart"},
             {"condition": "everyone", "tag": "can_view_new_users_total_count"},
             {"condition": "everyone", "tag": "can_view_users_by_origin_country_chart"},
             {"condition": "everyone", "tag": "can_view_users_by_gender_chart"},
