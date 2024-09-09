@@ -235,6 +235,8 @@ def export_preferences_data(request):
     heading_cell.alignment = Alignment(horizontal="center", vertical="center")
     heading_cell.font = Font(bold=True)
 
+    is_sws_config = request.user.groups.filter(name="SWSConfig").exists()
+
     headers = [
         'Data Source ID',
         'Device ID',
@@ -250,10 +252,12 @@ def export_preferences_data(request):
         'Destination',
         'Route',
         'Organisation Sector',
-        'Organisation Access Code',
         'Factory Farm',
         'Organisation',
     ]
+
+    if not is_sws_config:
+        headers.insert(14, 'Organisation Access Code')
 
     for idx, header in enumerate(headers, start=1):
         ws.cell(row=4, column=idx, value=header)
@@ -273,9 +277,13 @@ def export_preferences_data(request):
         ws.cell(row=idx, column=12, value=data['destination__name'])
         ws.cell(row=idx, column=13, value=data['route__name'])
         ws.cell(row=idx, column=14, value=data['sectors_of_work__translated_name'])
-        ws.cell(row=idx, column=15, value=data['organisation_access_code__code'])
-        ws.cell(row=idx, column=16, value=data['factory_farm__name'])
-        ws.cell(row=idx, column=17, value=data['organisation__name'])
+        if not is_sws_config:
+            ws.cell(row=idx, column=15, value=data['organisation_access_code__code'])
+            ws.cell(row=idx, column=16, value=data['factory_farm__name'])
+            ws.cell(row=idx, column=17, value=data['organisation__name'])
+        else:
+            ws.cell(row=idx, column=15, value=data['factory_farm__name'])
+            ws.cell(row=idx, column=16, value=data['organisation__name'])
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename="preferences_report_from_{start_date}_to_{end_date}.xlsx"'
