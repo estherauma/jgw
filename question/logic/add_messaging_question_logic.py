@@ -181,20 +181,23 @@ def add_messaging_question_to_db(messaging_question):
                 messaging_question_response.responses.add(new_question_response)
 
 def update_translations_from_localization(localization_data):
-    for response_option in MessagingResponseOptionText.objects.filter(translated_option__contains="&#39;"):
-        response_option.translated_option = response_option.translated_option.replace("&#39;", "'")
-        response_option.save()
-    for entry in localization_data:
-        auto_translation = entry['auto_translation']
-        correct_translation = entry['correct_translation']
-        
-        response_option = MessagingResponseOptionText.objects.filter(
-            Q(option=auto_translation) | Q(translated_option=auto_translation)
-        ).first()
-
-        if response_option:
-            response_option.translated_option = correct_translation
+    try:
+        for response_option in MessagingResponseOptionText.objects.filter(translated_option__contains="&#39;"):
+            response_option.translated_option = response_option.translated_option.replace("&#39;", "'")
             response_option.save()
-            print(f"Updated '{auto_translation}' to '{correct_translation}' for id: {response_option.id}")
-        else:
-            print(f"No match found for '{auto_translation}'")
+        for entry in localization_data:
+            auto_translation = entry['auto_translation']
+            correct_translation = entry['correct_translation']
+            
+            response_option = MessagingResponseOptionText.objects.filter(
+                Q(option=auto_translation) | Q(translated_option=auto_translation)
+            ).first()
+
+            if response_option:
+                response_option.translated_option = correct_translation
+                response_option.save()
+                print(f"Updated '{auto_translation}' to '{correct_translation}' for id: {response_option.id}")
+            else:
+                print(f"No match found for '{auto_translation}'")
+    except Exception as e:
+        print(f"Error during translation update: {str(e)}")
