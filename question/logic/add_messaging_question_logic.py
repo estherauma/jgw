@@ -1,5 +1,8 @@
 from django.db import transaction
+from django.db.models import Q,F
+from django.db.models.functions import Replace
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from common.const.localization_const import meassaging_question_response_localization
 from common.helpers.model_helpers.preference import (
     get_or_add_country_to_db,
     get_or_add_factory_farm_to_db,
@@ -76,6 +79,7 @@ def fetch_messaging_questions_from_api_to_db():
 
     # call to translate, question text, response
     translate_and_clean_messaging_question_fields()
+    update_translations_from_localization(meassaging_question_response_localization)
 
 
 def add_messaging_question_to_db(messaging_question):
@@ -175,3 +179,22 @@ def add_messaging_question_to_db(messaging_question):
                     option=messaging_question_response_option_object, value=response_option.get("isChecked")
                 )
                 messaging_question_response.responses.add(new_question_response)
+
+def update_translations_from_localization(localization_data):
+    for response_option in MessagingResponseOptionText.objects.filter(translated_option__contains="&#39;"):
+        response_option.translated_option = response_option.translated_option.replace("&#39;", "'")
+        response_option.save()
+    for entry in localization_data:
+        auto_translation = entry['auto_translation']
+        correct_translation = entry['correct_translation']
+        
+        response_option = MessagingResponseOptionText.objects.filter(
+            Q(option=auto_translation) | Q(translated_option=auto_translation)
+        ).first()
+
+        if response_option:
+            response_option.translated_option = correct_translation
+            response_option.save()
+            print(f"Updated '{auto_translation}' to '{correct_translation}' for id: {response_option.id}")
+        else:
+            print(f"No match found for '{auto_translation}'")
