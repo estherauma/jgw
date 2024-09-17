@@ -75,7 +75,7 @@ def messaging_question_stats_for_export(filters):
 
 def get_all_messaging_question_responses_data(**filters):
     queryset = generic_question_filtered_queryset(queryset=MessagingQuestionStandard.objects.all(), **filters).select_related(
-        'route', 'language', 'origin', 'destination', 'organisation_sector', 'factory_farm', 'organisation'
+     'language', 'origin', 'destination', 'organisation_sector', 'factory_farm', 'organisation'
     ).prefetch_related(
         'question_standard',
         'question_standard__messagingquestionresponse_set__responses__option' 
@@ -103,7 +103,6 @@ def get_all_messaging_question_responses_data(**filters):
                 'device_id': standard.device_id,
                 'app_id': standard.app_id,
                 'locale': standard.locale,
-                'route': standard.route.name if standard.route else None,
                 'language': standard.language.name if standard.language else None,
                 'origin': standard.origin.name if standard.origin else None,
                 'destination': standard.destination.name if standard.destination else None,
