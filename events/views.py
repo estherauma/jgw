@@ -11,28 +11,22 @@ from events.repository.bigquery_chapters_feedback_repository import get_chapters
 from events.repository.bigquery_homepage_events_repository import get_monthly_active_user_count
 
 from events.repository.chapters_opened_repository import (
-    get_chapters_opened,
-    get_chapters_opened_unique_by_users,
+    get_chapters_opened_data
 )
 
-
-# Create your views here.
 def what_matters_to_workers(request):
     form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
     filters = form_filter_params["filters"]
 
-    print("FILTERS",filters)
     filter_form = form_filter_params["filter_form"]
 
     date_range_form = DateRangeForm()
 
-    chapters_opened = get_chapters_opened(**filters, current_user=request.user)
-    chapters_opened_by_unique_user = get_chapters_opened_unique_by_users(**filters, current_user=request.user)
     chapters_feedback = get_chapters_feedback(**filters, current_user=request.user)
+    chapters_opened_data = get_chapters_opened_data(**filters, current_user=request.user)
 
     context = {
-        "chapters_opened": chapters_opened,
-        "chapters_opened_by_unique_user": chapters_opened_by_unique_user,
+        "chapters_opened_data": chapters_opened_data,
         "chapters_feedback": chapters_feedback,
         "filter_form": filter_form,
         "date_range_form": date_range_form

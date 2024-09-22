@@ -1,6 +1,7 @@
-function chaptersOpenedGraph(chaptersOpenedParams, graphId) {
-    const data = chaptersOpenedParams["counts"];
-    const labels = chaptersOpenedParams["labels"];
+function chaptersOpenedGraph(chaptersOpenedData) {
+    const dataset1 = chaptersOpenedData["chapteropened_all"];
+    const dataset2 = chaptersOpenedData["chapteropened_unique"];
+    const labels = chaptersOpenedData["labels"];
   
     const chartConfig = {
       type: "bar",
@@ -8,10 +9,17 @@ function chaptersOpenedGraph(chaptersOpenedParams, graphId) {
         labels: labels,
         datasets: [
           {
-            data: data,
+            label: "Chapter Total Views ",
+            data: dataset1,
             backgroundColor: COLORS.navyBlue,
             barThickness: 15,
           },
+          {
+            label: "Chapter Views by Unique Users",
+            data: dataset2,
+            backgroundColor: COLORS.skyBlue,
+            barThickness: 15,
+          }
         ],
       },
       options: {
@@ -25,10 +33,18 @@ function chaptersOpenedGraph(chaptersOpenedParams, graphId) {
             },
           },
         },
+        elements: {
+          bar: {
+            borderWidth: 3,
+          }
+        },
         layout: {
           padding: {
               right: 50,
-          }
+          },
+          margin: {
+            bottom: 50,
+        }
         },
         maintainAspectRatio: false,
         responsive: true,
@@ -46,8 +62,8 @@ function chaptersOpenedGraph(chaptersOpenedParams, graphId) {
     };
   
     scrollableVerticalBarChart(
-      graphId, 
-      data, 
+      "chapters-opened-graph-id", 
+      dataset1, 
       chartConfig
   );
   }
