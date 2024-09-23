@@ -43,18 +43,18 @@
                             {% endflag %}
                         </div>
                     </div>
-                    <div class="{% if user.is_superuser %} col-3 {% else %} col-1 d-flex align-items-center {% endif %}">
+                    <div class=" col-3 position-absolute top-2 end-0">
                         {% if user.is_authenticated %}
-                            {% if user.is_superuser %}
                                 <div class="row">
                                     <div class="col-md-6 button-margin">
                                         <div class="dropdown w-100">
-                                            <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
-                                                id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                Export
-                                                <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                                            </a>
-        
+                                            {% flag 'can_download_preferences_excel_reports' %}
+                                                <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                                                    id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Export
+                                                    <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                                                </a>
+                                            {% endflag %}
                                             <div class="dropdown-menu" aria-labelledby="export-menu">
                                                 <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">Export Preferences Data Report to Excel</a>
                                                 <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">Export Help Contacts Data Report to Excel</a>
@@ -67,11 +67,6 @@
                                         role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
                                     </div>
                                 </div>
-                            {% else %}
-                                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter
-                                </button>
-                            {% endif %}
                         {% else %}
                             {% include 'includes/non_auth_banner_btns.html' %}
                         {% endif %}
