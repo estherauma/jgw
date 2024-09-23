@@ -58,7 +58,7 @@
                                             <div class="dropdown-menu" aria-labelledby="export-menu">
                                                 <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">Export Preferences Data Report to Excel</a>
                                                 <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">Export Help Contacts Data Report to Excel</a>
-                                                <button  class="dropdown-item" id="export-user-overview-to-excel">Export Preferences Statistics to Excel</button>
+                                                <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">Export Preferences Statistics to Excel</a>
                                             </div>
                                         </div>
                                     </div>
