@@ -1,7 +1,7 @@
 from common.utils.strings import format_thousands_with_commas
 from datetime import datetime
 from question.filters import generic_question_filtered_queryset
-from question.models import InlineQuestionResponse, InlineQuestionResponseText, MessagingQuestionResponse, MessagingQuestionStandard
+from question.models import MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
 
 
@@ -90,7 +90,8 @@ def get_all_messaging_question_responses_data(**filters):
             responses = []
             for response in messaging_question.messagingquestionresponse_set.all():
                 for option in response.responses.all():
-                    response_text = option.option.translated_option
+                    response_text = option.option.option
+                    translated_response_text = option.option.translated_option
                     responses.append(response_text)
             if not question_text:
                 continue
@@ -110,7 +111,8 @@ def get_all_messaging_question_responses_data(**filters):
                 'factory_farm': standard.factory_farm.name if standard.factory_farm else None,
                 'organisation': standard.organisation.name if standard.organisation else None,
                 'question': question_text,
-                'responses': response_text,
+                'response': response_text,
+                'translated_response': translated_response_text,
             })
 
     return data

@@ -14,6 +14,21 @@ meassaging_question_response_localization =[
         "auto_translation": "Ha",
         "correct_translation": "Yes"
     },
+     {
+        "language": "uzbek",
+        "auto_translation": "ha",
+        "correct_translation": "Yes"
+    },
+     {
+        "language": "indonesian",
+        "auto_translation": "Ya",
+        "correct_translation": "Yes"
+    },
+     {
+        "language": "ukrainian",
+        "auto_translation": "Так",
+        "correct_translation": "Yes"
+    },
     {
         "language": "ukrainian",
         "auto_translation": "Yo",
@@ -76,6 +91,11 @@ inline_question_response_localization = [
         "language": "llbanian",
         "auto_translation": "because",
         "correct_translation": "no"
+    },
+    {
+        "language": "ukrainin",
+        "auto_translation": "so",
+        "correct_translation": "yes"
     },
     {
         "language": "uzbek",

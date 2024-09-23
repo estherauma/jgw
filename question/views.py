@@ -171,14 +171,15 @@ def export_messaging_question_data(request):
         'App ID',
         'Message ID',
         'Locale',
-        'Language',
+        'Original Language',
         'Origin',
         'Destination',
         'Organisation Sector',
         'Factory Farm',
         'Organisation',
         'Question',
-        'Responses'
+        'Response',
+        'Translated Response'
     ]
 
     for idx, header in enumerate(headers, start=1):
@@ -202,7 +203,8 @@ def export_messaging_question_data(request):
         ws.cell(row=idx, column=12, value=data['factory_farm'])
         ws.cell(row=idx, column=13, value=data['organisation'])
         ws.cell(row=idx, column=14, value=data['question'])
-        ws.cell(row=idx, column=15, value=data['responses'])
+        ws.cell(row=idx, column=15, value=data['response'])
+        ws.cell(row=idx, column=16, value=data['translated_response'])
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=messaging_question_data.xlsx'
@@ -231,7 +233,7 @@ def export_inline_question_data(request):
         'Created At',
         'Updated At',
         'Device ID',
-        'Language',
+        'Original Language',
         'Origin',
         'Destination',
         'Organisation Sector',
