@@ -40,6 +40,10 @@
                                 <h3 class="text-dark"><span data-plugin="counterup">{{total_user_overview_responses}}</span></h3>
                                 <h5 class="text-muted general-title-text">New Users</h5>
                             </div>
+                            <div class="col-3">
+                                <h3 class="text-dark"><span data-plugin="counterup">{{total_active_user_count}}</span></h3>
+                                <h5 class="text-muted general-title-text">Active Users</h5>
+                            </div>
                             {% endflag %}
                         </div>
                     </div>
@@ -82,8 +86,24 @@
     </div>
 </div>
 
-<div class="chart-container">
-    
+{% flag 'can_view_monthly_active_users_chart' %}
+<div class="row">
+    <div class="col-md-12 user-by-month">
+            <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">Monthly Active Users</p>
+                <canvas id="monthly-active-users-graph-id" class="canvas-user-by-month"></canvas>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    Monthly Active Users: Users who accessed the app within the filtered timeframe
+                    <div class="tooltip-arrow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
+<div class="chart-container mt-3">
     {% flag 'can_view_users_by_origin_country_chart' %}
         <div class="chart-column-width">
             <div class="card h-100">
@@ -242,23 +262,6 @@
                 </div>
             </div>
         </div>
-</div>
-{% endflag %}
-{% flag 'can_view_monthly_active_users_chart' %}
-<div class="row">
-    <div class="col-md-12 user-by-month">
-            <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">Monthly Active Users</p>
-                <canvas id="monthly-active-users-graph-id" class="canvas-user-by-month"></canvas>
-                <div class="info-tooltip">
-                    <i class="fas fa-info-circle"></i>
-                    Monthly Active Users: Users who accessed the app within the filtered timeframe
-                    <div class="tooltip-arrow"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 {% endflag %}
 {% endblock content %}
