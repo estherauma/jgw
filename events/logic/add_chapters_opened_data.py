@@ -1,5 +1,7 @@
 import re
 from django.db import transaction
+from django.utils import timezone
+from django.db.models import Max
 from common.app_events import AppEvents
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
 
@@ -15,7 +17,7 @@ from common.helpers.model_helpers.preference import (
 )
 from common.helpers.preference_helpers.country import get_data_destination, get_data_origin
 from common.logger import KunfuPandaLogger
-from common.utils.date_utils import date_to_datetime, todays_date
+from events.logic.chapter_title_api_data import update_chapter_titles
 from events.models import Chapter, ChaptersOpened
 from preference.models import Preference
 from preference.tasks import translate_and_clean_preferences_fields
@@ -24,17 +26,20 @@ from preference.tasks import translate_and_clean_preferences_fields
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_opened.log")
 
 
-def fetch_chatpter_opened_from_api():
-    start_date = APPLICATION_POSSIBLE_START_DATE
-    end_date = todays_date()
+def get_latest_chapter_opened_event_timestamp():
+    latest_timestamp = ChaptersOpened.objects.aggregate(Max("event_created_at"))["event_created_at__max"]
+    return latest_timestamp
 
-    # get the last time preferences were fetched
-    latest_chapter_opened = ChaptersOpened.objects.last()
-    if latest_chapter_opened:
-        start_date = latest_chapter_opened.created_at.strftime("%Y-%m-%d")
 
-    appEvents = AppEvents()
-    chapters_events_result = appEvents.bigquery_chapters_data(start_date=start_date, end_date=end_date)
+def fetch_chapter_opened_from_bigquery_in_batches(batch_size=5000, last_event_timestamp=None):
+    try:
+        appEvents = AppEvents()
+        chapters_events_result = appEvents.bigquery_chapters_data(
+            batch_size=batch_size, last_event_timestamp=last_event_timestamp
+        )
+    except Exception as e:
+        kunfu_panda_logger.error(f"Error fetching data from big query: {str(e)}")
+        raise
     return chapters_events_result
 
 
@@ -45,20 +50,43 @@ def get_chapter_number_from_name(chapter_name):
 
 @transaction.atomic
 def fetch_chapters_opened_data_from_api_to_db():
-    chapters_opened = fetch_chatpter_opened_from_api() or []
+    try:
+        last_event_timestamp = get_latest_chapter_opened_event_timestamp()
+    except Exception as e:
+        kunfu_panda_logger.error(f"Error getting the last event timestamp in the database: {str(e)}")
+        raise
+    batch_size = 5000
+    total_fetched = 0
 
-    for chapter_opened in chapters_opened:
-        try:
-            add_chapters_opened_to_db(chapter_opened)
-        except Exception as e:
-            KunfuPandaLogger.error(f"An error occurred during preference creation: {str(e)}")
-            transaction.set_rollback(True)
-            raise
+    while True:
+        chapters_opened = (
+            fetch_chapter_opened_from_bigquery_in_batches(
+                batch_size=batch_size, last_event_timestamp=last_event_timestamp
+            )
+            or []
+        )
+        if not chapters_opened:
+            break
 
-    kunfu_panda_logger.info(f"Added {len(chapters_opened)} chapters opened to the database")
+        for chapter_opened in chapters_opened:
+            try:
+                add_chapters_opened_to_db(chapter_opened)
+            except Exception as e:
+                KunfuPandaLogger.error(f"An error occurred during chapter creation: {str(e)}")
+                transaction.set_rollback(True)
+                raise
+        last_event_timestamp = max([chapter_opened["event_date"] for chapter_opened in chapters_opened])
 
-    # call celery to the translate, gender, language and sector of work functions
+        total_fetched += len(chapters_opened)
+
+        kunfu_panda_logger.info(
+            f"Processed {len(chapters_opened)} chapters opened fetched in the current batch and total of {total_fetched} fetched now"
+        )
+
+    kunfu_panda_logger.info(f"Finished adding a total of {total_fetched} chapters opened to the database")
+
     translate_and_clean_preferences_fields()
+    update_chapter_titles()
 
 
 def add_chapters_opened_to_db(chapters_feedback):
@@ -98,13 +126,16 @@ def add_chapters_opened_to_db(chapters_feedback):
     destination_data = get_or_add_country_to_db(destination, source="destination")
     factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
 
+    if event_date is not None and timezone.is_naive(event_date):
+        event_date = timezone.make_aware(event_date)
+
     # save the related preference,
     preference = Preference.objects.filter(device_id=device_id).first()
 
     chapter_opened = ChaptersOpened.objects.create(
         event_name=event_name or NOT_SPECIFIED,
         organisation=organisation_data,
-        event_created_at=date_to_datetime(event_date),
+        event_created_at=event_date,
         age=age_data,
         language=language_data,
         gender=gender_data,
@@ -118,7 +149,11 @@ def add_chapters_opened_to_db(chapters_feedback):
         factory_farm=factory_farm_data,
     )
     chapter, _ = Chapter.objects.get_or_create(
-        number_key=get_chapter_number_from_name(chapter_opened.event_name),destination=destination_data
+        number_key=get_chapter_number_from_name(chapter_opened.event_name), destination=destination_data
     )
     chapter_opened.chapter = chapter
-    chapter_opened.save()
+    try:
+        chapter_opened.save()
+    except Exception as e:
+        kunfu_panda_logger.error(f"Error saving chapter opened: {str(e)}")
+        raise
