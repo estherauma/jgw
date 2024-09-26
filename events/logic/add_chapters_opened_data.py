@@ -48,7 +48,6 @@ def get_chapter_number_from_name(chapter_name):
     return matches[1] if matches else chapter_name
 
 
-@transaction.atomic
 def fetch_chapters_opened_data_from_api_to_db():
     try:
         last_event_timestamp = get_latest_chapter_opened_event_timestamp()
