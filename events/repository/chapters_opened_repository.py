@@ -14,6 +14,7 @@ def get_chapters_opened_data(**filters):
         .annotate(
             chapter_text=F('chapter__chapter_text'),
             number_key=F('chapter__number_key')
+
         )
         .values("chapter_text", "number_key")
         .annotate(count=Count("event_name"))
@@ -28,6 +29,7 @@ def get_chapters_opened_data(**filters):
         )
         .values("chapter_text", "number_key")
         .annotate(count=Count("device_id", distinct=True))
+
         .order_by("-count")
     )
 

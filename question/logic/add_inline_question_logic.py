@@ -2,9 +2,9 @@ from django.db import transaction
 import re
 import requests
 import json
-
-
+from django.db.models import Q
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, NOT_SPECIFIED
+from common.const.localization_const import inline_question_response_localization
 from common.custom_libs.google_translate import pandas_translator_translate
 from common.helpers.model_helpers.preference import (
     get_or_add_country_to_db,
@@ -33,6 +33,7 @@ from question.models import (
     InlineQuestionResponseText,
     InlineQuestionStandard,
     InlineQuestionText,
+    MessagingResponse,
 )
 from preference.models import Preference, TextTranslations
 from question.tasks import translate_and_clean_inline_question_fields
@@ -246,7 +247,7 @@ def fetch_inline_questions_from_api_to_db():
     #fetch questions keys and names data
     fetch_questions_key_and_name_from_api()
 
-
+    update_inline_question_response_translations(inline_question_response_localization)
 
 def add_inline_question_to_db(inline_question):
     if isinstance(inline_question, str):
@@ -484,19 +485,21 @@ def save_filtered_questions_and_keys(filtered_questions):
                         custom_lang = custom_lang
                     )
 
+def update_inline_question_response_translations(localization_data):
+    try:
+        for localization_entry in localization_data:
+            language = localization_entry['language'].lower()
+            auto_translation = localization_entry['auto_translation']
+            correct_translation = localization_entry['correct_translation']
 
+            updated_count = InlineQuestionResponseText.objects.filter(
+                Q(translated_text=auto_translation)
+            ).update(translated_text=correct_translation)
 
+            if updated_count > 0:
+                print(f"Updated: '{auto_translation}' to '{correct_translation}' for {updated_count} record(s)")
+            else:
+                print(f"No match found for '{auto_translation}' in language '{language}'")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    except Exception as e:
+        print(f"Error during translation update: {str(e)}")

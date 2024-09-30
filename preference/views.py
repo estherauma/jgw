@@ -9,7 +9,7 @@ from django.http import HttpResponse
 
 from core.forms import GenericFilterForm,DateRangeForm
 from core.logic.file_export import generate_and_export_excel
-from events.repository.bigquery_homepage_events_repository import get_monthly_active_user_count
+from events.repository.bigquery_homepage_events_repository import get_monthly_active_user_count, get_total_active_user_within_period
 from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
 from help_contacts.repository.help_contacts_data import get_help_contacts_between_dates
 from preference.models import Preference
@@ -53,6 +53,7 @@ def user_overview(request):
     preferences_by_sectors = get_preferences_by_sectors(**filters, current_user=request.user)
     sws_workcodes_with_access_code = get_sws_workcodes_with_access_code(**filters, current_user=request.user)
     monthly_active_users =get_monthly_active_user_count(**filters,current_user=request.user)
+    total_active_users = get_total_active_user_within_period(**filters, current_user = request.user)
     pasi_downloads = (
         get_total_dynamic_link_usage(current_user=request.user)
         if not request.user.is_anonymous and request.user.role == "SCHEME"
@@ -75,7 +76,8 @@ def user_overview(request):
         "users_by_country_state": users_by_country_state,
         "preferences_by_sectors": preferences_by_sectors,
         "sws_workcodes_with_access_code": sws_workcodes_with_access_code,
-        "monthly_active_user_count":monthly_active_users
+        "monthly_active_user_count":monthly_active_users,
+        "total_active_user_count":total_active_users
     }
     return render(request, "preference/user_overview.html", context=context)
 
