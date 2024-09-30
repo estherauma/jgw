@@ -11,8 +11,7 @@ def get_chapters_opened_unique_by_users(**filters):
 
     chapters_opened = (
         chapters_opened_queryset.annotate(
-            chapter_text=F('chapter__chapter_text'),
-            number_key=F('chapter__number_key')
+            chapter_text=F("chapter__chapter_text"), number_key=F("chapter__number_key")
         )
         .values("chapter_text", "number_key", "device_id")
         .annotate(count=Count("id"))
@@ -29,17 +28,22 @@ def get_chapters_opened_unique_by_users(**filters):
         sums.setdefault(chapter_text, 0)
         sums[chapter_text] += count
 
-    sorted_sums = {key: value for key, value in sorted(sums.items(), key=lambda item: item[1], reverse=True) if key is not None}
+    sorted_sums = {
+        key: value
+        for key, value in sorted(sums.items(), key=lambda item: item[1], reverse=True)
+        if key is not None
+    }
 
     return {"labels": list(sorted_sums.keys()), "counts": list(sorted_sums.values())}
+
+
 def get_chapters_opened(**filters):
     chapters_opened_queryset = generic_chapters_opened_filtered_queryset(
         queryset=ChaptersOpened.objects.all(), **filters
     )
 
     chapters_opened = (
-        chapters_opened_queryset
-        .values("chapter__chapter_text", "chapter__number_key")
+        chapters_opened_queryset.values("chapter__chapter_text", "chapter__number_key")
         .annotate(count=Count("event_name"))
         .order_by("-count")
     )

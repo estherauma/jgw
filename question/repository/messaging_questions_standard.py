@@ -1,7 +1,7 @@
 from common.utils.strings import format_thousands_with_commas
 from datetime import datetime
 from question.filters import generic_question_filtered_queryset
-from question.models import InlineQuestionResponse, InlineQuestionResponseText, MessagingQuestionResponse, MessagingQuestionStandard
+from question.models import MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
 
 
@@ -75,7 +75,7 @@ def messaging_question_stats_for_export(filters):
 
 def get_all_messaging_question_responses_data(**filters):
     queryset = generic_question_filtered_queryset(queryset=MessagingQuestionStandard.objects.all(), **filters).select_related(
-        'route', 'language', 'origin', 'destination', 'organisation_sector', 'factory_farm', 'organisation'
+     'language', 'origin', 'destination', 'organisation_sector', 'factory_farm', 'organisation'
     ).prefetch_related(
         'question_standard',
         'question_standard__messagingquestionresponse_set__responses__option' 
@@ -90,7 +90,8 @@ def get_all_messaging_question_responses_data(**filters):
             responses = []
             for response in messaging_question.messagingquestionresponse_set.all():
                 for option in response.responses.all():
-                    response_text = option.option.translated_option
+                    response_text = option.option.option
+                    translated_response_text = option.option.translated_option
                     responses.append(response_text)
             if not question_text:
                 continue
@@ -103,7 +104,6 @@ def get_all_messaging_question_responses_data(**filters):
                 'device_id': standard.device_id,
                 'app_id': standard.app_id,
                 'locale': standard.locale,
-                'route': standard.route.name if standard.route else None,
                 'language': standard.language.name if standard.language else None,
                 'origin': standard.origin.name if standard.origin else None,
                 'destination': standard.destination.name if standard.destination else None,
@@ -111,7 +111,8 @@ def get_all_messaging_question_responses_data(**filters):
                 'factory_farm': standard.factory_farm.name if standard.factory_farm else None,
                 'organisation': standard.organisation.name if standard.organisation else None,
                 'question': question_text,
-                'responses': response_text,
+                'response': response_text,
+                'translated_response': translated_response_text,
             })
 
     return data
