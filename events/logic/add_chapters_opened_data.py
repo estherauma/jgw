@@ -71,8 +71,7 @@ def fetch_chapters_opened_data_from_api_to_db():
             try:
                 add_chapters_opened_to_db(chapter_opened)
             except Exception as e:
-                KunfuPandaLogger.error(f"An error occurred during chapter creation: {str(e)}")
-                transaction.set_rollback(True)
+                kunfu_panda_logger.error(f"An error occurred during chapter creation: {str(e)}")
                 raise
         last_event_timestamp = max([chapter_opened["event_date"] for chapter_opened in chapters_opened])
 
@@ -128,7 +127,6 @@ def add_chapters_opened_to_db(chapters_feedback):
     if event_date is not None and timezone.is_naive(event_date):
         event_date = timezone.make_aware(event_date)
 
-    # save the related preference,
     preference = Preference.objects.filter(device_id=device_id).first()
 
     chapter_opened = ChaptersOpened.objects.create(
