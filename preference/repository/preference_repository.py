@@ -1,6 +1,6 @@
 from collections import defaultdict
 from django.db.models import Case, When, Value, CharField, F, Count
-from django.db.models.functions import Cast,Substr,Length
+from django.db.models.functions import Cast, Substr, Length
 from django.db.models import Q
 from django.db.models.functions import TruncMonth
 from common.const.value_const import ACCESS_CODE_MAPPING
@@ -79,27 +79,26 @@ def preferences_by_gender(**filters):
     return {"labels": summed_labels, "counts": summed_counts}
 
 
-
 def preferences_by_origin(**filters):
     preferences_origin_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
 
     preferences_origin_queryset = preferences_origin_queryset.annotate(
         normalized_origin=Case(
-            When(origin__name__iexact='phillippines', then=Value('Philippines')),
-            When(origin__name__iexact='philippines', then=Value('Philippines')),
-            default=F('origin__name'),
+            When(origin__name__iexact="phillippines", then=Value("Philippines")),
+            When(origin__name__iexact="philippines", then=Value("Philippines")),
+            default=F("origin__name"),
             output_field=CharField(),
         )
     )
 
     origin_counts = (
-        preferences_origin_queryset.values("normalized_origin")
-        .annotate(total=Count("id"))
-        .order_by("-total")
+        preferences_origin_queryset.values("normalized_origin").annotate(total=Count("id")).order_by("-total")
     )
 
     labels = [
-        origin["normalized_origin"].title() for origin in origin_counts if origin["normalized_origin"] is not None
+        origin["normalized_origin"].title()
+        for origin in origin_counts
+        if origin["normalized_origin"] is not None
     ]
     counts = [origin["total"] for origin in origin_counts]
 
@@ -130,26 +129,11 @@ def preferences_by_language(**filters):
         preferences_language_queryset.values("language__translated_name")
         .annotate(
             translated_name=Case(
-                When(
-                    language__translated_name="burma",
-                    then=Value("burmese"),
-                ),
-                When(
-                    language__translated_name="unknown language [qc]",
-                    then=Value("mandarin"),
-                ),
-                When(
-                    language__translated_name="unknown language [hq]",
-                    then=Value("indonesian"),
-                ),
-                When(
-                    language__translated_name="unknown language [qm]",
-                    then=Value("malay"),
-                ),
-                When(
-                    language__translated_name="unknown language [qf]",
-                    then=Value("filipino"),
-                ),
+                When(language__translated_name="burma", then=Value("burmese")),
+                When(language__translated_name="unknown language [qc]", then=Value("mandarin")),
+                When(language__translated_name="unknown language [hq]", then=Value("indonesian")),
+                When(language__translated_name="unknown language [qm]", then=Value("malay")),
+                When(language__translated_name="unknown language [qf]", then=Value("filipino")),
                 default=F("language__translated_name"),
                 output_field=CharField(),
             )
@@ -159,8 +143,17 @@ def preferences_by_language(**filters):
         .order_by("-total")
     )
 
-    labels = [destination["translated_name"].title() for destination in language_counts]
-    counts = [destination["total"] for destination in language_counts]
+    labels = []
+    counts = []
+
+    for destination in language_counts:
+        translated_name = destination["translated_name"]
+        if translated_name is None:
+            labels.append("Others")
+        else:
+            labels.append(translated_name.title())
+
+        counts.append(destination["total"])
 
     return {"labels": labels, "counts": counts}
 
@@ -314,15 +307,20 @@ def get_preferences_by_sectors(**filters):
 
     return result_dict
 
+
 def get_user_counts_by_origin_destination():
     user_counts = (
         Preference.objects.exclude(origin__isnull=True, destination__isnull=True)
-        .values('origin__name', 'destination__name')
-        .annotate(user_count=Count('id'))
+        .values("origin__name", "destination__name")
+        .annotate(user_count=Count("id"))
     )
 
     heatmap_data = [
-        {"origin": entry["origin__name"], "destination": entry["destination__name"], "count": entry["user_count"]}
+        {
+            "origin": entry["origin__name"],
+            "destination": entry["destination__name"],
+            "count": entry["user_count"],
+        }
         for entry in user_counts
     ]
 
@@ -333,103 +331,129 @@ def get_sws_workcodes_with_access_code(**filters):
     queryset = Preference.objects.all()
     filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
 
-    whens = [When(organisation_access_code__code=key, then=Value(value)) for key, value in ACCESS_CODE_MAPPING.items()]
+    whens = [
+        When(organisation_access_code__code=key, then=Value(value))
+        for key, value in ACCESS_CODE_MAPPING.items()
+    ]
 
     queryset_data = (
-        filtered_queryset
-        .values(
-            organisation_name=F("organisation__name"),
-            access_code=F("organisation_access_code__code")
+        filtered_queryset.values(
+            organisation_name=F("organisation__name"), access_code=F("organisation_access_code__code")
         )
         .exclude(organisation__name__in=["not specified"])
         .annotate(
             access_code_count=Count("organisation_access_code"),
             mapped_access_code=Case(
-                *whens,
-                default=F("organisation_access_code__code"),
-                output_field=CharField()
-            )
+                *whens, default=F("organisation_access_code__code"), output_field=CharField()
+            ),
         )
         .filter(organisation_access_code__isnull=False)
     )
 
     return list(queryset_data)
 
+
 def get_returning_users_grouped_by_original_device_id():
     preferences_with_length = Preference.objects.annotate(
-        device_id_length=Length('device_id')
+        device_id_length=Length("device_id")
     ).select_related(
-        'location_of_potential_work', 'gender', 'age', 'language', 'origin', 
-        'destination', 'api_destination', 'destination_state', 'route', 
-        'organisation_sector', 'organisation_access_code', 'factory_farm', 'organisation'
+        "location_of_potential_work",
+        "gender",
+        "age",
+        "language",
+        "origin",
+        "destination",
+        "api_destination",
+        "destination_state",
+        "route",
+        "organisation_sector",
+        "organisation_access_code",
+        "factory_farm",
+        "organisation",
     )
 
     original_device_id_annotation = Case(
-        When(device_id__startswith='jgw-vanilla-', device_id_length__gte=49, then=Substr('device_id', 13, 36)),
-        When(device_id__startswith='jgw-vanilla-', then=Substr('device_id', 13, 16)),
-        When(device_id__startswith='jgw-', device_id_length__gte=41, then=Substr('device_id', 5, 36)),
-        When(device_id__startswith='jgw-', then=Substr('device_id', 5, 16)),
-        default=F('device_id'),
-        output_field=CharField()
+        When(
+            device_id__startswith="jgw-vanilla-", device_id_length__gte=49, then=Substr("device_id", 13, 36)
+        ),
+        When(device_id__startswith="jgw-vanilla-", then=Substr("device_id", 13, 16)),
+        When(device_id__startswith="jgw-", device_id_length__gte=41, then=Substr("device_id", 5, 36)),
+        When(device_id__startswith="jgw-", then=Substr("device_id", 5, 16)),
+        default=F("device_id"),
+        output_field=CharField(),
     )
 
     preferences_with_original_id = preferences_with_length.annotate(
         original_device_id=original_device_id_annotation
     )
 
-    grouped_preferences_query = preferences_with_original_id.values(
-        'original_device_id'
-    ).annotate(
-        count=Count('id')
-    ).filter(
-        count__gt=1
-    ).order_by(
-        'original_device_id'
+    grouped_preferences_query = (
+        preferences_with_original_id.values("original_device_id")
+        .annotate(count=Count("id"))
+        .filter(count__gt=1)
+        .order_by("original_device_id")
     )
 
     related_preferences = preferences_with_original_id.filter(
-        original_device_id__in=[item['original_device_id'] for item in grouped_preferences_query]
+        original_device_id__in=[item["original_device_id"] for item in grouped_preferences_query]
     ).values(
-        'original_device_id', 'id', 'data_source_id', 'device_id', 'locale', 'app_id', 'cleaned', 
-        'api_created_at', 'api_updated_at', 'location_of_potential_work__name', 
-        'gender__translated_name', 'age__range', 'language__name', 'origin__name', 
-        'destination__name', 'api_destination__name', 'destination_state__name', 
-        'route__name', 'organisation_sector__name', 'organisation_access_code__code', 
-        'factory_farm__name', 'organisation__name'
+        "original_device_id",
+        "id",
+        "data_source_id",
+        "device_id",
+        "locale",
+        "app_id",
+        "cleaned",
+        "api_created_at",
+        "api_updated_at",
+        "location_of_potential_work__name",
+        "gender__translated_name",
+        "age__range",
+        "language__name",
+        "origin__name",
+        "destination__name",
+        "api_destination__name",
+        "destination_state__name",
+        "route__name",
+        "organisation_sector__name",
+        "organisation_access_code__code",
+        "factory_farm__name",
+        "organisation__name",
     )
     grouped_preferences = {}
     for pref in related_preferences:
-        original_device_id = pref['original_device_id']
+        original_device_id = pref["original_device_id"]
         if original_device_id not in grouped_preferences:
             grouped_preferences[original_device_id] = []
         grouped_preferences[original_device_id].append(pref)
 
     for original_device_id, preferences in grouped_preferences.items():
         for pref in preferences:
-            pref['api_created_at'] = pref['api_created_at'].strftime('%Y-%m-%d %H:%M:%S')
-            pref['api_updated_at'] = pref['api_updated_at'].strftime('%Y-%m-%d %H:%M:%S')
+            pref["api_created_at"] = pref["api_created_at"].strftime("%Y-%m-%d %H:%M:%S")
+            pref["api_updated_at"] = pref["api_updated_at"].strftime("%Y-%m-%d %H:%M:%S")
     return grouped_preferences
+
 
 def extract_preference_for_export(**filters):
     queryset = Preference.objects.all()
     filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
     preferences_data = filtered_queryset.values(
-        'data_source_id',
-        'device_id',
-        'locale',
-        'app_id',
-        'api_created_at',
-        'api_updated_at',
-        'location_of_potential_work__name',
-        'gender__translated_name',
-        'age__range',
-        'language__name',
-        'origin__name',
-        'destination__name',
-        'route__name',
-        'sectors_of_work__translated_name',
-        'organisation_access_code__code',
-        'factory_farm__name',
-        'organisation__name'
+        "data_source_id",
+        "device_id",
+        "locale",
+        "app_id",
+        "api_created_at",
+        "api_updated_at",
+        "location_of_potential_work__name",
+        "gender__translated_name",
+        "age__range",
+        "language__name",
+        "origin__name",
+        "destination__name",
+        "route__name",
+        "sectors_of_work__translated_name",
+        "organisation_access_code__code",
+        "factory_farm__name",
+        "organisation__name",
     )
     return preferences_data
