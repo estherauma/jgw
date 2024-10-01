@@ -85,10 +85,17 @@ class AppEvents(BaseAnalytics):
 
         return chapter_feedback_df
 
-    def bigquery_chapters_data(self, start_date=None, end_date=None):
+    def bigquery_chapters_data(self, batch_size=5000, last_event_timestamp=None):
+        timestamp_filter = ""
+        if last_event_timestamp:
+            timestamp_filter = f"AND event_timestamp > {int(last_event_timestamp.timestamp() * 1000000)}"
+            print("Last ChapterOpened event fetch timestamp", last_event_timestamp)
+            print(timestamp_filter)
+
         chapters_query = f"""
             SELECT 
-                DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+                TIMESTAMP_MICROS(event_timestamp) AS event_timestamp,
+                DATETIME(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
                 event_name, 
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'age') AS age,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'language') AS language,
@@ -107,7 +114,11 @@ class AppEvents(BaseAnalytics):
             FROM 
                 `just-good-work.analytics_191478110.events_*`
             WHERE 
-                event_name LIKE 'ChapterOpened%' AND DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
+                event_name LIKE 'ChapterOpened%' 
+                {timestamp_filter}
+            ORDER BY 
+                event_timestamp ASC
+            LIMIT {batch_size}
         """
         chapters_data_df = google_client_instance().query(chapters_query).to_dataframe()
         chapters_data_dict = chapters_data_df.to_dict("records")
@@ -275,7 +286,7 @@ class AppEvents(BaseAnalytics):
         links_click_event_dict = links_click_event_df.to_dict("records")
 
         return links_click_event_dict
-    
+
     def bigquery_telephone_click_event(self, start_date=None, end_date=None):
         telephone_click_query = f"""
             SELECT
@@ -316,9 +327,7 @@ class AppEvents(BaseAnalytics):
             AND 
             DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
             """
-        bigquery_homepage_df = (
-            google_client_instance().query(bigquery_homepage_query).to_dataframe()
-        )
+        bigquery_homepage_df = google_client_instance().query(bigquery_homepage_query).to_dataframe()
         bigquery_homepage_df_dict = bigquery_homepage_df.to_dict("records")
 
         return bigquery_homepage_df_dict

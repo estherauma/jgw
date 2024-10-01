@@ -23,12 +23,16 @@ class InlineQuestionResponseTextAdminDisplay(admin.ModelAdmin):
     list_display = ["text", "translated_text", "title_text"]
     search_fields = ["text", "translated_text", "title_text"]
 
+@admin.register(InlineQuestionResponse)
+class InlineQuestionResponseAdmin(admin.ModelAdmin):
+    list_display = ["inline_question","organisation_inline_question","response", "created_at","updated_at"]
+    search_fields = ["response"]
+    ordering = ['-created_at']
 
 @admin.register(InlineQuestionResponseText)
 class InlineQuestionResponseTextAdminDisplay(admin.ModelAdmin):
     list_display = ["translated_text"]
     search_fields = ["translated_text"]
-
 
 @admin.register(InlineQuestion)
 class InlineQuestionAdmin(admin.ModelAdmin):
@@ -81,7 +85,6 @@ class MessagingQuestionResponseAdmin(admin.ModelAdmin):
     search_fields = ["messaging_question"]
     ordering = ['-created_at']
 
-admin.site.register(InlineQuestionResponse)
 admin.site.register(MessagingQuestion)
 admin.site.register(MessagingResponse)
 admin.site.register(MessagingResponseOptionText)
