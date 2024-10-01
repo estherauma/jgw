@@ -2,7 +2,6 @@ from django.db.models import Manager as BaseManager, Q
 from datetime import datetime
 from typing import Any
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
-from preference.models import SectorOfWork
 from users.utils import (
     get_user_destinations,
     get_user_excluded_origin_countries,
@@ -10,7 +9,7 @@ from users.utils import (
     get_user_factories,
     get_user_organisations,
     get_user_start_date,
-    get_user_end_date
+    get_user_end_date,
 )
 
 
@@ -29,9 +28,17 @@ def preference_filtered_queryset(
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
 
-    final_start_date = max(start_date, user_start_date) if start_date and user_start_date else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
-    final_end_date = min(end_date, user_end_date) if end_date and user_end_date else (end_date or user_end_date or datetime.now().date())
-        
+    final_start_date = (
+        max(start_date, user_start_date)
+        if start_date and user_start_date
+        else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
+    )
+    final_end_date = (
+        min(end_date, user_end_date)
+        if end_date and user_end_date
+        else (end_date or user_end_date or datetime.now().date())
+    )
+
     if destination_countries is None:
         destination_countries = []
 
@@ -46,10 +53,6 @@ def preference_filtered_queryset(
 
     if factory_farms is None:
         factory_farms = []
-
-    if sector_of_work:
-        sectors = SectorOfWork.objects.filter(sectorsofworkmapper__mapper__in=sector_of_work).distinct()
-        queryset = queryset.filter(sectors_of_work__in=sectors)
 
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
