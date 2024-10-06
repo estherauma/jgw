@@ -7,7 +7,7 @@ from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
 from core.forms import DateRangeForm
 from core.logic.file_export import generate_and_export_excel
-from question.forms import InlineQuestionFilterForm, InlineQuestionOnlyFilterForm, MessagingQuestionFilterForm
+from question.forms import InlineQuestionFilterForm, InlineQuestionOnlyFilterForm, MessagingQuestionFilterForm, MessagingQuestionOnlyFilterForm
 from question.repository.inline_questions_standard import (
     each_inline_question_response,
     get_all_inline_question_responses_data,
@@ -21,6 +21,7 @@ from question.repository.inline_questions_standard import (
     inline_questions_count,
 )
 from question.repository.messaging_questions_standard import (
+    each_messaging_question_response,
     get_all_messaging_question_responses_data,
     get_messaging_question_per_destination_counts,
     get_messaging_question_per_origin_counts,
@@ -44,13 +45,18 @@ def messaging_question(request):
     messaging_question_per_destination = get_messaging_question_per_destination_counts(
         **filters, current_user=request.user
     )
-
+    each_messaging_question_response_data = each_messaging_question_response(**filters, current_user=request.user)
+    print(each_messaging_question_response_data)
+    each_messaging_question_response_data_list = [{"key": key, "title": value["title"]} for key, value in each_messaging_question_response_data.items()]
+    messaging_question_choices = [{"key":item['key'], "title":item['key']} for item in each_messaging_question_response_data_list]
     context = {
         "total_messaging_questions": total_messaging_questions,
         "messaging_question_per_origin": messaging_question_per_origin,
         "messaging_question_per_destination": messaging_question_per_destination,
+        "each_messaing_question_response":each_messaging_question_response_data,
         "filter_form": filter_form,
         "date_range_form": date_range_form,
+        "messaging_question_only_form": MessagingQuestionOnlyFilterForm(messaging_question_choices=messaging_question_choices)
     }
     return render(request, "question/messaging_question.html", context=context)
 
@@ -100,8 +106,10 @@ def inline_question(request):
         **filters, current_user=request.user
     )
     inline_question_response_data = inline_question_response()
+    print("INLINE QUESTION RESPONSE DATA",inline_question_response_data)
     total_inline_question_responses = inline_question_responses_count(**filters, current_user=request.user)
     each_inline_question_response_data = each_inline_question_response(**filters, current_user=request.user)
+    print("EACH INLINE QUESTION RESPONSE DATA",each_inline_question_response_data)
     
     each_inline_question_response_data_list = [{"key": key, "title": value["title"]} for key, value in each_inline_question_response_data.items()]
 

@@ -107,6 +107,30 @@
             </div>
         </div>
     {% endflag %}
+    
+</div>
+
+<div class="row">
+    <div class="card h-100">
+        <div class="card-body chart">
+            <p class="chart-title">Messaging question responses</p>
+            <form method="post" id="all-messaging-question-filter-form">
+                {{messaging_question_only_form|crispy}}
+            </form>
+
+            <div class="row mb-6 px-5 py-2" id="messaging-questions-dynamic-section">
+                <div class="col-md-12">
+                    <div>Select Questions to see their responses</div>
+                </div>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    Messaging Question Responses: Responses from users to questions which sit alongside content in Just Good Work.
+                    <div class="tooltip-arrow"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 {% endblock content %}
@@ -114,17 +138,108 @@
 {% block scripts %}
 <script src="{% static 'js/charts/bar/messaging_question_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/messaging_question_destination_graph.js' %}"></script>
+<script src="{% static 'js/charts/bar/inline_question_graph.js' %}"></script>
 <script src="{% static 'js/app/messaging_question.js' %}"></script>
 <script type="text/javascript">
     // get data from context
     var originData = {{ messaging_question_per_origin|safe }};
     var destinationData = {{ messaging_question_per_destination|safe }};
+    var allMessagingQuestionResponse = {{ each_messaing_question_response | safe }}
+
+    console.log(allMessagingQuestionResponse)
 
     // plots the origin graph
     messagingQuestionOriginChart(originData)
 
     // plots the origin graph
     messagingQuestionDestinationChart(destinationData)
+
+    function handleMessagingQuestionsChange() {
+    var selectElement = document.getElementById('all-messaging-question-select-id');
+    var selectedOptions = [];
+
+    const messagingQuestionsSection = document.getElementById("messaging-questions-dynamic-section");
+    messagingQuestionsSection.innerHTML = "";
+
+    const questionsToPlot = {};
+    console.log(questionsToPlot)
+    if (selectElement.value === 'select_all' && selectElement.options[0].selected) {
+        for (var i = 0; i < selectElement.options.length; i++) {
+            selectedOptions.push(selectElement.options[i].value);
+        }
+        Object.keys(allMessagingQuestionResponse).forEach(key => {
+            questionsToPlot[key] = allMessagingQuestionResponse[key];
+        });
+    } else if (selectElement.value === 'select_all' && !selectElement.options[0].selected) {
+  
+        selectedOptions = []; 
+    } else {
+  
+        for (var i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].selected && selectElement.options[i].value !== 'select_all') {
+                selectedOptions.push(selectElement.options[i].value);
+            }
+        }
+        Object.keys(allMessagingQuestionResponse).forEach(key => {
+            const title = allMessagingQuestionResponse[key].title;
+            if (selectedOptions.includes(title)) {
+                questionsToPlot[key] = allMessagingQuestionResponse[key];
+            }
+        });
+    }
+
+    
+    for (let [key, value] of Object.entries(questionsToPlot)) {
+        const containerDiv = document.createElement("div");
+        containerDiv.classList.add("col-md-3");
+        containerDiv.classList.add("mb-3");
+        containerDiv.classList.add("messaging-question-container-div");
+        console.log("Value", value)
+        const title = document.createElement("p");
+        title.innerHTML = truncateText(value.title, 90); 
+        title.classList.add("chart-title");
+        const sanitizedKey = sanitizeKey(key);
+        const canvasId = `${sanitizedKey}-id`;
+        const canvasDiv = document.createElement("div");
+        canvasDiv.id = canvasId;
+
+        
+        const chartboxDiv = document.createElement("div");
+        chartboxDiv.classList.add(`${canvasId}-chart-box`);
+        chartboxDiv.classList.add("messaging-questions-chart-box");
+        chartboxDiv.appendChild(canvasDiv);
+
+        
+        containerDiv.appendChild(title);
+        containerDiv.appendChild(chartboxDiv);
+
+        messagingQuestionsSection.appendChild(containerDiv);
+
+       
+        inlineQuestionGraph(value, canvasId);
+    }
+     
+    initializeTooltips();
+}
+
+function sanitizeKey(key) {
+    return key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-_]/g, ''); 
+}
+
+function truncateText(text, maxLength) { 
+        if (text.length > maxLength) {
+            return `<span class="tooltip-title" title="${text}">${text.substring(0, maxLength)}...</span>`;
+        }
+        return text;
+    }
+
+
+function initializeTooltips() {
+    const tooltipElements = document.querySelectorAll('.tooltip-title');
+    tooltipElements.forEach(function(elem) {
+        new bootstrap.Tooltip(elem);
+    });
+}
 
 </script>
 {% endblock %}
