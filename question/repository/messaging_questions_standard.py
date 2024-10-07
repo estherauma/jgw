@@ -109,7 +109,7 @@ def each_messaging_question_response(**filters):
                 result_dict[question_text] = {
                     "labels": [response_text],
                     "counts": [response_count],
-                    "title": title_text,
+                    "title": question_text,
                 }
 
     return result_dict
