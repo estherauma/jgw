@@ -83,28 +83,25 @@ def user_overview(request):
 
 
 def export_preference_stats(request):
-    if request.method == "POST":
-        filter_form = GenericFilterForm(request=request, data=request.POST)
-        if filter_form.is_valid():
-            filters = generic_filter_form_parser(filter_form)
+    form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
+    filters = form_filter_params["filters"]
 
-        organisations = filters.get("organisations", None)
-        if organisations is None:
-            user_orgs = get_user_organisations(request.user)
-            organisations = [getattr(org, "name") for org in user_orgs]
+    organisations = filters.get("organisations", None)
+    if organisations is None:
+        user_orgs = get_user_organisations(request.user)
+        organisations = [getattr(org, "name") for org in user_orgs]
 
-        export_dict = {
-            "all": preference_stats_for_export(
-                {**filters, "organisations": organisations, "current_user": request.user}
-            )
-        }
+    export_dict = {
+        "all": preference_stats_for_export(
+            {**filters, "organisations": organisations, "current_user": request.user}
+        )
+    }
 
-        for organisation in organisations:
-            export_dict[organisation] = preference_stats_for_export(
-                {**filters, "organisations": [organisation], "current_user": request.user}
-            )
-
-        return generate_and_export_excel(export_dict, "preference_stats")
+    for organisation in organisations:
+        export_dict[organisation] = preference_stats_for_export(
+            {**filters, "organisations": [organisation], "current_user": request.user}
+        )
+    return generate_and_export_excel(export_dict, "preference_stats")
 
 def export_returning_users_to_excel(request):
     returning_users = get_returning_users_grouped_by_original_device_id()
