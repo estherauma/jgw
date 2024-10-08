@@ -438,7 +438,7 @@ def create_user(request):
             all_langs = Language.objects.filter(translated_name__in=langs_from_ids)
 
             user.save()
-            form.save_m2m()  
+            form.save_m2m()  # Save the many-to-many relationships
 
             new_user = User.objects.filter(id=user.id).first()
             new_user.user_languages.clear()
@@ -446,9 +446,9 @@ def create_user(request):
                 new_user.user_languages.add(lang)
 
             messages.success(request, f"User {user.email} created successfully!")
-            form = CreateNewUserForm()
+            return render(request, "users/create_user.html", context={"form": CreateNewUserForm(), "show_modal": True})
 
-    return render(request, "users/create_user.html", context={"form": form})
+    return render(request, "users/create_user.html", context={"form": form, "show_modal": False})
 
 
 def update_user(request, user_id):
@@ -465,7 +465,7 @@ def update_user(request, user_id):
         all_langs = Language.objects.filter(translated_name__in=langs_from_ids)
 
         user.save()
-        form.save_m2m()  
+        form.save_m2m()  # Save the many-to-many relationships
 
         edited_user = User.objects.filter(id=user.id).first()
         edited_user.user_languages.clear()
