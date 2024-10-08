@@ -72,6 +72,41 @@
         </div>
     </div>
 </div>
+<div class="chart-container mb-2">
+    {% flag 'can_view_organisation_chart_on_messaging_question_page'%}
+        <div class="chart-column-width">
+            <div class="card h-100">
+                <div class="card-body chart">
+                    <p class="chart-title">Question Responses Per Organisation</p>
+                    <canvas id="messaging-question-organisation-pie-chart-id" class="canvas-chart"></canvas>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Messaging Questions: Organisation: Question responses by users who have logged into the app using an organisation QR Code or Link.
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endflag %}
+
+    {% flag 'can_view_messaging_question_per_destination_on_messaging_page' %}
+        <div class="chart-column-width">
+            <div class="card h-100">
+                <div class="card-body chart">
+                    <p class="chart-title">messaging question per destination</p>
+                    <div id="messaging-question-destination-chart-id-chart-box">
+                        <div id="messaging-question-destination-chart-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Messaging Question per Destination: Country users are working in or looking for work in who have responded to questions in the filtered timeframe. 
+                            <div class="tooltip-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endflag %}
+</div>
 <div class="row">
     {% flag 'can_view_messaging_question_per_origin_on_messaging_page' %}
         <div class="col-md-12 mb-3">
@@ -90,23 +125,6 @@
             </div>
         </div>
     {% endflag %}
-    {% flag 'can_view_messaging_question_per_destination_on_messaging_page' %}
-        <div class="col-md-12">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">messaging question per destination</p>
-                    <div id="messaging-question-destination-chart-id-chart-box">
-                        <div id="messaging-question-destination-chart-id"></div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            Messaging Question per Destination: Country users are working in or looking for work in who have responded to questions in the filtered timeframe. 
-                            <div class="tooltip-arrow"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
 </div>
 
 {% endblock content %}
@@ -114,17 +132,21 @@
 {% block scripts %}
 <script src="{% static 'js/charts/bar/messaging_question_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/messaging_question_destination_graph.js' %}"></script>
+<script src="{% static 'js/charts/pie/messaging_question_organisation_pie_chart.js' %}"></script>
 <script src="{% static 'js/app/messaging_question.js' %}"></script>
 <script type="text/javascript">
     // get data from context
     var originData = {{ messaging_question_per_origin|safe }};
     var destinationData = {{ messaging_question_per_destination|safe }};
+    var organisationData = {{ messaging_question_per_organisation|safe }};
 
     // plots the origin graph
     messagingQuestionOriginChart(originData)
 
     // plots the origin graph
     messagingQuestionDestinationChart(destinationData)
+
+    messagingQustionOrganisationPieChart(organisationData)
 
 </script>
 {% endblock %}

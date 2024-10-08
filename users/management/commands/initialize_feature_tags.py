@@ -49,6 +49,7 @@ class Command(BaseCommand):
             {"condition": "everyone", "tag": "can_view_total_messaging_questions_count_on_messaging_page"},
             {"condition": "everyone", "tag": "can_view_messaging_question_per_origin_on_messaging_page"},
             {"condition": "everyone", "tag": "can_view_messaging_question_per_destination_on_messaging_page"},
+            {"condition": "everyone", "tag": "can_view_organisation_chart_on_messaging_question_page"} 
         ]
         WaffleFlag = get_waffle_flag_model()
         for flag in flags_list:

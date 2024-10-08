@@ -1,8 +1,8 @@
 from common.utils.strings import format_thousands_with_commas
 from datetime import datetime
 from question.filters import generic_question_filtered_queryset
-from question.models import MessagingQuestionStandard
-from django.db.models import Count, Case, When, F
+from question.models import MessagingQuestionResponse, MessagingQuestionStandard
+from django.db.models import Count, Case, When, F, Q
 
 
 def get_messaging_question_per_origin_counts(**filters):
@@ -116,3 +116,33 @@ def get_all_messaging_question_responses_data(**filters):
             })
 
     return data
+
+def get_messaging_question_per_organisation_counts(**filters):
+    queryset = generic_question_filtered_queryset(
+        queryset=MessagingQuestionStandard.objects.all(), 
+        **filters
+    )
+
+    organisation_counts_data = (
+        MessagingQuestionResponse.objects.filter(
+            messaging_question__messaging_question_standard__in=queryset
+        ).exclude(
+            responses__option__translated_option__iexact="not specified"
+        ).values(
+            organisation_name=F('messaging_question__messaging_question_standard__organisation__name')
+        ).annotate(
+            count=Count('id', distinct=True)
+        ).order_by('-count')
+    )
+
+    organisation_data = [count['count'] for count in organisation_counts_data]
+    organisation_labels = [
+        count['organisation_name'].title() 
+        for count in organisation_counts_data 
+        if count['organisation_name'] is not None
+    ]
+
+    return {
+        "counts": organisation_data,
+        "labels": organisation_labels,
+    }

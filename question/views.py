@@ -23,6 +23,7 @@ from question.repository.inline_questions_standard import (
 from question.repository.messaging_questions_standard import (
     get_all_messaging_question_responses_data,
     get_messaging_question_per_destination_counts,
+    get_messaging_question_per_organisation_counts,
     get_messaging_question_per_origin_counts,
     messaging_question_stats_for_export,
     messaging_questions_count,
@@ -44,11 +45,15 @@ def messaging_question(request):
     messaging_question_per_destination = get_messaging_question_per_destination_counts(
         **filters, current_user=request.user
     )
+    messaging_question_per_organisation = get_messaging_question_per_organisation_counts(
+        **filters, current_user=request.user
+    )
 
     context = {
         "total_messaging_questions": total_messaging_questions,
         "messaging_question_per_origin": messaging_question_per_origin,
         "messaging_question_per_destination": messaging_question_per_destination,
+        "messaging_question_per_organisation": messaging_question_per_organisation,
         "filter_form": filter_form,
         "date_range_form": date_range_form,
     }
