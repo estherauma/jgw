@@ -50,6 +50,7 @@ class InlineQuestionStandard(models.Model):
         blank=True,
         related_name="inline_question_organisation",
     )
+    is_myvoice_organisation = models.BooleanField(default=False)
     api_version = models.CharField(max_length=10, blank=False, null=True)
 
     api_created_at = models.DateTimeField(default=timezone.now)
@@ -171,7 +172,7 @@ class MessagingQuestionStandard(models.Model):
     language = models.ForeignKey(
         Language, on_delete=models.CASCADE, null=True, blank=True, related_name="messaging_question_language"
     )
-
+    is_myvoice_organisation = models.BooleanField(default=False)
     api_created_at = models.DateTimeField(default=timezone.now)
     api_updated_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -24,7 +24,7 @@ from question.models import (
     MessagingResponse,
     MessagingResponseOptionText,
 )
-from preference.models import Preference
+from preference.models import Country, Organisation, Preference
 from question.tasks import translate_and_clean_messaging_question_fields
 
 
@@ -80,7 +80,7 @@ def fetch_messaging_questions_from_api_to_db():
     # call to translate, question text, response
     translate_and_clean_messaging_question_fields()
     update_translations_from_localization(meassaging_question_response_localization)
-
+    update_myvoice_messaging_questions()
 
 def add_messaging_question_to_db(messaging_question):
     if MessagingQuestionStandard.objects.filter(data_source_id=messaging_question.get("_id")).exists():
@@ -201,3 +201,37 @@ def update_translations_from_localization(localization_data):
                 print(f"No match found for '{auto_translation}'")
     except Exception as e:
         print(f"Error during translation update: {str(e)}")
+
+def update_myvoice_messaging_questions():
+    with transaction.atomic():
+        not_specified_org = Organisation.objects.get(name='not specified')
+        myvoice_org = Organisation.objects.get(name='myvoice')
+        malaysia_country = Country.objects.get(name='malaysia')
+
+        messaging_questions_to_update = MessagingQuestionStandard.objects.filter(
+            organisation=not_specified_org,
+            destination=malaysia_country
+        )
+
+        updated_count = messaging_questions_to_update.update(
+            organisation=myvoice_org,
+            is_myvoice_organisation=True
+        )
+
+    return updated_count
+
+def reverse_myvoice_messaging_questions():
+    with transaction.atomic():
+
+        not_specified_org = Organisation.objects.get(name='not specified')
+
+        messaging_questions_to_reverse = MessagingQuestionStandard.objects.filter(
+            is_myvoice_organisation=True
+        )
+
+        updated_count = messaging_questions_to_reverse.update(
+            organisation=not_specified_org,
+            is_myvoice_organisation=False
+        )
+
+    return updated_count

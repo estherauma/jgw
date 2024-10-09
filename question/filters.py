@@ -149,11 +149,11 @@ def question_response_filtered_queryset(
         organisation_q_objects = Q()
         user_org_names = [org.name for org in user_orgs]
         if "evergreen" in user_org_names:
-            organisation_q_objects |= Q(organisation_inline_question="evergreen")
-        if "not specified" in user_org_names:
-            organisation_q_objects |= Q(organisation_inline_question="myvoice")
+            organisation_q_objects |= Q(organisation_inline_question="evergreen") & Q(inline_question__inline_question_standard__destination__name="malaysia")
+        if "myvoice" in user_org_names:
+            organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(inline_question__inline_question_standard__destination__name="malaysia")
         
-        other_organisations = [org for org in user_org_names if org not in {"evergreen", "not specified"}]
+        other_organisations = [org for org in user_org_names if org not in {"evergreen", "myvoice"}]
         if other_organisations:
             organisation_q_objects |= Q(inline_question__inline_question_standard__organisation__name__in=other_organisations)
         question_response_filters_q_object &= organisation_q_objects
@@ -186,11 +186,11 @@ def question_response_filtered_queryset(
     if organisations:
         organisation_q_objects = Q()
         if "evergreen" in organisations:
-            organisation_q_objects |= Q(organisation_inline_question="evergreen")
-        if "not specified" in organisations:
-            organisation_q_objects |= Q(organisation_inline_question="myvoice")
+            organisation_q_objects |= Q(organisation_inline_question="evergreen") & Q(inline_question__inline_question_standard__destination__name="malaysia")
+        if "myvoice" in organisations:
+            organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(inline_question__inline_question_standard__destination__name="malaysia")
         
-        other_organisations = [org for org in organisations if org not in {"evergreen", "not specified"}]
+        other_organisations = [org for org in organisations if org not in {"evergreen", "myvoice"}]
         if other_organisations:
             organisation_q_objects |= Q(inline_question__inline_question_standard__organisation__name__in=other_organisations)
         

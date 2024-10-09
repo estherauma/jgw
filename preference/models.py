@@ -177,6 +177,7 @@ class Preference(models.Model):
     factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     is_missing_sector_cleaned = models.BooleanField(default=False)
+    is_myvoice_organisation = models.BooleanField(default=False)
     is_missing_accesscode_cleaned = models.BooleanField(default=False)
 
 

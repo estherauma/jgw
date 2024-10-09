@@ -26,7 +26,7 @@ class InlineQuestionResponseTextAdminDisplay(admin.ModelAdmin):
 @admin.register(InlineQuestionResponse)
 class InlineQuestionResponseAdmin(admin.ModelAdmin):
     list_display = ["inline_question","organisation_inline_question","response", "created_at","updated_at"]
-    search_fields = ["response"]
+    search_fields = ["organisation_inline_question"]
     ordering = ['-created_at']
 
 @admin.register(InlineQuestionResponseText)
@@ -63,7 +63,7 @@ class InlineQuestionAndKeysMatchAdmin(admin.ModelAdmin):
 
 @admin.register(InlineQuestionStandard)
 class InlineQuestionStandardAdmin(admin.ModelAdmin):
-    list_display = ["id","data_source_id","device_id","destination", "organisation"]
+    list_display = ["id","data_source_id","device_id","destination", "organisation","is_myvoice_organisation"]
     search_fields = ["id","data_source_id","device_id"]
 
 @admin.register(FollowUpQuestion)
@@ -75,8 +75,8 @@ class FollowUpQuestionAdmin(admin.ModelAdmin):
         return obj.inline_question.inline_question
 @admin.register(MessagingQuestionStandard)
 class MessagingQuestionStandardAdmin(admin.ModelAdmin):
-    list_display = ["api_created_at", "data_source_id", "device_id", "question_id","route","factory_farm","destination","organisation_sector"]
-    search_fields = ["api_created_at", "data_source_id", "device_id", "question_id","route","factory_farm","destination","organisation_sector"]
+    list_display = ["api_created_at", "data_source_id", "device_id", "question_id","route","factory_farm","destination","organisation_sector","organisation","is_myvoice_organisation"]
+    search_fields = ["api_created_at", "data_source_id", "device_id", "question_id","route","factory_farm","destination","organisation_sector","organisation","is_myvoice_organisation"]
     ordering=["-api_created_at"]
 
 @admin.register(MessagingQuestionResponse)

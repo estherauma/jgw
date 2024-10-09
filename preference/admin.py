@@ -54,6 +54,7 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
         "is_missing_sector_cleaned",
         "get_org_workcode",
         "is_missing_accesscode_cleaned",
+        "is_myvoice_organisation",
     ]
     search_fields = [
         "id",
