@@ -104,6 +104,7 @@ def export_preference_stats(request):
     return generate_and_export_excel(export_dict, "preference_stats")
 
 
+
 def export_returning_users_to_excel(request):
     returning_users = get_returning_users_grouped_by_original_device_id()
     wb = openpyxl.Workbook()
@@ -287,7 +288,7 @@ def export_preferences_data(request):
         "Origin",
         "Destination",
         "Route",
-        "Organisation Sector",
+        "Organisation Sector"
     ]
 
     if not is_sws_config:
