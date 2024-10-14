@@ -1,6 +1,5 @@
-from common.inline import convert_question_key_to_readable_string, convert_to_camel_case
+from collections import defaultdict
 from common.utils.strings import format_thousands_with_commas
-from datetime import datetime
 from question.filters import generic_question_filtered_queryset
 from question.models import MessagingQuestionResponse, MessagingQuestionStandard
 from django.db.models import Count, Case, When, F
@@ -75,6 +74,18 @@ def messaging_question_stats_for_export(filters):
     }
 
 def each_messaging_question_response(**filters):
+    """
+    Fetches and aggregates responses for messaging questions, applying specified filters.
+    
+    Args:
+        **filters: Keyword arguments used to filter the messaging questions.
+
+    Returns:
+        dict: A dictionary where keys are question texts (translated), and values contain:
+            - 'labels': List of response options.
+            - 'counts': List of counts for each response option.
+            - 'title': Original or translated text of the question.
+    """
   
     messaging_question_standards = generic_question_filtered_queryset(
         queryset=MessagingQuestionStandard.objects.all(),
@@ -97,22 +108,22 @@ def each_messaging_question_response(**filters):
     
     for response in messaging_question_responses:
         question_text = response.get("messaging_question__question__translated_text")
-        title_text = response.get("messaging_question__question__text")
         response_text = response.get("responses__option__translated_option")
         response_count = response.get("num_responses")
 
-        if question_text:
-            if question_text in result_dict:
+        result_dict = defaultdict(lambda: {"labels": [], "counts": [], "title": ""})
+
+        for response in messaging_question_responses:
+            question_text = response.get("messaging_question__question__translated_text")
+            response_text = response.get("responses__option__translated_option")
+            response_count = response.get("num_responses")
+
+            if question_text and response_text is not None:
                 result_dict[question_text]["labels"].append(response_text)
                 result_dict[question_text]["counts"].append(response_count)
-            else:
-                result_dict[question_text] = {
-                    "labels": [response_text],
-                    "counts": [response_count],
-                    "title": question_text,
-                }
+                result_dict[question_text]["title"] = question_text
 
-    return result_dict
+        return dict(result_dict)
 
 def get_all_messaging_question_responses_data(**filters):
     queryset = generic_question_filtered_queryset(queryset=MessagingQuestionStandard.objects.all(), **filters).select_related(
