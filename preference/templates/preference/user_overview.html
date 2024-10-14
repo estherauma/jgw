@@ -1,4 +1,3 @@
-
 {% extends 'core/layouts/base.html' %}
 {% load crispy_forms_tags %}
 
@@ -306,7 +305,7 @@
     preferenceWorkCodeUsageGraph(workCodeData)
 
     // preferenceMonthlyUsersChart
-    preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData)
+    preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData)
 
     // users by country state graph
     usersByCountryStateChart(usersByCountryStateChartData)
