@@ -52,18 +52,20 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="dropdown w-100">
-                  <a
-                    class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue"
-                    href="#"
-                    role="button"
-                    id="export-menu"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >
-                    Export
-                    <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                  </a>
+                  {% flag 'can_download_worker_insights_excel_reports' %}
+                    <a
+                      class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue"
+                      href="#"
+                      role="button"
+                      id="export-menu"
+                      data-bs-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      Export
+                      <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                    </a>
+                  {% endflag %}
                   <div class="dropdown-menu" aria-labelledby="export-menu">
                     <a class="dropdown-item" href="{% url 'events:export_telephone_clicks_data' %}?export=true">Export Telephone Clicks Data Report to Excel</a>
                     <a class="dropdown-item" href="{% url 'events:export_link_clicks_data' %}?export=true">Export Link Clicks Data Report to Excel</a>
@@ -99,22 +101,14 @@
         <p class="chart-title">
           what matters to workers (where people spend time in the app)
         </p>
-        <button id="chapters-pened-btn" class="btn btn-sm btn-primary bg-jgw-deep-blue my-2">Show by unique users</button>
         <div class="chapters-opened-graph-id-chart-box">
           <div id="chapters-opened-graph-id"></div>
-          <div class="info-tooltip">
-            <i class="fas fa-info-circle"></i>
-            What Matters to Workers: What issues are jobseekers or workers interested in / trying to find out information about? Shows total views of a section by default, or select unique users to see how many individuals visited that section.
-            <div class="tooltip-arrow"></div>
-        </div>
-        </div>
-        <div class="chapters-opened-by-unique-users-graph-id-chart-box display-hidden">
-          <div id="chapters-opened-by-unique-users-graph-id"></div>
-          <div class="info-tooltip">
-            <i class="fas fa-info-circle"></i>
-            What Matters to Workers: What issues are jobseekers or workers interested in / trying to find out information about? Select total views to see how many individuals visited that section.
-          <div class="tooltip-arrow"></div>
-        </div>
+            <div class="info-tooltip">
+              <i class="fas fa-info-circle"></i>
+              What Matters to Workers: What issues are jobseekers or workers interested in / trying to find out information about? Shows total views of a section by default, or select unique users to see how many individuals visited that section.
+              <div class="tooltip-arrow"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -146,19 +140,12 @@
 <script src="{% static 'js/app/what_matter_to_workers.js' %}"></script>
 
 <script type="text/javascript">
-  $("#chapters-pened-btn").click(function(){
-    $(".chapters-opened-by-unique-users-graph-id-chart-box, .chapters-opened-graph-id-chart-box").toggleClass("display-hidden");
-     let buttonText = $(this).text() === "Show by unique users" ? "Show by total view" : "Show by unique users";
-     $(this).text(buttonText);
-  });
-
+ 
   const chaptersFeedbackParams = {{ chapters_feedback | safe }}
   chapterFeedBackGraph(chaptersFeedbackParams);
 
-  const chaptersOpened = {{ chapters_opened | safe }};
-  chaptersOpenedGraph(chaptersOpened, "chapters-opened-graph-id");
+  const chaptersOpenedData = {{ chapters_opened_data | safe }};
+  chaptersOpenedGraph(chaptersOpenedData);
 
-  const chaptersOpenedUniqueUsers = {{ chapters_opened_by_unique_user | safe }};
-  chaptersOpenedGraph(chaptersOpenedUniqueUsers, "chapters-opened-by-unique-users-graph-id");
 </script>
 {% endblock %}

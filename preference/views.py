@@ -83,28 +83,26 @@ def user_overview(request):
 
 
 def export_preference_stats(request):
-    if request.method == "POST":
-        filter_form = GenericFilterForm(request=request, data=request.POST)
-        if filter_form.is_valid():
-            filters = generic_filter_form_parser(filter_form)
+    form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
+    filters = form_filter_params["filters"]
 
-        organisations = filters.get("organisations", None)
-        if organisations is None:
-            user_orgs = get_user_organisations(request.user)
-            organisations = [getattr(org, "name") for org in user_orgs]
+    organisations = filters.get("organisations", None)
+    if organisations is None:
+        user_orgs = get_user_organisations(request.user)
+        organisations = [getattr(org, "name") for org in user_orgs]
 
-        export_dict = {
-            "all": preference_stats_for_export(
-                {**filters, "organisations": organisations, "current_user": request.user}
-            )
-        }
+    export_dict = {
+        "all": preference_stats_for_export(
+            {**filters, "organisations": organisations, "current_user": request.user}
+        )
+    }
 
-        for organisation in organisations:
-            export_dict[organisation] = preference_stats_for_export(
-                {**filters, "organisations": [organisation], "current_user": request.user}
-            )
+    for organisation in organisations:
+        export_dict[organisation] = preference_stats_for_export(
+            {**filters, "organisations": [organisation], "current_user": request.user}
+        )
+    return generate_and_export_excel(export_dict, "preference_stats")
 
-        return generate_and_export_excel(export_dict, "preference_stats")
 
 
 def export_returning_users_to_excel(request):
@@ -290,13 +288,12 @@ def export_preferences_data(request):
         "Origin",
         "Destination",
         "Route",
-        "Organisation Sector",
-        "Factory Farm",
-        "Organisation",
+        "Organisation Sector"
     ]
 
     if not is_sws_config:
-        headers.insert(14, "Organisation Access Code")
+        headers.insert(15, "Organisation Access Code")
+        headers.append("Organisation")
 
     for idx, header in enumerate(headers, start=1):
         ws.cell(row=4, column=idx, value=header)
@@ -318,10 +315,6 @@ def export_preferences_data(request):
         ws.cell(row=idx, column=14, value=data["sectors_of_work__translated_name"])
         if not is_sws_config:
             ws.cell(row=idx, column=15, value=data["organisation_access_code__code"])
-            ws.cell(row=idx, column=16, value=data["factory_farm__name"])
-            ws.cell(row=idx, column=17, value=data["organisation__name"])
-        else:
-            ws.cell(row=idx, column=15, value=data["factory_farm__name"])
             ws.cell(row=idx, column=16, value=data["organisation__name"])
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

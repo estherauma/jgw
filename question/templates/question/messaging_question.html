@@ -47,12 +47,13 @@
                         <div class="row">
                             <div class="col-md-6 button-margin">
                                 <div class="dropdown w-100">
-                                    <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
-                                        id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Export
-                                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                                    </a>
-        
+                                    {% flag 'can_download_messaging_questions_excel_reports' %}
+                                        <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                                            id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Export
+                                            <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                                        </a>
+                                    {% endflag %}
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
                                         {% flag 'can_view_messaging_question_report_export_button' %}
                                             <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">Export Messaging Question Data Report to Excel</a>

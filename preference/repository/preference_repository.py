@@ -129,26 +129,11 @@ def preferences_by_language(**filters):
         preferences_language_queryset.values("language__translated_name")
         .annotate(
             translated_name=Case(
-                When(
-                    language__translated_name="burma",
-                    then=Value("burmese"),
-                ),
-                When(
-                    language__translated_name="unknown language [qc]",
-                    then=Value("mandarin"),
-                ),
-                When(
-                    language__translated_name="unknown language [hq]",
-                    then=Value("indonesian"),
-                ),
-                When(
-                    language__translated_name="unknown language [qm]",
-                    then=Value("malay"),
-                ),
-                When(
-                    language__translated_name="unknown language [qf]",
-                    then=Value("filipino"),
-                ),
+                When(language__translated_name="burma", then=Value("burmese")),
+                When(language__translated_name="unknown language [qc]", then=Value("mandarin")),
+                When(language__translated_name="unknown language [hq]", then=Value("indonesian")),
+                When(language__translated_name="unknown language [qm]", then=Value("malay")),
+                When(language__translated_name="unknown language [qf]", then=Value("filipino")),
                 default=F("language__translated_name"),
                 output_field=CharField(),
             )
@@ -158,8 +143,17 @@ def preferences_by_language(**filters):
         .order_by("-total")
     )
 
-    labels = [destination["translated_name"].title() for destination in language_counts]
-    counts = [destination["total"] for destination in language_counts]
+    labels = []
+    counts = []
+
+    for destination in language_counts:
+        translated_name = destination["translated_name"]
+        if translated_name is None:
+            labels.append("Others")
+        else:
+            labels.append(translated_name.title())
+
+        counts.append(destination["total"])
 
     return {"labels": labels, "counts": counts}
 
@@ -275,6 +269,7 @@ def get_preferences_by_sectors(**filters):
     counts = [entry["preferences_count"] for entry in result]
 
     return {"labels": labels, "counts": counts}
+
 
 
 def get_user_counts_by_origin_destination():
