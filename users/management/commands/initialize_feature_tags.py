@@ -5,7 +5,7 @@ from waffle import get_waffle_flag_model
 class Command(BaseCommand):
     help = "Create initial feature toggle tags for user groups using the waffle library"
     def handle(self, *args, **options):
-        # Create testers group
+
         group_name = "testers"
         testers_group, _ = Group.objects.get_or_create(name=group_name)
         permissions = Permission.objects.filter(
@@ -16,7 +16,7 @@ class Command(BaseCommand):
         )
         for permission in permissions:
             testers_group.permissions.add(permission)
-        # initialize user groups features tag
+
         flags_list = [
             {"condition": "testers", "tag": "can_view_other_resources"},
             {"condition": "testers", "tag": "can_add_other_resources"},
@@ -34,6 +34,7 @@ class Command(BaseCommand):
             {"condition": "everyone", "tag": "can_download_inline_questions_excel_reports"},             
             {"condition": "everyone", "tag": "can_download_preferences_excel_reports"},
             {"condition": "everyone", "tag": "can_view_monthly_active_users_chart"},
+            {"condition": "everyone", "tag": "can_view_messaging_question_responses_on_messaging_page"},
             {"condition": "everyone", "tag": "can_view_new_users_total_count"},
             {"condition": "everyone", "tag": "can_view_users_by_origin_country_chart"},
             {"condition": "everyone", "tag": "can_view_users_by_gender_chart"},
