@@ -272,9 +272,30 @@ def get_preferences_by_sectors(**filters):
 
 
 
-def get_user_counts_by_origin_destination():
+def get_user_counts_by_origin_destination(**filters):
+    """
+    Retrieves user counts grouped by origin and destination countries.
+
+    This function filters the Preference queryset based on provided filters,
+    excludes entries with null origin or destination, and aggregates user counts
+    for each origin-destination pair.
+
+    Args:
+        **filters: Keyword arguments for filtering the queryset.
+
+    Returns:
+        list: A list of dictionaries containing origin, destination, and user count data.
+        Each dictionary has the following structure:
+        {
+            "origin": str,  # Name of the origin country
+            "destination": str,  # Name of the destination country
+            "count": int  # Number of users for this origin-destination pair
+        }
+    """
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
     user_counts = (
-        Preference.objects.exclude(origin__isnull=True, destination__isnull=True)
+        filtered_queryset.exclude(origin__isnull=True, destination__isnull=True)
         .values("origin__name", "destination__name")
         .annotate(user_count=Count("id"))
     )
