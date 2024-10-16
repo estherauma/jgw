@@ -23,6 +23,9 @@ from common.helpers.preference_helpers.country import (
     get_data_origin,
 )
 from common.utils.helpers import can_use_cached_data
+from preference.logic.update_original_sector_of_work_translation import (
+    update_original_sector_of_work_references,
+)
 from preference.models import Preference
 from preference.tasks import translate_and_clean_preferences_fields
 from scripts.load_dev_data import PreferenceDataCache
@@ -38,7 +41,6 @@ def fetch_preferences_from_api(client):
     start_date = APPLICATION_POSSIBLE_START_DATE
     end_date = todays_date()
 
-    # get the last time preferences were fetched
     latest_preference = Preference.objects.last()
     if latest_preference:
         start_date = latest_preference.created_at.strftime("%Y-%m-%d")
@@ -61,6 +63,7 @@ def fetch_preferences_from_api_to_db():
 
     # call celery to the translate, gender, language, and sector of work functions
     translate_and_clean_preferences_fields()
+    update_original_sector_of_work_references()
 
 
 def create_preference_object(preference):
