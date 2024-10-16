@@ -3,6 +3,7 @@ from datetime import datetime
 from question.filters import generic_question_filtered_queryset
 from question.models import MessagingQuestionResponse, MessagingQuestionStandard
 from django.db.models import Count, Case, When, F, Q
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def get_messaging_question_per_origin_counts(**filters):
@@ -118,31 +119,62 @@ def get_all_messaging_question_responses_data(**filters):
     return data
 
 def get_messaging_question_per_organisation_counts(**filters):
-    queryset = generic_question_filtered_queryset(
-        queryset=MessagingQuestionStandard.objects.all(), 
-        **filters
-    )
+    """
+    Retrieves the count of messaging question responses per organization.
 
-    organisation_counts_data = (
-        MessagingQuestionResponse.objects.filter(
-            messaging_question__messaging_question_standard__in=queryset
-        ).exclude(
-            responses__option__translated_option__iexact="not specified"
-        ).values(
-            organisation_name=F('messaging_question__messaging_question_standard__organisation__name')
-        ).annotate(
-            count=Count('id', distinct=True)
-        ).order_by('-count')
-    )
+    This function filters messaging question responses based on the provided filters,
+    excludes responses with "not specified" options, and aggregates the count for each organization.
 
-    organisation_data = [count['count'] for count in organisation_counts_data]
-    organisation_labels = [
-        count['organisation_name'].title() 
-        for count in organisation_counts_data 
-        if count['organisation_name'] is not None
-    ]
+    Args:
+        **filters: Arbitrary keyword arguments for filtering the queryset.
 
-    return {
-        "counts": organisation_data,
-        "labels": organisation_labels,
-    }
+    Returns:
+        dict: A dictionary containing two keys:
+            - "counts": A list of response counts for each organization.
+            - "labels": A list of organization names (capitalized) corresponding to the counts.
+
+    Raises:
+        ObjectDoesNotExist: If no matching objects are found.
+        Exception: For any other unexpected errors during execution.
+    """
+    try:
+        queryset = generic_question_filtered_queryset(
+            queryset=MessagingQuestionStandard.objects.all(), 
+            **filters
+        )
+
+        organisation_counts_data = (
+            MessagingQuestionResponse.objects.filter(
+                messaging_question__messaging_question_standard__in=queryset
+            ).exclude(
+                responses__option__translated_option__iexact="not specified"
+            ).values(
+                organisation_name=F('messaging_question__messaging_question_standard__organisation__name')
+            ).annotate(
+                count=Count('id', distinct=True)
+            ).order_by('-count')
+        )
+
+        organisation_data = [count['count'] for count in organisation_counts_data]
+        organisation_labels = [
+            count['organisation_name'].title() 
+            for count in organisation_counts_data 
+            if count['organisation_name'] is not None
+        ]
+
+        return {
+            "counts": organisation_data,
+            "labels": organisation_labels,
+        }
+
+    except ObjectDoesNotExist:
+        return {
+            "counts": [],
+            "labels": [],
+        }
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return {
+            "counts": [],
+            "labels": [],
+        }
