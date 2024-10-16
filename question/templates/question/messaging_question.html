@@ -104,8 +104,29 @@
             </div>
         </div>
     {% endflag %}
+</div>
+<div class="row">
+    {% flag 'can_view_messaging_question_per_origin_on_messaging_page' %}
+        <div class="col-md-12 mb-3">
+            <div class="card h-100">
+                <div class="card-body chart">
+                    <p class="chart-title">messaging question per origin</p>
+                    <div class="messaging-question-origin-chart-id-chart-box">
+                        <div id="messaging-question-origin-chart-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Messaging Question per Origin: Home country of users who have responded to questions in the filtered timeframe. 
+                            <div class="tooltip-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endflag %}
+</div>
+<div class="row">
     {% flag 'can_view_messaging_question_responses_on_messaging_page' %}
-        <div class="container mt-3">
+        <div class="container">
             <div class="card">
                 <div class="mt-3">
                     <p class="chart-title">Messaging Question Responses</p>
@@ -152,28 +173,7 @@
             </div>
         </div>
     </div>
-    
 </div>
-<div class="row">
-    {% flag 'can_view_messaging_question_per_origin_on_messaging_page' %}
-        <div class="col-md-12 mb-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">messaging question per origin</p>
-                    <div class="messaging-question-origin-chart-id-chart-box">
-                        <div id="messaging-question-origin-chart-id"></div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            Messaging Question per Origin: Home country of users who have responded to questions in the filtered timeframe. 
-                            <div class="tooltip-arrow"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
-</div>
-
 
 {% endblock content %}
 
