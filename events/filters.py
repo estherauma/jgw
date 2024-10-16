@@ -188,17 +188,56 @@ def generic_chapters_feedback_filtered_queryset(
     return queryset.filter(chapters_feedback_filters_q_object)
 
 
-def filter_bigquery_homepage_event_data(queryset, **filters):
-    if filters.get("start_date"):
-        queryset = queryset.filter(event_date__gte=filters["start_date"])
+def filter_bigquery_homepage_event_data(
+    queryset: BaseManager[Any],
+    current_user,
+    start_date=None,
+    end_date=None,
+    destination_countries=None,
+    origin_countries=None,
+    organisations=None,
+    schemes=None,
+    factory_farms=None,
+    sector_of_work=None,
+):
+    user_start_date = get_user_start_date(current_user)
+    user_end_date = get_user_end_date(current_user)
+    user_destinations = get_user_destinations(current_user)
+    user_orgs = get_user_organisations(current_user)
 
-    if filters.get("end_date"):
-        queryset = queryset.filter(event_date__lte=filters["end_date"])
+    final_start_date = (
+        max(start_date, user_start_date)
+        if start_date and user_start_date
+        else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
+    )
+    final_end_date = (
+        min(end_date, user_end_date)
+        if end_date and user_end_date
+        else (end_date or user_end_date or datetime.now().date())
+    )
 
-    if filters.get("destination_countries"):
-        queryset = queryset.filter(destination__name__in=filters["destination_countries"])
+    if destination_countries is None:
+        destination_countries = []
 
-    if filters.get("organisations"):
-        queryset = queryset.filter(organisation__name__in=filters["organisations"])
+    if organisations is None:
+        organisations = []
+    if current_user.is_superuser:
+        user_destinations = []
+        user_orgs = []
 
-    return queryset
+    homepage_event_filters_q_object = Q()
+
+    homepage_event_filters_q_object &= Q(event_date__range=(final_start_date, final_end_date))
+
+    if user_destinations:
+        homepage_event_filters_q_object &= Q(destination__in=user_destinations)
+    if destination_countries:
+        homepage_event_filters_q_object &= Q(destination__name__in=destination_countries)
+
+    if user_orgs:
+        homepage_event_filters_q_object &= Q(organisation__in=user_orgs)
+    if organisations:
+        homepage_event_filters_q_object &= Q(organisation__name__in=organisations)
+    
+
+    return queryset.filter(homepage_event_filters_q_object)
