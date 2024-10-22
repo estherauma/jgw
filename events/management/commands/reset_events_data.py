@@ -10,7 +10,6 @@ from events.models import (
     ChaptersOpened,
     SwsPasiEvent,
     Chapter,
-    BigqueryHomepageEventData
 )
 
 
@@ -35,5 +34,3 @@ class Command(BaseCommand):
         BigQueryChaptersData.objects.all().delete()
         
         SwsPasiEvent.objects.all().delete()
-        BigqueryHomepageEventData.objects.all().delete()
-        
