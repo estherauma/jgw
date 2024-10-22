@@ -181,7 +181,7 @@
 <script src="{% static 'js/charts/bar/messaging_question_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/messaging_question_destination_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/messaging_question_organisation_pie_chart.js' %}"></script>
-<script src="{% static 'js/charts/bar/inline_question_graph.js' %}"></script>
+<script src="{% static 'js/charts/bar/messaging_question_graph.js' %}"></script>
 <script src="{% static 'js/app/messaging_question.js' %}"></script>
 <script type="text/javascript">
     var originData = {{ messaging_question_per_origin|safe }};
@@ -249,9 +249,9 @@
                 const colDiv = document.createElement('div');
                 colDiv.className = 'col-md-12 chart-wrapper';
                 colDiv.innerHTML = `
-                <div class="chart-wrapper-messaging-question" style="height: 400px; margin-top: 20px;">
+                <div class="chart-wrapper-inline-question" style="margin-bottom: 40px; border: 1px solid navy; border-radius: 5px;">
                     <div class="chart-title">${questionData.title}</div>
-                    <div class="chart-container" style="height: 75%;">
+                    <div class="chart-container">
                         <canvas id="chart-${sanitizedKey}"></canvas>
                     </div>
                 </div>
@@ -290,74 +290,6 @@
         } else {
             dropdownButton.textContent = `${checkedBoxes.length} Question(s) Selected`;
         }
-    }
-
-    function messagingQuestionGraph(inlineQuestionData, inlineQuestionCanvasId) {
-        
-        const canvas = document.getElementById(inlineQuestionCanvasId);
-        if (!canvas) {
-            console.error('Canvas element not found:', inlineQuestionCanvasId);
-            return;
-        }
-
-        const ctx = canvas.getContext('2d');
-        const data = inlineQuestionData.counts;
-        const labels = inlineQuestionData.labels;
-
-        const originChartConfig = {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'RESPONSES',
-                    data: data,
-                    backgroundColor: COLORS.navyBlue,
-                    barThickness: 15,
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            drawBorder: false,
-                            display: false
-                        },
-                        ticks: {
-                            autoSkip: false,
-                            maxRotation: 0,
-                            minRotation: 0
-                        }
-                    },
-                    x: {
-                        position: 'bottom'
-                    }
-                },
-                layout: {
-                    padding: {
-                        right: 30,
-                        bottom: 20,
-                    }
-                },
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                    ...externalPluginsConfigDataTables(),
-                    legend: {
-                        display: false
-                    },
-                    scrollbar: {
-                        enabled: true
-                    }
-                }
-            },
-            plugins: [ChartDataLabels],
-        };
-
-        const chart = new Chart(ctx, originChartConfig);
-
-        
     }
 </script>
 {% endblock %}

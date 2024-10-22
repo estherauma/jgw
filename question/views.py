@@ -7,11 +7,7 @@ from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
 from core.forms import DateRangeForm
 from core.logic.file_export import generate_and_export_excel
-from question.forms import (
-    InlineQuestionFilterForm,
-    InlineQuestionOnlyFilterForm,
-    MessagingQuestionFilterForm
-)
+from question.forms import InlineQuestionFilterForm, InlineQuestionOnlyFilterForm, MessagingQuestionFilterForm
 from question.repository.inline_questions_standard import (
     each_inline_question_response,
     get_all_inline_question_responses_data,
@@ -53,7 +49,10 @@ def messaging_question(request):
     messaging_question_per_organisation = get_messaging_question_per_organisation_counts(
         **filters, current_user=request.user
     )
-    each_messaging_question_response_data = each_messaging_question_response(**filters, current_user=request.user)
+    each_messaging_question_response_data = each_messaging_question_response(
+        **filters, current_user=request.user
+    )
+    print("MESSAGING QUESTIONS", each_messaging_question_response_data)
 
     context = {
         "total_messaging_questions": total_messaging_questions,
@@ -62,7 +61,7 @@ def messaging_question(request):
         "messaging_question_per_organisation": messaging_question_per_organisation,
         "each_messaging_question_response": each_messaging_question_response_data,
         "filter_form": filter_form,
-        "date_range_form": date_range_form
+        "date_range_form": date_range_form,
     }
     return render(request, "question/messaging_question.html", context=context)
 
@@ -123,6 +122,7 @@ def inline_question(request):
     inline_question_choices = [
         {"key": item["key"], "title": item["title"]} for item in each_inline_question_response_data_list
     ]
+    print("INLINE QUESTIONS", each_inline_question_response_data)
     context = {
         "total_inline_questions": total_inline_questions,
         "total_inline_question_responses": total_inline_question_responses,
@@ -134,9 +134,6 @@ def inline_question(request):
         "filter_form": filter_form,
         "date_range_form": date_range_form,
         "each_inline_question_response": each_inline_question_response_data,
-        "inline_question_only_form": InlineQuestionOnlyFilterForm(
-            inline_question_choices=inline_question_choices
-        ),
     }
     return render(request, "question/inline_question.html", context=context)
 

@@ -1,15 +1,22 @@
-function messagingQuestionGraph(inlineQuestionData, inlineQuestionCanvasId) {
-    const canvas = document.getElementById(inlineQuestionCanvasId);
+function messagingQuestionGraph(messagingQuestionData, messagingQuestionCanvasId) {
+    const canvas = document.getElementById(messagingQuestionCanvasId);
     if (!canvas) {
-        console.error('Canvas element not found:', inlineQuestionCanvasId);
+        console.error('Canvas element not found:', messagingQuestionCanvasId);
         return;
     }
 
     const ctx = canvas.getContext('2d');
-    const data = inlineQuestionData.counts;
-    const labels = inlineQuestionData.labels;
+    const data = messagingQuestionData.counts;
+    const labels = messagingQuestionData.labels;
 
-    const originChartConfig = {
+    const minHeight = 400;
+    const heightPerLabel = 30; 
+    const dynamicHeight = Math.max(minHeight, labels.length * heightPerLabel);
+
+    canvas.style.height = `${dynamicHeight}px`;
+    canvas.parentElement.style.height = `${dynamicHeight}px`;
+
+    const messagingChartConfig = {
         type: 'bar',
         data: {
             labels: labels,
@@ -18,6 +25,8 @@ function messagingQuestionGraph(inlineQuestionData, inlineQuestionCanvasId) {
                 data: data,
                 backgroundColor: COLORS.navyBlue,
                 barThickness: 15,
+                borderColor: COLORS.navyBlue,
+                borderWidth: 1,
             }]
         },
         options: {
@@ -48,34 +57,24 @@ function messagingQuestionGraph(inlineQuestionData, inlineQuestionCanvasId) {
             maintainAspectRatio: false,
             responsive: true,
             plugins: {
-                ...externalPluginsConfigDataTables(),
                 legend: {
                     display: false
                 },
                 scrollbar: {
                     enabled: true
+                },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'right',
+                    formatter: (value, context) => {
+                        return value;
+                    },
+                    color: COLORS.navyBlue,
                 }
             }
         },
         plugins: [ChartDataLabels],
     };
 
-    const chart = new Chart(ctx, originChartConfig);
-
-    const scrollContainer = document.createElement('div');
-    scrollContainer.style.overflowX = 'auto';
-    scrollContainer.style.width = '100%';
-    canvas.parentNode.insertBefore(scrollContainer, canvas);
-    scrollContainer.appendChild(canvas);
-
-    canvas.style.width = `${labels.length * 50}px`;
-    canvas.style.height = '100%';
-
-    scrollContainer.addEventListener('scroll', () => {
-        chart.update();
-    });
-
-    return chart;
+    new Chart(ctx, messagingChartConfig);
 }
-
-export default messagingQuestionGraph;
