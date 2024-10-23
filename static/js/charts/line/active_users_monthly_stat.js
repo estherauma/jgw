@@ -4,6 +4,17 @@ function monthlyActiveUsersChart(monthlyActiveUserCountData) {
     const data = monthlyActiveUserCountData.map(entry => entry.count);
     console.log("Labels data:", labels);
     console.log("data:", data);
+
+      const plugin = {
+        beforeInit(chart) {
+            const originalFit = chart.legend.fit;
+            chart.legend.fit = function fit() {
+                originalFit.bind(chart.legend)();
+                this.height += 50;
+            }
+        }
+      }
+      
       const originChartConfig = {
         type: "bar",
         data: {
@@ -51,7 +62,7 @@ function monthlyActiveUsersChart(monthlyActiveUserCountData) {
             },
           },
         },
-        plugins: [ChartDataLabels],
+        plugins: [ChartDataLabels, plugin],
       };
   
       drawChart("monthly-active-users-graph-id", data, originChartConfig)
