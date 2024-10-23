@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Q,F
+from django.db.models import Q, F
 from django.db.models.functions import Replace
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.const.localization_const import meassaging_question_response_localization
@@ -81,6 +81,7 @@ def fetch_messaging_questions_from_api_to_db():
     translate_and_clean_messaging_question_fields()
     update_translations_from_localization(meassaging_question_response_localization)
     update_myvoice_messaging_questions()
+
 
 def add_messaging_question_to_db(messaging_question):
     if MessagingQuestionStandard.objects.filter(data_source_id=messaging_question.get("_id")).exists():
@@ -180,15 +181,18 @@ def add_messaging_question_to_db(messaging_question):
                 )
                 messaging_question_response.responses.add(new_question_response)
 
+
 def update_translations_from_localization(localization_data):
     try:
-        for response_option in MessagingResponseOptionText.objects.filter(translated_option__contains="&#39;"):
+        for response_option in MessagingResponseOptionText.objects.filter(
+            translated_option__contains="&#39;"
+        ):
             response_option.translated_option = response_option.translated_option.replace("&#39;", "'")
             response_option.save()
         for entry in localization_data:
-            auto_translation = entry['auto_translation']
-            correct_translation = entry['correct_translation']
-            
+            auto_translation = entry["auto_translation"]
+            correct_translation = entry["correct_translation"]
+
             response_option = MessagingResponseOptionText.objects.filter(
                 Q(option=auto_translation) | Q(translated_option=auto_translation)
             ).first()
@@ -197,41 +201,39 @@ def update_translations_from_localization(localization_data):
                 response_option.translated_option = correct_translation
                 response_option.save()
                 print(f"Updated '{auto_translation}' to '{correct_translation}' for id: {response_option.id}")
-            else:
-                
+
     except Exception as e:
         print(f"Error during translation update: {str(e)}")
 
+
 def update_myvoice_messaging_questions():
     with transaction.atomic():
-        not_specified_org = Organisation.objects.get(name='not specified')
-        myvoice_org = Organisation.objects.get(name='myvoice')
-        malaysia_country = Country.objects.get(name='malaysia')
+        not_specified_org = Organisation.objects.get(name="not specified")
+        myvoice_org = Organisation.objects.get(name="myvoice")
+        malaysia_country = Country.objects.get(name="malaysia")
 
         messaging_questions_to_update = MessagingQuestionStandard.objects.filter(
-            organisation=not_specified_org,
-            destination=malaysia_country
+            organisation=not_specified_org, destination=malaysia_country
         )
 
         updated_count = messaging_questions_to_update.update(
-            organisation=myvoice_org,
-            is_myvoice_organisation=True
+            organisation=myvoice_org, is_myvoice_organisation=True
         )
 
     return updated_count
 
+
 def reverse_myvoice_messaging_questions():
     with transaction.atomic():
 
-        not_specified_org = Organisation.objects.get(name='not specified')
+        not_specified_org = Organisation.objects.get(name="not specified")
 
         messaging_questions_to_reverse = MessagingQuestionStandard.objects.filter(
             is_myvoice_organisation=True
         )
 
         updated_count = messaging_questions_to_reverse.update(
-            organisation=not_specified_org,
-            is_myvoice_organisation=False
+            organisation=not_specified_org, is_myvoice_organisation=False
         )
 
     return updated_count

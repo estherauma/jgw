@@ -1,8 +1,5 @@
 from django.db import models
 
-# Create your models here.
-from django.db import models
-
 from common.const.value_const import NOT_SPECIFIED
 
 
