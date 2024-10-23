@@ -8,26 +8,22 @@ function createUserRouteMap(data, elementId, countryCoords) {
                 .filter(row => row.origin === origin)
                 .map(row => `${capitalizeFirstLetter(row.destination)}: ${row.count}`)
                 .join('<br>');
-            
+
             return {
                 type: 'scattergeo',
                 lon: [countryCoords[origin][1], countryCoords[destination][1]],
                 lat: [countryCoords[origin][0], countryCoords[destination][0]],
-                mode: 'lines+markers',
+                mode: 'markers+lines',
                 line: {
                     width: 2,
-                    color: '#193560'
+                    color: '#193560',
+                    dash: 'dash'
                 },
-                opacity: 0.3,
+                opacity: 0.4,
                 text: `${capitalizeFirstLetter(origin)}<br>${hoverText}`,
                 hoverinfo: 'text',
-                marker: {
-                    symbol: 'arrow',
-                    size: 15,
-                    color: '#193560',
-                    angle: 45,
-                    angleref: 'previous'
-                }
+                customdata: [countryCoords[origin], countryCoords[destination]],
+                hovertemplate: '%{text}<extra></extra>'
             };
         }
         return null;
@@ -49,8 +45,8 @@ function createUserRouteMap(data, elementId, countryCoords) {
                     symbol: 'circle-dot',
                     color: '#37c1e3',
                     line: {
-                        width: 2,
-                        color: '#193560'
+                        width: 4,
+                        color: '#193560',
                     }
                 },
                 textposition: 'right',
@@ -60,13 +56,7 @@ function createUserRouteMap(data, elementId, countryCoords) {
                     color: 'black'
                 },
                 name: capitalizeFirstLetter(country),
-                hoverinfo: 'text',
-                textbackground: {
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    bordercolor: '#193560',
-                    borderwidth: 1,
-                    borderpad: 2
-                }
+                hoverinfo: 'text'
             };
         }
         return null;
@@ -96,7 +86,7 @@ function createUserRouteMap(data, elementId, countryCoords) {
             showland: true,
             showcountries: true,
             showocean: true,
-            countrywidth: 0.5,
+            countrywidth: 0.2,
             landcolor: 'rgb(243, 243, 243)',
             lakecolor: 'rgb(255, 255, 255)',
             oceancolor: 'rgb(230, 255, 255)',
@@ -112,8 +102,8 @@ function createUserRouteMap(data, elementId, countryCoords) {
         },
         width: containerWidth,
         height: containerHeight,
-        margin: { t: 0, b: 0, l: 0, r: 0 },  
-        dragmode: true  
+        margin: { t: 0, b: 0, l: 0, r: 0 },
+        dragmode: true
     };
 
     const initialRange = {
@@ -124,8 +114,7 @@ function createUserRouteMap(data, elementId, countryCoords) {
     Plotly.newPlot(elementId, allTraces, layout, {
         responsive: true,
         scrollZoom: false,
-        modeBarButtonsToRemove: ['pan2d'],
-        displayModeBar: true,
+        displayModeBar: false,
     }).then(function(gd) {
         gd.on('plotly_relayout', function(eventData) {
             const newRange = {
