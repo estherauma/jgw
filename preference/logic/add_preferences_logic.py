@@ -23,10 +23,11 @@ from common.helpers.preference_helpers.country import (
     get_data_origin,
 )
 from common.utils.helpers import can_use_cached_data
+from preference.models import Country, Organisation, OrganisationAccessCode, Preference
 from preference.logic.update_original_sector_of_work_translation import (
     update_original_sector_of_work_references,
 )
-from preference.models import Preference
+
 from preference.tasks import translate_and_clean_preferences_fields
 from scripts.load_dev_data import PreferenceDataCache
 
@@ -64,6 +65,7 @@ def fetch_preferences_from_api_to_db():
     # call celery to the translate, gender, language, and sector of work functions
     translate_and_clean_preferences_fields()
     update_original_sector_of_work_references()
+    update_myvoice_preferences()
 
 
 def create_preference_object(preference):
@@ -147,3 +149,42 @@ def create_preference_object(preference):
     new_preference.sectors_of_work.set(sec_of_work_list)
 
     return new_preference
+
+
+def update_myvoice_preferences():
+    with transaction.atomic():
+        not_specified_org = Organisation.objects.get(name="not specified")
+        myvoice_org = Organisation.objects.get(name="myvoice")
+        malaysia_country = Country.objects.get(name="malaysia")
+        myvoice_access_code = OrganisationAccessCode.objects.get(code="myv2112")
+
+        preferences_to_update = Preference.objects.filter(
+            organisation=not_specified_org, destination=malaysia_country
+        )
+
+        updated_count = preferences_to_update.update(
+            organisation=myvoice_org,
+            organisation_access_code=myvoice_access_code,
+            is_myvoice_organisation=True,
+        )
+
+    return updated_count
+
+
+def reverse_myvoice_preferences():
+    with transaction.atomic():
+
+        not_specified_org = Organisation.objects.get(name="not specified")
+        not_specified_access_code = OrganisationAccessCode.objects.get(code="not specified")
+
+        preferences_to_reverse = Preference.objects.filter(is_myvoice_organisation=True)
+
+        updated_count = preferences_to_reverse.update(
+            organisation=not_specified_org,
+            organisation_access_code=not_specified_access_code,
+            is_myvoice_organisation=False,
+        )
+
+        print(f"Number of instances updated: {len(preferences_to_reverse)}")
+
+    return updated_count

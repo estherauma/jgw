@@ -35,7 +35,7 @@ from question.models import (
     InlineQuestionText,
     MessagingResponse,
 )
-from preference.models import Preference, TextTranslations
+from preference.models import Country, Organisation, Preference, TextTranslations
 from question.tasks import translate_and_clean_inline_question_fields
 from scripts.load_dev_data import InlineQuestionDataCache
 
@@ -248,6 +248,7 @@ def fetch_inline_questions_from_api_to_db():
     fetch_questions_key_and_name_from_api()
 
     update_inline_question_response_translations(inline_question_response_localization)
+    update_myvoice_inline_questions()
 
 def add_inline_question_to_db(inline_question):
     if isinstance(inline_question, str):
@@ -503,3 +504,38 @@ def update_inline_question_response_translations(localization_data):
 
     except Exception as e:
         print(f"Error during translation update: {str(e)}")
+
+def update_myvoice_inline_questions():
+    with transaction.atomic():
+        not_specified_org = Organisation.objects.get(name='not specified')
+        myvoice_org = Organisation.objects.get(name='myvoice')
+        malaysia_country = Country.objects.get(name='malaysia')
+
+        inline_questions_to_update = InlineQuestionStandard.objects.filter(
+            organisation=not_specified_org,
+            destination=malaysia_country
+        )
+
+        updated_count = inline_questions_to_update.update(
+            organisation=myvoice_org,
+            is_myvoice_organisation=True
+        )
+
+    return updated_count
+
+def reverse_myvoice_inline_questions():
+    with transaction.atomic():
+
+        not_specified_org = Organisation.objects.get(name='not specified')
+
+        inline_questions_to_reverse = InlineQuestionStandard.objects.filter(
+            is_myvoice_organisation=True
+        )
+
+        updated_count = inline_questions_to_reverse.update(
+            organisation=not_specified_org,
+            is_myvoice_organisation=False
+        )
+
+    return updated_count
+
