@@ -198,7 +198,7 @@ def update_translations_from_localization(localization_data):
                 response_option.save()
                 print(f"Updated '{auto_translation}' to '{correct_translation}' for id: {response_option.id}")
             else:
-                print(f"No match found for '{auto_translation}'")
+                
     except Exception as e:
         print(f"Error during translation update: {str(e)}")
 
