@@ -1,15 +1,13 @@
 from django import forms
 
 from core.forms import GenericFilterForm
-from question.models import InlineQuestionText, MessagingQuestionText
 
 
-def current_inline_questions(inline_question_choices):
+def current_inline_questions(question_choices):
     return [
         (choice['title'], choice['title'] or choice['key'])
-        for choice in inline_question_choices
+        for choice in question_choices
     ]
-
 
 class InlineQuestionFilterForm(GenericFilterForm):
     def __init__(self, *args, **kwargs):

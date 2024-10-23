@@ -6,11 +6,30 @@ from django.db import models
 from common.const.value_const import NOT_SPECIFIED
 
 
+class OriginalSectorOfWork(models.Model):
+    language = models.CharField(max_length=10)
+    key = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+    display_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.display_name} ({self.language})"
+
+
 class SectorOfWork(models.Model):
     name = models.CharField(max_length=255)
     translated_name = models.CharField(max_length=255, null=True, blank=True)
     translated_to = models.CharField(max_length=255, default="en")
     is_disabled = models.BooleanField(default=False)
+    is_original_sector_of_work_in_english = models.BooleanField(default=False)
+    original_sector_of_work = models.ForeignKey(
+        OriginalSectorOfWork,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sectors_of_work_english",
+    )
+    translated_to = models.CharField(max_length=255, default="en")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

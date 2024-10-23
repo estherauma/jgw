@@ -258,59 +258,44 @@ def get_preferences_by_sectors(**filters):
     queryset = Preference.objects.all()
     filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
 
-    sectors_of_work_mapper_instances = SectorsOfWorkMapper.objects.exclude(sectors__is_disabled=True)
-
-    initial_case_list = [
-        {
-            "then_value": sof.mapper.lower(),
-            "match_list": [sec.translated_name for sec in sof.sectors.all()],
-        }
-        for sof in sectors_of_work_mapper_instances
-    ]
-
-    case_list = [initial_case for initial_case in initial_case_list if initial_case["match_list"]]
-
-    when_list = [
-        When(sectors_of_work__translated_name__in=case["match_list"], then=Value(case["then_value"]))
-        for case in case_list
-        if case["match_list"]
-    ]
-
-    aggregated_data = (
-        filtered_queryset.exclude(sectors_of_work__is_disabled=True)
-        .annotate(
-            sectors_of_work__translated_name=Case(
-                *when_list,
-                default=F("sectors_of_work__translated_name"),
-                output_field=CharField(),
-            ),
-        )
-        .values("sectors_of_work__translated_name")
-        .annotate(count=Count("id"))
+    result = (
+        filtered_queryset.filter(sectors_of_work__original_sector_of_work__isnull=False)
+        .values("sectors_of_work__original_sector_of_work__value")
+        .annotate(preferences_count=Count("id"))
+        .order_by("-preferences_count")
     )
 
-    sector_counts = {}
+    labels = [entry["sectors_of_work__original_sector_of_work__value"] for entry in result]
+    counts = [entry["preferences_count"] for entry in result]
 
-    for entry in aggregated_data:
-        sector_name = entry["sectors_of_work__translated_name"]
-        count = entry["count"]
-
-        if sector_name in sector_counts:
-            sector_counts[sector_name.trim()] += count
-        else:
-            sector_counts[sector_name] = count
-
-    labels = list(sector_counts.keys())
-    count = list(sector_counts.values())
-
-    result_dict = {"labels": [label.capitalize() for label in labels if label is not None], "counts": count}
-
-    return result_dict
+    return {"labels": labels, "counts": counts}
 
 
-def get_user_counts_by_origin_destination():
+
+def get_user_counts_by_origin_destination(**filters):
+    """
+    Retrieves user counts grouped by origin and destination countries.
+
+    This function filters the Preference queryset based on provided filters,
+    excludes entries with null origin or destination, and aggregates user counts
+    for each origin-destination pair.
+
+    Args:
+        **filters: Keyword arguments for filtering the queryset.
+
+    Returns:
+        list: A list of dictionaries containing origin, destination, and user count data.
+        Each dictionary has the following structure:
+        {
+            "origin": str,  # Name of the origin country
+            "destination": str,  # Name of the destination country
+            "count": int  # Number of users for this origin-destination pair
+        }
+    """
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
     user_counts = (
-        Preference.objects.exclude(origin__isnull=True, destination__isnull=True)
+        filtered_queryset.exclude(origin__isnull=True, destination__isnull=True)
         .values("origin__name", "destination__name")
         .annotate(user_count=Count("id"))
     )

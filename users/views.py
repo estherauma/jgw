@@ -445,10 +445,10 @@ def create_user(request):
             for lang in all_langs:
                 new_user.user_languages.add(lang)
 
-            messages.success(request, "User created successfully!")
-            return redirect("users:create_user")
+            messages.success(request, f"User {user.email} created successfully!")
+            return render(request, "users/create_user.html", context={"form": CreateNewUserForm(), "show_modal": True})
 
-    return render(request, "users/create_user.html", context={"form": form})
+    return render(request, "users/create_user.html", context={"form": form, "show_modal": False})
 
 
 def update_user(request, user_id):

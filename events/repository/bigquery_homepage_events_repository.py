@@ -12,7 +12,7 @@ def get_total_active_user_within_period(**filters):
     filtered_queryset = filter_bigquery_homepage_event_data(queryset, **filters)
     total_active_user_count = filtered_queryset.filter(
         device_id__isnull=False
-    ).aggregate(  # Ensure device_id is not null
+    ).aggregate(  
         total_unique_device_count=Count("device_id", distinct=True)
     )[
         "total_unique_device_count"
@@ -21,10 +21,10 @@ def get_total_active_user_within_period(**filters):
     return format_thousands_with_commas(total_active_user_count)
 
 
-def get_monthly_active_user_count(**filters):
+def get_monthly_active_user_count(current_user, **filters):
     queryset = BigqueryHomepageEventData.objects.all()
 
-    filtered_queryset = filter_bigquery_homepage_event_data(queryset, **filters)
+    filtered_queryset = filter_bigquery_homepage_event_data(queryset, current_user, **filters)
 
     monthly_counts = (
         filtered_queryset.filter(device_id__isnull=False)

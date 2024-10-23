@@ -6,6 +6,7 @@ from preference.models import (
     Organisation,
     OrganisationAccessCode,
     OrganisationSector,
+    OriginalSectorOfWork,
     Preference,
     SectorOfWork,
     Route,
@@ -23,8 +24,16 @@ from preference.models import (
 
 @admin.register(SectorOfWork)
 class SectorOfWorkTabularAdminDisplay(admin.ModelAdmin):
-    list_display = ["created_at", "name", "translated_name", "translated_to", "is_disabled"]
-    search_fields = ["translated_name", "name", "is_disabled"]
+    list_display = [
+        "created_at",
+        "name",
+        "translated_name",
+        "translated_to",
+        "original_sector_of_work",
+        "is_original_sector_of_work_in_english",
+        "is_disabled",
+    ]
+    search_fields = ["translated_name", "name", "is_disabled", "is_original_sector_of_work_in_english"]
 
 
 @admin.register(Gender)
@@ -105,6 +114,12 @@ class SwsCountryAdmin(admin.ModelAdmin):
 class SectorsOfWorkMapperAdmin(admin.ModelAdmin):
     form = SectorsOfWorkMapperForm
     list_display = ["mapper"]
+
+
+@admin.register(OriginalSectorOfWork)
+class OriginalSectorOfWorkAdmin(admin.ModelAdmin):
+    list_display = ["language", "key", "value", "display_name"]
+    search_fields = ["language", "key", "value", "display_name"]
 
 
 # Register your models here.
