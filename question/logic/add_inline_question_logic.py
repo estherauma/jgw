@@ -230,9 +230,21 @@ def inline_questions_v2_logic(jgw_api_client):
         else:
             qn_resp_text = text_translations.translated_text
 
-        inline_question_response_text, _ = InlineQuestionResponseText.objects.get_or_create(
-            translated_text=qn_resp_text
-        )
+        # Replace the direct creation with get_or_create logic that handles duplicates
+        try:
+            inline_question_response_text = InlineQuestionResponseText.objects.get(
+                translated_text=qn_resp_text
+            )
+        except MultipleObjectsReturned:
+            # If multiple objects exist, use the first one
+            inline_question_response_text = InlineQuestionResponseText.objects.filter(
+                translated_text=qn_resp_text
+            ).first()
+        except InlineQuestionResponseText.DoesNotExist:
+            # If no object exists, create a new one
+            inline_question_response_text = InlineQuestionResponseText.objects.create(
+                translated_text=qn_resp_text
+            )
 
         inline_question_text.title_text = inline_question_v2.get("questionText")
         inline_question_text.save()
@@ -663,37 +675,34 @@ def extract_question_value_option(question_value):
         return [item.get("option") for item in question_value if isinstance(item, dict)]
     else:
         return question_value
+
+
 def update_myvoice_inline_questions():
     with transaction.atomic():
-        not_specified_org = Organisation.objects.get(name='not specified')
-        myvoice_org = Organisation.objects.get(name='myvoice')
-        malaysia_country = Country.objects.get(name='malaysia')
+        not_specified_org = Organisation.objects.get(name="not specified")
+        myvoice_org = Organisation.objects.get(name="myvoice")
+        malaysia_country = Country.objects.get(name="malaysia")
 
         inline_questions_to_update = InlineQuestionStandard.objects.filter(
-            organisation=not_specified_org,
-            destination=malaysia_country
+            organisation=not_specified_org, destination=malaysia_country
         )
 
         updated_count = inline_questions_to_update.update(
-            organisation=myvoice_org,
-            is_myvoice_organisation=True
+            organisation=myvoice_org, is_myvoice_organisation=True
         )
 
     return updated_count
+
 
 def reverse_myvoice_inline_questions():
     with transaction.atomic():
 
-        not_specified_org = Organisation.objects.get(name='not specified')
+        not_specified_org = Organisation.objects.get(name="not specified")
 
-        inline_questions_to_reverse = InlineQuestionStandard.objects.filter(
-            is_myvoice_organisation=True
-        )
+        inline_questions_to_reverse = InlineQuestionStandard.objects.filter(is_myvoice_organisation=True)
 
         updated_count = inline_questions_to_reverse.update(
-            organisation=not_specified_org,
-            is_myvoice_organisation=False
+            organisation=not_specified_org, is_myvoice_organisation=False
         )
 
     return updated_count
-

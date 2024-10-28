@@ -188,16 +188,9 @@ sentry_sdk.init(
     send_default_pii=True,
 )
 
-#  Celery Broker - Redis
+# Celery Broker - Redis
 CELERY_BROKER_URL = os.getenv("REDIS_URL")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
-
-if CELERY_BROKER_URL.startswith("rediss://"):
-    CELERY_REDIS_BACKEND_OPTIONS = {"ssl_cert_reqs": ssl.CERT_NONE}
-else:
-    CELERY_REDIS_BACKEND_OPTIONS = {}
-
-CELERY_BROKER_TRANSPORT_OPTIONS = CELERY_REDIS_BACKEND_OPTIONS
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
