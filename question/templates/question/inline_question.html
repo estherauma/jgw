@@ -1,14 +1,11 @@
-
 {% extends 'core/layouts/base.html' %}
 {% load crispy_forms_tags %}
 
 {% load static %}
 {% load waffle_tags %}
 
-<!-- title -->
 {% block title %} Inline Questions {% endblock title %}
 
-<!-- page content -->
 {% block content %}
 
 <div class="modal fade" id="messaging-question-filter-modal" tabindex="-1" role="dialog" aria-labelledby="filter-modal-area-label">
@@ -151,34 +148,54 @@
             </div>
         </div>
     {% endflag %}
+</div>
 
-{% flag 'can_view_inline_question_responses_chart_on_inline_question_page' %}
-   
-        <div class="chart-column-width">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">inline question responses</p>
-                    <form method="post" id="all-inline-question-filter-form">
-                        {{inline_question_only_form|crispy}}
-                    </form>
-
-                    <div class="row mb-6 px-5 py-2" id="inline-questions-dynamic-section">
-                        <div class="col-md-12">
-                            <div>Select Questions to see their responses</div>
+<div class="row">
+        <div class="container">
+            <div class="card">
+                <div class="mt-3">
+                    <p class="chart-title">Inline Question Responses</p>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Inline Question Responses: Detailed breakdown of responses to individual inline questions within the filtered timeframe.
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <button class="btn btn-primary bg-jgw-deep-blue w-100" type="button" data-bs-toggle="modal" data-bs-target="#questionSelectModal">
+                                Select questions to display <i class="fas fa-filter"></i>
+                            </button>
                         </div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            Inline Question Responses: Responses from users to questions which sit alongside content in Just Good Work.
-                            <div class="tooltip-arrow"></div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="questionSearch" placeholder="Search inline questions..." oninput="searchQuestions()">
                         </div>
                     </div>
-
+                    <div id="chartContainer" class="row"></div>
                 </div>
             </div>
         </div>
-    </div>
+</div>
 
-{% endflag %}
+<div class="modal fade" id="questionSelectModal" tabindex="-1" aria-labelledby="questionSelectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="questionSelectModalLabel">Select Questions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="questionDropdown" style="list-style-type: none;">
+                    <li class="list-group-item mb-2">
+                        <input class="form-check-input" type="checkbox" id="selectAll">
+                        <label class="form-check-label" for="selectAll">Select All</label>
+                    </li>
+                    <li class="mb-2"><hr class="dropdown-divider"></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock content %}
@@ -198,7 +215,7 @@
     var languageData = {{ inline_question_per_language|safe }};
     var organisationData = {{ inline_question_per_organisation|safe }};
     var responseData  = {{ inline_question_response_data | safe }}
-    var alInlineQuestionResponse = {{ each_inline_question_response | safe }}
+    var allInlineQuestionResponse = {{ each_inline_question_response | safe }}
 
     // plots the origin graph
     inlineQuestionOriginGraph(originData)
@@ -229,74 +246,6 @@
         return text;
     }
 
-    function handleInlineQuestionsChange() {
-    var selectElement = document.getElementById('all-inline-question-select-id');
-    var selectedOptions = [];
-
-    const inlineQuestionsSection = document.getElementById("inline-questions-dynamic-section");
-    inlineQuestionsSection.innerHTML = "";
-
-    const questionsToPlot = {};
-    if (selectElement.value === 'select_all' && selectElement.options[0].selected) {
-        for (var i = 0; i < selectElement.options.length; i++) {
-            selectedOptions.push(selectElement.options[i].value);
-        }
-        Object.keys(alInlineQuestionResponse).forEach(key => {
-            questionsToPlot[key] = alInlineQuestionResponse[key];
-        });
-    } else if (selectElement.value === 'select_all' && !selectElement.options[0].selected) {
-  
-        selectedOptions = []; 
-    } else {
-  
-        for (var i = 0; i < selectElement.options.length; i++) {
-            if (selectElement.options[i].selected && selectElement.options[i].value !== 'select_all') {
-                selectedOptions.push(selectElement.options[i].value);
-            }
-        }
-        Object.keys(alInlineQuestionResponse).forEach(key => {
-            const title = alInlineQuestionResponse[key].title;
-            if (selectedOptions.includes(title)) {
-                questionsToPlot[key] = alInlineQuestionResponse[key];
-            }
-        });
-    }
-
-    
-    for (let [key, value] of Object.entries(questionsToPlot)) {
-        const containerDiv = document.createElement("div");
-        containerDiv.classList.add("col-md-3");
-        containerDiv.classList.add("mb-3");
-        containerDiv.classList.add("inline-question-container-div");
-
-   
-            const title = document.createElement("p");
-            title.innerHTML = truncateText(value.title, 90); 
-            title.classList.add("chart-title");
-
-       
-        const canvasId = `${key}-id`;
-        const canvasDiv = document.createElement("div");
-        canvasDiv.id = canvasId;
-
-        
-        const chartboxDiv = document.createElement("div");
-        chartboxDiv.classList.add(`${canvasId}-chart-box`);
-        chartboxDiv.classList.add("inline-questions-chart-box");
-        chartboxDiv.appendChild(canvasDiv);
-
-        
-        containerDiv.appendChild(title);
-        containerDiv.appendChild(chartboxDiv);
-
-        inlineQuestionsSection.appendChild(containerDiv);
-
-       
-        inlineQuestionGraph(value, canvasId);
-    }
-     
-    initializeTooltips();
-}
 
 
 function initializeTooltips() {
@@ -307,7 +256,91 @@ function initializeTooltips() {
 }
 
 
+document.addEventListener('DOMContentLoaded', function() {
+        createDropdownItems();
+        document.getElementById('selectAll').addEventListener('change', handleCheckboxChange);
+        document.querySelectorAll('.question-checkbox').forEach(cb => {
+            cb.addEventListener('change', handleCheckboxChange);
+        });
+        document.getElementById('questionSearch').addEventListener('input', searchAndPlotQuestions);
+    });
 
-    
+    function createDropdownItems() {
+        const dropdown = document.getElementById('questionDropdown');
+        Object.keys(allInlineQuestionResponse).forEach(key => {
+            const questionData = allInlineQuestionResponse[key];
+            if (questionData && questionData.title) {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <a class="dropdown-item" href="#">
+                        <input class="form-check-input question-checkbox" type="checkbox" id="${sanitizeKey(key)}" value="${key}">
+                        <label class="form-check-label" for="${sanitizeKey(key)}">${questionData.title}</label>
+                    </a>
+                `;
+                dropdown.appendChild(li);
+            }
+        });
+    }
+
+    function searchAndPlotQuestions() {
+        const searchTerm = document.getElementById('questionSearch').value.toLowerCase();
+        const checkboxes = document.querySelectorAll('.question-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            const label = checkbox.nextElementSibling.textContent.toLowerCase();
+            const matches = label.includes(searchTerm);
+            checkbox.closest('.dropdown-item').style.display = matches ? '' : 'none';
+            
+            checkbox.checked = matches;
+        });
+
+        updateCharts();
+    }
+
+    function updateCharts() {
+        const chartContainer = document.getElementById('chartContainer');
+        chartContainer.innerHTML = '';
+        const checkedBoxes = document.querySelectorAll('.question-checkbox:checked');
+        console.log('Checked boxes:', checkedBoxes.length);
+        checkedBoxes.forEach((checkbox, index) => {
+            const key = checkbox.value.trim();
+            const questionData = allInlineQuestionResponse[key];
+            if (questionData && questionData.title) {
+                const sanitizedKey = sanitizeKey(key);
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-12 chart-wrapper';
+                colDiv.innerHTML = `
+                <div class="chart-wrapper-inline-question" style="margin-bottom: 40px; border: 1px solid navy; border-radius: 5px">
+                    <div class="chart-title">${questionData.title}</div>
+                    <div class="chart-container">
+                        <canvas id="chart-${sanitizedKey}"></canvas>
+                    </div>
+                </div>
+                `;
+                chartContainer.appendChild(colDiv);
+                inlineQuestionGraph(questionData, `chart-${sanitizedKey}`);
+            } else {
+                console.error('Invalid or missing question data for key:', key);
+            }
+        });
+    }
+
+    function sanitizeKey(key) {
+        return key.replace(/[^a-zA-Z0-9-]/g, '-');
+    }
+
+    function handleCheckboxChange(event) {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.question-checkbox');
+        if (event.target === selectAll) {
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        } else {
+            selectAll.checked = Array.from(checkboxes).every(cb => cb.checked);
+        }
+        updateCharts();
+    }
+
 </script>
 {% endblock %}
+
+

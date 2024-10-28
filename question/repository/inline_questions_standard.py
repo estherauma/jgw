@@ -2,7 +2,7 @@ from datetime import datetime
 from django.db.models import Q
 from django.db.models import Count, Case, When, F
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
-from common.inline import convert_question_key_to_readable_string,convert_to_camel_case
+from common.inline import convert_question_key_to_readable_string, convert_to_camel_case
 from common.utils.strings import format_thousands_with_commas
 from question.filters import generic_question_filtered_queryset, question_response_filtered_queryset
 
@@ -18,16 +18,11 @@ def inline_questions_count(**filters):
 
 
 def get_inline_question_per_origin_counts(**filters):
-    queryset = question_response_filtered_queryset(
-        queryset=InlineQuestionResponse.objects.all(), **filters
-    )
+    queryset = question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
     queryset = queryset.exclude(response__translated_text="not specified")
 
     origin_counts_data = (
-        queryset.annotate(
-            origin_name=F("inline_question__inline_question_standard__origin__name")
-            
-        )
+        queryset.annotate(origin_name=F("inline_question__inline_question_standard__origin__name"))
         .values("origin_name")
         .annotate(count=Count("origin_name"))
         .order_by("-count")
@@ -43,16 +38,13 @@ def get_inline_question_per_origin_counts(**filters):
         "labels": origin_labels,
     }
 
+
 def get_inline_question_per_destination_counts(**filters):
-    queryset = question_response_filtered_queryset(
-        queryset=InlineQuestionResponse.objects.all(), **filters
-    )
+    queryset = question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
     queryset = queryset.exclude(response__translated_text="not specified")
-    
+
     destination_counts_data = (
-        queryset.annotate(
-            destination_name=F("inline_question__inline_question_standard__destination__name")
-        )
+        queryset.annotate(destination_name=F("inline_question__inline_question_standard__destination__name"))
         .values("destination_name")
         .annotate(count=Count("destination_name"))
         .order_by("-count")
@@ -72,11 +64,9 @@ def get_inline_question_per_destination_counts(**filters):
 
 
 def get_inline_question_per_organisation_counts(**filters):
-    queryset = question_response_filtered_queryset(
-        queryset=InlineQuestionResponse.objects.all(), **filters
-    )
+    queryset = question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
     queryset = queryset.exclude(response__translated_text="not specified")
-    
+
     organisation_counts_data = (
         queryset.annotate(
             organisation_name=F("inline_question__inline_question_standard__organisation__name")
@@ -100,16 +90,15 @@ def get_inline_question_per_organisation_counts(**filters):
 
 from django.db.models import Case, Count, F, When
 
+
 def get_inline_question_per_language_counts(**filters):
-    queryset = question_response_filtered_queryset(
-        queryset=InlineQuestionResponse.objects.all(), **filters
-    )
+    queryset = question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
     queryset = queryset.exclude(response__translated_text="not specified")
 
     language_counts_data = (
         queryset.annotate(
             language_name=F("inline_question__inline_question_standard__language__translated_name"),
-            )
+        )
         .values("language_name")
         .annotate(count=Count("language_name"))
         .order_by("-count")
@@ -117,9 +106,7 @@ def get_inline_question_per_language_counts(**filters):
 
     language_counts = [count["count"] for count in language_counts_data]
     language_labels = [
-        count["language_name"].title()
-        for count in language_counts_data
-        if count["language_name"] is not None
+        count["language_name"].title() for count in language_counts_data if count["language_name"] is not None
     ]
 
     return {
@@ -134,7 +121,9 @@ def each_inline_question_response(**filters):
     )
     inline_question_responses = inline_question_responses.exclude(response__translated_text="not specified")
     inline_questions_with_responses = inline_question_responses.values(
-        "inline_question__question__translated_text","inline_question__question__title_text", "response__translated_text"
+        "inline_question__question__translated_text",
+        "inline_question__question__title_text",
+        "response__translated_text",
     ).annotate(num_responses=Count("response__translated_text"))
 
     result_dict = {}
@@ -155,8 +144,12 @@ def each_inline_question_response(**filters):
             question_in_result_dict["labels"].append(response_text.capitalize())
             question_in_result_dict["counts"].append(response_count)
         else:
-            result_dict[convert_to_camel_case(question_text)] = {"labels": [response_text.capitalize()], "counts": [response_count],"title":title_text}
-    
+            result_dict[convert_to_camel_case(question_text)] = {
+                "labels": [response_text.capitalize()],
+                "counts": [response_count],
+                "title": title_text,
+            }
+
     return result_dict
 
 
@@ -164,7 +157,9 @@ def inline_question_responses_count(**filters):
     inline_question_responses = question_response_filtered_queryset(
         queryset=InlineQuestionResponse.objects.all(), **filters
     )
-    inline_question_responses_filtered = inline_question_responses.exclude(response__translated_text="not specified")
+    inline_question_responses_filtered = inline_question_responses.exclude(
+        response__translated_text="not specified"
+    )
     inline_question_responses_count_queryset = inline_question_responses_filtered.count()
 
     return format_thousands_with_commas(inline_question_responses_count_queryset)
@@ -213,51 +208,60 @@ def inline_question_response():
 
 
 def get_all_inline_question_responses_data(**filters):
-    responses = question_response_filtered_queryset(
-        queryset=InlineQuestionResponse.objects.all(), **filters
-    ).exclude(
-        Q(inline_question__question__text='not specified')
-    ).select_related(
-        'inline_question__inline_question_standard',
-        'inline_question__question',
-        'inline_question__inline_question_standard__api_created_at',
-        'inline_question__inline_question_standard__api_updated_at',
-        'inline_question__inline_question_standard__route',
-        'inline_question__inline_question_standard__language',
-        'inline_question__inline_question_standard__origin',
-        'inline_question__inline_question_standard__destination',
-        'inline_question__inline_question_standard__organisation_sector',
-        'inline_question__inline_question_standard__organisation'
-    ).values(
-        'inline_question__inline_question_standard__device_id',
-        'inline_question__inline_question_standard__api_created_at',
-        'inline_question__inline_question_standard__api_updated_at',
-        'inline_question__inline_question_standard__language__name',
-        'inline_question__inline_question_standard__origin__name',
-        'inline_question__inline_question_standard__destination__name',
-        'inline_question__inline_question_standard__organisation_sector__name',
-        'inline_question__inline_question_standard__organisation__name',
-        'inline_question__inline_question_standard__route__name',
-        'inline_question__question__text',
-        'inline_question__question__title_text',
-        'response__translated_text'
+    responses = (
+        question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
+        .exclude(Q(inline_question__question__text="not specified"))
+        .select_related(
+            "inline_question__inline_question_standard",
+            "inline_question__question",
+            "inline_question__inline_question_standard__api_created_at",
+            "inline_question__inline_question_standard__api_updated_at",
+            "inline_question__inline_question_standard__route",
+            "inline_question__inline_question_standard__language",
+            "inline_question__inline_question_standard__origin",
+            "inline_question__inline_question_standard__destination",
+            "inline_question__inline_question_standard__organisation_sector",
+            "inline_question__inline_question_standard__organisation",
+        )
+        .values(
+            "inline_question__inline_question_standard__device_id",
+            "inline_question__inline_question_standard__api_created_at",
+            "inline_question__inline_question_standard__api_updated_at",
+            "inline_question__inline_question_standard__language__name",
+            "inline_question__inline_question_standard__origin__name",
+            "inline_question__inline_question_standard__destination__name",
+            "inline_question__inline_question_standard__organisation_sector__name",
+            "inline_question__inline_question_standard__organisation__name",
+            "inline_question__inline_question_standard__route__name",
+            "inline_question__question__text",
+            "inline_question__question__title_text",
+            "response__translated_text",
+        )
     )
 
     data = []
     for response in responses:
-        data.append({
-            'device_id': response['inline_question__inline_question_standard__device_id'],
-            'created_at': response['inline_question__inline_question_standard__api_created_at'].strftime('%Y-%m-%d'),
-            'updated_at': response['inline_question__inline_question_standard__api_updated_at'].strftime('%Y-%m-%d'),
-            'language': response['inline_question__inline_question_standard__language__name'],
-            'origin': response['inline_question__inline_question_standard__origin__name'],
-            'destination': response['inline_question__inline_question_standard__destination__name'],
-            'organisation_sector': response['inline_question__inline_question_standard__organisation_sector__name'],
-            'organisation': response['inline_question__inline_question_standard__organisation__name'],
-            'route': response['inline_question__inline_question_standard__route__name'],
-            'question_key': response['inline_question__question__text'],
-            'title_text': response['inline_question__question__title_text'],
-            'response': response['response__translated_text'],
-        })
+        data.append(
+            {
+                "device_id": response["inline_question__inline_question_standard__device_id"],
+                "created_at": response["inline_question__inline_question_standard__api_created_at"].strftime(
+                    "%Y-%m-%d"
+                ),
+                "updated_at": response["inline_question__inline_question_standard__api_updated_at"].strftime(
+                    "%Y-%m-%d"
+                ),
+                "language": response["inline_question__inline_question_standard__language__name"],
+                "origin": response["inline_question__inline_question_standard__origin__name"],
+                "destination": response["inline_question__inline_question_standard__destination__name"],
+                "organisation_sector": response[
+                    "inline_question__inline_question_standard__organisation_sector__name"
+                ],
+                "organisation": response["inline_question__inline_question_standard__organisation__name"],
+                "route": response["inline_question__inline_question_standard__route__name"],
+                "question_key": response["inline_question__question__text"],
+                "title_text": response["inline_question__question__title_text"],
+                "response": response["response__translated_text"],
+            }
+        )
 
     return data
