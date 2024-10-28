@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from django.contrib.messages import constants as messages
+import ssl
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
@@ -190,6 +191,13 @@ sentry_sdk.init(
 #  Celery Broker - Redis
 CELERY_BROKER_URL = os.getenv("REDIS_URL")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
+
+if CELERY_BROKER_URL.startswith("rediss://"):
+    CELERY_REDIS_BACKEND_OPTIONS = {"ssl_cert_reqs": ssl.CERT_NONE}
+else:
+    CELERY_REDIS_BACKEND_OPTIONS = {}
+
+CELERY_BROKER_TRANSPORT_OPTIONS = CELERY_REDIS_BACKEND_OPTIONS
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
