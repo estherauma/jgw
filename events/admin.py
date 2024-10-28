@@ -29,7 +29,7 @@ class ChapterAdminDisplay(admin.ModelAdmin):
 
 @admin.register(ChaptersFeedbackStandard)
 class ChaptersFeedbackStandardAdminDisplay(admin.ModelAdmin):
-    list_display = ["api_created_at", "data_source_id","destination","feedback_title","organisation"]
+    list_display = ["api_created_at", "data_source_id","destination","feedback_title","organisation","is_myvoice_organisation"]
     search_fields = ["api_created_at", "data_source_id","destination","feedback_title"]
     ordering = ["-api_created_at"]
 @admin.register(ChaptersFeedback)
@@ -55,7 +55,7 @@ class LinksClickEventAdmin(admin.ModelAdmin):
 
 @admin.register(BigqueryHomepageEventData)
 class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
-    list_display = ["event_date", "device_id","app_id","language","locale","destination","age","organisation","organisation_code"]
+    list_display = ["event_date", "device_id","app_id","language","locale","destination","age","organisation","organisation_code","is_myvoice_organisation"]
     ordering = ["event_date"]
 
 @admin.register(TelephoneClickEvent)
@@ -72,6 +72,9 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
         "get_chapter_text",
         "get_chapter_key",
         "device_id",
+        "destination",
+        "organisation",
+        "is_myvoice_organisation"
     ]
 
     def get_chapter_text(self, obj):

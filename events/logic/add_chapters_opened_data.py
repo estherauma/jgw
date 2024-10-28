@@ -19,7 +19,7 @@ from common.helpers.preference_helpers.country import get_data_destination, get_
 from common.logger import KunfuPandaLogger
 from events.logic.chapter_title_api_data import update_chapter_titles
 from events.models import Chapter, ChaptersOpened
-from preference.models import Preference
+from preference.models import Country, Organisation, Preference
 from preference.tasks import translate_and_clean_preferences_fields
 
 
@@ -85,7 +85,7 @@ def fetch_chapters_opened_data_from_api_to_db():
 
     translate_and_clean_preferences_fields()
     update_chapter_titles()
-
+    update_myvoice_chapters_opened_events()
 
 def add_chapters_opened_to_db(chapters_feedback):
     event_name = chapters_feedback.get("event_name")
@@ -154,3 +154,38 @@ def add_chapters_opened_to_db(chapters_feedback):
     except Exception as e:
         kunfu_panda_logger.error(f"Error saving chapter opened: {str(e)}")
         raise
+
+def update_myvoice_chapters_opened_events():
+    with transaction.atomic():
+        not_specified_org = Organisation.objects.get(name='not specified')
+        myvoice_org = Organisation.objects.get(name='myvoice')
+        malaysia_country = Country.objects.get(name='malaysia')
+
+
+        chapters_opened_to_update = ChaptersOpened.objects.filter(
+            organisation=not_specified_org,
+            destination=malaysia_country
+        )
+
+        updated_count = chapters_opened_to_update.update(
+            organisation=myvoice_org,
+            is_myvoice_organisation=True
+        )
+
+    return updated_count
+
+def reverse_myvoice_chapters_opened_events():
+    with transaction.atomic():
+
+        not_specified_org = Organisation.objects.get(name='not specified')
+
+        preferences_to_reverse = ChaptersOpened.objects.filter(
+            is_myvoice_organisation=True
+        )
+
+        updated_count = preferences_to_reverse.update(
+            organisation=not_specified_org,
+            is_myvoice_organisation=False
+        )
+
+    return updated_count

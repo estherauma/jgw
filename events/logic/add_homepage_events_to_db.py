@@ -1,3 +1,4 @@
+from django.db import transaction
 from common.app_events import AppEvents
 from common.const.value_const import BIGQUERY_HOMEPAGE_EVENTS_START_DATE
 from common.helpers.model_helpers.common import bulk_create_in_chunks
@@ -72,5 +73,44 @@ def fetch_and_save_homepage_events_to_db():
 
         print(f"{len(homepage_events)} homepage events saved to the database.")
 
+        update_myvoice_bigquery_homepage_events()
+
     except Exception as e:
         print(f"An error occurred while saving homepage events: {str(e)}")
+
+def update_myvoice_bigquery_homepage_events():
+    with transaction.atomic():
+        not_specified_org = Organisation.objects.get(name='not specified')
+        myvoice_org = Organisation.objects.get(name='myvoice')
+        malaysia_country = Country.objects.get(name='malaysia')
+        myvoice_access_code = 'myv2112'
+
+        bigquery_homepage_events_to_update = BigqueryHomepageEventData.objects.filter(
+            organisation=not_specified_org,
+            destination=malaysia_country
+        )
+
+        updated_count = bigquery_homepage_events_to_update.update(
+            organisation=myvoice_org,
+            organisation_code=myvoice_access_code,
+            is_myvoice_organisation=True
+        )
+
+    return updated_count
+
+def reverse_myvoice_bigquery_homepage_events():
+    with transaction.atomic():
+
+        not_specified_org = Organisation.objects.get(name='not specified')
+
+        preferences_to_reverse = BigqueryHomepageEventData.objects.filter(
+            is_myvoice_organisation=True
+        )
+
+        updated_count = preferences_to_reverse.update(
+            organisation=not_specified_org,
+            organisation_code=None,
+            is_myvoice_organisation=False
+        )
+
+    return updated_count

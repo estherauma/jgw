@@ -9,6 +9,16 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyAct
   const cummulativeCounts = preferenceMonthlyUsersChartData["cummulative_counts"];
   const monthlyActiveUsers = transformMonthlyActiveUserData(monthlyActiveUserCountData, labels);
 
+  const plugin = {
+    beforeInit(chart) {
+        const originalFit = chart.legend.fit;
+        chart.legend.fit = function fit() {
+            originalFit.bind(chart.legend)();
+            this.height += 45;
+        }
+    }
+  }
+
   const originChartConfig = {
     type: "line",
     data: {
@@ -74,7 +84,7 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyAct
         },
       },
     },
-    plugins: [ChartDataLabels],
+    plugins: [ChartDataLabels, plugin],
   };
 
   drawChart("preference-monthly-cumulative-users-graph-id", data, originChartConfig);

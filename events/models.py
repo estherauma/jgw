@@ -120,6 +120,7 @@ class ChaptersOpened(models.Model):
     origin = models.ForeignKey(
         Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="chapters_opened_origin"
     )
+    is_myvoice_organisation = models.BooleanField(default=False)
 
     def __str__(self):
         return f"ChaptersOpened {self.event_name}"
@@ -171,6 +172,7 @@ class ChaptersFeedbackStandard(models.Model):
     factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     sectors_of_work = models.ManyToManyField(SectorOfWork)
+    is_myvoice_organisation = models.BooleanField(default=False)
 
     def __str__(self):
         return self.data_source_id
@@ -277,6 +279,7 @@ class BigqueryHomepageEventData(models.Model):
     gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     organisation_code = models.CharField(max_length=255, null=True, blank=True)
+    is_myvoice_organisation = models.BooleanField(default=False)
 
 
     def __str__(self):
