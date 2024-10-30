@@ -98,9 +98,9 @@
     </div>
 </div>
 {% endflag %}
-<div class="chart-container mt-3">
+<div class="row">
     {% flag 'can_view_users_by_origin_country_chart' %}
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">users by origin country</p>
@@ -119,7 +119,7 @@
 
     {% flag 'can_view_users_by_gender_chart' %}
         
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart" >
                     <p class="chart-title">users by gender</p>
@@ -137,7 +137,7 @@
     
     {% if user.role != 'SCHEME' or user.is_superuser%}
         {% flag 'can_view_users_by_destination_country_chart' %}
-            <div class="chart-column-width">
+            <div class="chart-column-width mt-3">
                 <div class="card h-100">
                     <div class="card-body chart">
                         <p class="chart-title">users by destination country</p>
@@ -153,7 +153,7 @@
     {% endif %}
         
     {% flag 'can_view_selected_users_language_chart' %}
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">Users by Language</p>
@@ -171,7 +171,7 @@
     {% endflag %}
 
     {% flag 'can_view_work_code_usage_chart' %}
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">work code usage</p>
@@ -191,7 +191,7 @@
     {% endflag %}
 
     {% flag 'can_view_users_by_age_chart' %}
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">users by age</p>
@@ -207,7 +207,7 @@
     {% endflag %} 
 
     {% flag 'can_view_get_users_by_country_state_chart' %}
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">users by state</p>
@@ -225,7 +225,7 @@
     {% endflag %}
 
     {% flag 'can_view_get_users_by_sector_chart' %}
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">users by sector</p>
@@ -244,30 +244,30 @@
 </div>
 {% flag 'can_view_new_monthly_users_chart' %}
 <div class="row">
-        <div class="col-md-12 user-by-month">
-             <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">New Users by Month</p>
-                    <canvas id="preference-monthly-cumulative-users-graph-id" class="canvas-user-by-month"></canvas>
-                    <div class="info-tooltip">
-                        <i class="fas fa-info-circle"></i>
-                        New Users by Month: Cumulative new users in the filtered timeframe. 
-                        <div class="tooltip-arrow"></div>
-                    </div>
+    <div class="col-md-12 user-by-month">
+            <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">New Users by Month</p>
+                <canvas id="preference-monthly-cumulative-users-graph-id" class="canvas-user-by-month"></canvas>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    New Users by Month: Cumulative new users in the filtered timeframe. 
+                    <div class="tooltip-arrow"></div>
                 </div>
             </div>
         </div>
+    </div>
 </div>
 {% endflag %}
 {% flag 'can_view_user_route_map_chart' %}
-<div class="row col-md-12 chart-container mt-3 user-route-map-chart-box">
+<div class="row col-md-12 mt-3 user-route-map-chart-box">
     <div class="card h-100">
         <div class="card-body chart">
             <p class="chart-title mb-2">User Route Map</p>
             <div id="user_route_map" class="user-route-map"></div>
-            <div class="info-tooltip">
+            <div class="info-tooltip user-route-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
-                User Route Map: Shows where workers say they are from and the country they are working in or looking for work in (which they select when they first use the app)
+                User Route Map: Shows where workers say they are from (marked with blue dots) and the country they are working in or looking for work in (which they select when they first use the app marked with green dots)
                 <div class="tooltip-arrow"></div>
             </div>
         </div>
@@ -304,8 +304,6 @@
         const monthlyActiveUserCountData = {{monthly_active_user_count | safe}}
         const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }}
         const countryCoords = {{ country_coords | safe }}
-
-        console.log(countryCoords);
 
         // plots the age piechart
         preferenceAgePieChart(ageData)
