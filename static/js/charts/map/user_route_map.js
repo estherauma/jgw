@@ -4,14 +4,15 @@ function createUserRouteMap(data, elementId, countryCoords) {
         const destination = row.destination;
 
         if (countryCoords[origin] && countryCoords[destination]) {
-            const hoverText = data
-                .filter(row => row.origin === origin)
-                .map(row => `${capitalizeFirstLetter(row.destination)}: ${row.count}`)
-                .join('<br>');
+            const originData = data.filter(d => d.origin === origin);
+            const hoverText = `From ${capitalizeFirstLetter(origin)}:<br>` + 
+                    (originData.length > 0 ? 
+                        originData.map(d => `To ${capitalizeFirstLetter(d.destination)}: ${d.count} users`).join('<br>') :
+                        'No users came in')
 
             return {
                 type: 'scattergeo',
-                lon: [countryCoords[origin][1], countryCoords[destination][1]],
+                lon: [countryCoords[origin][1], countryCoords[destination][1]], 
                 lat: [countryCoords[origin][0], countryCoords[destination][0]],
                 mode: 'markers+lines',
                 line: {
@@ -20,10 +21,9 @@ function createUserRouteMap(data, elementId, countryCoords) {
                     dash: 'dash'
                 },
                 opacity: 0.4,
-                text: `${capitalizeFirstLetter(origin)}<br>${hoverText}`,
+                text: hoverText,
                 hoverinfo: 'text',
                 customdata: [countryCoords[origin], countryCoords[destination]],
-                hovertemplate: '%{text}<extra></extra>'
             };
         }
         return null;
@@ -43,7 +43,7 @@ function createUserRouteMap(data, elementId, countryCoords) {
                 marker: {
                     size: 16,
                     symbol: 'circle-dot',
-                    color: '#37c1e3',
+                    color: data.some(row => row.destination === country) ? '#00FF00' : '#37c1e3',
                     line: {
                         width: 4,
                         color: '#193560',

@@ -72,11 +72,11 @@
         </div>
     </div>
 </div>
-<div class="chart-container">
+<div class="row">
   
             {% if user.is_authenticated %}
                 {% flag 'can_view_organisation_chart_on_inline_question_page'%}
-                <div class="chart-column-width">
+                <div class="chart-column-width mt-3">
                     <div class="card h-100">
                         <div class="card-body chart">
                             <p class="chart-title">organisation</p>
@@ -92,7 +92,7 @@
                 {% endflag %}
             {% endif %}
             {% flag 'can_view_selected_user_language_chart_on_inline_question_page' %}
-                <div class="chart-column-width">
+                <div class="chart-column-width mt-3">
                     <div class="card h-100">
                         <div class="card-body chart">
                             <p class="chart-title">selected user language</p>
@@ -110,7 +110,7 @@
             {% endflag %}
 
     {% flag 'can_view_responses_per_origin_country_chart_on_inline_question_page' %}
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">responses per origin country</p>
@@ -127,7 +127,7 @@
         </div>
     {% endflag %}
     {% flag 'can_view_responses_per_destination_country_chart_on_inline_question_page' %}
-        <div class="chart-column-width">
+        <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">responses per destination country</p>
@@ -151,9 +151,10 @@
 </div>
 
 <div class="row">
-        <div class="container">
+    {% flag 'can_view_inline_question_responses_chart_on_inline_question_page' %}
+        <div class="container mt-3">
             <div class="card">
-                <div class="mt-3">
+                <div class="card-body chart">
                     <p class="chart-title">Inline Question Responses</p>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
@@ -161,21 +162,20 @@
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <button class="btn btn-primary bg-jgw-deep-blue w-100" type="button" data-bs-toggle="modal" data-bs-target="#questionSelectModal">
-                                Select questions to display <i class="fas fa-filter"></i>
-                            </button>
-                        </div>
-                        <div class="col-md-8">
-                            <input type="text" class="form-control" id="questionSearch" placeholder="Search inline questions..." oninput="searchQuestions()">
-                        </div>
+                <div class="row mb-3 px-3">
+                    <div class="col-md-4">
+                        <button class="btn btn-primary bg-jgw-deep-blue w-100" type="button" data-bs-toggle="modal" data-bs-target="#questionSelectModal">
+                            Select questions to display <i class="fas fa-filter"></i>
+                        </button>
                     </div>
-                    <div id="chartContainer" class="row"></div>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="questionSearch" placeholder="Search inline questions..." oninput="searchQuestions()">
+                    </div>
                 </div>
+                <div id="chartContainer" class="row"></div>
             </div>
         </div>
+    {% endflag %}
 </div>
 
 <div class="modal fade" id="questionSelectModal" tabindex="-1" aria-labelledby="questionSelectModalLabel" aria-hidden="true">

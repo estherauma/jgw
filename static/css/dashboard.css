@@ -257,7 +257,7 @@ body.modal-open {
 
 .info-tooltip {
     position: absolute;
-    top: 10px;
+    top: -60px;
     left: 50%;
     transform: translateX(-50%);
     background-color: #193560;
@@ -268,10 +268,10 @@ body.modal-open {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    z-index: 1000;
+    z-index: 1050 !important;
     text-align: center;
     width: max-content;
-    max-width: 300px;
+    max-width: 400px;
 }
 
 .info-tooltip i {
@@ -325,4 +325,11 @@ body.modal-open {
     margin-bottom: 10px;
 }
 
+.chapters-opened-graph-id-chart-box .info-tooltip {
+    top: -100px;
+}
+
+.user-route-map-info-tooltip {
+    top: -100px;
+}
 
