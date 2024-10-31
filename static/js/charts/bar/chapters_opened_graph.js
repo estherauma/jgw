@@ -12,13 +12,13 @@ function chaptersOpenedGraph(chaptersOpenedData) {
             label: "Chapter Total Views ",
             data: dataset1,
             backgroundColor: COLORS.navyBlue,
-            barThickness: 12,
+            barThickness: 10,
           },
           {
             label: "Chapter Views by Unique Users",
             data: dataset2,
             backgroundColor: COLORS.skyBlue,
-            barThickness: 12,
+            barThickness: 10,
           }
         ],
       },
@@ -32,11 +32,6 @@ function chaptersOpenedGraph(chaptersOpenedData) {
               display: false,
             },
           },
-        },
-        elements: {
-          bar: {
-            borderWidth: 1,
-          }
         },
         layout: {
           padding: {
@@ -56,6 +51,9 @@ function chaptersOpenedGraph(chaptersOpenedData) {
           scrollbar: {
             enabled: true,
           },
+          datalabels: {
+            display: false,
+         }
         },
       },
       plugins: [ChartDataLabels],
