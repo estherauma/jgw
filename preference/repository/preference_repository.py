@@ -88,7 +88,7 @@ def preferences_by_origin(**filters):
             When(origin__name__iexact="philippines", then=Value("Philippines")),
             When(origin__name__iexact="russian federation", then=Value("russia")),
             When(origin__name__iexact="republic of moldova", then=Value("moldova")),
-            When(origin__name__iexact="sri-lanka", then=Value("Sri Lanka")),
+            When(origin__name__iexact="sri-lanka", then=Value("sri lanka")),
             When(origin__name__iexact="pdr", then=Value("republic of laos")),
             When(origin__name__iexact="laos", then=Value("republic of laos")),
             default=F("origin__name"),
