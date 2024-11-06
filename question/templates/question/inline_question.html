@@ -163,18 +163,18 @@
                     </div>
                 </div>
                 <div class="row mb-3 px-3">
-                    <div class="col-md-4">
-                        <button class="btn btn-primary bg-jgw-deep-blue w-100" type="button" data-bs-toggle="modal" data-bs-target="#questionSelectModal">
-                            Select questions to display <i class="fas fa-filter"></i>
-                        </button>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary bg-jgw-deep-blue w-100" type="button" data-bs-toggle="modal" data-bs-target="#questionSelectModal">
+                                Select questions to display <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="questionSearch" placeholder="Search inline questions..." oninput="searchQuestions()">
+                        </div>
                     </div>
-                    <div class="col-md-8">
-                        <input type="text" class="form-control" id="questionSearch" placeholder="Search inline questions..." oninput="searchQuestions()">
-                    </div>
+                    <div id="chartContainer" class="row"></div>
                 </div>
-                <div id="chartContainer" class="row"></div>
             </div>
-        </div>
     {% endflag %}
 </div>
 
@@ -227,17 +227,6 @@
 
     inlineQuestionLanguageGraph(languageData)
 
-    // Count the number of flex items
-    const chartContainer = document.querySelector('.chart-container');
-    const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
-    const numColumns = chartColumns.length;
-
-  
-    if (numColumns % 2 !== 0) {
-        const lastColumn = chartColumns[numColumns - 1];
-        lastColumn.style.flex = '0 0 100%';
-        lastColumn.style.maxWidth = '100%';
-    }
 
     function truncateText(text, maxLength) { 
         if (text.length > maxLength) {
