@@ -60,35 +60,41 @@ def get_or_add_country_to_db(country_name: str, source="generic") -> Country:
     country_name = normalize_country_name(country_name)
     is_origin = True if source == "origin" else False
     is_destination = True if source == "destination" else False
+
     if country_name:
         country_code = aplha_code_from_country_name(country_name).lower() or NOT_SPECIFIED
         real_country_name = country_name_from_aplha_code(country_code).lower() or NOT_SPECIFIED
-        try:
-            country_instance = Country.objects.get(name__iexact=real_country_name, code__iexact=country_code)
-        except Country.DoesNotExist:
-            country_instance = Country.objects.create(
-                code=country_code,
-                name=real_country_name,
-                api_value=country_name,
-                is_origin=is_origin,
-                is_destination=is_destination,
-            )
-            return country_instance
 
-        if is_origin and not country_instance.is_origin:
-            country_instance.is_origin = True
-            country_instance.save()
-        if is_destination and not country_instance.is_destination:
-            country_instance.is_destination = True
-            country_instance.save()
+        country_instance, created = Country.objects.get_or_create(
+            code=country_code,
+            defaults={
+                "name": real_country_name,
+                "api_value": country_name,
+                "is_origin": is_origin,
+                "is_destination": is_destination,
+            },
+        )
+
+        if not created:
+            update_needed = False
+            if is_origin and not country_instance.is_origin:
+                country_instance.is_origin = True
+                update_needed = True
+            if is_destination and not country_instance.is_destination:
+                country_instance.is_destination = True
+                update_needed = True
+            if update_needed:
+                country_instance.save()
 
         return country_instance
-
     else:
         country_instance, _ = Country.objects.get_or_create(
             code=NOT_SPECIFIED,
-            name=NOT_SPECIFIED,
-            defaults={"is_origin": is_origin, "is_destination": is_destination},
+            defaults={
+                "name": NOT_SPECIFIED,
+                "is_origin": is_origin,
+                "is_destination": is_destination,
+            },
         )
         return country_instance
 
