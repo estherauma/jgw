@@ -86,6 +86,11 @@ def preferences_by_origin(**filters):
         normalized_origin=Case(
             When(origin__name__iexact="phillippines", then=Value("Philippines")),
             When(origin__name__iexact="philippines", then=Value("Philippines")),
+            When(origin__name__iexact="russian federation", then=Value("russia")),
+            When(origin__name__iexact="republic of moldova", then=Value("moldova")),
+            When(origin__name__iexact="sri-lanka", then=Value("sri lanka")),
+            When(origin__name__iexact="pdr", then=Value("republic of laos")),
+            When(origin__name__iexact="laos", then=Value("republic of laos")),
             default=F("origin__name"),
             output_field=CharField(),
         )
@@ -269,7 +274,6 @@ def get_preferences_by_sectors(**filters):
     counts = [entry["preferences_count"] for entry in result]
 
     return {"labels": labels, "counts": counts}
-
 
 
 def get_user_counts_by_origin_destination(**filters):

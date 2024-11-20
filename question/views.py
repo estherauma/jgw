@@ -52,7 +52,6 @@ def messaging_question(request):
     each_messaging_question_response_data = each_messaging_question_response(
         **filters, current_user=request.user
     )
-    print("MESSAGING QUESTIONS", each_messaging_question_response_data)
 
     context = {
         "total_messaging_questions": total_messaging_questions,

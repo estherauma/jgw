@@ -2,7 +2,17 @@ function chaptersOpenedGraph(chaptersOpenedData) {
     const dataset1 = chaptersOpenedData["chapteropened_all"];
     const dataset2 = chaptersOpenedData["chapteropened_unique"];
     const labels = chaptersOpenedData["labels"];
-  
+
+    const plugin = {
+      beforeInit(chart) {
+          const originalFit = chart.legend.fit;
+          chart.legend.fit = function fit() {
+              originalFit.bind(chart.legend)();
+              this.height += 10;
+          }
+      }
+    }
+
     const chartConfig = {
       type: "bar",
       data: {
@@ -46,7 +56,7 @@ function chaptersOpenedGraph(chaptersOpenedData) {
         plugins: {
           ...externalPluginsConfigDataTables(),
           legend: {
-            display: false,
+            display: true,
           },
           scrollbar: {
             enabled: true,
@@ -56,7 +66,7 @@ function chaptersOpenedGraph(chaptersOpenedData) {
          }
         },
       },
-      plugins: [ChartDataLabels],
+      plugins: [ChartDataLabels, plugin],
     };
   
     scrollableVerticalBarChart(
