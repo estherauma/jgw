@@ -39,6 +39,7 @@ function createUserRouteMap(data, elementId, countryCoords) {
                         dash: 'dash'
                     },
                     opacity: 0.4, 
+                    showlegend: false 
                 },
                 {
                     type: 'scattergeo',
@@ -51,6 +52,7 @@ function createUserRouteMap(data, elementId, countryCoords) {
                         size: 8,
                         color: '#37c1e3'
                     },
+                    showlegend: false 
                 }
             ];
     
@@ -59,6 +61,8 @@ function createUserRouteMap(data, elementId, countryCoords) {
     }).flat().filter(trace => trace !== null);
 
     const countries = [...new Set(data.map(row => row.origin).concat(data.map(row => row.destination)))];
+    
+    const legendGroupsAdded = new Set();
     const markerTraces = countries.map(country => {
         if (countryCoords[country]) {
             const totalCount = data.filter(row => row.origin === country || row.destination === country)
@@ -66,22 +70,37 @@ function createUserRouteMap(data, elementId, countryCoords) {
         
             const isOrigin = data.some(d => d.origin === country);
             const isDestination = data.some(d => d.destination === country);
-
+    
             let color;
+            let legendgroup;
+            let name; 
+            let showlegend = false; 
+    
             if (isOrigin && isDestination) {
-                color = '#FFFF00';  
+                color = '#FFFF00';
+                legendgroup = 'both';
+                name = 'Both Origin and Destination';
             } else if (isOrigin) {
                 color = '#37c1e3';
+                legendgroup = 'origin';
+                name = 'Origin';
             } else if (isDestination) {
-                color = '#00FF00'; 
+                color = '#00FF00';
+                legendgroup = 'destination';
+                name = 'Destination';
             }
 
+            if (!legendGroupsAdded.has(legendgroup)) {
+                showlegend = true;
+                legendGroupsAdded.add(legendgroup); 
+            }
+        
             return {
                 type: 'scattergeo',
                 lon: [countryCoords[country][1]],
                 lat: [countryCoords[country][0]],
                 text: `${capitalizeFirstLetter(country)}: ${totalCount} Users`,
-                mode: 'markers+text',
+                mode: 'markers',
                 marker: {
                     size: 16,
                     symbol: 'circle-dot',
@@ -97,12 +116,14 @@ function createUserRouteMap(data, elementId, countryCoords) {
                     size: 12,
                     color: 'black',
                 },
-                name: capitalizeFirstLetter(country),
+                name: showlegend ? name : "", 
+                legendgroup: legendgroup, 
+                showlegend: showlegend,
                 hoverinfo: 'text'
             };
         }
         return null;
-    }).filter(trace => trace !== null);  
+    }).filter(trace => trace !== null);
 
     const allTraces = [...traces, ...markerTraces];
    
@@ -122,8 +143,13 @@ function createUserRouteMap(data, elementId, countryCoords) {
     const containerHeight = container.offsetHeight;
 
     const layout = {
-        title: 'User Route Map',
-        showlegend: false,
+        showlegend: true,
+        legend: {
+            orientation: 'h',
+            x: 0.5,
+            y: 1.1,
+            xanchor: 'center'
+        },
         geo: {
             showland: true,
             showcountries: true,
