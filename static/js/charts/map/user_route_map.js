@@ -2,38 +2,80 @@ function createUserRouteMap(data, elementId, countryCoords) {
     const traces = data.map(row => {
         const origin = row.origin;
         const destination = row.destination;
-
+        const OFFSET = 0.02;
+     
         if (countryCoords[origin] && countryCoords[destination]) {
+            const totalUsersFromOrigin = data
+                .filter(d => d.origin === origin)
+                .reduce((sum, d) => sum + d.count, 0);
+    
+            const totalUsersToDestination = data
+                .filter(d => d.destination === destination)
+                .reduce((sum, d) => sum + d.count, 0);
+    
             const originData = data.filter(d => d.origin === origin);
-            const hoverText = `From ${capitalizeFirstLetter(origin)}:<br>` + 
-                    (originData.length > 0 ? 
-                        originData.map(d => `To ${capitalizeFirstLetter(d.destination)}: ${d.count} users`).join('<br>') :
-                        'No users came in')
+            const originHoverText = `From ${capitalizeFirstLetter(origin)}: ${totalUsersFromOrigin} users<br>` +
+                (originData.length > 0 ?
+                    originData.map(d => `To ${capitalizeFirstLetter(d.destination)}: ${d.count} users`).join('<br>') :
+                    'No users traveled');
+    
+            const destinationData = data.filter(d => d.destination === destination);
+            const destinationHoverText = `To ${capitalizeFirstLetter(destination)}: ${totalUsersToDestination} users<br>` +
+                (destinationData.length > 0 ?
+                    destinationData.map(d => `From ${capitalizeFirstLetter(d.origin)}: ${d.count} users`).join('<br>') :
+                    'No users came in');
 
-            return {
-                type: 'scattergeo',
-                lon: [countryCoords[origin][1], countryCoords[destination][1]], 
-                lat: [countryCoords[origin][0], countryCoords[destination][0]],
-                mode: 'markers+lines',
-                line: {
-                    width: 2,
-                    color: '#193560',
-                    dash: 'dash'
+            return [                
+                {
+                    type: 'scattergeo',
+                    lon: [countryCoords[origin][1], countryCoords[destination][1]+ OFFSET],
+                    lat: [countryCoords[origin][0], countryCoords[destination][0]+ OFFSET],
+                    text: destinationHoverText,
+                    mode: 'markers+lines',
+                    hoverinfo: 'text',
+                    line: {
+                        width: 2,
+                        color: '#193560',
+                        dash: 'dash'
+                    },
+                    opacity: 0.4, 
                 },
-                opacity: 0.4,
-                text: hoverText,
-                hoverinfo: 'text',
-                customdata: [countryCoords[origin], countryCoords[destination]],
-            };
+                {
+                    type: 'scattergeo',
+                    lon: [countryCoords[origin][1]],
+                    lat: [countryCoords[origin][0]],
+                    text: originHoverText,
+                    mode: 'markers',
+                    hoverinfo: 'text',
+                    marker: {
+                        size: 8,
+                        color: '#37c1e3'
+                    },
+                }
+            ];
+    
         }
         return null;
-    }).filter(trace => trace !== null);
+    }).flat().filter(trace => trace !== null);
 
     const countries = [...new Set(data.map(row => row.origin).concat(data.map(row => row.destination)))];
     const markerTraces = countries.map(country => {
         if (countryCoords[country]) {
             const totalCount = data.filter(row => row.origin === country || row.destination === country)
                 .reduce((sum, row) => sum + row.count, 0);
+        
+            const isOrigin = data.some(d => d.origin === country);
+            const isDestination = data.some(d => d.destination === country);
+
+            let color;
+            if (isOrigin && isDestination) {
+                color = '#FFFF00';  
+            } else if (isOrigin) {
+                color = '#37c1e3';
+            } else if (isDestination) {
+                color = '#00FF00'; 
+            }
+
             return {
                 type: 'scattergeo',
                 lon: [countryCoords[country][1]],
@@ -43,7 +85,7 @@ function createUserRouteMap(data, elementId, countryCoords) {
                 marker: {
                     size: 16,
                     symbol: 'circle-dot',
-                    color: data.some(row => row.destination === country) ? '#00FF00' : '#37c1e3',
+                    color: color,
                     line: {
                         width: 4,
                         color: '#193560',
@@ -53,17 +95,17 @@ function createUserRouteMap(data, elementId, countryCoords) {
                 textfont: {
                     family: 'Arial, sans-serif',
                     size: 12,
-                    color: 'black'
+                    color: 'black',
                 },
                 name: capitalizeFirstLetter(country),
                 hoverinfo: 'text'
             };
         }
         return null;
-    }).filter(trace => trace !== null);
+    }).filter(trace => trace !== null);  
 
     const allTraces = [...traces, ...markerTraces];
-
+   
     let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
     countries.forEach(country => {
         if (countryCoords[country]) {
