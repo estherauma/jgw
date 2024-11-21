@@ -9,7 +9,7 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset
-from preference.models import Organisation, Preference, SectorsOfWorkMapper
+from preference.models import Organisation, Preference
 
 
 def preferences_count(**filters):
@@ -265,12 +265,21 @@ def get_preferences_by_sectors(**filters):
 
     result = (
         filtered_queryset.filter(sectors_of_work__original_sector_of_work__isnull=False)
-        .values("sectors_of_work__original_sector_of_work__value")
+        .annotate(
+            sector_value=Case(
+                When(sectors_of_work__original_sector_of_work__value="Driving", then=Value("Transport")),
+                default=F("sectors_of_work__original_sector_of_work__value"),
+                output_field=CharField(),
+            )
+        )
+        .values("sector_value")
         .annotate(preferences_count=Count("id"))
         .order_by("-preferences_count")
     )
 
-    labels = [entry["sectors_of_work__original_sector_of_work__value"] for entry in result]
+    SECTOR_MAPPING = {"Agriculture": "Agriculture - Other", "Any": "All"}
+
+    labels = [SECTOR_MAPPING.get(entry["sector_value"], entry["sector_value"]) for entry in result]
     counts = [entry["preferences_count"] for entry in result]
 
     return {"labels": labels, "counts": counts}
