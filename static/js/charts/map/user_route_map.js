@@ -94,13 +94,15 @@ function createUserRouteMap(data, elementId, countryCoords) {
                 showlegend = true;
                 legendGroupsAdded.add(legendgroup); 
             }
+
+            const mode = showlegend ? 'markers' : 'markers+text';
         
             return {
                 type: 'scattergeo',
                 lon: [countryCoords[country][1]],
                 lat: [countryCoords[country][0]],
                 text: `${capitalizeFirstLetter(country)}: ${totalCount} Users`,
-                mode: 'markers',
+                mode: mode,
                 marker: {
                     size: 16,
                     symbol: 'circle-dot',
