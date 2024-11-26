@@ -3,6 +3,7 @@ from preference.forms import SectorsOfWorkMapperForm
 
 from preference.models import (
     FactoryFarm,
+    ImmigrationStatus,
     Organisation,
     OrganisationAccessCode,
     OrganisationSector,
@@ -62,6 +63,7 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
         "get_age_translated_name",
         "is_missing_sector_cleaned",
         "get_org_workcode",
+        "immigration_status",
         "is_missing_accesscode_cleaned",
         "is_myvoice_organisation",
     ]
@@ -75,6 +77,7 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
         "destination__name",
         "is_missing_sector_cleaned",
         "is_missing_accesscode_cleaned",
+        "immigration_status",
     ]
 
     def get_translated_name(self, obj):
@@ -163,3 +166,9 @@ class AgeAdmin(admin.ModelAdmin):
 class OrganisationAccessCodeAdmin(admin.ModelAdmin):
     search_fields = ["code"]
     list_display = ["code", "created_at", "updated_at"]
+
+
+@admin.register(ImmigrationStatus)
+class ImmigrationStatusAdmin(admin.ModelAdmin):
+    search_fields = ["name"]
+    list_display = ["name", "created_at", "updated_at"]

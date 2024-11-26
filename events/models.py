@@ -10,6 +10,7 @@ from preference.models import (
     CountryState,
     FactoryFarm,
     Gender,
+    ImmigrationStatus,
     Language,
     Organisation,
     OrganisationSector,
@@ -68,12 +69,17 @@ class Chapter(models.Model):
     number_key = models.CharField(max_length=100)
     chapter_text = models.CharField(max_length=255, null=True, blank=True)
     destination = models.ForeignKey(
-        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="chapter_tittle_opened_destination"
+        Country,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="chapter_tittle_opened_destination",
     )
 
     def __str__(self):
         return self.number_key
-    
+
+
 class ChaptersOpened(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -102,6 +108,9 @@ class ChaptersOpened(models.Model):
     destination = models.ForeignKey(
         Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="chapters_opened_destination"
     )
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     preference = models.ForeignKey(
         Preference,
@@ -124,12 +133,13 @@ class ChaptersOpened(models.Model):
 
     def __str__(self):
         return f"ChaptersOpened {self.event_name}"
+
     class Meta:
         indexes = [
-            Index(fields=['event_name']),
-            Index(fields=['chapter']),
-            Index(fields=['device_id']),
-            Index(fields=['destination']),
+            Index(fields=["event_name"]),
+            Index(fields=["chapter"]),
+            Index(fields=["device_id"]),
+            Index(fields=["destination"]),
         ]
 
 
@@ -164,6 +174,9 @@ class ChaptersFeedbackStandard(models.Model):
         null=True,
         blank=True,
         related_name="chapter_feedback_destination_state",
+    )
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus, on_delete=models.SET_NULL, null=True, blank=True
     )
     route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True)
     organisation_sector = models.ForeignKey(
@@ -257,7 +270,8 @@ class LinksClickEvent(models.Model):
 
     def __str__(self) -> str:
         return self.link
-    
+
+
 class TelephoneClickEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -268,19 +282,24 @@ class TelephoneClickEvent(models.Model):
     def __str__(self) -> str:
         return self.link
 
+
 class BigqueryHomepageEventData(models.Model):
     event_date = models.DateField()
     device_id = models.CharField(max_length=255, null=True, blank=True)
     app_id = models.CharField(max_length=255, null=True, blank=True)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
     locale = models.CharField(max_length=255, null=True, blank=True)
-    destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="homepage_event_destination")
+    destination = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="homepage_event_destination"
+    )
     age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
     gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus, on_delete=models.SET_NULL, null=True, blank=True
+    )
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     organisation_code = models.CharField(max_length=255, null=True, blank=True)
     is_myvoice_organisation = models.BooleanField(default=False)
-
 
     def __str__(self):
         return f"Homepage Event on {self.event_date} for Device {self.device_id}"

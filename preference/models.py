@@ -148,6 +148,16 @@ class OrganisationAccessCode(models.Model):
         return self.code
 
 
+class ImmigrationStatus(models.Model):
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Preference(models.Model):
     data_source_id = models.CharField(max_length=255)
     device_id = models.CharField(max_length=255)
@@ -182,6 +192,9 @@ class Preference(models.Model):
     sectors_of_work = models.ManyToManyField(SectorOfWork, related_name="pref_sectors_of_work")
     organisation_sector = models.ForeignKey(
         OrganisationSector, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus, on_delete=models.SET_NULL, null=True, blank=True
     )
     organisation_access_code = models.ForeignKey(
         OrganisationAccessCode,

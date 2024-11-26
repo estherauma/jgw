@@ -23,6 +23,8 @@ from preference.models import (
     OrganisationSector,
     Route,
     SectorOfWork,
+    Preference,
+    ImmigrationStatus,
 )
 
 
@@ -212,4 +214,14 @@ def get_or_add_organisation_access_code(access_code: str) -> OrganisationAccessC
     else:
         # Create a new 'model' object with the desired name
         instance = model.objects.create(code=final_access_code)
+    return instance
+
+
+def get_or_add_immigration_status_to_db(immigration_status_data: str) -> ImmigrationStatus:
+    if not immigration_status_data:
+        return None
+
+    instance, _ = ImmigrationStatus.objects.get_or_create(
+        name=immigration_status_data, defaults={"value": immigration_status_data}
+    )
     return instance

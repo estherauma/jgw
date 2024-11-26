@@ -23,16 +23,19 @@ class InlineQuestionResponseTextAdminDisplay(admin.ModelAdmin):
     list_display = ["text", "translated_text", "title_text"]
     search_fields = ["text", "translated_text", "title_text"]
 
+
 @admin.register(InlineQuestionResponse)
 class InlineQuestionResponseAdmin(admin.ModelAdmin):
-    list_display = ["inline_question","organisation_inline_question","response", "created_at","updated_at"]
+    list_display = ["inline_question", "organisation_inline_question", "response", "created_at", "updated_at"]
     search_fields = ["organisation_inline_question"]
-    ordering = ['-created_at']
+    ordering = ["-created_at"]
+
 
 @admin.register(InlineQuestionResponseText)
 class InlineQuestionResponseTextAdminDisplay(admin.ModelAdmin):
     list_display = ["translated_text"]
     search_fields = ["translated_text"]
+
 
 @admin.register(InlineQuestion)
 class InlineQuestionAdmin(admin.ModelAdmin):
@@ -54,17 +57,26 @@ class InlineQuestionAdmin(admin.ModelAdmin):
             if obj.inline_question_standard.preference
             else "not specified"
         )
-    
+
 
 @admin.register(InlineQuestionAndKeysMatch)
 class InlineQuestionAndKeysMatchAdmin(admin.ModelAdmin):
-    list_display = ["inline_question","inline_question_key", "custom_lang"]
+    list_display = ["inline_question", "inline_question_key", "custom_lang"]
     search_fields = ["inline_question", "inline_question_key"]
+
 
 @admin.register(InlineQuestionStandard)
 class InlineQuestionStandardAdmin(admin.ModelAdmin):
-    list_display = ["id","data_source_id","device_id","destination", "organisation","is_myvoice_organisation"]
-    search_fields = ["id","data_source_id","device_id"]
+    list_display = [
+        "id",
+        "data_source_id",
+        "device_id",
+        "destination",
+        "organisation",
+        "is_myvoice_organisation",
+    ]
+    search_fields = ["id", "data_source_id", "device_id"]
+
 
 @admin.register(FollowUpQuestion)
 class FollowUpQuestionAdmin(admin.ModelAdmin):
@@ -73,17 +85,45 @@ class FollowUpQuestionAdmin(admin.ModelAdmin):
 
     def inline_question_text(cls, obj):
         return obj.inline_question.inline_question
+
+
 @admin.register(MessagingQuestionStandard)
 class MessagingQuestionStandardAdmin(admin.ModelAdmin):
-    list_display = ["api_created_at", "data_source_id", "device_id", "question_id","route","factory_farm","destination","organisation_sector","organisation","is_myvoice_organisation"]
-    search_fields = ["api_created_at", "data_source_id", "device_id", "question_id","route","factory_farm","destination","organisation_sector","organisation","is_myvoice_organisation"]
-    ordering=["-api_created_at"]
+    list_display = [
+        "api_created_at",
+        "data_source_id",
+        "device_id",
+        "question_id",
+        "route",
+        "factory_farm",
+        "destination",
+        "organisation_sector",
+        "organisation",
+        "is_myvoice_organisation",
+        "immigration_status",
+    ]
+    search_fields = [
+        "api_created_at",
+        "data_source_id",
+        "device_id",
+        "question_id",
+        "route",
+        "factory_farm",
+        "destination",
+        "organisation_sector",
+        "organisation",
+        "is_myvoice_organisation",
+        "immigration_status",
+    ]
+    ordering = ["-api_created_at"]
+
 
 @admin.register(MessagingQuestionResponse)
 class MessagingQuestionResponseAdmin(admin.ModelAdmin):
     list_display = ["messaging_question", "created_at", "updated_at"]
     search_fields = ["messaging_question"]
-    ordering = ['-created_at']
+    ordering = ["-created_at"]
+
 
 admin.site.register(MessagingQuestion)
 admin.site.register(MessagingResponse)

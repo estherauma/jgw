@@ -9,6 +9,7 @@ from common.custom_libs.google_translate import pandas_translator_translate
 from common.helpers.model_helpers.preference import (
     get_or_add_country_to_db,
     get_or_add_factory_farm_to_db,
+    get_or_add_immigration_status_to_db,
     get_or_add_language_to_db,
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
@@ -173,6 +174,7 @@ def inline_questions_v2_logic(jgw_api_client):
             api_destination=inline_question_v2.get("destination"),
             location_of_potential_work=inline_question_v2.get("location_of_potential_work"),
         )
+        immigration_status = inline_question_v2.get("immigrationStatus")
 
         route_data = get_or_add_route_to_db(inline_question_v2.get("route") or NOT_SPECIFIED)
         language_data = get_or_add_language_to_db(inline_question_v2.get("language"))
@@ -183,6 +185,7 @@ def inline_questions_v2_logic(jgw_api_client):
         )
         organisation_data = get_or_add_organisation_to_db(inline_question_v2.get("organisation"))
         factory_farm_data = get_or_add_factory_farm_to_db(inline_question_v2.get("factoryFarm"))
+        immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
 
         new_inline_question_standard = InlineQuestionStandard.objects.create(
             data_source_id=inline_question_v2.get("_id"),
@@ -197,6 +200,7 @@ def inline_questions_v2_logic(jgw_api_client):
             organisation_sector=organisation_sector_data,
             organisation=organisation_data,
             factory_farm=factory_farm_data,
+            immigration_status=immigration_status_data,
             api_created_at=inline_question_v2.get("createdAt"),
             api_updated_at=inline_question_v2.get("updatedAt"),
             api_version="v2",
@@ -277,6 +281,7 @@ def inline_questions_v3_logic(jgw_api_client):
                 api_destination=inline_question_v3.get("destination"),
                 location_of_potential_work=inline_question_v3.get("location_of_potential_work"),
             )
+            immigration_status = inline_question_v3.get("immigrationStatus")
 
             route_data = get_or_add_route_to_db(inline_question_v3.get("route") or NOT_SPECIFIED)
             language_data = get_or_add_language_to_db(inline_question_v3.get("language"))
@@ -287,6 +292,7 @@ def inline_questions_v3_logic(jgw_api_client):
             )
             organisation_data = get_or_add_organisation_to_db(inline_question_v3.get("organisation"))
             factory_farm_data = get_or_add_factory_farm_to_db(inline_question_v3.get("factoryFarm"))
+            immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
 
             new_inline_question_standard = InlineQuestionStandard.objects.create(
                 data_source_id=inline_question_v3.get("_id"),
@@ -298,6 +304,7 @@ def inline_questions_v3_logic(jgw_api_client):
                 language=language_data,
                 origin=origin_data,
                 destination=destination_data,
+                immigration_status=immigration_status_data,
                 organisation_sector=organisation_sector_data,
                 organisation=organisation_data,
                 factory_farm=factory_farm_data,
@@ -420,6 +427,7 @@ def add_inline_question_to_db(inline_question):
     organisation_sector = standard_fields_dict.get("organisationSector")
     organisation = standard_fields_dict.get("organisation")
     factory_farm = standard_fields_dict.get("factoryFarm")
+    immigration_status = standard_fields_dict.get("immigrationStatus")
 
     route_data = get_or_add_route_to_db(route)
     language_data = get_or_add_language_to_db(language)
@@ -428,6 +436,7 @@ def add_inline_question_to_db(inline_question):
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
     organisation_data = get_or_add_organisation_to_db(organisation)
     factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
+    immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
 
     # save the standard fields,
     device_id = standard_fields_dict.get("deviceId")
@@ -443,6 +452,7 @@ def add_inline_question_to_db(inline_question):
         language=language_data,
         origin=origin_data,
         destination=destination_data,
+        immigration_status=immigration_status_data,
         organisation_sector=organisation_sector_data,
         organisation=organisation_data,
         factory_farm=factory_farm_data,

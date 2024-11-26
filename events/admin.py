@@ -14,7 +14,7 @@ from events.models import (
     LinksClickEvent,
     OneTimeEventJob,
     SwsPasiEvent,
-    Chapter
+    Chapter,
 )
 
 
@@ -24,19 +24,32 @@ class SwsPasiEventTabularAdminDisplay(admin.ModelAdmin):
 
 
 class ChapterAdminDisplay(admin.ModelAdmin):
-    list_display = ["number_key", "chapter_text","destination"]
+    list_display = ["number_key", "chapter_text", "destination"]
     search_fields = ["number_key", "chapter_text"]
+
 
 @admin.register(ChaptersFeedbackStandard)
 class ChaptersFeedbackStandardAdminDisplay(admin.ModelAdmin):
-    list_display = ["api_created_at", "data_source_id","destination","feedback_title","organisation","is_myvoice_organisation"]
-    search_fields = ["api_created_at", "data_source_id","destination","feedback_title"]
+    list_display = [
+        "api_created_at",
+        "data_source_id",
+        "destination",
+        "feedback_title",
+        "organisation",
+        "is_myvoice_organisation",
+        "immigration_status",
+    ]
+    search_fields = ["api_created_at", "data_source_id", "destination", "feedback_title"]
     ordering = ["-api_created_at"]
+
+
 @admin.register(ChaptersFeedback)
 class ChaptersFeedbackAdminDisplay(admin.ModelAdmin):
-    list_display = ["feedback_standard", "feedback_question","feedback_response","chapter"]
-    search_fields = ["feedback_standard", "feedback_question","feedback_response","chapter"]
+    list_display = ["feedback_standard", "feedback_question", "feedback_response", "chapter"]
+    search_fields = ["feedback_standard", "feedback_question", "feedback_response", "chapter"]
     ordering = ["-feedback_standard"]
+
+
 # Register your models here.
 admin.site.register(BigQueryChaptersData)
 admin.site.register(BigQueryFirstOpenHomepageData)
@@ -46,22 +59,35 @@ admin.site.register(SwsPasiEvent, SwsPasiEventTabularAdminDisplay)
 admin.site.register(Chapter, ChapterAdminDisplay)
 
 
-
-
 @admin.register(LinksClickEvent)
 class LinksClickEventAdmin(admin.ModelAdmin):
     list_display = ["event_name", "link"]
     actions = [download_links_click]
 
+
 @admin.register(BigqueryHomepageEventData)
 class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
-    list_display = ["event_date", "device_id","app_id","language","locale","destination","age","organisation","organisation_code","is_myvoice_organisation"]
+    list_display = [
+        "event_date",
+        "device_id",
+        "app_id",
+        "language",
+        "locale",
+        "destination",
+        "immigration_status",
+        "age",
+        "organisation",
+        "organisation_code",
+        "is_myvoice_organisation",
+    ]
     ordering = ["event_date"]
+
 
 @admin.register(TelephoneClickEvent)
 class TelephoneClickEventAdmin(admin.ModelAdmin):
     list_display = ["event_name", "link"]
     actions = [download_links_click]
+
 
 @admin.register(ChaptersOpened)
 class ChaptersOpenedAdmin(admin.ModelAdmin):
@@ -71,10 +97,11 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
         "event_name",
         "get_chapter_text",
         "get_chapter_key",
+        "immigration_status",
         "device_id",
         "destination",
         "organisation",
-        "is_myvoice_organisation"
+        "is_myvoice_organisation",
     ]
 
     def get_chapter_text(self, obj):
@@ -88,4 +115,4 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
 class ChaptersFeedbackResponseAdmin(admin.ModelAdmin):
     search_fields = ["response", "translated_response"]
     list_display = ["created_at", "response", "translated_response"]
-    ordering= ["created_at"]
+    ordering = ["created_at"]

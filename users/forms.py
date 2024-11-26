@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from common.helpers.model_helpers.preference import get_unique_langaues_list
 
-from preference.models import Country, Organisation, FactoryFarm
+from preference.models import Country, ImmigrationStatus, Organisation, FactoryFarm
 
 from .models import User, UserInvitations
 
@@ -155,6 +155,7 @@ class UserAdminForm(forms.ModelForm):
             "destinations",
             "user_languages",
             "excluded_origin_countries",
+            "immigration_status",
             "is_staff",
             "is_superuser",
             "is_active",
@@ -199,6 +200,11 @@ class CreateNewUserForm(forms.ModelForm):
         self.fields["start_date"].widget = forms.DateInput(attrs={"class": "form-control", "type": "date"})
         self.fields["end_date"].widget = forms.DateInput(attrs={"class": "form-control", "type": "date"})
 
+        self.fields["immigration_status"].choices = [
+            (status.id, status.name.capitalize())
+            for status in ImmigrationStatus.objects.all().order_by("name")
+        ]
+
     organisations = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
             attrs={
@@ -225,6 +231,17 @@ class CreateNewUserForm(forms.ModelForm):
                 "class": "form-select selectpicker",
                 "data-live-search": "true",
                 "id": "create-new-user-destinations-id",
+            }
+        ),
+        required=False,
+    )
+
+    immigration_status = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "create-new-user-immigration-status-id",
             }
         ),
         required=False,
@@ -267,6 +284,7 @@ class CreateNewUserForm(forms.ModelForm):
             "destinations",
             "user_languages",
             "excluded_origin_countries",
+            "immigration_status",
             "groups",
         ]
 
@@ -325,6 +343,14 @@ class EditUserForm(forms.ModelForm):
         self.fields["excluded_origin_countries"].widget.attrs["id"] = "edit-user-exluded-origin-countries-id"
         self.fields["excluded_origin_countries"].widget.attrs["data-live-search"] = "true"
 
+        self.fields["immigration_status"].choices = [
+            (status.id, status.name.capitalize())
+            for status in ImmigrationStatus.objects.all().order_by("name")
+        ]
+        self.fields["immigration_status"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["immigration_status"].widget.attrs["id"] = "edit-user-immigration-status-id"
+        self.fields["immigration_status"].widget.attrs["data-live-search"] = "true"
+
         # groups
         self.fields["groups"].widget.attrs["class"] = "form-select selectpicker"
         self.fields["groups"].widget.attrs["id"] = "user-groups-id"
@@ -347,5 +373,6 @@ class EditUserForm(forms.ModelForm):
             "factories",
             "destinations",
             "excluded_origin_countries",
+            "immigration_status",
             "groups",
         ]

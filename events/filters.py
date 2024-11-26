@@ -10,6 +10,7 @@ from users.utils import (
     get_user_organisations,
     get_user_start_date,
     get_user_end_date,
+    get_user_immigration_status,
 )
 
 
@@ -24,6 +25,7 @@ def generic_chapters_opened_filtered_queryset(
     schemes=None,
     factory_farms=None,
     sector_of_work=None,
+    immigration_status=None,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -55,9 +57,13 @@ def generic_chapters_opened_filtered_queryset(
     if factory_farms is None:
         factory_farms = []
 
+    if immigration_status is None:
+        immigration_status = []
+
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
+    user_immigration_status = get_user_immigration_status(current_user)
 
     chapters_opened_filters_q_object = Q()
 
@@ -97,6 +103,13 @@ def generic_chapters_opened_filtered_queryset(
     if sector_of_work:
         pass
 
+    if immigration_status:
+        immigration_status_q = Q(immigration_status__name__in=immigration_status)
+        chapters_opened_filters_q_object &= immigration_status_q
+    elif user_immigration_status:
+        user_immigration_status_q = Q(immigration_status__in=user_immigration_status)
+        chapters_opened_filters_q_object &= user_immigration_status_q
+
     return queryset.filter(chapters_opened_filters_q_object)
 
 
@@ -111,6 +124,7 @@ def generic_chapters_feedback_filtered_queryset(
     schemes=None,
     factory_farms=None,
     sector_of_work=None,
+    immigration_status=None,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -140,11 +154,15 @@ def generic_chapters_feedback_filtered_queryset(
     if factory_farms is None:
         factory_farms = []
 
+    if immigration_status is None:
+        immigration_status = []
+
     # current user specific orgs and factories filters
 
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
+    user_immigration_status = get_user_immigration_status(current_user)
 
     chapters_feedback_filters_q_object = Q()
 
@@ -185,6 +203,13 @@ def generic_chapters_feedback_filtered_queryset(
     if sector_of_work:
         pass
 
+    if immigration_status:
+        immigration_status_q = Q(feedback_standard__immigration_status__name__in=immigration_status)
+        chapters_feedback_filters_q_object &= immigration_status_q
+    elif user_immigration_status:
+        user_immigration_status_q = Q(feedback_standard__immigration_status__in=user_immigration_status)
+        chapters_feedback_filters_q_object &= user_immigration_status_q
+
     return queryset.filter(chapters_feedback_filters_q_object)
 
 
@@ -194,11 +219,12 @@ def filter_bigquery_homepage_event_data(
     start_date=None,
     end_date=None,
     destination_countries=None,
-    origin_countries=None,
+    origin_countries=None,  # Add this
     organisations=None,
-    schemes=None,
-    factory_farms=None,
+    schemes=None,  # Add this
+    factory_farms=None,  # Add this
     sector_of_work=None,
+    immigration_status=None,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -225,6 +251,11 @@ def filter_bigquery_homepage_event_data(
         user_destinations = []
         user_orgs = []
 
+    if immigration_status is None:
+        immigration_status = []
+
+    user_immigration_status = get_user_immigration_status(current_user)
+
     homepage_event_filters_q_object = Q()
 
     homepage_event_filters_q_object &= Q(event_date__range=(final_start_date, final_end_date))
@@ -238,6 +269,10 @@ def filter_bigquery_homepage_event_data(
         homepage_event_filters_q_object &= Q(organisation__in=user_orgs)
     if organisations:
         homepage_event_filters_q_object &= Q(organisation__name__in=organisations)
-    
+
+    if immigration_status:
+        homepage_event_filters_q_object &= Q(immigration_status__name__in=immigration_status)
+    elif user_immigration_status and not current_user.is_superuser:
+        homepage_event_filters_q_object &= Q(immigration_status__in=user_immigration_status)
 
     return queryset.filter(homepage_event_filters_q_object)

@@ -40,17 +40,38 @@ def get_user_excluded_origin_countries(user):
     user_excluded_origin_countries = user.excluded_origin_countries.all()
     return user_excluded_origin_countries
 
+
 def get_user_start_date(user):
     if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
         return None
     return user.start_date
+
 
 def get_user_end_date(user):
     if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
         return None
     return user.end_date
 
+
 def get_user_group(user):
     if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
         return []
-    return list(user.groups.values_list('name', flat=True))
+    return list(user.groups.values_list("name", flat=True))
+
+
+def get_user_immigration_status(user):
+    """
+    Get immigration statuses associated with a user.
+    Returns all immigration statuses for admin/superuser, otherwise returns user's configured statuses.
+
+    Args:
+        user: User object
+
+    Returns:
+        QuerySet of ImmigrationStatus objects
+    """
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+        return []
+
+    user_immigration_status = user.immigration_status.all()
+    return user_immigration_status

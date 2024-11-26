@@ -11,6 +11,7 @@ from common.helpers.model_helpers.preference import (
     get_or_add_country_to_db,
     get_or_add_factory_farm_to_db,
     get_or_add_gender_to_db,
+    get_or_add_immigration_status_to_db,
     get_or_add_language_to_db,
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
@@ -87,6 +88,7 @@ def fetch_chapters_opened_data_from_api_to_db():
     update_chapter_titles()
     update_myvoice_chapters_opened_events()
 
+
 def add_chapters_opened_to_db(chapters_feedback):
     event_name = chapters_feedback.get("event_name")
     event_date = chapters_feedback.get("event_date")
@@ -97,7 +99,7 @@ def add_chapters_opened_to_db(chapters_feedback):
     organisation_sector = chapters_feedback.get("organisationSector")
     organisation = chapters_feedback.get("organisation")
     destination_state = chapters_feedback.get("destinationState")
-
+    immigration_status = chapters_feedback.get("immigrationStatus")
     device_id = chapters_feedback.get("deviceId")
     app_id = chapters_feedback.get("appId")
     route = chapters_feedback.get("route")
@@ -119,6 +121,7 @@ def add_chapters_opened_to_db(chapters_feedback):
     organisation_data = get_or_add_organisation_to_db(organisation)
     gender_data = get_or_add_gender_to_db(gender)
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
+    immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
 
     origin_data = get_or_add_country_to_db(origin, source="origin")
     destination_data = get_or_add_country_to_db(destination, source="destination")
@@ -143,6 +146,7 @@ def add_chapters_opened_to_db(chapters_feedback):
         destination=destination_data,
         origin=origin_data,
         preference=preference,
+        immigration_status=immigration_status_data,
         factory_farm=factory_farm_data,
     )
     chapter, _ = Chapter.objects.get_or_create(
@@ -155,37 +159,33 @@ def add_chapters_opened_to_db(chapters_feedback):
         kunfu_panda_logger.error(f"Error saving chapter opened: {str(e)}")
         raise
 
+
 def update_myvoice_chapters_opened_events():
     with transaction.atomic():
-        not_specified_org = Organisation.objects.get(name='not specified')
-        myvoice_org = Organisation.objects.get(name='myvoice')
-        malaysia_country = Country.objects.get(name='malaysia')
-
+        not_specified_org = Organisation.objects.get(name="not specified")
+        myvoice_org = Organisation.objects.get(name="myvoice")
+        malaysia_country = Country.objects.get(name="malaysia")
 
         chapters_opened_to_update = ChaptersOpened.objects.filter(
-            organisation=not_specified_org,
-            destination=malaysia_country
+            organisation=not_specified_org, destination=malaysia_country
         )
 
         updated_count = chapters_opened_to_update.update(
-            organisation=myvoice_org,
-            is_myvoice_organisation=True
+            organisation=myvoice_org, is_myvoice_organisation=True
         )
 
     return updated_count
 
+
 def reverse_myvoice_chapters_opened_events():
     with transaction.atomic():
 
-        not_specified_org = Organisation.objects.get(name='not specified')
+        not_specified_org = Organisation.objects.get(name="not specified")
 
-        preferences_to_reverse = ChaptersOpened.objects.filter(
-            is_myvoice_organisation=True
-        )
+        preferences_to_reverse = ChaptersOpened.objects.filter(is_myvoice_organisation=True)
 
         updated_count = preferences_to_reverse.update(
-            organisation=not_specified_org,
-            is_myvoice_organisation=False
+            organisation=not_specified_org, is_myvoice_organisation=False
         )
 
     return updated_count

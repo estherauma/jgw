@@ -110,7 +110,8 @@ class AppEvents(BaseAnalytics):
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'factoryFarm') AS factoryFarm,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'origin') AS origin,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'location_of_potential_work') AS location_of_potential_work,
-                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'route') AS route
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'route') AS route,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'immigrationStatus') AS immigrationStatus
             FROM 
                 `just-good-work.analytics_191478110.events_*`
             WHERE 
@@ -319,8 +320,8 @@ class AppEvents(BaseAnalytics):
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'age') AS age,
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'gender') AS gender,
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'organisation') AS organisation,
-                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'organisationCode') AS organisationCode 
-
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'organisationCode') AS organisationCode,
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'immigrationStatus') AS immigrationStatus
             FROM `just-good-work.analytics_191478110.events_*` 
 
             WHERE event_name='homepage'
