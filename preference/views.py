@@ -32,6 +32,7 @@ from preference.repository.preference_repository import (
     preferences_by_origin,
     preferences_count,
     get_user_counts_by_origin_destination,
+    preferences_by_immigration_status,
 )
 from users.utils import get_user_organisations
 from django.core.serializers.json import DjangoJSONEncoder
@@ -67,6 +68,11 @@ def user_overview(request):
         if not request.user.is_anonymous and request.user.role == "SCHEME"
         else 0
     )
+    preferences_by_immigration_status_responses = preferences_by_immigration_status(
+        **filters, current_user=request.user
+    )
+
+    print("preferences_by_immigration_status_responses", preferences_by_immigration_status_responses)
 
     context = {
         "filter_form": filter_form,
@@ -90,6 +96,7 @@ def user_overview(request):
             list(user_counts_by_origin_destination), cls=DjangoJSONEncoder
         ),
         "country_coords": country_coords,
+        "preferences_by_immigration_status": preferences_by_immigration_status_responses,
     }
     return render(request, "preference/user_overview.html", context=context)
 
