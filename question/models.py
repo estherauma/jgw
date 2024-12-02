@@ -1,7 +1,15 @@
 from django.db import models
 from django.utils import timezone
 
-from preference.models import Country, FactoryFarm, Language, Organisation, OrganisationSector, Route
+from preference.models import (
+    Country,
+    FactoryFarm,
+    ImmigrationStatus,
+    Language,
+    Organisation,
+    OrganisationSector,
+    Route,
+)
 
 
 class InlineQuestionStandard(models.Model):
@@ -42,6 +50,13 @@ class InlineQuestionStandard(models.Model):
         null=True,
         blank=True,
         related_name="inline_question_factory_farm",
+    )
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="inline_question_immigration_status",
     )
     organisation = models.ForeignKey(
         Organisation,
@@ -97,7 +112,7 @@ class InlineQuestionResponseText(models.Model):
 class InlineQuestionResponse(models.Model):
     inline_question = models.ForeignKey(InlineQuestion, on_delete=models.CASCADE)
     response = models.ForeignKey(InlineQuestionResponseText, on_delete=models.CASCADE, null=True, blank=True)
-    organisation_inline_question=models.CharField(max_length=255,null=True,blank=True)
+    organisation_inline_question = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -106,18 +121,22 @@ class InlineQuestionResponse(models.Model):
 
 
 class InlineQuestionAndKeysMatch(models.Model):
-    inline_question=models.TextField(max_length=255)
-    inline_question_key=models.TextField(max_length=255,null=True)
+    inline_question = models.TextField(max_length=255)
+    inline_question_key = models.TextField(max_length=255, null=True)
     custom_lang = models.CharField(max_length=5, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.inline_question} -> {self.inline_question_key}"
 
+
 class FollowUpQuestion(models.Model):
-    inline_question = models.ForeignKey(InlineQuestionAndKeysMatch, on_delete=models.CASCADE, related_name="inline_question_follow_question")
-    followup_question=models.TextField(max_length=255)
-    followup_question_key=models.TextField(max_length=255,null=True)
+    inline_question = models.ForeignKey(
+        InlineQuestionAndKeysMatch, on_delete=models.CASCADE, related_name="inline_question_follow_question"
+    )
+    followup_question = models.TextField(max_length=255)
+    followup_question_key = models.TextField(max_length=255, null=True)
     custom_lang = models.CharField(max_length=5, null=True, blank=True)
+
 
 class MessagingQuestionStandard(models.Model):
     data_source_id = models.CharField(max_length=24)
@@ -146,6 +165,13 @@ class MessagingQuestionStandard(models.Model):
         null=True,
         blank=True,
         related_name="messaging_question_destination",
+    )
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="messaging_question_immigration_status",
     )
 
     organisation_sector = models.ForeignKey(
@@ -229,5 +255,3 @@ class MessagingQuestionResponse(models.Model):
     responses = models.ManyToManyField(MessagingResponse)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    

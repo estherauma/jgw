@@ -2,7 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from dashboard.forms import OPERATORS
-from preference.models import Country, FactoryFarm, Language, Organisation
+from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation
 
 ROLES = ["SCHEME", "FACTORY", "STAFF", "ADMIN"]
 STATUS = ["PENDING", "ACCEPTED", "SENT"]
@@ -66,6 +66,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     receive_marketing_emails = models.BooleanField(
         default=False, help_text="Designates whether this user should receive marketing emails."
     )
+    immigration_status = models.ManyToManyField(ImmigrationStatus, blank=True)
 
     def __str___(self):
         return f"{self.email}"

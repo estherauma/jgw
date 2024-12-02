@@ -3,7 +3,7 @@ from django import forms
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
-from preference.models import CountryState
+from preference.models import CountryState, ImmigrationStatus
 from users.utils import (
     get_user_factories,
     get_user_group,
@@ -11,6 +11,7 @@ from users.utils import (
     get_user_destinations,
     get_user_start_date,
     get_user_end_date,
+    get_user_immigration_status,
 )
 
 
@@ -25,9 +26,25 @@ class GenericFilterForm(forms.Form):
         user_factories = get_user_factories(self.request.user)
         user_orgs = get_user_organisations(self.request.user)
         user_group = get_user_group(self.request.user)
+        user_immigration_status = get_user_immigration_status(self.request.user)
 
         self.fields["factory_farm"].choices = sorted([(farm.name, farm.name) for farm in user_factories])
         self.fields["organisation"].choices = sorted([(org.name, org.name) for org in user_orgs])
+
+        if user_immigration_status:
+            choices = [(status.name, status.name.capitalize()) for status in user_immigration_status]
+        else:
+            choices = [(status.name, status.name.capitalize()) for status in ImmigrationStatus.objects.all()]
+
+        self.fields["immigration_status"].choices = sorted(choices)
+        self.fields["immigration_status"].widget.attrs.update(
+            {
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "immigration_status",
+                "data-actions-box": "true",
+            }
+        )
 
         if "SWSConfig" in user_group:
             self.fields["organisation"].widget.attrs["disabled"] = True
@@ -106,6 +123,18 @@ class GenericFilterForm(forms.Form):
         label="Factory / Farm",
         widget=forms.SelectMultiple(
             attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "factory_farm"}
+        ),
+        required=False,
+    )
+
+    immigration_status = forms.MultipleChoiceField(
+        label="Immigration Status",
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "immigration_status",
+            }
         ),
         required=False,
     )

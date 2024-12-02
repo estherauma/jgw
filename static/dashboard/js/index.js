@@ -10,6 +10,7 @@ $('#factory_farm').multiselect({ ... generalMultiSelectConfig });
 $('#inline-question-select-id').multiselect({ ... generalMultiSelectConfig });
 $('#messaging-question-select-id').multiselect({ ... generalMultiSelectConfig });
 $('#all-inline-question-select-id').multiselect({ ... generalMultiSelectConfig });
+$('#immigration_status').multiselect({ ... generalMultiSelectConfig, enableClickableOptGroups: true });
 
 // Create User
 $('#create-new-user-destinations-id').multiselect({ ... generalMultiSelectConfig });
@@ -17,6 +18,7 @@ $('#create-new-user-factory-farms-id').multiselect({ ... generalMultiSelectConfi
 $('#create-new-user-organisations-id').multiselect({ ... generalMultiSelectConfig });
 $('#excepted-languages-search-id').multiselect({ ... generalMultiSelectConfig });
 $('#create-new-user-excluded-origin-countries-id').multiselect({ ... generalMultiSelectConfig });
+$('#create-new-user-immigration-status-id').multiselect({ ... generalMultiSelectConfig });
 
 // Edit User
 $('#edit-user-destinations-id').multiselect({ ... generalMultiSelectConfig });
@@ -25,3 +27,4 @@ $('#edit-user-organisations-id').multiselect({ ... generalMultiSelectConfig });
 $('#edit-user-factories-id').multiselect({ ... generalMultiSelectConfig });
 $('#edit-user-exluded-origin-countries-id').multiselect({ ... generalMultiSelectConfig });
 $('#user-groups-id').multiselect({ ... generalMultiSelectConfig });
+$('#edit-user-immigration-status-id').multiselect({ ... generalMultiSelectConfig });

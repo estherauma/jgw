@@ -3,7 +3,14 @@ from typing import Any
 from django.db.models import Manager as BaseManager, Q
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 
-from users.utils import get_user_destinations, get_user_factories, get_user_organisations,get_user_start_date,get_user_end_date
+from users.utils import (
+    get_user_destinations,
+    get_user_factories,
+    get_user_organisations,
+    get_user_start_date,
+    get_user_end_date,
+    get_user_immigration_status,
+)
 
 
 def generic_question_filtered_queryset(
@@ -16,14 +23,15 @@ def generic_question_filtered_queryset(
     organisations=None,
     schemes=None,
     factory_farms=None,
-    sector_of_work=None
+    sector_of_work=None,
+    immigration_status=None,
 ):
     if start_date is None:
         start_date = APPLICATION_POSSIBLE_START_DATE
 
     if end_date is None:
         end_date = datetime.now().date()
-        
+
     if destination_countries is None:
         destination_countries = []
 
@@ -39,9 +47,13 @@ def generic_question_filtered_queryset(
     if factory_farms is None:
         factory_farms = []
 
+    if immigration_status is None:
+        immigration_status = []
+
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
+    user_immigration_status = get_user_immigration_status(current_user)
 
     generic_question_filters_q_object = Q()
 
@@ -54,40 +66,37 @@ def generic_question_filtered_queryset(
         generic_question_filters_q_object &= user_fact_farm_q
 
     if user_destinations:
-        user_destination_q = Q(
-            destination__in=user_destinations
-        )
+        user_destination_q = Q(destination__in=user_destinations)
         generic_question_filters_q_object &= user_destination_q
 
     if start_date and end_date:
         generic_question_filters_q_object &= Q(api_created_at__range=(start_date, end_date))
 
     if destination_countries:
-        preference_dest_q = Q(
-            destination__name__in=destination_countries
-        )
+        preference_dest_q = Q(destination__name__in=destination_countries)
         generic_question_filters_q_object &= preference_dest_q
 
     if origin_countries:
-        preference_origin_q = Q(
-            origin__name__in=origin_countries
-        )
+        preference_origin_q = Q(origin__name__in=origin_countries)
         generic_question_filters_q_object &= preference_origin_q
 
     if organisations:
-        preference_organisation_q = Q(
-            organisation__name__in=organisations
-        )
+        preference_organisation_q = Q(organisation__name__in=organisations)
         generic_question_filters_q_object &= preference_organisation_q
 
     if factory_farms:
-        preference_factory_farm_q = Q(
-            factory_farm__name__in=factory_farms
-        )
+        preference_factory_farm_q = Q(factory_farm__name__in=factory_farms)
         generic_question_filters_q_object &= preference_factory_farm_q
 
     if sector_of_work:
         pass
+
+    if immigration_status:
+        immigration_status_q = Q(immigration_status__name__in=immigration_status)
+        generic_question_filters_q_object &= immigration_status_q
+    elif user_immigration_status:
+        user_immigration_status_q = Q(immigration_status__in=user_immigration_status)
+        generic_question_filters_q_object &= user_immigration_status_q
 
     return queryset.filter(generic_question_filters_q_object)
 
@@ -102,13 +111,22 @@ def question_response_filtered_queryset(
     organisations=None,
     schemes=None,
     factory_farms=None,
-    sector_of_work=None
+    sector_of_work=None,
+    immigration_status=None,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
 
-    final_start_date = max(start_date, user_start_date) if start_date and user_start_date else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
-    final_end_date = min(end_date, user_end_date) if end_date and user_end_date else (end_date or user_end_date or datetime.now().date())
+    final_start_date = (
+        max(start_date, user_start_date)
+        if start_date and user_start_date
+        else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
+    )
+    final_end_date = (
+        min(end_date, user_end_date)
+        if end_date and user_end_date
+        else (end_date or user_end_date or datetime.now().date())
+    )
 
     if destination_countries is None:
         destination_countries = []
@@ -125,18 +143,22 @@ def question_response_filtered_queryset(
     if factory_farms is None:
         factory_farms = []
 
+    if immigration_status is None:
+        immigration_status = []
+
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
+    user_immigration_status = get_user_immigration_status(current_user)
 
     question_response_filters_q_object = Q()
 
     question_response_filters_q_object &= Q(
-            inline_question__inline_question_standard__api_created_at__range=(
-                final_start_date,
-                final_end_date,
-            )
+        inline_question__inline_question_standard__api_created_at__range=(
+            final_start_date,
+            final_end_date,
         )
+    )
 
     if user_factories:
         user_fact_farm_q = Q(
@@ -149,13 +171,19 @@ def question_response_filtered_queryset(
         organisation_q_objects = Q()
         user_org_names = [org.name for org in user_orgs]
         if "evergreen" in user_org_names:
-            organisation_q_objects |= Q(organisation_inline_question="evergreen") & Q(inline_question__inline_question_standard__destination__name="malaysia")
+            organisation_q_objects |= Q(organisation_inline_question="evergreen") & Q(
+                inline_question__inline_question_standard__destination__name="malaysia"
+            )
         if "myvoice" in user_org_names:
-            organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(inline_question__inline_question_standard__destination__name="malaysia")
-        
+            organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(
+                inline_question__inline_question_standard__destination__name="malaysia"
+            )
+
         other_organisations = [org for org in user_org_names if org not in {"evergreen", "myvoice"}]
         if other_organisations:
-            organisation_q_objects |= Q(inline_question__inline_question_standard__organisation__name__in=other_organisations)
+            organisation_q_objects |= Q(
+                inline_question__inline_question_standard__organisation__name__in=other_organisations
+            )
         question_response_filters_q_object &= organisation_q_objects
 
     if user_destinations:
@@ -166,7 +194,7 @@ def question_response_filtered_queryset(
         current_model_dest_q = Q(
             inline_question__inline_question_standard__destination__name__in=destination_countries
         )
-       
+
         question_response_filters_q_object &= current_model_dest_q
 
     if origin_countries:
@@ -186,14 +214,20 @@ def question_response_filtered_queryset(
     if organisations:
         organisation_q_objects = Q()
         if "evergreen" in organisations:
-            organisation_q_objects |= Q(organisation_inline_question="evergreen") & Q(inline_question__inline_question_standard__destination__name="malaysia")
+            organisation_q_objects |= Q(organisation_inline_question="evergreen") & Q(
+                inline_question__inline_question_standard__destination__name="malaysia"
+            )
         if "myvoice" in organisations:
-            organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(inline_question__inline_question_standard__destination__name="malaysia")
-        
+            organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(
+                inline_question__inline_question_standard__destination__name="malaysia"
+            )
+
         other_organisations = [org for org in organisations if org not in {"evergreen", "myvoice"}]
         if other_organisations:
-            organisation_q_objects |= Q(inline_question__inline_question_standard__organisation__name__in=other_organisations)
-        
+            organisation_q_objects |= Q(
+                inline_question__inline_question_standard__organisation__name__in=other_organisations
+            )
+
         question_response_filters_q_object &= organisation_q_objects
 
     if factory_farms:
@@ -208,5 +242,16 @@ def question_response_filtered_queryset(
 
     if sector_of_work:
         pass
+
+    if immigration_status:
+        immigration_status_q = Q(
+            inline_question__inline_question_standard__preference__immigration_status__name__in=immigration_status
+        ) | Q(inline_question__inline_question_standard__immigration_status__name__in=immigration_status)
+        question_response_filters_q_object &= immigration_status_q
+    elif user_immigration_status:
+        user_immigration_status_q = Q(
+            inline_question__inline_question_standard__preference__immigration_status__in=user_immigration_status
+        ) | Q(inline_question__inline_question_standard__immigration_status__in=user_immigration_status)
+        question_response_filters_q_object &= user_immigration_status_q
 
     return queryset.filter(question_response_filters_q_object)

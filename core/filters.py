@@ -6,6 +6,7 @@ def create_generic_filters_dictionary(
     organisations=None,
     factory_farms=None,
     question_texts=None,
+    immigration_status=None,
 ):
     extra_filters = {}
     if question_texts is not None:
@@ -18,6 +19,7 @@ def create_generic_filters_dictionary(
         "origin_countries": origin_countries,
         "organisations": organisations,
         "factory_farms": factory_farms,
+        "immigration_status": immigration_status,
         **extra_filters,
     }
 
@@ -29,6 +31,7 @@ def generic_filter_form_parser(filter_form):
     origins = filter_form.cleaned_data["origin"]
     organisations = filter_form.cleaned_data["organisation"]
     factory_farms = filter_form.cleaned_data["factory_farm"]
+    immigration_status = filter_form.cleaned_data["immigration_status"]
     question_texts = filter_form.cleaned_data.get("question_texts")
 
     return create_generic_filters_dictionary(
@@ -38,5 +41,6 @@ def generic_filter_form_parser(filter_form):
         origin_countries=origins,
         organisations=organisations,
         factory_farms=factory_farms,
+        immigration_status=immigration_status,
         question_texts=question_texts,
     )

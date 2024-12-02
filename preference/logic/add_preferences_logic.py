@@ -14,6 +14,7 @@ from common.helpers.model_helpers.preference import (
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
     get_or_add_route_to_db,
+    get_or_add_immigration_status_to_db,
 )
 from common.logger import KunfuPandaLogger
 from common.services.api_client import JustGoodWorkAPIClient
@@ -84,6 +85,7 @@ def create_preference_object(preference):
     age = preference.get("age")
     language = preference.get("language")
     route = preference.get("route") or NOT_SPECIFIED
+    immigration_status = preference.get("immigrationStatus")
 
     origin = get_data_origin(route=route, api_origin=preference.get("locale") or preference.get("origin"))
     destination = get_data_destination(
@@ -111,6 +113,8 @@ def create_preference_object(preference):
     route_data = get_or_add_route_to_db(route)
     organisation_access_code_data = get_or_add_organisation_access_code(organisation_access_code)
 
+    immigration_status_instance = get_or_add_immigration_status_to_db(immigration_status)
+
     new_preference = Preference(
         data_source_id=preference.get("_id"),
         device_id=preference.get("deviceId"),
@@ -125,6 +129,7 @@ def create_preference_object(preference):
         origin=origin_data,
         destination=destination_data,
         destination_state=destination_state_data,
+        immigration_status=immigration_status_instance,
         route=route_data,
         organisation_sector=organisation_sector_data,
         factory_farm=factory_farm_data,

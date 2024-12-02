@@ -10,6 +10,7 @@ from users.utils import (
     get_user_organisations,
     get_user_start_date,
     get_user_end_date,
+    get_user_immigration_status,
 )
 
 
@@ -23,7 +24,7 @@ def preference_filtered_queryset(
     organisations=None,
     schemes=None,
     factory_farms=None,
-    sector_of_work=None,
+    immigration_status=None,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -54,11 +55,17 @@ def preference_filtered_queryset(
     if factory_farms is None:
         factory_farms = []
 
+    if immigration_status is None:
+        immigration_status = []
+
     user_factories = get_user_factories(current_user)
     user_orgs = get_user_organisations(current_user)
     user_destinations = get_user_destinations(current_user)
     user_languages = get_user_languages(current_user)
     user_excluded_origin_countries = get_user_excluded_origin_countries(current_user)
+    user_immigration_status = get_user_immigration_status(current_user)
+
+    print("user_immigration_status", user_immigration_status)
 
     preference_filters_q_object = Q()
 
@@ -90,5 +97,11 @@ def preference_filtered_queryset(
 
     if origin_countries:
         preference_filters_q_object &= Q(origin__name__in=origin_countries)
+
+    if immigration_status:
+        preference_filters_q_object &= Q(immigration_status__name__in=immigration_status)
+
+    if user_immigration_status and not immigration_status:
+        preference_filters_q_object &= Q(immigration_status__in=user_immigration_status)
 
     return queryset.filter(preference_filters_q_object)

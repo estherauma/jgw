@@ -7,6 +7,7 @@ from common.helpers.model_helpers.preference import (
     get_or_add_country_to_db,
     get_or_add_factory_farm_to_db,
     get_or_add_gender_to_db,
+    get_or_add_immigration_status_to_db,
     get_or_add_language_to_db,
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
@@ -25,7 +26,7 @@ from events.models import (
     ChaptersFeedbackQuestion,
     ChaptersFeedbackResponse,
     ChaptersFeedbackStandard,
-    Chapter
+    Chapter,
 )
 from events.tasks import translate_and_clean_chapter_feedback_fields
 from preference.models import Country, Organisation, Preference
@@ -65,6 +66,8 @@ def fetch_chapters_feedback_from_api_to_db():
     translate_and_clean_chapter_feedback_fields()
 
     update_myvoice_chapters_feedback()
+
+
 feedback_non_required_fields = [
     "__v",
     "deviceModel",
@@ -97,7 +100,7 @@ feedback_standard_fields = [
     "organisationCode",
     "organisationAccessCode",
     "registrationToken",
-    "version"
+    "version",
 ]
 
 
@@ -114,7 +117,7 @@ def separate_feedback_standard_fields_from_others(chapter_feedback):
 
         else:
             feedback_list.append({"key": obj_key, "value": obj_value})
-            
+
     return {"feedback_list": feedback_list, "standard_fields_dict": standard_fields}
 
 
@@ -122,7 +125,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
     chapter_feedback_parts = separate_feedback_standard_fields_from_others(chapter_feedback)
     standard_fields_dict = chapter_feedback_parts["standard_fields_dict"]
     feedback_list = chapter_feedback_parts["feedback_list"]
-    
+
     if not feedback_list:
         return
 
@@ -141,6 +144,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
     language = standard_fields_dict.get("language")
     organisation_sector = standard_fields_dict.get("organisationSector")
     organisation = standard_fields_dict.get("organisation")
+    immigration_status = standard_fields_dict.get("immigrationStatus")
     factory_farm = standard_fields_dict.get("factoryFarm")
     api_created_at = standard_fields_dict.get("createdAt")
     api_updated_at = standard_fields_dict.get("updatedAt")
@@ -162,7 +166,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
     origin_data = get_or_add_country_to_db(origin, source="origin")
     destination_data = get_or_add_country_to_db(destination, source="destination")
     route_data = get_or_add_route_to_db(route)
-
+    immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
     for feedback_data in feedback_list:
         feedback_data_key = feedback_data.get("key")
 
@@ -191,6 +195,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
             "organisation_sector": organisation_sector_data,
             "factory_farm": factory_farm_data,
             "organisation": organisation_data,
+            "immigration_status": immigration_status_data,
         }
 
         chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
@@ -201,9 +206,13 @@ def add_chapter_feedback_to_db(chapter_feedback):
             feedback_response, _ = ChaptersFeedbackResponse.objects.get_or_create(
                 response=feedback_data_question_answer
             )
-            feedback_question, _ = ChaptersFeedbackQuestion.objects.get_or_create(question=feedback_data_question)
+            feedback_question, _ = ChaptersFeedbackQuestion.objects.get_or_create(
+                question=feedback_data_question
+            )
 
-            chapter_instance, _ = Chapter.objects.get_or_create(number_key=feedback_data_key, destination=destination_data)
+            chapter_instance, _ = Chapter.objects.get_or_create(
+                number_key=feedback_data_key, destination=destination_data
+            )
 
             ChaptersFeedback.objects.create(
                 feedback_standard=chapters_feedback_standard,
@@ -219,34 +228,30 @@ def add_chapter_feedback_to_db(chapter_feedback):
 
 def update_myvoice_chapters_feedback():
     with transaction.atomic():
-        not_specified_org = Organisation.objects.get(name='not specified')
-        myvoice_org = Organisation.objects.get(name='myvoice')
-        malaysia_country = Country.objects.get(name='malaysia')
+        not_specified_org = Organisation.objects.get(name="not specified")
+        myvoice_org = Organisation.objects.get(name="myvoice")
+        malaysia_country = Country.objects.get(name="malaysia")
 
         bigquery_homepage_events_to_update = ChaptersFeedbackStandard.objects.filter(
-            organisation=not_specified_org,
-            destination=malaysia_country
+            organisation=not_specified_org, destination=malaysia_country
         )
 
         updated_count = bigquery_homepage_events_to_update.update(
-            organisation=myvoice_org,
-            is_myvoice_organisation=True
+            organisation=myvoice_org, is_myvoice_organisation=True
         )
 
     return updated_count
 
+
 def reverse_myvoice_chapters_feedback():
     with transaction.atomic():
 
-        not_specified_org = Organisation.objects.get(name='not specified')
+        not_specified_org = Organisation.objects.get(name="not specified")
 
-        preferences_to_reverse = ChaptersFeedbackStandard.objects.filter(
-            is_myvoice_organisation=True
-        )
+        preferences_to_reverse = ChaptersFeedbackStandard.objects.filter(is_myvoice_organisation=True)
 
         updated_count = preferences_to_reverse.update(
-            organisation=not_specified_org,
-            is_myvoice_organisation=False
+            organisation=not_specified_org, is_myvoice_organisation=False
         )
 
     return updated_count
