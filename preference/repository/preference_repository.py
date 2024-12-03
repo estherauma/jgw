@@ -455,3 +455,25 @@ def extract_preference_for_export(**filters):
         "organisation__name",
     )
     return preferences_data
+
+
+def preferences_by_immigration_status(**filters):
+    queryset = Preference.objects.all()
+    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    results = (
+        filtered_queryset.values("immigration_status__name")
+        .annotate(
+            name=Case(
+                When(immigration_status__name__isnull=True, then=Value("Not Specified")),
+                default="immigration_status__name",
+                output_field=CharField(),
+            )
+        )
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+
+    return {
+        "labels": [item["name"] for item in results],
+        "counts": [item["count"] for item in results],
+    }

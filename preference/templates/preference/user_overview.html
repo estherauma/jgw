@@ -172,42 +172,6 @@
         </div>
     {% endflag %}
 
-    {% flag 'can_view_work_code_usage_chart' %}
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">work code usage</p>
-                    <div class="chart-container ">
-                        <div class="organisation-work-code-usage-graph-id-chart-box">
-                            <div id="organisation-work-code-usage-graph-id"></div>
-                            <div class="info-tooltip">
-                                <i class="fas fa-info-circle"></i>
-                                Work Code Usage: Users who have logged into the app using an organisation QR Code or Link.
-                                <div class="tooltip-arrow"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
-
-    {% flag 'can_view_users_by_age_chart' %}
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">users by age</p>
-                    <canvas id="preference-age-graph-id" class="canvas-chart"></canvas>
-                    <div class="info-tooltip">
-                        <i class="fas fa-info-circle"></i>
-                        Users by Age: Users select their age then they first use the app. 
-                        <div class="tooltip-arrow"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %} 
-
     {% flag 'can_view_get_users_by_country_state_chart' %}
         <div class="col-md-6 mt-3">
             <div class="card h-100">
@@ -225,6 +189,39 @@
             </div>
         </div>
     {% endflag %}
+
+    {% flag 'can_view_users_by_immigration_status_chart' %}
+        <div class="col-md-6 mt-3">
+            <div class="card h-100">
+                <div class="card-body chart">
+                    <p class="chart-title">users by immigration status</p>
+                    <canvas id="preference-immigration-status-pie-chart-id" class="canvas-chart"></canvas>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Users by Immigration Status: Users select their immigration status when they first use the app.
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endflag %}
+
+
+    {% flag 'can_view_users_by_age_chart' %}
+        <div class="col-md-6 mt-3">
+            <div class="card h-100">
+                <div class="card-body chart">
+                    <p class="chart-title">users by age</p>
+                    <canvas id="preference-age-graph-id" class="canvas-chart"></canvas>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Users by Age: Users select their age then they first use the app. 
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endflag %} 
 
     {% flag 'can_view_get_users_by_sector_chart' %}
         <div class="col-md-6 mt-3">
@@ -244,6 +241,27 @@
         </div>
     {% endflag %}
 </div>
+{% flag 'can_view_work_code_usage_chart' %}
+<div class="row">
+    <div class="col-12 mt-3 user-by-month">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">work code usage</p>
+                <div class="chart-container">
+                    <div class="organisation-work-code-usage-graph-id-chart-box chart-column-width">
+                        <div id="organisation-work-code-usage-graph-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Work Code Usage: Users who have logged into the app using an organisation QR Code or Link.
+                            <div class="tooltip-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% flag 'can_view_new_monthly_users_chart' %}
 <div class="row">
     <div class="col-md-12 user-by-month">
@@ -291,6 +309,7 @@
 <script src="{% static 'js/app/user_overview.js' %}"></script>
 <script src="{% static 'js/charts/line/active_users_monthly_stat.js' %}"></script>
 <script src="{% static 'js/charts/map/user_route_map.js' %}"></script>
+<script src="{% static 'js/charts/pie/preference_immigration_status_pie_chart.js' %}"></script>
 <script type="text/javascript">
         // get data from context
         var ageData = {{ preferences_by_age | safe }};
@@ -306,6 +325,7 @@
         const monthlyActiveUserCountData = {{monthly_active_user_count | safe}}
         const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }}
         const countryCoords = {{ country_coords | safe }}
+        var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
 
         // plots the age piechart
         preferenceAgePieChart(ageData)
@@ -337,6 +357,8 @@
 
         monthlyActiveUsersChart(monthlyActiveUserCountData);
 
+        preferenceImmigrationStatusPieChart(immigrationStatusData)
+
         // Count the number of flex items
         const chartContainer = document.querySelector('.chart-container');
         const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
@@ -350,6 +372,7 @@
 
         // Call the createUserRouteMap function
         createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
+
 
 </script>
 {% endblock %}
