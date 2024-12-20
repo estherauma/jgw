@@ -294,6 +294,34 @@
     </div>
 </div>
 {% endflag %}
+{% flag 'can_view_user_geolocation_map_chart' %}
+<div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
+    <div class="card h-100">
+        <div class="card-body chart wide-map">
+            <p class="chart-title mb-2">Users in Origin Countries</p>
+            <div id="user_geolocation_map_origin" class="user-geolocation-map"></div>
+            <div class="info-tooltip user-geol-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Geolocation Map: Shows users in orign countries.
+                <div class="tooltip-arrow"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
+    <div class="card h-100">
+        <div class="card-body chart wide-map">
+            <p class="chart-title mb-2">Users in Destination Countries</p>
+            <div id="user_geolocation_map_destination" class="user-geolocation-map"></div>
+            <div class="info-tooltip user-geol-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Geolocation Map: Shows users in Destination Countries.
+                <div class="tooltip-arrow"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
@@ -309,6 +337,7 @@
 <script src="{% static 'js/app/user_overview.js' %}"></script>
 <script src="{% static 'js/charts/line/active_users_monthly_stat.js' %}"></script>
 <script src="{% static 'js/charts/map/user_route_map.js' %}"></script>
+<script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_immigration_status_pie_chart.js' %}"></script>
 <script type="text/javascript">
         // get data from context
@@ -372,6 +401,8 @@
 
         // Call the createUserRouteMap function
         createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
+        createUserOriginMap(getUserCountsByOriginDestination, 'user_geolocation_map_origin', countryCoords);
+        createUserDestinationMap(getUserCountsByOriginDestination, 'user_geolocation_map_destination', countryCoords);
 
 
 </script>
