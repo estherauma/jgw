@@ -8,8 +8,9 @@ from core.logic.file_export import generate_and_export_excel
 from events.forms import EventsDataFilterForm
 from events.models import LinksClickEvent, TelephoneClickEvent
 from events.repository.bigquery_chapters_feedback_repository import get_chapters_feedback
-
 from events.repository.chapters_opened_repository import get_chapters_opened_data
+from datetime import datetime
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 
 
 def what_matters_to_workers(request):
@@ -55,8 +56,8 @@ def export_what_matters_to_workers_stats(request):
 def export_link_clicks_data(request):
     form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
     filters = form_filter_params["filters"]
-    start_date = filters.get("start_date")
-    end_date = filters.get("end_date")
+    start_date = filters.get("start_date") or APPLICATION_POSSIBLE_START_DATE
+    end_date = filters.get("end_date") or datetime.now().date()
 
     link_clicks = LinksClickEvent.objects.filter(event_date__range=(start_date, end_date)).values(
         "event_date", "event_name", "link"
@@ -91,8 +92,8 @@ def export_link_clicks_data(request):
 def export_telephone_clicks_data(request):
     form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
     filters = form_filter_params["filters"]
-    start_date = filters.get("start_date")
-    end_date = filters.get("end_date")
+    start_date = filters.get("start_date") or APPLICATION_POSSIBLE_START_DATE
+    end_date = filters.get("end_date") or datetime.now().date()
 
     telephone_clicks = TelephoneClickEvent.objects.filter(event_date__range=(start_date, end_date)).values(
         "event_date", "event_name", "link"
