@@ -255,3 +255,6 @@ TEMPLATE_CONTEXT_PROCESSORS = "django.template.context_processors.request"
 
 
 ADMIN_SITE_HEADER = "FiftyEight"
+
+MESSAGING_API_BASE_URL = os.getenv("MESSAGING_API_BASE_URL")
+MESSAGING_API_SECRET = os.getenv("MESSAGING_API_SECRET")

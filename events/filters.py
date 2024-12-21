@@ -219,10 +219,10 @@ def filter_bigquery_homepage_event_data(
     start_date=None,
     end_date=None,
     destination_countries=None,
-    origin_countries=None,  # Add this
+    origin_countries=None,
     organisations=None,
-    schemes=None,  # Add this
-    factory_farms=None,  # Add this
+    schemes=None,
+    factory_farms=None,
     sector_of_work=None,
     immigration_status=None,
 ):
