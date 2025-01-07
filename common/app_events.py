@@ -332,3 +332,31 @@ class AppEvents(BaseAnalytics):
         bigquery_homepage_df_dict = bigquery_homepage_df.to_dict("records")
 
         return bigquery_homepage_df_dict
+
+    def bigquery_report_issue_submitted_events(self, start_date=None, end_date=None):
+        report_issue_query = f"""
+            SELECT 
+                DATETIME(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+                event_name, 
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'age') AS age,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'language') AS language,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'gender') AS gender,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'deviceId') AS deviceId,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'appId') AS appId,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'organisationAccessCode') AS organisationAccessCode,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'organisationCode') AS organisationCode,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'organisation') AS organisation,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'locale') AS locale,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destinationState') AS destinationState,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destination') AS destination,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'origin') AS origin,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'route') AS route
+            FROM 
+                `just-good-work.analytics_191478110.events_*` 
+            WHERE 
+                event_name = 'ReportIssueSubmitted'
+            AND 
+                DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
+        """
+        report_issue_df = google_client_instance().query(report_issue_query).to_dataframe()
+        return report_issue_df.to_dict("records")

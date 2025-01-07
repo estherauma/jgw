@@ -15,6 +15,7 @@ from events.models import (
     OneTimeEventJob,
     SwsPasiEvent,
     Chapter,
+    ReportIssueSubmittedEvent,
 )
 
 
@@ -116,3 +117,19 @@ class ChaptersFeedbackResponseAdmin(admin.ModelAdmin):
     search_fields = ["response", "translated_response"]
     list_display = ["created_at", "response", "translated_response"]
     ordering = ["created_at"]
+
+
+@admin.register(ReportIssueSubmittedEvent)
+class ReportIssueSubmittedEventAdmin(admin.ModelAdmin):
+    list_display = (
+        "event_date",
+        "event_name",
+        "device_id",
+        "app_id",
+        "organisation",
+        "destination",
+        "origin",
+        "language",
+        "created_at",
+    )
+    search_fields = ("device_id", "app_id", "organisation_access_code", "organisation_code", "locale")
