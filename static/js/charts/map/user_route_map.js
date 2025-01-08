@@ -256,8 +256,8 @@ function createUserRouteMap(data, elementId, countryCoords) {
 
     const modeBar = container.querySelector('.modebar-container');
     if (modeBar) {
-        modeBar.style.right = '90px';
-        modeBar.style.top = '70px';
+        modeBar.style.left = '-70px';
+        modeBar.style.top = '65px';
     }
 
     window.addEventListener('resize', () => {

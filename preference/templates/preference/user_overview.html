@@ -399,11 +399,10 @@
             lastColumn.style.maxWidth = '100%';
         }
 
-        // Call the createUserRouteMap function
+        // Call the functions create the different maps
         createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
         createUserOriginMap(getUserCountsByOriginDestination, 'user_geolocation_map_origin', countryCoords);
         createUserDestinationMap(getUserCountsByOriginDestination, 'user_geolocation_map_destination', countryCoords);
-
 
 </script>
 {% endblock %}
