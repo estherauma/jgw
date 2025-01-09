@@ -37,20 +37,30 @@ def export_what_matters_to_workers_stats(request):
     if request.method == "POST":
         form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
         filters = form_filter_params["filters"]
+
         chapters_feedback = get_chapters_feedback(current_user=request.user, **filters)
         smiles_count = [cf.get("smiles") for cf in chapters_feedback]
         frowns_counts = [cf.get("frowns") for cf in chapters_feedback]
-        labels = [cf.get("chapter_text") for cf in chapters_feedback]
+        feedback_labels = [cf.get("chapter_text") for cf in chapters_feedback]
 
-        chapters_opened = get_chapters_opened(current_user=request.user, **filters)
-        export_dict = {
-            "chapters": {
-                "what_matters_to_workers": chapters_opened,
-                "user_feedback_smiles": {"labels": labels, "counts": smiles_count},
-                "user_feedback_frowns": {"labels": labels, "counts": frowns_counts},
-            },
-        }
-        return generate_and_export_excel(export_dict, filename="what_matters_to_workers_stats")
+        chapters_opened_data = get_chapters_opened_data(current_user=request.user, **filters)
+
+        if chapters_opened_data:
+            export_dict = {
+                "chapters": {
+                    "what_matters_to_workers_all": {
+                        "labels": chapters_opened_data["labels"],
+                        "counts": chapters_opened_data["chapteropened_all"],
+                    },
+                    "what_matters_to_workers_unique": {
+                        "labels": chapters_opened_data["labels"],
+                        "counts": chapters_opened_data["chapteropened_unique"],
+                    },
+                    "user_feedback_smiles": {"labels": feedback_labels, "counts": smiles_count},
+                    "user_feedback_frowns": {"labels": feedback_labels, "counts": frowns_counts},
+                }
+            }
+            return generate_and_export_excel(export_dict, filename="what_matters_to_workers_stats")
 
 
 def export_link_clicks_data(request):
