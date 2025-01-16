@@ -93,6 +93,10 @@ def each_messaging_question_response(**filters):
         queryset=MessagingQuestionStandard.objects.all(), **filters
     )
 
+    test_patterns = ["test 2 q", "testq", "test qn", "question"]
+    exclude_q = Q()
+    for pattern in test_patterns:
+        exclude_q |= Q(messaging_question__question__text__icontains=pattern)
     messaging_question_responses = (
         MessagingQuestionResponse.objects.filter(
             messaging_question__messaging_question_standard__in=messaging_question_standards

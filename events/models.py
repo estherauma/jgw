@@ -303,3 +303,42 @@ class BigqueryHomepageEventData(models.Model):
 
     def __str__(self):
         return f"Homepage Event on {self.event_date} for Device {self.device_id}"
+
+
+class ReportIssueSubmittedEvent(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    event_date = models.DateTimeField()
+    event_name = models.CharField(max_length=100)
+    age = models.ForeignKey("preference.Age", on_delete=models.SET_NULL, null=True, blank=True)
+    language = models.ForeignKey("preference.Language", on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.ForeignKey("preference.Gender", on_delete=models.SET_NULL, null=True, blank=True)
+    device_id = models.CharField(max_length=255, null=True, blank=True)
+    app_id = models.CharField(max_length=255, null=True, blank=True)
+    organisation_access_code = models.CharField(max_length=255, null=True, blank=True)
+    organisation_code = models.CharField(max_length=255, null=True, blank=True)
+    organisation = models.ForeignKey(
+        "preference.Organisation", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    locale = models.CharField(max_length=255, null=True, blank=True)
+    destination_state = models.ForeignKey(
+        "preference.CountryState", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    destination = models.ForeignKey(
+        "preference.Country",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="report_issue_destination",
+    )
+    origin = models.ForeignKey(
+        "preference.Country",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="report_issue_origin",
+    )
+    route = models.ForeignKey("preference.Route", on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"Report Issue on {self.event_date} by {self.device_id}"

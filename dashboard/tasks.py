@@ -8,20 +8,18 @@ from google.cloud import translate_v2 as translate
 
 from celery import shared_task
 from common.reports import get_SWS_report
-from dashboard.management.commands.add_contacts import add_new_contacts
-from dashboard.management.commands.add_genders import add_new_genders
-from dashboard.models import JGWCache, TranslatedQuestionText, TranslatedResponseText, TranslatedText
+from dashboard.models import JGWCache
 from events.logic.add_chapters_feedback_data import fetch_chapters_feedback_from_api_to_db
 from events.logic.add_chapters_opened_data import fetch_chapters_opened_data_from_api_to_db
 from events.logic.add_homepage_events_to_db import fetch_and_save_homepage_events_to_db
 from events.logic.add_links_click_data import fetch_links_click_events_from_api_to_db
+from events.logic.add_report_issue_events import fetch_report_issue_events_from_api_to_db
 from events.logic.add_sws_pasi_data import fetch_sws_pasi_events_from_api_to_db
 from events.logic.add_telephone_click import fetch_telephone_click_events_from_api_to_db
 from help_contacts.logic.add_help_contacts_logic import fetch_help_contacts_from_api_to_db
 from jgwpandas.settings import EMAIL_HOST_USER
 import base64
 import requests
-import json
 from pipeline.models import CommandLog
 
 from preference.logic.add_preferences_logic import fetch_preferences_from_api_to_db
@@ -47,70 +45,184 @@ def translate_to_eng(text, client=client):
 def fetch_data_from_jgw_api():
     try:
         fetch_preferences_from_api_to_db()
-        CommandLog.objects.create(command_name='add_preferences_from_api',data_fetch='Preferences',error='None',command_status=True)
+        CommandLog.objects.create(
+            command_name="add_preferences_from_api",
+            data_fetch="Preferences",
+            error="None",
+            command_status=True,
+        )
     except Exception as e:
-        CommandLog.objects.create(command_name='add_preferences_from_api',data_fetch='Preferences',error=e, command_status=False)
+        CommandLog.objects.create(
+            command_name="add_preferences_from_api", data_fetch="Preferences", error=e, command_status=False
+        )
 
     try:
         fetch_inline_questions_from_api_to_db()
-        CommandLog.objects.create(command_name='add_inline_question_from_api',data_fetch='Inline questions',error='None',command_status=True)
+        CommandLog.objects.create(
+            command_name="add_inline_question_from_api",
+            data_fetch="Inline questions",
+            error="None",
+            command_status=True,
+        )
     except Exception as e:
-        CommandLog.objects.create(command_name='add_inline_question_from_api', command_status=False,error=e, data_fetch='Inline questions')
+        CommandLog.objects.create(
+            command_name="add_inline_question_from_api",
+            command_status=False,
+            error=e,
+            data_fetch="Inline questions",
+        )
 
     try:
         fetch_messaging_questions_from_api_to_db()
-        CommandLog.objects.create(command_name='add_messaging_question_from_api',data_fetch='Messsaging questions',error='None',command_status=True)
+        CommandLog.objects.create(
+            command_name="add_messaging_question_from_api",
+            data_fetch="Messsaging questions",
+            error="None",
+            command_status=True,
+        )
     except Exception as e:
-        CommandLog.objects.create(command_name='add_messaging_question_from_api',data_fetch='Messaging questions',error=e, command_status=False)
-    
+        CommandLog.objects.create(
+            command_name="add_messaging_question_from_api",
+            data_fetch="Messaging questions",
+            error=e,
+            command_status=False,
+        )
+
     try:
         fetch_chapters_opened_data_from_api_to_db()
-        CommandLog.objects.create(command_name='cache_bigquery_data - chapters_opened',data_fetch='Events',error='None',command_status=True)
+        CommandLog.objects.create(
+            command_name="cache_bigquery_data - chapters_opened",
+            data_fetch="Events",
+            error="None",
+            command_status=True,
+        )
     except Exception as e:
-        CommandLog.objects.create(command_name='cache_bigquery_data - chapters_opened',data_fetch='Events',error=e, command_status=False)
+        CommandLog.objects.create(
+            command_name="cache_bigquery_data - chapters_opened",
+            data_fetch="Events",
+            error=e,
+            command_status=False,
+        )
 
     try:
         fetch_chapters_feedback_from_api_to_db()
-        CommandLog.objects.create(command_name='cache_bigquery_data - chapters_feedback',data_fetch='Events',error='None',command_status=True)
+        CommandLog.objects.create(
+            command_name="cache_bigquery_data - chapters_feedback",
+            data_fetch="Events",
+            error="None",
+            command_status=True,
+        )
     except Exception as e:
-        CommandLog.objects.create(command_name='cache_bigquery_data - chapters_feedback',data_fetch='Events',error=e, command_status=False)
-    
-    try:
-        fetch_sws_pasi_events_from_api_to_db()
-        CommandLog.objects.create(command_name='cache_bigquery_data - sws_pasi_events',data_fetch='Events',error='None',command_status=True)
-    except Exception as e:
-        CommandLog.objects.create(command_name='cache_bigquery_data - sws_pasi_events',data_fetch='Events',error=e, command_status=False)
-    
-    try:
-        fetch_help_contacts_from_api_to_db()
-        CommandLog.objects.create(command_name='add_help_contacts_from_api',data_fetch='Help contacts',error='None',command_status=True)
-    except Exception as e:
-        CommandLog.objects.create(command_name='add_help_contacts_from_api',data_fetch='Help contacts',error=e, command_status=False)
-    
-    try:
-        fetch_links_click_events_from_api_to_db()
-        CommandLog.objects.create(command_name='add_link_clicks_data',data_fetch='Link clicks',error='None',command_status=True)
-    except Exception as e:
-        CommandLog.objects.create(command_name='add_link_clicks_data',data_fetch='Link clicks',error=e, command_status=False)
+        CommandLog.objects.create(
+            command_name="cache_bigquery_data - chapters_feedback",
+            data_fetch="Events",
+            error=e,
+            command_status=False,
+        )
 
     try:
-        fetch_telephone_click_events_from_api_to_db() 
-        CommandLog.objects.create(command_name='add_telephone_clicks_data',data_fetch='Telephone number clicks',error='None',command_status=True)
+        fetch_sws_pasi_events_from_api_to_db()
+        CommandLog.objects.create(
+            command_name="cache_bigquery_data - sws_pasi_events",
+            data_fetch="Events",
+            error="None",
+            command_status=True,
+        )
     except Exception as e:
-        CommandLog.objects.create(command_name='add_telephone_clicks_data',data_fetch='Telephone number clicks',error=e, command_status=False)
+        CommandLog.objects.create(
+            command_name="cache_bigquery_data - sws_pasi_events",
+            data_fetch="Events",
+            error=e,
+            command_status=False,
+        )
+
+    try:
+        fetch_help_contacts_from_api_to_db()
+        CommandLog.objects.create(
+            command_name="add_help_contacts_from_api",
+            data_fetch="Help contacts",
+            error="None",
+            command_status=True,
+        )
+    except Exception as e:
+        CommandLog.objects.create(
+            command_name="add_help_contacts_from_api",
+            data_fetch="Help contacts",
+            error=e,
+            command_status=False,
+        )
+
+    try:
+        fetch_links_click_events_from_api_to_db()
+        CommandLog.objects.create(
+            command_name="add_link_clicks_data", data_fetch="Link clicks", error="None", command_status=True
+        )
+    except Exception as e:
+        CommandLog.objects.create(
+            command_name="add_link_clicks_data", data_fetch="Link clicks", error=e, command_status=False
+        )
+
+    try:
+        fetch_telephone_click_events_from_api_to_db()
+        CommandLog.objects.create(
+            command_name="add_telephone_clicks_data",
+            data_fetch="Telephone number clicks",
+            error="None",
+            command_status=True,
+        )
+    except Exception as e:
+        CommandLog.objects.create(
+            command_name="add_telephone_clicks_data",
+            data_fetch="Telephone number clicks",
+            error=e,
+            command_status=False,
+        )
 
     try:
         fetch_and_save_homepage_events_to_db()
-        CommandLog.objects.create(command_name='add_homepage_events',data_fetch='Homepage events',error='None',command_status=True)
+        CommandLog.objects.create(
+            command_name="add_homepage_events",
+            data_fetch="Homepage events",
+            error="None",
+            command_status=True,
+        )
     except Exception as e:
-        CommandLog.objects.create(command_name='add_homepage_events',data_fetch='Homepage events',error=e, command_status=False)
-  
+        CommandLog.objects.create(
+            command_name="add_homepage_events", data_fetch="Homepage events", error=e, command_status=False
+        )
+
+    try:
+        fetch_report_issue_events_from_api_to_db()
+        CommandLog.objects.create(
+            command_name="fetch_report_issue_events",
+            data_fetch="Report Issue Events",
+            error="None",
+            command_status=True,
+        )
+    except Exception as e:
+        CommandLog.objects.create(
+            command_name="fetch_report_issue_events",
+            data_fetch="Report Issue Events",
+            error=e,
+            command_status=False,
+        )
+
     # should always come last
     try:
         attach_countries_to_state()
-        CommandLog.objects.create(command_name='attach_countries_to_state',data_fetch='Country names',error='None',command_status=True)
+        CommandLog.objects.create(
+            command_name="attach_countries_to_state",
+            data_fetch="Country names",
+            error="None",
+            command_status=True,
+        )
     except Exception as e:
-        CommandLog.objects.create(command_name='attach_countries_to_state',data_fetch='Country names',error=e, command_status=False)
+        CommandLog.objects.create(
+            command_name="attach_countries_to_state",
+            data_fetch="Country names",
+            error=e,
+            command_status=False,
+        )
 
 
 @shared_task(name="get_jgw_data")
