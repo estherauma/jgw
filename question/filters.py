@@ -255,3 +255,58 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= user_immigration_status_q
 
     return queryset.filter(question_response_filters_q_object)
+
+
+def message_data_sent_filtered_queryset(
+    current_user,
+    queryset: BaseManager[Any],
+    start_date=None,
+    end_date=None,
+    destination_countries=None,
+    origin_countries=None,
+    organisations=None,
+    schemes=None,
+    factory_farms=None,
+    sector_of_work=None,
+    immigration_status=None,
+):
+    user_start_date = get_user_start_date(current_user)
+    user_end_date = get_user_end_date(current_user)
+    user_destinations = get_user_destinations(current_user)
+    user_orgs = get_user_organisations(current_user)
+
+    final_start_date = (
+        max(start_date, user_start_date)
+        if start_date and user_start_date
+        else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
+    )
+    final_end_date = (
+        min(end_date, user_end_date)
+        if end_date and user_end_date
+        else (end_date or user_end_date or datetime.now().date())
+    )
+
+    if destination_countries is None:
+        destination_countries = []
+
+    if organisations is None:
+        organisations = []
+    if current_user.is_superuser:
+        user_destinations = []
+        user_orgs = []
+
+    message_data_push_filters_q_object = Q()
+
+    message_data_push_filters_q_object &= Q(message_date__range=(final_start_date, final_end_date))
+
+    if user_destinations:
+        message_data_push_filters_q_object &= Q(destination__in=user_destinations)
+    if destination_countries:
+        message_data_push_filters_q_object &= Q(destination__name__in=destination_countries)
+
+    if user_orgs:
+        message_data_push_filters_q_object &= Q(organisation__in=user_orgs)
+    if organisations:
+        message_data_push_filters_q_object &= Q(organisation__name__in=organisations)
+
+    return queryset.filter(message_data_push_filters_q_object)

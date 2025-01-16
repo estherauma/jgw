@@ -1,7 +1,7 @@
 from collections import defaultdict
 from common.utils.strings import format_thousands_with_commas
-from question.filters import generic_question_filtered_queryset
-from question.models import MessagingQuestionResponse, MessagingQuestionStandard
+from question.filters import generic_question_filtered_queryset, message_data_sent_filtered_queryset
+from question.models import MessageDataSent, MessagingQuestionResponse, MessagingQuestionStandard
 from django.db.models import Count, Case, When, F, Q
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -97,13 +97,11 @@ def each_messaging_question_response(**filters):
     exclude_q = Q()
     for pattern in test_patterns:
         exclude_q |= Q(messaging_question__question__text__icontains=pattern)
-
     messaging_question_responses = (
         MessagingQuestionResponse.objects.filter(
             messaging_question__messaging_question_standard__in=messaging_question_standards
         )
         .exclude(responses__option__translated_option__iexact="not specified")
-        .exclude(exclude_q)
         .values(
             "messaging_question__question__translated_text",
             "messaging_question__question__text",
@@ -246,3 +244,36 @@ def get_messaging_question_per_organisation_counts(**filters):
             "counts": [],
             "labels": [],
         }
+
+
+def get_all_message_data_sent(**filters):
+    """
+    Get all message data sent with applied filters
+    """
+    print("Filters get method", filters)
+    queryset = message_data_sent_filtered_queryset(
+        queryset=MessageDataSent.objects.select_related("language", "destination", "organisation"), **filters
+    )
+
+    data = []
+    for message in queryset:
+        data.append(
+            {
+                "api_created_at": message.api_created_at,
+                "api_updated_at": message.api_updated_at,
+                "message_id": message.message_id,
+                "device_id": message.device_id,
+                "language": message.language.name if message.language else None,
+                "destination": message.destination.name if message.destination else None,
+                "message_title": message.message_title,
+                "message_title_english": message.message_title_english,
+                "message_date": message.message_date,
+                "message_delivered": message.message_delivered,
+                "message_queued": message.message_queued,
+                "message_notification_sent_to_FCM": message.message_notification_sent_to_FCM,
+                "message_delivered_date": message.message_delivered_date,
+                "organisation": message.organisation.name if message.organisation else None,
+            }
+        )
+
+    return data
