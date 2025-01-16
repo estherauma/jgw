@@ -270,7 +270,7 @@ def get_all_message_data_sent(**filters):
                 "message_date": message.message_date,
                 "message_delivered": message.message_delivered,
                 "message_queued": message.message_queued,
-                "message_notification_sent_to_FCM": message.message_notification_sent_to_FCM,
+                "message_notification_sent_to_FCM": message.message_notification_sent_to_fcm,
                 "message_delivered_date": message.message_delivered_date,
                 "organisation": message.organisation.name if message.organisation else None,
             }

@@ -366,7 +366,7 @@ def export_message_sent_data(request):
         ws.cell(row=idx, column=11, value=str(data.get("message_delivered", "")))
         ws.cell(row=idx, column=12, value=str(data.get("message_delivered_date", "")))
         ws.cell(row=idx, column=13, value=str(data.get("message_queued", "")))
-        ws.cell(row=idx, column=14, value=str(data.get("message_notification_sent_to_fcm", "")))
+        ws.cell(row=idx, column=14, value=str(data.get("message_notification_sent_to_FCM", "")))
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = "attachment; filename=message_sent_data.xlsx"
