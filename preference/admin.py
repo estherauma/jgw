@@ -6,6 +6,7 @@ from preference.models import (
     ImmigrationStatus,
     Organisation,
     OrganisationAccessCode,
+    OrganisationData,
     OrganisationSector,
     OriginalSectorOfWork,
     Preference,
@@ -56,10 +57,12 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
         "data_source_id",
         "device_id",
         "created_at",
+        "api_created_at",
         "get_translated_name",
         "get_origin_name",
         "destination",
         "organisation",
+        "org_code",
         "get_age_translated_name",
         "is_missing_sector_cleaned",
         "get_org_workcode",
@@ -172,3 +175,9 @@ class OrganisationAccessCodeAdmin(admin.ModelAdmin):
 class ImmigrationStatusAdmin(admin.ModelAdmin):
     search_fields = ["name"]
     list_display = ["name", "created_at", "updated_at"]
+
+
+@admin.register(OrganisationData)
+class OrganisationDataAdmin(admin.ModelAdmin):
+    search_fields = ["name", "org_code"]
+    list_display = ["name", "org_code", "created_at", "updated_at"]
