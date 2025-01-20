@@ -4,6 +4,7 @@ from django.utils import timezone
 from preference.models import (
     Country,
     FactoryFarm,
+    Gender,
     ImmigrationStatus,
     Language,
     Organisation,
@@ -255,3 +256,56 @@ class MessagingQuestionResponse(models.Model):
     responses = models.ManyToManyField(MessagingResponse)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class MessageDataSent(models.Model):
+    message_id = models.CharField(max_length=255)
+    message_title = models.TextField()
+    message_title_english = models.TextField()
+    message_date = models.DateTimeField()
+    message_delivered_date = models.DateField(null=True)
+    message_notification_response_code = models.CharField(max_length=255, blank=True)
+    message_notification_response_message = models.TextField(blank=True)
+
+    message_queued = models.BooleanField(default=False)
+    message_delivered = models.BooleanField(default=False)
+    message_notification_sent_to_fcm = models.BooleanField(default=False)
+
+    device_id = models.CharField(max_length=255)
+    device_model = models.CharField(max_length=255)
+    app_id = models.CharField(max_length=255)
+    app_version = models.CharField(max_length=255)
+    registration_token = models.TextField(blank=True)
+
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, related_name="message_data")
+    destination = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, related_name="destination_messages"
+    )
+    origin_country = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, related_name="origin_messages"
+    )
+    organisation = models.ForeignKey(
+        Organisation, on_delete=models.SET_NULL, null=True, related_name="message_data"
+    )
+
+    destination_state = models.CharField(max_length=255, blank=True)
+    immigration_status = models.CharField(max_length=255, blank=True)
+    age = models.CharField(max_length=255)
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    seen_tab_welcome_text = models.CharField(max_length=255)
+    factory_farm = models.CharField(max_length=255, blank=True)
+
+    user_created_at = models.DateTimeField()
+    user_updated_at = models.DateTimeField()
+    api_created_at = models.DateTimeField(auto_now_add=True)
+    api_updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["message_id"]),
+            models.Index(fields=["device_id"]),
+            models.Index(fields=["message_date"]),
+        ]
+
+    def __str__(self):
+        return f"{self.message_id} - {self.device_id}"

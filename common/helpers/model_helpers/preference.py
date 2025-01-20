@@ -10,6 +10,7 @@ from common.helpers.preference_helpers.country import normalize_country_name
 from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.language import normalize_laguage_name
 from common.helpers.preference_helpers.organisation import normalize_organisation_name
+from common.utils.date_utils import parse_api_date
 from preference.models import (
     Age,
     Country,
@@ -225,3 +226,15 @@ def get_or_add_immigration_status_to_db(immigration_status_data: str) -> Immigra
         name=immigration_status_data, defaults={"value": immigration_status_data}
     )
     return instance
+
+
+def parse_date_or_none(date_str):
+    """
+    Safely parse a date string, returning None if the string is empty or invalid
+    """
+    if not date_str or date_str == "":
+        return None
+    try:
+        return parse_api_date(date_str)
+    except:
+        return None

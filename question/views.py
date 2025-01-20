@@ -1,13 +1,15 @@
+from datetime import datetime
 from django.shortcuts import render
 from django.utils import timezone
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
 from core.forms import DateRangeForm
 from core.logic.file_export import generate_and_export_excel
-from question.forms import InlineQuestionFilterForm, InlineQuestionOnlyFilterForm, MessagingQuestionFilterForm
+from question.forms import InlineQuestionFilterForm, MessagingQuestionFilterForm
 from question.repository.inline_questions_standard import (
     each_inline_question_response,
     get_all_inline_question_responses_data,
@@ -22,6 +24,7 @@ from question.repository.inline_questions_standard import (
 )
 from question.repository.messaging_questions_standard import (
     each_messaging_question_response,
+    get_all_message_data_sent,
     get_all_messaging_question_responses_data,
     get_messaging_question_per_destination_counts,
     get_messaging_question_per_organisation_counts,
@@ -292,4 +295,80 @@ def export_inline_question_data(request):
 
     wb.save(response)
 
+    return response
+
+
+def export_message_sent_data(request):
+    form_filter_params = get_form_filter_params(request=request, form_class=MessagingQuestionFilterForm)
+    filters = form_filter_params["filters"]
+    start_date = filters.get("start_date") or APPLICATION_POSSIBLE_START_DATE
+    end_date = filters.get("end_date") or datetime.now().date()
+
+    message_data = get_all_message_data_sent(**filters, current_user=request.user)
+
+    wb = Workbook()
+    ws = wb.active
+
+    heading = f"Message Sent Data Report for the Period Starting {start_date} to {end_date}"
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=15)
+    heading_cell = ws.cell(row=2, column=1, value=heading)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
+
+    headers = [
+        "API Created At",
+        "API Updated At",
+        "Message ID",
+        "Device ID",
+        "Language",
+        "Destination",
+        "Organisation",
+        "Message Title",
+        "Message Title English",
+        "Message Date",
+        "Message Delivered",
+        "Message Delivered Date",
+        "Message Queued",
+        "Notification Sent to FCM",
+    ]
+
+    for idx, header in enumerate(headers, start=1):
+        ws.cell(row=4, column=idx, value=header)
+
+    for idx, data in enumerate(message_data, start=5):
+        api_created_at = (
+            timezone.localtime(data.get("api_created_at")).strftime("%Y-%m-%d %H:%M:%S")
+            if data.get("api_created_at")
+            else ""
+        )
+        api_updated_at = (
+            timezone.localtime(data.get("api_updated_at")).strftime("%Y-%m-%d %H:%M:%S")
+            if data.get("api_updated_at")
+            else ""
+        )
+
+        message_date = (
+            timezone.localtime(data.get("message_date")).strftime("%Y-%m-%d %H:%M:%S")
+            if data.get("message_date")
+            else ""
+        )
+
+        ws.cell(row=idx, column=1, value=api_created_at)
+        ws.cell(row=idx, column=2, value=api_updated_at)
+        ws.cell(row=idx, column=3, value=data.get("message_id", ""))
+        ws.cell(row=idx, column=4, value=data.get("device_id", ""))
+        ws.cell(row=idx, column=5, value=data.get("language", ""))
+        ws.cell(row=idx, column=6, value=data.get("destination", ""))
+        ws.cell(row=idx, column=7, value=data.get("organisation", ""))
+        ws.cell(row=idx, column=8, value=data.get("message_title", ""))
+        ws.cell(row=idx, column=9, value=data.get("message_title_english", ""))
+        ws.cell(row=idx, column=10, value=message_date)
+        ws.cell(row=idx, column=11, value=str(data.get("message_delivered", "")))
+        ws.cell(row=idx, column=12, value=str(data.get("message_delivered_date", "")))
+        ws.cell(row=idx, column=13, value=str(data.get("message_queued", "")))
+        ws.cell(row=idx, column=14, value=str(data.get("message_notification_sent_to_FCM", "")))
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = "attachment; filename=message_sent_data.xlsx"
+    wb.save(response)
     return response

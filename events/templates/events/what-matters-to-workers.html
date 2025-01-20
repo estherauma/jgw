@@ -70,7 +70,8 @@
                   <div class="dropdown-menu" aria-labelledby="export-menu">
                     <a class="dropdown-item" href="{% url 'events:export_telephone_clicks_data' %}?export=true">Export Telephone Clicks Data Report to Excel</a>
                     <a class="dropdown-item" href="{% url 'events:export_link_clicks_data' %}?export=true">Export Link Clicks Data Report to Excel</a>
-                    <button class="dropdown-item"id="export-what-matters-to-workers-to-excel"> Export Events Data Statistics to Excel </button>
+                    <a class="dropdown-item" href="{% url 'events:export_report_issue_data' %}?export=true">Export Report Issue Data to Excel</a>
+                    <button class="dropdown-item" id="export-what-matters-to-workers-to-excel">Export Events Data Statistics to Excel</button>
                   </div>
                 </div>
               </div>
