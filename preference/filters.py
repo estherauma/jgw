@@ -72,10 +72,10 @@ def preference_filtered_queryset(
     preference_filters_q_object &= Q(api_created_at__date__range=(final_start_date, final_end_date))
 
     if organisations:
-        preference_filters_q_object &= Q(organisation__name__in=organisations)
+        preference_filters_q_object &= Q(org_info__name__in=organisations)
 
     if user_orgs and not organisations:
-        preference_filters_q_object &= Q(organisation__in=user_orgs)
+        preference_filters_q_object &= Q(org_info__in=user_orgs)
 
     if factory_farms:
         preference_filters_q_object &= Q(factory_farm__name__in=factory_farms)

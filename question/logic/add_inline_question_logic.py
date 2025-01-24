@@ -24,6 +24,7 @@ from common.helpers.preference_helpers.country import (
     get_data_origin,
 )
 from preference.utils import format_text_for_db
+from question.logic.update_question_data_with_org_info import update_inline_question_org_info_from_organisation
 from question.models import (
     FollowUpQuestion,
     InlineQuestion,
@@ -186,7 +187,7 @@ def inline_questions_v2_logic(jgw_api_client):
         organisation_data = get_or_add_organisation_to_db(inline_question_v2.get("organisation"))
         factory_farm_data = get_or_add_factory_farm_to_db(inline_question_v2.get("factoryFarm"))
         immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
-
+        org_code = inline_question_v2.get("organisationCode")
         new_inline_question_standard = InlineQuestionStandard.objects.create(
             data_source_id=inline_question_v2.get("_id"),
             device_id=inline_question_v2.get("deviceId"),
@@ -199,11 +200,12 @@ def inline_questions_v2_logic(jgw_api_client):
             destination=destination_data,
             organisation_sector=organisation_sector_data,
             organisation=organisation_data,
+            org_code=org_code,
             factory_farm=factory_farm_data,
             immigration_status=immigration_status_data,
             api_created_at=inline_question_v2.get("createdAt"),
             api_updated_at=inline_question_v2.get("updatedAt"),
-            api_version="v2",
+            api_version="v2"
         )
 
         inline_question_text, _ = InlineQuestionText.objects.get_or_create(
@@ -293,6 +295,7 @@ def inline_questions_v3_logic(jgw_api_client):
             organisation_data = get_or_add_organisation_to_db(inline_question_v3.get("organisation"))
             factory_farm_data = get_or_add_factory_farm_to_db(inline_question_v3.get("factoryFarm"))
             immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
+            org_code = inline_question_v3.get("organisationCode")
 
             new_inline_question_standard = InlineQuestionStandard.objects.create(
                 data_source_id=inline_question_v3.get("_id"),
@@ -307,6 +310,7 @@ def inline_questions_v3_logic(jgw_api_client):
                 immigration_status=immigration_status_data,
                 organisation_sector=organisation_sector_data,
                 organisation=organisation_data,
+                org_code=org_code,
                 factory_farm=factory_farm_data,
                 api_created_at=inline_question_v3.get("createdAt"),
                 api_updated_at=inline_question_v3.get("updatedAt"),
@@ -399,6 +403,7 @@ def fetch_inline_questions_from_api_to_db():
 
     update_inline_question_response_translations(inline_question_response_localization)
     update_myvoice_inline_questions()
+    update_inline_question_org_info_from_organisation()
 
 
 def add_inline_question_to_db(inline_question):
@@ -414,6 +419,7 @@ def add_inline_question_to_db(inline_question):
     responses_list = standard_and_other_fields.get("responses_list")
 
     route = standard_fields_dict.get("route") or NOT_SPECIFIED
+
 
     location_of_potential_work = standard_and_other_fields.get("location_of_potential_work")
     origin = get_data_origin(route=route, api_origin=standard_fields_dict.get("locale"))

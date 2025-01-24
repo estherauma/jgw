@@ -13,6 +13,7 @@ from preference.models import (
     ImmigrationStatus,
     Language,
     Organisation,
+    OrganisationData,
     OrganisationSector,
     Preference,
     Route,
@@ -90,6 +91,7 @@ class ChaptersOpened(models.Model):
         Chapter, null=True, blank=True, on_delete=models.SET_NULL, related_name="chapter_opened_chapters"
     )
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
     age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
     gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
@@ -130,7 +132,7 @@ class ChaptersOpened(models.Model):
         Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="chapters_opened_origin"
     )
     is_myvoice_organisation = models.BooleanField(default=False)
-
+    is_org_info_cleaned = models.BooleanField(default=False)
     def __str__(self):
         return f"ChaptersOpened {self.event_name}"
 
@@ -184,8 +186,10 @@ class ChaptersFeedbackStandard(models.Model):
     )
     factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
     sectors_of_work = models.ManyToManyField(SectorOfWork)
     is_myvoice_organisation = models.BooleanField(default=False)
+    is_org_info_cleaned = models.BooleanField(default=False)
 
     def __str__(self):
         return self.data_source_id
@@ -298,8 +302,10 @@ class BigqueryHomepageEventData(models.Model):
         ImmigrationStatus, on_delete=models.SET_NULL, null=True, blank=True
     )
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
     organisation_code = models.CharField(max_length=255, null=True, blank=True)
     is_myvoice_organisation = models.BooleanField(default=False)
+    is_org_info_cleaned = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Homepage Event on {self.event_date} for Device {self.device_id}"

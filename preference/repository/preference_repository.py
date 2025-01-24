@@ -167,29 +167,13 @@ def preferences_by_organisation(**filters):
     organisation_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
 
     organisation_counts = (
-        organisation_queryset.values("organisation__name")
-        .annotate(
-            organisation_name=Case(
-                When(
-                    organisation__name__in=["placeuk", "seasonal worker scheme - placeuk"],
-                    then=Value("PlaceUk"),
-                ),
-                When(
-                    organisation__name__icontains="hops",
-                    then=Value("seasonal worker scheme - hops"),
-                ),
-                default=F("organisation__name"),
-                output_field=CharField(),
-            )
-        )
-        .values("organisation_name")
-        .annotate(count=Count("organisation_name"))
-        .exclude(organisation__name__in=["not specified", "tst-org"])
+        organisation_queryset.values("org_info__name")
+        .annotate(count=Count("org_info__name"))
         .order_by("-count")
     )
 
     labels = [
-        format_org_name_from_display(organisation["organisation_name"]).title()
+        format_org_name_from_display(organisation["org_info__name"]).title()
         for organisation in organisation_counts
     ]
 

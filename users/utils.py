@@ -1,6 +1,6 @@
 from django.db.models import Q
 
-from preference.models import Country, FactoryFarm, Language, Organisation
+from preference.models import Country, FactoryFarm, Language, OrganisationData
 
 
 def get_user_factories(user):
@@ -11,7 +11,7 @@ def get_user_factories(user):
 
 def get_user_organisations(user):
     if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
-        return Organisation.objects.all()
+        return OrganisationData.objects.all()
     return user.organisations.all()
 
 

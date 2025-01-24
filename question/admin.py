@@ -73,9 +73,12 @@ class InlineQuestionStandardAdmin(admin.ModelAdmin):
         "device_id",
         "destination",
         "organisation",
+        "org_info",
+        "org_code",
         "is_myvoice_organisation",
+        "is_org_info_cleaned",
     ]
-    search_fields = ["id", "data_source_id", "device_id"]
+    search_fields = ["id", "data_source_id", "device_id", "org_code"]
 
 
 @admin.register(FollowUpQuestion)
@@ -99,6 +102,9 @@ class MessagingQuestionStandardAdmin(admin.ModelAdmin):
         "destination",
         "organisation_sector",
         "organisation",
+        "org_code",
+        "org_info",
+        "is_org_info_cleaned",
         "is_myvoice_organisation",
         "immigration_status",
     ]
@@ -112,6 +118,7 @@ class MessagingQuestionStandardAdmin(admin.ModelAdmin):
         "destination",
         "organisation_sector",
         "organisation",
+        "org_code",
         "is_myvoice_organisation",
         "immigration_status",
     ]

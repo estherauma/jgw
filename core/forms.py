@@ -29,7 +29,7 @@ class GenericFilterForm(forms.Form):
         user_immigration_status = get_user_immigration_status(self.request.user)
 
         self.fields["factory_farm"].choices = sorted([(farm.name, farm.name) for farm in user_factories])
-        self.fields["organisation"].choices = sorted([(org.name, org.name) for org in user_orgs])
+        self.fields["organisation"].choices = sorted([(org_info.name, org_info.name) for org_info in user_orgs])
 
         if user_immigration_status:
             choices = [(status.name, status.name.capitalize()) for status in user_immigration_status]

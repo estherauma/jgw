@@ -16,6 +16,7 @@ from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient, MessagingAPIClient
 from common.utils.date_utils import todays_date
+from question.logic.update_question_data_with_org_info import update_messaging_question_org_info_from_organisation
 from question.models import (
     MessagingQuestion,
     MessagingQuestionResponse,
@@ -81,6 +82,7 @@ def fetch_messaging_questions_from_api_to_db():
     translate_and_clean_messaging_question_fields()
     update_translations_from_localization(meassaging_question_response_localization)
     update_myvoice_messaging_questions()
+    update_messaging_question_org_info_from_organisation()
 
 
 def add_messaging_question_to_db(messaging_question):
@@ -100,6 +102,7 @@ def add_messaging_question_to_db(messaging_question):
 
     organisation_sector = messaging_question.get("organisationSector")
     language = messaging_question.get("language")
+    org_code = messaging_question.get("orgCode")
     organisation = messaging_question.get("organisation")
     factory_farm = messaging_question.get("factoryFarm")
     route_data = get_or_add_route_to_db(route)
@@ -131,6 +134,7 @@ def add_messaging_question_to_db(messaging_question):
         organisation_sector=organisation_sector_data,
         organisation=organisation_data,
         factory_farm=factory_farm_data,
+        org_code=org_code,
     )
 
     #  create messaging question text

@@ -24,7 +24,8 @@ from common.helpers.preference_helpers.country import (
     get_data_origin,
 )
 from common.utils.helpers import can_use_cached_data
-from preference.models import Country, Organisation, OrganisationAccessCode, Preference
+from preference.logic.update_perference_organisation_info import update_preferences_org_info_from_organisation
+from preference.models import Country, Organisation, OrganisationAccessCode, Preference, OrganisationData
 from preference.logic.update_original_sector_of_work_translation import (
     update_original_sector_of_work_references,
 )
@@ -67,6 +68,7 @@ def fetch_preferences_from_api_to_db():
     translate_and_clean_preferences_fields()
     update_original_sector_of_work_references()
     update_myvoice_preferences()
+    update_preferences_org_info_from_organisation()
 
 
 def create_preference_object(preference):
@@ -76,6 +78,7 @@ def create_preference_object(preference):
 
     organisation_sector = preference.get("organisationSector")
     organisation = preference.get("organisation")
+    org_info = preference.get("organisationCode")
     factory_farm = preference.get("factoryFarm")
     sectors_of_work = preference.get("sectorsOfWork")
     sector_of_work_list = preference.get("sectorOfWork")
@@ -115,6 +118,13 @@ def create_preference_object(preference):
 
     immigration_status_instance = get_or_add_immigration_status_to_db(immigration_status)
 
+    org_info_data = None
+    if org_info:
+        try:
+            org_info_data = OrganisationData.objects.get(org_code=org_info)
+        except OrganisationData.DoesNotExist:
+            kunfu_panda_logger.warning(f"No OrganisationData found for org_code: {org_info}")
+
     new_preference = Preference(
         data_source_id=preference.get("_id"),
         device_id=preference.get("deviceId"),
@@ -136,6 +146,7 @@ def create_preference_object(preference):
         organisation=organisation_data,
         api_destination=api_destination_data,
         organisation_access_code=organisation_access_code_data,
+        org_info=org_info_data,
     )
 
     # Create SectorsOfWork instances and associate them with the preference

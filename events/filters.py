@@ -70,7 +70,8 @@ def generic_chapters_opened_filtered_queryset(
     chapters_opened_filters_q_object &= Q(event_created_at__date__range=(final_start_date, final_end_date))
 
     if user_orgs and "MyVoiceConfig" not in user_group:
-        user_org_q = Q(organisation__in=user_orgs)
+        user_org_names = [org.name for org in user_orgs]
+        user_org_q = Q(org_info__name__in=user_org_names)
         chapters_opened_filters_q_object &= user_org_q
     elif "MyVoiceConfig" in user_group:
         user_org_q = Q(destination__in=user_destinations)
@@ -93,7 +94,7 @@ def generic_chapters_opened_filtered_queryset(
         chapters_opened_filters_q_object &= preference_origin_q
 
     if organisations:
-        preference_organisation_q = Q(organisation__name__in=organisations)
+        preference_organisation_q = Q(org_info__name__in=organisations)
         chapters_opened_filters_q_object &= preference_organisation_q
 
     if factory_farms:
@@ -173,7 +174,8 @@ def generic_chapters_feedback_filtered_queryset(
 
     # organisation filter
     if user_orgs:
-        user_org_q = Q(feedback_standard__organisation__in=user_orgs)
+        user_org_names = [org.name for org in user_orgs]
+        user_org_q = Q(feedback_standard__org_info__name__in=user_org_names)
         chapters_feedback_filters_q_object &= user_org_q
 
     if user_factories:
@@ -193,7 +195,7 @@ def generic_chapters_feedback_filtered_queryset(
         chapters_feedback_filters_q_object &= preference_origin_q
 
     if organisations:
-        preference_organisation_q = Q(feedback_standard__organisation__name__in=organisations)
+        preference_organisation_q = Q(feedback_standard__org_info__name__in=organisations)
         chapters_feedback_filters_q_object &= preference_organisation_q
 
     if factory_farms:
@@ -219,10 +221,10 @@ def filter_bigquery_homepage_event_data(
     start_date=None,
     end_date=None,
     destination_countries=None,
-    origin_countries=None,  # Add this
+    origin_countries=None,  
     organisations=None,
-    schemes=None,  # Add this
-    factory_farms=None,  # Add this
+    schemes=None,  
+    factory_farms=None,  
     sector_of_work=None,
     immigration_status=None,
 ):
@@ -266,9 +268,9 @@ def filter_bigquery_homepage_event_data(
         homepage_event_filters_q_object &= Q(destination__name__in=destination_countries)
 
     if user_orgs:
-        homepage_event_filters_q_object &= Q(organisation__in=user_orgs)
+        homepage_event_filters_q_object &= Q(org_info__name__in=user_orgs)
     if organisations:
-        homepage_event_filters_q_object &= Q(organisation__name__in=organisations)
+        homepage_event_filters_q_object &= Q(org_info__name__in=organisations)
 
     if immigration_status:
         homepage_event_filters_q_object &= Q(immigration_status__name__in=immigration_status)

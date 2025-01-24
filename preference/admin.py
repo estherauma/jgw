@@ -61,14 +61,16 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
         "get_translated_name",
         "get_origin_name",
         "destination",
-        "organisation",
         "org_code",
+        "organisation",
+        "org_info",
         "get_age_translated_name",
         "is_missing_sector_cleaned",
         "get_org_workcode",
         "immigration_status",
         "is_missing_accesscode_cleaned",
         "is_myvoice_organisation",
+        "is_missing_organisation_info_cleaned",
     ]
     search_fields = [
         "id",
