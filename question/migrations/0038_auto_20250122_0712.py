@@ -7,7 +7,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('preference', '0040_preference_org_code'),
         ('question', '0037_inlinequestionstandard_immigration_status'),
     ]
 
