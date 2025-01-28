@@ -301,7 +301,7 @@ def request_password_reset(request):
                 send_email_notification.delay(
                     subject="Reset your password on JGWPandas",
                     message=f"""
-                    Follow this link to reset the password for your account on JGW Pandas:
+                    \n Follow this link to reset the password for your account on JGW Pandas:
                     \n https://jgwpandas.herokuapp.com{reverse("users:set_password", args=(token,))}
                     \n This link expires in 1 day.
                     """,

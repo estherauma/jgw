@@ -3,6 +3,7 @@ from django.contrib import admin
 from question.actions import export_responses
 from question.models import (
     FollowUpQuestion,
+    MessageDataSent,
     MessagingResponse,
     InlineQuestion,
     InlineQuestionResponse,
@@ -130,6 +131,27 @@ class MessagingQuestionResponseAdmin(admin.ModelAdmin):
     list_display = ["messaging_question", "created_at", "updated_at"]
     search_fields = ["messaging_question"]
     ordering = ["-created_at"]
+
+
+@admin.register(MessageDataSent)
+class MessageDataSentAdmin(admin.ModelAdmin):
+    list_display = [
+        "api_created_at",
+        "device_id",
+        "message_id",
+        "destination",
+        "organisation",
+        "language",
+        "message_title_english",
+        "message_title",
+        "message_date",
+        "message_delivered_date",
+        "message_queued",
+        "message_delivered",
+        "message_notification_sent_to_fcm",
+    ]
+    search_fields = ["device_id", "message_id", "message_title"]
+    ordering = ["-message_date"]
 
 
 admin.site.register(MessagingQuestion)
