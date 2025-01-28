@@ -54,6 +54,7 @@
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
                                         {% flag 'can_view_messaging_question_report_export_button' %}
                                             <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">Export Messaging Question Data Report to Excel</a>
+                                            <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">Export Messaging Pushed Data Report to Excel</a>
                                         {% endflag %}
                                         <button  class="dropdown-item" id="export-messaging-question-to-excel">Export Messaging Question Statistics to Excel</button>
                                     </div>                                    
