@@ -17,6 +17,9 @@ from django.http import HttpResponseRedirect
 from preference.models import Language
 from django.contrib.auth.models import Group
 from django.core.paginator import Paginator
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.contrib.staticfiles import finders
 
 from users.tasks import send_email_notification
 from users.utils import get_user_destinations, get_user_factories, get_user_organisations
@@ -291,6 +294,7 @@ def profile(request):
 def request_password_reset(request):
     logout(request)
     form = RequestPasswordResetForm()
+
     if request.method == "POST":
         form = RequestPasswordResetForm(request.POST)
         if form.is_valid():
@@ -298,28 +302,35 @@ def request_password_reset(request):
             try:
                 user = User.objects.get(email=email_address)
                 token = generate_token(payload_data={"user_id": user.id}, days_to_expiry=1)
-                send_email_notification.delay(
-                    subject="Reset your password on JGWPandas",
-                    message=f"""
-                    \n Follow this link to reset the password for your account on JGW Pandas:
-                    \n https://jgwpandas.herokuapp.com{reverse("users:set_password", args=(token,))}
-                    \n This link expires in 1 day.
-                    """,
-                    recipients=[email_address],
-                    attachment_path=None,
+                reset_link = f"https://jgwpandas.herokuapp.com{reverse('users:set_password', args=(token,))}"
+
+                logo_path = finders.find("../static/logo.jpg")
+
+                html_content = render_to_string(
+                    "users/password_reset_email.html",
+                    {"reset_link": reset_link, "logo_cid": "logo_cid"}
                 )
+                plain_message = strip_tags(html_content)
+
+                send_email_notification(
+                    subject="Reset your password on JGWPandas",
+                    message=plain_message,
+                    recipients=[email_address],
+                    html_message=html_content,
+                    inline_images={"logo_cid": logo_path} if logo_path else None
+                )
+
                 success_text = f"""
                     An email has been sent to {email_address}.
                     Please check for an email from JGWPandas and click on the included link to reset your password.
-                    """
-                return render(
-                    request, template_name="users/email_sent.html", context={"success_text": success_text}
-                )
+                """
+                return render(request, "users/email_sent.html", {"success_text": success_text})
+
             except User.DoesNotExist:
                 form.full_clean()
                 messages.error(request, "No user account matches this email address!")
-    return render(request, template_name="users/request_password_reset.html", context={"form": form})
 
+    return render(request, "users/request_password_reset.html", {"form": form})
 
 def set_password(request, token):
     logout(request)

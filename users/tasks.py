@@ -1,12 +1,12 @@
 from logging import getLogger
-
 from celery import shared_task
-from django.core.mail import EmailMessage, send_mail
-
+from django.core.mail import EmailMultiAlternatives, send_mail
 from users.models import User
+from email.mime.image import MIMEImage
+import os
+import mimetypes
 
 debug_logger = getLogger("djangoDebug")
-
 
 @shared_task(name="notify_admins_inactive_users")
 def notify_admins_inactive_users():
@@ -29,8 +29,41 @@ def notify_admins_inactive_users():
 
 
 @shared_task(name="send_email_notification")
-def send_email_notification(subject, message, recipients, attachment_path=None):
-    mail = EmailMessage(subject, message, "JGW Pandas <alerts@jgwpandas.com>", recipients)
+def send_email_notification(subject, message, recipients, html_message=None, attachment_path=None, inline_images=None):
+    """
+    Sends an email with optional HTML content, attachments, and inline images.
+    
+    :param subject: Email subject
+    :param message: Plain text fallback
+    :param recipients: List of recipient email addresses
+    :param html_message: HTML formatted email content
+    :param attachment_path: File path of an attachment (if any)
+    :param inline_images: Dict {CID: file_path} for inline images
+    """
+    mail = EmailMultiAlternatives(
+        subject,
+        message,
+        "JGW Pandas <alerts@jgwpandas.com>",
+        recipients
+    )
+
     if attachment_path:
         mail.attach_file(attachment_path)
+    
+    if html_message:
+        mail.attach_alternative(html_message, "text/html")
+
+    if inline_images:
+        for cid, img_path in inline_images.items():
+            if os.path.exists(img_path):
+                mime_type, _ = mimetypes.guess_type(img_path)
+                if not mime_type:
+                    mime_type = "../static/logo.jpeg"
+
+                with open(img_path, "rb") as img_file:
+                    image = MIMEImage(img_file.read(), _subtype=mime_type.split("/")[-1])
+                    image.add_header("Content-ID", f"<{cid}>")
+                    image.add_header("Content-Disposition", "inline", filename=os.path.basename(img_path))
+                    mail.attach(image)
+
     mail.send()
