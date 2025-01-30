@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 import six
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from google.cloud import translate_v2 as translate
 
 from celery import shared_task
@@ -29,6 +29,10 @@ from question.logic.add_messaging_question_logic import fetch_messaging_question
 from common.logger import KunfuPandaLogger
 
 from dashboard.models import JGWCache
+
+from email.mime.image import MIMEImage
+import os
+import mimetypes
 
 client = translate.Client()
 
@@ -232,10 +236,27 @@ def fetch_API_data():
 
 
 @shared_task(name="send_email_notification")
-def send_email_notification(subject, message, attachment_path, recipients):
-    mail = EmailMessage(subject, message, EMAIL_HOST_USER, recipients)
+def send_email_notification(subject, message, attachment_path, recipients, html_message, inline_images):
+    mail = EmailMultiAlternatives(subject, message, EMAIL_HOST_USER, recipients)
     if attachment_path:
         mail.attach_file(attachment_path)
+    
+    if html_message:
+        mail.attach_alternative(html_message, "text/html")
+
+    if inline_images:
+        for cid, img_path in inline_images.items():
+            if os.path.exists(img_path):
+                mime_type, _ = mimetypes.guess_type(img_path)
+                if not mime_type:
+                    mime_type = "../static/logo.jpeg"
+
+                with open(img_path, "rb") as img_file:
+                    image = MIMEImage(img_file.read(), _subtype=mime_type.split("/")[-1])
+                    image.add_header("Content-ID", f"<{cid}>")
+                    image.add_header("Content-Disposition", "inline", filename=os.path.basename(img_path))
+                    mail.attach(image)
+
     mail.send()
 
 

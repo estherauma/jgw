@@ -29,7 +29,7 @@ def notify_admins_inactive_users():
 
 
 @shared_task(name="send_email_notification")
-def send_email_notification(subject, message, recipients, html_message=None, attachment_path=None, inline_images=None):
+def send_email_notification(subject, message, recipients, attachment_path=None, html_message=None, inline_images=None):
     """
     Sends an email with optional HTML content, attachments, and inline images.
     

@@ -328,6 +328,7 @@ def request_password_reset(request):
                     subject="Reset your password on JGWPandas",
                     message=plain_message,
                     recipients=[email_address],
+                    attachment_path=None,
                     html_message=html_content,
                     inline_images={"logo_cid": logo_path} if logo_path else None
                 )
