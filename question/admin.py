@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from question.actions import export_responses
 from question.models import (
+    ActualMessageSent,
     FollowUpQuestion,
     MessageDataSent,
     MessagingResponse,
@@ -132,6 +133,7 @@ class MessageDataSentAdmin(admin.ModelAdmin):
         "api_created_at",
         "device_id",
         "message_id",
+        "message_content",
         "destination",
         "organisation",
         "language",
@@ -147,7 +149,15 @@ class MessageDataSentAdmin(admin.ModelAdmin):
     ordering = ["-message_date"]
 
 
+@admin.register(ActualMessageSent)
+class ActualMessageSentAdmin(admin.ModelAdmin):
+    list_display = ["message_id", "message", "created_at", "updated_at"]
+    search_fields = ["message_id", "message"]
+    ordering = ["-created_at"]
+
+
 admin.site.register(MessagingQuestion)
 admin.site.register(MessagingResponse)
 admin.site.register(MessagingResponseOptionText)
 admin.site.register(MessagingQuestionText)
+

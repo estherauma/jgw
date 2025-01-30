@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from question.models import MessageDataSent
+from question.models import ActualMessageSent, MessageDataSent
 from common.logger import KunfuPandaLogger
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/message_data.log")
@@ -15,6 +15,7 @@ class Command(BaseCommand):
             count = MessageDataSent.objects.count()
 
             MessageDataSent.objects.all().delete()
+            ActualMessageSent.objects.all().delete()
 
             success_message = f"Successfully deleted {count} records from MessageDataSent table."
             self.stdout.write(self.style.SUCCESS(success_message))
