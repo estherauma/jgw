@@ -155,14 +155,24 @@ def activate_account(request, id):
         user.save()
         messages.info(request, f"The user account: {user.email} was deactivated successfully.")
         send_email_notification.delay(
-            subject=subject, message=deactivation_message, recipients=[user.email], attachment_path=None
+            subject=subject,
+            message=deactivation_message,
+            recipients=[user.email],
+            attachment_path=None,
+            html_message=None,
+            inline_images=None
         )
     elif user.is_active == False:
         user.is_active = True
         user.save()
         messages.info(request, f"The user account: {user.email} was activated and will be notified shortly.")
         send_email_notification.delay(
-            subject=subject, message=activation_message, recipients=[user.email], attachment_path=None
+            subject=subject,
+            message=activation_message,
+            recipients=[user.email],
+            attachment_path=None,
+            html_message=None,
+            inline_images=None
         )
     return redirect("users:list_users")
 
@@ -203,6 +213,8 @@ def invite_user(request):
                 """,
                 recipients=[email_address],
                 attachment_path=None,
+                html_message=None,
+                inline_images=None
             )
             messages.info(request, "The invitation email will be sent out shortly.")
             return redirect("users:list_users")
@@ -393,6 +405,8 @@ def change_email_address(request):
                     """,
                     recipients=[new_email],
                     attachment_path=None,
+                    html_message=None,
+                    inline_images=None
                 )
                 success_text = f"""
                     An email has been sent to {new_email}.
