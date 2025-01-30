@@ -258,8 +258,24 @@ class MessagingQuestionResponse(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+
+class ActualMessageSent(models.Model):
+    message_id = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'actual_message_sent'
+        verbose_name = 'Actual Message Sent'
+        verbose_name_plural = 'Actual Messages Sent'
+
+    def __str__(self):
+        return f"{self.message_id}"
+    
 class MessageDataSent(models.Model):
     message_id = models.CharField(max_length=255)
+    message_content = models.ForeignKey(ActualMessageSent, on_delete=models.SET_NULL, null=True, related_name='actual_message_data')
     message_title = models.TextField()
     message_title_english = models.TextField()
     message_date = models.DateTimeField()
@@ -309,3 +325,5 @@ class MessageDataSent(models.Model):
 
     def __str__(self):
         return f"{self.message_id} - {self.device_id}"
+
+

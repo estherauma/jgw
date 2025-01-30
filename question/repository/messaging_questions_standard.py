@@ -252,7 +252,7 @@ def get_all_message_data_sent(**filters):
     """
     print("Filters get method", filters)
     queryset = message_data_sent_filtered_queryset(
-        queryset=MessageDataSent.objects.select_related("language", "destination", "organisation"), **filters
+        queryset=MessageDataSent.objects.select_related("language", "destination", "organisation", "message_content"), **filters
     )
 
     data = []
@@ -267,6 +267,7 @@ def get_all_message_data_sent(**filters):
                 "destination": message.destination.name if message.destination else None,
                 "message_title": message.message_title,
                 "message_title_english": message.message_title_english,
+                "actual_message": message.message_content.message if message.message_content else None,
                 "message_date": message.message_date,
                 "message_delivered": message.message_delivered,
                 "message_queued": message.message_queued,

@@ -11,7 +11,8 @@ from common.helpers.model_helpers.preference import (
     get_or_add_organisation_to_db,
     parse_date_or_none,
 )
-from question.models import MessageDataSent
+from question.logic.add_actual_message_sent_data import save_messages_to_db
+from question.models import ActualMessageSent, MessageDataSent
 from common.logger import KunfuPandaLogger
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.utils.date_utils import todays_date
@@ -65,9 +66,14 @@ def store_message_data(message_data):
         user_created_at = datetime.fromisoformat(message_data["userCreatedAt"].replace("Z", "+00:00"))
         user_updated_at = datetime.fromisoformat(message_data["userUpdatedAt"].replace("Z", "+00:00"))
         message_delivered_date = parse_date_or_none(message_data.get("messageDeliveredDate"))
+        try:
+            message_content = ActualMessageSent.objects.get(message_id=message_data["messageId"])
+        except ActualMessageSent.DoesNotExist:
+            message_content = None
 
         message = MessageDataSent.objects.create(
             message_id=message_data["messageId"],
+            message_content=message_content,
             message_title=message_data["messageTitle"],
             message_title_english=message_data["messageTitleEnglish"],
             message_date=message_date,
@@ -106,6 +112,7 @@ def fetch_and_store_message_data():
     """
     Fetches message data from API and stores in database
     """
+    actual_messages = save_messages_to_db()
     messages = get_message_data_from_api()
     stored_count = 0
 
