@@ -15,6 +15,7 @@ from events.repository.bigquery_homepage_events_repository import (
     get_total_active_user_within_period,
 )
 from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
+from events.repository.link_clicks_repository import get_link_clicked_data
 from help_contacts.repository.help_contacts_data import get_help_contacts_between_dates
 from preference.repository.preference_repository import (
     extract_preference_for_export,
@@ -72,7 +73,8 @@ def user_overview(request):
         **filters, current_user=request.user
     )
 
-    print("preferences_by_immigration_status_responses", preferences_by_immigration_status_responses)
+    link_clicks_data = get_link_clicked_data(**filters, current_user=request.user)
+
 
     context = {
         "filter_form": filter_form,
@@ -97,6 +99,7 @@ def user_overview(request):
         ),
         "country_coords": country_coords,
         "preferences_by_immigration_status": preferences_by_immigration_status_responses,
+        "link_clicks_data": link_clicks_data,
     }
     return render(request, "preference/user_overview.html", context=context)
 
