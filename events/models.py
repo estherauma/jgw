@@ -342,3 +342,16 @@ class ReportIssueSubmittedEvent(models.Model):
 
     def __str__(self):
         return f"Report Issue on {self.event_date} by {self.device_id}"
+
+from django.db import models
+
+class UserLocation(models.Model):
+    country = models.CharField(max_length=100)
+    city = models.CharField(max_length=100)
+    region = models.CharField(max_length=100)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    user_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.city}, {self.country} ({self.user_count} users)"
