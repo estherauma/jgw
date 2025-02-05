@@ -56,6 +56,7 @@ class PreferenceTabularAdminDisplay(admin.ModelAdmin):
         "data_source_id",
         "device_id",
         "created_at",
+        "api_created_at",
         "get_translated_name",
         "get_origin_name",
         "destination",

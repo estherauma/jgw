@@ -33,9 +33,11 @@ from preference.repository.preference_repository import (
     preferences_count,
     get_user_counts_by_origin_destination,
     preferences_by_immigration_status,
+    get_preferences_by_device_id,
 )
 from users.utils import get_user_organisations
 from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth.decorators import login_required
 
 
 def user_overview(request):
@@ -100,6 +102,20 @@ def user_overview(request):
     }
     return render(request, "preference/user_overview.html", context=context)
 
+
+@login_required
+def user_diagnostics(request):
+    preferences = []
+    device_id = request.GET.get('device_id', '')
+    
+    if device_id:
+        preferences = get_preferences_by_device_id(device_id)
+    
+    context = {
+        'preferences': preferences,
+        'device_id': device_id
+    }
+    return render(request, 'preference/user_diagnostics.html', context)
 
 def export_preference_stats(request):
     form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
@@ -342,3 +358,5 @@ def export_preferences_data(request):
     wb.save(response)
 
     return response
+
+
