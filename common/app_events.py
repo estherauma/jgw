@@ -15,9 +15,7 @@ from common.utils.date_utils import previous_dates
 from common.utils.helpers import save_as_excel
 from events.models import BigQueryChaptersData, BigQueryFirstOpenHomepageData
 
-# from django.http import JsonResponse
-from events.models import UserLocation
-from events.geolocation import get_lat_lon
+
 
 api = JGWApi()
 
@@ -365,43 +363,31 @@ class AppEvents(BaseAnalytics):
         report_issue_df = google_client_instance().query(report_issue_query).to_dataframe()
         return report_issue_df.to_dict("records")
 
-def fetch_location_data(self, start_date=None, end_date=None):
-    fetch_location_query = f"""
-    SELECT 
-        DATETIME(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
-        geo.country, geo.city, geo.region, COUNT(*) AS user_count
+    def fetch_location_data(self, start_date=None, end_date=None):
+        fetch_location_query = f"""
+        SELECT 
+            DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+            geo.city, 
+            geo.country, 
+            geo.region,
+            geo.continent,
+            COUNT(*) AS user_count
         FROM 
             `just-good-work.analytics_191478110.events_*`
         WHERE 
             event_name = "user_engagement"
-        AND 
-            DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
-        GROUP BY 
-            geo.country, geo.city, geo.region
+            AND 
+            DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
+            GROUP BY 
+            event_date,
+            geo.city,
+            geo.country,
+            geo.region,
+            geo.continent
         ORDER BY 
             user_count DESC;
-    """
+        """
 
-    results = google_client_instance().query(fetch_location_query)
-
-    for row in results:
-        city = row["city"]
-        country = row["country"]
-        region = row["region"]
-
-        # Get latitude and longitude using OpenStreetMap (Nominatim)
-        latitude, longitude = get_lat_lon(city, country)
-
-        if latitude and longitude:
-            UserLocation.objects.update_or_create(
-                city=city,
-                country=country,
-                region=region,
-                defaults={
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "user_count": row["user_count"]
-                }
-            )
-    location_df = results.to_dataframe()
-    return location_df.to_dict("records")
+        results = google_client_instance().query(fetch_location_query)
+        results_df = results.to_dataframe()
+        return results_df.to_dict('records')

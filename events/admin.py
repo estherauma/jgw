@@ -16,6 +16,7 @@ from events.models import (
     SwsPasiEvent,
     Chapter,
     ReportIssueSubmittedEvent,
+    UserLocation,
 )
 
 
@@ -133,3 +134,9 @@ class ReportIssueSubmittedEventAdmin(admin.ModelAdmin):
         "created_at",
     )
     search_fields = ("device_id", "app_id", "organisation_access_code", "organisation_code", "locale")
+
+@admin.register(UserLocation)
+class UserLocationAdmin(admin.ModelAdmin):
+    list_display = ["created_at", "city", "country", "user_count", "latitude", "longitude"]
+    search_fields = ["city", "country"]
+    ordering = ["-user_count"]

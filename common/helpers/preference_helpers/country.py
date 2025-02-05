@@ -1,4 +1,8 @@
 from common.const.value_const import NOT_SPECIFIED
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
+
+geolocator = Nominatim(user_agent="geo_django")
 
 
 def normalize_country_name(country: str) -> str:
@@ -59,3 +63,12 @@ def get_data_destination(route, api_destination, location_of_potential_work):
         return get_origin_and_destination_from_route(route).get("destination")
 
     return NOT_SPECIFIED
+
+def get_lat_lon(city, country):
+    try:
+        location = geolocator.geocode(f"{city}, {country}")
+        if location:
+            return location.latitude, location.longitude
+    except GeocoderTimedOut:
+        pass
+    return None, None

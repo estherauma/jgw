@@ -72,7 +72,6 @@ def user_overview(request):
         **filters, current_user=request.user
     )
 
-    print("preferences_by_immigration_status_responses", preferences_by_immigration_status_responses)
 
     context = {
         "filter_form": filter_form,
