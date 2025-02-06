@@ -62,7 +62,7 @@ admin.site.register(Chapter, ChapterAdminDisplay)
 
 @admin.register(LinksClickEvent)
 class LinksClickEventAdmin(admin.ModelAdmin):
-    list_display = ["event_name", "link"]
+    list_display = ["event_date", "event_name", "link"]
     actions = [download_links_click]
 
 

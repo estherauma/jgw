@@ -276,3 +276,21 @@ def filter_bigquery_homepage_event_data(
         homepage_event_filters_q_object &= Q(immigration_status__in=user_immigration_status)
 
     return queryset.filter(homepage_event_filters_q_object)
+
+
+def generic_link_clicked_filtered_queryset(
+    queryset: BaseManager[Any],
+    start_date=None,
+    end_date=None,
+    **kwargs
+):
+    link_clicked_filters_q_object = Q()
+
+    if start_date and end_date:
+        link_clicked_filters_q_object &= Q(event_date__range=(start_date, end_date))
+    elif start_date:
+        link_clicked_filters_q_object &= Q(event_date__gte=start_date)
+    elif end_date:
+        link_clicked_filters_q_object &= Q(event_date__lte=end_date)
+
+    return queryset.filter(link_clicked_filters_q_object)
