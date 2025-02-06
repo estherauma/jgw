@@ -477,3 +477,21 @@ def preferences_by_immigration_status(**filters):
         "labels": [item["name"] for item in results],
         "counts": [item["count"] for item in results],
     }
+
+
+def get_preferences_by_device_id(device_id):
+    preferences = Preference.objects.filter(device_id__icontains=device_id).select_related(
+        'gender',
+        'age',
+        'language',
+        'origin',
+        'destination',
+        'api_destination',
+        'destination_state',
+        'route',
+        'organisation_sector',
+        'organisation_access_code',
+        'factory_farm',
+        'organisation',
+    ).order_by('-api_created_at')
+    return preferences
