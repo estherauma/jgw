@@ -17,6 +17,7 @@ from users.utils import (
 def preference_filtered_queryset(
     queryset: BaseManager[Any],
     current_user=None,
+    show_new_user_data=False,
     start_date=None,
     end_date=None,
     destination_countries=None,
@@ -65,11 +66,11 @@ def preference_filtered_queryset(
     user_excluded_origin_countries = get_user_excluded_origin_countries(current_user)
     user_immigration_status = get_user_immigration_status(current_user)
 
-    print("user_immigration_status", user_immigration_status)
 
     preference_filters_q_object = Q()
 
-    preference_filters_q_object &= Q(api_created_at__date__range=(final_start_date, final_end_date))
+    if show_new_user_data:
+        preference_filters_q_object &= Q(api_created_at__date__range=(final_start_date, final_end_date))
 
     if organisations:
         preference_filters_q_object &= Q(organisation__name__in=organisations)

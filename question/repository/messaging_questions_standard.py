@@ -1,13 +1,29 @@
 from collections import defaultdict
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.utils.strings import format_thousands_with_commas
+from events.models import BigqueryHomepageEventData
 from question.filters import generic_question_filtered_queryset, message_data_sent_filtered_queryset
 from question.models import MessageDataSent, MessagingQuestionResponse, MessagingQuestionStandard
 from django.db.models import Count, Case, When, F, Q
 from django.core.exceptions import ObjectDoesNotExist
+from datetime import datetime
 
 
 def get_messaging_question_per_origin_counts(**filters):
-    queryset = generic_question_filtered_queryset(queryset=MessagingQuestionStandard.objects.all(), **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
+    queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
 
     origin_counts_data = (
         queryset.annotate(
@@ -32,7 +48,21 @@ def get_messaging_question_per_origin_counts(**filters):
 
 
 def get_messaging_question_per_destination_counts(**filters):
-    queryset = generic_question_filtered_queryset(queryset=MessagingQuestionStandard.objects.all(), **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
+    queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
+
     destination_counts_data = (
         queryset.annotate(
             destination_name=Case(
@@ -59,8 +89,21 @@ def get_messaging_question_per_destination_counts(**filters):
 
 
 def messaging_questions_count(**filters):
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
     messaging_questions_count_queryset = generic_question_filtered_queryset(
-        queryset=MessagingQuestionStandard.objects.all(), **filters
+        queryset=base_queryset, **filters
     )
 
     return format_thousands_with_commas(messaging_questions_count_queryset.count())
@@ -89,8 +132,21 @@ def each_messaging_question_response(**filters):
             - 'title': Original or translated text of the question.
     """
 
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
     messaging_question_standards = generic_question_filtered_queryset(
-        queryset=MessagingQuestionStandard.objects.all(), **filters
+        queryset=base_queryset, **filters
     )
 
     test_patterns = ["test 2 q", "testq", "test qn", "question"]
@@ -134,8 +190,22 @@ def each_messaging_question_response(**filters):
 
 
 def get_all_messaging_question_responses_data(**filters):
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
+    queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
     queryset = (
-        generic_question_filtered_queryset(queryset=MessagingQuestionStandard.objects.all(), **filters)
+        queryset
         .select_related(
             "language", "origin", "destination", "organisation_sector", "factory_farm", "organisation"
         )
@@ -205,21 +275,33 @@ def get_messaging_question_per_organisation_counts(**filters):
         Exception: For any other unexpected errors during execution.
     """
     try:
-        queryset = generic_question_filtered_queryset(
-            queryset=MessagingQuestionStandard.objects.all(), **filters
-        )
+        show_new_user_data = filters.get('show_new_user_data', False)
+        start_date = filters.get('start_date')
+        end_date = filters.get('end_date')
+
+        if show_new_user_data is False:
+            base_queryset = get_messaging_questions_by_homepage_events(
+                start_date=start_date,
+                end_date=end_date
+            )
+
+        else:
+            base_queryset = MessagingQuestionStandard.objects.all()
+
+        queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
+
+        print("queryset", queryset)
 
         organisation_counts_data = (
-            MessagingQuestionResponse.objects.filter(
-                messaging_question__messaging_question_standard__in=queryset
-            )
-            .exclude(responses__option__translated_option__iexact="not specified")
+            queryset
             .values(
-                organisation_name=F("messaging_question__messaging_question_standard__organisation__name")
+                organisation_name=F("organisation__name")
             )
             .annotate(count=Count("id", distinct=True))
             .order_by("-count")
         )
+
+        print("organisation_counts_data", organisation_counts_data)
 
         organisation_data = [count["count"] for count in organisation_counts_data]
         organisation_labels = [
@@ -278,3 +360,32 @@ def get_all_message_data_sent(**filters):
         )
 
     return data
+
+
+def get_messaging_questions_by_homepage_events(start_date=None, end_date=None):
+    """
+    Retrieves messaging questions for users who have homepage events within the specified date range.
+    
+    Args:
+        start_date (date, optional): Start date for filtering homepage events
+        end_date (date, optional): End date for filtering homepage events
+        
+    Returns:
+        QuerySet: MessagingQuestionResponse queryset filtered by device_ids from homepage events
+    """
+    if start_date is None:
+        start_date = APPLICATION_POSSIBLE_START_DATE
+    if end_date is None:
+        end_date = datetime.now().date()
+
+    homepage_events = BigqueryHomepageEventData.objects.filter(
+        Q(event_date__range=(start_date, end_date))
+    )
+
+    device_ids = homepage_events.values_list('device_id', flat=True).distinct()
+
+    messaging_questions = MessagingQuestionStandard.objects.filter(
+        device_id__in=device_ids
+    )
+
+    return messaging_questions

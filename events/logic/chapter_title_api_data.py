@@ -44,8 +44,6 @@ def extract_relevant_data(combined_data):
             }
             chapters_list.append(chapter_info)
 
-    print("CHAPTERS", len(chapters_list))
-
     return chapters_list
 
 

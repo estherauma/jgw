@@ -25,6 +25,7 @@ def generic_question_filtered_queryset(
     factory_farms=None,
     sector_of_work=None,
     immigration_status=None,
+    show_new_user_data=False,
 ):
     if start_date is None:
         start_date = APPLICATION_POSSIBLE_START_DATE
@@ -113,6 +114,7 @@ def question_response_filtered_queryset(
     factory_farms=None,
     sector_of_work=None,
     immigration_status=None,
+    show_new_user_data=False,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -153,12 +155,14 @@ def question_response_filtered_queryset(
 
     question_response_filters_q_object = Q()
 
-    question_response_filters_q_object &= Q(
-        inline_question__inline_question_standard__api_created_at__range=(
-            final_start_date,
-            final_end_date,
+    if show_new_user_data is False:
+
+        question_response_filters_q_object &= Q(
+            inline_question__inline_question_standard__api_created_at__range=(
+                final_start_date,
+                final_end_date,
+            )
         )
-    )
 
     if user_factories:
         user_fact_farm_q = Q(
