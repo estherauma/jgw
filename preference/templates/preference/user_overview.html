@@ -262,6 +262,7 @@
     </div>
 </div>
 {% endflag %}
+
 {% flag 'can_view_new_monthly_users_chart' %}
 <div class="row">
     <div class="col-md-12 user-by-month">
@@ -279,6 +280,27 @@
     </div>
 </div>
 {% endflag %}
+
+{% flag 'can_view_link_clicks_chart' %}
+<div class="row">
+    <div class="col-md-12 user-by-month">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">Link Clicks by Users</p>
+                <div class="link-clicks-graph-id-chart-box">
+                    <div id="link-clicks-graph-id"></div>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Link Clicks: Number of times a link has been clicked. 
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
+
 {% flag 'can_view_user_route_map_chart' %}
 <div class="row col-md-12 mt-3 user-route-map-chart-box">
     <div class="card h-100">
@@ -326,6 +348,7 @@
 <script src="{% static 'js/charts/map/user_route_map.js' %}"></script>
 <script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_immigration_status_pie_chart.js' %}"></script>
+<script src="{% static 'js/charts/bar/link_clicks_graph.js' %}"></script>
 <script type="text/javascript">
         // get data from context
         var ageData = {{ preferences_by_age | safe }};
@@ -345,6 +368,7 @@
         console.log("users by geo", getUserCountsByGeolocation)
         const countryCoords = {{ country_coords | safe }};
         var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
+        const linkClicksData = {{ link_clicks_data | safe }}
 
         // plots the age piechart
         preferenceAgePieChart(ageData)
@@ -377,6 +401,8 @@
         monthlyActiveUsersChart(monthlyActiveUserCountData);
 
         preferenceImmigrationStatusPieChart(immigrationStatusData)
+
+        linkClicksGraph(linkClicksData)
 
         // Count the number of flex items
         const chartContainer = document.querySelector('.chart-container');
