@@ -80,6 +80,8 @@ class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
         "age",
         "organisation",
         "organisation_code",
+        "geo_city",
+        "geo_country",
         "is_myvoice_organisation",
     ]
     ordering = ["event_date"]

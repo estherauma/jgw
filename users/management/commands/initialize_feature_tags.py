@@ -22,6 +22,7 @@ class Command(BaseCommand):
 
         flags_list = [
             {"condition": "testers", "tag": "can_view_user_geolocation_map_chart_on_user_engagement"},
+            {"condition": "testers", "tag": "can_view_user_geolocation_map"},
             {"condition": "testers", "tag": "can_view_link_clicks_chart"},
             {"condition": "testers", "tag": "can_view_users_by_immigration_status_chart"},
             {"condition": "testers", "tag": "can_view_user_route_map_chart"},

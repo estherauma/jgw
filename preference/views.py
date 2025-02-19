@@ -13,6 +13,7 @@ from core.logic.file_export import generate_and_export_excel
 from events.repository.bigquery_homepage_events_repository import (
     get_monthly_active_user_count,
     get_total_active_user_within_period,
+    get_user_counts_by_geo_country,
 )
 from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
 from events.repository.link_clicks_repository import get_link_clicked_data
@@ -78,7 +79,7 @@ def user_overview(request):
         **filters, current_user=request.user
     )
     link_clicks_data = get_link_clicked_data(**filters, current_user=request.user)
-
+    user_counts_by_geo_country = get_user_counts_by_geo_country(**filters, current_user=request.user)
 
     context = {
         "filter_form": filter_form,
@@ -105,6 +106,7 @@ def user_overview(request):
         "country_coords": country_coords,
         "preferences_by_immigration_status": preferences_by_immigration_status_responses,
         "link_clicks_data": link_clicks_data,
+        "user_counts_by_geo_country": user_counts_by_geo_country,
     }
     return render(request, "preference/user_overview.html", context=context)
 

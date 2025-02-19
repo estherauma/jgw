@@ -323,13 +323,13 @@ class AppEvents(BaseAnalytics):
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'gender') AS gender,
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'organisation') AS organisation,
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'organisationCode') AS organisationCode,
-                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'immigrationStatus') AS immigrationStatus
+                (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'immigrationStatus') AS immigrationStatus,
+                geo.city As geoCity,
+                geo.country As geoCountry
             FROM `just-good-work.analytics_191478110.events_*` 
-
             WHERE event_name='homepage'
-            AND 
-            DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}';
-            """
+            AND DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
+        """
         bigquery_homepage_df = google_client_instance().query(bigquery_homepage_query).to_dataframe()
         bigquery_homepage_df_dict = bigquery_homepage_df.to_dict("records")
 
