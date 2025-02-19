@@ -78,4 +78,5 @@ def get_user_counts_by_geo_country(**filters):
         for entry in user_counts
     ]
 
+    print("geo_data_homepage_events", geo_data)
     return geo_data

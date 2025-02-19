@@ -325,7 +325,11 @@
             <div class="info-tooltip user-geol-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
                 User Geolocation Map: Shows users Geolocation at the time of using the app.
-
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% flag 'can_view_user_geolocation_map' %}
 <div class="row col-md-12 user-route-map-chart-box">
     <div class="card h-100">
@@ -433,6 +437,8 @@
         
         // Call the createUserGeolocationMap function
         createUserGeolocationMap(userGeoCountryData, 'user_geolocation_map');
+        console.log(userGeoCountryData);
+        console.log(getUserCountsByGeolocation);
 
 </script>
 {% endblock %}
