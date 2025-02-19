@@ -33,6 +33,7 @@ from preference.repository.preference_repository import (
     preferences_count,
     get_user_counts_by_origin_destination,
     preferences_by_immigration_status,
+    get_user_counts_by_geolocation,
 )
 from users.utils import get_user_organisations
 from django.core.serializers.json import DjangoJSONEncoder
@@ -62,6 +63,10 @@ def user_overview(request):
     user_counts_by_origin_destination = get_user_counts_by_origin_destination(
         **filters, current_user=request.user
     )
+    start_date = filters.get("start_date")
+    end_date = filters.get("end_date")
+    user_counts_by_geolocation = get_user_counts_by_geolocation(start_date, end_date)
+    
     country_coords = COUNTRY_COORDS
     pasi_downloads = (
         get_total_dynamic_link_usage(current_user=request.user)
@@ -93,6 +98,9 @@ def user_overview(request):
         "total_active_user_count": total_active_users,
         "get_user_counts_by_origin_destination": json.dumps(
             list(user_counts_by_origin_destination), cls=DjangoJSONEncoder
+        ),
+        "get_user_counts_by_geolocation": json.dumps(
+            list(user_counts_by_geolocation), cls=DjangoJSONEncoder
         ),
         "country_coords": country_coords,
         "preferences_by_immigration_status": preferences_by_immigration_status_responses,

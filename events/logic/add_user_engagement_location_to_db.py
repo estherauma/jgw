@@ -26,26 +26,25 @@ def fetch_user_engagement_location_from_bigquery():
 def fetch_and_save_user_engagement_location_to_db():
     try:
         location_events = fetch_user_engagement_location_from_bigquery()
-        
+        print("location_events", len(location_events))
         for location in location_events:
+            event_date = location.get("event_date")
             city = location.get("city")
             country = location.get("country")
             region = location.get("region")
             user_count = location.get("user_count", 0)
             
-            # Get latitude and longitude using OpenStreetMap (Nominatim)
             latitude, longitude = get_lat_lon(city, country)
             
             if latitude and longitude:
-                UserLocation.objects.update_or_create(
+                UserLocation.objects.create(
+                    event_date=event_date,
                     city=city,
                     country=country,
                     region=region,
-                    defaults={
-                        "latitude": latitude,
-                        "longitude": longitude,
-                        "user_count": user_count
-                    }
+                    latitude=latitude,
+                    longitude=longitude,
+                    user_count=user_count
                 )
         
         kunfu_panda_logger.info(f"{len(location_events)} location events saved to the database.")

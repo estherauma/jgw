@@ -298,24 +298,11 @@
 <div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
     <div class="card h-100">
         <div class="card-body chart wide-map">
-            <p class="chart-title mb-2">Users in Origin Countries</p>
-            <div id="user_geolocation_map_origin" class="user-geolocation-map"></div>
+            <p class="chart-title mb-2">Users Geolocation</p>
+            <div id="user_geolocation_map" class="user-geolocation-map"></div>
             <div class="info-tooltip user-geol-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
-                User Geolocation Map: Shows users in orign countries.
-                <div class="tooltip-arrow"></div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
-    <div class="card h-100">
-        <div class="card-body chart wide-map">
-            <p class="chart-title mb-2">Users in Destination Countries</p>
-            <div id="user_geolocation_map_destination" class="user-geolocation-map"></div>
-            <div class="info-tooltip user-geol-map-info-tooltip">
-                <i class="fas fa-info-circle"></i>
-                User Geolocation Map: Shows users in Destination Countries.
+                User Geolocation Map: Shows users Geolocation at the time of using the app.
                 <div class="tooltip-arrow"></div>
             </div>
         </div>
@@ -350,10 +337,13 @@
         var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
         var usersByCountryStateChartData = {{ users_by_country_state | safe }};
         var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
-        const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
-        const monthlyActiveUserCountData = {{monthly_active_user_count | safe}}
-        const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }}
-        const countryCoords = {{ country_coords | safe }}
+        const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }};
+        const monthlyActiveUserCountData = {{monthly_active_user_count | safe}};
+        const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }};
+        console.log("users by origin", getUserCountsByOriginDestination)
+        const getUserCountsByGeolocation = {{ get_user_counts_by_geolocation | safe }};
+        console.log("users by geo", getUserCountsByGeolocation)
+        const countryCoords = {{ country_coords | safe }};
         var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
 
         // plots the age piechart
@@ -401,8 +391,7 @@
 
         // Call the functions create the different maps
         createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
-        createUserOriginMap(getUserCountsByOriginDestination, 'user_geolocation_map_origin', countryCoords);
-        createUserDestinationMap(getUserCountsByOriginDestination, 'user_geolocation_map_destination', countryCoords);
-
+        createUserGeolocationMap(getUserCountsByGeolocation, 'user_geolocation_map', countryCoords);
+        
 </script>
 {% endblock %}

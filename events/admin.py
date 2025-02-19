@@ -137,6 +137,6 @@ class ReportIssueSubmittedEventAdmin(admin.ModelAdmin):
 
 @admin.register(UserLocation)
 class UserLocationAdmin(admin.ModelAdmin):
-    list_display = ["created_at", "city", "country", "user_count", "latitude", "longitude"]
+    list_display = ["event_date", "created_at", "city", "country", "user_count", "latitude", "longitude"]
     search_fields = ["city", "country"]
     ordering = ["-user_count"]

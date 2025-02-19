@@ -345,6 +345,7 @@ class ReportIssueSubmittedEvent(models.Model):
 
 
 class UserLocation(models.Model):
+    event_date = models.DateTimeField()
     country = models.CharField(max_length=100, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     region = models.CharField(max_length=100, null=True, blank=True)

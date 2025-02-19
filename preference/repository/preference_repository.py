@@ -11,6 +11,9 @@ from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset
 from preference.models import Organisation, Preference
 
+from django.db.models import Count,Avg, Min
+from events.models import UserLocation
+
 
 def preferences_count(**filters):
     queryset = Preference.objects.all()
@@ -322,6 +325,64 @@ def get_user_counts_by_origin_destination(**filters):
         for entry in user_counts
     ]
 
+    return heatmap_data
+
+
+def get_user_counts_by_geolocation(start_date=None, end_date=None):
+    """
+    Retrieves user counts grouped by country from the UserLocation model.
+    
+    If start_date and end_date are provided, the function filters records to only those with an event_date
+    within the given range. Otherwise, it returns data for all records.
+    
+    This function excludes entries with a null country and aggregates user counts for each country.
+    It calculates the average latitude and longitude for the country and the earliest creation time and event_date.
+    
+    Args:
+        start_date (date or datetime, optional): The start date to filter event_date.
+        end_date (date or datetime, optional): The end date to filter event_date.
+    
+    Returns:
+        list: A list of dictionaries, each containing:
+        {
+            "country": str,         # Name of the country
+            "latitude": float,      # Average latitude of the location
+            "longitude": float,     # Average longitude of the location
+            "user_count": int,      # Number of users for the country
+            "created_at": datetime, # Earliest creation time for the country data
+            "event_date": datetime  # Earliest event_date for the country data
+        }
+    """
+    queryset = UserLocation.objects.all()
+    
+    if start_date and end_date:
+        queryset = queryset.filter(event_date__range=(start_date, end_date))
+    
+    user_counts = (
+        queryset.exclude(country__isnull=True)
+        .values("country")
+        .annotate(
+            user_count=Count("id"),
+            latitude=Avg("latitude"),
+            longitude=Avg("longitude"),
+            created_at=Min("created_at"),
+            event_date=Min("event_date")
+        )
+        .order_by("-user_count")
+    )
+    
+    heatmap_data = [
+        {
+            "country": entry["country"],
+            "latitude": entry["latitude"],
+            "longitude": entry["longitude"],
+            "user_count": entry["user_count"],
+            "created_at": entry["created_at"],
+            "event_date": entry["event_date"],
+        }
+        for entry in user_counts
+    ]
+    
     return heatmap_data
 
 
