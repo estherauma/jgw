@@ -299,6 +299,8 @@ class BigqueryHomepageEventData(models.Model):
     )
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     organisation_code = models.CharField(max_length=255, null=True, blank=True)
+    geo_city = models.CharField(max_length=255, null=True, blank=True)
+    geo_country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
     is_myvoice_organisation = models.BooleanField(default=False)
 
     def __str__(self):

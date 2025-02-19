@@ -316,6 +316,22 @@
     </div>
 </div>
 {% endflag %}
+
+{% flag 'can_view_user_geolocation_map' %}
+<div class="row col-md-12 user-route-map-chart-box">
+    <div class="card h-100">
+        <div class="card-body chart">
+            <p class="chart-title mb-2">User Geolocation Map</p>
+            <div id="user_geolocation_map" class="user-geolocation-map"></div>
+            <div class="info-tooltip user-geolocation-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Geolocation Map: Shows the geographical distribution of users based on their detected location
+                <div class="tooltip-arrow"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
@@ -333,6 +349,7 @@
 <script src="{% static 'js/charts/map/user_route_map.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_immigration_status_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/bar/link_clicks_graph.js' %}"></script>
+<script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
 <script type="text/javascript">
         // get data from context
         var ageData = {{ preferences_by_age | safe }};
@@ -350,6 +367,7 @@
         const countryCoords = {{ country_coords | safe }}
         var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
         const linkClicksData = {{ link_clicks_data | safe }}
+        const userGeoCountryData = {{ user_counts_by_geo_country | safe }}
 
         // plots the age piechart
         preferenceAgePieChart(ageData)
@@ -399,6 +417,8 @@
         // Call the createUserRouteMap function
         createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
 
+        // Call the createUserGeolocationMap function
+        createUserGeolocationMap(userGeoCountryData, 'user_geolocation_map');
 
 </script>
 {% endblock %}
