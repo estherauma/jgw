@@ -363,9 +363,7 @@
         const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }};
         const monthlyActiveUserCountData = {{monthly_active_user_count | safe}};
         const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }};
-        console.log("users by origin", getUserCountsByOriginDestination)
         const getUserCountsByGeolocation = {{ get_user_counts_by_geolocation | safe }};
-        console.log("users by geo", getUserCountsByGeolocation)
         const countryCoords = {{ country_coords | safe }};
         var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
         const linkClicksData = {{ link_clicks_data | safe }}
