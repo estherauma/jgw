@@ -374,9 +374,7 @@ def get_user_counts_by_geolocation(**filters):
         }
         for entry in user_counts
     ]
-
-    print("heatmap_data", heatmap_data)
-    
+   
     return heatmap_data
 
 

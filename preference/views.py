@@ -67,8 +67,6 @@ def user_overview(request):
         **filters, current_user=request.user
     )
     user_counts_by_geolocation = get_user_counts_by_geolocation(**filters)
-
-    print("user_counts_by_geolocation", user_counts_by_geolocation)
     
     country_coords = COUNTRY_COORDS
     pasi_downloads = (

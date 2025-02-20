@@ -1,9 +1,8 @@
 function createUserGeolocationMap(data, elementId) {
    
-    const filteredData = data.filter(row => row.country !== "Antarctica");
-    const countries = filteredData.map(row => row.country);
-    const counts = filteredData.map(row => row.user_count);
-    const hoverTexts = filteredData.map(row => `${row.country}: ${row.user_count} Users`);
+    const countries = data.map(row => row.country);
+    const counts = data.map(row => row.user_count);
+    const hoverTexts = data.map(row => `${row.country}: ${row.user_count} Users`);
 
     const choroplethTrace = {
         type: 'choropleth',
