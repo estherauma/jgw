@@ -65,8 +65,6 @@ def preference_filtered_queryset(
     user_excluded_origin_countries = get_user_excluded_origin_countries(current_user)
     user_immigration_status = get_user_immigration_status(current_user)
 
-    print("user_immigration_status", user_immigration_status)
-
     preference_filters_q_object = Q()
 
     preference_filters_q_object &= Q(api_created_at__date__range=(final_start_date, final_end_date))

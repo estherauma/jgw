@@ -346,12 +346,8 @@ class ReportIssueSubmittedEvent(models.Model):
 
 class UserLocation(models.Model):
     event_date = models.DateTimeField()
-    country = models.CharField(max_length=100, null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    region = models.CharField(max_length=100, null=True, blank=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    user_count = models.IntegerField(default=0)
+    user_pseudo_id = models.CharField(max_length=255, null=True, blank=True)
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

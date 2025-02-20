@@ -1,9 +1,10 @@
 from collections import defaultdict
+from datetime import datetime
 from django.db.models import Case, When, Value, CharField, F, Count
 from django.db.models.functions import Cast, Substr, Length
 from django.db.models import Q
 from django.db.models.functions import TruncMonth
-from common.const.value_const import ACCESS_CODE_MAPPING
+from common.const.value_const import ACCESS_CODE_MAPPING, APPLICATION_POSSIBLE_START_DATE
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
@@ -328,60 +329,53 @@ def get_user_counts_by_origin_destination(**filters):
     return heatmap_data
 
 
-def get_user_counts_by_geolocation(start_date=None, end_date=None):
+def get_user_counts_by_geolocation(**filters):
     """
-    Retrieves user counts grouped by country from the UserLocation model.
+    Retrieves counts of unique users grouped by country from the UserLocation model.
     
-    If start_date and end_date are provided, the function filters records to only those with an event_date
-    within the given range. Otherwise, it returns data for all records.
-    
-    This function excludes entries with a null country and aggregates user counts for each country.
-    It calculates the average latitude and longitude for the country and the earliest creation time and event_date.
+    If start_date and end_date are provided in filters, the function filters records to only those 
+    with an event_date within the given range. Otherwise, it returns data for all records.
     
     Args:
-        start_date (date or datetime, optional): The start date to filter event_date.
-        end_date (date or datetime, optional): The end date to filter event_date.
+        **filters: Dictionary containing optional start_date and end_date filters
     
     Returns:
         list: A list of dictionaries, each containing:
         {
             "country": str,         # Name of the country
-            "latitude": float,      # Average latitude of the location
-            "longitude": float,     # Average longitude of the location
-            "user_count": int,      # Number of users for the country
+            "user_count": int,      # Number of unique users for the country
             "created_at": datetime, # Earliest creation time for the country data
             "event_date": datetime  # Earliest event_date for the country data
         }
     """
     queryset = UserLocation.objects.all()
     
-    if start_date and end_date:
-        queryset = queryset.filter(event_date__range=(start_date, end_date))
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+    if start_date is None:
+        start_date = APPLICATION_POSSIBLE_START_DATE
+    if end_date is None:
+        end_date = datetime.now().date()
+    queryset = queryset.filter(event_date__range=(start_date, end_date))
     
     user_counts = (
         queryset.exclude(country__isnull=True)
-        .values("country")
+        .values("country__name")
         .annotate(
-            user_count=Count("id"),
-            latitude=Avg("latitude"),
-            longitude=Avg("longitude"),
-            created_at=Min("created_at"),
-            event_date=Min("event_date")
+            user_count=Count('user_pseudo_id', distinct=True),
         )
         .order_by("-user_count")
     )
-    
+
     heatmap_data = [
         {
-            "country": entry["country"],
-            "latitude": entry["latitude"],
-            "longitude": entry["longitude"],
-            "user_count": entry["user_count"],
-            "created_at": entry["created_at"],
-            "event_date": entry["event_date"],
+            "country": entry["country__name"],
+            "user_count": entry["user_count"]       
         }
         for entry in user_counts
     ]
+
+    print("heatmap_data", heatmap_data)
     
     return heatmap_data
 

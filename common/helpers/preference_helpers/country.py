@@ -63,12 +63,3 @@ def get_data_destination(route, api_destination, location_of_potential_work):
         return get_origin_and_destination_from_route(route).get("destination")
 
     return NOT_SPECIFIED
-
-def get_lat_lon(city, country):
-    try:
-        location = geolocator.geocode(f"{city}, {country}")
-        if location:
-            return location.latitude, location.longitude
-    except GeocoderTimedOut:
-        pass
-    return None, None

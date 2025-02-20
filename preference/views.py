@@ -66,9 +66,9 @@ def user_overview(request):
     user_counts_by_origin_destination = get_user_counts_by_origin_destination(
         **filters, current_user=request.user
     )
-    start_date = filters.get("start_date")
-    end_date = filters.get("end_date")
-    user_counts_by_geolocation = get_user_counts_by_geolocation(start_date, end_date)
+    user_counts_by_geolocation = get_user_counts_by_geolocation(**filters)
+
+    print("user_counts_by_geolocation", user_counts_by_geolocation)
     
     country_coords = COUNTRY_COORDS
     pasi_downloads = (
@@ -103,9 +103,7 @@ def user_overview(request):
         "get_user_counts_by_origin_destination": json.dumps(
             list(user_counts_by_origin_destination), cls=DjangoJSONEncoder
         ),
-        "get_user_counts_by_geolocation": json.dumps(
-            list(user_counts_by_geolocation), cls=DjangoJSONEncoder
-        ),
+        "get_user_counts_by_geolocation": user_counts_by_geolocation,
         "country_coords": country_coords,
         "preferences_by_immigration_status": preferences_by_immigration_status_responses,
         "link_clicks_data": link_clicks_data,

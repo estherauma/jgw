@@ -1,7 +1,7 @@
 from django.db import transaction
 from common.app_events import AppEvents
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
-from common.helpers.preference_helpers.country import get_lat_lon
+from common.helpers.model_helpers.preference import get_or_add_country_to_db
 from common.utils.date_utils import todays_date
 from events.models import UserLocation
 from common.logger import KunfuPandaLogger
@@ -29,23 +29,15 @@ def fetch_and_save_user_engagement_location_to_db():
         print("location_events", len(location_events))
         for location in location_events:
             event_date = location.get("event_date")
-            city = location.get("city")
+            user_pseudo_id = location.get("user_pseudo_id")
             country = location.get("country")
-            region = location.get("region")
-            user_count = location.get("user_count", 0)
-            
-            latitude, longitude = get_lat_lon(city, country)
-            
-            if latitude and longitude:
-                UserLocation.objects.create(
-                    event_date=event_date,
-                    city=city,
-                    country=country,
-                    region=region,
-                    latitude=latitude,
-                    longitude=longitude,
-                    user_count=user_count
-                )
+            country = get_or_add_country_to_db(country)
+
+            UserLocation.objects.create(
+                event_date=event_date,
+                user_pseudo_id=user_pseudo_id,
+                country=country,
+            )
         
         kunfu_panda_logger.info(f"{len(location_events)} location events saved to the database.")
         

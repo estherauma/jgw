@@ -366,26 +366,17 @@ class AppEvents(BaseAnalytics):
     def fetch_location_data(self, start_date=None, end_date=None):
         fetch_location_query = f"""
         SELECT 
-            DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
-            geo.city, 
-            geo.country, 
-            geo.region,
-            geo.continent,
-            COUNT(*) AS user_count
+            DATETIME(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+            user_pseudo_id,
+            geo.country
         FROM 
             `just-good-work.analytics_191478110.events_*`
         WHERE 
             event_name = "user_engagement"
             AND 
             DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
-            GROUP BY 
-            event_date,
-            geo.city,
-            geo.country,
-            geo.region,
-            geo.continent
-        ORDER BY 
-            user_count DESC;
+        ORDER BY
+            event_date ASC;
         """
 
         results = google_client_instance().query(fetch_location_query)
