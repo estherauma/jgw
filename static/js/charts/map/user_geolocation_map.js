@@ -1,4 +1,4 @@
-function createUserGeolocationMap(data, elementId) {
+function createUserGeolocMap(data, elementId) {
    
     const countries = data.map(row => row.country);
     const counts = data.map(row => row.user_count);
