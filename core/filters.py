@@ -1,4 +1,5 @@
 def create_generic_filters_dictionary(
+    show_new_user_data=False,
     start_date=None,
     end_date=None,
     destination_countries=None,
@@ -13,6 +14,7 @@ def create_generic_filters_dictionary(
         extra_filters["question_texts"] = question_texts
 
     return {
+        "show_new_user_data": show_new_user_data,
         "start_date": start_date,
         "end_date": end_date,
         "destination_countries": destination_countries,
@@ -25,6 +27,7 @@ def create_generic_filters_dictionary(
 
 
 def generic_filter_form_parser(filter_form):
+    show_new_user_data = filter_form.cleaned_data["show_new_user_data"]
     start_date = filter_form.cleaned_data["start_date"]
     end_date = filter_form.cleaned_data["end_date"]
     destinations = filter_form.cleaned_data["destination"]
@@ -35,6 +38,7 @@ def generic_filter_form_parser(filter_form):
     question_texts = filter_form.cleaned_data.get("question_texts")
 
     return create_generic_filters_dictionary(
+        show_new_user_data=show_new_user_data,
         start_date=start_date,
         end_date=end_date,
         destination_countries=destinations,

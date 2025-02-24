@@ -26,6 +26,7 @@ def generic_chapters_opened_filtered_queryset(
     factory_farms=None,
     sector_of_work=None,
     immigration_status=None,
+    show_new_user_data=False,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -125,6 +126,7 @@ def generic_chapters_feedback_filtered_queryset(
     factory_farms=None,
     sector_of_work=None,
     immigration_status=None,
+    show_new_user_data=False,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -225,6 +227,7 @@ def filter_bigquery_homepage_event_data(
     factory_farms=None,
     sector_of_work=None,
     immigration_status=None,
+    show_new_user_data=False,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
