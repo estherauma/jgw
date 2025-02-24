@@ -76,7 +76,6 @@ def fetch_and_save_homepage_events_to_db():
                 geo_country=geo_country
             )
             event_instances.append(event_instance)
-        print("event_instances", event_instances[0].__dict__)
         bulk_create_in_chunks(BigqueryHomepageEventData, event_instances)
 
         print(f"{len(homepage_events)} homepage events saved to the database.")
