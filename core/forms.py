@@ -16,6 +16,16 @@ from users.utils import (
 
 
 class GenericFilterForm(forms.Form):
+    show_new_user_data = forms.BooleanField(
+        label="Show Data for New Users(Default is Active Users)",
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={
+            "class": "form-check-input",
+            "style": "margin-right: 5px;",
+        })
+    )
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)

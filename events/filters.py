@@ -26,6 +26,7 @@ def generic_chapters_opened_filtered_queryset(
     factory_farms=None,
     sector_of_work=None,
     immigration_status=None,
+    show_new_user_data=False,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -126,6 +127,7 @@ def generic_chapters_feedback_filtered_queryset(
     factory_farms=None,
     sector_of_work=None,
     immigration_status=None,
+    show_new_user_data=False,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -227,6 +229,7 @@ def filter_bigquery_homepage_event_data(
     factory_farms=None,  
     sector_of_work=None,
     immigration_status=None,
+    show_new_user_data=False,
 ):
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
@@ -278,3 +281,21 @@ def filter_bigquery_homepage_event_data(
         homepage_event_filters_q_object &= Q(immigration_status__in=user_immigration_status)
 
     return queryset.filter(homepage_event_filters_q_object)
+
+
+def generic_link_clicked_filtered_queryset(
+    queryset: BaseManager[Any],
+    start_date=None,
+    end_date=None,
+    **kwargs
+):
+    link_clicked_filters_q_object = Q()
+
+    if start_date and end_date:
+        link_clicked_filters_q_object &= Q(event_date__range=(start_date, end_date))
+    elif start_date:
+        link_clicked_filters_q_object &= Q(event_date__gte=start_date)
+    elif end_date:
+        link_clicked_filters_q_object &= Q(event_date__lte=end_date)
+
+    return queryset.filter(link_clicked_filters_q_object)

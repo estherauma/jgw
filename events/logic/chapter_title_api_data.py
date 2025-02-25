@@ -2,23 +2,28 @@ import requests
 from django.db import transaction
 from events.models import Chapter, ChaptersFeedback, ChaptersFeedbackStandard
 
+from jgwpandas.settings import JGW_API, JGW_API_SECRET
 from preference.models import Country
 
 
 def fetch_data_from_api(destination_codes):
 
-    url = "https://staging-api.justgood.work/api/v2/appcontent/chapter-titles"
+    url = f"{JGW_API}appcontent/v2/chapter-titles"
+    
     combined_data = []
 
     for code in destination_codes:
         params = {
-            "productID": "vanilla",
-            "configVersion": "app_config_v3",
+            "configVersion": "version_4",
             "languageCode": "en-gc",
             "destinationCode": code,
         }
 
-        response = requests.get(url, params=params)
+        headers = {
+            "secret": JGW_API_SECRET
+        }
+
+        response = requests.get(url, params=params, headers=headers)
         if response.status_code == 200:
             data = response.json()
             if data["status"] == "OK":
@@ -43,8 +48,6 @@ def extract_relevant_data(combined_data):
                 "title": chapter["title"],
             }
             chapters_list.append(chapter_info)
-
-    print("CHAPTERS", len(chapters_list))
 
     return chapters_list
 
@@ -99,7 +102,7 @@ def update_chapter_titles():
 
 
 def fetch_and_update_all_destiantion_chapter_titles():
-    destination_codes = ["JOR", "MYS", "MUS", "POL", "QAT", "ROU", "SAU", "ARE", "GBR", "ESP"]
+    destination_codes = ["JOR", "MYS", "MUS", "POL", "QAT", "ROU", "SAU", "ARE", "GBR", "ESP","MEX","MAU","JEY"]
     api_data = fetch_data_from_api(destination_codes)
     if api_data:
         chapters_list = extract_relevant_data(api_data)

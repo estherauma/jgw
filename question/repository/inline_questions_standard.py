@@ -1,28 +1,61 @@
 from datetime import datetime
 from django.db.models import Q
-from django.db.models import Count, Case, When, F
+from django.db.models import Count, F
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.inline import convert_question_key_to_readable_string, convert_to_camel_case
 from common.utils.strings import format_thousands_with_commas
-from question.filters import generic_question_filtered_queryset, question_response_filtered_queryset
+from question.filters import question_response_filtered_queryset
 
-from question.models import InlineQuestionResponse, InlineQuestionStandard
+from question.models import InlineQuestionResponse
+from events.models import BigqueryHomepageEventData
 
 
 def inline_questions_count(**filters):
-    inline_questions_count_queryset = generic_question_filtered_queryset(
-        queryset=InlineQuestionStandard.objects.all(), **filters
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_inline_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    else:
+        base_queryset = InlineQuestionResponse.objects.all()
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    inline_questions_queryset = question_response_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
     )
 
-    return format_thousands_with_commas(inline_questions_count_queryset.count())
+    return format_thousands_with_commas(inline_questions_queryset.count())
 
 
 def get_inline_question_per_origin_counts(**filters):
-    queryset = question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
-    queryset = queryset.exclude(response__translated_text="not specified")
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_inline_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = InlineQuestionResponse.objects.all()
+
+    inline_questions_queryset = question_response_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     origin_counts_data = (
-        queryset.annotate(origin_name=F("inline_question__inline_question_standard__origin__name"))
+        inline_questions_queryset.annotate(origin_name=F("inline_question__inline_question_standard__origin__name"))
         .values("origin_name")
         .annotate(count=Count("origin_name"))
         .order_by("-count")
@@ -40,11 +73,28 @@ def get_inline_question_per_origin_counts(**filters):
 
 
 def get_inline_question_per_destination_counts(**filters):
-    queryset = question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
-    queryset = queryset.exclude(response__translated_text="not specified")
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_inline_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    else:
+        base_queryset = InlineQuestionResponse.objects.all()
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    inline_questions_queryset = question_response_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     destination_counts_data = (
-        queryset.annotate(destination_name=F("inline_question__inline_question_standard__destination__name"))
+        inline_questions_queryset.annotate(destination_name=F("inline_question__inline_question_standard__destination__name"))
         .values("destination_name")
         .annotate(count=Count("destination_name"))
         .order_by("-count")
@@ -64,9 +114,25 @@ def get_inline_question_per_destination_counts(**filters):
 
 
 def get_inline_question_per_organisation_counts(**filters):
-    queryset = question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
-    queryset = queryset.exclude(response__translated_text="not specified")
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
 
+    if show_new_user_data is False:
+        base_queryset = get_inline_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    else:
+        base_queryset = InlineQuestionResponse.objects.all()
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    inline_questions_queryset = question_response_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
     organisation_counts_data = (
         queryset.annotate(
             organisation_name=F("inline_question__inline_question_standard__org_info__name")
@@ -90,11 +156,28 @@ def get_inline_question_per_organisation_counts(**filters):
 
 
 def get_inline_question_per_language_counts(**filters):
-    queryset = question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
-    queryset = queryset.exclude(response__translated_text="not specified")
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_inline_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    else:
+        base_queryset = InlineQuestionResponse.objects.all()
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    inline_questions_queryset = question_response_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     language_counts_data = (
-        queryset.annotate(
+        inline_questions_queryset.annotate(
             language_name=F("inline_question__inline_question_standard__language__translated_name"),
         )
         .values("language_name")
@@ -114,8 +197,23 @@ def get_inline_question_per_language_counts(**filters):
 
 
 def each_inline_question_response(**filters):
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_inline_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    else:
+        base_queryset = InlineQuestionResponse.objects.all()
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
     inline_question_responses = question_response_filtered_queryset(
-        queryset=InlineQuestionResponse.objects.all(), **filters
+        queryset=base_queryset, **filters
     )
     inline_question_responses = inline_question_responses.exclude(response__translated_text="not specified")
     inline_questions_with_responses = inline_question_responses.values(
@@ -152,13 +250,26 @@ def each_inline_question_response(**filters):
 
 
 def inline_question_responses_count(**filters):
-    inline_question_responses = question_response_filtered_queryset(
-        queryset=InlineQuestionResponse.objects.all(), **filters
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_inline_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    else:
+        base_queryset = InlineQuestionResponse.objects.all()
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
+    inline_questions_queryset = question_response_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
     )
-    inline_question_responses_filtered = inline_question_responses.exclude(
-        response__translated_text="not specified"
-    )
-    inline_question_responses_count_queryset = inline_question_responses_filtered.count()
+    inline_question_responses_count_queryset = inline_questions_queryset.count()
 
     return format_thousands_with_commas(inline_question_responses_count_queryset)
 
@@ -206,8 +317,19 @@ def inline_question_response():
 
 
 def get_all_inline_question_responses_data(**filters):
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_inline_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
+
     responses = (
-        question_response_filtered_queryset(queryset=InlineQuestionResponse.objects.all(), **filters)
+        question_response_filtered_queryset(queryset=base_queryset, **filters)
         .exclude(Q(inline_question__question__text="not specified"))
         .select_related(
             "inline_question__inline_question_standard",
@@ -263,3 +385,32 @@ def get_all_inline_question_responses_data(**filters):
         )
 
     return data
+
+
+def get_inline_questions_by_homepage_events(start_date=None, end_date=None):
+    """
+    Retrieves inline questions for users who have homepage events within the specified date range.
+    
+    Args:
+        start_date (date, optional): Start date for filtering homepage events
+        end_date (date, optional): End date for filtering homepage events
+        
+    Returns:
+        QuerySet: InlineQuestionResponse queryset filtered by device_ids from homepage events
+    """
+    if start_date is None:
+        start_date = APPLICATION_POSSIBLE_START_DATE
+    if end_date is None:
+        end_date = datetime.now().date()
+
+    homepage_events = BigqueryHomepageEventData.objects.filter(
+        Q(event_date__range=(start_date, end_date))
+    )
+
+    device_ids = homepage_events.values_list('device_id', flat=True).distinct()
+
+    inline_questions = InlineQuestionResponse.objects.filter(
+        inline_question__inline_question_standard__device_id__in=device_ids
+    )
+
+    return inline_questions

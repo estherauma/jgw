@@ -15,6 +15,7 @@ from events.repository.bigquery_homepage_events_repository import (
     get_total_active_user_within_period,
 )
 from events.repository.bigquery_sws_pasi_repository import get_total_dynamic_link_usage
+from events.repository.link_clicks_repository import get_link_clicked_data
 from help_contacts.repository.help_contacts_data import get_help_contacts_between_dates
 from preference.repository.preference_repository import (
     extract_preference_for_export,
@@ -33,9 +34,11 @@ from preference.repository.preference_repository import (
     preferences_count,
     get_user_counts_by_origin_destination,
     preferences_by_immigration_status,
+    get_preferences_by_device_id,
 )
 from users.utils import get_user_organisations
 from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth.decorators import login_required
 
 
 def user_overview(request):
@@ -72,7 +75,8 @@ def user_overview(request):
         **filters, current_user=request.user
     )
 
-    print("preferences_by_immigration_status_responses", preferences_by_immigration_status_responses)
+    link_clicks_data = get_link_clicked_data(**filters, current_user=request.user)
+
 
     context = {
         "filter_form": filter_form,
@@ -97,9 +101,24 @@ def user_overview(request):
         ),
         "country_coords": country_coords,
         "preferences_by_immigration_status": preferences_by_immigration_status_responses,
+        "link_clicks_data": link_clicks_data,
     }
     return render(request, "preference/user_overview.html", context=context)
 
+
+@login_required
+def user_diagnostics(request):
+    preferences = []
+    device_id = request.GET.get('device_id', '')
+    
+    if device_id:
+        preferences = get_preferences_by_device_id(device_id)
+    
+    context = {
+        'preferences': preferences,
+        'device_id': device_id
+    }
+    return render(request, 'preference/user_diagnostics.html', context)
 
 def export_preference_stats(request):
     form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
@@ -342,3 +361,5 @@ def export_preferences_data(request):
     wb.save(response)
 
     return response
+
+

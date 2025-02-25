@@ -324,6 +324,7 @@ def export_message_sent_data(request):
         "Organisation",
         "Message Title",
         "Message Title English",
+        "Actual Message Content",
         "Message Date",
         "Message Delivered",
         "Message Delivered Date",
@@ -361,11 +362,12 @@ def export_message_sent_data(request):
         ws.cell(row=idx, column=7, value=data.get("organisation", ""))
         ws.cell(row=idx, column=8, value=data.get("message_title", ""))
         ws.cell(row=idx, column=9, value=data.get("message_title_english", ""))
-        ws.cell(row=idx, column=10, value=message_date)
-        ws.cell(row=idx, column=11, value=str(data.get("message_delivered", "")))
-        ws.cell(row=idx, column=12, value=str(data.get("message_delivered_date", "")))
-        ws.cell(row=idx, column=13, value=str(data.get("message_queued", "")))
-        ws.cell(row=idx, column=14, value=str(data.get("message_notification_sent_to_FCM", "")))
+        ws.cell(row=idx, column=10, value=data.get("actual_message", ""))
+        ws.cell(row=idx, column=11, value=message_date)
+        ws.cell(row=idx, column=12, value=str(data.get("message_delivered", "")))
+        ws.cell(row=idx, column=13, value=str(data.get("message_delivered_date", "")))
+        ws.cell(row=idx, column=14, value=str(data.get("message_queued", "")))
+        ws.cell(row=idx, column=15, value=str(data.get("message_notification_sent_to_FCM", "")))
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = "attachment; filename=message_sent_data.xlsx"

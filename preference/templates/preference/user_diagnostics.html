@@ -1,0 +1,128 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}User Diagnostics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">User Diagnostics</h4>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="header-title">Search by Device ID</h4>
+                    <form method="GET" class="row g-3 align-items-center">
+                        <div class="col-8">
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="device_id" 
+                                   name="device_id"
+                                   value="{{ device_id }}" 
+                                   placeholder="Enter Preference Device ID ......">
+                        </div>
+                        <div class="col-4">
+                            <button type="submit" class="btn bg-jgw-deep-blue text-white w-100">
+                                Search
+                                <i class="fas fa-search ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if device_id %}
+        {% if preferences %}
+            {% for preference in preferences %}
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title text-center mb-4"><i class="fas fa-file-alt me-2"></i>Preference Record #{{ preference.id }}</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <th><i class="fas fa-mobile-alt me-2"></i>Device ID</th>
+                                                    <td>{{ preference.device_id }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="min-width: 150px;"><i class="far fa-calendar-alt me-2"></i>Created At</th>
+                                                    <td>{{ preference.api_created_at }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="min-width: 150px;"><i class="far fa-clock me-2"></i>Updated At</th>
+                                                    <td>{{ preference.api_updated_at }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th><i class="fas fa-user me-2"></i>Gender</th>
+                                                    <td>{{ preference.gender.translated_name|default:"Not specified" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th><i class="fas fa-birthday-cake me-2"></i>Age</th>
+                                                    <td>{{ preference.age.translated_range|default:"Not specified" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th><i class="fas fa-language me-2"></i>Language</th>
+                                                    <td>{{ preference.language.name|default:"Not specified" }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <th><i class="fas fa-map-marker-alt me-2"></i>Origin</th>
+                                                    <td>{{ preference.origin.name|default:"Not specified" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th><i class="fas fa-map-pin me-2"></i>Destination</th>
+                                                    <td>{{ preference.destination.name|default:"Not specified" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th><i class="fas fa-building me-2"></i>Organization</th>
+                                                    <td>{{ preference.organisation.name|default:"Not specified" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th><i class="fas fa-key me-2"></i>Access Code</th>
+                                                    <td>{{ preference.organisation_access_code.code|default:"Not specified" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th><i class="fas fa-database me-2"></i>Data Source ID</th>
+                                                    <td>{{ preference.data_source_id }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5><i class="fas fa-exclamation-circle me-2"></i>No preferences found for device ID: {{ device_id }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

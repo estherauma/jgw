@@ -1,27 +1,45 @@
 from collections import defaultdict
+from datetime import datetime
 from django.db.models import Case, When, Value, CharField, F, Count
 from django.db.models.functions import Cast, Substr, Length
 from django.db.models import Q
 from django.db.models.functions import TruncMonth
-from common.const.value_const import ACCESS_CODE_MAPPING
+from common.const.value_const import ACCESS_CODE_MAPPING, APPLICATION_POSSIBLE_START_DATE
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset
 from preference.models import Organisation, Preference
+from events.models import BigqueryHomepageEventData
 
 
 def preferences_count(**filters):
-    queryset = Preference.objects.all()
 
-    preferences_count_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    base_queryset = Preference.objects.all()
 
-    return format_thousands_with_commas(preferences_count_queryset.count())
+    return format_thousands_with_commas(base_queryset.count())
 
 
 def preferences_by_age(**filters):
-    preferences_age_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
+
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_age_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     age_counts = (
         preferences_age_queryset.values("age__translated_range")
@@ -60,7 +78,23 @@ def preferences_by_age(**filters):
 
 
 def preferences_by_gender(**filters):
-    preferences_gender_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_gender_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     gender_counts = (
         preferences_gender_queryset.values("gender__translated_name")
@@ -80,7 +114,20 @@ def preferences_by_gender(**filters):
 
 
 def preferences_by_origin(**filters):
-    preferences_origin_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_origin_queryset = preference_filtered_queryset(queryset=base_queryset, **filters)
 
     preferences_origin_queryset = preferences_origin_queryset.annotate(
         normalized_origin=Case(
@@ -111,8 +158,22 @@ def preferences_by_origin(**filters):
 
 
 def preferences_by_destination(**filters):
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        # Get base queryset from homepage events
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+    else:
+        base_queryset = Preference.objects.all()
+
     preferences_destination_queryset = preference_filtered_queryset(
-        queryset=Preference.objects.all(), **filters
+        queryset=base_queryset, 
+        **filters
     )
 
     destination_counts = (
@@ -128,7 +189,24 @@ def preferences_by_destination(**filters):
 
 
 def preferences_by_language(**filters):
-    preferences_language_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        # Get base queryset from homepage events
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_language_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     language_counts = (
         preferences_language_queryset.values("language__translated_name")
@@ -164,7 +242,23 @@ def preferences_by_language(**filters):
 
 
 def preferences_by_organisation(**filters):
-    organisation_queryset = preference_filtered_queryset(queryset=Preference.objects.all(), **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_organisation_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     organisation_counts = (
         organisation_queryset.values("org_info__name")
@@ -225,10 +319,26 @@ def get_cumulative_monthly_new_users(**filters):
 
 
 def get_users_by_country_state(**filters):
-    queryset = Preference.objects.all()
-    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_language_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
+
     preferences_count_by_state = (
-        filtered_queryset.values("destination_state__name")
+        preferences_language_queryset.values("destination_state__name")
         .annotate(users_count=Count("id"))
         .order_by("destination_state__name")
     )
@@ -244,11 +354,26 @@ def get_users_by_country_state(**filters):
 
 
 def get_preferences_by_sectors(**filters):
-    queryset = Preference.objects.all()
-    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_language_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     result = (
-        filtered_queryset.filter(sectors_of_work__original_sector_of_work__isnull=False)
+        preferences_language_queryset.filter(sectors_of_work__original_sector_of_work__isnull=False)
         .annotate(
             sector_value=Case(
                 When(sectors_of_work__original_sector_of_work__value="Driving", then=Value("Transport")),
@@ -289,10 +414,26 @@ def get_user_counts_by_origin_destination(**filters):
             "count": int  # Number of users for this origin-destination pair
         }
     """
-    queryset = Preference.objects.all()
-    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_user_counts_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
+
     user_counts = (
-        filtered_queryset.exclude(origin__isnull=True, destination__isnull=True)
+        preferences_user_counts_queryset.exclude(origin__isnull=True, destination__isnull=True)
         .values("origin__name", "destination__name")
         .annotate(user_count=Count("id"))
     )
@@ -310,8 +451,23 @@ def get_user_counts_by_origin_destination(**filters):
 
 
 def get_sws_workcodes_with_access_code(**filters):
-    queryset = Preference.objects.all()
-    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_access_code_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
 
     whens = [
         When(organisation_access_code__code=key, then=Value(value))
@@ -319,7 +475,7 @@ def get_sws_workcodes_with_access_code(**filters):
     ]
 
     queryset_data = (
-        filtered_queryset.values(
+        preferences_access_code_queryset.values(
             organisation_name=F("organisation__name"), access_code=F("organisation_access_code__code")
         )
         .exclude(organisation__name__in=["not specified"])
@@ -442,10 +598,26 @@ def extract_preference_for_export(**filters):
 
 
 def preferences_by_immigration_status(**filters):
-    queryset = Preference.objects.all()
-    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    else:
+        base_queryset = Preference.objects.all()
+
+    preferences_immigration_status_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
+
     results = (
-        filtered_queryset.values("immigration_status__name")
+        preferences_immigration_status_queryset.values("immigration_status__name")
         .annotate(
             name=Case(
                 When(immigration_status__name__isnull=True, then=Value("Not Specified")),
@@ -461,3 +633,41 @@ def preferences_by_immigration_status(**filters):
         "labels": [item["name"] for item in results],
         "counts": [item["count"] for item in results],
     }
+
+
+def get_preferences_by_device_id(device_id):
+    preferences = Preference.objects.filter(device_id__icontains=device_id).select_related(
+        'gender',
+        'age',
+        'language',
+        'origin',
+        'destination',
+        'api_destination',
+        'destination_state',
+        'route',
+        'organisation_sector',
+        'organisation_access_code',
+        'factory_farm',
+        'organisation',
+    ).order_by('-api_created_at')
+    return preferences
+
+
+def get_preferences_by_homepage_events(start_date=None, end_date=None):
+    if start_date is None:
+        start_date = APPLICATION_POSSIBLE_START_DATE
+    if end_date is None:
+        end_date = datetime.now().date()
+
+    homepage_events = BigqueryHomepageEventData.objects.filter(
+        Q(event_date__range=(start_date, end_date))
+    )
+        
+    device_ids = homepage_events.values_list('device_id', flat=True).distinct()
+
+
+    preferences = Preference.objects.filter(
+        device_id__in=device_ids
+    )
+
+    return preferences
