@@ -21,7 +21,6 @@ class Command(BaseCommand):
             testers_group.permissions.add(permission)
 
         flags_list = [
-            {"condition": "testers", "tag": "can_view_user_geolocation_map_chart_on_user_engagement"},
             {"condition": "testers", "tag": "can_view_user_geolocation_map"},
             {"condition": "testers", "tag": "can_view_link_clicks_chart"},
             {"condition": "testers", "tag": "can_view_users_by_immigration_status_chart"},
