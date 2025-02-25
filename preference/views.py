@@ -34,6 +34,7 @@ from preference.repository.preference_repository import (
     preferences_count,
     get_user_counts_by_origin_destination,
     preferences_by_immigration_status,
+    get_user_counts_by_geolocation,
     get_preferences_by_device_id,
 )
 from users.utils import get_user_organisations
@@ -65,6 +66,8 @@ def user_overview(request):
     user_counts_by_origin_destination = get_user_counts_by_origin_destination(
         **filters, current_user=request.user
     )
+    user_counts_by_geolocation = get_user_counts_by_geolocation(**filters)
+    
     country_coords = COUNTRY_COORDS
     pasi_downloads = (
         get_total_dynamic_link_usage(current_user=request.user)
@@ -74,7 +77,6 @@ def user_overview(request):
     preferences_by_immigration_status_responses = preferences_by_immigration_status(
         **filters, current_user=request.user
     )
-
     link_clicks_data = get_link_clicked_data(**filters, current_user=request.user)
 
 
@@ -99,6 +101,7 @@ def user_overview(request):
         "get_user_counts_by_origin_destination": json.dumps(
             list(user_counts_by_origin_destination), cls=DjangoJSONEncoder
         ),
+        "get_user_counts_by_geolocation": user_counts_by_geolocation,
         "country_coords": country_coords,
         "preferences_by_immigration_status": preferences_by_immigration_status_responses,
         "link_clicks_data": link_clicks_data,

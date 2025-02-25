@@ -342,3 +342,13 @@ class ReportIssueSubmittedEvent(models.Model):
 
     def __str__(self):
         return f"Report Issue on {self.event_date} by {self.device_id}"
+
+
+class UserLocation(models.Model):
+    event_date = models.DateTimeField()
+    user_pseudo_id = models.CharField(max_length=255, null=True, blank=True)
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.city}, {self.country} ({self.user_count} users)"

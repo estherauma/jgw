@@ -316,6 +316,21 @@
     </div>
 </div>
 {% endflag %}
+{% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
+<div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
+    <div class="card h-100">
+        <div class="card-body chart wide-map">
+            <p class="chart-title mb-2">Users Geolocation Map Basing On User Engagement</p>
+            <div id="user_geolocation_map_user_engagement" class="user-geolocation-map"></div>
+            <div class="info-tooltip user-geol-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Geolocation Map: Shows users Geolocation at the time of using the app.
+                <div class="tooltip-arrow"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
@@ -331,6 +346,7 @@
 <script src="{% static 'js/app/user_overview.js' %}"></script>
 <script src="{% static 'js/charts/line/active_users_monthly_stat.js' %}"></script>
 <script src="{% static 'js/charts/map/user_route_map.js' %}"></script>
+<script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_immigration_status_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/bar/link_clicks_graph.js' %}"></script>
 <script type="text/javascript">
@@ -344,10 +360,11 @@
         var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
         var usersByCountryStateChartData = {{ users_by_country_state | safe }};
         var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
-        const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }}
-        const monthlyActiveUserCountData = {{monthly_active_user_count | safe}}
-        const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }}
-        const countryCoords = {{ country_coords | safe }}
+        const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }};
+        const monthlyActiveUserCountData = {{monthly_active_user_count | safe}};
+        const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }};
+        const getUserCountsByGeolocation = {{ get_user_counts_by_geolocation | safe }};
+        const countryCoords = {{ country_coords | safe }};
         var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
         const linkClicksData = {{ link_clicks_data | safe }}
 
@@ -396,9 +413,11 @@
             lastColumn.style.maxWidth = '100%';
         }
 
-        // Call the createUserRouteMap function
+        // Call the functions create the different maps
         createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
 
-
+        // Call the createUserGeolocMap function
+        createUserGeolocMap(getUserCountsByGeolocation, 'user_geolocation_map_user_engagement', countryCoords);
+        
 </script>
 {% endblock %}

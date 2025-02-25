@@ -1,4 +1,8 @@
 from common.const.value_const import NOT_SPECIFIED
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
+
+geolocator = Nominatim(user_agent="geo_django")
 
 
 def normalize_country_name(country: str) -> str:

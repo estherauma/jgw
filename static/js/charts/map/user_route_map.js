@@ -181,10 +181,35 @@ function createUserRouteMap(data, elementId, countryCoords) {
         lat: layout.geo.lataxis.range
     };
 
-    Plotly.newPlot(elementId, allTraces, layout, {
+    const config = {
         responsive: true,
-        scrollZoom: false,
-        displayModeBar: false,
+        scrollZoom: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: [
+            'pan2d',
+            'toImage', 
+            'select2d', 
+            'lasso2d', 
+            'hoverClosestGeo', 
+            'hoverClosestCartesian',
+            'hoverCompareCartesian',
+            'autoScale2d',
+            'resetScale2d',
+            'toggleHover',
+            'resetViews'
+        ],
+        modeBarButtonsToAdd: [
+            'zoomInGeo', 
+            'zoomOutGeo', 
+            'resetGeo'
+        ],
+        displaylogo: false 
+    };
+
+    Plotly.newPlot(elementId, allTraces, layout, config,{
+        responsive: true,
+        scrollZoom: true,
+        displayModeBar: true,
     }).then(function(gd) {
         gd.on('plotly_relayout', function(eventData) {
             const newRange = {
@@ -228,6 +253,12 @@ function createUserRouteMap(data, elementId, countryCoords) {
     }
 
     animateLines();
+
+    const modeBar = container.querySelector('.modebar-container');
+    if (modeBar) {
+        modeBar.style.left = '-70px';
+        modeBar.style.top = '65px';
+    }
 
     window.addEventListener('resize', () => {
         Plotly.Plots.resize(elementId);

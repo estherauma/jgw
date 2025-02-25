@@ -15,6 +15,8 @@ from common.utils.date_utils import previous_dates
 from common.utils.helpers import save_as_excel
 from events.models import BigQueryChaptersData, BigQueryFirstOpenHomepageData
 
+
+
 api = JGWApi()
 
 QueryMap = Dict[str, list[str]]
@@ -360,3 +362,23 @@ class AppEvents(BaseAnalytics):
         """
         report_issue_df = google_client_instance().query(report_issue_query).to_dataframe()
         return report_issue_df.to_dict("records")
+
+    def fetch_location_data(self, start_date=None, end_date=None):
+        fetch_location_query = f"""
+        SELECT 
+            DATETIME(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+            user_pseudo_id,
+            geo.country
+        FROM 
+            `just-good-work.analytics_191478110.events_*`
+        WHERE 
+            event_name = "user_engagement"
+            AND 
+            DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
+        ORDER BY
+            event_date ASC;
+        """
+
+        results = google_client_instance().query(fetch_location_query)
+        results_df = results.to_dataframe()
+        return results_df.to_dict('records')

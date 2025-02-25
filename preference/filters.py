@@ -66,7 +66,6 @@ def preference_filtered_queryset(
     user_excluded_origin_countries = get_user_excluded_origin_countries(current_user)
     user_immigration_status = get_user_immigration_status(current_user)
 
-
     preference_filters_q_object = Q()
 
     if show_new_user_data:
