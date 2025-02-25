@@ -24,6 +24,7 @@ from common.helpers.preference_helpers.country import (
     get_data_origin,
 )
 from common.utils.helpers import can_use_cached_data
+from preference.logic.add_orgcode_to_preferences import add_organisation_data_to_db
 from preference.logic.update_perference_organisation_info import update_preferences_org_info_from_organisation
 from preference.models import Country, Organisation, OrganisationAccessCode, Preference, OrganisationData
 from preference.logic.update_original_sector_of_work_translation import (
@@ -56,6 +57,7 @@ BATCH_SIZE = 10000
 
 @transaction.atomic
 def fetch_preferences_from_api_to_db():
+    add_organisation_data_to_db()
     jgw_api_client = JustGoodWorkAPIClient()
     preferences = fetch_preferences_from_api(jgw_api_client) or []
 

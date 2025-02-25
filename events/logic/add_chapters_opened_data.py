@@ -19,6 +19,7 @@ from common.helpers.model_helpers.preference import (
 from common.helpers.preference_helpers.country import get_data_destination, get_data_origin
 from common.logger import KunfuPandaLogger
 from events.logic.chapter_title_api_data import update_chapter_titles
+from events.logic.update_events_data_with_org_info import update_chapters_opened_org_info_from_organisation
 from events.models import Chapter, ChaptersOpened
 from preference.models import Country, Organisation, Preference
 from preference.tasks import translate_and_clean_preferences_fields
@@ -87,6 +88,7 @@ def fetch_chapters_opened_data_from_api_to_db():
     translate_and_clean_preferences_fields()
     update_chapter_titles()
     update_myvoice_chapters_opened_events()
+    update_chapters_opened_org_info_from_organisation()
 
 
 def add_chapters_opened_to_db(chapters_feedback):
