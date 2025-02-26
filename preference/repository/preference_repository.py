@@ -264,7 +264,7 @@ def preferences_by_organisation(**filters):
     )
 
     organisation_counts = (
-        organisation_queryset.values("org_info__name")
+        preferences_organisation_queryset.values("org_info__name")
         .annotate(count=Count("org_info__name"))
         .order_by("-count")
     )
