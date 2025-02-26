@@ -38,8 +38,10 @@ class ChaptersFeedbackStandardAdminDisplay(admin.ModelAdmin):
         "destination",
         "feedback_title",
         "organisation",
+        "org_info",
         "is_myvoice_organisation",
         "immigration_status",
+        "is_org_info_cleaned",
     ]
     search_fields = ["api_created_at", "data_source_id", "destination", "feedback_title"]
     ordering = ["-api_created_at"]
@@ -79,8 +81,10 @@ class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
         "immigration_status",
         "age",
         "organisation",
+        "org_info",
         "organisation_code",
         "is_myvoice_organisation",
+        "is_org_info_cleaned",
     ]
     ordering = ["event_date"]
 
@@ -103,7 +107,9 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
         "device_id",
         "destination",
         "organisation",
+        "org_info",
         "is_myvoice_organisation",
+        "is_org_info_cleaned",
     ]
 
     def get_chapter_text(self, obj):

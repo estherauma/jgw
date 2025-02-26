@@ -124,7 +124,6 @@ def inline_question(request):
     inline_question_choices = [
         {"key": item["key"], "title": item["title"]} for item in each_inline_question_response_data_list
     ]
-    print("INLINE QUESTIONS", each_inline_question_response_data)
     context = {
         "total_inline_questions": total_inline_questions,
         "total_inline_question_responses": total_inline_question_responses,

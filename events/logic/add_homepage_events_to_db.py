@@ -5,6 +5,7 @@ from common.helpers.model_helpers.common import bulk_create_in_chunks
 from common.helpers.model_helpers.preference import get_or_add_immigration_status_to_db
 from common.utils.date_utils import todays_date
 from events.models import BigqueryHomepageEventData
+from preference.logic.update_perference_organisation_info import update_bigquery_homepage_event_org_info_from_organisation
 from preference.models import Country, Language, Age, Gender, Organisation
 
 
@@ -78,6 +79,7 @@ def fetch_and_save_homepage_events_to_db():
         print(f"{len(homepage_events)} homepage events saved to the database.")
 
         update_myvoice_bigquery_homepage_events()
+        update_bigquery_homepage_event_org_info_from_organisation()
 
     except Exception as e:
         print(f"An error occurred while saving homepage events: {str(e)}")

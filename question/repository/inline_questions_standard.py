@@ -134,8 +134,8 @@ def get_inline_question_per_organisation_counts(**filters):
         **filters
     )
     organisation_counts_data = (
-        inline_questions_queryset.annotate(
-            organisation_name=F("inline_question__inline_question_standard__organisation__name")
+        queryset.annotate(
+            organisation_name=F("inline_question__inline_question_standard__org_info__name")
         )
         .values("organisation_name")
         .annotate(count=Count("organisation_name"))
@@ -144,8 +144,9 @@ def get_inline_question_per_organisation_counts(**filters):
 
     organisation_counts = [count["count"] for count in organisation_counts_data]
     organisation_labels = [
-        format_org_name_from_display(organisation["organisation_name"]).title()
+        organisation["organisation_name"]
         for organisation in organisation_counts_data
+        if organisation["organisation_name"] is not None
     ]
 
     return {

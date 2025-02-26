@@ -8,6 +8,7 @@ from preference.models import (
     ImmigrationStatus,
     Language,
     Organisation,
+    OrganisationData,
     OrganisationSector,
     Route,
 )
@@ -66,6 +67,8 @@ class InlineQuestionStandard(models.Model):
         blank=True,
         related_name="inline_question_organisation",
     )
+    org_code = models.CharField(max_length=255, blank=True, null=True)
+    org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
     is_myvoice_organisation = models.BooleanField(default=False)
     api_version = models.CharField(max_length=10, blank=False, null=True)
 
@@ -73,6 +76,7 @@ class InlineQuestionStandard(models.Model):
     api_updated_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_org_info_cleaned = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.id}"
@@ -196,10 +200,13 @@ class MessagingQuestionStandard(models.Model):
         blank=True,
         related_name="messaging_question_organisation",
     )
+    org_code = models.CharField(max_length=255, blank=True, null=True)
+    org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.ForeignKey(
         Language, on_delete=models.CASCADE, null=True, blank=True, related_name="messaging_question_language"
     )
     is_myvoice_organisation = models.BooleanField(default=False)
+    is_org_info_cleaned = models.BooleanField(default=False)
     api_created_at = models.DateTimeField(default=timezone.now)
     api_updated_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)

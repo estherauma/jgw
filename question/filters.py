@@ -59,7 +59,8 @@ def generic_question_filtered_queryset(
     generic_question_filters_q_object = Q()
 
     if user_orgs:
-        user_org_q = Q(organisation__in=user_orgs)
+        user_org_names = [org.name for org in user_orgs]
+        user_org_q = Q(org_info__name__in=user_org_names)
         generic_question_filters_q_object &= user_org_q
 
     if user_factories:
@@ -82,7 +83,7 @@ def generic_question_filtered_queryset(
         generic_question_filters_q_object &= preference_origin_q
 
     if organisations:
-        preference_organisation_q = Q(organisation__name__in=organisations)
+        preference_organisation_q = Q(org_info__name__in=organisations)
         generic_question_filters_q_object &= preference_organisation_q
 
     if factory_farms:
@@ -174,19 +175,23 @@ def question_response_filtered_queryset(
     if user_orgs:
         organisation_q_objects = Q()
         user_org_names = [org.name for org in user_orgs]
-        if "evergreen" in user_org_names:
+        if "Evergreen" in user_org_names:
             organisation_q_objects |= Q(organisation_inline_question="evergreen") & Q(
                 inline_question__inline_question_standard__destination__name="malaysia"
+            ) & Q(
+                inline_question__inline_question_standard__org_info__name="Evergreen"
             )
-        if "myvoice" in user_org_names:
+        if "MY Voice" in user_org_names:
             organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(
                 inline_question__inline_question_standard__destination__name="malaysia"
+            ) & Q(
+                inline_question__inline_question_standard__org_info__name="MY Voice"
             )
 
-        other_organisations = [org for org in user_org_names if org not in {"evergreen", "myvoice"}]
+        other_organisations = [org for org in user_org_names if org not in {"Evergreen", "MY Voice"}]
         if other_organisations:
             organisation_q_objects |= Q(
-                inline_question__inline_question_standard__organisation__name__in=other_organisations
+                inline_question__inline_question_standard__org_info__name__in=other_organisations
             )
         question_response_filters_q_object &= organisation_q_objects
 
@@ -217,19 +222,23 @@ def question_response_filtered_queryset(
 
     if organisations:
         organisation_q_objects = Q()
-        if "evergreen" in organisations:
+        if "Evergreen" in organisations:
             organisation_q_objects |= Q(organisation_inline_question="evergreen") & Q(
                 inline_question__inline_question_standard__destination__name="malaysia"
+            ) & Q(
+                inline_question__inline_question_standard__org_info__name="Evergreen"
             )
-        if "myvoice" in organisations:
+        if "MyVoice" in organisations:
             organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(
                 inline_question__inline_question_standard__destination__name="malaysia"
+            ) & Q(
+                inline_question__inline_question_standard__org_info__name="MyVoice"
             )
 
-        other_organisations = [org for org in organisations if org not in {"evergreen", "myvoice"}]
+        other_organisations = [org for org in organisations if org not in {"Evergreen", "MyVoice"}]
         if other_organisations:
             organisation_q_objects |= Q(
-                inline_question__inline_question_standard__organisation__name__in=other_organisations
+                inline_question__inline_question_standard__org_info__name__in=other_organisations
             )
 
         question_response_filters_q_object &= organisation_q_objects
