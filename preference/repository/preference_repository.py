@@ -13,6 +13,9 @@ from preference.filters import preference_filtered_queryset
 from preference.models import Organisation, Preference
 from events.models import BigqueryHomepageEventData
 
+from django.db.models import Count,Avg, Min
+from events.models import UserLocation
+
 
 def preferences_count(**filters):
 
@@ -447,6 +450,55 @@ def get_user_counts_by_origin_destination(**filters):
         for entry in user_counts
     ]
 
+    return heatmap_data
+
+
+def get_user_counts_by_geolocation(**filters):
+    """
+    Retrieves counts of unique users grouped by country from the UserLocation model.
+    
+    If start_date and end_date are provided in filters, the function filters records to only those 
+    with an event_date within the given range. Otherwise, it returns data for all records.
+    
+    Args:
+        **filters: Dictionary containing optional start_date and end_date filters
+    
+    Returns:
+        list: A list of dictionaries, each containing:
+        {
+            "country": str,         # Name of the country
+            "user_count": int,      # Number of unique users for the country
+            "created_at": datetime, # Earliest creation time for the country data
+            "event_date": datetime  # Earliest event_date for the country data
+        }
+    """
+    queryset = UserLocation.objects.all()
+    
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+    if start_date is None:
+        start_date = APPLICATION_POSSIBLE_START_DATE
+    if end_date is None:
+        end_date = datetime.now().date()
+    queryset = queryset.filter(event_date__range=(start_date, end_date))
+    
+    user_counts = (
+        queryset.exclude(country__isnull=True)
+        .values("country__name")
+        .annotate(
+            user_count=Count('user_pseudo_id', distinct=True),
+        )
+        .order_by("-user_count")
+    )
+
+    heatmap_data = [
+        {
+            "country": entry["country__name"],
+            "user_count": entry["user_count"]       
+        }
+        for entry in user_counts
+    ]
+   
     return heatmap_data
 
 
