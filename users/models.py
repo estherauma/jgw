@@ -2,7 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from dashboard.forms import OPERATORS
-from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation
+from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation, OrganisationData
 
 ROLES = ["SCHEME", "FACTORY", "STAFF", "ADMIN"]
 STATUS = ["PENDING", "ACCEPTED", "SENT"]
@@ -51,6 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     end_date = models.DateField(null=True, blank=True)
     factories = models.ManyToManyField(FactoryFarm, blank=True)
     organisations = models.ManyToManyField(Organisation, blank=True)
+    organisation_data = models.ManyToManyField(OrganisationData, blank=True)
     destinations = models.ManyToManyField(Country, blank=True)
     user_languages = models.ManyToManyField(Language, blank=True)
     excluded_origin_countries = models.ManyToManyField(Country, blank=True, related_name="excluded_origins")

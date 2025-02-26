@@ -21,7 +21,12 @@ def preferences_count(**filters):
 
     base_queryset = Preference.objects.all()
 
-    return format_thousands_with_commas(base_queryset.count())
+    preferences_count_queryset = preference_filtered_queryset(
+        queryset=base_queryset, 
+        **filters
+    )
+
+    return format_thousands_with_commas(preferences_count_queryset.count())
 
 
 def preferences_by_age(**filters):
