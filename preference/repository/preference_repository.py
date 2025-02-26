@@ -510,7 +510,7 @@ def get_user_counts_by_geolocation(**filters):
     heatmap_data = [
         {
             "country": entry["country__name"],
-            "user_count": entry["user_count"]       
+            "count": entry["user_count"]       
         }
         for entry in user_counts
     ]

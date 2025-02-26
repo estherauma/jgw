@@ -316,6 +316,21 @@
     </div>
 </div>
 {% endflag %}
+{% flag 'can_view_user_geolocation_map' %}
+<div class="row col-md-12 user-route-map-chart-box">
+    <div class="card h-100">
+        <div class="card-body chart">
+            <p class="chart-title mb-2">User Geolocation Map for Active Users</p>
+            <div id="user_geolocation_map" class="user-geolocation-map"></div>
+            <div class="info-tooltip user-geolocation-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Geolocation Map: Shows the geographical distribution of users based on their detected location
+                <div class="tooltip-arrow"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
 <div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
     <div class="card h-100">
@@ -325,21 +340,6 @@
             <div class="info-tooltip user-geol-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
                 User Geolocation Map: Shows users Geolocation at the time of using the app.
-            </div>
-        </div>
-    </div>
-</div>
-{% endflag %}
-{% flag 'can_view_user_geolocation_map' %}
-<div class="row col-md-12 user-route-map-chart-box">
-    <div class="card h-100">
-        <div class="card-body chart">
-            <p class="chart-title mb-2">User Geolocation Map</p>
-            <div id="user_geolocation_map" class="user-geolocation-map"></div>
-            <div class="info-tooltip user-geolocation-map-info-tooltip">
-                <i class="fas fa-info-circle"></i>
-                User Geolocation Map: Shows the geographical distribution of users based on their detected location
-                <div class="tooltip-arrow"></div>
             </div>
         </div>
     </div>
@@ -429,16 +429,11 @@
             lastColumn.style.maxWidth = '100%';
         }
 
-        // Call the functions create the different maps
         createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
 
-        // Call the createUserGeolocMap function
-        createUserGeolocMap(getUserCountsByGeolocation, 'user_geolocation_map_user_engagement', countryCoords);
-        
-        // Call the createUserGeolocationMap function
+        createUserGeolocationMap(getUserCountsByGeolocation, 'user_geolocation_map_user_engagement', countryCoords);
+
         createUserGeolocationMap(userGeoCountryData, 'user_geolocation_map');
-        console.log(userGeoCountryData);
-        console.log(getUserCountsByGeolocation);
 
 </script>
 {% endblock %}
