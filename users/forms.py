@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from common.helpers.model_helpers.preference import get_unique_langaues_list
 
-from preference.models import Country, ImmigrationStatus, Organisation, FactoryFarm
+from preference.models import Country, ImmigrationStatus, Organisation, FactoryFarm, OrganisationData
 
 from .models import User, UserInvitations
 
@@ -151,6 +151,7 @@ class UserAdminForm(forms.ModelForm):
             "start_date",
             "end_date",
             "factories",
+            "organisation_data",
             "organisations",
             "destinations",
             "user_languages",
@@ -185,6 +186,9 @@ class CreateNewUserForm(forms.ModelForm):
         self.fields["factories"].choices = [
             (farm.id, farm.name) for farm in FactoryFarm.objects.all().order_by("name")
         ]
+        self.fields["organisation_data"].choices = [
+            (org.id, org.name) for org in OrganisationData.objects.all().order_by("name")
+        ]
         self.fields["organisations"].choices = [
             (org.id, org.name) for org in Organisation.objects.all().order_by("name")
         ]
@@ -205,6 +209,8 @@ class CreateNewUserForm(forms.ModelForm):
             for status in ImmigrationStatus.objects.all().order_by("name")
         ]
 
+
+
     organisations = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
             attrs={
@@ -215,6 +221,18 @@ class CreateNewUserForm(forms.ModelForm):
         ),
         required=False,
     )
+
+    organisation_data = forms.MultipleChoiceField(
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "create-new-user-organisation-data-id",
+            }
+        ),
+        required=False,
+    )
+
     factories = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(
             attrs={
@@ -279,6 +297,7 @@ class CreateNewUserForm(forms.ModelForm):
             "password2",
             "start_date",
             "end_date",
+            "organisation_data",
             "organisations",
             "factories",
             "destinations",
@@ -326,6 +345,14 @@ class EditUserForm(forms.ModelForm):
         self.fields["organisations"].widget.attrs["id"] = "edit-user-organisations-id"
         self.fields["organisations"].widget.attrs["data-live-search"] = "true"
 
+        # organisation_data
+        self.fields["organisation_data"].choices = [
+            (org.id, org.name) for org in OrganisationData.objects.all().order_by("name")
+        ]
+        self.fields["organisation_data"].widget.attrs["class"] = "form-select selectpicker"
+        self.fields["organisation_data"].widget.attrs["id"] = "edit-user-organisation-data-id"
+        self.fields["organisation_data"].widget.attrs["data-live-search"] = "true"
+
         # factories
         self.fields["factories"].choices = [
             (farm.id, farm.name) for farm in FactoryFarm.objects.all().order_by("name")
@@ -369,6 +396,7 @@ class EditUserForm(forms.ModelForm):
             "end_date",
             "destinations",
             "user_languages",
+            "organisation_data",
             "organisations",
             "factories",
             "destinations",

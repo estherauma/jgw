@@ -271,7 +271,7 @@ def filter_bigquery_homepage_event_data(
         homepage_event_filters_q_object &= Q(destination__name__in=destination_countries)
 
     if user_orgs:
-        homepage_event_filters_q_object &= Q(org_info__name__in=user_orgs)
+        homepage_event_filters_q_object &= Q(org_info__in=user_orgs)
     if organisations:
         homepage_event_filters_q_object &= Q(org_info__name__in=organisations)
 

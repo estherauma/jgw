@@ -134,7 +134,7 @@ def get_inline_question_per_organisation_counts(**filters):
         **filters
     )
     organisation_counts_data = (
-        queryset.annotate(
+        inline_questions_queryset.annotate(
             organisation_name=F("inline_question__inline_question_standard__org_info__name")
         )
         .values("organisation_name")

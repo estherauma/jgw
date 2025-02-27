@@ -12,7 +12,7 @@ def get_user_factories(user):
 def get_user_organisations(user):
     if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
         return OrganisationData.objects.all()
-    return user.organisations.all()
+    return user.organisation_data.all()
 
 
 def get_user_destinations(user):
