@@ -89,4 +89,3 @@ function createUserGeolocationMap(data, elementId) {
         Plotly.Plots.resize(elementId);
     });
 }
-
