@@ -16,6 +16,7 @@ from events.logic.add_links_click_data import fetch_links_click_events_from_api_
 from events.logic.add_report_issue_events import fetch_report_issue_events_from_api_to_db
 from events.logic.add_sws_pasi_data import fetch_sws_pasi_events_from_api_to_db
 from events.logic.add_telephone_click import fetch_telephone_click_events_from_api_to_db
+from events.logic.add_user_engagement_location_to_db import fetch_and_save_user_engagement_location_to_db
 from help_contacts.logic.add_help_contacts_logic import fetch_help_contacts_from_api_to_db
 from jgwpandas.settings import EMAIL_HOST_USER
 import base64
@@ -228,6 +229,21 @@ def fetch_data_from_jgw_api():
             command_status=False,
         )
 
+    try:
+        fetch_and_save_user_engagement_location_to_db()
+        CommandLog.objects.create(
+            command_name="add_user_engagement_location_to_db",
+            data_fetch="User engagement location",
+            error="None",
+            command_status=True,
+        )
+    except Exception as e:
+        CommandLog.objects.create(
+            command_name="add_user_engagement_location_to_db",
+            data_fetch="User engagement location",
+            error=e,
+            command_status=False,
+        )
 
 @shared_task(name="get_jgw_data")
 def fetch_API_data():

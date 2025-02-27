@@ -2,7 +2,7 @@ from django.db import transaction
 from common.app_events import AppEvents
 from common.const.value_const import BIGQUERY_HOMEPAGE_EVENTS_START_DATE
 from common.helpers.model_helpers.common import bulk_create_in_chunks
-from common.helpers.model_helpers.preference import get_or_add_immigration_status_to_db
+from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_immigration_status_to_db
 from common.utils.date_utils import todays_date
 from events.models import BigqueryHomepageEventData
 from preference.logic.update_perference_organisation_info import update_bigquery_homepage_event_org_info_from_organisation
@@ -15,7 +15,7 @@ def fetch_homepage_events_from_bigquery():
 
     latest_homepage_event = BigqueryHomepageEventData.objects.last()
     if latest_homepage_event:
-        start_date = latest_homepage_event.event_date.strftime("%Y-%m-%d")
+        start_date = latest_homepage_event.event_date.strftime("%Y-%m-%d %H:%M:%S")
 
     appEvents = AppEvents()
     latest_homepage_events_result = appEvents.bigquery_homepage_data(start_date=start_date, end_date=end_date)
@@ -48,6 +48,8 @@ def fetch_and_save_homepage_events_to_db():
             age = ages.get(event.get("age"))
             gender = genders.get(event.get("gender"))
             immigrationStatus = event.get("immigrationStatus")
+            geo_city = event.get("geoCity")
+            geo_country = event.get("geoCountry")
             organisation_name = event.get("organisation")
             organisation = organisations.get(organisation_name.lower()) if organisation_name else None
 
@@ -56,7 +58,7 @@ def fetch_and_save_homepage_events_to_db():
 
             if destination and destination.name.lower() == "malaysia" and organisation is None:
                 organisation = organisation_not_specified
-
+            geo_country = get_or_add_country_to_db(geo_country)
             immigration_status = get_or_add_immigration_status_to_db(immigrationStatus)
 
             event_instance = BigqueryHomepageEventData(
@@ -71,9 +73,10 @@ def fetch_and_save_homepage_events_to_db():
                 organisation=organisation,
                 organisation_code=organisation_code,
                 immigration_status=immigration_status,
+                geo_city=geo_city,
+                geo_country=geo_country
             )
             event_instances.append(event_instance)
-
         bulk_create_in_chunks(BigqueryHomepageEventData, event_instances)
 
         print(f"{len(homepage_events)} homepage events saved to the database.")

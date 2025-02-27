@@ -295,11 +295,10 @@ body.modal-open {
     border-top: 8px solid #193560;
 }
 
-.user-route-map-chart-box, .user-geolocation-map-chart-box {
+.user-route-map-chart-box, .user-geolocation-map-chart-box{
     position: relative;
     left: 10px;
 }
-
 .user-route-map, .user-geolocation-map{
     width: 100%;
     height: 800px;

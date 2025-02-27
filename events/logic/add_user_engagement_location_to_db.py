@@ -26,7 +26,6 @@ def fetch_user_engagement_location_from_bigquery():
 def fetch_and_save_user_engagement_location_to_db():
     try:
         location_events = fetch_user_engagement_location_from_bigquery()
-        print("location_events", len(location_events))
         for location in location_events:
             event_date = location.get("event_date")
             user_pseudo_id = location.get("user_pseudo_id")

@@ -83,6 +83,8 @@ class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
         "organisation",
         "org_info",
         "organisation_code",
+        "geo_city",
+        "geo_country",
         "is_myvoice_organisation",
         "is_org_info_cleaned",
     ]
