@@ -15,7 +15,7 @@ def fetch_homepage_events_from_bigquery():
 
     latest_homepage_event = BigqueryHomepageEventData.objects.last()
     if latest_homepage_event:
-        start_date = latest_homepage_event.event_date.strftime("%Y-%m-%d %H:%M:%S")
+        start_date = latest_homepage_event.event_date.strftime("%Y-%m-%d")
 
     appEvents = AppEvents()
     latest_homepage_events_result = appEvents.bigquery_homepage_data(start_date=start_date, end_date=end_date)
