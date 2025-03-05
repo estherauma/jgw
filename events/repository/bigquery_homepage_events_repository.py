@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from django.utils.dateformat import DateFormat
 from common.utils.strings import format_thousands_with_commas
@@ -78,5 +78,4 @@ def get_user_counts_by_geo_country(**filters):
         for entry in user_counts
     ]
 
-    print("geo_data_homepage_events", geo_data)
     return geo_data

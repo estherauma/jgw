@@ -51,13 +51,11 @@ def fetch_and_save_homepage_events_to_db():
             geo_city = event.get("geoCity")
             geo_country = event.get("geoCountry")
             organisation_name = event.get("organisation")
-            organisation = organisations.get(organisation_name.lower()) if organisation_name else None
+            organisation = organisations.get(organisation_name.lower()) if organisation_name else organisation_not_specified
 
             destination_name = event.get("destination")
             destination = countries.get(destination_name.lower()) if destination_name else None
 
-            if destination and destination.name.lower() == "malaysia" and organisation is None:
-                organisation = organisation_not_specified
             geo_country = get_or_add_country_to_db(geo_country)
             immigration_status = get_or_add_immigration_status_to_db(immigrationStatus)
 
