@@ -9,19 +9,18 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.utils.strings import format_thousands_with_commas
-from preference.filters import preference_filtered_queryset
+from preference.filters import preference_filtered_queryset_for_active_users_data, preference_filtered_queryset_for_new_user_data
 from preference.models import Organisation, Preference
 from events.models import BigqueryHomepageEventData
 
-from django.db.models import Count,Avg, Min
+from django.db.models import Count
 from events.models import UserLocation
 
 
 def preferences_count(**filters):
-
     base_queryset = Preference.objects.all()
-
-    preferences_count_queryset = preference_filtered_queryset(
+   
+    preferences_count_queryset = preference_filtered_queryset_for_new_user_data(
         queryset=base_queryset, 
         **filters
     )
@@ -44,10 +43,16 @@ def preferences_by_age(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_age_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_age_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_age_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
 
     age_counts = (
         preferences_age_queryset.values("age__translated_range")
@@ -99,10 +104,18 @@ def preferences_by_gender(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_gender_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_gender_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+
+        print("preferences_gender_queryset_________________", len(preferences_gender_queryset))
+    else:
+        preferences_gender_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
 
     gender_counts = (
         preferences_gender_queryset.values("gender__translated_name")
@@ -135,7 +148,13 @@ def preferences_by_origin(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_origin_queryset = preference_filtered_queryset(queryset=base_queryset, **filters)
+    if show_new_user_data is False:
+        preferences_origin_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_origin_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     preferences_origin_queryset = preferences_origin_queryset.annotate(
         normalized_origin=Case(
@@ -179,10 +198,13 @@ def preferences_by_destination(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_destination_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_destination_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_destination_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     destination_counts = (
         preferences_destination_queryset.values("destination__name")
@@ -211,10 +233,13 @@ def preferences_by_language(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_language_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_language_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_language_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     language_counts = (
         preferences_language_queryset.values("language__translated_name")
@@ -263,10 +288,13 @@ def preferences_by_organisation(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_organisation_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_organisation_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_organisation_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     organisation_counts = (
         preferences_organisation_queryset.values("org_info__name")
@@ -309,7 +337,7 @@ def preference_stats_for_export(filters):
 
 def get_cumulative_monthly_new_users(**filters):
     queryset = Preference.objects.all()
-    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    filtered_queryset = preference_filtered_queryset_for_new_user_data(queryset=queryset, **filters)
 
     data = (
         filtered_queryset.annotate(month=TruncMonth("api_created_at"))
@@ -340,10 +368,13 @@ def get_users_by_country_state(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_language_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_language_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_language_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     preferences_count_by_state = (
         preferences_language_queryset.values("destination_state__name")
@@ -375,10 +406,13 @@ def get_preferences_by_sectors(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_language_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_language_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_language_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     result = (
         preferences_language_queryset.filter(sectors_of_work__original_sector_of_work__isnull=False)
@@ -435,10 +469,13 @@ def get_user_counts_by_origin_destination(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_user_counts_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_user_counts_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_user_counts_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     user_counts = (
         preferences_user_counts_queryset.exclude(origin__isnull=True, destination__isnull=True)
@@ -523,10 +560,13 @@ def get_sws_workcodes_with_access_code(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_access_code_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_access_code_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_access_code_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     whens = [
         When(organisation_access_code__code=key, then=Value(value))
@@ -633,7 +673,7 @@ def get_returning_users_grouped_by_original_device_id():
 
 def extract_preference_for_export(**filters):
     queryset = Preference.objects.all()
-    filtered_queryset = preference_filtered_queryset(queryset=queryset, **filters)
+    filtered_queryset = preference_filtered_queryset_for_new_user_data(queryset=queryset, **filters)
     preferences_data = filtered_queryset.values(
         "data_source_id",
         "device_id",
@@ -670,10 +710,13 @@ def preferences_by_immigration_status(**filters):
     else:
         base_queryset = Preference.objects.all()
 
-    preferences_immigration_status_queryset = preference_filtered_queryset(
-        queryset=base_queryset, 
-        **filters
-    )
+    if show_new_user_data is False:
+        preferences_immigration_status_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+    else:
+        preferences_immigration_status_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     results = (
         preferences_immigration_status_queryset.values("immigration_status__name")

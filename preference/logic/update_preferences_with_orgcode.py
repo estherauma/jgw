@@ -1,8 +1,8 @@
 from django.db import transaction
 from common.services.api_client import JustGoodWorkAPIClient
-from preference.models import Preference, OrganisationData
+from preference.models import Preference
 from common.logger import KunfuPandaLogger
-from common.const.value_const import org_info_list
+
 
 
 def update_preferences_org_code_field():
@@ -12,7 +12,6 @@ def update_preferences_org_code_field():
     update_count = 0
 
     with transaction.atomic():
-        # Get all preferences data from API
         preferences_data = jgw_api_client.get_data("/preferences") or []
         
         for api_preference in preferences_data:
@@ -20,16 +19,12 @@ def update_preferences_org_code_field():
             if not data_source_id:
                 continue
 
-            # Find corresponding preference in database
             preference = Preference.objects.filter(data_source_id=data_source_id).first()
             if not preference:
                 kunfu_panda_logger.warning(f"No preference found for data_source_id: {data_source_id}")
                 continue
-
-            # Get organisationCode from API
             org_code = api_preference.get("organisationCode")
             
-            # Update preference org_code field
             preference.org_code = org_code
             preference.save()
             

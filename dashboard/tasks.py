@@ -212,6 +212,22 @@ def fetch_data_from_jgw_api():
             command_status=False,
         )
 
+    try:
+        fetch_and_save_user_engagement_location_to_db()
+        CommandLog.objects.create(
+            command_name="add_user_engagement_location_to_db",
+            data_fetch="User engagement location",
+            error="None",
+            command_status=True,
+        )
+    except Exception as e:
+        CommandLog.objects.create(
+            command_name="add_user_engagement_location_to_db",
+            data_fetch="User engagement location",
+            error=e,
+            command_status=False,
+        )
+
     # should always come last
     try:
         attach_countries_to_state()
@@ -229,21 +245,7 @@ def fetch_data_from_jgw_api():
             command_status=False,
         )
 
-    try:
-        fetch_and_save_user_engagement_location_to_db()
-        CommandLog.objects.create(
-            command_name="add_user_engagement_location_to_db",
-            data_fetch="User engagement location",
-            error="None",
-            command_status=True,
-        )
-    except Exception as e:
-        CommandLog.objects.create(
-            command_name="add_user_engagement_location_to_db",
-            data_fetch="User engagement location",
-            error=e,
-            command_status=False,
-        )
+  
 
 @shared_task(name="get_jgw_data")
 def fetch_API_data():
