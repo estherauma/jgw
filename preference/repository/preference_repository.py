@@ -110,7 +110,6 @@ def preferences_by_gender(**filters):
             **filters
         )
 
-        print("preferences_gender_queryset_________________", len(preferences_gender_queryset))
     else:
         preferences_gender_queryset = preference_filtered_queryset_for_new_user_data(
             queryset=base_queryset, 
