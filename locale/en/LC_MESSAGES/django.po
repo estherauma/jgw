@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-05 15:04+0000\n"
+"POT-Creation-Date: 2025-03-06 06:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,18 +20,18 @@ msgstr ""
 
 #: jgwpandas/settings.py:157
 msgid "English"
-msgstr "english"
+msgstr "English"
 
 #: jgwpandas/settings.py:158
 msgid "Spanish"
-msgstr "spanish"
+msgstr "Spanish"
 
-#: templates/landing/landing_page.html:17
+#: templates/landing/landing_page.html:15
 msgid "Welcome to the Just Good Work Data Platform."
 msgstr "Welcome to the Just Good Work Data Platform."
 
-#: templates/landing/landing_page.html:18
-msgid "landingpagetext"
+#: templates/landing/landing_page.html:16
+msgid "landingPageText"
 msgstr ""
 "The Just Good Work data platform offers information, data and insights about "
 "migrant labour. This includes issues that affect migrants from when they are "
@@ -42,90 +42,92 @@ msgstr ""
 "and support that will help individuals, organizations, and governments to "
 "combat modern slavery and protect the rights of migrant workers."
 
-#: templates/landing/landing_page.html:46
+#: templates/landing/landing_page.html:44
 msgid "How can the JGW data platform help you?"
 msgstr "How can the JGW data platform help you?"
 
-#: templates/landing/landing_page.html:58
+#: templates/landing/landing_page.html:56
 msgid "Real time insights"
 msgstr "Real time insights"
 
-#: templates/landing/landing_page.html:59
-msgid "landingfeedbackinsights"
+#: templates/landing/landing_page.html:57
+msgid "landingFeedbackInsights"
 msgstr ""
 "Get real time feedbacks and insights from 105,000+ workers in over 33 "
 "countries."
 
-#: templates/landing/landing_page.html:68
+#: templates/landing/landing_page.html:66
 msgid "Track issues specific to your supply chain"
 msgstr "Track issues specific to your supply chain"
 
-#: templates/landing/landing_page.html:69
-msgid "landingpagesupplychain"
+#: templates/landing/landing_page.html:67
+msgid "landingPageSupplyChain"
 msgstr ""
 "By using JGW in your supply chain you can find issues and inefficiencies "
 "earlier."
 
-#: templates/landing/landing_page.html:79
+#: templates/landing/landing_page.html:77
 msgid "Understand what matters to workers"
 msgstr "Understand what matters to workers"
 
-#: templates/landing/landing_page.html:80
-msgid "improveworkerexperience"
+#: templates/landing/landing_page.html:78
+msgid "improveWorkerExperience"
 msgstr ""
 "Improves worker's experience for better attraction, engagement, and "
 "retention."
 
-#: templates/landing/landing_page.html:90
+#: templates/landing/landing_page.html:88
 msgid "Improve your recruitment and retention"
 msgstr "Improve your recruitment and retention"
 
-#: templates/landing/landing_page.html:91
-msgid "landinglowstaffturnover"
+#: templates/landing/landing_page.html:89
+msgid "landingLowStaffTurnover"
 msgstr ""
 "Lower staff turnover and increase retention proactively understanding issues "
 "negatively affecting migrants."
 
-#: templates/landing/landing_page.html:100
+#: templates/landing/landing_page.html:98
 msgid "Safety for workers"
 msgstr "Safety for workers"
 
-#: templates/landing/landing_page.html:101
-msgid "landingpganonymusinfo"
+#: templates/landing/landing_page.html:99
+msgid "landingPgAnonymusInfo"
 msgstr ""
 "All the information we collect is anonymised to ensure protection for "
 "migrants."
 
-#: templates/landing/landing_page.html:110
+#: templates/landing/landing_page.html:108
 msgid "Accurate information"
 msgstr "Accurate information"
 
-#: templates/landing/landing_page.html:111
-msgid "buildingtrusttext"
+#: templates/landing/landing_page.html:109
+msgid "buildingTrustText"
 msgstr ""
 "We have spent years building trust with migrants and migrant supportagencies "
 "all over the world, which means we have the relationships to get "
 "accurateinformation"
 
-#: templates/landing/landing_page.html:141
+#: templates/landing/landing_page.html:139
 msgid "Have any Questions ?"
 msgstr "Have any Questions ?"
 
-#: templates/landing/landing_page.html:142
+#: templates/landing/landing_page.html:140
 msgid "Please reach out to us using an of the channels below"
 msgstr "Please reach out to us using an of the channels below"
 
-#: templates/landing/landing_page.html:151
-msgid "contactuslandingpg"
+#: templates/landing/landing_page.html:149
+msgid "contactUsLandingPg"
 msgstr "Contact Us"
 
-#: templates/landing/landing_page.html:153
+#: templates/landing/landing_page.html:151
 msgid "Email:"
 msgstr "Email:"
 
-#: templates/landing/landing_page.html:161
-msgid "jgwdpoffersinfo"
-msgstr "The Just Good Work data platform offers information, data and insights about migrant labour."
+#: templates/landing/landing_page.html:159
+msgid "jgwDpOffersInfo"
+msgstr ""
+"The Just Good Work data platform offers information, data and insights about "
+"migrant labour."
 
 #: templates/layouts/non_auth_base.html:55
 msgid "Home"

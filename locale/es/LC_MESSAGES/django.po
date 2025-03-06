@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-05 15:04+0000\n"
+"POT-Creation-Date: 2025-03-06 06:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,18 +20,18 @@ msgstr ""
 
 #: jgwpandas/settings.py:157
 msgid "English"
-msgstr "inglés"
+msgstr "Inglés"
 
 #: jgwpandas/settings.py:158
 msgid "Spanish"
-msgstr "español"
+msgstr "Español"
 
-#: templates/landing/landing_page.html:17
+#: templates/landing/landing_page.html:15
 msgid "Welcome to the Just Good Work Data Platform."
 msgstr "Bienvenido a la plataforma de datos Just Good Work."
 
-#: templates/landing/landing_page.html:18
-msgid "landingpagetext"
+#: templates/landing/landing_page.html:16
+msgid "landingPageText"
 msgstr ""
 "La plataforma de datos Just Good Work ofrece información, datos y "
 "perspectivas sobre la mano de obra migrante. Esto incluye cuestiones que "
@@ -44,81 +44,94 @@ msgstr ""
 "ayudarán a las personas, organizaciones y gobiernos a combatir la esclavitud "
 "moderna y proteger los derechos de los trabajadores migrantes."
 
-#: templates/landing/landing_page.html:46
+#: templates/landing/landing_page.html:44
 msgid "How can the JGW data platform help you?"
 msgstr "¿Cómo puede ayudarle la plataforma de datos JGW?"
 
-#: templates/landing/landing_page.html:58
+#: templates/landing/landing_page.html:56
 msgid "Real time insights"
 msgstr "Información en tiempo real"
 
-#: templates/landing/landing_page.html:59
-msgid "landingfeedbackinsights"
+#: templates/landing/landing_page.html:57
+msgid "landingFeedbackInsights"
 msgstr ""
 "Obtenga información y comentarios en tiempo real de más de 105 000 "
 "trabajadores en más de 33 países."
 
-#: templates/landing/landing_page.html:68
+#: templates/landing/landing_page.html:66
 msgid "Track issues specific to your supply chain"
 msgstr "Seguimiento de problemas específicos de su cadena de suministro"
 
-#: templates/landing/landing_page.html:69
-msgid "landingpagesupplychain"
+#: templates/landing/landing_page.html:67
+msgid "landingPageSupplyChain"
 msgstr ""
 "Al utilizar JGW en su cadena de suministro, podrá detectar problemas e "
 "ineficiencias antes."
 
-#: templates/landing/landing_page.html:79
+#: templates/landing/landing_page.html:77
 msgid "Understand what matters to workers"
 msgstr "Entender lo que importa a los trabajadores"
 
-#: templates/landing/landing_page.html:80
-msgid "improveworkerexperience"
-msgstr "Mejora la experiencia del trabajador para lograr una mejor atracción, compromiso y retención."
+#: templates/landing/landing_page.html:78
+msgid "improveWorkerExperience"
+msgstr ""
+"Mejora la experiencia del trabajador para lograr una mejor atracción, "
+"compromiso y retención."
 
-#: templates/landing/landing_page.html:90
+#: templates/landing/landing_page.html:88
 msgid "Improve your recruitment and retention"
 msgstr "Mejore su reclutamiento y retención"
 
-#: templates/landing/landing_page.html:91
-msgid "landinglowstaffturnover"
-msgstr "Reducir la rotación del personal y aumentar la retención comprendiendo de manera proactiva los problemas que afectan negativamente a los migrantes."
+#: templates/landing/landing_page.html:89
+msgid "landingLowStaffTurnover"
+msgstr ""
+"Reducir la rotación del personal y aumentar la retención comprendiendo de "
+"manera proactiva los problemas que afectan negativamente a los migrantes."
 
-#: templates/landing/landing_page.html:100
+#: templates/landing/landing_page.html:98
 msgid "Safety for workers"
 msgstr "Seguridad para los trabajadores"
 
-#: templates/landing/landing_page.html:101
-msgid "landingpganonymusinfo"
-msgstr "Toda la información que recopilamos es anonimizada para garantizar la protección de los migrantes."
+#: templates/landing/landing_page.html:99
+msgid "landingPgAnonymusInfo"
+msgstr ""
+"Toda la información que recopilamos es anonimizada para garantizar la "
+"protección de los migrantes."
 
-#: templates/landing/landing_page.html:110
+#: templates/landing/landing_page.html:108
 msgid "Accurate information"
 msgstr "Información precisa"
 
-#: templates/landing/landing_page.html:111
-msgid "buildingtrusttext"
-msgstr "Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a migrantes en todo el mundo, lo que significa que tenemos las relaciones para obtener información precisa."
+#: templates/landing/landing_page.html:109
+msgid "buildingTrustText"
+msgstr ""
+"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a "
+"migrantes en todo el mundo, lo que significa que tenemos las relaciones para "
+"obtener información precisa."
 
-#: templates/landing/landing_page.html:141
+#: templates/landing/landing_page.html:139
 msgid "Have any Questions ?"
 msgstr "¿Tiene alguna pregunta?"
 
-#: templates/landing/landing_page.html:142
+#: templates/landing/landing_page.html:140
 msgid "Please reach out to us using an of the channels below"
-msgstr "Comuníquese con nosotros mediante uno de los canales que aparecen a continuación."
+msgstr ""
+"Comuníquese con nosotros mediante uno de los canales que aparecen a "
+"continuación."
 
-#: templates/landing/landing_page.html:151
-msgid "contactuslandingpg"
+#: templates/landing/landing_page.html:149
+msgid "contactUsLandingPg"
 msgstr "Contacta con nosotros"
 
-#: templates/landing/landing_page.html:153
+#: templates/landing/landing_page.html:151
 msgid "Email:"
 msgstr "Correo electrónico:"
 
-#: templates/landing/landing_page.html:161
-msgid "jgwdpoffersinfo"
-msgstr "La plataforma de datos Just Good Work ofrece información, datos y conocimientos sobre el trabajo migrante."
+#: templates/landing/landing_page.html:159
+msgid "jgwDpOffersInfo"
+msgstr ""
+"La plataforma de datos Just Good Work ofrece información, datos y "
+"conocimientos sobre el trabajo migrante."
 
 #: templates/layouts/non_auth_base.html:55
 msgid "Home"
