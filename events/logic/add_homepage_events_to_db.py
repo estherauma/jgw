@@ -1,90 +1,138 @@
 from django.db import transaction
 from common.app_events import AppEvents
+from datetime import datetime
 from common.const.value_const import BIGQUERY_HOMEPAGE_EVENTS_START_DATE
 from common.helpers.model_helpers.common import bulk_create_in_chunks
 from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_immigration_status_to_db
-from common.utils.date_utils import todays_date
+from common.logger import KunfuPandaLogger
 from events.models import BigqueryHomepageEventData
 from preference.logic.update_perference_organisation_info import update_bigquery_homepage_event_org_info_from_organisation
 from preference.models import Country, Language, Age, Gender, Organisation
 
+kunfu_panda_logger = KunfuPandaLogger(log_file="logs/homepage_events.log")
 
-def fetch_homepage_events_from_bigquery():
-    start_date = BIGQUERY_HOMEPAGE_EVENTS_START_DATE
-    end_date = todays_date()
+def get_latest_homepage_event_timestamp():
+    latest_event = BigqueryHomepageEventData.objects.order_by('-event_date').first()
+    if latest_event:
+        return datetime.combine(latest_event.event_date, datetime.min.time())
+    return datetime.strptime(BIGQUERY_HOMEPAGE_EVENTS_START_DATE, "%Y-%m-%d")
 
-    latest_homepage_event = BigqueryHomepageEventData.objects.last()
-    if latest_homepage_event:
-        start_date = latest_homepage_event.event_date.strftime("%Y-%m-%d")
 
-    appEvents = AppEvents()
-    latest_homepage_events_result = appEvents.bigquery_homepage_data(start_date=start_date, end_date=end_date)
-
-    return latest_homepage_events_result
-
+def fetch_homepage_events_from_bigquery_in_batches(batch_size=5000, last_event_timestamp=None):
+    try:
+        appEvents = AppEvents()
+        homepage_events = appEvents.bigquery_homepage_data(
+            batch_size=batch_size,
+            last_event_timestamp=last_event_timestamp
+        )
+        return homepage_events
+    except Exception as e:
+        kunfu_panda_logger.error(f"Error fetching data from BigQuery: {str(e)}")
+        raise
 
 def fetch_and_save_homepage_events_to_db():
     try:
-        homepage_events = fetch_homepage_events_from_bigquery()
-
-        languages = {lang.code: lang for lang in Language.objects.all()}
-        ages = {age.range: age for age in Age.objects.all()}
-        genders = {gender.name: gender for gender in Gender.objects.all()}
-        organisations = {org.name.lower(): org for org in Organisation.objects.all()}
-        countries = {country.code.lower(): country for country in Country.objects.all()}
-
-        organisation_not_specified = organisations.get("not specified")
-
-        event_instances = []
-
-        for event in homepage_events:
-            event_date = event.get("event_date")
-            device_id = event.get("deviceId")
-            app_id = event.get("appId")
-            locale = event.get("locale")
-            organisation_code = event.get("organisation_code")
-
-            language = languages.get(event.get("language"))
-            age = ages.get(event.get("age"))
-            gender = genders.get(event.get("gender"))
-            immigrationStatus = event.get("immigrationStatus")
-            geo_city = event.get("geoCity")
-            geo_country = event.get("geoCountry")
-            organisation_name = event.get("organisation")
-            organisation = organisations.get(organisation_name.lower()) if organisation_name else organisation_not_specified
-
-            destination_name = event.get("destination")
-            destination = countries.get(destination_name.lower()) if destination_name else None
-
-            geo_country = get_or_add_country_to_db(geo_country)
-            immigration_status = get_or_add_immigration_status_to_db(immigrationStatus)
-
-            event_instance = BigqueryHomepageEventData(
-                event_date=event_date,
-                device_id=device_id,
-                app_id=app_id,
-                language=language,
-                locale=locale,
-                destination=destination,
-                age=age,
-                gender=gender,
-                organisation=organisation,
-                organisation_code=organisation_code,
-                immigration_status=immigration_status,
-                geo_city=geo_city,
-                geo_country=geo_country
-            )
-            event_instances.append(event_instance)
-        bulk_create_in_chunks(BigqueryHomepageEventData, event_instances)
-
-        print(f"{len(homepage_events)} homepage events saved to the database.")
-
-        update_myvoice_bigquery_homepage_events()
-        update_bigquery_homepage_event_org_info_from_organisation()
-
+        last_event_timestamp = get_latest_homepage_event_timestamp()
     except Exception as e:
-        print(f"An error occurred while saving homepage events: {str(e)}")
+        kunfu_panda_logger.error(f"Error getting the last event timestamp in the database: {str(e)}")
+        raise
 
+    batch_size = 5000
+    total_fetched = 0
+
+    languages = {lang.code: lang for lang in Language.objects.all()}
+    ages = {age.range: age for age in Age.objects.all()}
+    genders = {gender.name: gender for gender in Gender.objects.all()}
+    organisations = {org.name.lower(): org for org in Organisation.objects.all()}
+    countries = {country.code.lower(): country for country in Country.objects.all()}
+    organisation_not_specified = organisations.get("not specified")
+
+    while True:
+        try:
+            homepage_events = fetch_homepage_events_from_bigquery_in_batches(
+                batch_size=batch_size,
+                last_event_timestamp=last_event_timestamp
+            ) or []
+
+            if not homepage_events:
+                break
+
+            event_instances = []
+            for event in homepage_events:
+                try:
+                    event_instance = create_homepage_event_instance(
+                        event,
+                        languages,
+                        ages,
+                        genders,
+                        organisations,
+                        countries,
+                        organisation_not_specified
+                    )
+                    event_instances.append(event_instance)
+                except Exception as e:
+                    kunfu_panda_logger.error(f"Error processing homepage event: {str(e)}")
+                    continue
+
+            if event_instances:
+                bulk_create_in_chunks(BigqueryHomepageEventData, event_instances, chunk_size=100)
+
+            last_event_timestamp = homepage_events[-1]["event_timestamp"]
+            total_fetched += len(homepage_events)
+
+            kunfu_panda_logger.info(
+                f"Processed {len(homepage_events)} homepage events in current batch. Total processed: {total_fetched}"
+            )
+
+            event_instances.clear()
+
+        except Exception as e:
+            kunfu_panda_logger.error(f"Error processing batch: {str(e)}")
+            raise
+
+    kunfu_panda_logger.info(f"Finished adding {total_fetched} homepage events to the database")
+
+    update_myvoice_bigquery_homepage_events()
+    update_bigquery_homepage_event_org_info_from_organisation()
+
+def create_homepage_event_instance(event, languages, ages, genders, organisations, countries, organisation_not_specified):
+    event_date = event.get("event_date")
+    device_id = event.get("deviceId")
+    app_id = event.get("appId")
+    locale = event.get("locale")
+    organisation_code = event.get("organisationCode")
+
+    language = languages.get(event.get("language"))
+    age = ages.get(event.get("age"))
+    gender = genders.get(event.get("gender"))
+    immigrationStatus = event.get("immigrationStatus")
+    geo_city = event.get("geoCity")
+    geo_country = event.get("geoCountry")
+    
+    organisation_name = event.get("organisation")
+    organisation = organisations.get(organisation_name.lower()) if organisation_name else organisation_not_specified
+
+    destination_name = event.get("destination")
+    destination = countries.get(destination_name.lower()) if destination_name else None
+
+    geo_country = get_or_add_country_to_db(geo_country)
+    immigration_status = get_or_add_immigration_status_to_db(immigrationStatus)
+
+    return BigqueryHomepageEventData(
+        event_date=event_date,
+        device_id=device_id,
+        app_id=app_id,
+        language=language,
+        locale=locale,
+        destination=destination,
+        age=age,
+        gender=gender,
+        organisation=organisation,
+        organisation_code=organisation_code,
+        immigration_status=immigration_status,
+        geo_city=geo_city,
+        geo_country=geo_country
+    )
 
 def update_myvoice_bigquery_homepage_events():
     with transaction.atomic():
