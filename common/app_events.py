@@ -310,10 +310,17 @@ class AppEvents(BaseAnalytics):
 
         return telephone_click_event_dict
 
-    def bigquery_homepage_data(self, start_date=None, end_date=None):
+    def bigquery_homepage_data(self, batch_size=5000, last_event_timestamp=None):
+        timestamp_filter = ""
+        if last_event_timestamp:
+            timestamp_filter = f"AND event_timestamp > {int(last_event_timestamp.timestamp() * 1000000)}"
+            print("Last Homepage event fetch timestamp", last_event_timestamp)
+            print(timestamp_filter)
+
         bigquery_homepage_query = f"""
             SELECT 
-                DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+                TIMESTAMP_MICROS(event_timestamp) AS event_timestamp,
+                DATETIME(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'deviceId') AS deviceId,
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'appId') AS appId,
                 (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'language') AS language,
@@ -328,12 +335,12 @@ class AppEvents(BaseAnalytics):
                 geo.country As geoCountry
             FROM `just-good-work.analytics_191478110.events_*` 
             WHERE event_name='homepage'
-            AND DATE(TIMESTAMP_MICROS(event_timestamp)) BETWEEN '{start_date}' AND '{end_date}'
+            {timestamp_filter}
+            ORDER BY event_timestamp ASC
+            LIMIT {batch_size}
         """
         bigquery_homepage_df = google_client_instance().query(bigquery_homepage_query).to_dataframe()
-        bigquery_homepage_df_dict = bigquery_homepage_df.to_dict("records")
-
-        return bigquery_homepage_df_dict
+        return bigquery_homepage_df.to_dict("records")
 
     def bigquery_report_issue_submitted_events(self, start_date=None, end_date=None):
         report_issue_query = f"""
