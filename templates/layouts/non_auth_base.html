@@ -1,6 +1,6 @@
 {% extends "layouts/main_base.html" %}
 {% load static %}
-
+{% load i18n %}
 {% block main_base_head %}
     <meta charset="utf-8" />
     <title>Just Good Work</title>
@@ -52,27 +52,34 @@
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <ul class="navbar-nav mx-auto navbar-center" id="mySidenav">
                         <li class="nav-item">
-                            <a href="#home" class="nav-link">Home</a>
+                            <a href="#home" class="nav-link">{% translate "Home" %}</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#pricing" class="nav-link">Pricing</a>
+                            <a href="#pricing" class="nav-link">{% translate "Pricing" %}</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#faq" class="nav-link">Faqs</a>
+                            <a href="#faq" class="nav-link">{% translate "Faqs" %}</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#contact" class="nav-link">Contact</a>
+                            <a href="#contact" class="nav-link">{% translate "Contact" %}</a>
                         </li>
                     </ul>
+                    <form action="{% url 'set_language' %}" method="post" style="padding-right: 4px;">
+                            {% csrf_token %}
+                        <select name="language" onchange="this.form.submit()" class="btn btn-info navbar-btn">
+                            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+                            <option value="es" {% if LANGUAGE_CODE == 'es' %}selected{% endif %}>Español</option>
+                        </select>
+                    </form>
                     <div>
                         {% if user.is_authenticated %}
-                            <a href="{% url 'preference:user_overview' %}" class="btn btn-info navbar-btn">Go To Dashboard</a>
+                            <a href="{% url 'preference:user_overview' %}" class="btn btn-info navbar-btn">{% translate "Go To Dashboard" %}</a>
                             <a href="{% url 'users:logout_user' %}" class="btn btn-info navbar-btn">
-                                Logout
+                                {% translate "Logout" %}
                             </a>
                         {% else %}
-                            <a href="{% url 'users:login_user' %}" class="btn btn-info navbar-btn">Login</a>
-                            <a href="{% url 'preference:user_overview' %}" class="btn btn-info navbar-btn">Try Now</a>
+                            <a href="{% url 'users:login_user' %}" class="btn btn-info navbar-btn">{% translate "Login" %}</a>
+                            <a href="{% url 'preference:user_overview' %}" class="btn btn-info navbar-btn">{% translate "Try Now" %}</a>
                         {% endif %}
                     </div>
                 </div>
@@ -89,12 +96,12 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="float-start pull-none">
-                                <p class="text-white-50"><script>document.write(new Date().getFullYear())</script> &copy; Just Good Work. A solution of <a href="https://50eight.com" target="_blank" class="text-white-50">FiftyEight</a> </p>
+                                <p class="text-white-50"><script>document.write(new Date().getFullYear())</script> &copy; Just Good Work. {% translate "A solution of" %} <a href="https://50eight.com" target="_blank" class="text-white-50">FiftyEight</a> </p>
                             </div>
                             <div class="float-end pull-none">
                                 <ul class="list-inline social-links">
                                     <li class="list-inline-item text-white-50">
-                                        Social :
+                                        {% translate "Social :" %}
                                     </li>
                                     <li class="list-inline-item"><a href="https://www.facebook.com/justgoodwork/"><i class="mdi mdi-facebook"></i></a></li>
                                     <li class="list-inline-item"><a href="https://twitter.com/JustGoodWork" target="_blank"><i class="mdi mdi-twitter"></i></a></li>
