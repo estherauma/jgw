@@ -246,4 +246,61 @@ class SectorsOfWorkMapper(models.Model):
         return self.mapper
 
 
+class PreferenceHistory(models.Model):
+    data_source_id = models.CharField(max_length=255)
+    device_id = models.CharField(max_length=255)
+    locale = models.CharField(max_length=255, null=True, blank=True)
+    app_id = models.CharField(max_length=255, null=True, blank=True)
+    cleaned = models.BooleanField(default=False)
+
+    api_created_at = models.DateTimeField()
+    api_updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    location_of_potential_work = models.ForeignKey(
+        LocationOfPotentialWork, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
+    origin = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="pref_history_origin"
+    )
+    destination = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="pref_history_destination"
+    )
+    api_destination = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="pref_history_api_destination"
+    )
+    destination_state = models.ForeignKey(
+        CountryState, on_delete=models.SET_NULL, null=True, blank=True, related_name="pref_history_destination_state"
+    )
+    route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True, related_name="pref_history_route")
+    sectors_of_work = models.ManyToManyField(SectorOfWork, related_name="pref_history_sectors_of_work")
+    organisation_sector = models.ForeignKey(
+        OrganisationSector, on_delete=models.SET_NULL, null=True, blank=True, related_name="pref_history_organisation_sector"
+    )
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    org_code = models.CharField(max_length=255, null=True, blank=True)
+    org_info = models.ForeignKey(
+        OrganisationData,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pref_history_org_info",
+    )
+    organisation_access_code = models.ForeignKey(
+        OrganisationAccessCode,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pref_history_org_access_code",
+    )
+    factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
+    organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    is_missing_organisation_info_cleaned = models.BooleanField(default=False)
+
 
