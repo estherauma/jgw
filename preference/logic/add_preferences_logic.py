@@ -151,7 +151,6 @@ def create_preference_object(preference):
         org_info=org_info_data,
     )
 
-    # Create SectorsOfWork instances and associate them with the preference
     final_sectors_of_work = None
     if sector_of_work_list:
         final_sectors_of_work = sector_of_work_list

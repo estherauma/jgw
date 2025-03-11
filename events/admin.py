@@ -18,6 +18,7 @@ from events.models import (
     ReportIssueSubmittedEvent,
     UserLocation,
 )
+from preference.models import PreferenceHistory
 
 
 class SwsPasiEventTabularAdminDisplay(admin.ModelAdmin):
@@ -147,4 +148,10 @@ class ReportIssueSubmittedEventAdmin(admin.ModelAdmin):
 class UserLocationAdmin(admin.ModelAdmin):
     list_display = ["event_date", "created_at", "user_pseudo_id", "country"]
     search_fields = ["user_pseudo_id", "country__name"]
+    ordering = ["-created_at"]
+
+@admin.register(PreferenceHistory)
+class PreferenceHistoryAdmin(admin.ModelAdmin):
+    list_display = ["created_at", "data_source_id", "destination", "immigration_status", "age", "organisation", "org_info"]
+    search_fields = ["data_source_id", "destination", "immigration_status", "age", "organisation", "org_info", "org_code"]
     ordering = ["-created_at"]

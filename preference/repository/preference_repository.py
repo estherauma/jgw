@@ -10,7 +10,7 @@ from common.helpers.preference_helpers.gender import normalize_gender_name
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset_for_active_users_data, preference_filtered_queryset_for_new_user_data
-from preference.models import Organisation, Preference
+from preference.models import Organisation, Preference, PreferenceHistory
 from events.models import BigqueryHomepageEventData
 
 from django.db.models import Count
@@ -737,7 +737,7 @@ def preferences_by_immigration_status(**filters):
 
 
 def get_preferences_by_device_id(device_id):
-    preferences = Preference.objects.filter(device_id__icontains=device_id).select_related(
+    preferences = PreferenceHistory.objects.filter(device_id__icontains=device_id).select_related(
         'gender',
         'age',
         'language',

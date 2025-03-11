@@ -23,6 +23,7 @@ import base64
 import requests
 from pipeline.models import CommandLog
 
+from preference.logic.add_preferences_journal import fetch_preferences_journal_from_api_to_db
 from preference.logic.add_preferences_logic import fetch_preferences_from_api_to_db
 from preference.tasks import attach_countries_to_state
 from question.logic.add_inline_question_logic import fetch_inline_questions_from_api_to_db
@@ -224,6 +225,22 @@ def fetch_data_from_jgw_api():
         CommandLog.objects.create(
             command_name="add_user_engagement_location_to_db",
             data_fetch="User engagement location",
+            error=e,
+            command_status=False,
+        )
+
+    try:
+        fetch_preferences_journal_from_api_to_db()
+        CommandLog.objects.create(
+            command_name="add_preferences_journal_from_api",
+            data_fetch="Preferences journal",
+            error="None",
+            command_status=True,
+        )
+    except Exception as e:
+        CommandLog.objects.create(
+            command_name="add_preferences_journal_from_api",
+            data_fetch="Preferences journal",
             error=e,
             command_status=False,
         )
