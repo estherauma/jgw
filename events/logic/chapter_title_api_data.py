@@ -44,6 +44,7 @@ def extract_relevant_data(combined_data):
         for chapter in destination["chapters"]:
             chapter_info = {
                 "destinationName": destination_name,
+                "jgwDestinationCode": chapter["documentId"],
                 "uid": chapter["uid"],
                 "title": chapter["title"],
             }
@@ -58,19 +59,41 @@ def filter_unique_chapters(chapters_list):
     seen_combinations = set()
     for chapter in chapters_list:
         transformed_uid = chapter["uid"].replace(".", "_")
-        transformed_destination_name = chapter["destinationName"].lower()
+        jgw_code = chapter["jgwDestinationCode"]
+        if "jgw-saudi-arabia" in jgw_code:
+            transformed_destination_name = "saudi arabia"
+        elif "jgw-uae" in jgw_code:
+            transformed_destination_name = "united arab emirates"
+        elif "jgw-qatar" in jgw_code:
+            transformed_destination_name = "qatar"
+        elif "jgw-verite-jordan" in jgw_code:
+            transformed_destination_name = "jordan"
+        elif "jgw-uk" in jgw_code:
+            transformed_destination_name = "united kingdom"
+        elif "jgw-malaysia" in jgw_code:
+            transformed_destination_name = "malaysia"
+        elif "jgw-spain" in jgw_code:
+            transformed_destination_name = "spain"
+        elif "jgw-jersey" in jgw_code:
+            transformed_destination_name = "jersey"
+        elif "jgw-poland" in jgw_code:
+            transformed_destination_name = "poland"
+        elif "jgw-mexico" in jgw_code:
+            transformed_destination_name = "mexico"
+        else:
+            transformed_destination_name = None
 
         combination = (transformed_uid, transformed_destination_name, chapter["title"])
         if combination not in seen_combinations:
             unique_chapters.append(
                 {
+                    "jgwDestinationCode": jgw_code,
                     "destinationName": transformed_destination_name,
                     "uid": transformed_uid,
                     "title": chapter["title"],
                 }
             )
             seen_combinations.add(combination)
-
     return unique_chapters
 
 
@@ -102,10 +125,11 @@ def update_chapter_titles():
 
 
 def fetch_and_update_all_destiantion_chapter_titles():
-    destination_codes = ["JOR", "MYS", "MUS", "POL", "QAT", "ROU", "SAU", "ARE", "GBR", "ESP","MEX","MAU","JEY"]
+    destination_codes = ["JOR", "MYS", "MUS", "POL", "QAT", "ROU", "SAU", "ARE", "GBR", "ESP","MEX","JEY"]
     api_data = fetch_data_from_api(destination_codes)
     if api_data:
         chapters_list = extract_relevant_data(api_data)
+
         unique_chapters = filter_unique_chapters(chapters_list)
         update_or_create_chapters(unique_chapters)
 
