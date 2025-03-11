@@ -32,7 +32,7 @@ def get_chapters_opened_data(**filters):
         chapter_text = entry["chapter_text"]
         number_key = entry["number_key"]
         count = entry["count"]
-        key = chapter_text if chapter_text is not None else number_key
+        key = chapter_text if chapter_text is not None else "Others"
         sums_all.setdefault(key, 0)
         sums_all[key] += count
 

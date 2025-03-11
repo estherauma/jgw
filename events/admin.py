@@ -99,6 +99,7 @@ class TelephoneClickEventAdmin(admin.ModelAdmin):
 
 @admin.register(ChaptersOpened)
 class ChaptersOpenedAdmin(admin.ModelAdmin):
+    search_fields = ["event_name", "chapter__chapter_text", "chapter__number_key", "destination", "organisation", "org_info"]
     list_display = [
         "created_at",
         "event_created_at",
