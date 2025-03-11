@@ -1,24 +1,30 @@
+from datetime import datetime
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from django.utils.dateformat import DateFormat
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.utils.strings import format_thousands_with_commas
 from events.filters import filter_bigquery_homepage_event_data
 from events.models import BigqueryHomepageEventData
+from preference.filters import preference_filtered_queryset_for_active_users_data
+from preference.repository.preference_repository import get_preferences_by_homepage_events
 
 
 def get_total_active_user_within_period(**filters):
-    queryset = BigqueryHomepageEventData.objects.all()
-
-    filtered_queryset = filter_bigquery_homepage_event_data(queryset, **filters)
-    total_active_user_count = filtered_queryset.filter(
-        device_id__isnull=False
-    ).aggregate(  
-        total_unique_device_count=Count("device_id", distinct=True)
-    )[
-        "total_unique_device_count"
-    ]
-
-    return format_thousands_with_commas(total_active_user_count)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+    if not start_date:
+        start_date = APPLICATION_POSSIBLE_START_DATE
+    if not end_date:
+        end_date = datetime.now().date()
+    total_active_user = get_preferences_by_homepage_events(start_date=start_date, end_date=end_date)
+    total_active_user_count = preference_filtered_queryset_for_active_users_data(
+            queryset=total_active_user, 
+            **filters
+        )
+    unique_device_count = total_active_user_count.values('device_id').distinct().count()
+    
+    return format_thousands_with_commas(unique_device_count)
 
 
 def get_monthly_active_user_count(current_user, **filters):
