@@ -671,28 +671,93 @@ def get_returning_users_grouped_by_original_device_id():
 
 
 def extract_preference_for_export(**filters):
-    queryset = Preference.objects.all()
-    filtered_queryset = preference_filtered_queryset_for_new_user_data(queryset=queryset, **filters)
-    preferences_data = filtered_queryset.values(
-        "data_source_id",
-        "device_id",
-        "locale",
-        "app_id",
-        "api_created_at",
-        "api_updated_at",
-        "location_of_potential_work__name",
-        "gender__translated_name",
-        "age__range",
-        "language__name",
-        "origin__name",
-        "destination__name",
-        "route__name",
-        "sectors_of_work__translated_name",
-        "organisation_access_code__code",
-        "factory_farm__name",
-        "organisation__name",
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+    if show_new_user_data is False:
+        base_queryset = get_preferences_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+    else:
+        base_queryset = Preference.objects.all()
+
+    if show_new_user_data is False:
+        preferences_user_counts_queryset = preference_filtered_queryset_for_active_users_data(
+            queryset=base_queryset, 
+            **filters
+        )
+        print(preferences_user_counts_queryset.count())
+    else:
+        preferences_user_counts_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
+        print(preferences_user_counts_queryset.count())
+    
+    # Add select_related and prefetch_related to avoid N+1 queries
+    preferences_user_counts_queryset = preferences_user_counts_queryset.select_related(
+        'location_of_potential_work',
+        'gender',
+        'age', 
+        'language',
+        'origin',
+        'destination',
+        'route',
+        'organisation_access_code',
+        'factory_farm',
+        'org_info'
+    ).prefetch_related('sectors_of_work')
+
+    # Convert QuerySet to list using values() to get all fields in one query
+    preferences_data = preferences_user_counts_queryset.values(
+        'data_source_id',
+        'device_id',
+        'locale',
+        'app_id',
+        'api_created_at',
+        'api_updated_at',
+        'location_of_potential_work__name',
+        'gender__translated_name',
+        'age__range',
+        'language__name', 
+        'origin__name',
+        'destination__name',
+        'route__name',
+        'organisation_access_code__code',
+        'factory_farm__name',
+        'org_info__name'
+    ).annotate(
+        sectors_of_work__translated_name=F('sectors_of_work__translated_name')
     )
-    return preferences_data
+
+    # Group sectors_of_work by preference
+    grouped_data = defaultdict(list)
+    for pref in preferences_data:
+        pref_id = (
+            pref['data_source_id'],
+            pref['device_id'],
+            pref['locale'],
+            pref['app_id']
+        )
+        if pref['sectors_of_work__translated_name']:
+            grouped_data[pref_id].append(pref['sectors_of_work__translated_name'])
+
+    # Create final data structure
+    final_data = []
+    seen_prefs = set()
+    for pref in preferences_data:
+        pref_id = (
+            pref['data_source_id'],
+            pref['device_id'], 
+            pref['locale'],
+            pref['app_id']
+        )
+        
+        if pref_id not in seen_prefs:
+            pref_copy = pref.copy()
+            pref_copy['sectors_of_work__translated_name'] = grouped_data[pref_id]
+            final_data.append(pref_copy)
+            seen_prefs.add(pref_id)
+
+    return final_data
 
 
 def preferences_by_immigration_status(**filters):

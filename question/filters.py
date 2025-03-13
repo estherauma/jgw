@@ -273,6 +273,7 @@ def question_response_filtered_queryset(
 def message_data_sent_filtered_queryset(
     current_user,
     queryset: BaseManager[Any],
+    show_new_user_data=False,
     start_date=None,
     end_date=None,
     destination_countries=None,

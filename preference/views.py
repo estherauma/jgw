@@ -354,10 +354,10 @@ def export_preferences_data(request):
         ws.cell(row=idx, column=11, value=data["origin__name"])
         ws.cell(row=idx, column=12, value=data["destination__name"])
         ws.cell(row=idx, column=13, value=data["route__name"])
-        ws.cell(row=idx, column=14, value=data["sectors_of_work__translated_name"])
+        ws.cell(row=idx, column=14, value=", ".join(data["sectors_of_work__translated_name"]))
         if not is_sws_config:
             ws.cell(row=idx, column=15, value=data["organisation_access_code__code"])
-            ws.cell(row=idx, column=16, value=data["organisation__name"])
+            ws.cell(row=idx, column=16, value=data["org_info__name"])
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = (
