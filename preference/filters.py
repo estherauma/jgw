@@ -161,9 +161,6 @@ def preference_filtered_queryset_for_active_users_data(
 
     preference_filters_q_object = Q()
 
-    if show_new_user_data:
-        preference_filters_q_object &= Q(api_created_at__date__range=(final_start_date, final_end_date))
-
     if organisations:
         preference_filters_q_object &= Q(org_info__name__in=organisations)
 
