@@ -241,27 +241,30 @@
         </div>
     {% endflag %}
 </div>
-{% flag 'can_view_work_code_usage_chart' %}
-<div class="row">
-    <div class="col-12 mt-3 user-by-month">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">work code usage</p>
-                <div class="chart-container">
-                    <div class="organisation-work-code-usage-graph-id-chart-box chart-column-width">
-                        <div id="organisation-work-code-usage-graph-id"></div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            Work Code Usage: Users who have logged into the app using an organisation QR Code or Link.
-                            <div class="tooltip-arrow"></div>
+
+{% if user.is_authenticated %}
+    {% flag 'can_view_work_code_usage_chart' %}
+    <div class="row">
+        <div class="col-12 mt-3 user-by-month">
+            <div class="card h-100">
+                <div class="card-body chart">
+                    <p class="chart-title">work code usage</p>
+                    <div class="chart-container">
+                        <div class="organisation-work-code-usage-graph-id-chart-box chart-column-width">
+                            <div id="organisation-work-code-usage-graph-id"></div>
+                            <div class="info-tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                Work Code Usage: Users who have logged into the app using an organisation QR Code or Link.
+                                <div class="tooltip-arrow"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endflag %}
+    {% endflag %}
+{% endif %}
 
 {% flag 'can_view_new_monthly_users_chart' %}
 <div class="row">
