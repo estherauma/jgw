@@ -46,6 +46,7 @@ def list_users(request):
     search_query = request.GET.get('search', '')
     group_id = request.GET.get('group', '')
     page_number = request.GET.get('page', 1)
+    items_per_page = request.GET.get('items_per_page', 25)
 
     users = User.objects.all()
 
@@ -61,7 +62,7 @@ def list_users(request):
     users = users.order_by("-id")
     groups = Group.objects.all()
 
-    paginator = Paginator(users, 10) 
+    paginator = Paginator(users, int(items_per_page))
     page_obj = paginator.get_page(page_number)
 
     context = {
@@ -69,7 +70,8 @@ def list_users(request):
         'groups': groups,
         'paginator': paginator,
         'search_query': search_query,
-        'group_id': group_id
+        'group_id': group_id,
+        'items_per_page': items_per_page
     }
 
     return render(request, "users/list_users.html", context)
@@ -138,6 +140,12 @@ def manage_account(request, id):
 @login_required
 @admin_required
 def activate_account(request, id):
+    # Get return parameters from query string
+    return_page = request.GET.get('return_page', '1')
+    search_query = request.GET.get('search', '')
+    group_id = request.GET.get('group', '')
+    items_per_page = request.GET.get('items_per_page', '25')
+    
     user = User.objects.get(id=id)
     subject = "Your account at JGW Data Dashboard."
     deactivation_message = (
@@ -153,7 +161,7 @@ def activate_account(request, id):
     if user.is_active:
         user.is_active = False
         user.save()
-        messages.info(request, f"The user account: {user.email} was deactivated successfully.")
+        messages.success(request, f"The user account: {user.email} was deactivated successfully.")
         send_email_notification.delay(
             subject=subject,
             message=deactivation_message,
@@ -165,7 +173,7 @@ def activate_account(request, id):
     elif user.is_active == False:
         user.is_active = True
         user.save()
-        messages.info(request, f"The user account: {user.email} was activated and will be notified shortly.")
+        messages.success(request, f"The user account: {user.email} was activated successfully.")
         send_email_notification.delay(
             subject=subject,
             message=activation_message,
@@ -174,7 +182,19 @@ def activate_account(request, id):
             html_message=None,
             inline_images=None
         )
-    return redirect("users:list_users")
+    
+    # Construct return URL with all parameters
+    return_params = {
+        'page': return_page,
+        'search': search_query,
+        'group': group_id,
+        'items_per_page': items_per_page
+    }
+    base_url = reverse('users:list_users')
+    query_string = '&'.join(f"{key}={value}" for key, value in return_params.items() if value)
+    return_url = f"{base_url}?{query_string}" if query_string else base_url
+    
+    return redirect(return_url)
 
 
 def generate_token(payload_data=None, days_to_expiry=1):
@@ -479,24 +499,52 @@ def create_user(request):
 
 def update_user(request, user_id):
     user = get_object_or_404(User, pk=user_id)
-    print("USER",user)
+    
+    # Get return parameters
+    return_page = request.GET.get('return_page', '1')
+    search_query = request.GET.get('search', '')
+    group_id = request.GET.get('group', '')
+    items_per_page = request.GET.get('items_per_page', '25')
+    
     form = EditUserForm(request.POST or None, instance=user)
     if request.method == "POST":
-        user = form.save(commit=False)
+        if form.is_valid():
+            user = form.save(commit=False)
 
-        user_languages = form.cleaned_data.get("user_languages", [])
-        langs_from_ids = Language.objects.filter(id__in=user_languages).values_list(
-            "translated_name", flat=True
-        )
-        all_langs = Language.objects.filter(translated_name__in=langs_from_ids)
+            user_languages = form.cleaned_data.get("user_languages", [])
+            langs_from_ids = Language.objects.filter(id__in=user_languages).values_list(
+                "translated_name", flat=True
+            )
+            all_langs = Language.objects.filter(translated_name__in=langs_from_ids)
 
-        user.save()
-        form.save_m2m()  # Save the many-to-many relationships
+            user.save()
+            form.save_m2m()
 
-        edited_user = User.objects.filter(id=user.id).first()
-        edited_user.user_languages.clear()
-        for lang in all_langs:
-            edited_user.user_languages.add(lang)
+            edited_user = User.objects.filter(id=user.id).first()
+            edited_user.user_languages.clear()
+            for lang in all_langs:
+                edited_user.user_languages.add(lang)
 
-        messages.success(request, "User updated successfully!")
-    return render(request, "users/create_user.html", context={"form": form})
+            messages.success(request, "User updated successfully!")
+            
+            # Construct return URL with all parameters
+            return_params = {
+                'page': return_page,
+                'search': search_query,
+                'group': group_id,
+                'items_per_page': items_per_page
+            }
+            base_url = reverse('users:list_users')
+            query_string = '&'.join(f"{key}={value}" for key, value in return_params.items() if value)
+            return_url = f"{base_url}?{query_string}" if query_string else base_url
+            
+            return redirect(return_url)
+
+    context = {
+        'form': form,
+        'return_page': return_page,
+        'search_query': search_query,
+        'group_id': group_id,
+        'items_per_page': items_per_page
+    }
+    return render(request, "users/edit_user.html", context=context)
