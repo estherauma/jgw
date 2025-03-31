@@ -153,7 +153,8 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 302)
         new_user = User.objects.get(email="test2@test.local")
         self.assertTrue(new_user.is_active)
-        self.assertRedirects(response, "/accounts/")
+        expected_url = reverse('users:list_users') + "?page=1&items_per_page=25"
+        self.assertRedirects(response, expected_url)
 
     @patch("users.tasks.send_email_notification.delay")
     def test_deactivate_user_OK(self, mock_send_email):
@@ -164,7 +165,8 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 302)
         new_user = User.objects.get(email="test2@test.local")
         self.assertFalse(new_user.is_active)
-        self.assertRedirects(response, "/accounts/")
+        expected_url = reverse('users:list_users') + "?page=1&items_per_page=25"
+        self.assertRedirects(response, expected_url)
 
     def test_create_user_view_renders_correctly(self):
         response = self.client.get(reverse("users:create_user"))
