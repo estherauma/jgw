@@ -13,23 +13,15 @@ class MaintenanceModeMiddleware:
 
     def __call__(self, request):
         try:
-            # Check maintenance mode from Redis
+
             maintenance_mode = self.redis_client.get('MAINTENANCE_MODE')
             maintenance_mode = maintenance_mode is not None and maintenance_mode.decode('utf-8') == 'true'
-            
-            # Add debug logging
-            logger.info(f"Maintenance mode status: {maintenance_mode}")
-            logger.info(f"Current request path: {request.path_info}")
 
-            # Check if maintenance mode is enabled
             if maintenance_mode:
-                logger.info("Maintenance mode is enabled")
-                # Allow superusers to view the site
                 if not request.user.is_authenticated or not request.user.is_superuser:
-                    # Check if the request path is in the allowed urls
+
                     allowed_urls = getattr(settings, 'MAINTENANCE_MODE_ALLOWED_URLS', [])
                     if request.path_info not in allowed_urls:
-                        logger.info(f"Showing maintenance page to user (path: {request.path_info})")
                         context = {
                             'maintenance_message': getattr(
                                 settings,

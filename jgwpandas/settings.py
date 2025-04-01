@@ -263,7 +263,7 @@ MESSAGING_API_SECRET = os.getenv("MESSAGING_API_SECRET")
 
 # Maintenance Mode Settings
 MAINTENANCE_MODE = True
-MAINTENANCE_MODE_MESSAGE = "We are currently performing scheduled maintenance. Please check back in a few minutes."
+MAINTENANCE_MODE_MESSAGE = "We are currently performing scheduled maintenance. Please check back later."
 MAINTENANCE_MODE_ALLOWED_URLS = [
     '/admin/login/'
 ]
