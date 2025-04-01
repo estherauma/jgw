@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "payment",
     "pipeline",
     "other_resource",
+    "maintenance",
 ]
 
 MIDDLEWARE = [
@@ -81,10 +82,11 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "core.middlewares.custom_csrf.CustomCSRFMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "maintenance.middleware.MaintenanceModeMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-    "waffle.middleware.WaffleMiddleware",
+    "waffle.middleware.WaffleMiddleware"
 ]
 
 ROOT_URLCONF = "jgwpandas.urls"
@@ -258,3 +260,10 @@ ADMIN_SITE_HEADER = "FiftyEight"
 
 MESSAGING_API_BASE_URL = os.getenv("MESSAGING_API_BASE_URL")
 MESSAGING_API_SECRET = os.getenv("MESSAGING_API_SECRET")
+
+# Maintenance Mode Settings
+MAINTENANCE_MODE = True
+MAINTENANCE_MODE_MESSAGE = "We are currently performing scheduled maintenance. Please check back in a few minutes."
+MAINTENANCE_MODE_ALLOWED_URLS = [
+    '/admin/login/'
+]
