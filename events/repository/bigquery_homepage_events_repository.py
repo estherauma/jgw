@@ -2,7 +2,7 @@ from datetime import datetime
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from django.utils.dateformat import DateFormat
-from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, PUBLIC_USER_DATA_START_DATE
 from common.utils.strings import format_thousands_with_commas
 from events.filters import filter_bigquery_homepage_event_data
 from events.models import BigqueryHomepageEventData
@@ -11,6 +11,9 @@ from preference.repository.preference_repository import get_preferences_by_homep
 
 
 def get_total_active_user_within_period(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
     if not start_date:
@@ -66,6 +69,10 @@ def get_user_counts_by_geo_country(**filters):
             "count": int  # Number of users from this country
         }
     """
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
     queryset = BigqueryHomepageEventData.objects.all()
     filtered_queryset = filter_bigquery_homepage_event_data(queryset, **filters)
     
