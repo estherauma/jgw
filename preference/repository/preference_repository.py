@@ -574,9 +574,9 @@ def get_sws_workcodes_with_access_code(**filters):
 
     queryset_data = (
         preferences_access_code_queryset.values(
-            organisation_name=F("organisation__name"), access_code=F("organisation_access_code__code")
+            organisation_name=F("org_info__name"), access_code=F("organisation_access_code__code")
         )
-        .exclude(organisation__name__in=["not specified"])
+        .exclude(org_info__name__in=["Organisation Not Specified"])
         .annotate(
             access_code_count=Count("organisation_access_code"),
             mapped_access_code=Case(
