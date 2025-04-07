@@ -338,3 +338,18 @@ body.modal-open {
     max-width: 1200px; 
     margin: 0 auto; 
 }
+
+#user_route_map .modebar-container{
+    right: 55px !important;
+    top: 65px !important;
+}
+
+#user_geolocation_map_user_engagement .modebar-container {
+    right: 80px !important;
+    top: 2px !important;
+}
+
+#user_geolocation_map .modebar-container{
+    right: 80px !important; 
+    top: -8px !important;
+}
