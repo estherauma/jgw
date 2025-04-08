@@ -1,7 +1,7 @@
 from django.db.models import Manager as BaseManager, Q
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
-from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, PUBLIC_USER_DATA_START_DATE
 from users.utils import (
     get_user_destinations,
     get_user_excluded_origin_countries,
@@ -27,6 +27,10 @@ def preference_filtered_queryset_for_new_user_data(
     factory_farms=None,
     immigration_status=None,
 ):
+    if not current_user or not current_user.is_authenticated or current_user == "AnonymousUser":
+        end_date = datetime.now().date()
+        start_date = PUBLIC_USER_DATA_START_DATE
+
     user_start_date = get_user_start_date(current_user)
     user_end_date = get_user_end_date(current_user)
 

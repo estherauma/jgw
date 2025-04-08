@@ -4,7 +4,7 @@ from django.db.models import Case, When, Value, CharField, F, Count
 from django.db.models.functions import Cast, Substr, Length
 from django.db.models import Q
 from django.db.models.functions import TruncMonth
-from common.const.value_const import ACCESS_CODE_MAPPING, APPLICATION_POSSIBLE_START_DATE
+from common.const.value_const import ACCESS_CODE_MAPPING, APPLICATION_POSSIBLE_START_DATE, PUBLIC_USER_DATA_START_DATE
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
@@ -29,6 +29,17 @@ def preferences_count(**filters):
 
 
 def preferences_by_age(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_age_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
 
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
@@ -91,6 +102,17 @@ def preferences_by_age(**filters):
 
 
 def preferences_by_gender(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_gender_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
@@ -134,6 +156,17 @@ def preferences_by_gender(**filters):
 
 
 def preferences_by_origin(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_origin_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
@@ -184,6 +217,17 @@ def preferences_by_origin(**filters):
 
 
 def preferences_by_destination(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_destination_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
@@ -218,6 +262,17 @@ def preferences_by_destination(**filters):
 
 
 def preferences_by_language(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_language_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
@@ -274,6 +329,17 @@ def preferences_by_language(**filters):
 
 
 def preferences_by_organisation(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_organisation_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
@@ -354,6 +420,17 @@ def get_cumulative_monthly_new_users(**filters):
 
 
 def get_users_by_country_state(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_count_by_state_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
@@ -368,15 +445,15 @@ def get_users_by_country_state(**filters):
         base_queryset = Preference.objects.all()
 
     if show_new_user_data is False:
-        preferences_language_queryset = preference_filtered_queryset_for_active_users_data(
+        preferences_count_by_state_queryset = preference_filtered_queryset_for_active_users_data(
             queryset=base_queryset, 
             **filters
         )
     else:
-        preferences_language_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
+        preferences_count_by_state_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     preferences_count_by_state = (
-        preferences_language_queryset.values("destination_state__name")
+        preferences_count_by_state_queryset.values("destination_state__name")
         .annotate(users_count=Count("id"))
         .order_by("destination_state__name")
     )
@@ -392,6 +469,17 @@ def get_users_by_country_state(**filters):
 
 
 def get_preferences_by_sectors(**filters):
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_sectors_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
@@ -406,15 +494,15 @@ def get_preferences_by_sectors(**filters):
         base_queryset = Preference.objects.all()
 
     if show_new_user_data is False:
-        preferences_language_queryset = preference_filtered_queryset_for_active_users_data(
+        preferences_sectors_queryset = preference_filtered_queryset_for_active_users_data(
             queryset=base_queryset, 
             **filters
         )
     else:
-        preferences_language_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
+        preferences_sectors_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
 
     result = (
-        preferences_language_queryset.filter(sectors_of_work__original_sector_of_work__isnull=False)
+        preferences_sectors_queryset.filter(sectors_of_work__original_sector_of_work__isnull=False)
         .annotate(
             sector_value=Case(
                 When(sectors_of_work__original_sector_of_work__value="Driving", then=Value("Transport")),
@@ -455,6 +543,17 @@ def get_user_counts_by_origin_destination(**filters):
             "count": int  # Number of users for this origin-destination pair
         }
     """
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['show_new_user_data'] = True
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
+
+        show_new_user_data = filters.get('show_new_user_data', False)
+        base_queryset = Preference.objects.all()
+        preferences_user_counts_queryset = preference_filtered_queryset_for_new_user_data(
+            queryset=base_queryset, 
+            **filters
+        )
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
@@ -513,8 +612,12 @@ def get_user_counts_by_geolocation(**filters):
             "event_date": datetime  # Earliest event_date for the country data
         }
     """
+    
     queryset = UserLocation.objects.all()
     
+    if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
+        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['end_date'] = datetime.now().date()
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
     if start_date is None:
@@ -539,8 +642,6 @@ def get_user_counts_by_geolocation(**filters):
         }
         for entry in user_counts
     ]
-
-    print(heatmap_data)
    
     return heatmap_data
 
@@ -574,9 +675,9 @@ def get_sws_workcodes_with_access_code(**filters):
 
     queryset_data = (
         preferences_access_code_queryset.values(
-            organisation_name=F("organisation__name"), access_code=F("organisation_access_code__code")
+            organisation_name=F("org_info__name"), access_code=F("organisation_access_code__code")
         )
-        .exclude(organisation__name__in=["not specified"])
+        .exclude(org_info__name__in=["Organisation Not Specified"])
         .annotate(
             access_code_count=Count("organisation_access_code"),
             mapped_access_code=Case(
@@ -687,12 +788,9 @@ def extract_preference_for_export(**filters):
             queryset=base_queryset, 
             **filters
         )
-        print(preferences_user_counts_queryset.count())
     else:
         preferences_user_counts_queryset = preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
-        print(preferences_user_counts_queryset.count())
     
-    # Add select_related and prefetch_related to avoid N+1 queries
     preferences_user_counts_queryset = preferences_user_counts_queryset.select_related(
         'location_of_potential_work',
         'gender',

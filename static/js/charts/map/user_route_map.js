@@ -254,12 +254,6 @@ function createUserRouteMap(data, elementId, countryCoords) {
 
     animateLines();
 
-    const modeBar = container.querySelector('.modebar-container');
-    if (modeBar) {
-        modeBar.style.left = '-70px';
-        modeBar.style.top = '65px';
-    }
-
     window.addEventListener('resize', () => {
         Plotly.Plots.resize(elementId);
     });

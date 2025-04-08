@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 from django.db.models import Manager as BaseManager, Q
-from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, PUBLIC_USER_DATA_START_DATE
 
 from users.utils import (
     get_user_destinations,
@@ -235,6 +235,10 @@ def filter_bigquery_homepage_event_data(
     user_end_date = get_user_end_date(current_user)
     user_destinations = get_user_destinations(current_user)
     user_orgs = get_user_organisations(current_user)
+
+    if not current_user or not current_user.is_authenticated:
+        end_date = datetime.now().date()
+        start_date = PUBLIC_USER_DATA_START_DATE
 
     final_start_date = (
         max(start_date, user_start_date)
