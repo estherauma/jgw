@@ -303,52 +303,53 @@
     </div>
 </div>
 {% endflag %}
+{% if user.is_authenticated %}
+    {% flag 'can_view_user_route_map_chart' %}
+    <div class="row col-md-12 mt-3 user-route-map-chart-box">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title mb-2">User Route Map</p>
+                <div id="user_route_map" class="user-route-map"></div>
+                <div class="info-tooltip user-route-map-info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    User Route Map: Shows where workers say they are from (marked with blue dots) and the country they are working in or looking for work in (which they select when they first use the app marked with green dots)
+                    <div class="tooltip-arrow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endflag %}
 
-{% flag 'can_view_user_route_map_chart' %}
-<div class="row col-md-12 mt-3 user-route-map-chart-box">
-    <div class="card h-100">
-        <div class="card-body chart">
-            <p class="chart-title mb-2">User Route Map</p>
-            <div id="user_route_map" class="user-route-map"></div>
-            <div class="info-tooltip user-route-map-info-tooltip">
-                <i class="fas fa-info-circle"></i>
-                User Route Map: Shows where workers say they are from (marked with blue dots) and the country they are working in or looking for work in (which they select when they first use the app marked with green dots)
-                <div class="tooltip-arrow"></div>
+    {% flag 'can_view_user_geolocation_map' %}
+    <div class="row col-md-12 user-route-map-chart-box">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title mb-2">User Geolocation Map for Active Users</p>
+                <div id="user_geolocation_map" class="user-geolocation-map"></div>
+                <div class="info-tooltip user-geolocation-map-info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    User Geolocation Map: Shows the geographical distribution of users based on their detected location
+                    <div class="tooltip-arrow"></div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% endflag %}
-
-{% flag 'can_view_user_geolocation_map' %}
-<div class="row col-md-12 user-route-map-chart-box">
-    <div class="card h-100">
-        <div class="card-body chart">
-            <p class="chart-title mb-2">User Geolocation Map for Active Users</p>
-            <div id="user_geolocation_map" class="user-geolocation-map"></div>
-            <div class="info-tooltip user-geolocation-map-info-tooltip">
-                <i class="fas fa-info-circle"></i>
-                User Geolocation Map: Shows the geographical distribution of users based on their detected location
-                <div class="tooltip-arrow"></div>
+    {% endflag %}
+    {% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
+    <div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
+        <div class="card h-100">
+            <div class="card-body chart wide-map">
+                <p class="chart-title mb-2">Users Geolocation Map Basing On User Engagement</p>
+                <div id="user_geolocation_map_user_engagement" class="user-geolocation-map"></div>
+                <div class="info-tooltip user-geol-map-info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    User Geolocation Map: Shows users Geolocation at the time of using the app.
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% endflag %}
-{% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
-<div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
-    <div class="card h-100">
-        <div class="card-body chart wide-map">
-            <p class="chart-title mb-2">Users Geolocation Map Basing On User Engagement</p>
-            <div id="user_geolocation_map_user_engagement" class="user-geolocation-map"></div>
-            <div class="info-tooltip user-geol-map-info-tooltip">
-                <i class="fas fa-info-circle"></i>
-                User Geolocation Map: Shows users Geolocation at the time of using the app.
-            </div>
-        </div>
-    </div>
-</div>
-{% endflag %}
+    {% endflag %}
+{% endif %}
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
