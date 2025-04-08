@@ -17,7 +17,6 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from django.contrib.messages import constants as messages
 import ssl
-from django.utils.translation import gettext_lazy as _
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
@@ -78,7 +77,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "core.middlewares.custom_csrf.CustomCSRFMiddleware",
@@ -98,7 +96,6 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "django.template.context_processors.i18n",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
@@ -153,11 +150,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-LANGUAGES = (
-    ('en', _('English')),
-    ('es', _('Spanish')),
-)
-
 TIME_ZONE = "UTC"
 
 USE_I18N = True
@@ -165,8 +157,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-HTML_MINIFY = True
 
 AUTH_USER_MODEL = "users.User"
 
@@ -233,23 +223,12 @@ LOGGING = {
             # "stream": "sys.stdout",
             "formatter": "verbose",
         },
-         "translation_file": {
-            "level": "ERROR",
-            "class": "logging.FileHandler",
-            "filename": "translation_errors.log",  # Log file for translation errors
-            "formatter": "verbose",
-        },
     },
     "loggers": {
         "djangoDebug": {
             "handlers": ["console"],
             "level": "DEBUG",
-        },
-        "django.utils.translation": {
-            "handlers": ["translation_file"],
-            "level": "ERROR",
-            "propagate": False,
-        },
+        }
     },
 }
 
@@ -279,6 +258,3 @@ ADMIN_SITE_HEADER = "FiftyEight"
 
 MESSAGING_API_BASE_URL = os.getenv("MESSAGING_API_BASE_URL")
 MESSAGING_API_SECRET = os.getenv("MESSAGING_API_SECRET")
-
-# i18n
-LOCALE_PATHS = [os.path.join(BASE_DIR,'locale')]
