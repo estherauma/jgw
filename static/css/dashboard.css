@@ -338,7 +338,6 @@ body.modal-open {
     max-width: 1200px; 
     margin: 0 auto; 
 }
-
 /* Maintenance page styles */
 .maintenance-page-body {
     font-family: Arial, sans-serif;
@@ -376,4 +375,18 @@ body.modal-open {
 .maintenance-logo {
     max-width: 200px;
     margin-bottom: 2rem;
+
+#user_route_map .modebar-container{
+    right: 55px !important;
+    top: 65px !important;
+}
+
+#user_geolocation_map_user_engagement .modebar-container {
+    right: 80px !important;
+    top: 2px !important;
+}
+
+#user_geolocation_map .modebar-container{
+    right: 80px !important; 
+    top: -8px !important;
 }
