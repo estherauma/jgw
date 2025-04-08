@@ -249,7 +249,7 @@ class AuthTests(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, "/accounts/login/")
+        self.assertTemplateUsed(response, "users/email_sent.html")
 
     @patch("users.tasks.send_email_notification.delay")
     def test_request_password_reset_OK(self, mock_send_email):
