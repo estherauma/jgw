@@ -248,7 +248,7 @@ class AuthTests(TestCase):
                 "confirm_password": "samplePword123",
             },
         )
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/email_sent.html")
 
     @patch("users.tasks.send_email_notification.delay")
