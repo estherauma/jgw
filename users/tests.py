@@ -286,7 +286,7 @@ class AuthTests(TestCase):
                 "confirm_password": "samplePword123",
             },
         )
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, "/accounts/login/")
 
     def test_set_password_expired_token(self):
