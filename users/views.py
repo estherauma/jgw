@@ -149,14 +149,14 @@ def activate_account(request, id):
     user = User.objects.get(id=id)
     subject = "Your account at JGW Data Dashboard."
     deactivation_message = (
-        f"Hello\n, Your account at JGW Pandas has been deactivated.\n"
+        f"Hello\n, Your account at Just Good Work Data Platform has been deactivated.\n"
         f"\nPlease reach out to the administrator if this action was not initiated by you."
-        f"\n\nJGWPandas"
+        f"\n\nJust Good Work Data Platform"
     )
     activation_message = (
         f"Hello\n, Your account at JGW Pandas has been activated.\n"
         f"\n Please reach out to the administrator if this account was not created by you."
-        f"\nJGWPandas"
+        f"\nJust Good Work Data Platform"
     )
     if user.is_active:
         user.is_active = False
@@ -225,9 +225,9 @@ def invite_user(request):
             invite = form.save(commit=True)
             token = generate_token(payload_data={"invite_id": invite.id}, days_to_expiry=3)
             send_email_notification.delay(
-                subject="Set up your account on JGWPandas",
+                subject="Set up your account on Just Good Work Data Platform",
                 message=f"""
-                Please follow this link to set up your new account on JGW Pandas:
+                Please follow this link to set up your new account on Just Good Work Data Platform:
                 https://jgwpandas.herokuapp.com{reverse("users:verify_invite", args=(token,))}
                 \nPlease note that this link expires in 3 days.
                 """,
@@ -345,7 +345,7 @@ def request_password_reset(request):
                 plain_message = strip_tags(html_content)
 
                 send_email_notification(
-                    subject="Reset your password on JGWPandas",
+                    subject="Reset your password on Just Good Work Data Platform",
                     message=plain_message,
                     recipients=[email_address],
                     attachment_path=None,
@@ -355,7 +355,7 @@ def request_password_reset(request):
 
                 success_text = f"""
                     An email has been sent to {email_address}.
-                    Please check for an email from JGWPandas and click on the included link to reset your password.
+                    Please check for an email from Just Good Work Data Platform and click on the included link to reset your password.
                 """
                 return render(request, "users/email_sent.html", {"success_text": success_text})
 
@@ -388,7 +388,11 @@ def set_password(request, token):
                     ).get(id=invite_id)
                     user_obj = {"email": invite["email"], "role": invite["scheme"]}
                     User.objects.create_user(**user_obj, password=password, is_active=True)
-                return redirect("users:login_user")
+                success_text = """
+                    Your password has been successfully reset.
+                    You can now log in using your new password.
+                """
+                return render(request, "users/email_sent.html", {"success_text": success_text})
             else:
                 messages.error(request, "Error validating form!")
     except jwt.ExpiredSignatureError:
@@ -419,7 +423,7 @@ def change_email_address(request):
                 send_email_notification.delay(
                     subject="Verify your email",
                     message=f"""
-                    \n Click this link to verify this email for your account on JGW Pandas:
+                    \n Click this link to verify this email for your account on Just Good Work Data Platform:
                     \n https://jgwpandas.herokuapp.com{reverse("users:verify_email", args=(token,))}
                     \n This link expires in 1 day.
                     \n Reach out to your administrator if you didn't initiate this action.
@@ -431,7 +435,7 @@ def change_email_address(request):
                 )
                 success_text = f"""
                     An email has been sent to {new_email}.
-                    Please check for an email from JGWPandas and click on the included link to verify the change in email address.
+                    Please check for an email from Just Good Work Data Platform and click on the included link to verify the change in email address.
                     """
                 return render(
                     request, template_name="users/email_sent.html", context={"success_text": success_text}

@@ -76,7 +76,7 @@ class RequestPasswordResetForm(forms.Form):
 
 class SetPasswordForm(forms.Form):
     """
-    A form that lets a user change set their password without entering the old
+    A form that lets a user change their password without entering the old
     password
     """
 
