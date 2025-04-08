@@ -29,7 +29,7 @@ function createUserGeolocationMap(data, elementId) {
         colorbar: {
             title: 'Users',
             thickness: 10,
-            x: 1.05,
+            x: elementId === 'user_geolocation_map' ? 0.92 : 1.05,
             xpad: 50
         },
         hoverinfo: 'text'
