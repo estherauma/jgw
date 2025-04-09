@@ -112,14 +112,19 @@ def login_user(request):
         if form.is_valid():
             email = form.cleaned_data.get("email")
             password = form.cleaned_data.get("password")
-            user = authenticate(request, username=email, password=password)
-            if user is not None:
-                login(request, user)
-                if has_group(user, "Summerberry"):
-                    return redirect("dashboard:summerberry-dashboard")
+            # Try to find user with case-insensitive email match
+            try:
+                user = User.objects.get(email__iexact=email)
+                user = authenticate(request, username=user.email, password=password)
+                if user is not None:
+                    login(request, user)
+                    if has_group(user, "Summerberry"):
+                        return redirect("dashboard:summerberry-dashboard")
+                    else:
+                        return redirect("preference:user_overview")
                 else:
-                    return redirect("preference:user_overview")
-            else:
+                    messages.error(request, "Can not log in with provided credentials!")
+            except User.DoesNotExist:
                 messages.error(request, "Can not log in with provided credentials!")
         else:
             messages.error(request, "Error validating form!")
