@@ -248,8 +248,8 @@ class AuthTests(TestCase):
                 "confirm_password": "samplePword123",
             },
         )
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, "/accounts/login/")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/email_sent.html")
 
     @patch("users.tasks.send_email_notification.delay")
     def test_request_password_reset_OK(self, mock_send_email):
@@ -286,8 +286,8 @@ class AuthTests(TestCase):
                 "confirm_password": "samplePword123",
             },
         )
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, "/accounts/login/")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/email_sent.html")
 
     def test_set_password_expired_token(self):
         payload = {
