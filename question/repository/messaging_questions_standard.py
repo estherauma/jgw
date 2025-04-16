@@ -332,7 +332,6 @@ def get_all_message_data_sent(**filters):
     """
     Get all message data sent with applied filters
     """
-    print("Filters get method", filters)
     queryset = message_data_sent_filtered_queryset(
         queryset=MessageDataSent.objects.select_related("language", "destination", "organisation", "message_content"), **filters
     )

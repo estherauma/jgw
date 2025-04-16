@@ -327,6 +327,9 @@ def get_all_inline_question_responses_data(**filters):
             end_date=end_date
         )
         base_queryset = base_queryset.exclude(response__translated_text="not specified")
+    else:
+        base_queryset = InlineQuestionResponse.objects.all()
+        base_queryset = base_queryset.exclude(response__translated_text="not specified")
 
     responses = (
         question_response_filtered_queryset(queryset=base_queryset, **filters)
@@ -341,7 +344,7 @@ def get_all_inline_question_responses_data(**filters):
             "inline_question__inline_question_standard__origin",
             "inline_question__inline_question_standard__destination",
             "inline_question__inline_question_standard__organisation_sector",
-            "inline_question__inline_question_standard__organisation",
+            "inline_question__inline_question_standard__org_info",
         )
         .values(
             "inline_question__inline_question_standard__device_id",
@@ -351,7 +354,7 @@ def get_all_inline_question_responses_data(**filters):
             "inline_question__inline_question_standard__origin__name",
             "inline_question__inline_question_standard__destination__name",
             "inline_question__inline_question_standard__organisation_sector__name",
-            "inline_question__inline_question_standard__organisation__name",
+            "inline_question__inline_question_standard__org_info__name",
             "inline_question__inline_question_standard__route__name",
             "inline_question__question__text",
             "inline_question__question__title_text",
@@ -376,7 +379,7 @@ def get_all_inline_question_responses_data(**filters):
                 "organisation_sector": response[
                     "inline_question__inline_question_standard__organisation_sector__name"
                 ],
-                "organisation": response["inline_question__inline_question_standard__organisation__name"],
+                "organisation": response["inline_question__inline_question_standard__org_info__name"],
                 "route": response["inline_question__inline_question_standard__route__name"],
                 "question_key": response["inline_question__question__text"],
                 "title_text": response["inline_question__question__title_text"],
