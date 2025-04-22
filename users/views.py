@@ -337,7 +337,9 @@ def request_password_reset(request):
         if form.is_valid():
             email_address = form.cleaned_data.get("email")
             try:
-                user = User.objects.get(email=email_address)
+                user = User.objects.filter(email__iexact=email_address).first()
+                if not user:
+                    raise User.DoesNotExist()
                 token = generate_token(payload_data={"user_id": user.id}, days_to_expiry=1)
                 reset_link = f"https://jgwpandas.herokuapp.com{reverse('users:set_password', args=(token,))}"
 
