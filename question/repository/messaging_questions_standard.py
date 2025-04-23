@@ -290,24 +290,20 @@ def get_messaging_question_per_organisation_counts(**filters):
 
         queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
 
-        print("queryset", queryset)
-
         organisation_counts_data = (
             queryset
             .values(
-                organisation_name=F("organisation__name")
+                org_info__name=F("org_info__name")
             )
             .annotate(count=Count("id", distinct=True))
             .order_by("-count")
         )
 
-        print("organisation_counts_data", organisation_counts_data)
-
         organisation_data = [count["count"] for count in organisation_counts_data]
         organisation_labels = [
-            count["organisation_name"].title()
+            count["org_info__name"].title()
             for count in organisation_counts_data
-            if count["organisation_name"] is not None
+            if count["org_info__name"] is not None
         ]
 
         return {
