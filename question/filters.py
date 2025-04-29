@@ -181,14 +181,14 @@ def question_response_filtered_queryset(
             ) & Q(
                 inline_question__inline_question_standard__org_info__name="Evergreen"
             )
-        if "MY Voice" in user_org_names:
+        if "Dashboard Demo" in user_org_names:
             organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(
                 inline_question__inline_question_standard__destination__name="malaysia"
             ) & Q(
-                inline_question__inline_question_standard__org_info__name="MY Voice"
+                inline_question__inline_question_standard__org_info__name="Dashboard Demo"
             )
 
-        other_organisations = [org for org in user_org_names if org not in {"Evergreen", "MY Voice"}]
+        other_organisations = [org for org in user_org_names if org not in {"Evergreen", "Dashboard Demo"}]
         if other_organisations:
             organisation_q_objects |= Q(
                 inline_question__inline_question_standard__org_info__name__in=other_organisations
@@ -228,14 +228,14 @@ def question_response_filtered_queryset(
             ) & Q(
                 inline_question__inline_question_standard__org_info__name="Evergreen"
             )
-        if "MyVoice" in organisations:
+        if "Dashboard Demo" in organisations:
             organisation_q_objects |= Q(organisation_inline_question="myvoice") & Q(
                 inline_question__inline_question_standard__destination__name="malaysia"
             ) & Q(
-                inline_question__inline_question_standard__org_info__name="MyVoice"
+                inline_question__inline_question_standard__org_info__name="Dashboard Demo"
             )
 
-        other_organisations = [org for org in organisations if org not in {"Evergreen", "MyVoice"}]
+        other_organisations = [org for org in organisations if org not in {"Evergreen", "Dashboard Demo"}]
         if other_organisations:
             organisation_q_objects |= Q(
                 inline_question__inline_question_standard__org_info__name__in=other_organisations
