@@ -229,7 +229,6 @@ function createUserRouteMap(data, elementId, countryCoords) {
                 });
             }
         });
-        updateModebarPosition(elementId);
     });
 
     function animateLines() {
@@ -255,26 +254,9 @@ function createUserRouteMap(data, elementId, countryCoords) {
 
     animateLines();
 
-    // const modeBar = container.querySelector('.modebar-container');
-    // if (modeBar) {
-    //     modeBar.style.right = '80px';
-    //     modeBar.style.top = '5px';
-    // }
-
     window.addEventListener('resize', () => {
         Plotly.Plots.resize(elementId);
-        updateModebarPosition(elementId);
     });
-}
-
-function updateModebarPosition(elementId) {
-    const container = document.getElementById(elementId);
-    const modeBar = container.querySelector('.modebar');
-
-    if (modeBar) {
-        modeBar.style.right = window.innerWidth < 600 ? '20px' : '80px';
-        modeBar.style.top = '5px';
-    }
 }
 
 function capitalizeFirstLetter(string) {
