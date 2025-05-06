@@ -1,9 +1,9 @@
 import requests
 from django.db import transaction
-from events.models import Chapter, ChaptersFeedback, ChaptersFeedbackStandard
+from events.models import Chapter, ChaptersFeedback, ChaptersFeedbackStandard, ImmigrationStatusChapterTitle
 
 from jgwpandas.settings import JGW_API, JGW_API_SECRET
-from preference.models import Country
+from preference.models import Country, ImmigrationStatus
 
 
 def fetch_data_from_api(destination_codes):
@@ -43,6 +43,7 @@ def extract_relevant_data(combined_data):
         destination_name = destination["destinationName"]
         for chapter in destination["chapters"]:
             chapter_info = {
+                "immigrationStatus": destination["immigrationStatus"],
                 "destinationName": destination_name,
                 "jgwDestinationCode": chapter["documentId"],
                 "uid": chapter["uid"],
@@ -129,7 +130,6 @@ def fetch_and_update_all_destiantion_chapter_titles():
     api_data = fetch_data_from_api(destination_codes)
     if api_data:
         chapters_list = extract_relevant_data(api_data)
-
         unique_chapters = filter_unique_chapters(chapters_list)
         update_or_create_chapters(unique_chapters)
 
@@ -185,3 +185,76 @@ def update_feedback_titles_for_united_kingdom_and_malaysia():
                 chapter_instance = Chapter.objects.filter(number_key=new_title, destination=malaysia).first()
                 ChaptersFeedback.objects.filter(feedback_standard=feedback).update(chapter=chapter_instance)
                 print(f"Updated chapter to {new_title} for feedback_standard id {feedback.id} in Malaysia")
+
+
+def fetch_data_by_immigration_status(destination_code, immigration_status):
+    url = f"{JGW_API}appcontent/v2/chapter-titles"
+    
+    params = {
+        "configVersion": "version_4",
+        "languageCode": "en-gc",
+        "destinationCode": destination_code,
+        "immigrationStatus": immigration_status
+    }
+
+    headers = {
+        "secret": JGW_API_SECRET
+    }
+
+    response = requests.get(url, params=params, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        if data["status"] == "OK":
+            return data["data"]
+    else:
+        print(
+            f"Error: Failed to fetch data for destination {destination_code} and immigration status {immigration_status}. Status code: {response.status_code}"
+        )
+    return []
+
+
+def update_chapters_by_immigration_status():
+    # Get all immigration status instances for United Kingdom(GBR)
+    destinationCode = "GBR"
+    try:
+        immigration_statuses = ImmigrationStatus.objects.all()
+        
+        for immigration_status in immigration_statuses:
+            print(f"Fetching chapters for immigration status: {immigration_status.name}")
+            api_data = fetch_data_by_immigration_status(destinationCode, immigration_status.value)
+            
+            if api_data:
+                chapters_list = extract_relevant_data(api_data)
+                update_or_create_immigration_status_chapter_titles(chapters_list)
+                print(f"Successfully updated chapters for immigration status: {immigration_status.name}")
+            else:
+                print(f"No data found for immigration status: {immigration_status.name}")
+                
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+
+def update_or_create_immigration_status_chapter_titles(chapters_list):
+
+    for chapter_data in chapters_list:
+        try:
+
+            destination = Country.objects.filter(name__iexact=chapter_data["destinationName"]).first()
+            if not destination:
+                raise Country.DoesNotExist
+            immigration_status = ImmigrationStatus.objects.get(name=chapter_data["immigrationStatus"])
+
+            chapter, created = ImmigrationStatusChapterTitle.objects.update_or_create(
+                chapter_uid=chapter_data["uid"],
+                destination=destination,
+                immigration_status=immigration_status,
+                chapter_title=chapter_data["title"],
+                documentId=chapter_data["jgwDestinationCode"]
+            )
+            if created:
+                print(f"Created new immigration status chapter title: {chapter_data['uid']}")
+            else:
+                print(f"Updated existing immigration status chapter title: {chapter_data['uid']}")
+        except Country.DoesNotExist:
+            print(f"Destination {chapter_data['destinationName']} does not exist.")
+        except Exception as e:
+            print(f"Error processing chapter {chapter_data['uid']}: {e}")

@@ -1,6 +1,6 @@
 function chapterFeedBackGraph(feedbackParams) {
 
-  const labels = feedbackParams.map((item) => item.chapter_text);
+  const labels = feedbackParams.map((item) => item.display_chapter_text);
   const frownsData = feedbackParams.map((item) => item.frowns);
   const smilesData = feedbackParams.map((item) => item.smiles);
   const data = [...smilesData, ...frownsData];

@@ -10,6 +10,7 @@ from events.models import (
     ChaptersFeedbackResponse,
     ChaptersFeedbackStandard,
     ChaptersOpened,
+    ImmigrationStatusChapterTitle,
     TelephoneClickEvent,
     LinksClickEvent,
     OneTimeEventJob,
@@ -36,6 +37,7 @@ class ChaptersFeedbackStandardAdminDisplay(admin.ModelAdmin):
     list_display = [
         "api_created_at",
         "data_source_id",
+        "documentId",
         "destination",
         "feedback_title",
         "organisation",
@@ -44,14 +46,14 @@ class ChaptersFeedbackStandardAdminDisplay(admin.ModelAdmin):
         "immigration_status",
         "is_org_info_cleaned",
     ]
-    search_fields = ["api_created_at", "data_source_id", "destination", "feedback_title"]
+    search_fields = ["api_created_at", "data_source_id", "destination", "feedback_title", "documentId"]
     ordering = ["-api_created_at"]
 
 
 @admin.register(ChaptersFeedback)
 class ChaptersFeedbackAdminDisplay(admin.ModelAdmin):
-    list_display = ["feedback_standard", "feedback_question", "feedback_response", "chapter"]
-    search_fields = ["feedback_standard", "feedback_question", "feedback_response", "chapter"]
+    list_display = ["feedback_standard", "feedback_question", "feedback_response", "chapter", "immigration_status_chapter_title"]
+    search_fields = ["feedback_standard", "feedback_question", "feedback_response", "chapter", "immigration_status_chapter_title"]
     ordering = ["-feedback_standard"]
 
 
@@ -107,6 +109,7 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
         "event_name",
         "get_chapter_text",
         "get_chapter_key",
+        "immigration_status_chapter_title",
         "immigration_status",
         "device_id",
         "destination",
@@ -117,10 +120,13 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
     ]
 
     def get_chapter_text(self, obj):
-        return obj.chapter.chapter_text
+        return obj.chapter.chapter_text if obj.chapter else None
 
     def get_chapter_key(self, obj):
-        return obj.chapter.number_key
+        return obj.chapter.number_key if obj.chapter else None
+    
+    def get_immigration_status_chapter_title(self, obj):
+        return obj.immigration_status_chapter_title.chapter_title if obj.immigration_status_chapter_title else None
 
 
 @admin.register(ChaptersFeedbackResponse)
@@ -156,3 +162,8 @@ class PreferenceHistoryAdmin(admin.ModelAdmin):
     list_display = ["created_at", "data_source_id", "destination", "immigration_status", "age", "organisation", "org_info"]
     search_fields = ["data_source_id", "destination", "immigration_status", "age", "organisation", "org_info", "org_code"]
     ordering = ["-created_at"]
+
+@admin.register(ImmigrationStatusChapterTitle)
+class ImmigrationStatusChapterTitleAdmin(admin.ModelAdmin):
+    list_display = ["immigration_status", "destination", "documentId", "chapter_uid", "chapter_title"]
+    search_fields = ["immigration_status", "destination", "documentId", "chapter_uid", "chapter_title"]

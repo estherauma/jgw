@@ -8,6 +8,7 @@ from events.models import (
     ChaptersFeedbackResponse, 
     ChaptersFeedbackStandard, 
     ChaptersOpened,
+    ImmigrationStatusChapterTitle,
     SwsPasiEvent,
     Chapter,
 )
@@ -23,12 +24,13 @@ class Command(BaseCommand):
     """
     def handle(self, *args, **options):
         ChaptersOpened.objects.all().delete()
-        
+        ImmigrationStatusChapterTitle.objects.all().delete()
+        Chapter.objects.all().delete()
         ChaptersFeedbackStandard.objects.all().delete()
         ChaptersFeedback.objects.all().delete()
         ChaptersFeedbackResponse.objects.all().delete()
         ChaptersFeedbackQuestion.objects.all().delete()
-        Chapter.objects.all().delete()
+
         
         BigQueryFirstOpenHomepageData.objects.all().delete()
         BigQueryChaptersData.objects.all().delete()

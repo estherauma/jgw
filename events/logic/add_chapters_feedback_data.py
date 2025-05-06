@@ -28,6 +28,7 @@ from events.models import (
     ChaptersFeedbackResponse,
     ChaptersFeedbackStandard,
     Chapter,
+    ImmigrationStatusChapterTitle,
 )
 from events.tasks import translate_and_clean_chapter_feedback_fields
 from preference.models import Country, Organisation, Preference
@@ -82,6 +83,7 @@ feedback_non_required_fields = [
 feedback_standard_fields = [
     "_id",
     "deviceId",
+    "documentId",
     "appId",
     "locale",
     "route",
@@ -154,6 +156,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
     gender = standard_fields_dict.get("gender")
     age = standard_fields_dict.get("age")
     sectors_of_work = standard_fields_dict.get("sectors")
+    documentId = standard_fields_dict.get("documentId")
 
     device_id = standard_fields_dict.get("deviceId")
     preference = Preference.objects.filter(device_id=device_id).first()
@@ -198,8 +201,8 @@ def add_chapter_feedback_to_db(chapter_feedback):
             "factory_farm": factory_farm_data,
             "organisation": organisation_data,
             "immigration_status": immigration_status_data,
+            "documentId": documentId,
         }
-
         chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
 
         for feedback in feedback_data_value_list:
@@ -212,16 +215,31 @@ def add_chapter_feedback_to_db(chapter_feedback):
                 question=feedback_data_question
             )
 
-            chapter_instance, _ = Chapter.objects.get_or_create(
-                number_key=feedback_data_key, destination=destination_data
-            )
-
-            ChaptersFeedback.objects.create(
-                feedback_standard=chapters_feedback_standard,
-                feedback_question=feedback_question,
-                feedback_response=feedback_response,
-                chapter=chapter_instance,
-            )
+            if immigration_status_data:
+                number_key_with_dots = feedback_data_key.replace('_', '.')
+                immigration_status_title = ImmigrationStatusChapterTitle.objects.filter(
+                    chapter_uid=number_key_with_dots,
+                    destination=destination_data,
+                    immigration_status=immigration_status_data
+                ).first()
+                if immigration_status_title:
+                    print("immigration_status_title", immigration_status_title)
+                    ChaptersFeedback.objects.create(
+                        feedback_standard=chapters_feedback_standard,
+                        feedback_question=feedback_question,
+                        feedback_response=feedback_response,
+                        immigration_status_chapter_title=immigration_status_title,
+                    )
+                else:
+                    chapter_instance, _ = Chapter.objects.get_or_create(
+                        number_key=feedback_data_key, destination=destination_data
+                    )
+                    ChaptersFeedback.objects.create(
+                        feedback_standard=chapters_feedback_standard,
+                        feedback_question=feedback_question,
+                        feedback_response=feedback_response,
+                        chapter=chapter_instance,
+                    )
 
         sec_of_work_list = add_sector_of_work_to_db(sectors_of_work)
         for sec_of_work in sec_of_work_list:
