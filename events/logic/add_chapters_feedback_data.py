@@ -223,7 +223,6 @@ def add_chapter_feedback_to_db(chapter_feedback):
                     immigration_status=immigration_status_data
                 ).first()
                 if immigration_status_title:
-                    print("immigration_status_title", immigration_status_title)
                     ChaptersFeedback.objects.create(
                         feedback_standard=chapters_feedback_standard,
                         feedback_question=feedback_question,
