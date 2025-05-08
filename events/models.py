@@ -80,6 +80,15 @@ class Chapter(models.Model):
     def __str__(self):
         return self.number_key
 
+class ImmigrationStatusChapterTitle(models.Model):
+    immigration_status = models.ForeignKey(ImmigrationStatus, on_delete=models.SET_NULL, null=True, blank=True)
+    destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
+    documentId = models.CharField(null=True, blank=True, max_length=255)
+    chapter_uid = models.CharField(null=True, blank=True, max_length=255)
+    chapter_title = models.CharField(null=True, blank=True, max_length=255)
+
+    def __str__(self):
+        return f"{self.immigration_status.name} - {self.destination.name} - {self.documentId}"
 
 class ChaptersOpened(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -89,6 +98,9 @@ class ChaptersOpened(models.Model):
     event_name = models.CharField(max_length=255)
     chapter = models.ForeignKey(
         Chapter, null=True, blank=True, on_delete=models.SET_NULL, related_name="chapter_opened_chapters"
+    )
+    immigration_status_chapter_title = models.ForeignKey(
+        ImmigrationStatusChapterTitle, null=True, blank=True, on_delete=models.SET_NULL, related_name="chapter_opened_immigration_status_chapter_titles"
     )
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
@@ -161,6 +173,7 @@ class ChaptersFeedbackStandard(models.Model):
         related_name="chapter_feedback_preference",
     )
     feedback_title = models.CharField(null=True, blank=True, max_length=255)
+    documentId = models.CharField(null=True, blank=True, max_length=255)
     gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
     age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
@@ -239,6 +252,9 @@ class ChaptersFeedback(models.Model):
     )
     chapter = models.ForeignKey(
         Chapter, on_delete=models.SET_NULL, null=True, blank=False, related_name="chapterfeedback_chapters"
+    )
+    immigration_status_chapter_title = models.ForeignKey(
+        ImmigrationStatusChapterTitle, null=True, blank=True, on_delete=models.SET_NULL, related_name="chapter_feedback_immigration_status_chapter_titles"
     )
 
     def __str__(self):
@@ -360,3 +376,5 @@ class UserLocation(models.Model):
 
     def __str__(self):
         return f"{self.city}, {self.country} ({self.user_count} users)"
+    
+

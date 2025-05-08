@@ -20,7 +20,7 @@ from common.helpers.preference_helpers.country import get_data_destination, get_
 from common.logger import KunfuPandaLogger
 from events.logic.chapter_title_api_data import update_chapter_titles
 from events.logic.update_events_data_with_org_info import update_chapters_opened_org_info_from_organisation
-from events.models import Chapter, ChaptersOpened
+from events.models import Chapter, ChaptersOpened, ImmigrationStatusChapterTitle
 from preference.models import Country, Organisation, Preference
 from preference.tasks import translate_and_clean_preferences_fields
 
@@ -151,10 +151,33 @@ def add_chapters_opened_to_db(chapters_feedback):
         immigration_status=immigration_status_data,
         factory_farm=factory_farm_data,
     )
-    chapter, _ = Chapter.objects.get_or_create(
-        number_key=get_chapter_number_from_name(chapter_opened.event_name), destination=destination_data
-    )
-    chapter_opened.chapter = chapter
+
+    number_key = get_chapter_number_from_name(chapter_opened.event_name)
+    
+    if immigration_status_data:
+        number_key_with_dots = number_key.replace('_', '.')
+        
+        immigration_status_title = ImmigrationStatusChapterTitle.objects.filter(
+            chapter_uid__in=[number_key_with_dots],
+            destination=destination_data,
+            immigration_status=immigration_status_data
+        ).first()
+
+        if immigration_status_title:
+            chapter_opened.immigration_status_chapter_title = immigration_status_title
+        else:
+            chapter, _ = Chapter.objects.get_or_create(
+                number_key=number_key,
+                destination=destination_data
+            )
+            chapter_opened.chapter = chapter
+    else:
+        chapter, _ = Chapter.objects.get_or_create(
+            number_key=number_key,
+            destination=destination_data
+        )
+        chapter_opened.chapter = chapter
+
     try:
         chapter_opened.save()
     except Exception as e:
