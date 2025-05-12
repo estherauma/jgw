@@ -296,6 +296,7 @@ class BigqueryHomepageEventData(models.Model):
     destination = models.ForeignKey(
         Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="homepage_event_destination"
     )
+    preference = models.ForeignKey(Preference, on_delete=models.SET_NULL, null=True, blank=True)
     age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
     gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
     immigration_status = models.ForeignKey(
@@ -308,6 +309,14 @@ class BigqueryHomepageEventData(models.Model):
     geo_country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
     is_myvoice_organisation = models.BooleanField(default=False)
     is_org_info_cleaned = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['event_date']),
+            models.Index(fields=['device_id']),
+            models.Index(fields=['destination']),
+            models.Index(fields=['preference']),
+        ]
 
     def __str__(self):
         return f"Homepage Event on {self.event_date} for Device {self.device_id}"

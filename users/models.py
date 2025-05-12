@@ -69,6 +69,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     immigration_status = models.ManyToManyField(ImmigrationStatus, blank=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['email']),
+        ]
+
     def __str___(self):
         return f"{self.email}"
 

@@ -51,6 +51,11 @@ class FactoryFarm(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
+
 
 class Organisation(models.Model):
     name = models.CharField(max_length=255)
@@ -83,6 +88,11 @@ class Country(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
 
 
 class CountryState(models.Model):
@@ -156,6 +166,13 @@ class ImmigrationStatus(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
+
+
 class OrganisationData(models.Model):
     name = models.CharField(max_length=255)
     org_code = models.CharField(max_length=50, unique=True)
@@ -164,6 +181,12 @@ class OrganisationData(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
+
 
 class Preference(models.Model):
     data_source_id = models.CharField(max_length=255)
@@ -224,6 +247,25 @@ class Preference(models.Model):
     is_myvoice_organisation = models.BooleanField(default=False)
     is_missing_accesscode_cleaned = models.BooleanField(default=False)
     is_missing_organisation_info_cleaned = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            # Date-based filtering
+            models.Index(fields=['api_created_at']),
+            
+            # Foreign key fields used in filtering
+            models.Index(fields=['org_info']),
+            models.Index(fields=['factory_farm']),
+            models.Index(fields=['destination']),
+            models.Index(fields=['origin']),
+            models.Index(fields=['language']),
+            models.Index(fields=['immigration_status']),
+            
+            # Composite indexes for common query patterns
+            models.Index(fields=['api_created_at', 'org_info']),
+            models.Index(fields=['api_created_at', 'destination']),
+            models.Index(fields=['api_created_at', 'origin']),
+        ]
 
 
 class TextTranslations(models.Model):

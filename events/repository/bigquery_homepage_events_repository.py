@@ -7,7 +7,7 @@ from common.utils.strings import format_thousands_with_commas
 from events.filters import filter_bigquery_homepage_event_data
 from events.models import BigqueryHomepageEventData
 from preference.filters import preference_filtered_queryset_for_active_users_data
-from preference.repository.preference_repository import get_preferences_by_homepage_events
+from preference.models import Preference
 
 
 def get_total_active_user_within_period(**filters):
@@ -20,7 +20,14 @@ def get_total_active_user_within_period(**filters):
         start_date = APPLICATION_POSSIBLE_START_DATE
     if not end_date:
         end_date = datetime.now().date()
-    total_active_user = get_preferences_by_homepage_events(start_date=start_date, end_date=end_date)
+    
+    total_active_user = Preference.objects.filter(
+        bigqueryhomepageeventdata__event_date__range=(start_date, end_date)
+    ).values_list('device_id', flat=True).distinct()
+
+    total_active_user = Preference.objects.filter(
+        device_id__in=total_active_user
+    )
     total_active_user_count = preference_filtered_queryset_for_active_users_data(
             queryset=total_active_user, 
             **filters
