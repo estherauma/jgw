@@ -50,30 +50,31 @@
                     </div>
                     <div class=" col-3 position-absolute top-2 end-0">
                         {% if user.is_authenticated %}
-                                <div class="row">
-                                    <div class="col-md-6 button-margin">
-                                        <div class="dropdown w-100">
-                                            {% flag 'can_download_preferences_excel_reports' %}
-                                                <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
-                                                    id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    Export
-                                                    <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                                                </a>
-                                            {% endflag %}
-                                            <div class="dropdown-menu" aria-labelledby="export-menu">
-                                                <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">Export Preferences Data Report to Excel</a>
-                                                <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">Export Help Contacts Data Report to Excel</a>
-                                                <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">Export Preferences Statistics to Excel</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 button-margin">
-                                        <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                        role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
+                        <div class="row">
+                            <div class="col-md-6 button-margin">
+                                <div class="dropdown w-100">
+                                    {% flag 'can_download_preferences_excel_reports' %}
+                                    <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue"
+                                        href="#" role="button" id="export-menu" data-bs-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                        Export
+                                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                                    </a>
+                                    {% endflag %}
+                                    <div class="dropdown-menu" aria-labelledby="export-menu">
+                                        <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">Export Preferences Data Report to Excel</a>
+                                        <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">Export Help Contacts Data Report to Excel</a>
+                                        <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">Export Preferences Statistics to Excel</a>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="col-md-6 button-margin">
+                                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
+                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
+                            </div>
+                        </div>
                         {% else %}
-                            {% include 'includes/non_auth_banner_btns.html' %}
+                        {% include 'includes/non_auth_banner_btns.html' %}
                         {% endif %}
                     </div>
                 </div>
@@ -102,180 +103,179 @@
 {% endflag %}
 <div class="row">
     {% flag 'can_view_users_by_origin_country_chart' %}
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">users by origin country</p>
-                    <div class="preference-origin-graph-id-chart-box">
-                        <div id="preference-origin-graph-id"></div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            Users by Origin Country: Users select the country they are from when they first use the app.
-                            <div class="tooltip-arrow"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
-
-    {% flag 'can_view_users_by_gender_chart' %}
-        
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart" >
-                    <p class="chart-title">users by gender</p>
-                    <canvas id="preference-gender-pie-chart-id" class="canvas-chart"></canvas>
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">users by origin country</p>
+                <div class="preference-origin-graph-id-chart-box">
+                    <div id="preference-origin-graph-id"></div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Users by Gender: Users select their gender when they first use the app. 
+                        Users by Origin Country: Users select the country they are from when they first use the app.
                         <div class="tooltip-arrow"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-           
-    {% endflag %}
-    
-    {% if user.role != 'SCHEME' or user.is_superuser%}
-        {% flag 'can_view_users_by_destination_country_chart' %}
-            <div class="col-md-6 mt-3">
-                <div class="card h-100">
-                    <div class="card-body chart">
-                        <p class="chart-title">users by destination country</p>
-                            <canvas id="preference-destination-pie-chart-id" class="canvas-chart"></canvas>
-                            <div class="info-tooltip">
-                                <i class="fas fa-info-circle"></i>
-                                Users by Destination Country: Users choose the country they are working in or looking for work in.
-                            </div>
-                    </div>
-                </div>
-            </div>
-        {% endflag %}
-    {% endif %}
-        
-    {% flag 'can_view_selected_users_language_chart' %}
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">Users by Language</p>
-                    <div class="preference-language-graph-id-chart-box">
-                        <div id="preference-language-graph-id"></div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            Users by Language: Users choose their language when they first use the app.
-                            <div class="tooltip-arrow"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
-
-    {% flag 'can_view_get_users_by_country_state_chart' %}
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">users by state</p>
-                    <div class="users-by-country-state-graph-id-chart-box">
-                        <div id="users-by-country-state-graph-id"></div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            Users by State: Users select the state they are working in when they first use the app. 
-                            <div class="tooltip-arrow"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
-
-    {% flag 'can_view_users_by_immigration_status_chart' %}
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">users by immigration status</p>
-                    <canvas id="preference-immigration-status-pie-chart-id" class="canvas-chart"></canvas>
-                    <div class="info-tooltip">
-                        <i class="fas fa-info-circle"></i>
-                        Users by Immigration Status: Users select their immigration status when they first use the app.
-                        <div class="tooltip-arrow"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
-
-
-    {% flag 'can_view_users_by_age_chart' %}
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">users by age</p>
-                    <canvas id="preference-age-graph-id" class="canvas-chart"></canvas>
-                    <div class="info-tooltip">
-                        <i class="fas fa-info-circle"></i>
-                        Users by Age: Users select their age then they first use the app. 
-                        <div class="tooltip-arrow"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %} 
-
-    {% flag 'can_view_get_users_by_sector_chart' %}
-        <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">users by sector</p>
-                    <div class="users-by-sector-graph-id-chart-box">
-                        <div id="users-by-sector-graph-id"></div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            Users by Sector: Users select one or more sectors they are working in or looking for work in when they first use the app.
-                            <div class="tooltip-arrow"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endflag %}
-</div>
-
-{% if user.is_authenticated %}
-    {% flag 'can_view_work_code_usage_chart' %}
-    <div class="row">
-        <div class="col-12 mt-3 user-by-month">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">work code usage</p>
-                    <div class="chart-container">
-                        <div class="organisation-work-code-usage-graph-id-chart-box chart-column-width">
-                            <div id="organisation-work-code-usage-graph-id"></div>
-                            <div class="info-tooltip">
-                                <i class="fas fa-info-circle"></i>
-                                Work Code Usage: Users who have logged into the app using an organisation QR Code or Link.
-                                <div class="tooltip-arrow"></div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     {% endflag %}
+
+    {% flag 'can_view_users_by_gender_chart' %}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">users by gender</p>
+                <canvas id="preference-gender-pie-chart-id" class="canvas-chart"></canvas>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    Users by Gender: Users select their gender when they first use the app.
+                    <div class="tooltip-arrow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endflag %}
+
+    {% if user.role != 'SCHEME' or user.is_superuser%}
+    {% flag 'can_view_users_by_destination_country_chart' %}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">users by destination country</p>
+                <canvas id="preference-destination-pie-chart-id" class="canvas-chart"></canvas>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    Users by Destination Country: Users choose the country they are working in or looking for work in.
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endflag %}
+    {% endif %}
+
+    {% flag 'can_view_selected_users_language_chart' %}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">Users by Language</p>
+                <div class="preference-language-graph-id-chart-box">
+                    <div id="preference-language-graph-id"></div>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Users by Language: Users choose their language when they first use the app.
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endflag %}
+
+    {% flag 'can_view_get_users_by_country_state_chart' %}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">users by state</p>
+                <div class="users-by-country-state-graph-id-chart-box">
+                    <div id="users-by-country-state-graph-id"></div>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Users by State: Users select the state they are working in when they first use the app.
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endflag %}
+
+    {% flag 'can_view_users_by_immigration_status_chart' %}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">users by immigration status</p>
+                <canvas id="preference-immigration-status-pie-chart-id" class="canvas-chart"></canvas>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    Users by Immigration Status: Users select their immigration status when they first use the app.
+                    <div class="tooltip-arrow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endflag %}
+
+
+    {% flag 'can_view_users_by_age_chart' %}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">users by age</p>
+                <canvas id="preference-age-graph-id" class="canvas-chart"></canvas>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    Users by Age: Users select their age then they first use the app.
+                    <div class="tooltip-arrow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endflag %}
+
+    {% flag 'can_view_get_users_by_sector_chart' %}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">users by sector</p>
+                <div class="users-by-sector-graph-id-chart-box">
+                    <div id="users-by-sector-graph-id"></div>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Users by Sector: Users select one or more sectors they are working in or looking for work in when they first use the app.
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endflag %}
+</div>
+
+{% if user.is_authenticated %}
+{% flag 'can_view_work_code_usage_chart' %}
+<div class="row">
+    <div class="col-12 mt-3 user-by-month">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">work code usage</p>
+                <div class="chart-container">
+                    <div class="organisation-work-code-usage-graph-id-chart-box chart-column-width">
+                        <div id="organisation-work-code-usage-graph-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Work Code Usage: Users who have logged into the app using an organisation QR Code or Link.
+                            <div class="tooltip-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% endif %}
 
 {% flag 'can_view_new_monthly_users_chart' %}
 <div class="row">
     <div class="col-md-12 user-by-month">
-            <div class="card h-100">
+        <div class="card h-100">
             <div class="card-body chart">
                 <p class="chart-title">New Users by Month</p>
                 <canvas id="preference-monthly-cumulative-users-graph-id" class="canvas-user-by-month"></canvas>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
-                    New Users by Month: Cumulative new users in the filtered timeframe. 
+                    New Users by Month: Cumulative new users in the filtered timeframe.
                     <div class="tooltip-arrow"></div>
                 </div>
             </div>
@@ -294,7 +294,7 @@
                     <div id="link-clicks-graph-id"></div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Link Clicks: Number of times a link has been clicked. 
+                        Link Clicks: Number of times a link has been clicked.
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -303,53 +303,57 @@
     </div>
 </div>
 {% endflag %}
-{% if user.is_authenticated %}
-    {% flag 'can_view_user_route_map_chart' %}
-    <div class="row col-md-12 mt-3 user-route-map-chart-box">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title mb-2">User Route Map</p>
-                <div id="user_route_map" class="user-route-map"></div>
-                <div class="info-tooltip user-route-map-info-tooltip">
-                    <i class="fas fa-info-circle"></i>
-                    User Route Map: Shows where workers say they are from (marked with blue dots) and the country they are working in or looking for work in (which they select when they first use the app marked with green dots)
-                    <div class="tooltip-arrow"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endflag %}
 
-    {% flag 'can_view_user_geolocation_map' %}
-    <div class="row col-md-12 user-route-map-chart-box">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title mb-2">User Geolocation Map for Active Users</p>
-                <div id="user_geolocation_map" class="user-geolocation-map"></div>
-                <div class="info-tooltip user-geolocation-map-info-tooltip">
-                    <i class="fas fa-info-circle"></i>
-                    User Geolocation Map: Shows the geographical distribution of users based on their detected location
-                    <div class="tooltip-arrow"></div>
-                </div>
+{% if user.is_authenticated %}
+{% flag 'can_view_user_route_map_chart' %}
+<div class="row col-md-12 mt-3 user-route-map-chart-box">
+    <div class="card h-100">
+        <div class="card-body chart">
+            <p class="chart-title mb-2">User Route Map</p>
+            <div id="user_route_map" class="user-route-map"></div>
+            <div class="info-tooltip user-route-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Route Map: Shows where workers say they are from (marked with blue dots) and the country they are
+                working in or looking for work in (which they select when they first use the app marked with green dots)
+                <div class="tooltip-arrow"></div>
             </div>
         </div>
     </div>
-    {% endflag %}
-    {% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
-    <div class="row col-md-12 mt-1 user-geolocation-map-chart-box"> 
-        <div class="card h-100">
-            <div class="card-body chart wide-map">
-                <p class="chart-title mb-2">Users Geolocation Map Basing On User Engagement</p>
-                <div id="user_geolocation_map_user_engagement" class="user-geolocation-map"></div>
-                <div class="info-tooltip user-geol-map-info-tooltip">
-                    <i class="fas fa-info-circle"></i>
-                    User Geolocation Map: Shows users Geolocation at the time of using the app.
-                </div>
+</div>
+{% endflag %}
+
+{% flag 'can_view_user_geolocation_map' %}
+<div class="row col-md-12 user-route-map-chart-box">
+    <div class="card h-100">
+        <div class="card-body chart">
+            <p class="chart-title mb-2">User Geolocation Map for Active Users</p>
+            <div id="user_geolocation_map" class="user-geolocation-map"></div>
+            <div class="info-tooltip user-geolocation-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Geolocation Map: Shows the geographical distribution of users based on their detected location
+                <div class="tooltip-arrow"></div>
             </div>
         </div>
     </div>
-    {% endflag %}
+</div>
+{% endflag %}
+
+{% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
+<div class="row col-md-12 mt-1 user-geolocation-map-chart-box">
+    <div class="card h-100">
+        <div class="card-body chart wide-map">
+            <p class="chart-title mb-2">Users Geolocation Map Basing On User Engagement</p>
+            <div id="user_geolocation_map_user_engagement" class="user-geolocation-map"></div>
+            <div class="info-tooltip user-geol-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Geolocation Map: Shows users Geolocation at the time of using the app.
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 {% endif %}
+
 {% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
@@ -370,75 +374,75 @@
 <script src="{% static 'js/charts/bar/link_clicks_graph.js' %}"></script>
 <script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
 <script type="text/javascript">
-        // get data from context
-        var ageData = {{ preferences_by_age | safe }};
-        var genderData = {{ preferences_by_gender | safe }};
-        var originData = {{ preferences_per_origin_country | safe }};
-        var destinationData = {{ preferences_per_destination_country | safe }};
-        var languageData = {{ preferences_selected_user_language | safe }};
-        var workCodeData = {{ work_code_usage | safe }};
-        var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
-        var usersByCountryStateChartData = {{ users_by_country_state | safe }};
-        var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
-        const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }};
-        const monthlyActiveUserCountData = {{monthly_active_user_count | safe}};
-        const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }};
-        const getUserCountsByGeolocation = {{ get_user_counts_by_geolocation | safe }};
-        const countryCoords = {{ country_coords | safe }};
-        var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
-        const linkClicksData = {{ link_clicks_data | safe }}
-        const userGeoCountryData = {{ user_counts_by_geo_country | safe }}
+    // get data from context
+    var ageData = {{ preferences_by_age | safe }};
+    var genderData = {{ preferences_by_gender | safe }};
+    var originData = {{ preferences_per_origin_country | safe }};
+    var destinationData = {{ preferences_per_destination_country | safe }};
+    var languageData = {{ preferences_selected_user_language | safe }};
+    var workCodeData = {{ work_code_usage | safe }};
+    var preferenceMonthlyUsersChartData = {{ pref_cumulative_monthly_new_users | safe }};
+    var usersByCountryStateChartData = {{ users_by_country_state | safe }};
+    var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
+    const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }};
+    const monthlyActiveUserCountData = {{ monthly_active_user_count | safe }};
+    const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }};
+    const getUserCountsByGeolocation = {{ get_user_counts_by_geolocation | safe }};
+    const countryCoords = {{ country_coords | safe }};
+    var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
+    const linkClicksData = {{ link_clicks_data | safe }}
+    const userGeoCountryData = {{ user_counts_by_geo_country | safe }}
 
-        // plots the age piechart
-        preferenceAgePieChart(ageData)
+    // plots the age piechart
+    preferenceAgePieChart(ageData)
 
-        // plots the gender piechart
-        preferenceGenderPieChart(genderData)
+    // plots the gender piechart
+    preferenceGenderPieChart(genderData)
 
-        // plots the language graph
-        preferenceLanguageGraph(languageData)
+    // plots the language graph
+    preferenceLanguageGraph(languageData)
 
-        // plots the destination piechart
-        preferenceDestinationPieChart(destinationData)
+    // plots the destination piechart
+    preferenceDestinationPieChart(destinationData)
 
-        // plots the origin graph
-        preferenceOriginGraph(originData)
+    // plots the origin graph
+    preferenceOriginGraph(originData)
 
-        // plots the work code usage graph
-        preferenceWorkCodeUsageGraph(workCodeData)
+    // plots the work code usage graph
+    preferenceWorkCodeUsageGraph(workCodeData)
 
-        // users by country state graph
-        usersByCountryStateChart(usersByCountryStateChartData)
+    // users by country state graph
+    usersByCountryStateChart(usersByCountryStateChartData)
 
-        // users by sectors chart data
-        usersBySectorsChart(usersBySectorsChartData)
-        // Organisation work code stack bar chart
-        workCodeUsageStackBar(swsWorkcodesWithAccessCode)
-        // preferenceMonthlyUsersChart
-        preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData)
+    // users by sectors chart data
+    usersBySectorsChart(usersBySectorsChartData)
+    // Organisation work code stack bar chart
+    workCodeUsageStackBar(swsWorkcodesWithAccessCode)
+    // preferenceMonthlyUsersChart
+    preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData)
 
-        monthlyActiveUsersChart(monthlyActiveUserCountData);
+    monthlyActiveUsersChart(monthlyActiveUserCountData);
 
-        preferenceImmigrationStatusPieChart(immigrationStatusData)
+    preferenceImmigrationStatusPieChart(immigrationStatusData)
 
-        linkClicksGraph(linkClicksData)
+    linkClicksGraph(linkClicksData)
 
-        // Count the number of flex items
-        const chartContainer = document.querySelector('.chart-container');
-        const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
-        const numColumns = chartColumns.length;
+    // Count the number of flex items
+    const chartContainer = document.querySelector('.chart-container');
+    const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
+    const numColumns = chartColumns.length;
 
-        if (numColumns % 2 !== 0) {
-            const lastColumn = chartColumns[numColumns - 1];
-            lastColumn.style.flex = '0 0 100%';
-            lastColumn.style.maxWidth = '100%';
-        }
+    if (numColumns % 2 !== 0) {
+        const lastColumn = chartColumns[numColumns - 1];
+        lastColumn.style.flex = '0 0 100%';
+        lastColumn.style.maxWidth = '100%';
+    }
 
-        createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
+    createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
 
-        createUserGeolocationMap(getUserCountsByGeolocation, 'user_geolocation_map_user_engagement', countryCoords);
+    createUserGeolocationMap(getUserCountsByGeolocation, 'user_geolocation_map_user_engagement', countryCoords);
 
-        createUserGeolocationMap(userGeoCountryData, 'user_geolocation_map');
+    createUserGeolocationMap(userGeoCountryData, 'user_geolocation_map');
 
 </script>
 {% endblock %}
