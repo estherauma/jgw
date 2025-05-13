@@ -19,7 +19,7 @@ $(document).ready(function () {
             data: 'completedInduction',
             title: 'Induction',
             render: function (data, type, row) {
-                if (data == 1) {
+                if (data == "Completed") {
                     return ' <span class="badge bg-success">Completed</span>';
                 } else {
                     return '<span class="badge bg-danger">No</span>';
