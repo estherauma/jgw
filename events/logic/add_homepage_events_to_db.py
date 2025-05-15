@@ -7,7 +7,7 @@ from common.helpers.model_helpers.preference import get_or_add_country_to_db, ge
 from common.logger import KunfuPandaLogger
 from events.models import BigqueryHomepageEventData
 from preference.logic.update_perference_organisation_info import update_bigquery_homepage_event_org_info_from_organisation
-from preference.models import Country, Language, Age, Gender, Organisation
+from preference.models import Country, Language, Age, Gender, Organisation, Preference
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/homepage_events.log")
 
@@ -108,6 +108,12 @@ def create_homepage_event_instance(event, languages, ages, genders, organisation
     immigrationStatus = event.get("immigrationStatus")
     geo_city = event.get("geoCity")
     geo_country = event.get("geoCountry")
+
+    if device_id:
+        print("device_id", device_id)
+        preference = Preference.objects.get(device_id=device_id)
+    else:
+        preference = None
     
     organisation_name = event.get("organisation")
     organisation = organisations.get(organisation_name.lower()) if organisation_name else organisation_not_specified
@@ -131,7 +137,8 @@ def create_homepage_event_instance(event, languages, ages, genders, organisation
         organisation_code=organisation_code,
         immigration_status=immigration_status,
         geo_city=geo_city,
-        geo_country=geo_country
+        geo_country=geo_country,
+        preference=preference
     )
 
 def update_myvoice_bigquery_homepage_events():

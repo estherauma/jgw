@@ -80,6 +80,7 @@ class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
         "app_id",
         "language",
         "locale",
+        "preference",
         "destination",
         "immigration_status",
         "age",
@@ -91,7 +92,7 @@ class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
         "is_myvoice_organisation",
         "is_org_info_cleaned",
     ]
-    ordering = ["event_date"]
+    ordering = ["-event_date"]
 
 
 @admin.register(TelephoneClickEvent)
