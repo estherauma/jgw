@@ -11,7 +11,6 @@ from django.db import connection
 from django.http import JsonResponse
 from django.conf import settings
 from django.conf.urls.static import static
-from django.conf.urls.i18n import set_language
 
 from django.conf import settings
 
@@ -45,8 +44,6 @@ urlpatterns = [
     path("events/", include("events.urls")),
     path("payment/", include("payment.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
-
-    path('set-language/', set_language, name='set_language'),
 ]
 
 if settings.DEBUG:
