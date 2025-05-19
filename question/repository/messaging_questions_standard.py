@@ -1,5 +1,6 @@
 from collections import defaultdict
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from common.utils.preferences import get_date_13_months_ago
 from common.utils.strings import format_thousands_with_commas
 from events.models import BigqueryHomepageEventData
 from question.filters import generic_question_filtered_queryset, message_data_sent_filtered_queryset
@@ -369,7 +370,7 @@ def get_messaging_questions_by_homepage_events(start_date=None, end_date=None):
         QuerySet: MessagingQuestionResponse queryset filtered by device_ids from homepage events
     """
     if start_date is None:
-        start_date = APPLICATION_POSSIBLE_START_DATE
+        start_date = get_date_13_months_ago()
     if end_date is None:
         end_date = datetime.now().date()
 

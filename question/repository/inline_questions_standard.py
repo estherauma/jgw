@@ -4,6 +4,7 @@ from django.db.models import Count, F
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
 from common.inline import convert_question_key_to_readable_string, convert_to_camel_case
+from common.utils.preferences import get_date_13_months_ago
 from common.utils.strings import format_thousands_with_commas
 from question.filters import question_response_filtered_queryset
 
@@ -402,7 +403,7 @@ def get_inline_questions_by_homepage_events(start_date=None, end_date=None):
         QuerySet: InlineQuestionResponse queryset filtered by device_ids from homepage events
     """
     if start_date is None:
-        start_date = APPLICATION_POSSIBLE_START_DATE
+        start_date = get_date_13_months_ago()
     if end_date is None:
         end_date = datetime.now().date()
 

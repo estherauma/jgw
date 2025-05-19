@@ -3,6 +3,7 @@ from typing import Any
 from django.db.models import Manager as BaseManager, Q
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 
+from common.utils.preferences import get_date_13_months_ago
 from users.utils import (
     get_user_destinations,
     get_user_factories,
@@ -28,7 +29,7 @@ def generic_question_filtered_queryset(
     show_new_user_data=False,
 ):
     if start_date is None:
-        start_date = APPLICATION_POSSIBLE_START_DATE
+        start_date = get_date_13_months_ago()
 
     if end_date is None:
         end_date = datetime.now().date()
@@ -123,7 +124,7 @@ def question_response_filtered_queryset(
     final_start_date = (
         max(start_date, user_start_date)
         if start_date and user_start_date
-        else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
+        else (start_date or user_start_date or get_date_13_months_ago())
     )
     final_end_date = (
         min(end_date, user_end_date)
@@ -292,7 +293,7 @@ def message_data_sent_filtered_queryset(
     final_start_date = (
         max(start_date, user_start_date)
         if start_date and user_start_date
-        else (start_date or user_start_date or APPLICATION_POSSIBLE_START_DATE)
+        else (start_date or user_start_date or get_date_13_months_ago())
     )
     final_end_date = (
         min(end_date, user_end_date)

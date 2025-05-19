@@ -55,8 +55,4 @@ def get_chapters_opened_data(**filters):
     unique_counts = [sums_unique.get(label, 0) for label in all_labels]
     all_counts = [sums_all.get(label, 0) for label in all_labels]
 
-    print("all_labels", all_labels)
-    print("unique_counts", unique_counts)
-    print("all_counts", all_counts)
-
     return {"labels": all_labels, "chapteropened_unique": unique_counts, "chapteropened_all": all_counts}

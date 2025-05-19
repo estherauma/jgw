@@ -110,7 +110,6 @@ def create_homepage_event_instance(event, languages, ages, genders, organisation
     geo_country = event.get("geoCountry")
 
     if device_id:
-        print("device_id", device_id)
         preference = Preference.objects.get(device_id=device_id)
     else:
         preference = None
