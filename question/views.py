@@ -117,13 +117,6 @@ def inline_question(request):
     total_inline_question_responses = inline_question_responses_count(**filters, current_user=request.user)
     each_inline_question_response_data = each_inline_question_response(**filters, current_user=request.user)
 
-    each_inline_question_response_data_list = [
-        {"key": key, "title": value["title"]} for key, value in each_inline_question_response_data.items()
-    ]
-
-    inline_question_choices = [
-        {"key": item["key"], "title": item["title"]} for item in each_inline_question_response_data_list
-    ]
     context = {
         "total_inline_questions": total_inline_questions,
         "total_inline_question_responses": total_inline_question_responses,

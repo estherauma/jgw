@@ -215,7 +215,15 @@ def each_inline_question_response(**filters):
     inline_question_responses = question_response_filtered_queryset(
         queryset=base_queryset, **filters
     )
-    inline_question_responses = inline_question_responses.exclude(response__translated_text="not specified")
+    inline_question_responses = inline_question_responses.exclude(
+        response__translated_text="not specified"
+    ).exclude(
+        response__translated_text__isnull=True
+    ).exclude(
+        response__translated_text=""
+    ).exclude(
+        response__translated_text__exact=""
+    )
     inline_questions_with_responses = inline_question_responses.values(
         "inline_question__question__translated_text",
         "inline_question__question__title_text",

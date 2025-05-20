@@ -16,7 +16,8 @@ myvoice = [
     "providedWorkPlace",
     "passportTaken",
     "passportUsedToGetResidentPermit",
-    "passportReturned"
+    "passportReturned",
+    "recentJobSearchPayment"
 ]
 
 evergreen = [
