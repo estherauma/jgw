@@ -86,6 +86,22 @@ def list_invitations(request):
 
 @login_required
 def logout_user(request):
+    # Calculate session duration if login time exists
+    if 'login_time' in request.session:
+        login_time = datetime.fromisoformat(request.session['login_time'])
+        logout_time = datetime.now(timezone.utc)
+        session_duration = (logout_time - login_time).total_seconds()
+        
+        # Store logout data for tracking
+        request.session['logout_time'] = logout_time.isoformat()
+        request.session['session_duration'] = session_duration
+        
+        # Clear session data
+        request.session.flush()
+        
+        logout(request)
+        return redirect("users:login_user")
+    
     logout(request)
     return redirect("users:login_user")
 
@@ -112,12 +128,18 @@ def login_user(request):
         if form.is_valid():
             email = form.cleaned_data.get("email")
             password = form.cleaned_data.get("password")
-            # Try to find user with case-insensitive email match
             try:
                 user = User.objects.get(email__iexact=email)
                 user = authenticate(request, username=user.email, password=password)
                 if user is not None:
                     login(request, user)
+                    request.session['login_time'] = datetime.now(timezone.utc).isoformat()
+                    request.session['user_email'] = user.email
+                    request.session['user_id'] = user.id
+                    request.session['user_role'] = user.groups.first().name if user.groups.exists() else 'No Role'
+
+
+                    
                     if has_group(user, "Summerberry"):
                         return redirect("dashboard:summerberry-dashboard")
                     else:
@@ -145,7 +167,6 @@ def manage_account(request, id):
 @login_required
 @admin_required
 def activate_account(request, id):
-    # Get return parameters from query string
     return_page = request.GET.get('return_page', '1')
     search_query = request.GET.get('search', '')
     group_id = request.GET.get('group', '')

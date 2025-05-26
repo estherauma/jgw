@@ -1,7 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         {% block main_base_head%}{% endblock main_base_head%}
+        {% if google_analytics_id %}
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_id }}"></script>
         <script>
@@ -9,10 +11,36 @@
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            const g4Id = "{{ google_analytics_id }}"
+            const g4Id = "{{ google_analytics_id }}";
+            if (g4Id) {
+                gtag('config', g4Id);
+            }
 
-            gtag('config', g4Id);
+            // Track login event
+            {% if request.session.login_time %}
+            gtag('event', 'login', {
+                'user_id': '{{ request.session.user_id }}',
+                'user_email': '{{ request.session.user_email }}',
+                'user_role': '{{ request.session.user_role }}',
+                'login_time': '{{ request.session.login_time }}'
+            });
+            {% endif %}
+
+            // Track logout event
+            {% if request.session.logout_time %}
+            gtag('event', 'logout', {
+                'user_id': '{{ request.session.user_id }}',
+                'user_email': '{{ request.session.user_email }}',
+                'user_role': '{{ request.session.user_role }}',
+                'session_duration': '{{ request.session.session_duration }}'
+            });
+            {% endif %}
         </script>
+        {% endif %}
+        <!-- User Analytics -->
+        <script src="{% static 'js/user_analytics.js' %}"></script>
     </head>
-    {% block main_base_body%}{% endblock main_base_body%}
+    <body data-user-id="{{ request.session.user_id }}" data-user-role="{{ request.session.user_role }}">
+        {% block main_base_body%}{% endblock main_base_body%}
+    </body>
 </html>
