@@ -2,6 +2,7 @@ from openpyxl.styles import Alignment, Font
 from django.http import HttpResponse
 from django.shortcuts import render
 from openpyxl import Workbook
+from common.utils.preferences import get_date_13_months_ago
 from common.utils.request import get_form_filter_params
 from core.forms import DateRangeForm
 from core.logic.file_export import generate_and_export_excel
@@ -66,7 +67,7 @@ def export_what_matters_to_workers_stats(request):
 def export_link_clicks_data(request):
     form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
     filters = form_filter_params["filters"]
-    start_date = filters.get("start_date") or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get("start_date") or get_date_13_months_ago()
     end_date = filters.get("end_date") or datetime.now().date()
 
     link_clicks = LinksClickEvent.objects.filter(event_date__range=(start_date, end_date)).values(
@@ -102,7 +103,7 @@ def export_link_clicks_data(request):
 def export_telephone_clicks_data(request):
     form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
     filters = form_filter_params["filters"]
-    start_date = filters.get("start_date") or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get("start_date") or get_date_13_months_ago()
     end_date = filters.get("end_date") or datetime.now().date()
 
     telephone_clicks = TelephoneClickEvent.objects.filter(event_date__range=(start_date, end_date)).values(
@@ -138,7 +139,7 @@ def export_telephone_clicks_data(request):
 def export_report_issue_data(request):
     form_filter_params = get_form_filter_params(request=request, form_class=EventsDataFilterForm)
     filters = form_filter_params["filters"]
-    start_date = filters.get("start_date") or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get("start_date") or get_date_13_months_ago()
     end_date = filters.get("end_date") or datetime.now().date()
 
     report_issues = ReportIssueSubmittedEvent.objects.filter(event_date__range=(start_date, end_date)).values(

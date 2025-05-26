@@ -8,6 +8,7 @@ from common.const.value_const import ACCESS_CODE_MAPPING, APPLICATION_POSSIBLE_S
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
 from common.helpers.preference_helpers.organisation import format_org_name_from_display
+from common.utils.preferences import get_date_13_months_ago
 from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset_for_active_users_data, preference_filtered_queryset_for_new_user_data
 from preference.models import Organisation, Preference, PreferenceHistory
@@ -30,7 +31,7 @@ def preferences_count(**filters):
 
 def preferences_by_age(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -90,7 +91,7 @@ def preferences_by_age(**filters):
 
 def preferences_by_gender(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -136,7 +137,7 @@ def preferences_by_gender(**filters):
 
 def preferences_by_origin(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -180,7 +181,7 @@ def preferences_by_origin(**filters):
 
 def preferences_by_destination(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -221,7 +222,7 @@ def preferences_by_destination(**filters):
 
 def preferences_by_language(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -265,7 +266,7 @@ def preferences_by_language(**filters):
 def preferences_by_organisation(**filters):
     if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
         filters['show_new_user_data'] = True
-        filters['start_date'] = PUBLIC_USER_DATA_START_DATE
+        filters['start_date'] = get_date_13_months_ago()
         filters['end_date'] = datetime.now().date()
 
         show_new_user_data = filters.get('show_new_user_data', False)
@@ -278,7 +279,7 @@ def preferences_by_organisation(**filters):
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
     if start_date is None:
-        start_date = APPLICATION_POSSIBLE_START_DATE
+        start_date = get_date_13_months_ago()
     if end_date is None:
         end_date = datetime.now().date()
 
@@ -361,7 +362,7 @@ def get_cumulative_monthly_new_users(**filters):
 
 def get_users_by_country_state(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -402,7 +403,7 @@ def get_users_by_country_state(**filters):
 
 def get_preferences_by_sectors(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -471,7 +472,7 @@ def get_user_counts_by_origin_destination(**filters):
         }
     """
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -545,7 +546,7 @@ def get_user_counts_by_geolocation(**filters):
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
     if start_date is None:
-        start_date = APPLICATION_POSSIBLE_START_DATE
+        start_date = get_date_13_months_ago()
     if end_date is None:
         end_date = datetime.now().date()
     queryset = queryset.filter(event_date__range=(start_date, end_date))
@@ -572,7 +573,7 @@ def get_user_counts_by_geolocation(**filters):
 
 def get_sws_workcodes_with_access_code(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -700,10 +701,7 @@ def extract_preference_for_export(**filters):
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
     if show_new_user_data is False:
-        base_queryset = get_preferences_by_homepage_events(
-            start_date=start_date,
-            end_date=end_date
-        )
+        base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     else:
         base_queryset = Preference.objects.all()
 
@@ -784,7 +782,7 @@ def extract_preference_for_export(**filters):
 
 def preferences_by_immigration_status(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
-    start_date = filters.get('start_date') or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
     # Get base queryset with optimized querying
@@ -837,31 +835,9 @@ def get_preferences_by_device_id(device_id):
     ).order_by('-api_created_at')
     return preferences
 
-
-# def get_preferences_by_homepage_events(start_date=None, end_date=None):
-#     if start_date is None:
-#         start_date = APPLICATION_POSSIBLE_START_DATE
-#     if end_date is None:
-#         end_date = datetime.now().date()
-
-#     homepage_events = BigqueryHomepageEventData.objects.filter(
-#         Q(event_date__range=(start_date, end_date))
-#     )
-        
-#     device_ids = homepage_events.values_list('device_id', flat=True).distinct()
-
-
-#     preferences = Preference.objects.filter(
-#         device_id__in=device_ids
-#     )
-
-#     return preferences
-
-
 def get_base_queryset(show_new_user_data, start_date, end_date):
     """Centralized function to get base queryset with optimized querying"""
     if show_new_user_data is False:
-        print("start_date, end_date", start_date, end_date)
         preferences = Preference.objects.filter(
             bigqueryhomepageeventdata__event_date__range=(start_date, end_date)
         ).select_related(

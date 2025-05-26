@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from django.utils.dateformat import DateFormat
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, PUBLIC_USER_DATA_START_DATE
+from common.utils.preferences import get_date_13_months_ago
 from common.utils.strings import format_thousands_with_commas
 from events.filters import filter_bigquery_homepage_event_data
 from events.models import BigqueryHomepageEventData
@@ -17,7 +18,7 @@ def get_total_active_user_within_period(**filters):
     start_date = filters.get('start_date')
     end_date = filters.get('end_date')
     if not start_date:
-        start_date = APPLICATION_POSSIBLE_START_DATE
+        start_date = get_date_13_months_ago()
     if not end_date:
         end_date = datetime.now().date()
     

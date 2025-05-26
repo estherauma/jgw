@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from common.utils.preferences import get_date_13_months_ago
 from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
 from core.forms import DateRangeForm
@@ -293,7 +294,7 @@ def export_inline_question_data(request):
 def export_message_sent_data(request):
     form_filter_params = get_form_filter_params(request=request, form_class=MessagingQuestionFilterForm)
     filters = form_filter_params["filters"]
-    start_date = filters.get("start_date") or APPLICATION_POSSIBLE_START_DATE
+    start_date = filters.get("start_date") or get_date_13_months_ago()
     end_date = filters.get("end_date") or datetime.now().date()
 
     message_data = get_all_message_data_sent(**filters, current_user=request.user)

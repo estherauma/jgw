@@ -11,7 +11,6 @@ from users.utils import get_user_group
 def other_resource_view(request):
     user=request.user
     user_group=get_user_group(user)
-    print(user_group)
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -39,8 +38,6 @@ def other_resource_view(request):
 def edit_resource(request, resource_id):
     resource = get_object_or_404(OtherResource, pk=resource_id)
     groups = Group.objects.all()
-
-    print("GROUPS",groups)
 
     if request.method == 'POST':
         form = EditResourceForm(request.POST, instance=resource)
