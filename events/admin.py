@@ -1,5 +1,6 @@
 from django.contrib import admin
 from events.actions import download_links_click
+from import_export.admin import ExportActionModelAdmin
 
 from events.models import (
     BigQueryChaptersData,
@@ -33,7 +34,7 @@ class ChapterAdminDisplay(admin.ModelAdmin):
 
 
 @admin.register(ChaptersFeedbackStandard)
-class ChaptersFeedbackStandardAdminDisplay(admin.ModelAdmin):
+class ChaptersFeedbackStandardAdminDisplay(ExportActionModelAdmin, admin.ModelAdmin):
     list_display = [
         "api_created_at",
         "data_source_id",
@@ -73,7 +74,7 @@ class LinksClickEventAdmin(admin.ModelAdmin):
 
 
 @admin.register(BigqueryHomepageEventData)
-class BigqueryHomepageEventDataAdmin(admin.ModelAdmin):
+class BigqueryHomepageEventDataAdmin(ExportActionModelAdmin, admin.ModelAdmin):
     list_display = [
         "event_date",
         "device_id",
@@ -156,12 +157,6 @@ class ReportIssueSubmittedEventAdmin(admin.ModelAdmin):
 class UserLocationAdmin(admin.ModelAdmin):
     list_display = ["event_date", "created_at", "user_pseudo_id", "country"]
     search_fields = ["user_pseudo_id", "country__name"]
-    ordering = ["-created_at"]
-
-@admin.register(PreferenceHistory)
-class PreferenceHistoryAdmin(admin.ModelAdmin):
-    list_display = ["created_at", "data_source_id", "destination", "immigration_status", "age", "organisation", "org_info"]
-    search_fields = ["data_source_id", "destination", "immigration_status", "age", "organisation", "org_info", "org_code"]
     ordering = ["-created_at"]
 
 @admin.register(ImmigrationStatusChapterTitle)
