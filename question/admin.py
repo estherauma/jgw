@@ -1,4 +1,5 @@
 from django.contrib import admin
+from import_export.admin import ExportActionModelAdmin
 
 from question.actions import export_responses
 from question.models import (
@@ -18,6 +19,7 @@ from question.models import (
     MessagingQuestionText,
     MessagingResponseOptionText,
 )
+from question.resources import InlineQuestionResource, MessagingQuestionResource
 
 
 @admin.register(InlineQuestionText)
@@ -68,8 +70,11 @@ class InlineQuestionAndKeysMatchAdmin(admin.ModelAdmin):
 
 
 @admin.register(InlineQuestionStandard)
-class InlineQuestionStandardAdmin(admin.ModelAdmin):
+class InlineQuestionStandardAdmin(ExportActionModelAdmin, admin.ModelAdmin):
+    resource_class = InlineQuestionResource
     list_display = [
+        "api_created_at",
+        "api_updated_at",
         "id",
         "data_source_id",
         "device_id",
@@ -93,7 +98,8 @@ class FollowUpQuestionAdmin(admin.ModelAdmin):
 
 
 @admin.register(MessagingQuestionStandard)
-class MessagingQuestionStandardAdmin(admin.ModelAdmin):
+class MessagingQuestionStandardAdmin(ExportActionModelAdmin, admin.ModelAdmin):
+    resource_class = MessagingQuestionResource
     list_display = [
         "api_created_at",
         "data_source_id",
