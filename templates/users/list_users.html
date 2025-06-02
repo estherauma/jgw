@@ -97,6 +97,16 @@
                                     </select>
                                 </div>
                             </th>
+                            <th class="sortable-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Logged Hours</span>
+                                    <select class="form-select form-select-sm sort-select" data-sort="total_hours">
+                                        <option value=""><i class="mdi mdi-sort"></i></option>
+                                        <option value="asc">Asc ↑</option>
+                                        <option value="desc">Desc ↓</option>
+                                    </select>
+                                </div>
+                            </th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -124,6 +134,7 @@
                                     User has not login
                                 {% endif %}
                             </td>
+                            <td>{{ user.total_logged_hours|floatformat:2 }} hrs</td>
                             <td class="">
                                 <div class="dropdown">
                                     <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -246,9 +257,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sortBy === 'status') {
                 aValue = aValue.toLowerCase();
                 bValue = bValue.toLowerCase();
-            } else if (sortBy === 'last_login') {
-                aValue = aValue === 'User has not login' ? '' : aValue;
-                bValue = bValue === 'User has not login' ? '' : bValue;
             }
 
             if (direction === 'asc') {
@@ -274,7 +282,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getCellValue(row, sortBy) {
         const cell = row.querySelector(`td:nth-child(${getColumnIndex(sortBy)})`);
-        return cell ? cell.textContent.trim() : '';
+        if (!cell) return '';
+        
+        if (sortBy === 'total_hours') {
+            const value = parseFloat(cell.textContent.trim().replace('hrs', '').trim());
+            console.log(value);
+            return isNaN(value) ? 0 : value;
+        }
+        
+        if (sortBy === 'last_login') {
+            const systemStartDate = new Date('2019-01-01');
+            const text = cell.textContent.trim();
+            if (text === 'User has not login') {
+                return systemStartDate;
+            }
+            return new Date(text);
+        }
+        
+        return cell.textContent.trim();
     }
 
     function getColumnIndex(sortBy) {
@@ -283,7 +308,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'email': 2,
             'groups': 3,
             'status': 4,
-            'last_login': 5
+            'last_login': 5,
+            'total_hours': 6
         };
         return columnMap[sortBy];
     }
