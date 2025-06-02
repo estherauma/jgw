@@ -375,6 +375,7 @@ body.modal-open {
 .maintenance-logo {
     max-width: 200px;
     margin-bottom: 2rem;
+}
 
 #user_route_map .modebar-container{
     right: 55px !important;
@@ -389,4 +390,26 @@ body.modal-open {
 #user_geolocation_map .modebar-container{
     right: 80px !important; 
     top: -8px !important;
+}
+
+.sort-select {
+    font-size: 0.8rem;
+    padding: 0.25rem;
+    height: auto;
+    width: 40px !important;
+    text-align: center;
+}
+
+.sort-select option {
+    text-align: center;
+    padding: 10px;
+}
+
+.sortable-header {
+    white-space: nowrap;
+    padding: 0.75rem;
+}
+
+.sortable-header > div {
+    min-width: 100px;
 }
