@@ -9,13 +9,15 @@ from events.filters import filter_bigquery_homepage_event_data
 from events.models import BigqueryHomepageEventData
 from preference.filters import preference_filtered_queryset_for_active_users_data
 from preference.models import Preference
+from users.utils import get_user_start_date
 
 
 def get_total_active_user_within_period(**filters):
     if isinstance(filters.get('current_user'), type) or str(filters.get('current_user')) == "AnonymousUser":
         filters['start_date'] = PUBLIC_USER_DATA_START_DATE
         filters['end_date'] = datetime.now().date()
-    start_date = filters.get('start_date')
+    user_start_date = get_user_start_date(filters.get('current_user'))
+    start_date = filters.get('start_date') or user_start_date
     end_date = filters.get('end_date')
     if not start_date:
         start_date = get_date_13_months_ago()
