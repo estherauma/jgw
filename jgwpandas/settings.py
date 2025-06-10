@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "django_extensions",
     "waffle",
+    "import_export",
     # added/developed packages
     "core",
     "events",

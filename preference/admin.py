@@ -1,5 +1,7 @@
 from django.contrib import admin
+from import_export.admin import ExportActionModelAdmin
 from preference.forms import SectorsOfWorkMapperForm
+from preference.resources import PreferenceResource, PreferenceHistoryResource
 
 from preference.models import (
     FactoryFarm,
@@ -21,6 +23,7 @@ from preference.models import (
     LocationOfPotentialWork,
     CountryState,
     SwsCountry,
+    PreferenceHistory,
 )
 
 
@@ -51,7 +54,8 @@ class LanguageTabularAdminDisplay(admin.ModelAdmin):
 
 
 @admin.register(Preference)
-class PreferenceTabularAdminDisplay(admin.ModelAdmin):
+class PreferenceTabularAdminDisplay(ExportActionModelAdmin, admin.ModelAdmin):
+    resource_class = PreferenceResource
     list_display = [
         "id",
         "data_source_id",
@@ -183,3 +187,46 @@ class ImmigrationStatusAdmin(admin.ModelAdmin):
 class OrganisationDataAdmin(admin.ModelAdmin):
     search_fields = ["name", "org_code"]
     list_display = ["name", "org_code", "created_at", "updated_at"]
+
+
+@admin.register(PreferenceHistory)
+class PreferenceHistoryAdmin(ExportActionModelAdmin, admin.ModelAdmin):
+    resource_class = PreferenceHistoryResource
+    list_display = [
+        "id",
+        "data_source_id",
+        "device_id",
+        "created_at",
+        "api_created_at",
+        "get_translated_name",
+        "get_origin_name",
+        "destination",
+        "org_code",
+        "organisation",
+        "org_info",
+        "get_age_translated_name",
+        "get_org_workcode",
+        "immigration_status",
+        "is_missing_organisation_info_cleaned",
+    ]
+    search_fields = [
+        "id",
+        "created_at",
+        "data_source_id",
+        "device_id",
+        "gender__translated_name",
+        "origin__name",
+        "destination__name",
+    ]
+
+    def get_translated_name(self, obj):
+        return obj.gender.translated_name if obj.gender else None
+
+    def get_age_translated_name(self, obj):
+        return obj.age.translated_range if obj.age else None
+
+    def get_origin_name(self, obj):
+        return obj.origin.name if obj.origin else None
+
+    def get_org_workcode(self, obj):
+        return obj.organisation_access_code.code if obj.organisation_access_code else None
