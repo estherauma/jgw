@@ -106,6 +106,7 @@ class MessagingQuestionStandardAdmin(ExportActionModelAdmin, admin.ModelAdmin):
         "device_id",
         "question_id",
         "route",
+        "preference",
         "factory_farm",
         "destination",
         "organisation_sector",
