@@ -2,8 +2,9 @@ from django.contrib import admin
 
 from users.forms import UserAdminForm
 from .models import User, UserInvitations, UserSession
+from import_export.admin import ExportActionModelAdmin
 
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(ExportActionModelAdmin, admin.ModelAdmin):
     form = UserAdminForm
 
 admin.site.register(User, UserAdmin)
