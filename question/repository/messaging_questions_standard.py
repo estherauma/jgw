@@ -385,3 +385,124 @@ def get_messaging_questions_by_homepage_events(start_date=None, end_date=None):
     )
 
     return messaging_questions
+
+
+def get_messaging_question_by_age(**filters):
+    """
+    Retrieves the count of messaging question responses broken down by age ranges.
+
+    Args:
+        **filters: Arbitrary keyword arguments for filtering the queryset.
+
+    Returns:
+        dict: A dictionary containing:
+            - "labels": List of age ranges
+            - "counts": List of counts for each age range
+    """
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
+    queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
+
+    age_counts = (
+        queryset
+        .values('preference__age__translated_range')
+        .annotate(count=Count('id'))
+        .order_by('preference__age__translated_range')
+    )
+
+    age_ranges = {
+        '18-20': 0,
+        '21-30': 0,
+        '31-40': 0,
+        '41-50': 0,
+        '51-60': 0,
+        'Prefer not to answer': 0
+    }
+
+    for age_count in age_counts:
+        age_range = age_count['preference__age__translated_range']
+        count = age_count['count']
+        
+        if age_range is None:
+            continue
+            
+        if age_range.lower() in ['prefer not to answer', 'prefernottoanswer']:
+            age_ranges['Prefer not to answer'] += count
+        elif age_range in age_ranges:
+            age_ranges[age_range] += count
+
+    age_ranges = {k: v for k, v in age_ranges.items() if v > 0}
+
+    return {
+        'labels': list(age_ranges.keys()),
+        'counts': list(age_ranges.values())
+    }
+
+
+def get_messaging_question_by_gender(**filters):
+    """
+    Retrieves the count of messaging question responses broken down by gender.
+
+    Args:
+        **filters: Arbitrary keyword arguments for filtering the queryset.
+
+    Returns:
+        dict: A dictionary containing:
+            - "labels": List of gender categories
+            - "counts": List of counts for each gender category
+    """
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
+    queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
+
+    gender_counts = (
+        queryset
+        .values('preference__gender__name')
+        .annotate(count=Count('id'))
+        .order_by('preference__gender__name')
+    )
+
+    gender_data = {
+        'Male': 0,
+        'Female': 0,
+        'Prefer not to answer': 0
+    }
+
+    for gender_count in gender_counts:
+        gender = gender_count['preference__gender__name']
+        count = gender_count['count']
+        
+        if gender is None:
+            continue
+            
+        if gender.lower() == 'male':
+            gender_data['Male'] += count
+        elif gender.lower() == 'female':
+            gender_data['Female'] += count
+        else:
+            gender_data['Prefer not to answer'] += count
+
+    return {
+        'labels': list(gender_data.keys()),
+        'counts': list(gender_data.values())
+    }

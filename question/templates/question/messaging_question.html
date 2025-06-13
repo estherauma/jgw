@@ -72,6 +72,35 @@
     </div>
 </div>
 <div class="row">
+    {% flag 'can_view_age_chart_on_messaging_question_page'%}
+        <div class="col-md-6 mt-3">
+            <div class="card h-100">
+                <div class="card-body chart">
+                    <p class="chart-title">Question Responses Per Age</p>
+                    <canvas id="messaging-question-by-age-chart-id" class="canvas-chart"></canvas>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        Messaging Questions by Age: Question responses by users of different age groups who have logged into the app using an organisation QR Code or Link.
+                        <div class="tooltip-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endflag %}{% flag 'can_view_gender_chart_on_messaging_question_page'%}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100">
+            <div class="card-body chart">
+                <p class="chart-title">Question Responses Per Gender</p>
+                <canvas id="messaging-question-by-gender-chart-id" class="canvas-chart"></canvas>
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    Messaging Questions by Gender: Question responses by users of different genders who have logged into the app using an organisation QR Code or Link.
+                    <div class="tooltip-arrow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endflag %}
     {% flag 'can_view_organisation_chart_on_messaging_question_page'%}
         <div class="col-md-6 mt-3">
             <div class="card h-100">
@@ -80,7 +109,7 @@
                     <canvas id="messaging-question-organisation-pie-chart-id" class="canvas-chart"></canvas>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Messaging Questions: Organisation: Question responses by users who have logged into the app using an organisation QR Code or Link.
+                        Messaging Questions by Organisation: Question responses by users of different organisations who have logged into the app using an organisation QR Code or Link.
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -182,17 +211,24 @@
 <script src="{% static 'js/charts/pie/messaging_question_organisation_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/bar/messaging_question_graph.js' %}"></script>
 <script src="{% static 'js/app/messaging_question.js' %}"></script>
+<script src="{% static 'js/charts/pie/reusable_pie_chart.js' %}"></script>
 <script type="text/javascript">
     var originData = {{ messaging_question_per_origin|safe }};
     var destinationData = {{ messaging_question_per_destination|safe }};
     var organisationData = {{ messaging_question_per_organisation|safe }};
     var allMessagingQuestionResponse = {{ each_messaging_question_response | safe }}
+    var messaging_question_by_age = {{ messaging_question_by_age | safe }}
+    var messaging_question_by_gender = {{ messaging_question_by_gender | safe }}
 
     messagingQuestionOriginChart(originData)
 
     messagingQuestionDestinationChart(destinationData)
 
     messagingQustionOrganisationPieChart(organisationData)
+
+    reusablePieChart(messaging_question_by_age, 'messaging-question-by-age-chart-id')
+
+    reusablePieChart(messaging_question_by_gender, 'messaging-question-by-gender-chart-id')
 
     document.addEventListener('DOMContentLoaded', function() {
         createDropdownItems();

@@ -27,6 +27,8 @@ from question.repository.messaging_questions_standard import (
     each_messaging_question_response,
     get_all_message_data_sent,
     get_all_messaging_question_responses_data,
+    get_messaging_question_by_age,
+    get_messaging_question_by_gender,
     get_messaging_question_per_destination_counts,
     get_messaging_question_per_organisation_counts,
     get_messaging_question_per_origin_counts,
@@ -47,6 +49,8 @@ def messaging_question(request):
     messaging_question_per_origin = get_messaging_question_per_origin_counts(
         **filters, current_user=request.user
     )
+    messaging_question_by_age = get_messaging_question_by_age(**filters, current_user=request.user)
+    messaging_question_by_gender = get_messaging_question_by_gender(**filters, current_user=request.user)
     messaging_question_per_destination = get_messaging_question_per_destination_counts(
         **filters, current_user=request.user
     )
@@ -63,6 +67,8 @@ def messaging_question(request):
         "messaging_question_per_destination": messaging_question_per_destination,
         "messaging_question_per_organisation": messaging_question_per_organisation,
         "each_messaging_question_response": each_messaging_question_response_data,
+        "messaging_question_by_age": messaging_question_by_age,
+        "messaging_question_by_gender": messaging_question_by_gender,
         "filter_form": filter_form,
         "date_range_form": date_range_form,
     }
