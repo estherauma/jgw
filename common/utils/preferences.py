@@ -29,5 +29,5 @@ def dict_to_querydict(data):
 
 def get_date_13_months_ago():
     today = date.today()
-    thirteen_months_ago = today - relativedelta(months=13)
+    thirteen_months_ago = today - relativedelta(months=12)
     return date(thirteen_months_ago.year, thirteen_months_ago.month, 1)

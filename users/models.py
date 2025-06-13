@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from dashboard.forms import OPERATORS
 from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation, OrganisationData
+from decimal import Decimal
 
 ROLES = ["SCHEME", "FACTORY", "STAFF", "ADMIN"]
 STATUS = ["PENDING", "ACCEPTED", "SENT"]
@@ -68,6 +69,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False, help_text="Designates whether this user should receive marketing emails."
     )
     immigration_status = models.ManyToManyField(ImmigrationStatus, blank=True)
+    total_logged_hours = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, help_text="Total number of hours the user has been logged in")
 
     class Meta:
         indexes = [
@@ -88,3 +90,20 @@ class UserInvitations(models.Model):
     status = models.CharField(
         blank=False, null=False, max_length=16, choices=STATUS.choices, default="PENDING"
     )
+
+
+class UserSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
+    login_time = models.DateTimeField(auto_now_add=True)
+    logout_time = models.DateTimeField(null=True, blank=True)
+    duration = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+
+    def save(self, *args, **kwargs):
+        if self.logout_time and not self.duration:
+            duration = (self.logout_time - self.login_time).total_seconds() / 3600
+            self.duration = Decimal(str(round(duration, 2)))
+            
+            self.user.total_logged_hours = Decimal(str(self.user.total_logged_hours)) + self.duration
+            self.user.save()
+        
+        super().save(*args, **kwargs)

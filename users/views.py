@@ -36,7 +36,7 @@ from .forms import (
     UserMgtForm,
     CreateNewUserForm,
 )
-from .models import User, UserInvitations
+from .models import User, UserInvitations, UserSession
 from users.templatetags.user_role_tags import has_group
 
 
@@ -92,6 +92,17 @@ def logout_user(request):
         logout_time = datetime.now(timezone.utc)
         session_duration = (logout_time - login_time).total_seconds()
         
+        # Update the latest user session
+        try:
+            latest_session = UserSession.objects.filter(
+                user_id=request.session['user_id'],
+                logout_time__isnull=True
+            ).latest('login_time')
+            latest_session.logout_time = logout_time
+            latest_session.save()
+        except UserSession.DoesNotExist:
+            pass
+        
         # Store logout data for tracking
         request.session['logout_time'] = logout_time.isoformat()
         request.session['session_duration'] = session_duration
@@ -133,13 +144,13 @@ def login_user(request):
                 user = authenticate(request, username=user.email, password=password)
                 if user is not None:
                     login(request, user)
+                    # Create new user session
+                    UserSession.objects.create(user=user)
                     request.session['login_time'] = datetime.now(timezone.utc).isoformat()
                     request.session['user_email'] = user.email
                     request.session['user_id'] = user.id
                     request.session['user_role'] = user.groups.first().name if user.groups.exists() else 'No Role'
 
-
-                    
                     if has_group(user, "Summerberry"):
                         return redirect("dashboard:summerberry-dashboard")
                     else:
