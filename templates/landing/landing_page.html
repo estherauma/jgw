@@ -1,6 +1,9 @@
 {% extends 'layouts/non_auth_base.html' %}
 {% load static %}
 
+
+{% load i18n %}
+
 {% block body %}
 
 <body data-bs-spy="scroll" data-bs-target=".navbar" data-bs-offset="78">
@@ -12,15 +15,8 @@
                     <div class="row align-items-center">
                         <div class="col-lg-6">
                             <div class="home-title mo-mb-20">
-                                <h1 class="mb-4 text-white">Welcome to the Just Good Work Data Platform.</h1>
-                                <p class="text-white-50 home-desc">The Just Good Work data platform offers information,
-                                    data and insights about migrant labour. This includes issues that affect migrants
-                                    from when they are looking for work in their home countries, through their
-                                    experience migrating and working until they finish. Through this platform, we hope
-                                    to shed light on the issues that not only affect migrant workers, but also lead to
-                                    inefficiencies in labour supply chains. This resource is to provide insight and
-                                    support that will help individuals, organizations, and governments to combat modern
-                                    slavery and protect the rights of migrant workers.</p>
+                                <h1 class="mb-4 text-white">{% translate "landingPageWelcomeText" %}</h1>
+                                <p class="text-white-50 home-desc"> {% translate "landingPageIntroText" %} </p>
                             </div>
                         </div>
                         <div class="col-xl-4 offset-xl-2 col-lg-5 offset-lg-1 col-md-7">
@@ -48,7 +44,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6">
                     <div class="text-center mb-4 pb-1">
-                        <h3 class="mb-3">How can the JGW data platform help you?</h3>
+                        <h3 class="mb-3">{% translate "landingPageJGWDataPlatformHelp" %}</h3>
                     </div>
                 </div>
             </div>
@@ -60,9 +56,8 @@
                         <div class="features-img mb-4">
                             <img src="{% static 'icons/Real_time.png' %}" alt="">
                         </div>
-                        <h4 class="mb-2">Real time insights</h4>
-                        <p class="text-muted">Get real time feedbacks and insights from 105,000+ workers in over 33
-                            countries.</p>
+                        <h4 class="mb-2">{% translate "landingPageRealTimeInsights" %}</h4>
+                        <p class="text-muted">{% translate "landingPageFeedbackInsights"%}</p>
                     </div>
                 </div>
 
@@ -71,9 +66,8 @@
                         <div class="features-img mb-4">
                             <img src="{% static 'icons/Supply_chain.png' %}" alt="">
                         </div>
-                        <h4 class="mb-2">Track issues specific to your supply chain</h4>
-                        <p class="text-muted">By using JGW in your supply chain you can find issues and inefficiencies
-                            earlier.</p>
+                        <h4 class="mb-2">{% translate "landingPageTrackIssues" %}</h4>
+                        <p class="text-muted">{% translate "landingPageSupplyChain" %}</p>
                     </div>
                 </div>
                 <!-- end col -->
@@ -83,9 +77,8 @@
                         <div class="features-img mb-4">
                             <img src="{% static 'icons/What_matters.png' %}" alt="">
                         </div>
-                        <h4 class="mb-3">Understand what matters to workers</h4>
-                        <p class="text-muted">Improves worker's experience for better attraction, engagement, and
-                            retention.</p>
+                        <h4 class="mb-3">{% translate "landingPageUnderstandWhatMattersToWorkers" %}</h4>
+                        <p class="text-muted">{% translate "landingPageImproveWorkerExperience" %}</p>
                     </div>
                 </div>
                 <!-- end col -->
@@ -95,9 +88,8 @@
                         <div class="features-img mb-4">
                             <img src="{% static 'icons/recruitment.png' %}" alt="">
                         </div>
-                        <h4 class="mb-2">Improve your recruitment and retention</h4>
-                        <p class="text-muted">Lower staff turnover and increase retention proactively understanding
-                            issues negatively affecting migrants.</p>
+                        <h4 class="mb-2">{% translate "landingPageImproveRecruitmentAndRetention" %}</h4>
+                        <p class="text-muted">{% translate "landingPageLowStaffTurnover" %}</p>
                     </div>
                 </div>
                 <!-- end col -->
@@ -106,9 +98,8 @@
                         <div class="features-img mb-4">
                             <img src="{% static 'icons/Safety.png' %}" alt="">
                         </div>
-                        <h4 class="mb-3">Safety for workers</h4>
-                        <p class="text-muted">All the information we collect is anonymised to ensure protection for
-                            migrants.</p>
+                        <h4 class="mb-3">{% translate "landingPageSafetyForWorkers" %}</h4>
+                        <p class="text-muted">{% translate "landingPageAnonymusInformation" %}</p>
                     </div>
                 </div>
                 <!-- end col -->
@@ -117,10 +108,8 @@
                         <div class="features-img mb-4">
                             <img src="{% static 'icons/information.png' %}" alt="">
                         </div>
-                        <h4 class="mb-3">Accurate information</h4>
-                        <p class="text-muted">We have spent years building trust with migrants and migrant support
-                            agencies all over the world, which means we have the relationships to get accurate
-                            information</p>
+                        <h4 class="mb-3">{% translate "landingPageAccurateInformation" %}</h4>
+                        <p class="text-muted">{% translate "landingPageBuildingTrustText" %}</p>
                     </div>
                 </div>
                 <!-- end col -->
@@ -149,8 +138,8 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="title text-center mb-4">
-                        <h3 class="text-white">Have any Questions ?</h3>
-                        <p class="text-white-50">Please reach out to us using an of the channels below</p>
+                        <h3 class="text-white">{% translate "landingPageHaveAnyQuestions" %}</h3>
+                        <p class="text-white-50">{% translate "landingPageReachout" %}</p>
                     </div>
                 </div>
             </div>
@@ -159,9 +148,9 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-6">
-                            <h4 class="text-white">Contact Us</h4>
+                            <h4 class="text-white">{% translate "landingPageContactUs" %}</h4>
                             <ul class="list-unstyled">
-                                <li class="text-white-50">Email: Info@justgood.work</li>
+                                <li class="text-white-50">{% translate "landingPageEmail" %} Info@justgood.work</li>
                                 <li class="text-white-50">UK: +44 3036 665459</li>
                                 <li class="text-white-50">USA: +1 813 322 2785</li>
                                 <li class="text-white-50">New Zealand: +64 9 884 9737</li>
@@ -169,7 +158,7 @@
                         </div>
                         <div class="col-md-6">
                             <h4 class="text-white">Just good work</h4>
-                            <p class="text-white-50">The Just Good Work data platform offers information, data and insights about migrant labour.</p>
+                            <p class="text-white-50">{% translate "landingPagejgwDpOffersInfo" %}</p>
                         </div>
                     </div>
                 </div>
