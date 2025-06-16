@@ -26,6 +26,7 @@ from preference.models import (
     SectorOfWork,
     Preference,
     ImmigrationStatus,
+    OriginalSectorOfWork,
 )
 
 
@@ -238,3 +239,26 @@ def parse_date_or_none(date_str):
         return parse_api_date(date_str)
     except:
         return None
+
+
+def add_original_sector_of_work_to_db(sectors_of_work: Union[str, list[str]]) -> list[OriginalSectorOfWork]:
+    sector_list = []
+
+    if not sectors_of_work:
+        pass
+
+    if isinstance(sectors_of_work, str):
+        sector = OriginalSectorOfWork.objects.filter(
+            key__iexact=sectors_of_work
+        ).first()
+        if sector:
+            sector_list.append(sector)
+        return sector_list
+
+    for sector_name in sectors_of_work:
+        sector = OriginalSectorOfWork.objects.filter(
+            key__iexact=sector_name
+        ).first()
+        if sector:
+            sector_list.append(sector)
+    return sector_list

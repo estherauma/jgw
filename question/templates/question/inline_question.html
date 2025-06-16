@@ -290,7 +290,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const chartContainer = document.getElementById('chartContainer');
         chartContainer.innerHTML = '';
         const checkedBoxes = document.querySelectorAll('.question-checkbox:checked');
-        console.log('Checked boxes:', checkedBoxes.length);
         checkedBoxes.forEach((checkbox, index) => {
             const key = checkbox.value.trim();
             const questionData = allInlineQuestionResponse[key];

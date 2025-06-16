@@ -110,6 +110,7 @@ class MessagingQuestionStandardAdmin(ExportActionModelAdmin, admin.ModelAdmin):
         "factory_farm",
         "destination",
         "organisation_sector",
+        "get_sectors_of_work",
         "organisation",
         "org_code",
         "org_info",
@@ -132,6 +133,10 @@ class MessagingQuestionStandardAdmin(ExportActionModelAdmin, admin.ModelAdmin):
         "immigration_status",
     ]
     ordering = ["-api_created_at"]
+
+    def get_sectors_of_work(self, obj):
+        return ", ".join([sector.display_name for sector in obj.sectors_of_work.all()])
+    get_sectors_of_work.short_description = "Sectors of Work"
 
 
 @admin.register(MessagingQuestionResponse)

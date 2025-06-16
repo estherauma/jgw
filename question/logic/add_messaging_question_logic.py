@@ -10,6 +10,7 @@ from common.helpers.model_helpers.preference import (
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
     get_or_add_route_to_db,
+    add_original_sector_of_work_to_db,
 )
 from common.helpers.preference_helpers.country import get_data_destination, get_data_origin
 from common.logger import KunfuPandaLogger
@@ -36,9 +37,9 @@ def fetch_legacy_messaging_question_from_api(client):
     start_date = "2020-11-01"
     end_date = "2022-11-31"
 
-    latest_inlinequestion = MessagingQuestionStandard.objects.last()
-    if latest_inlinequestion:
-        start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
+    latest_messaging_question = MessagingQuestionStandard.objects.last()
+    if latest_messaging_question:
+        start_date = latest_messaging_question.created_at.strftime("%Y-%m-%d")
 
     return client.get_data(f"/messaging-questions?startDate={start_date}&endDate={end_date}")
 
@@ -48,9 +49,9 @@ def fetch_messaging_question_from_api(client):
     end_date = todays_date()
 
     # get the last time inline question were fetched
-    latest_inlinequestion = MessagingQuestionStandard.objects.last()
-    if latest_inlinequestion:
-        start_date = latest_inlinequestion.created_at.strftime("%Y-%m-%d")
+    latest_messaging_question = MessagingQuestionStandard.objects.last()
+    if latest_messaging_question:
+        start_date = latest_messaging_question.created_at.strftime("%Y-%m-%d")
 
     return client.get_data(f"/question-responses?startDate={start_date}&endDate={end_date}")
 
@@ -105,6 +106,8 @@ def add_messaging_question_to_db(messaging_question):
     org_code = messaging_question.get("orgCode")
     organisation = messaging_question.get("organisation")
     factory_farm = messaging_question.get("factoryFarm")
+    sectors = messaging_question.get("sectors", [])
+    
     route_data = get_or_add_route_to_db(route)
     language_data = get_or_add_language_to_db(language)
     origin_data = get_or_add_country_to_db(origin, source="origin")
@@ -136,6 +139,9 @@ def add_messaging_question_to_db(messaging_question):
         factory_farm=factory_farm_data,
         org_code=org_code,
     )
+    if sectors:
+        sectors_of_work_list = add_original_sector_of_work_to_db(sectors)
+        messaging_question_standard.sectors_of_work.set(sectors_of_work_list)
 
     #  create messaging question text
     messaging_question_text = messaging_question.get("questionText")

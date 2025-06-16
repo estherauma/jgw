@@ -1,9 +1,6 @@
 function monthlyActiveUsersChart(monthlyActiveUserCountData) {
-    console.log("Received data:", monthlyActiveUserCountData);
     const labels = monthlyActiveUserCountData.map(entry => entry.month);
     const data = monthlyActiveUserCountData.map(entry => entry.count);
-    console.log("Labels data:", labels);
-    console.log("data:", data);
 
       const plugin = {
         beforeInit(chart) {

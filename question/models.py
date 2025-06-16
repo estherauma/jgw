@@ -11,6 +11,7 @@ from preference.models import (
     OrganisationData,
     OrganisationSector,
     Route,
+    OriginalSectorOfWork,
 )
 
 
@@ -178,7 +179,10 @@ class MessagingQuestionStandard(models.Model):
         blank=True,
         related_name="messaging_question_immigration_status",
     )
-
+    sectors_of_work = models.ManyToManyField(
+        OriginalSectorOfWork,
+        related_name="messaging_question_sectors_of_work",
+    )
     organisation_sector = models.ForeignKey(
         OrganisationSector,
         on_delete=models.CASCADE,

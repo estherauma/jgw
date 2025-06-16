@@ -137,7 +137,7 @@
 </div>
 <div class="row">
     {% flag 'can_view_messaging_question_per_origin_on_messaging_page' %}
-        <div class="col-md-12 mt-3">
+        <div class="col-md-6 mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">messaging question per origin</p>
@@ -153,7 +153,39 @@
             </div>
         </div>
     {% endflag %}
+
+    {% flag 'can_view_messaging_question_by_sectors_on_messaging_page' %}
+        <div class=" col-md-6 mt-3">
+            <div class="card h-100">
+                <div class="card-body chart">
+                    <p class="chart-title">messaging question per sector</p>
+                    <div class="messaging-question-sectors-chart-id-chart-box">
+                        <div id="messaging-question-sectors-chart-id"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            Messaging Question per Sector: Sector of work of users who have responded to questions in the filtered timeframe. 
+                            <div class="tooltip-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endflag %}
 </div>
+{% flag 'can_view_user_geolocation_map_chart_on_messaging_question_page' %}
+<div class="row col-md-12 mt-3 user-geolocation-map-chart-box">
+    <div class="card h-100">
+        <div class="card-body chart wide-map">
+            <p class="chart-title mb-2">Users Geolocation Map Basing On Messaging Question</p>
+            <div id="user_geolocation_map_messaging_question" class="user-geolocation-map"></div>
+            <div class="info-tooltip user-geol-map-info-tooltip">
+                <i class="fas fa-info-circle"></i>
+                User Geolocation Map: Shows users Geolocation at the time of using the app.
+            </div>
+        </div>
+    </div>
+</div>
+{% endflag %}
 <div class="row">
     {% flag 'can_view_messaging_question_responses_on_messaging_page' %}
         <div class="container mt-3">
@@ -212,6 +244,8 @@
 <script src="{% static 'js/charts/bar/messaging_question_graph.js' %}"></script>
 <script src="{% static 'js/app/messaging_question.js' %}"></script>
 <script src="{% static 'js/charts/pie/reusable_pie_chart.js' %}"></script>
+<script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
+<script src="{% static 'js/charts/bar/user_by_sector_graph.js' %}"></script>
 <script type="text/javascript">
     var originData = {{ messaging_question_per_origin|safe }};
     var destinationData = {{ messaging_question_per_destination|safe }};
@@ -219,17 +253,19 @@
     var allMessagingQuestionResponse = {{ each_messaging_question_response | safe }}
     var messaging_question_by_age = {{ messaging_question_by_age | safe }}
     var messaging_question_by_gender = {{ messaging_question_by_gender | safe }}
+    var messaging_question_by_sectors = {{ messaging_question_by_sectors | safe }}
+    var user_counts_by_geo_country = {{ user_counts_by_geo_country | safe }}
 
     messagingQuestionOriginChart(originData)
 
     messagingQuestionDestinationChart(destinationData)
 
     messagingQustionOrganisationPieChart(organisationData)
-
     reusablePieChart(messaging_question_by_age, 'messaging-question-by-age-chart-id')
 
     reusablePieChart(messaging_question_by_gender, 'messaging-question-by-gender-chart-id')
-
+    createUserGeolocationMap(user_counts_by_geo_country, 'user_geolocation_map_messaging_question')
+    usersBySectorsChart(messaging_question_by_sectors, 'messaging-question-sectors-chart-id')
     document.addEventListener('DOMContentLoaded', function() {
         createDropdownItems();
         document.getElementById('selectAll').addEventListener('change', handleCheckboxChange);
@@ -275,7 +311,7 @@
         const chartContainer = document.getElementById('chartContainer');
         chartContainer.innerHTML = '';
         const checkedBoxes = document.querySelectorAll('.question-checkbox:checked');
-        console.log('Checked boxes:', checkedBoxes.length);
+       
         checkedBoxes.forEach((checkbox, index) => {
             const key = checkbox.value.trim();
             const questionData = allMessagingQuestionResponse[key];

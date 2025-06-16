@@ -34,17 +34,14 @@ def preferences_by_age(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
-    
-    # Apply filters
+
     preferences_age_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields and do grouping in the database
     age_counts = (
         preferences_age_queryset
         .values('age__translated_range')
@@ -52,7 +49,6 @@ def preferences_by_age(**filters):
         .order_by('-total')
     )
 
-    # Define age group mapping
     group_mapping = {
         "60+": ["60+"],
         "51-60": ["51-60"],
@@ -62,12 +58,8 @@ def preferences_by_age(**filters):
         "18-20": ["15-18", "15-20", "18-20", "19-20", "15 - 20"],
         "15-17": ["15-17"],
     }
-
-    # Initialize combined values with all groups
     combined_values = {group: 0 for group in group_mapping}
     combined_values["PREFER NOT TO ANSWER"] = 0
-
-    # Process age counts in a single pass
     for age in age_counts:
         age_range = age['age__translated_range'].title() if age['age__translated_range'] else None
         if not age_range:
@@ -82,7 +74,6 @@ def preferences_by_age(**filters):
                 combined_values[group] += age['total']
                 break
 
-    # Convert to final format
     return {
         "labels": list(combined_values.keys()),
         "counts": list(combined_values.values())
@@ -94,17 +85,14 @@ def preferences_by_gender(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_gender_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields and do grouping in the database
     gender_counts = (
         preferences_gender_queryset
         .values('gender__translated_name')
@@ -123,7 +111,6 @@ def preferences_by_gender(**filters):
         .order_by('-total')
     )
 
-    # Process gender counts in a single pass
     label_sums = defaultdict(int)
     for gender in gender_counts:
         normalized_label = normalize_gender_name(gender['normalized_name']).title()
@@ -140,17 +127,14 @@ def preferences_by_origin(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_origin_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields
     origin_counts = (
         preferences_origin_queryset
         .values('origin__name')
@@ -172,7 +156,6 @@ def preferences_by_origin(**filters):
         .order_by('-total')
     )
 
-    # Convert to lists directly from the queryset
     return {
         "labels": [origin["normalized_origin"].title() for origin in origin_counts if origin["normalized_origin"]],
         "counts": [origin["total"] for origin in origin_counts if origin["normalized_origin"]]
@@ -184,17 +167,14 @@ def preferences_by_destination(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_destination_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields and do grouping in the database
     destination_counts = (
         preferences_destination_queryset
         .values('destination__name')
@@ -213,7 +193,6 @@ def preferences_by_destination(**filters):
         .order_by('-total')
     )
 
-    # Process results in a single pass
     return {
         "labels": [dest['normalized_name'].title() for dest in destination_counts if dest['normalized_name']],
         "counts": [dest['total'] for dest in destination_counts if dest['normalized_name']]
@@ -225,17 +204,14 @@ def preferences_by_language(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_language_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields and do grouping in the database
     language_counts = (
         preferences_language_queryset
         .values('language__translated_name')
@@ -256,7 +232,6 @@ def preferences_by_language(**filters):
         .order_by('-total')
     )
 
-    # Process results in a single pass
     return {
         "labels": [lang['translated_name'].title() for lang in language_counts],
         "counts": [lang['total'] for lang in language_counts]
@@ -288,7 +263,6 @@ def preferences_by_organisation(**filters):
             bigqueryhomepageeventdata__event_date__range=(start_date, end_date)
         ).distinct()
 
-        # Convert to Preference queryset
         base_queryset = Preference.objects.filter(id__in=base_queryset)
 
     else:
@@ -365,17 +339,14 @@ def get_users_by_country_state(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_count_by_state_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields and do grouping in the database
     preferences_count_by_state = (
         preferences_count_by_state_queryset
         .values('destination_state__name')
@@ -394,7 +365,6 @@ def get_users_by_country_state(**filters):
         .order_by('normalized_name')
     )
 
-    # Process results in a single pass
     return {
         "labels": [state['normalized_name'].title() for state in preferences_count_by_state if state['normalized_name']],
         "counts": [state['users_count'] for state in preferences_count_by_state if state['normalized_name']]
@@ -406,24 +376,20 @@ def get_preferences_by_sectors(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_sectors_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Define sector mapping at the module level for better performance
     SECTOR_MAPPING = {
         "Agriculture": "Agriculture - Other",
         "Any": "All",
         "Driving": "Transport"
     }
 
-    # Use values() to only fetch needed fields and do grouping in the database
     result = (
         preferences_sectors_queryset
         .filter(sectors_of_work__original_sector_of_work__isnull=False)
@@ -444,7 +410,6 @@ def get_preferences_by_sectors(**filters):
         .order_by('-preferences_count')
     )
 
-    # Process results in a single pass
     return {
         "labels": [entry['sector_value'] for entry in result],
         "counts": [entry['preferences_count'] for entry in result]
@@ -475,17 +440,14 @@ def get_user_counts_by_origin_destination(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_user_counts_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields and do grouping in the database
     user_counts = (
         preferences_user_counts_queryset
         .exclude(origin__isnull=True, destination__isnull=True)
@@ -507,7 +469,6 @@ def get_user_counts_by_origin_destination(**filters):
         .order_by('-user_count')
     )
 
-    # Process results in a single pass
     return [
         {
             "origin": entry['normalized_origin'],
@@ -576,17 +537,14 @@ def get_sws_workcodes_with_access_code(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_access_code_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields and do grouping in the database
     queryset_data = (
         preferences_access_code_queryset
         .values(
@@ -611,7 +569,6 @@ def get_sws_workcodes_with_access_code(**filters):
         .order_by('-access_code_count')
     )
 
-    # Return list directly from queryset
     return list(queryset_data)
 
 
@@ -726,7 +683,6 @@ def extract_preference_for_export(**filters):
         'org_info'
     ).prefetch_related('sectors_of_work')
 
-    # Convert QuerySet to list using values() to get all fields in one query
     preferences_data = preferences_user_counts_queryset.values(
         'data_source_id',
         'device_id',
@@ -748,7 +704,6 @@ def extract_preference_for_export(**filters):
         sectors_of_work__translated_name=F('sectors_of_work__translated_name')
     )
 
-    # Group sectors_of_work by preference
     grouped_data = defaultdict(list)
     for pref in preferences_data:
         pref_id = (
@@ -760,7 +715,6 @@ def extract_preference_for_export(**filters):
         if pref['sectors_of_work__translated_name']:
             grouped_data[pref_id].append(pref['sectors_of_work__translated_name'])
 
-    # Create final data structure
     final_data = []
     seen_prefs = set()
     for pref in preferences_data:
@@ -785,17 +739,14 @@ def preferences_by_immigration_status(**filters):
     start_date = filters.get('start_date') or get_date_13_months_ago()
     end_date = filters.get('end_date') or datetime.now().date()
 
-    # Get base queryset with optimized querying
     base_queryset = get_base_queryset(show_new_user_data, start_date, end_date)
     
-    # Apply filters
     preferences_immigration_status_queryset = (
         preference_filtered_queryset_for_active_users_data(queryset=base_queryset, **filters)
         if not show_new_user_data
         else preference_filtered_queryset_for_new_user_data(queryset=base_queryset, **filters)
     )
 
-    # Use values() to only fetch needed fields and do grouping in the database
     results = (
         preferences_immigration_status_queryset
         .values('immigration_status__name')
@@ -811,7 +762,6 @@ def preferences_by_immigration_status(**filters):
         .order_by('-count')
     )
 
-    # Process results in a single pass
     return {
         "labels": [item['name'] for item in results],
         "counts": [item['count'] for item in results]
