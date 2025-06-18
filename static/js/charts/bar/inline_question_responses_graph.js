@@ -20,7 +20,6 @@ function inlineQuestionResponsesGraph(responseData) {
     }
   }
 
-  //   console.log(datasets)
 
   var chartData = {
     labels: labels,

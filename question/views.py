@@ -10,6 +10,7 @@ from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
 from core.forms import DateRangeForm
 from core.logic.file_export import generate_and_export_excel
+from events.repository.bigquery_homepage_events_repository import get_user_counts_by_geo_country
 from question.forms import InlineQuestionFilterForm, MessagingQuestionFilterForm
 from question.repository.inline_questions_standard import (
     each_inline_question_response,
@@ -29,9 +30,11 @@ from question.repository.messaging_questions_standard import (
     get_all_messaging_question_responses_data,
     get_messaging_question_by_age,
     get_messaging_question_by_gender,
+    get_messaging_question_by_sectors,
     get_messaging_question_per_destination_counts,
     get_messaging_question_per_organisation_counts,
     get_messaging_question_per_origin_counts,
+    get_user_counts_by_destination,
     messaging_question_stats_for_export,
     messaging_questions_count,
 )
@@ -60,6 +63,9 @@ def messaging_question(request):
     each_messaging_question_response_data = each_messaging_question_response(
         **filters, current_user=request.user
     )
+    messaging_question_by_sectors = get_messaging_question_by_sectors(**filters, current_user=request.user)
+
+    user_counts_by_geo_country = get_user_counts_by_destination(**filters, current_user=request.user)
 
     context = {
         "total_messaging_questions": total_messaging_questions,
@@ -69,6 +75,8 @@ def messaging_question(request):
         "each_messaging_question_response": each_messaging_question_response_data,
         "messaging_question_by_age": messaging_question_by_age,
         "messaging_question_by_gender": messaging_question_by_gender,
+        "user_counts_by_geo_country": user_counts_by_geo_country,
+        "messaging_question_by_sectors": messaging_question_by_sectors,
         "filter_form": filter_form,
         "date_range_form": date_range_form,
     }

@@ -5,7 +5,7 @@ from common.utils.strings import format_thousands_with_commas
 from events.models import BigqueryHomepageEventData
 from question.filters import generic_question_filtered_queryset, message_data_sent_filtered_queryset
 from question.models import MessageDataSent, MessagingQuestionResponse, MessagingQuestionStandard
-from django.db.models import Count, Case, When, F, Q
+from django.db.models import Count, Case, When, F, Q, Value, CharField
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 
@@ -505,4 +505,112 @@ def get_messaging_question_by_gender(**filters):
     return {
         'labels': list(gender_data.keys()),
         'counts': list(gender_data.values())
+    }
+
+
+def get_user_counts_by_destination(**filters):
+    """
+    Retrieves user counts grouped by destination.
+
+    This function filters the MessagingQuestionStandard queryset based on provided filters,
+    excludes entries with null destination, and aggregates user counts for each destination.
+
+    Args:
+        **filters: Keyword arguments for filtering the queryset.
+
+    Returns:
+        list: A list of dictionaries containing destination and user count data.
+        Each dictionary has the following structure:
+        {
+            "country": str,  # Name of the destination
+            "count": int  # Number of users for this destination
+        }
+    """
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
+    queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
+    
+    user_counts = (
+        queryset.exclude(destination__isnull=True)
+        .values("destination__name")
+        .annotate(user_count=Count("device_id"))
+        .order_by("-user_count")
+    )
+
+    destination_data = [
+        {
+            "country": entry["destination__name"],
+            "count": entry["user_count"],
+        }
+        for entry in user_counts
+    ]
+
+    return destination_data
+
+
+def get_messaging_question_by_sectors(**filters):
+    """
+    Retrieves the count of messaging question responses broken down by sectors.
+
+    Args:
+        **filters: Arbitrary keyword arguments for filtering the queryset.
+
+    Returns:
+        dict: A dictionary containing:
+            - "labels": List of sector names
+            - "counts": List of counts for each sector
+    """
+    show_new_user_data = filters.get('show_new_user_data', False)
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if show_new_user_data is False:
+        base_queryset = get_messaging_questions_by_homepage_events(
+            start_date=start_date,
+            end_date=end_date
+        )
+    else:
+        base_queryset = MessagingQuestionStandard.objects.all()
+
+    queryset = generic_question_filtered_queryset(queryset=base_queryset, **filters)
+
+    SECTOR_MAPPING = {
+        "Agriculture": "Agriculture - Other",
+        "Any": "All",
+        "Driving": "Transport"
+    }
+
+    result = (
+        queryset
+        .filter(sectors_of_work__isnull=False)
+        .annotate(
+            sector_value=Case(
+                *[
+                    When(
+                        sectors_of_work__value=key,
+                        then=Value(value)
+                    ) for key, value in SECTOR_MAPPING.items()
+                ],
+                default=F("sectors_of_work__value"),
+                output_field=CharField(),
+            )
+        )
+        .values('sector_value')
+        .annotate(questions_count=Count('id'))
+        .order_by('-questions_count')
+    )
+
+    return {
+        "labels": [entry['sector_value'] for entry in result],
+        "counts": [entry['questions_count'] for entry in result]
     }

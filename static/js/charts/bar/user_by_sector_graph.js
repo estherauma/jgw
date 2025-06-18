@@ -1,14 +1,14 @@
-function usersBySectorsChart(usersBySectorsChartChartData) {
-    const data = usersBySectorsChartChartData["counts"];
-    const labels = usersBySectorsChartChartData["labels"];
+function usersBySectorsChart(chartData, chartId = "users-by-sector-graph-id", label = "Users") {
+    const data = chartData["counts"];
+    const labels = chartData["labels"];
   
-    const originChartConfig = {
+    const chartConfig = {
       type: "bar",
       data: {
         labels: labels,
         datasets: [
           {
-            label: "Preferences",
+            label: label,
             data: data,
             backgroundColor: COLORS.navyBlue,
             barThickness: 15,
@@ -47,9 +47,9 @@ function usersBySectorsChart(usersBySectorsChartChartData) {
     };
   
     scrollableVerticalBarChart(
-      "users-by-sector-graph-id",
+      chartId,
       data,
-      originChartConfig
+      chartConfig
     );
   }
   
