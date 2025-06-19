@@ -129,7 +129,7 @@
                             </td>
                             <td>
                                 {% if user.last_login %}
-                                    {{ user.last_login }}
+                                    {{ user.last_login|date:"Y/m/d H:i" }}
                                 {% else %}
                                     User has not login
                                 {% endif %}
@@ -295,6 +295,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const text = cell.textContent.trim();
             if (text === 'User has not login') {
                 return systemStartDate;
+            }
+            
+            const dateTimeParts = text.split(' ');
+            if (dateTimeParts.length === 2) {
+                const datePart = dateTimeParts[0];
+                const timePart = dateTimeParts[1];
+                const dateParts = datePart.split('/');
+                const timeParts = timePart.split(':');
+                
+                if (dateParts.length === 3 && timeParts.length === 2) {
+                    const [year, month, day] = dateParts;
+                    const [hour, minute] = timeParts;
+                    return new Date(year, month - 1, day, hour, minute);
+                }
+            }
+            
+            const dateParts = text.split('/');
+            if (dateParts.length === 3) {
+                const [day, month, year] = dateParts;
+                return new Date(year, month - 1, day);
             }
             return new Date(text);
         }
