@@ -1,9 +1,10 @@
 {% extends "layouts/main_base.html" %}
 {% load static %}
+{%load i18n %}
 
 {% block main_base_head %}
     <meta charset="utf-8" />
-    <title>{% block title %}{% endblock %}| JGW Data Dashboard</title>
+    <title>{% block title %}{% endblock %}| {% translate "authBaseTitle" %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="JGW Pandas Dashboard." name="description" />
     <meta content="Coderthemes" name="author" />
@@ -72,7 +73,7 @@
                 <div class="auth-user-testimonial">
                     <h2 class="mb-3 text-white">Just Good Work</h2>
                     <p class="lead">
-                        The Just Good Work data platform offers information, data and insights about migrant labour. This includes issues that affect migrants from when they are looking for work in their home countries, through their experience migrating and working until they finish. Through this platform, we hope to shed light on the issues that not only affect migrant workers, but also lead to inefficiencies in labour supply chains. This resource is to provide insight and support that will help individuals, organizations, and governments to combat modern slavery and protect the rights of migrant workers.
+                        {% translate "authBaseJGWText" %}
                     </p>
                 </div> <!-- end auth-user-testimonial-->
             </div>
