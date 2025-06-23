@@ -39,6 +39,8 @@ from .forms import (
 from .models import User, UserInvitations, UserSession
 from users.templatetags.user_role_tags import has_group
 
+from django.utils.translation import gettext as _ 
+
 
 @login_required
 @admin_required
@@ -124,10 +126,10 @@ def create_user_account(request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             form.save(commit=True)
-            messages.info(request, "Your account was created and will be activated shortly.")
+            messages.info(request, _("createUserAccountViewInfo"))
             return redirect("users:login_user")
         else:
-            messages.error(request, "Error validating form!")
+            messages.error(request, _("createUserAccountViewError"))
     return render(request, "users/sign_up.html", context={"form": form})
 
 
@@ -156,11 +158,11 @@ def login_user(request):
                     else:
                         return redirect("preference:user_overview")
                 else:
-                    messages.error(request, "Can not log in with provided credentials!")
+                    messages.error(request, _("loginUserViewError"))
             except User.DoesNotExist:
-                messages.error(request, "Can not log in with provided credentials!")
+                messages.error(request, _("loginUserViewErrorNotUser"))
         else:
-            messages.error(request, "Error validating form!")
+            messages.error(request, _("loginUserViewInvalidForm"))
     return render(request, "users/sign_in.html", {"form": form})
 
 
@@ -384,7 +386,7 @@ def request_password_reset(request):
                 plain_message = strip_tags(html_content)
 
                 send_email_notification(
-                    subject="Reset your password on Just Good Work Data Platform",
+                    subject=_("requestPasswordResetViewEmailSubject"),
                     message=plain_message,
                     recipients=[email_address],
                     attachment_path=None,
@@ -392,15 +394,13 @@ def request_password_reset(request):
                     inline_images={"logo_cid": logo_path} if logo_path else None
                 )
 
-                success_text = f"""
-                    An email has been sent to {email_address}.
-                    Please check for an email from Just Good Work Data Platform and click on the included link to reset your password.
-                """
+                success_text = _("requestPasswordResetViewEmailSuccessText").format(email_address=email_address)
+
                 return render(request, "users/email_sent.html", {"success_text": success_text})
 
             except User.DoesNotExist:
                 form.full_clean()
-                messages.error(request, "No user account matches this email address!")
+                messages.error(request, _("requestPasswordResetViewErrorMessage"))
 
     return render(request, "users/request_password_reset.html", {"form": form})
 
@@ -411,7 +411,7 @@ def set_password(request, token):
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         user_id, invite_id = payload.get("user_id"), payload.get("invite_id")
         if user_id is None and invite_id is None:
-            messages.error(request, "Invalid token!")
+            messages.error(request, _("setPasswordViewInvalidTokenError"))
             return redirect("users:login_user")
         if request.method == "POST":
             form = SetPasswordForm(request.POST)
@@ -427,17 +427,15 @@ def set_password(request, token):
                     ).get(id=invite_id)
                     user_obj = {"email": invite["email"], "role": invite["scheme"]}
                     User.objects.create_user(**user_obj, password=password, is_active=True)
-                success_text = """
-                    Your password has been successfully reset.
-                    You can now log in using your new password.
-                """
+                success_text = _("setPasswordViewSuccessText")
+                
                 return render(request, "users/email_sent.html", {"success_text": success_text})
             else:
-                messages.error(request, "Error validating form!")
+                messages.error(request, _("setPasswordViewInvalidFormError"))
     except jwt.ExpiredSignatureError:
-        messages.error(request, "This link is expired!")
+        messages.error(request, _("setPasswordViewLinkExpiredError"))
     except User.DoesNotExist:
-        messages.error(request, "User account not found!")
+        messages.error(request, _("setPasswordViewUserAccountNotFound"))
     return render(request, "users/set_password.html", {"form": form})
 
 
