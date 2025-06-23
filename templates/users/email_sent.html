@@ -1,7 +1,8 @@
 {% extends "layouts/auth_base.html" %}
+{% load i18n %}
 
 <!-- title -->
-{% block title %} Email Sent {% endblock title %}
+{% block title %} {% translate "emailSentTitle" %} {% endblock title %}
 
 <!-- custom css -->
 {% block stylesheets %}
@@ -40,9 +41,9 @@
         </g>
     </svg>
 
-    <h3>Success !</h3>
+    <h3>{% translate "emailSentSuccess" %}</h3>
     <p class="text-muted font-14 mt-2">{{success_text}}</p>
-    <a href="{% url 'users:login_user' %}" class="btn w-100 btn-primary waves-effect waves-light mt-3">Back to Sign In</a>
+    <a href="{% url 'users:login_user' %}" class="btn w-100 btn-primary waves-effect waves-light mt-3">{% translate "emailSentBackToSignIn" %}</a>
 </div>
 
 {% endblock form %}

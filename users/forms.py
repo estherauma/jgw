@@ -10,10 +10,21 @@ from preference.models import Country, ImmigrationStatus, Organisation, FactoryF
 
 from .models import User, UserInvitations
 
+from django.utils.translation import gettext_lazy as _
+
 
 class LoginForm(forms.Form):
-    email = forms.EmailField()
-    password = forms.CharField()
+    email = forms.EmailField(
+        label=_("LoginFormEmail"),
+        error_messages={
+            "required": _("loginFormEmailRequired"),
+            "invalid": _("loginFormEmailInvalid"),
+        })
+    password = forms.CharField(
+        label=_("LoginFormPassword"),
+        error_messages={
+            "required": _("loginFormPasswordRequired")
+        })
 
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
@@ -26,6 +37,9 @@ class CreateUserForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("email",)
+        labels = {
+            'email': _('createUserFormEmail'),
+        }
 
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
@@ -66,8 +80,12 @@ class InviteUserForm(forms.ModelForm):
 
 
 class RequestPasswordResetForm(forms.Form):
-    email = forms.EmailField(required=True)
-
+    email = forms.EmailField(required=True,
+        label=_("requestPasswordResetFormEmail"),
+        error_messages={
+            "required": _("requestPasswordResetFormEmailRequired"),
+            "invalid": _("requestPasswordResetFormEmailInvalid"),
+        })
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:
@@ -81,16 +99,16 @@ class SetPasswordForm(forms.Form):
     """
 
     error_messages = {
-        "password_mismatch": "The two password fields didn’t match.",
+        "password_mismatch": _("setPasswordFormErrorMessage"),
     }
     new_password = forms.CharField(
-        label="New password",
+        label=_("setPasswordFormNewPassword"),
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
         strip=False,
         help_text=password_validation.password_validators_help_text_html(),
     )
     confirm_password = forms.CharField(
-        label="Confirm new password",
+        label=_("setPasswordFormConfirmNewPassword"),
         strip=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
     )
