@@ -71,7 +71,7 @@ class AuthTests(TestCase):
         self.assertTrue(bool(form_errors))
         self.assertEqual(
             form_errors,
-            {"password2": [_("loginFormPasswordRequired")], "email": ["User with this Email already exists."]},
+            {"password2": ["This field is required."], "email": ["User with this Email already exists."]},
         )
 
     def test_login_OK(self):
