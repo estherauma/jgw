@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-23 13:17+0000\n"
+"POT-Creation-Date: 2025-06-23 15:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,8 +37,8 @@ msgstr ""
 "afectan a los migrantes desde que buscan trabajo en sus países de origen, "
 "pasando por su experiencia migratoria y laboral, hasta que terminan su "
 "trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
-"problemas que no solo afectan a los trabajadores migrantes, sino que también"
-" provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también "
+"provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
 "recurso busca brindar información y apoyo que ayude a personas, "
 "organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
 "derechos de los trabajadores migrantes."
@@ -106,9 +106,9 @@ msgstr "Información precisa"
 #: templates/landing/landing_page.html:112
 msgid "landingPageBuildingTrustText"
 msgstr ""
-"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a"
-" migrantes en todo el mundo, lo que significa que tenemos las relaciones "
-"para obtener información precisa."
+"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a "
+"migrantes en todo el mundo, lo que significa que tenemos las relaciones para "
+"obtener información precisa."
 
 #: templates/landing/landing_page.html:142
 msgid "landingPageHaveAnyQuestions"
@@ -144,8 +144,8 @@ msgstr ""
 "afectan a los migrantes desde que buscan trabajo en sus países de origen, "
 "pasando por su experiencia migratoria y laboral, hasta que terminan su "
 "trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
-"problemas que no solo afectan a los trabajadores migrantes, sino que también"
-" provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también "
+"provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
 "recurso busca brindar información y apoyo que ayude a personas, "
 "organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
 "derechos de los trabajadores migrantes."
@@ -236,8 +236,7 @@ msgstr "Este enlace expirará en 1 día."
 #: templates/users/password_reset_email.html:74
 msgid "passwordResetEmailIfIssues"
 msgstr ""
-"Si tiene algún problema, envíe un correo electrónico a: "
-"support@justgood.work"
+"Si tiene algún problema, envíe un correo electrónico a: support@justgood.work"
 
 #: templates/users/password_reset_email.html:75
 msgid "passwordResetEmailJGWTeam"
@@ -269,19 +268,19 @@ msgstr "Volver a"
 msgid "requestPasswordResetSignIn"
 msgstr "Iniciar sesión"
 
-#: templates/users/set_password.html:4
+#: templates/users/set_password.html:5
 msgid "setPasswordPageTitle"
 msgstr "Establecer nueva contraseña"
 
-#: templates/users/set_password.html:8
+#: templates/users/set_password.html:9
 msgid "setPasswordPageHeading"
 msgstr "Establecer nueva contraseña"
 
-#: templates/users/set_password.html:9
+#: templates/users/set_password.html:10
 msgid "setPasswordPageInstructions"
 msgstr "Establezca una nueva contraseña para su cuenta de usuario."
 
-#: templates/users/set_password.html:45
+#: templates/users/set_password.html:46
 msgid "setPasswordPageSubmitButton"
 msgstr "Entregar"
 
@@ -296,8 +295,8 @@ msgstr "Iniciar sesión"
 #: templates/users/sign_in.html:10
 msgid "signInPageEnterEmail"
 msgstr ""
-"Introduzca su dirección de correo electrónico y contraseña para acceder a la"
-" cuenta."
+"Introduzca su dirección de correo electrónico y contraseña para acceder a la "
+"cuenta."
 
 #: templates/users/sign_in.html:40
 msgid "signInPageSignInButton"
@@ -341,7 +340,7 @@ msgstr "Correo electrónico"
 msgid "loginFormEmailRequired"
 msgstr "Este campo es obligatorio."
 
-#: users/forms.py:21
+#: users/forms.py:21 users/tests.py:97
 msgid "loginFormEmailInvalid"
 msgstr "Introduzca una dirección de correo electrónico válida."
 
@@ -349,7 +348,7 @@ msgstr "Introduzca una dirección de correo electrónico válida."
 msgid "LoginFormPassword"
 msgstr "Contraseña"
 
-#: users/forms.py:26
+#: users/forms.py:26 users/tests.py:74
 msgid "loginFormPasswordRequired"
 msgstr "Este campo es obligatorio."
 
@@ -369,7 +368,7 @@ msgstr "Este campo es obligatorio."
 msgid "requestPasswordResetFormEmailInvalid"
 msgstr "Introduzca una dirección de correo electrónico válida."
 
-#: users/forms.py:102
+#: users/forms.py:102 users/tests.py:334
 msgid "setPasswordFormErrorMessage"
 msgstr "Los dos campos de contraseña no coincidieron."
 
@@ -381,6 +380,15 @@ msgstr "Nueva contraseña"
 msgid "setPasswordFormConfirmNewPassword"
 msgstr "Confirmar nueva contraseña"
 
+#: users/tests.py:92 users/views.py:152
+msgid "loginUserViewErrorNotUser"
+msgstr "¡No se puede iniciar sesión con las credenciales proporcionadas!"
+
+#: users/tests.py:266 users/views.py:392
+msgid "requestPasswordResetViewErrorMessage"
+msgstr ""
+"¡Ninguna cuenta de usuario coincide con esta dirección de correo electrónico!"
+
 #: users/views.py:118
 msgid "createUserAccountViewInfo"
 msgstr "Su cuenta fue creada y se activará en breve."
@@ -391,10 +399,6 @@ msgstr "¡Error al validar el formulario!"
 
 #: users/views.py:150
 msgid "loginUserViewError"
-msgstr "¡No se puede iniciar sesión con las credenciales proporcionadas!"
-
-#: users/views.py:152
-msgid "loginUserViewErrorNotUser"
 msgstr "¡No se puede iniciar sesión con las credenciales proporcionadas!"
 
 #: users/views.py:154
@@ -409,14 +413,8 @@ msgstr "Restablezca su contraseña en Just Good Work Data Platform"
 msgid "requestPasswordResetViewEmailSuccessText"
 msgstr ""
 "Se ha enviado un correo electrónico a {email_address}. Por favor, revise si "
-"recibió un correo electrónico de Just Good Work Data Platform y haga clic en"
-" el enlace incluido para restablecer su contraseña."
-
-#: users/views.py:392
-msgid "requestPasswordResetViewErrorMessage"
-msgstr ""
-"¡Ninguna cuenta de usuario coincide con esta dirección de correo "
-"electrónico!"
+"recibió un correo electrónico de Just Good Work Data Platform y haga clic en "
+"el enlace incluido para restablecer su contraseña."
 
 #: users/views.py:403
 msgid "setPasswordViewInvalidTokenError"
