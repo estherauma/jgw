@@ -42,6 +42,7 @@ class Command(BaseCommand):
             {"condition": "testers", "tag": "can_view_new_monthly_users_chart"},
             {"condition": "testers", "tag": "can_view_get_users_by_country_state_chart"},
             {"condition": "testers", "tag": "can_view_get_users_by_sector_chart"},
+            {"condition": "testers", "tag": "can_view_language_select_button"},
             {"condition": "everyone", "tag": "can_download_worker_insights_excel_reports"},
             {"condition": "everyone", "tag": "can_download_messaging_questions_excel_reports"},
             {"condition": "everyone", "tag": "can_download_inline_questions_excel_reports"},
