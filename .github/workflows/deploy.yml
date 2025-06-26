@@ -25,6 +25,6 @@ jobs:
           ssh -i ~/.ssh/github-actions-deploy ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
             cd ~/jgw-pandas
             git pull origin develop
-            docker compose down
-            docker compose up -d --build
+            sudo docker compose down
+            sudo docker compose up -d --build
           EOF
