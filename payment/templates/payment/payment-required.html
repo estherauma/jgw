@@ -1,5 +1,6 @@
+{% load i18n %}
 <div>
-    <h4>Login to proceed</h4>
-    <p>To access our premium content and personalized features, please take a moment to,</p>
-    <p><a href="{% url 'users:login_user' %}">Log in</a> or <a href="{% url 'users:create_user' %}">Create an account</a></p>
+    <h4>{% translate "paymentRequiredHeading" %}</h4>
+    <p>{% translate "paymentRequiredInstructions" %}</p>
+    <p><a href="{% url 'users:login_user' %}">{% translate "paymentRequiredLogin" %}</a> {% translate "paymentRequiredOr" %}<a href="{% url 'users:create_user' %}">{% translate "paymentRequiredCreateAnAccount" %}</a></p>
 </div>

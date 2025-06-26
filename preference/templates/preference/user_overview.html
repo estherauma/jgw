@@ -3,9 +3,10 @@
 
 {% load static %}
 {% load waffle_tags %}
+{% load i18n %}
 
 <!-- title -->
-{% block title %} User Overview {% endblock title %}
+{% block title %} {% translate "userOverviewTitle" %}{% endblock title %}
 
 <!-- page content -->
 {% block content %}
@@ -13,7 +14,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="filter-modal-area-label">Filters</h4>
+                <h4 class="modal-title" id="filter-modal-area-label">{% translate "userOverviewHeadingFilters" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -21,8 +22,8 @@
                     {% csrf_token %}
                     {{filter_form|crispy}}
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary me-4">Submit</button>
-                        <button type="submit" name="reset" value="true" class="btn btn-secondary">Reset</button>
+                        <button type="submit" class="btn btn-primary me-4">{% translate "userOverviewSubmitButton" %}</button>
+                        <button type="submit" name="reset" value="true" class="btn btn-secondary">{% translate "userOverviewResetButton" %}</button>
                     </div>
                 </form>
             </div>
@@ -39,11 +40,11 @@
                             {% flag 'can_view_new_users_total_count' %}
                             <div class="col-3">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{total_user_overview_responses}}</span></h3>
-                                <h5 class="text-muted general-title-text">New Users</h5>
+                                <h5 class="text-muted general-title-text">{% translate "userOverviewNewUsers" %}</h5>
                             </div>
                             <div class="col-3">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{total_active_user_count}}</span></h3>
-                                <h5 class="text-muted general-title-text">Active Users</h5>
+                                <h5 class="text-muted general-title-text">{% translate "userOverviewActiveUsers" %}</h5>
                             </div>
                             {% endflag %}
                         </div>
@@ -57,20 +58,20 @@
                                     <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue"
                                         href="#" role="button" id="export-menu" data-bs-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
-                                        Export
+                                        {% translate "userOverviewExport" %}
                                         <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
                                     </a>
                                     {% endflag %}
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
-                                        <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">Export Preferences Data Report to Excel</a>
-                                        <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">Export Help Contacts Data Report to Excel</a>
-                                        <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">Export Preferences Statistics to Excel</a>
+                                        <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">{% translate "userOverviewExportPreferencesDataReport" %}</a>
+                                        <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">{% translate "userOverviewExportHelpContactsDataReport" %}</a>
+                                        <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">{% translate "userOverviewExportPreferencesStatistics" %}</a>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6 button-margin">
                                 <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
+                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "userOverviewFilterButton" %}</button>
                             </div>
                         </div>
                         {% else %}
@@ -89,11 +90,11 @@
     <div class="col-md-12 user-by-month">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">Monthly Active Users</p>
+                <p class="chart-title">{% translate "userOverviewMonthlyActiveUsersTitle" %}</p>
                 <canvas id="monthly-active-users-graph-id" class="canvas-user-by-month"></canvas>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
-                    Monthly Active Users: Users who accessed the app within the filtered timeframe
+                    {% translate "userOverviewMonthlyActiveUsersTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
             </div>
@@ -106,12 +107,12 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">users by origin country</p>
+                <p class="chart-title">{% translate "userOverviewUsersByOriginCountryTitle" %}</p>
                 <div class="preference-origin-graph-id-chart-box">
                     <div id="preference-origin-graph-id"></div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Users by Origin Country: Users select the country they are from when they first use the app.
+                        {% translate "userOverviewUsersByOriginCountryTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -124,11 +125,11 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">users by gender</p>
+                <p class="chart-title">{% translate "userOverviewUsersByGenderTitle" %}</p>
                 <canvas id="preference-gender-pie-chart-id" class="canvas-chart"></canvas>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
-                    Users by Gender: Users select their gender when they first use the app.
+                    {% translate "userOverviewUsersByGenderTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
             </div>
@@ -142,11 +143,11 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">users by destination country</p>
+                <p class="chart-title">{% translate "userOverviewUsersByDestinationCountryTitle" %}</p>
                 <canvas id="preference-destination-pie-chart-id" class="canvas-chart"></canvas>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
-                    Users by Destination Country: Users choose the country they are working in or looking for work in.
+                    {% translate "userOverviewUsersByDestinationCountryTooltip" %}
                 </div>
             </div>
         </div>
@@ -158,12 +159,12 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">Users by Language</p>
+                <p class="chart-title">{% translate "userOverviewUsersByLanguageTitle" %}</p>
                 <div class="preference-language-graph-id-chart-box">
                     <div id="preference-language-graph-id"></div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Users by Language: Users choose their language when they first use the app.
+                        {% translate "userOverviewUsersByLanguageTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -176,12 +177,12 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">users by state</p>
+                <p class="chart-title">{% translate "userOverviewUsersByStateTitle" %}</p>
                 <div class="users-by-country-state-graph-id-chart-box">
                     <div id="users-by-country-state-graph-id"></div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Users by State: Users select the state they are working in when they first use the app.
+                        {% translate "userOverviewUsersByStateTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -194,11 +195,11 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">users by immigration status</p>
+                <p class="chart-title">{% translate "userOverviewUsersByImmigrationStatusTitle" %}</p>
                 <canvas id="preference-immigration-status-pie-chart-id" class="canvas-chart"></canvas>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
-                    Users by Immigration Status: Users select their immigration status when they first use the app.
+                    {% translate "userOverviewUsersByImmigrationStatusTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
             </div>
@@ -211,11 +212,11 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">users by age</p>
+                <p class="chart-title">{% translate "userOverviewUsersByAgeTitle" %}</p>
                 <canvas id="preference-age-graph-id" class="canvas-chart"></canvas>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
-                    Users by Age: Users select their age then they first use the app.
+                    {% translate "userOverviewUsersByAgeTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
             </div>
@@ -227,12 +228,12 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">users by sector</p>
+                <p class="chart-title">{% translate "userOverviewUsersBySectorTitle" %}</p>
                 <div class="users-by-sector-graph-id-chart-box">
                     <div id="users-by-sector-graph-id"></div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Users by Sector: Users select one or more sectors they are working in or looking for work in when they first use the app.
+                        {% translate "userOverviewUsersBySectorTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -248,13 +249,13 @@
     <div class="col-12 mt-3 user-by-month">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">work code usage</p>
+                <p class="chart-title">{% translate "userOverviewWorkCodeUsageTitle" %}</p>
                 <div class="chart-container">
                     <div class="organisation-work-code-usage-graph-id-chart-box chart-column-width">
                         <div id="organisation-work-code-usage-graph-id"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
-                            Work Code Usage: Users who have logged into the app using an organisation QR Code or Link.
+                            {% translate "userOverviewWorkCodeUsageTooltip" %}
                             <div class="tooltip-arrow"></div>
                         </div>
                     </div>
@@ -271,11 +272,11 @@
     <div class="col-md-12 user-by-month">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">New Users by Month</p>
+                <p class="chart-title">{% translate "userOverviewNewUsersByMonthTitle" %}</p>
                 <canvas id="preference-monthly-cumulative-users-graph-id" class="canvas-user-by-month"></canvas>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
-                    New Users by Month: Cumulative new users in the filtered timeframe.
+                    {% translate "userOverviewNewUsersByMonthTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
             </div>
@@ -289,12 +290,12 @@
     <div class="col-md-12 user-by-month">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">Link Clicks by Users</p>
+                <p class="chart-title">{% translate "userOverviewLinkClicksByUsersTitle" %}</p>
                 <div class="link-clicks-graph-id-chart-box">
                     <div id="link-clicks-graph-id"></div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Link Clicks: Number of times a link has been clicked.
+                        {% translate "userOverviewLinkClicksByUsersTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -309,12 +310,11 @@
 <div class="row col-md-12 mt-3 user-route-map-chart-box">
     <div class="card h-100">
         <div class="card-body chart">
-            <p class="chart-title mb-2">User Route Map</p>
+            <p class="chart-title mb-2">{% translate "userOverviewUserRouteMapTitle" %}</p>
             <div id="user_route_map" class="user-route-map"></div>
             <div class="info-tooltip user-route-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
-                User Route Map: Shows where workers say they are from (marked with blue dots) and the country they are
-                working in or looking for work in (which they select when they first use the app marked with green dots)
+                {% translate "userOverviewUserRouteMapTooltip" %}
                 <div class="tooltip-arrow"></div>
             </div>
         </div>
@@ -326,11 +326,11 @@
 <div class="row col-md-12 user-route-map-chart-box">
     <div class="card h-100">
         <div class="card-body chart">
-            <p class="chart-title mb-2">User Geolocation Map for Active Users</p>
+            <p class="chart-title mb-2">{% translate "userOverviewUserGeolocationMapForActiveUsersTitle" %}</p>
             <div id="user_geolocation_map" class="user-geolocation-map"></div>
             <div class="info-tooltip user-geolocation-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
-                User Geolocation Map: Shows the geographical distribution of users based on their detected location
+                {% translate "userOverviewUserGeolocationMapForActiveUsersTooltip" %}
                 <div class="tooltip-arrow"></div>
             </div>
         </div>
@@ -342,11 +342,11 @@
 <div class="row col-md-12 mt-1 user-geolocation-map-chart-box">
     <div class="card h-100">
         <div class="card-body chart wide-map">
-            <p class="chart-title mb-2">Users Geolocation Map Basing On User Engagement</p>
+            <p class="chart-title mb-2">{% translate "userOverviewUsersGeoMapUserEngagementTitle" %}</p>
             <div id="user_geolocation_map_user_engagement" class="user-geolocation-map"></div>
             <div class="info-tooltip user-geol-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
-                User Geolocation Map: Shows users Geolocation at the time of using the app.
+                {% translate "userOverviewUsersGeoMapUserEngagementTooltip" %}
             </div>
         </div>
     </div>
@@ -445,4 +445,13 @@
     createUserGeolocationMap(userGeoCountryData, 'user_geolocation_map');
 
 </script>
+
+<!-- <script>
+    var translations = {
+
+        filterPlaceholder: "{% translate 'Search' %}",
+        nonSelectedText: "{% translate 'None selected' %}",
+
+    };
+</script> -->
 {% endblock %}

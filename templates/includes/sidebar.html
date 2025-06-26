@@ -1,6 +1,7 @@
 {% load user_role_tags %}
 {% load static %}
 {% load waffle_tags %}
+{% load i18n %}
 
 <div class="left-side-menu">
 
@@ -13,21 +14,21 @@
                     <li>
                         <a href="{% url 'dashboard:summerberry-dashboard' %}">
                             <i data-feather="bar-chart"></i>
-                            <span>Summerberry Dashboard</span>
+                            <span>{% translate "sideBarSummerberryDashboard" %}</span>
                         </a>
                     </li>
                 {% else %}
                     <li>
                         <a href="{% url 'preference:user_overview' %}">
                             <i data-feather="home"></i>
-                            <span> Users overview </span>
+                            <span>{% translate "sideBarUsersOverview" %}</span>
                         </a>
                     </li>
                     {% flag 'can_view_what_matters_to_workers_page' %}
                         <li>
                             <a href="{% url 'events:what_matters_to_workers' %}">
                                 <i data-feather="bar-chart-2"></i>
-                                <span>What matters to workers</span>
+                                <span>{% translate "sideBarWhatMattersToWorkers" %}</span>
                             </a>
                         </li>
                     {% endflag %}
@@ -37,7 +38,7 @@
                             {% if user.is_authenticated %}
                                 <a href="{% url 'question:messaging_question' %}">
                                     <i data-feather="message-square"></i>
-                                    <span>Messaging questions</span>
+                                    <span>{% translate "sideBarMessagingQuestions" %}</span>
                                 </a>
                             {% else %}
                                 <a
@@ -46,7 +47,7 @@
                                     data-bs-target="#make-payment-modal"
                                 >
                                     <i data-feather="message-square"></i>
-                                    <span>Messaging Questions</span>
+                                    <span>{% translate "sideBarPaymentRequiredMessagingQuestions" %}</span>
                                 </a>
                             {% endif %}
                         </li>
@@ -56,7 +57,7 @@
                         <li>
                             <a href="{% url 'question:inline_question' %}">
                                 <i data-feather="help-circle"></i>
-                                <span> Inline questions </span>
+                                <span>{% translate "sideBarInlineQuestions" %}</span>
                             </a>
                         </li>
                     {% endflag %}
@@ -65,7 +66,7 @@
                         <li>
                             <a href="{% url 'other_resource:other_resource' %}">
                                 <i data-feather="book"></i>
-                                <span> Other Resources</span>
+                                <span>{% translate "sideBarOtherResources" %}</span>
                             </a>
                         </li>
                     {% endflag %}
@@ -74,38 +75,38 @@
                     <li>
                         <a href="{% url 'pipeline:pipeline_status' %}">
                             <i data-feather="database"></i>
-                            <span>Data Pipeline</span>
+                            <span>{% translate "sideBarDataPipeline" %}</span>
                         </a>
                     </li>
                     <li>
                         <a href="{% url 'dashboard:export_report' %}">
                             <i data-feather="external-link"></i>
-                            <span>Export reports</span>
+                            <span>{% translate "sideBarExportReports" %}</span>
                         </a>
                     </li>
                     <li>
                         <a href="{% url 'preference:user_diagnostics' %}">
                             <i data-feather="activity"></i>
-                            <span>User Diagnostics</span>
+                            <span>{% translate "sideBarUserDiagnostics" %}</span>
                         </a>
                     </li>
                     <li>
                         <a href="#sidebarUsers" data-bs-toggle="collapse">
                             <i data-feather="settings"></i>
-                            <span>Settings</span>
+                            <span>{% translate "sideBarSettings" %}</span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebarUsers">
                             <ul class="nav-second-level">
                                 <li>
-                                    <a href="{% url 'users:list_users' %}">Accounts</a>
+                                    <a href="{% url 'users:list_users' %}">{% translate "sideBarAccounts" %}</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'users:list_invitations' %}">Invitations</a>
+                                    <a href="{% url 'users:list_invitations' %}">{% translate "sideBarInvitations" %}</a>
                                 </li>
                                 {% if user.is_superuser %}
                                  <li>
-                                     <a href="{% url 'users:create_user_from_admin' %}">Add User</a>
+                                     <a href="{% url 'users:create_user_from_admin' %}">{% translate "sideBarAddUser" %}</a>
                                 </li>
                                 {% endif %}
                             </ul>
@@ -119,7 +120,7 @@
                     <li>
                         <a href="{% url 'users:logout_user' %}">
                             <i data-feather="log-out"></i>
-                            <span>Log out</span>
+                            <span>{% translate "sideBarLogout" %}</span>
                         </a>
                     </li>
                 {% endif %}
@@ -132,5 +133,4 @@
 
     </div>
     <!-- Sidebar -left -->
-
 </div>

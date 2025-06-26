@@ -1,3 +1,4 @@
+{% load i18n %}
 <div>
     <div class="row">
         <div class="col-md-6">
@@ -6,7 +7,7 @@
                     class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue"
                     data-bs-toggle="modal" data-bs-target="#make-payment-modal"
                 >
-                    Export
+                    {% translate "nonAuthBannerBtnsExport" %}
                 </button>            
             </div>
         </div>
@@ -14,7 +15,7 @@
             <button 
                 class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue"
                 data-bs-toggle="modal" data-bs-target="#make-payment-modal"
-            >Filter</button>
+            >{% translate "nonAuthBannerBtnsFilter" %}</button>
         </div>
     </div>
 </div>

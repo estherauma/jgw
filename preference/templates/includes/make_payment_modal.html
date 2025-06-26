@@ -1,10 +1,11 @@
+{% load i18n %}
 <div class="modal fade" id="make-payment-modal" tabindex="-1" role="dialog" aria-labelledby="make-payment-modal-area-label">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-body">
-                <h4>Login to proceed</h4>
-                <p>To access our premium content and personalized features, please take a moment to,</p>
-                <p><a href="{% url 'users:login_user' %}">Log in</a> or <a href="{% url 'users:create_user' %}">Create an account</a></p>
+                <h4>{% translate "makePaymentModalHeading" %}</h4>
+                <p>{% translate "makePaymentModalInstructions" %}</p>
+                <p><a href="{% url 'users:login_user' %}">{% translate "makePaymentModalLogin" %}</a>{% translate "makePaymentModalOr" %}<a href="{% url 'users:create_user' %}">{% translate "makePaymentModalCreateAnAccount" %}</a></p>
             </div>
         </div>
     </div>

@@ -1,4 +1,6 @@
 {% load static %}
+{% load i18n %}
+{% load waffle_tags %}
 <div class="navbar-custom dashboard-navbar">
     <div class="container-fluid">
     
@@ -46,6 +48,7 @@
         <!-- Right side menu -->
         <ul class="list-unstyled topnav-menu float-end mb-0">
             {% if user.is_authenticated %}
+            {% comment %}
             <li class="dropdown notification-list topbar-dropdown">
                 <!-- <a class="nav-link dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
                     <i class="fe-bell noti-icon"></i>
@@ -116,37 +119,49 @@
 
                 </div>
             </li>
+            {% endcomment %}
             {% endif %}
+            {% flag 'can_view_language_select_button' %}
+            <li>
+                <form action="{% url 'set_language' %}" method="post" style="margin-top: 20px;">
+                    {% csrf_token %}
+                    <select name="language" onchange="this.form.submit()" class="btn btn-info navbar-btn">
+                        <option value="en-us" {% if LANGUAGE_CODE == 'en-us' %}selected{% endif %}>English</option>
+                        <option value="es-es" {% if LANGUAGE_CODE == 'es-es' %}selected{% endif %}>Español</option>
+                    </select>
+                </form>
+            </li>
+            {% endflag %}
             <li class="dropdown notification-list topbar-dropdown">
                 <a class="nav-link dropdown-toggle nav-user me-0 waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
                     <img src="/static/assets/default-user.png" alt="user-image" class="rounded-circle">
                     <span class="pro-user-name ms-1">
-                        User <i class="mdi mdi-chevron-down"></i> 
+                        {% translate "topBarUser" %}<i class="mdi mdi-chevron-down"></i> 
                     </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end profile-dropdown ">
                     <!-- item-->
                     <div class="dropdown-header noti-title">
-                        <h6 class="text-overflow m-0">Welcome, {{ user.first_name }} {{ user.last_name }}!</h6>
+                        <h6 class="text-overflow m-0">{% translate "topBarWelcome" %}, {{ user.first_name }} {{ user.last_name }}!</h6>
                     </div>
 
                     {% if user.is_authenticated %}
                     <!-- item-->
                     <a href="{% url 'users:profile' %}" class="dropdown-item notify-item">
                         <i class="fe-user"></i>
-                        <span>My Account</span>
+                        <span>{% translate "topBarMyAccount" %}</span>
                     </a>
 
 
                     <div class="dropdown-divider"></div>
                     <a href="{% url 'users:logout_user' %}" class="dropdown-item notify-item">
                         <i class="fe-log-out"></i>
-                        <span>Logout</span>
+                        <span>{% translate "topBarLogout" %}</span>
                     </a>
                     {% else %}
                     <a href="{% url 'users:login_user' %}" class="dropdown-item notify-item">
                         <i class="fe-log-out"></i>
-                        <span>Login</span>
+                        <span>{% translate "topBarLogin" %}</span>
                     </a>
                     {% endif %}
                 </div>
