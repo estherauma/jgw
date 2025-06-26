@@ -1,0 +1,30 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github-actions-deploy
+          chmod 600 ~/.ssh/github-actions-deploy
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy Code to Server
+        run: |
+          ssh -i ~/.ssh/github-actions-deploy ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
+            cd ~/jgw-pandas
+            git pull origin develop
+            docker compose down
+            docker compose up -d --build
+          EOF
