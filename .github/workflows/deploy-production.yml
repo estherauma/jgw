@@ -48,7 +48,7 @@ jobs:
             git pull origin develop
 
             echo "Cleaning up docker containers..."
-            sudo docker builder prune --all
+            sudo docker system prune -f
             
             echo "Stopping production containers..."
             sudo docker compose down
@@ -62,6 +62,7 @@ jobs:
       - name: Verify Production Deployment
         run: |
           ssh -i ~/.ssh/production-deploy ${{ secrets.USERNAME }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd ~/jgw-pandas
             echo "Verifying production deployment..."
             sleep 45
             
@@ -73,7 +74,7 @@ jobs:
             fi
             
             # Check if Django is responding
-            if curl -f -s http://34.147.152.175:8000/health/ > /dev/null 2>&1; then
+            if curl -f -s http://localhost:8000/health/ > /dev/null 2>&1; then
               echo "✅ Production application is responding"
             else
               echo "⚠️  Production application health check failed"
