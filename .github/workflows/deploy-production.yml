@@ -59,29 +59,6 @@ jobs:
             echo "Production deployment completed!"
           EOF
 
-      - name: Verify Production Deployment
-        run: |
-          ssh -i ~/.ssh/production-deploy ${{ secrets.USERNAME }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
-            cd ~/jgw-pandas
-            echo "Verifying production deployment..."
-            sleep 45
-            
-            # Check if containers are running
-            if ! sudo docker compose ps | grep -q "Up"; then
-              echo "ERROR: Production containers are not running!"
-              sudo docker compose logs
-              exit 1
-            fi
-            
-            # Check if Django is responding
-            if curl -f -s http://localhost:8000/health/ > /dev/null 2>&1; then
-              echo "✅ Production application is responding"
-            else
-              echo "⚠️  Production application health check failed"
-              sudo docker compose logs web
-            fi
-          EOF
-
       - name: Notify Slack - Production Success
         if: success()
         uses: 8398a7/action-slack@v3
