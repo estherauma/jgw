@@ -1,0 +1,117 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+      confirm_deployment:
+        description: 'Confirm you want to deploy to production'
+        required: true
+        type: boolean
+        default: false
+
+env:
+  DEPLOYMENT_ENV: production
+  DEPLOYMENT_BRANCH: develop
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event.inputs.confirm_deployment == 'true'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}" > ~/.ssh/production-deploy
+          chmod 600 ~/.ssh/production-deploy
+          ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Production
+        run: |
+          ssh -i ~/.ssh/production-deploy ${{ secrets.USERNAME }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd ~/jgw-pandas
+            
+            echo "Pulling latest code from develop branch..."
+            git pull origin develop
+
+            echo "Cleaning up docker containers..."
+            sudo docker builder prune --all
+            
+            echo "Stopping production containers..."
+            sudo docker compose down
+            
+            echo "Building and starting production containers..."
+            sudo docker compose up -d --build
+            
+            echo "Production deployment completed!"
+          EOF
+
+      - name: Verify Production Deployment
+        run: |
+          ssh -i ~/.ssh/production-deploy ${{ secrets.USERNAME }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            echo "Verifying production deployment..."
+            sleep 45
+            
+            # Check if containers are running
+            if ! sudo docker compose ps | grep -q "Up"; then
+              echo "ERROR: Production containers are not running!"
+              sudo docker compose logs
+              exit 1
+            fi
+            
+            # Check if Django is responding
+            if curl -f -s http://34.147.152.175:8000/health/ > /dev/null 2>&1; then
+              echo "✅ Production application is responding"
+            else
+              echo "⚠️  Production application health check failed"
+              sudo docker compose logs web
+            fi
+          EOF
+
+      - name: Notify Slack - Production Success
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#deployments'
+          text: |
+            🎉 **Production Deployment Successful**
+            Environment: Production
+            Branch: ${{ env.DEPLOYMENT_BRANCH }}
+            Commit: ${{ github.sha }}
+            Deployed by: ${{ github.actor }}
+            Changes: ${{ github.event.head_commit.message }}
+            URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+            ⚠️  **This is now LIVE in production!**
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack - Production Failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#deployments'
+          text: |
+            🚨 **Production Deployment Failed**
+            Environment: Production
+            Branch: ${{ env.DEPLOYMENT_BRANCH }}
+            Commit: ${{ github.sha }}
+            Deployed by: ${{ github.actor }}
+            ⚠️  **URGENT: Production deployment failed!**
+            Check the logs immediately.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

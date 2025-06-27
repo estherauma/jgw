@@ -1,0 +1,95 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  DEPLOYMENT_ENV: staging
+  DEPLOYMENT_BRANCH: develop
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ~/.ssh/staging-deploy
+          chmod 600 ~/.ssh/staging-deploy
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Staging
+        run: |
+          ssh -i ~/.ssh/staging-deploy ${{ secrets.STAGING_USERNAME }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            cd ~/jgw-pandas
+            echo "Pulling latest code from develop branch..."
+            git pull origin develop
+            echo "Cleaning up docker containers..."
+            sudo docker builder prune --all
+            echo "Stopping staging containers..."
+            sudo docker compose down
+            echo "Building and starting containers..."
+            sudo docker compose up -d --build
+          EOF
+
+      - name: Verify Staging Deployment
+        run: |
+          ssh -i ~/.ssh/staging-deploy ${{ secrets.STAGING_USERNAME }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            echo "Verifying staging deployment..."
+            sleep 30
+            
+            # Check if containers are running
+            if ! sudo docker compose ps | grep -q "Up"; then
+              echo "ERROR: Containers are not running!"
+              sudo docker compose logs
+              exit 1
+            fi
+            
+            # Check if Django is responding
+            if curl -f -s http://34.42.138.201:8000/health/ > /dev/null 2>&1; then
+              echo "✅ Staging application is responding"
+            else
+              echo "⚠️  Staging application health check failed"
+              sudo docker compose logs web
+            fi
+          EOF
+
+      - name: Notify Slack - Staging Success
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#deployments'
+          text: |
+            🚀 **Staging Deployment Successful**
+            Environment: Staging
+            Branch: ${{ env.DEPLOYMENT_BRANCH }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            Changes: ${{ github.event.head_commit.message }}
+            URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack - Staging Failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#deployments'
+          text: |
+            ❌ **Staging Deployment Failed**
+            Environment: Staging
+            Branch: ${{ env.DEPLOYMENT_BRANCH }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            Check the logs for details.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
