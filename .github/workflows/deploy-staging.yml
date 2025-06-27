@@ -31,18 +31,24 @@ jobs:
             cd ~/jgw-pandas
             echo "Pulling latest code from develop branch..."
             git pull origin develop
+            
             echo "Cleaning up docker containers..."
-            sudo docker builder prune --all
-            echo "Stopping staging containers..."
+            sudo docker system prune -f
+            
+            echo "Stopping containers..."
             sudo docker compose down
+            
             echo "Building and starting containers..."
             sudo docker compose up -d --build
+            
+            echo "Staging deployment completed!"
           EOF
 
       - name: Verify Staging Deployment
         run: |
           ssh -i ~/.ssh/staging-deploy ${{ secrets.STAGING_USERNAME }}@${{ secrets.STAGING_HOST }} << 'EOF'
             echo "Verifying staging deployment..."
+            cd ~/jgw-pandas
             sleep 30
             
             # Check if containers are running
@@ -53,7 +59,7 @@ jobs:
             fi
             
             # Check if Django is responding
-            if curl -f -s http://34.42.138.201:8000/health/ > /dev/null 2>&1; then
+            if curl -f -s http://localhost:8000/health/ > /dev/null 2>&1; then
               echo "✅ Staging application is responding"
             else
               echo "⚠️  Staging application health check failed"
