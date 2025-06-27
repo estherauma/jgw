@@ -66,6 +66,9 @@ jobs:
             Author: ${{ github.actor }}
             Changes: ${{ github.event.head_commit.message }}
             URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
 
       - name: Notify Slack - Staging Failure
         if: failure()
@@ -80,3 +83,6 @@ jobs:
             Commit: ${{ github.sha }}
             Author: ${{ github.actor }}
             Check the logs for details.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

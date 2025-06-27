@@ -81,7 +81,9 @@ jobs:
             Changes: ${{ github.event.head_commit.message }}
             URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
             ⚠️  **This is now LIVE in production!**
-
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
 
       - name: Notify Slack - Production Failure
         if: failure()
@@ -97,3 +99,6 @@ jobs:
             Deployed by: ${{ github.actor }}
             ⚠️  **URGENT: Production deployment failed!**
             Check the logs immediately.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
