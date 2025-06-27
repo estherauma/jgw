@@ -29,14 +29,22 @@ jobs:
         run: |
           ssh -i ~/.ssh/staging-deploy ${{ secrets.STAGING_USERNAME }}@${{ secrets.STAGING_HOST }} << 'EOF'
             cd ~/jgw-pandas
+            
             echo "Pulling latest code from develop branch..."
             git pull origin develop
             
-            echo "Cleaning up docker containers..."
-            sudo docker system prune -f
-            
-            echo "Stopping containers..."
+            echo "Comprehensive Docker cleanup..."
+            # Stop all containers
             sudo docker compose down
+            
+            # Remove all unused containers, networks, and images (BUT NOT VOLUMES)
+            sudo docker system prune -a -f
+            
+            # Remove dangling images
+            sudo docker image prune -f
+            
+            # Clean build cache
+            sudo docker builder prune -f
             
             echo "Building and starting containers..."
             sudo docker compose up -d --build
@@ -58,8 +66,6 @@ jobs:
             Author: ${{ github.actor }}
             Changes: ${{ github.event.head_commit.message }}
             URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Notify Slack - Staging Failure
         if: failure()
@@ -74,5 +80,3 @@ jobs:
             Commit: ${{ github.sha }}
             Author: ${{ github.actor }}
             Check the logs for details.
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
