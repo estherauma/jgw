@@ -103,9 +103,5 @@ sudo docker compose down
 sudo docker compose up -d --build
 ```
 
-## 📊 Monitoring
 
-- Check GitHub Actions for deployment status
-- Monitor Slack channel for notifications
-- Verify application health endpoints
-- Review Docker logs if issues occur 
+
