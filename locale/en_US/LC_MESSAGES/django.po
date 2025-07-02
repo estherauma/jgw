@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-26 07:05+0000\n"
+"POT-Creation-Date: 2025-07-02 13:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,86 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: core/forms.py:21
+msgid "genericFilterFormTitle"
+msgstr "Show Data for New Users (Default is Active Users)"
+
+#: core/forms.py:96
+msgid "genericFilterFormStartDate"
+msgstr "Start Date"
+
+#: core/forms.py:104
+msgid "genericFilterFormEndDate"
+msgstr "End Date"
+
+#: core/forms.py:113
+msgid "genericFilterFormOriginLabel"
+msgstr "Origin"
+
+#: core/forms.py:119
+msgid "genericFilterFormOriginNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:120
+msgid "genericFilterFormOriginSearch"
+msgstr "Search"
+
+#: core/forms.py:127
+msgid "genericFilterFormDestinationLabel"
+msgstr "Destination"
+
+#: core/forms.py:133
+msgid "genericFilterFormDestinationNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:134
+msgid "genericFilterFormDestinationSearch"
+msgstr "Search"
+
+#: core/forms.py:141
+msgid "genericFilterFormOrganisationLabel"
+msgstr "Organisation"
+
+#: core/forms.py:147
+msgid "genericFilterFormOrganisationNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:148
+msgid "genericFilterFormOrganisationSearch"
+msgstr "Search"
+
+#: core/forms.py:155
+msgid "genericFilterFormFactoryFarmLabel"
+msgstr "Factory/Farm"
+
+#: core/forms.py:161
+msgid "genericFilterFormFactoryFarmNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:162
+msgid "genericFilterFormFactoryFarmSearch"
+msgstr "Search"
+
+#: core/forms.py:169
+msgid "genericFilterFormImmigrationStatusLabel"
+msgstr "Immigration Status"
+
+#: core/forms.py:175
+msgid "genericFilterFormImmigrationStatusNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:176
+msgid "genericFilterFormImmigrationStatusSearch"
+msgstr "Search"
+
+#: core/forms.py:185
+msgid "dateRangeFormStartDate"
+msgstr "Start Date"
+
+#: core/forms.py:196
+msgid "dateRangeFormEndDate"
+msgstr "End Date"
 
 #: jgwpandas/settings.py:162
 msgid "English"
@@ -332,23 +412,23 @@ msgstr "Add User"
 msgid "sideBarLogout"
 msgstr "Log out"
 
-#: templates/includes/topbar.html:128
+#: templates/includes/topbar.html:140
 msgid "topBarUser"
 msgstr "User"
 
-#: templates/includes/topbar.html:134
+#: templates/includes/topbar.html:146
 msgid "topBarWelcome"
 msgstr "Welcome"
 
-#: templates/includes/topbar.html:141
+#: templates/includes/topbar.html:153
 msgid "topBarMyAccount"
 msgstr "My Account"
 
-#: templates/includes/topbar.html:148
+#: templates/includes/topbar.html:160
 msgid "topBarLogout"
 msgstr "Logout"
 
-#: templates/includes/topbar.html:153
+#: templates/includes/topbar.html:165
 msgid "topBarLogin"
 msgstr "Login"
 
