@@ -4,6 +4,7 @@ from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
 from preference.models import CountryState, ImmigrationStatus
+from django.utils.translation import gettext_lazy as _
 from users.utils import (
     get_user_factories,
     get_user_group,
@@ -17,7 +18,7 @@ from users.utils import (
 
 class GenericFilterForm(forms.Form):
     show_new_user_data = forms.BooleanField(
-        label="Show Data for New Users (Default is Active Users)",
+        label=_("genericFilterFormTitle"),
         required=False,
         initial=False,
         widget=forms.CheckboxInput(attrs={
@@ -92,7 +93,7 @@ class GenericFilterForm(forms.Form):
         return countries
 
     start_date = forms.DateField(
-        label="Start Date",
+        label=_("genericFilterFormStartDate"),
         required=False,
         widget=forms.DateInput(
             format=("%Y-%m-%d"),
@@ -100,7 +101,7 @@ class GenericFilterForm(forms.Form):
         ),
     )
     end_date = forms.DateField(
-        label="End Date",
+        label=_("genericFilterFormEndDate"),
         required=False,
         widget=forms.DateInput(
             format=("%Y-%m-%d"),
@@ -109,41 +110,70 @@ class GenericFilterForm(forms.Form):
     )
 
     origin = forms.MultipleChoiceField(
+        label=_("genericFilterFormOriginLabel"),
         widget=forms.SelectMultiple(
-            attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "origin"}
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "origin",
+                "data-placeholder": _("genericFilterFormOriginNoneSelected"),
+                "data-filter-placeholder": _("genericFilterFormOriginSearch")
+            }
         ),
         required=False,
     )
 
     destination = forms.MultipleChoiceField(
+        label=_("genericFilterFormDestinationLabel"),
         widget=forms.SelectMultiple(
-            attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "destination"}
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "destination",
+                "data-placeholder":_("genericFilterFormDestinationNoneSelected"),
+                "data-filter-placeholder":_("genericFilterFormDestinationSearch")
+            }
         ),
         required=False,
     )
 
     organisation = forms.MultipleChoiceField(
+        label=_("genericFilterFormOrganisationLabel"),
         widget=forms.SelectMultiple(
-            attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "organisation"}
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "organisation",
+                "data-placeholder":_("genericFilterFormOrganisationNoneSelected"),
+                "data-filter-placeholder": _("genericFilterFormOrganisationSearch")
+            }
         ),
         required=False,
     )
 
     factory_farm = forms.MultipleChoiceField(
-        label="Factory / Farm",
+        label=_("genericFilterFormFactoryFarmLabel"),
         widget=forms.SelectMultiple(
-            attrs={"class": "form-select selectpicker", "data-live-search": "true", "id": "factory_farm"}
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "factory_farm",
+                "data-placeholder":_("genericFilterFormFactoryFarmNoneSelected"),
+                "data-filter-placeholder":_("genericFilterFormFactoryFarmSearch")
+            }
         ),
         required=False,
     )
 
     immigration_status = forms.MultipleChoiceField(
-        label="Immigration Status",
+        label=_("genericFilterFormImmigrationStatusLabel"),
         widget=forms.SelectMultiple(
             attrs={
                 "class": "form-select selectpicker",
                 "data-live-search": "true",
                 "id": "immigration_status",
+                "data-placeholder": _("genericFilterFormImmigrationStatusNoneSelected"),
+                "data-filter-placeholder": _("genericFilterFormImmigrationStatusSearch")
             }
         ),
         required=False,
@@ -152,7 +182,7 @@ class GenericFilterForm(forms.Form):
 
 class DateRangeForm(forms.Form):
     start_date = forms.DateField(
-        label="Start Date",
+        label= _("dateRangeFormStartDate"),
         required=True,
         widget=forms.DateInput(
             format=("%Y-%m-%d"),
@@ -163,7 +193,7 @@ class DateRangeForm(forms.Form):
         ),
     )
     end_date = forms.DateField(
-        label="End Date",
+        label=_("dateRangeFormEndDate"),
         required=True,
         widget=forms.DateInput(
             format=("%Y-%m-%d"),
