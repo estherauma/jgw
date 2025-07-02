@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.db.models import Count
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, TruncDay
 from django.utils.dateformat import DateFormat
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, PUBLIC_USER_DATA_START_DATE
 from common.utils.preferences import get_date_13_months_ago
@@ -42,8 +42,31 @@ def get_total_active_user_within_period(**filters):
 
 def get_monthly_active_user_count(current_user, **filters):
     queryset = BigqueryHomepageEventData.objects.all()
-
     filtered_queryset = filter_bigquery_homepage_event_data(queryset, current_user, **filters)
+
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+
+    if start_date and end_date:
+        if isinstance(start_date, str):
+            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        if isinstance(end_date, str):
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+        days_diff = (end_date - start_date).days
+        if days_diff < 32:
+            daily_counts = (
+                filtered_queryset.filter(device_id__isnull=False, event_date__range=(start_date, end_date))
+                .annotate(day=TruncDay("event_date"))
+                .values("day")
+                .annotate(unique_device_count=Count("device_id", distinct=True))
+                .order_by("day")
+            )
+            active_user_count = [
+                {"month": DateFormat(entry["day"]).format("d M, Y"), "count": entry["unique_device_count"]}
+                for entry in daily_counts
+            ]
+
+            return active_user_count
 
     monthly_counts = (
         filtered_queryset.filter(device_id__isnull=False)
@@ -57,7 +80,7 @@ def get_monthly_active_user_count(current_user, **filters):
         {"month": DateFormat(entry["month"]).format("M, Y"), "count": entry["unique_device_count"]}
         for entry in monthly_counts
     ]
-
+    
     return active_user_count
 
 
