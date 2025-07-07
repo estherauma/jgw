@@ -70,6 +70,7 @@ class InlineQuestionStandard(models.Model):
     )
     org_code = models.CharField(max_length=255, blank=True, null=True)
     org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
+    org_work_code = models.CharField(max_length=255, blank=True, null=True)
     is_myvoice_organisation = models.BooleanField(default=False)
     api_version = models.CharField(max_length=10, blank=False, null=True)
 

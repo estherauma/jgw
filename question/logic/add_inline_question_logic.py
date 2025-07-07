@@ -188,6 +188,7 @@ def inline_questions_v2_logic(jgw_api_client):
         factory_farm_data = get_or_add_factory_farm_to_db(inline_question_v2.get("factoryFarm"))
         immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
         org_code = inline_question_v2.get("organisationCode")
+        org_work_code = inline_question_v2.get("organisationAccessCode")
         new_inline_question_standard = InlineQuestionStandard.objects.create(
             data_source_id=inline_question_v2.get("_id"),
             device_id=inline_question_v2.get("deviceId"),
@@ -201,6 +202,7 @@ def inline_questions_v2_logic(jgw_api_client):
             organisation_sector=organisation_sector_data,
             organisation=organisation_data,
             org_code=org_code,
+            org_work_code=org_work_code,
             factory_farm=factory_farm_data,
             immigration_status=immigration_status_data,
             api_created_at=inline_question_v2.get("createdAt"),
@@ -225,9 +227,16 @@ def inline_questions_v2_logic(jgw_api_client):
         if isinstance(qn_resp_text, dict) and "amount" in qn_resp_text:
             qn_resp_text = qn_resp_text.get("amount")
 
-        text_translations, _ = TextTranslations.objects.get_or_create(
+        # Replace get_or_create with safer approach for TextTranslations
+        text_translations = TextTranslations.objects.filter(
             original_text=format_text_for_db(qn_resp_text)
-        )
+        ).first()
+        
+        if not text_translations:
+            text_translations = TextTranslations.objects.create(
+                original_text=format_text_for_db(qn_resp_text)
+            )
+            
         if not text_translations.translated_text:
             resp_translated = format_text_for_db(pandas_translator_translate(qn_resp_text))
             text_translations.translated_text = resp_translated
@@ -296,6 +305,7 @@ def inline_questions_v3_logic(jgw_api_client):
             factory_farm_data = get_or_add_factory_farm_to_db(inline_question_v3.get("factoryFarm"))
             immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
             org_code = inline_question_v3.get("organisationCode")
+            org_work_code = inline_question_v3.get("organisationAccessCode")
 
             new_inline_question_standard = InlineQuestionStandard.objects.create(
                 data_source_id=inline_question_v3.get("_id"),
@@ -311,6 +321,7 @@ def inline_questions_v3_logic(jgw_api_client):
                 organisation_sector=organisation_sector_data,
                 organisation=organisation_data,
                 org_code=org_code,
+                org_work_code=org_work_code,
                 factory_farm=factory_farm_data,
                 api_created_at=inline_question_v3.get("createdAt"),
                 api_updated_at=inline_question_v3.get("updatedAt"),
@@ -339,9 +350,16 @@ def inline_questions_v3_logic(jgw_api_client):
                 question=inline_question_text, inline_question_standard=new_inline_question_standard
             )
 
-            text_translations, _ = TextTranslations.objects.get_or_create(
+            # Replace get_or_create with safer approach for TextTranslations
+            text_translations = TextTranslations.objects.filter(
                 original_text=format_text_for_db(qn_resp_text)
-            )
+            ).first()
+            
+            if not text_translations:
+                text_translations = TextTranslations.objects.create(
+                    original_text=format_text_for_db(qn_resp_text)
+                )
+                
             if not text_translations.translated_text:
                 resp_translated = format_text_for_db(pandas_translator_translate(qn_resp_text))
                 text_translations.translated_text = resp_translated
@@ -485,9 +503,16 @@ def add_inline_question_to_db(inline_question):
         if isinstance(qn_resp_text, dict) and "amount" in qn_resp_text:
             qn_resp_text = qn_resp_text.get("amount")
 
-        text_translations, _ = TextTranslations.objects.get_or_create(
+        # Replace get_or_create with safer approach for TextTranslations
+        text_translations = TextTranslations.objects.filter(
             original_text=format_text_for_db(qn_resp_text)
-        )
+        ).first()
+        
+        if not text_translations:
+            text_translations = TextTranslations.objects.create(
+                original_text=format_text_for_db(qn_resp_text)
+            )
+            
         if not text_translations.translated_text:
             resp_translated = format_text_for_db(pandas_translator_translate(qn_resp_text))
             text_translations.translated_text = resp_translated
@@ -530,9 +555,16 @@ def add_inline_question_to_db(inline_question):
             if isinstance(resp_text, dict) and "amount" in resp_text:
                 resp_text = resp_text.get("amount")
 
-            text_translations, _ = TextTranslations.objects.get_or_create(
+            # Replace get_or_create with safer approach for TextTranslations
+            text_translations = TextTranslations.objects.filter(
                 original_text=format_text_for_db(resp_text)
-            )
+            ).first()
+            
+            if not text_translations:
+                text_translations = TextTranslations.objects.create(
+                    original_text=format_text_for_db(resp_text)
+                )
+                
             if not text_translations.translated_text:
                 resp_translated = format_text_for_db(pandas_translator_translate(resp_text))
                 text_translations.translated_text = resp_translated
