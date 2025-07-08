@@ -5,7 +5,7 @@ from rest_framework import status
 import requests
 from content.models import AggregatedContent
 from content.serializers import AggregatedContentSerializer
-from drf_yasg.utils import swagger_auto_schema
+# from drf_yasg.utils import swagger_auto_schema
 
 
 class ContentAPI:
@@ -99,10 +99,10 @@ class ContentAPI:
 
 
 class StartContentAggregation(APIView):
-    @swagger_auto_schema(
-        operation_summary="Trigger content aggregation",
-        tags=["Content"]
-    )
+    # @swagger_auto_schema(
+    #     operation_summary="Trigger content aggregation",
+    #     tags=["Content"]
+    # )
     def get(self, request):
         api = ContentAPI()
         documents = api.fetch_content()
@@ -110,10 +110,10 @@ class StartContentAggregation(APIView):
 
 
 class AggregatedContentView(APIView):
-    @swagger_auto_schema(
-        operation_summary="Retrieve aggregated content",
-        tags=["Content"]
-    )
+    # @swagger_auto_schema(
+    #     operation_summary="Retrieve aggregated content",
+    #     tags=["Content"]
+    # )
     def get(self, request):
         try:
             latest = AggregatedContent.objects.latest('created_at')
