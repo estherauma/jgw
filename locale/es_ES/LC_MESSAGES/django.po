@@ -1,0 +1,173 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-16 14:02+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: jgwpandas/settings.py:162
+msgid "English"
+msgstr "Inglés"
+
+#: jgwpandas/settings.py:163
+msgid "Spanish"
+msgstr "Español"
+
+#: templates/landing/landing_page.html:18
+msgid "landingPageWelcomeText"
+msgstr "Bienvenido a la plataforma de datos Just Good Work."
+
+#: templates/landing/landing_page.html:19
+msgid "landingPageIntroText"
+msgstr ""
+"La plataforma de datos Just Good Work ofrece información, datos y "
+"perspectivas sobre la mano de obra migrante. Esto incluye los problemas que "
+"afectan a los migrantes desde que buscan trabajo en sus países de origen, "
+"pasando por su experiencia migratoria y laboral, hasta que terminan su "
+"trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también"
+" provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"recurso busca brindar información y apoyo que ayude a personas, "
+"organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
+"derechos de los trabajadores migrantes."
+
+#: templates/landing/landing_page.html:47
+msgid "landingPageJGWDataPlatformHelp"
+msgstr "¿Cómo puede ayudarle la plataforma de datos JGW?"
+
+#: templates/landing/landing_page.html:59
+msgid "landingPageRealTimeInsights"
+msgstr "Información en tiempo real"
+
+#: templates/landing/landing_page.html:60
+msgid "landingPageFeedbackInsights"
+msgstr ""
+"Obtenga información y comentarios en tiempo real de más de 105 000 "
+"trabajadores en más de 33 países."
+
+#: templates/landing/landing_page.html:69
+msgid "landingPageTrackIssues"
+msgstr ""
+"Realice un seguimiento de los problemas específicos de su cadena de "
+"suministro"
+
+#: templates/landing/landing_page.html:70
+msgid "landingPageSupplyChain"
+msgstr ""
+"Al utilizar JGW en su cadena de suministro, podrá detectar problemas e "
+"ineficiencias antes."
+
+#: templates/landing/landing_page.html:80
+msgid "landingPageUnderstandWhatMattersToWorkers"
+msgstr "Entender lo que importa a los trabajadores"
+
+#: templates/landing/landing_page.html:81
+msgid "landingPageImproveWorkerExperience"
+msgstr ""
+"Mejora la experiencia del trabajador para lograr una mejor atracción, "
+"compromiso y retención."
+
+#: templates/landing/landing_page.html:91
+msgid "landingPageImproveRecruitmentAndRetention"
+msgstr "Mejore su reclutamiento y retención"
+
+#: templates/landing/landing_page.html:92
+msgid "landingPageLowStaffTurnover"
+msgstr ""
+"Reducir la rotación de personal y aumentar la retención comprendiendo de "
+"manera proactiva los problemas que afectan negativamente a los migrantes."
+
+#: templates/landing/landing_page.html:101
+msgid "landingPageSafetyForWorkers"
+msgstr "Seguridad para los trabajadores"
+
+#: templates/landing/landing_page.html:102
+msgid "landingPageAnonymusInformation"
+msgstr ""
+"Toda la información que recopilamos es anonimizada para garantizar la "
+"protección de los migrantes."
+
+#: templates/landing/landing_page.html:111
+msgid "landingPageAccurateInformation"
+msgstr "Información precisa"
+
+#: templates/landing/landing_page.html:112
+msgid "landingPageBuildingTrustText"
+msgstr ""
+"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a"
+" migrantes en todo el mundo, lo que significa que tenemos las relaciones "
+"para obtener información precisa."
+
+#: templates/landing/landing_page.html:142
+msgid "landingPageHaveAnyQuestions"
+msgstr "¿Tienes alguna pregunta?"
+
+#: templates/landing/landing_page.html:143
+msgid "landingPageReachout"
+msgstr "Comuníquese con nosotros mediante uno de los canales a continuación."
+
+#: templates/landing/landing_page.html:152
+msgid "landingPageContactUs"
+msgstr "Contacta con nosotros"
+
+#: templates/landing/landing_page.html:154
+msgid "landingPageEmail"
+msgstr "Correo electrónico:"
+
+#: templates/landing/landing_page.html:162
+msgid "landingPagejgwDpOffersInfo"
+msgstr ""
+"La plataforma de datos Just Good Work ofrece información, datos y "
+"conocimientos sobre el trabajo migrante."
+
+#: templates/layouts/non_auth_base.html:56
+msgid "nonAuthBaseHome"
+msgstr "Hogar"
+
+#: templates/layouts/non_auth_base.html:59
+msgid "nonAuthBasePricing"
+msgstr "Precios"
+
+#: templates/layouts/non_auth_base.html:62
+msgid "nonAuthBaseFaqs"
+msgstr "Preguntas frecuentes"
+
+#: templates/layouts/non_auth_base.html:65
+msgid "nonAuthBaseContact"
+msgstr "Contacto"
+
+#: templates/layouts/non_auth_base.html:77
+msgid "nonAuthBaseGoToDashboard"
+msgstr "Ir al panel de control"
+
+#: templates/layouts/non_auth_base.html:79
+msgid "nonAuthBaseLogout"
+msgstr "Cerrar sesión"
+
+#: templates/layouts/non_auth_base.html:82
+msgid "nonAuthBaseLogin"
+msgstr "Acceso"
+
+#: templates/layouts/non_auth_base.html:83
+msgid "nonAuthBaseTryNow"
+msgstr "Pruébalo ahora"
+
+#: templates/layouts/non_auth_base.html:100
+msgid "nonAuthBaseASolutionOf"
+msgstr "Una solución de"
+
+#: templates/layouts/non_auth_base.html:105
+msgid "nonAuthBaseSocial"
+msgstr "Social :"

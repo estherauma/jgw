@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     libssl-dev \
     libpq-dev \
+    gettext \   
     python3-dev \
     --no-install-recommends && \
     apt-get clean && \
