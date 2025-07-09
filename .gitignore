@@ -70,11 +70,6 @@ coverage.xml
 .pytest_cache/
 pytestdebug.log
 
-# Translations
-*.mo
-
-# Django stuff:
-
 # Flask stuff:
 instance/
 .webassets-cache
