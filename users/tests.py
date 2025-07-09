@@ -10,6 +10,7 @@ from dashboard.models import Factory, Scheme
 
 from .forms import ChangeEmailForm, CreateUserForm, InviteUserForm, SetPasswordForm, UserMgtForm
 from .models import User, UserInvitations
+from django.utils.translation import gettext as _ 
 
 
 class AuthTests(TestCase):
@@ -88,12 +89,12 @@ class AuthTests(TestCase):
         )
         messages = [str(i) for i in response.context["messages"]]
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(messages, ["Can not log in with provided credentials!"])
+        self.assertEqual(messages, [_("loginUserViewErrorNotUser")])
         response = self.client.post(
             reverse("users:login_user"), {"email": "test@fakeemail.", "password": self.test_pword}
         )
         form_errors = dict(response.context["form"].errors)
-        self.assertEqual(form_errors, {"email": ["Enter a valid email address."]})
+        self.assertEqual(form_errors, {"email": [_("loginFormEmailInvalid")]})
 
     def test_invite_user_view_renders_correctly(self):
         response = self.client.get(reverse("users:invite_user"))
@@ -262,7 +263,7 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/request_password_reset.html")
         self.assertEqual(
-            list(response.context["messages"])[0].message, "No user account matches this email address!"
+            list(response.context["messages"])[0].message, _("requestPasswordResetViewErrorMessage")
         )
 
     def test_set_password_new_account_OK(self):
@@ -330,7 +331,7 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             dict(response.context["form"].errors),
-            {"confirm_password": ["The two password fields didn’t match."]},
+            {"confirm_password": [_("setPasswordFormErrorMessage")]},
         )
 
     def test_logout(self):

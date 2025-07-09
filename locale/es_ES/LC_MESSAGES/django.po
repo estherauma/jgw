@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-16 14:02+0000\n"
+"POT-Creation-Date: 2025-06-23 15:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,8 +37,8 @@ msgstr ""
 "afectan a los migrantes desde que buscan trabajo en sus países de origen, "
 "pasando por su experiencia migratoria y laboral, hasta que terminan su "
 "trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
-"problemas que no solo afectan a los trabajadores migrantes, sino que también"
-" provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también "
+"provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
 "recurso busca brindar información y apoyo que ayude a personas, "
 "organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
 "derechos de los trabajadores migrantes."
@@ -106,9 +106,9 @@ msgstr "Información precisa"
 #: templates/landing/landing_page.html:112
 msgid "landingPageBuildingTrustText"
 msgstr ""
-"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a"
-" migrantes en todo el mundo, lo que significa que tenemos las relaciones "
-"para obtener información precisa."
+"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a "
+"migrantes en todo el mundo, lo que significa que tenemos las relaciones para "
+"obtener información precisa."
 
 #: templates/landing/landing_page.html:142
 msgid "landingPageHaveAnyQuestions"
@@ -131,6 +131,24 @@ msgid "landingPagejgwDpOffersInfo"
 msgstr ""
 "La plataforma de datos Just Good Work ofrece información, datos y "
 "conocimientos sobre el trabajo migrante."
+
+#: templates/layouts/auth_base.html:7
+msgid "authBaseTitle"
+msgstr "Panel de datos de JGW"
+
+#: templates/layouts/auth_base.html:76
+msgid "authBaseJGWText"
+msgstr ""
+"La plataforma de datos Just Good Work ofrece información, datos y "
+"perspectivas sobre la mano de obra migrante. Esto incluye los problemas que "
+"afectan a los migrantes desde que buscan trabajo en sus países de origen, "
+"pasando por su experiencia migratoria y laboral, hasta que terminan su "
+"trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también "
+"provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"recurso busca brindar información y apoyo que ayude a personas, "
+"organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
+"derechos de los trabajadores migrantes."
 
 #: templates/layouts/non_auth_base.html:56
 msgid "nonAuthBaseHome"
@@ -171,3 +189,251 @@ msgstr "Una solución de"
 #: templates/layouts/non_auth_base.html:105
 msgid "nonAuthBaseSocial"
 msgstr "Social :"
+
+#: templates/users/email_sent.html:5
+msgid "emailSentTitle"
+msgstr "Correo electrónico enviado"
+
+#: templates/users/email_sent.html:44
+msgid "emailSentSuccess"
+msgstr "Éxito !"
+
+#: templates/users/email_sent.html:46
+msgid "emailSentBackToSignIn"
+msgstr "Volver a Iniciar sesión"
+
+#: templates/users/password_reset_email.html:7
+msgid "passwordResetEmailTitle"
+msgstr "Restablecer contraseña"
+
+#: templates/users/password_reset_email.html:61
+msgid "passwordResetEmailImgAlt"
+msgstr "Logotipo de la empresa"
+
+#: templates/users/password_reset_email.html:64
+msgid "passwordResetEmailRequest"
+msgstr "Solicitud de restablecimiento de contraseña"
+
+#: templates/users/password_reset_email.html:65
+msgid "passwordResetEmailHello"
+msgstr "Hola,"
+
+#: templates/users/password_reset_email.html:66
+msgid "passwordResetEmailBodyText"
+msgstr ""
+"Recibimos una solicitud para restablecer su contraseña. Si no la solicitó, "
+"ignore este correo electrónico. De lo contrario, puede restablecer su "
+"contraseña haciendo clic en el botón a continuación:"
+
+#: templates/users/password_reset_email.html:68
+msgid "passwordResetEmailResetPassword"
+msgstr "Restablecer contraseña"
+
+#: templates/users/password_reset_email.html:70
+msgid "passwordResetEmailExpiry"
+msgstr "Este enlace expirará en 1 día."
+
+#: templates/users/password_reset_email.html:74
+msgid "passwordResetEmailIfIssues"
+msgstr ""
+"Si tiene algún problema, envíe un correo electrónico a: support@justgood.work"
+
+#: templates/users/password_reset_email.html:75
+msgid "passwordResetEmailJGWTeam"
+msgstr "Equipo de JGW"
+
+#: templates/users/request_password_reset.html:4
+msgid "requestPasswordResetTitle"
+msgstr "Recuperar contraseña"
+
+#: templates/users/request_password_reset.html:9
+msgid "requestPasswordResetHeading"
+msgstr "Recuperar contraseña"
+
+#: templates/users/request_password_reset.html:11
+msgid "requestPasswordResetEnterEmail"
+msgstr ""
+"Ingrese su dirección de correo electrónico y le enviaremos un correo "
+"electrónico con instrucciones para restablecer su contraseña."
+
+#: templates/users/request_password_reset.html:33
+msgid "requestPasswordResetSubmit"
+msgstr "Entregar"
+
+#: templates/users/request_password_reset.html:41
+msgid "requestPasswordResetBackTo"
+msgstr "Volver a"
+
+#: templates/users/request_password_reset.html:41
+msgid "requestPasswordResetSignIn"
+msgstr "Iniciar sesión"
+
+#: templates/users/set_password.html:5
+msgid "setPasswordPageTitle"
+msgstr "Establecer nueva contraseña"
+
+#: templates/users/set_password.html:9
+msgid "setPasswordPageHeading"
+msgstr "Establecer nueva contraseña"
+
+#: templates/users/set_password.html:10
+msgid "setPasswordPageInstructions"
+msgstr "Establezca una nueva contraseña para su cuenta de usuario."
+
+#: templates/users/set_password.html:46
+msgid "setPasswordPageSubmitButton"
+msgstr "Entregar"
+
+#: templates/users/sign_in.html:5
+msgid "signInPageTitle"
+msgstr "Iniciar sesión"
+
+#: templates/users/sign_in.html:9
+msgid "signInPageHeading"
+msgstr "Iniciar sesión"
+
+#: templates/users/sign_in.html:10
+msgid "signInPageEnterEmail"
+msgstr ""
+"Introduzca su dirección de correo electrónico y contraseña para acceder a la "
+"cuenta."
+
+#: templates/users/sign_in.html:40
+msgid "signInPageSignInButton"
+msgstr "Iniciar sesión"
+
+#: templates/users/sign_in.html:46
+msgid "signInPageForgotPassword"
+msgstr "¿Olvidaste tu contraseña?"
+
+#: templates/users/sign_in.html:53
+msgid "signInPageDontHaveAccount"
+msgstr "¿No tienes una cuenta? Crea una."
+
+#: templates/users/sign_up.html:5
+msgid "signUpPageTitle"
+msgstr "Inscribirse"
+
+#: templates/users/sign_up.html:9
+msgid "signUpPageHeading"
+msgstr "Inscribirse"
+
+#: templates/users/sign_up.html:11
+msgid "signUpPageEnterEmail"
+msgstr ""
+"Introduzca su dirección de correo electrónico y una nueva contraseña para "
+"crear una cuenta."
+
+#: templates/users/sign_up.html:49
+msgid "signUpPageSubmitButton"
+msgstr "Entregar"
+
+#: templates/users/sign_up.html:58
+msgid "signUpPageAlreadyHaveAccount"
+msgstr "¿Ya tienes una cuenta? Inicia sesión."
+
+#: users/forms.py:18
+msgid "LoginFormEmail"
+msgstr "Correo electrónico"
+
+#: users/forms.py:20
+msgid "loginFormEmailRequired"
+msgstr "Este campo es obligatorio."
+
+#: users/forms.py:21 users/tests.py:97
+msgid "loginFormEmailInvalid"
+msgstr "Introduzca una dirección de correo electrónico válida."
+
+#: users/forms.py:24
+msgid "LoginFormPassword"
+msgstr "Contraseña"
+
+#: users/forms.py:26 users/tests.py:74
+msgid "loginFormPasswordRequired"
+msgstr "Este campo es obligatorio."
+
+#: users/forms.py:41
+msgid "createUserFormEmail"
+msgstr "Correo electrónico"
+
+#: users/forms.py:84
+msgid "requestPasswordResetFormEmail"
+msgstr "Correo electrónico"
+
+#: users/forms.py:86
+msgid "requestPasswordResetFormEmailRequired"
+msgstr "Este campo es obligatorio."
+
+#: users/forms.py:87
+msgid "requestPasswordResetFormEmailInvalid"
+msgstr "Introduzca una dirección de correo electrónico válida."
+
+#: users/forms.py:102 users/tests.py:334
+msgid "setPasswordFormErrorMessage"
+msgstr "Los dos campos de contraseña no coincidieron."
+
+#: users/forms.py:105
+msgid "setPasswordFormNewPassword"
+msgstr "Nueva contraseña"
+
+#: users/forms.py:111
+msgid "setPasswordFormConfirmNewPassword"
+msgstr "Confirmar nueva contraseña"
+
+#: users/tests.py:92 users/views.py:152
+msgid "loginUserViewErrorNotUser"
+msgstr "¡No se puede iniciar sesión con las credenciales proporcionadas!"
+
+#: users/tests.py:266 users/views.py:392
+msgid "requestPasswordResetViewErrorMessage"
+msgstr ""
+"¡Ninguna cuenta de usuario coincide con esta dirección de correo electrónico!"
+
+#: users/views.py:118
+msgid "createUserAccountViewInfo"
+msgstr "Su cuenta fue creada y se activará en breve."
+
+#: users/views.py:121
+msgid "createUserAccountViewError"
+msgstr "¡Error al validar el formulario!"
+
+#: users/views.py:150
+msgid "loginUserViewError"
+msgstr "¡No se puede iniciar sesión con las credenciales proporcionadas!"
+
+#: users/views.py:154
+msgid "loginUserViewInvalidForm"
+msgstr "¡Error al validar el formulario!"
+
+#: users/views.py:378
+msgid "requestPasswordResetViewEmailSubject"
+msgstr "Restablezca su contraseña en Just Good Work Data Platform"
+
+#: users/views.py:386
+msgid "requestPasswordResetViewEmailSuccessText"
+msgstr ""
+"Se ha enviado un correo electrónico a {email_address}. Por favor, revise si "
+"recibió un correo electrónico de Just Good Work Data Platform y haga clic en "
+"el enlace incluido para restablecer su contraseña."
+
+#: users/views.py:403
+msgid "setPasswordViewInvalidTokenError"
+msgstr "¡Token inválido!"
+
+#: users/views.py:419
+msgid "setPasswordViewSuccessText"
+msgstr ""
+"Su contraseña se ha restablecido correctamente. Ahora puede iniciar sesión "
+"con su nueva contraseña."
+
+#: users/views.py:423
+msgid "setPasswordViewInvalidFormError"
+msgstr "¡Error al validar el formulario!"
+
+#: users/views.py:425
+msgid "setPasswordViewLinkExpiredError"
+msgstr "¡Este enlace ha expirado!"
+
+#: users/views.py:427
+msgid "setPasswordViewUserAccountNotFound"
+msgstr "¡Cuenta de usuario no encontrada!"

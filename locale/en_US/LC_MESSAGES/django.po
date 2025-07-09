@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-16 14:00+0000\n"
+"POT-Creation-Date: 2025-06-23 15:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,15 +32,14 @@ msgstr "Welcome to the Just Good Work Data Platform."
 #: templates/landing/landing_page.html:19
 msgid "landingPageIntroText"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about"
-" migrant labour. This includes issues that affect migrants from when they "
-"are looking for work in their home countries, through their experience "
-"migrating and working until they finish. Through this platform, we hope to "
-"shed light on the issues that not only affect migrant workers, but also lead"
-" to inefficiencies in labour supply chains. This resource is to provide "
-"insight and support that will help individuals, organizations, and "
-"governments to combat modern slavery and protect the rights of migrant "
-"workers."
+"The Just Good Work data platform offers information, data and insights about "
+"migrant labour. This includes issues that affect migrants from when they are "
+"looking for work in their home countries, through their experience migrating "
+"and working until they finish. Through this platform, we hope to shed light "
+"on the issues that not only affect migrant workers, but also lead to "
+"inefficiencies in labour supply chains. This resource is to provide insight "
+"and support that will help individuals, organizations, and governments to "
+"combat modern slavery and protect the rights of migrant workers."
 
 #: templates/landing/landing_page.html:47
 msgid "landingPageJGWDataPlatformHelp"
@@ -83,8 +82,8 @@ msgstr "Improve your recruitment and retention"
 #: templates/landing/landing_page.html:92
 msgid "landingPageLowStaffTurnover"
 msgstr ""
-"Lower staff turnover and increase retention proactively understanding issues"
-" negatively affecting migrants."
+"Lower staff turnover and increase retention proactively understanding issues "
+"negatively affecting migrants."
 
 #: templates/landing/landing_page.html:101
 msgid "landingPageSafetyForWorkers"
@@ -126,8 +125,24 @@ msgstr "Email:"
 #: templates/landing/landing_page.html:162
 msgid "landingPagejgwDpOffersInfo"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about"
-" migrant labour."
+"The Just Good Work data platform offers information, data and insights about "
+"migrant labour."
+
+#: templates/layouts/auth_base.html:7
+msgid "authBaseTitle"
+msgstr "JGW Data Dashboard"
+
+#: templates/layouts/auth_base.html:76
+msgid "authBaseJGWText"
+msgstr ""
+"The Just Good Work data platform offers information, data and insights about "
+"migrant labour. This includes issues that affect migrants from when they are "
+"looking for work in their home countries, through their experience migrating "
+"and working until they finish. Through this platform, we hope to shed light "
+"on the issues that not only affect migrant workers, but also lead to "
+"inefficiencies in labour supply chains. This resource is to provide insight "
+"and support that will help individuals, organizations, and governments to "
+"combat modern slavery and protect the rights of migrant workers."
 
 #: templates/layouts/non_auth_base.html:56
 msgid "nonAuthBaseHome"
@@ -168,3 +183,246 @@ msgstr "A solution of"
 #: templates/layouts/non_auth_base.html:105
 msgid "nonAuthBaseSocial"
 msgstr "Social :"
+
+#: templates/users/email_sent.html:5
+msgid "emailSentTitle"
+msgstr "Email Sent"
+
+#: templates/users/email_sent.html:44
+msgid "emailSentSuccess"
+msgstr "Success !"
+
+#: templates/users/email_sent.html:46
+msgid "emailSentBackToSignIn"
+msgstr "Back to Sign In"
+
+#: templates/users/password_reset_email.html:7
+msgid "passwordResetEmailTitle"
+msgstr "Password Reset"
+
+#: templates/users/password_reset_email.html:61
+msgid "passwordResetEmailImgAlt"
+msgstr "Company Logo"
+
+#: templates/users/password_reset_email.html:64
+msgid "passwordResetEmailRequest"
+msgstr "Password Reset Request"
+
+#: templates/users/password_reset_email.html:65
+msgid "passwordResetEmailHello"
+msgstr "Hello,"
+
+#: templates/users/password_reset_email.html:66
+msgid "passwordResetEmailBodyText"
+msgstr ""
+"We received a request to reset your password. If you didn't request this, "
+"please ignore this email. Otherwise, you can reset your password by clicking "
+"the button below:"
+
+#: templates/users/password_reset_email.html:68
+msgid "passwordResetEmailResetPassword"
+msgstr "Reset Password"
+
+#: templates/users/password_reset_email.html:70
+msgid "passwordResetEmailExpiry"
+msgstr "This link will expire in 1 day."
+
+#: templates/users/password_reset_email.html:74
+msgid "passwordResetEmailIfIssues"
+msgstr ""
+"If you have any issues, please send an email to: support@justgood.work "
+
+#: templates/users/password_reset_email.html:75
+msgid "passwordResetEmailJGWTeam"
+msgstr "JGW Team"
+
+#: templates/users/request_password_reset.html:4
+msgid "requestPasswordResetTitle"
+msgstr "Recover Password"
+
+#: templates/users/request_password_reset.html:9
+msgid "requestPasswordResetHeading"
+msgstr "Recover Password"
+
+#: templates/users/request_password_reset.html:11
+msgid "requestPasswordResetEnterEmail"
+msgstr ""
+"Enter your email address and we'll send you an email with instructions to "
+"reset your password."
+
+#: templates/users/request_password_reset.html:33
+msgid "requestPasswordResetSubmit"
+msgstr "Submit"
+
+#: templates/users/request_password_reset.html:41
+msgid "requestPasswordResetBackTo"
+msgstr "Back to "
+
+#: templates/users/request_password_reset.html:41
+msgid "requestPasswordResetSignIn"
+msgstr "Sign In"
+
+#: templates/users/set_password.html:5
+msgid "setPasswordPageTitle"
+msgstr "Set New Password"
+
+#: templates/users/set_password.html:9
+msgid "setPasswordPageHeading"
+msgstr "Set New Password"
+
+#: templates/users/set_password.html:10
+msgid "setPasswordPageInstructions"
+msgstr "Set a new password for your user account."
+
+#: templates/users/set_password.html:46
+msgid "setPasswordPageSubmitButton"
+msgstr "Submit"
+
+#: templates/users/sign_in.html:5
+msgid "signInPageTitle"
+msgstr "Sign In "
+
+#: templates/users/sign_in.html:9
+msgid "signInPageHeading"
+msgstr "Sign In "
+
+#: templates/users/sign_in.html:10
+msgid "signInPageEnterEmail"
+msgstr "Enter your email address and password to access account."
+
+#: templates/users/sign_in.html:40
+msgid "signInPageSignInButton"
+msgstr "Sign In"
+
+#: templates/users/sign_in.html:46
+msgid "signInPageForgotPassword"
+msgstr "Forgot your password?"
+
+#: templates/users/sign_in.html:53
+msgid "signInPageDontHaveAccount"
+msgstr "Don't have an account? Sign up for one."
+
+#: templates/users/sign_up.html:5
+msgid "signUpPageTitle"
+msgstr "Sign Up "
+
+#: templates/users/sign_up.html:9
+msgid "signUpPageHeading"
+msgstr "Sign Up"
+
+#: templates/users/sign_up.html:11
+msgid "signUpPageEnterEmail"
+msgstr "Enter your email address and a new password to create an account."
+
+#: templates/users/sign_up.html:49
+msgid "signUpPageSubmitButton"
+msgstr "Submit"
+
+#: templates/users/sign_up.html:58
+msgid "signUpPageAlreadyHaveAccount"
+msgstr "Already have an account? Sign In."
+
+#: users/forms.py:18
+msgid "LoginFormEmail"
+msgstr "Email"
+
+#: users/forms.py:20
+msgid "loginFormEmailRequired"
+msgstr "This field is required."
+
+#: users/forms.py:21 users/tests.py:97
+msgid "loginFormEmailInvalid"
+msgstr "Enter a valid email address."
+
+#: users/forms.py:24
+msgid "LoginFormPassword"
+msgstr "Password"
+
+#: users/forms.py:26 users/tests.py:74
+msgid "loginFormPasswordRequired"
+msgstr "This field is required."
+
+#: users/forms.py:41
+msgid "createUserFormEmail"
+msgstr "Email"
+
+#: users/forms.py:84
+msgid "requestPasswordResetFormEmail"
+msgstr "Email"
+
+#: users/forms.py:86
+msgid "requestPasswordResetFormEmailRequired"
+msgstr "This field is required."
+
+#: users/forms.py:87
+msgid "requestPasswordResetFormEmailInvalid"
+msgstr "Enter a valid email address."
+
+#: users/forms.py:102 users/tests.py:334
+msgid "setPasswordFormErrorMessage"
+msgstr "The two password fields didn’t match."
+
+#: users/forms.py:105
+msgid "setPasswordFormNewPassword"
+msgstr "New password"
+
+#: users/forms.py:111
+msgid "setPasswordFormConfirmNewPassword"
+msgstr "Confirm new password"
+
+#: users/tests.py:92 users/views.py:152
+msgid "loginUserViewErrorNotUser"
+msgstr "Can not log in with provided credentials!"
+
+#: users/tests.py:266 users/views.py:392
+msgid "requestPasswordResetViewErrorMessage"
+msgstr "No user account matches this email address!"
+
+#: users/views.py:118
+msgid "createUserAccountViewInfo"
+msgstr "Your account was created and will be activated shortly."
+
+#: users/views.py:121
+msgid "createUserAccountViewError"
+msgstr "Error validating form!"
+
+#: users/views.py:150
+msgid "loginUserViewError"
+msgstr "Can not log in with provided credentials!"
+
+#: users/views.py:154
+msgid "loginUserViewInvalidForm"
+msgstr "Error validating form!"
+
+#: users/views.py:378
+msgid "requestPasswordResetViewEmailSubject"
+msgstr "Reset your password on Just Good Work Data Platform"
+
+#: users/views.py:386
+msgid "requestPasswordResetViewEmailSuccessText"
+msgstr ""
+"An email has been sent to {email_address}. Please check for an email from "
+"Just Good Work Data Platform and click on the included link to reset your "
+"password."
+
+#: users/views.py:403
+msgid "setPasswordViewInvalidTokenError"
+msgstr "Invalid token!"
+
+#: users/views.py:419
+msgid "setPasswordViewSuccessText"
+msgstr ""
+"Your password has been successfully reset.You can now log in using your new "
+"password"
+
+#: users/views.py:423
+msgid "setPasswordViewInvalidFormError"
+msgstr " Error validating form!"
+
+#: users/views.py:425
+msgid "setPasswordViewLinkExpiredError"
+msgstr "This link is expired!"
+
+#: users/views.py:427
+msgid "setPasswordViewUserAccountNotFound"
+msgstr "User account not found!"
