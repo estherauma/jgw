@@ -1,4 +1,4 @@
-.PHONY: celery-start celery-stop celery-restart format-redis add_genders runserver
+.PHONY: celery-start celery-stop celery-restart format-redis add_genders runserver makemessages compilemessages
 
 celery-start:
 	celery -A jgwpandas beat -l info --logfile=./celery/celery.beat.log --detach
@@ -20,3 +20,12 @@ runserver:
 
 runtests:
 	coverage run manage.py test
+
+makemessages:
+	python manage.py makemessages -l en_US -l es_ES
+
+compilemessages:
+	python manage.py compilemessages
+
+export-cms:
+	python manage.py export_cms_labels
