@@ -1,6 +1,7 @@
 {% extends "layouts/main_base.html" %}
 {% load static %}
 {% load i18n %}
+{% load waffle_tags %}
 
 {% block main_base_head %}
     <meta charset="utf-8" />
@@ -65,6 +66,7 @@
                             <a href="#contact" class="nav-link">{% translate "nonAuthBaseContact" %}</a>
                         </li>
                     </ul>
+                    {% flag 'can_view_language_select_button' %}
                     <form action="{% url 'set_language' %}" method="post" style="padding-right: 4px;">
                             {% csrf_token %}
                         <select name="language" onchange="this.form.submit()" class="btn btn-info navbar-btn">
@@ -72,6 +74,7 @@
                             <option value="es-es" {% if LANGUAGE_CODE == 'es-es' %}selected{% endif %}>Español</option>
                         </select>
                     </form>
+                    {% endflag %}
                     <div>
                         {% if user.is_authenticated %}
                             <a href="{% url 'preference:user_overview' %}" class="btn btn-info navbar-btn">{% translate "nonAuthBaseGoToDashboard" %}</a>
