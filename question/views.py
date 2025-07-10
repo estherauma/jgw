@@ -39,6 +39,15 @@ from question.repository.messaging_questions_standard import (
     messaging_questions_count,
 )
 from users.utils import get_user_organisations
+import pandas as pd
+from io import BytesIO
+from .models import (
+    InlineQuestionStandard,
+    InlineQuestionAndKeysMatch,
+    InlineQuestion,
+    InlineQuestionResponse,
+)
+from events.models import BigqueryHomepageEventData
 
 
 def messaging_question(request):
@@ -380,4 +389,190 @@ def export_message_sent_data(request):
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = "attachment; filename=message_sent_data.xlsx"
     wb.save(response)
+    return response
+
+
+def generate_payment_questions_excel(filters=None):
+    question_keys = [
+        'swsPayForTravelAndVisa',
+        'recruiterAskedForPayments',
+        'swsAskedToMakeOtherPayments',
+        'labourProviderAskedToMakePayment',
+        'fishingFees',
+        'swvAskedToPayFees',
+        'didARecruitmentAgentAskYouToPayIllegitimateFees',
+        'asvRecruiterAskedForPayments',
+        'swsAskedToMakeOtherPayments',
+        'labourProviderAskedToMakePayment',
+    ]
+
+    base_query = InlineQuestionResponse.objects.filter(
+        inline_question__question__text__in=question_keys,
+        response__translated_text__icontains='yes'
+    )
+
+    if filters:
+        start_date = filters.get('start_date')
+        end_date = filters.get('end_date')
+        if start_date:
+            base_query = base_query.filter(
+                inline_question__inline_question_standard__api_created_at__gte=start_date
+            )
+        if end_date:
+            base_query = base_query.filter(
+                inline_question__inline_question_standard__api_created_at__lte=end_date
+            )
+        
+        organisations = filters.get('organisations')
+        if organisations:
+            base_query = base_query.filter(
+                inline_question__inline_question_standard__org_info__name__in=organisations
+            )
+        
+        destinations = filters.get('destination_countries')
+        if destinations:
+            base_query = base_query.filter(
+                inline_question__inline_question_standard__destination__name__in=destinations
+            )
+
+    responses = base_query.select_related(
+        'inline_question',
+        'inline_question__inline_question_standard',
+        'inline_question__question',
+        'response',
+        'inline_question__inline_question_standard__language',
+        'inline_question__inline_question_standard__origin',
+        'inline_question__inline_question_standard__destination',
+        'inline_question__inline_question_standard__org_info',
+        'inline_question__inline_question_standard__immigration_status',
+        'inline_question__inline_question_standard__factory_farm',
+    )
+
+    question_text_to_key = dict(
+        InlineQuestionAndKeysMatch.objects.filter(
+            inline_question_key__in=question_keys
+        ).values_list('inline_question', 'inline_question_key')
+    )
+    export_data = []
+    for resp in responses:
+        question_standard = resp.inline_question.inline_question_standard
+        question_text = resp.inline_question.question.title_text
+        question_key = question_text_to_key.get(question_text, '')
+        
+        geo_data = BigqueryHomepageEventData.objects.filter(
+            device_id=question_standard.device_id
+        ).first()
+        
+        api_created_at = question_standard.api_created_at.replace(tzinfo=None) if question_standard.api_created_at else None
+        api_updated_at = question_standard.api_updated_at.replace(tzinfo=None) if question_standard.api_updated_at else None
+        
+        export_data.append({
+            'Data Source ID': question_standard.data_source_id,
+            'Device ID': question_standard.device_id,
+            'App ID': question_standard.app_id,
+            'Question Key': question_key,
+            'Question Text': question_text,
+            'Response': resp.response.translated_text if resp.response else 'N/A',
+            'Locale': question_standard.locale,
+            'Language': question_standard.language.name if question_standard.language else 'N/A',
+            'Origin Country': question_standard.origin.name if question_standard.origin else 'N/A',
+            'Destination Country': question_standard.destination.name if question_standard.destination else 'N/A',
+            'Organisation': question_standard.org_info.name if question_standard.org_info else 'N/A',
+            'Organisation Code': question_standard.org_code,
+            'Organisation Work Code': question_standard.org_work_code,
+            'Immigration Status': question_standard.immigration_status.name if question_standard.immigration_status else 'N/A',
+            'Geo Country': geo_data.geo_country.name if geo_data and geo_data.geo_country else 'N/A',
+            'Geo City': geo_data.geo_city if geo_data and geo_data.geo_city else 'N/A',
+            'API Created At': api_created_at,
+            'API Updated At': api_updated_at,
+           
+        })
+    if export_data:
+        df = pd.DataFrame(export_data)
+        output = BytesIO()
+        
+        wb = Workbook()
+        ws = wb.active
+        ws.title = 'Payment Questions Responses'
+        
+        header_rows = []
+        header_rows.append("Payment Inline Questions Export (Yes Responses)")
+        
+        if filters:
+            filter_info = []
+            start_date = filters.get('start_date')
+            end_date = filters.get('end_date')
+            organisations = filters.get('organisation')
+            destinations = filters.get('destination')
+            
+            if start_date or end_date:
+                date_range = f"Date Range: {start_date or 'Start'} to {end_date or 'End'}"
+                filter_info.append(date_range)
+            
+            if organisations:
+                org_list = ', '.join(organisations) if isinstance(organisations, list) else str(organisations)
+                filter_info.append(f"Organisations: {org_list}")
+            
+            if destinations:
+                dest_list = ', '.join(destinations) if isinstance(destinations, list) else str(destinations)
+                filter_info.append(f"Destinations: {dest_list}")
+            
+            if filter_info:
+                header_rows.append("Applied Filters:")
+                header_rows.extend([f"  • {info}" for info in filter_info])
+            else:
+                header_rows.append("No specific filters applied")
+        else:
+            header_rows.append("No filters applied - All data exported")
+        
+        for i, header_text in enumerate(header_rows, 1):
+            ws.cell(row=i, column=1, value=header_text)
+            if i == 1:  
+                ws.cell(row=i, column=1).font = Font(bold=True, size=14)
+            elif i == 2:  
+                ws.cell(row=i, column=1).font = Font(bold=True, size=12)
+        
+        blank_row = len(header_rows) + 1
+        
+        headers = [
+            'Data Source ID', 'Device ID', 'App ID','Question Key', 'Question Text', 'Response', 'Locale', 'Language', 'Origin Country',
+            'Destination Country', 'Organisation', 'Organisation Code', 'Organisation Work Code',
+            'Immigration Status', 'Geo Country', 'Geo City', 'API Created At',
+            'API Updated At'
+        ]
+        for idx, header in enumerate(headers, 1):
+            ws.cell(row=blank_row, column=idx, value=header)
+            ws.cell(row=blank_row, column=idx).font = Font(bold=True)
+        
+        for row_idx, data_row in enumerate(df.values, blank_row + 1):
+            for col_idx, value in enumerate(data_row, 1):
+                ws.cell(row=row_idx, column=col_idx, value=value)
+        
+        wb.save(output)
+        output.seek(0)
+        return output
+    else:
+        empty_df = pd.DataFrame(columns=[
+            'Data Source ID', 'Device ID', 'App ID','Question Key', 'Question Text', 'Response', 'Locale', 'Language', 'Origin Country',
+            'Destination Country', 'Organisation', 'Organisation Code', 'Organisation Work Code',
+            'Immigration Status', 'Geo Country', 'Geo City', 'API Created At',
+            'API Updated At'
+        ])
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            empty_df.to_excel(writer, sheet_name='Payment Questions Responses', index=False)
+        output.seek(0)
+        return output
+
+
+def export_payment_inline_questions(request):
+    form_filter_params = get_form_filter_params(request=request, form_class=InlineQuestionFilterForm)
+    filters = form_filter_params["filters"]
+    
+    excel_file = generate_payment_questions_excel(filters=filters)
+    response = HttpResponse(
+        excel_file,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = "attachment; filename=payment_inline_questions.xlsx"
     return response
