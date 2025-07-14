@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db.models import Case, When, Value, CharField, F, Count
 from django.db.models.functions import Cast, Substr, Length
 from django.db.models import Q
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, TruncDay
 from common.const.value_const import ACCESS_CODE_MAPPING, APPLICATION_POSSIBLE_START_DATE, PUBLIC_USER_DATA_START_DATE
 from common.helpers.preference_helpers.gender import normalize_gender_name
 
@@ -318,6 +318,27 @@ def preference_stats_for_export(filters):
 def get_cumulative_monthly_new_users(**filters):
     queryset = Preference.objects.all()
     filtered_queryset = preference_filtered_queryset_for_new_user_data(queryset=queryset, **filters)
+
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+    if start_date and end_date:
+        if isinstance(start_date, str):
+            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        if isinstance(end_date, str):
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+        days_diff = (end_date - start_date).days
+        if days_diff < 32:
+            daily_data = (
+                filtered_queryset.filter(api_created_at__range=(start_date, end_date))
+                .annotate(day=TruncDay("api_created_at"))
+                .values("day")
+                .annotate(new_users=Count("id"))
+                .order_by("day")
+            )
+            labels = [entry["day"].strftime("%d %b, %Y") for entry in daily_data]
+            values = [entry["new_users"] for entry in daily_data]
+            cummulative_counts = [sum(values[: i + 1]) for i in range(len(values))]
+            return {"labels": labels, "counts": values, "cummulative_counts": cummulative_counts}
 
     data = (
         filtered_queryset.annotate(month=TruncMonth("api_created_at"))
