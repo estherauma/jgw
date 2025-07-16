@@ -222,11 +222,18 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-9">
+                            <input type="text" class="form-control" id="modalQuestionSearch" placeholder="Search questions...">
+                        </div>
+                        <div class="col-3">
+                            <div class="form-check d-flex align-items-center h-100 border rounded">
+                                <input class="form-check-input me-2 ms-2" type="checkbox" id="selectAll">
+                                <label class="form-check-label mb-0" for="selectAll">Select All</label>
+                            </div>
+                        </div>
+                    </div>
                     <ul class="list-group" id="questionDropdown" style="list-style-type: none;">
-                        <li class="list-group-item mb-2">
-                            <input class="form-check-input" type="checkbox" id="selectAll">
-                            <label class="form-check-label" for="selectAll">Select All</label>
-                        </li>
                         <li class="mb-2"><hr class="dropdown-divider"></li>
                     </ul>
                 </div>
@@ -273,6 +280,7 @@
             cb.addEventListener('change', handleCheckboxChange);
         });
         document.getElementById('questionSearch').addEventListener('input', searchAndPlotQuestions);
+        document.getElementById('modalQuestionSearch').addEventListener('input', filterModalQuestions);
     });
 
     function createDropdownItems() {
@@ -361,6 +369,36 @@
         } else {
             dropdownButton.textContent = `${checkedBoxes.length} Question(s) Selected`;
         }
+    }
+
+    function filterModalQuestions() {
+        const searchTerm = document.getElementById('modalQuestionSearch').value.toLowerCase();
+        const dropdown = document.getElementById('questionDropdown');
+        const items = dropdown.querySelectorAll('li.list-group-item, a.dropdown-item');
+        const selected = [];
+        const unselected = [];
+        items.forEach(item => {
+            const checkbox = item.querySelector('.question-checkbox');
+            if (!checkbox) return;
+            const label = checkbox.nextElementSibling.textContent.toLowerCase();
+            if (checkbox.checked) {
+                selected.push(item);
+            } else if (label.includes(searchTerm)) {
+                unselected.push(item);
+            }
+            item.style.display = 'none';
+        });
+        
+        let insertAfter = dropdown.querySelector('li.mb-2'); 
+        selected.forEach(item => {
+            item.style.display = '';
+            dropdown.insertBefore(item, insertAfter.nextSibling);
+            insertAfter = item;
+        });
+        unselected.forEach(item => {
+            item.style.display = '';
+            dropdown.appendChild(item);
+        });
     }
 </script>
 {% endblock %}
