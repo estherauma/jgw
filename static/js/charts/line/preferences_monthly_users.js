@@ -25,7 +25,7 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyAct
       labels: labels,
       datasets: [
         {
-          label: "New Users per Month",
+          label: "New Users",
           data: data,
           backgroundColor: COLORS.skyBlue,
           borderColor: COLORS.navyBlue, 
@@ -44,7 +44,7 @@ function preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyAct
           pointHoverRadius: 7
         },
         {
-          label: "Monthly Active Users",
+          label: "Active Users",
           data: monthlyActiveUsers,
           backgroundColor: 'rgba(255, 99, 132, 0.2)',
           borderColor: 'rgb(255, 99, 132)',
