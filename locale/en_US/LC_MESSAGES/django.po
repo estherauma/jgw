@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-23 15:49+0000\n"
+"POT-Creation-Date: 2025-07-02 13:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,86 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: core/forms.py:21
+msgid "genericFilterFormTitle"
+msgstr "Show Data for New Users (Default is Active Users)"
+
+#: core/forms.py:96
+msgid "genericFilterFormStartDate"
+msgstr "Start Date"
+
+#: core/forms.py:104
+msgid "genericFilterFormEndDate"
+msgstr "End Date"
+
+#: core/forms.py:113
+msgid "genericFilterFormOriginLabel"
+msgstr "Origin"
+
+#: core/forms.py:119
+msgid "genericFilterFormOriginNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:120
+msgid "genericFilterFormOriginSearch"
+msgstr "Search"
+
+#: core/forms.py:127
+msgid "genericFilterFormDestinationLabel"
+msgstr "Destination"
+
+#: core/forms.py:133
+msgid "genericFilterFormDestinationNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:134
+msgid "genericFilterFormDestinationSearch"
+msgstr "Search"
+
+#: core/forms.py:141
+msgid "genericFilterFormOrganisationLabel"
+msgstr "Organisation"
+
+#: core/forms.py:147
+msgid "genericFilterFormOrganisationNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:148
+msgid "genericFilterFormOrganisationSearch"
+msgstr "Search"
+
+#: core/forms.py:155
+msgid "genericFilterFormFactoryFarmLabel"
+msgstr "Factory/Farm"
+
+#: core/forms.py:161
+msgid "genericFilterFormFactoryFarmNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:162
+msgid "genericFilterFormFactoryFarmSearch"
+msgstr "Search"
+
+#: core/forms.py:169
+msgid "genericFilterFormImmigrationStatusLabel"
+msgstr "Immigration Status"
+
+#: core/forms.py:175
+msgid "genericFilterFormImmigrationStatusNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:176
+msgid "genericFilterFormImmigrationStatusSearch"
+msgstr "Search"
+
+#: core/forms.py:185
+msgid "dateRangeFormStartDate"
+msgstr "Start Date"
+
+#: core/forms.py:196
+msgid "dateRangeFormEndDate"
+msgstr "End Date"
 
 #: jgwpandas/settings.py:162
 msgid "English"
@@ -25,6 +105,333 @@ msgstr "English"
 msgid "Spanish"
 msgstr "Spanish"
 
+#: payment/templates/payment/payment-required.html:3
+msgid "paymentRequiredHeading"
+msgstr "Login to proceed"
+
+#: payment/templates/payment/payment-required.html:4
+msgid "paymentRequiredInstructions"
+msgstr ""
+"To access our premium content and personalized features, please take a "
+"moment to,"
+
+#: payment/templates/payment/payment-required.html:5
+msgid "paymentRequiredLogin"
+msgstr "Log in"
+
+#: payment/templates/payment/payment-required.html:5
+msgid "paymentRequiredOr"
+msgstr "or "
+
+#: payment/templates/payment/payment-required.html:5
+msgid "paymentRequiredCreateAnAccount"
+msgstr "Create an account"
+
+#: preference/templates/includes/make_payment_modal.html:6
+msgid "makePaymentModalHeading"
+msgstr "Login to proceed"
+
+#: preference/templates/includes/make_payment_modal.html:7
+msgid "makePaymentModalInstructions"
+msgstr ""
+"To access our premium content and personalized features, please take a "
+"moment to,"
+
+#: preference/templates/includes/make_payment_modal.html:8
+msgid "makePaymentModalLogin"
+msgstr "Log in"
+
+#: preference/templates/includes/make_payment_modal.html:8
+msgid "makePaymentModalOr"
+msgstr "or"
+
+#: preference/templates/includes/make_payment_modal.html:8
+msgid "makePaymentModalCreateAnAccount"
+msgstr "Create an account"
+
+#: preference/templates/preference/user_overview.html:9
+msgid "userOverviewTitle"
+msgstr "User Overview "
+
+#: preference/templates/preference/user_overview.html:17
+msgid "userOverviewHeadingFilters"
+msgstr "Filters"
+
+#: preference/templates/preference/user_overview.html:25
+msgid "userOverviewSubmitButton"
+msgstr "Submit"
+
+#: preference/templates/preference/user_overview.html:26
+msgid "userOverviewResetButton"
+msgstr "Reset"
+
+#: preference/templates/preference/user_overview.html:43
+msgid "userOverviewNewUsers"
+msgstr "New Users"
+
+#: preference/templates/preference/user_overview.html:47
+msgid "userOverviewActiveUsers"
+msgstr "Active Users"
+
+#: preference/templates/preference/user_overview.html:61
+msgid "userOverviewExport"
+msgstr "Export"
+
+#: preference/templates/preference/user_overview.html:66
+msgid "userOverviewExportPreferencesDataReport"
+msgstr "Export Preferences Data Report to Excel"
+
+#: preference/templates/preference/user_overview.html:67
+msgid "userOverviewExportHelpContactsDataReport"
+msgstr "Export Help Contacts Data Report to Excel"
+
+#: preference/templates/preference/user_overview.html:68
+msgid "userOverviewExportPreferencesStatistics"
+msgstr "Export Preferences Statistics to Excel"
+
+#: preference/templates/preference/user_overview.html:74
+msgid "userOverviewFilterButton"
+msgstr "Filter"
+
+#: preference/templates/preference/user_overview.html:93
+msgid "userOverviewMonthlyActiveUsersTitle"
+msgstr "Monthly Active Users"
+
+#: preference/templates/preference/user_overview.html:97
+msgid "userOverviewMonthlyActiveUsersTooltip"
+msgstr ""
+"Monthly Active Users: Users who accessed the app within the filtered "
+"timeframe"
+
+#: preference/templates/preference/user_overview.html:110
+msgid "userOverviewUsersByOriginCountryTitle"
+msgstr "Users by origin country"
+
+#: preference/templates/preference/user_overview.html:115
+msgid "userOverviewUsersByOriginCountryTooltip"
+msgstr ""
+"Users by Origin Country: Users select the country they are from when they "
+"first use the app."
+
+#: preference/templates/preference/user_overview.html:128
+msgid "userOverviewUsersByGenderTitle"
+msgstr "Users by gender"
+
+#: preference/templates/preference/user_overview.html:132
+msgid "userOverviewUsersByGenderTooltip"
+msgstr ""
+"Users by Gender: Users select their gender when they first use the app."
+
+#: preference/templates/preference/user_overview.html:146
+msgid "userOverviewUsersByDestinationCountryTitle"
+msgstr "Users by destination country"
+
+#: preference/templates/preference/user_overview.html:150
+msgid "userOverviewUsersByDestinationCountryTooltip"
+msgstr ""
+"Users by Destination Country: Users choose the country they are working in "
+"or looking for work in."
+
+#: preference/templates/preference/user_overview.html:162
+msgid "userOverviewUsersByLanguageTitle"
+msgstr "Users by Language"
+
+#: preference/templates/preference/user_overview.html:167
+msgid "userOverviewUsersByLanguageTooltip"
+msgstr ""
+"Users by Language: Users choose their language when they first use the app."
+
+#: preference/templates/preference/user_overview.html:180
+msgid "userOverviewUsersByStateTitle"
+msgstr "Users by state"
+
+#: preference/templates/preference/user_overview.html:185
+msgid "userOverviewUsersByStateTooltip"
+msgstr ""
+"Users by State: Users select the state they are working in when they first "
+"use the app."
+
+#: preference/templates/preference/user_overview.html:198
+msgid "userOverviewUsersByImmigrationStatusTitle"
+msgstr "Users by immigration status"
+
+#: preference/templates/preference/user_overview.html:202
+msgid "userOverviewUsersByImmigrationStatusTooltip"
+msgstr ""
+"Users by Immigration Status: Users select their immigration status when they"
+" first use the app."
+
+#: preference/templates/preference/user_overview.html:215
+msgid "userOverviewUsersByAgeTitle"
+msgstr "Users by age"
+
+#: preference/templates/preference/user_overview.html:219
+msgid "userOverviewUsersByAgeTooltip"
+msgstr "Users by Age: Users select their age then they first use the app."
+
+#: preference/templates/preference/user_overview.html:231
+msgid "userOverviewUsersBySectorTitle"
+msgstr "Users by sector"
+
+#: preference/templates/preference/user_overview.html:236
+msgid "userOverviewUsersBySectorTooltip"
+msgstr ""
+"Users by Sector: Users select one or more sectors they are working in or "
+"looking for work in when they first use the app."
+
+#: preference/templates/preference/user_overview.html:252
+msgid "userOverviewWorkCodeUsageTitle"
+msgstr "Work code usage"
+
+#: preference/templates/preference/user_overview.html:258
+msgid "userOverviewWorkCodeUsageTooltip"
+msgstr ""
+"Work Code Usage: Users who have logged into the app using an organisation QR"
+" Code or Link."
+
+#: preference/templates/preference/user_overview.html:275
+msgid "userOverviewNewUsersByMonthTitle"
+msgstr "New Users by Month"
+
+#: preference/templates/preference/user_overview.html:279
+msgid "userOverviewNewUsersByMonthTooltip"
+msgstr "New Users by Month: Cumulative new users in the filtered timeframe."
+
+#: preference/templates/preference/user_overview.html:293
+msgid "userOverviewLinkClicksByUsersTitle"
+msgstr "Link Clicks by Users"
+
+#: preference/templates/preference/user_overview.html:298
+msgid "userOverviewLinkClicksByUsersTooltip"
+msgstr "Link Clicks: Number of times a link has been clicked."
+
+#: preference/templates/preference/user_overview.html:313
+msgid "userOverviewUserRouteMapTitle"
+msgstr "User Route Map"
+
+#: preference/templates/preference/user_overview.html:317
+msgid "userOverviewUserRouteMapTooltip"
+msgstr ""
+"User Route Map: Shows where workers say they are from (marked with blue "
+"dots) and the country they are                 working in or looking for "
+"work in (which they select when they first use the app marked with green "
+"dots)"
+
+#: preference/templates/preference/user_overview.html:329
+msgid "userOverviewUserGeolocationMapForActiveUsersTitle"
+msgstr "User Geolocation Map for Active Users"
+
+#: preference/templates/preference/user_overview.html:333
+msgid "userOverviewUserGeolocationMapForActiveUsersTooltip"
+msgstr ""
+"User Geolocation Map: Shows the geographical distribution of users based on "
+"their detected location"
+
+#: preference/templates/preference/user_overview.html:345
+msgid "userOverviewUsersGeoMapUserEngagementTitle"
+msgstr "Users Geolocation Map Basing On User Engagement"
+
+#: preference/templates/preference/user_overview.html:349
+msgid "userOverviewUsersGeoMapUserEngagementTooltip"
+msgstr ""
+"User Geolocation Map: Shows users Geolocation at the time of using the app."
+
+#: preference/templates/preference/user_overview.html:452
+msgid "Search"
+msgstr ""
+
+#: preference/templates/preference/user_overview.html:453
+msgid "None selected"
+msgstr ""
+
+#: templates/includes/non_auth_banner_btns.html:10
+msgid "nonAuthBannerBtnsExport"
+msgstr "Export"
+
+#: templates/includes/non_auth_banner_btns.html:18
+msgid "nonAuthBannerBtnsFilter"
+msgstr "Filter"
+
+#: templates/includes/sidebar.html:17
+msgid "sideBarSummerberryDashboard"
+msgstr "Summerberry Dashboard"
+
+#: templates/includes/sidebar.html:24
+msgid "sideBarUsersOverview"
+msgstr "Users overview"
+
+#: templates/includes/sidebar.html:31
+msgid "sideBarWhatMattersToWorkers"
+msgstr "What matters to workers"
+
+#: templates/includes/sidebar.html:41
+msgid "sideBarMessagingQuestions"
+msgstr "Messaging questions"
+
+#: templates/includes/sidebar.html:50
+msgid "sideBarPaymentRequiredMessagingQuestions"
+msgstr "Messaging Questions"
+
+#: templates/includes/sidebar.html:60
+msgid "sideBarInlineQuestions"
+msgstr "Inline questions"
+
+#: templates/includes/sidebar.html:69
+msgid "sideBarOtherResources"
+msgstr "Other Resources"
+
+#: templates/includes/sidebar.html:78
+msgid "sideBarDataPipeline"
+msgstr "Data Pipeline"
+
+#: templates/includes/sidebar.html:84
+msgid "sideBarExportReports"
+msgstr "Export reports"
+
+#: templates/includes/sidebar.html:90
+msgid "sideBarUserDiagnostics"
+msgstr "User Diagnostics"
+
+#: templates/includes/sidebar.html:96
+msgid "sideBarSettings"
+msgstr "Settings"
+
+#: templates/includes/sidebar.html:102
+msgid "sideBarAccounts"
+msgstr "Accounts"
+
+#: templates/includes/sidebar.html:105
+msgid "sideBarInvitations"
+msgstr "Invitations"
+
+#: templates/includes/sidebar.html:109
+msgid "sideBarAddUser"
+msgstr "Add User"
+
+#: templates/includes/sidebar.html:123
+msgid "sideBarLogout"
+msgstr "Log out"
+
+#: templates/includes/topbar.html:140
+msgid "topBarUser"
+msgstr "User"
+
+#: templates/includes/topbar.html:146
+msgid "topBarWelcome"
+msgstr "Welcome"
+
+#: templates/includes/topbar.html:153
+msgid "topBarMyAccount"
+msgstr "My Account"
+
+#: templates/includes/topbar.html:160
+msgid "topBarLogout"
+msgstr "Logout"
+
+#: templates/includes/topbar.html:165
+msgid "topBarLogin"
+msgstr "Login"
+
 #: templates/landing/landing_page.html:18
 msgid "landingPageWelcomeText"
 msgstr "Welcome to the Just Good Work Data Platform."
@@ -32,14 +439,15 @@ msgstr "Welcome to the Just Good Work Data Platform."
 #: templates/landing/landing_page.html:19
 msgid "landingPageIntroText"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about "
-"migrant labour. This includes issues that affect migrants from when they are "
-"looking for work in their home countries, through their experience migrating "
-"and working until they finish. Through this platform, we hope to shed light "
-"on the issues that not only affect migrant workers, but also lead to "
-"inefficiencies in labour supply chains. This resource is to provide insight "
-"and support that will help individuals, organizations, and governments to "
-"combat modern slavery and protect the rights of migrant workers."
+"The Just Good Work data platform offers information, data and insights about"
+" migrant labour. This includes issues that affect migrants from when they "
+"are looking for work in their home countries, through their experience "
+"migrating and working until they finish. Through this platform, we hope to "
+"shed light on the issues that not only affect migrant workers, but also lead"
+" to inefficiencies in labour supply chains. This resource is to provide "
+"insight and support that will help individuals, organizations, and "
+"governments to combat modern slavery and protect the rights of migrant "
+"workers."
 
 #: templates/landing/landing_page.html:47
 msgid "landingPageJGWDataPlatformHelp"
@@ -82,8 +490,8 @@ msgstr "Improve your recruitment and retention"
 #: templates/landing/landing_page.html:92
 msgid "landingPageLowStaffTurnover"
 msgstr ""
-"Lower staff turnover and increase retention proactively understanding issues "
-"negatively affecting migrants."
+"Lower staff turnover and increase retention proactively understanding issues"
+" negatively affecting migrants."
 
 #: templates/landing/landing_page.html:101
 msgid "landingPageSafetyForWorkers"
@@ -125,8 +533,8 @@ msgstr "Email:"
 #: templates/landing/landing_page.html:162
 msgid "landingPagejgwDpOffersInfo"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about "
-"migrant labour."
+"The Just Good Work data platform offers information, data and insights about"
+" migrant labour."
 
 #: templates/layouts/auth_base.html:7
 msgid "authBaseTitle"
@@ -135,52 +543,53 @@ msgstr "JGW Data Dashboard"
 #: templates/layouts/auth_base.html:76
 msgid "authBaseJGWText"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about "
-"migrant labour. This includes issues that affect migrants from when they are "
-"looking for work in their home countries, through their experience migrating "
-"and working until they finish. Through this platform, we hope to shed light "
-"on the issues that not only affect migrant workers, but also lead to "
-"inefficiencies in labour supply chains. This resource is to provide insight "
-"and support that will help individuals, organizations, and governments to "
-"combat modern slavery and protect the rights of migrant workers."
+"The Just Good Work data platform offers information, data and insights about"
+" migrant labour. This includes issues that affect migrants from when they "
+"are looking for work in their home countries, through their experience "
+"migrating and working until they finish. Through this platform, we hope to "
+"shed light on the issues that not only affect migrant workers, but also lead"
+" to inefficiencies in labour supply chains. This resource is to provide "
+"insight and support that will help individuals, organizations, and "
+"governments to combat modern slavery and protect the rights of migrant "
+"workers."
 
-#: templates/layouts/non_auth_base.html:56
+#: templates/layouts/non_auth_base.html:57
 msgid "nonAuthBaseHome"
 msgstr "Home"
 
-#: templates/layouts/non_auth_base.html:59
+#: templates/layouts/non_auth_base.html:60
 msgid "nonAuthBasePricing"
 msgstr "Pricing"
 
-#: templates/layouts/non_auth_base.html:62
+#: templates/layouts/non_auth_base.html:63
 msgid "nonAuthBaseFaqs"
 msgstr "Faqs"
 
-#: templates/layouts/non_auth_base.html:65
+#: templates/layouts/non_auth_base.html:66
 msgid "nonAuthBaseContact"
 msgstr "Contact"
 
-#: templates/layouts/non_auth_base.html:77
+#: templates/layouts/non_auth_base.html:80
 msgid "nonAuthBaseGoToDashboard"
 msgstr "Go To Dashboard"
 
-#: templates/layouts/non_auth_base.html:79
+#: templates/layouts/non_auth_base.html:82
 msgid "nonAuthBaseLogout"
 msgstr "Logout"
 
-#: templates/layouts/non_auth_base.html:82
+#: templates/layouts/non_auth_base.html:85
 msgid "nonAuthBaseLogin"
 msgstr "Login"
 
-#: templates/layouts/non_auth_base.html:83
+#: templates/layouts/non_auth_base.html:86
 msgid "nonAuthBaseTryNow"
 msgstr "Try Now"
 
-#: templates/layouts/non_auth_base.html:100
+#: templates/layouts/non_auth_base.html:103
 msgid "nonAuthBaseASolutionOf"
 msgstr "A solution of"
 
-#: templates/layouts/non_auth_base.html:105
+#: templates/layouts/non_auth_base.html:108
 msgid "nonAuthBaseSocial"
 msgstr "Social :"
 
@@ -216,8 +625,8 @@ msgstr "Hello,"
 msgid "passwordResetEmailBodyText"
 msgstr ""
 "We received a request to reset your password. If you didn't request this, "
-"please ignore this email. Otherwise, you can reset your password by clicking "
-"the button below:"
+"please ignore this email. Otherwise, you can reset your password by clicking"
+" the button below:"
 
 #: templates/users/password_reset_email.html:68
 msgid "passwordResetEmailResetPassword"
@@ -338,7 +747,7 @@ msgstr "Enter a valid email address."
 msgid "LoginFormPassword"
 msgstr "Password"
 
-#: users/forms.py:26 users/tests.py:74
+#: users/forms.py:26
 msgid "loginFormPasswordRequired"
 msgstr "This field is required."
 
