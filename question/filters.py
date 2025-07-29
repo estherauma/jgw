@@ -64,10 +64,6 @@ def generic_question_filtered_queryset(
         user_org_q = Q(org_info__name__in=user_org_names)
         generic_question_filters_q_object &= user_org_q
 
-    if user_factories:
-        user_fact_farm_q = Q(factory_farm__in=user_factories)
-        generic_question_filters_q_object &= user_fact_farm_q
-
     if user_destinations:
         user_destination_q = Q(destination__in=user_destinations)
         generic_question_filters_q_object &= user_destination_q
@@ -325,3 +321,4 @@ def message_data_sent_filtered_queryset(
         message_data_push_filters_q_object &= Q(organisation__name__in=organisations)
 
     return queryset.filter(message_data_push_filters_q_object)
+

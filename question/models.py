@@ -210,6 +210,7 @@ class MessagingQuestionStandard(models.Model):
     language = models.ForeignKey(
         Language, on_delete=models.CASCADE, null=True, blank=True, related_name="messaging_question_language"
     )
+    question_version = models.CharField(max_length=255, blank=True, null=True)
     is_myvoice_organisation = models.BooleanField(default=False)
     is_org_info_cleaned = models.BooleanField(default=False)
     api_created_at = models.DateTimeField(default=timezone.now)

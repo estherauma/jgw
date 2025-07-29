@@ -13,8 +13,7 @@ def update_messaging_question_org_info_from_organisation():
 
     with transaction.atomic():
         messaging_question_to_update = MessagingQuestionStandard.objects.filter(
-            is_org_info_cleaned=False,
-            organisation__isnull=False
+            is_org_info_cleaned=False
         ).select_related('organisation')
 
         kunfu_panda_logger.info(
@@ -22,7 +21,14 @@ def update_messaging_question_org_info_from_organisation():
         )
 
         for messaging_question in messaging_question_to_update:
-            org_name = messaging_question.organisation.name.lower().strip()
+            ons_org_data = OrganisationData.objects.get(org_code='ONS')
+            if messaging_question.organisation:
+                org_name = messaging_question.organisation.name.lower().strip()
+            else:
+                messaging_question.org_info = ons_org_data
+                messaging_question.is_org_info_cleaned = True
+                messaging_question.save()
+                continue
             
             matching_org = next(
                 (org for org in org_info_list 
@@ -53,6 +59,7 @@ def update_messaging_question_org_info_from_organisation():
                 kunfu_panda_logger.warning(
                     f"No matching organization found for name: {org_name}"
                 )
+                messaging_question.org_info = ons_org_data
                 messaging_question.is_org_info_cleaned = True
                 messaging_question.save()
 
