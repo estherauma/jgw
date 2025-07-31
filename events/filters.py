@@ -255,6 +255,9 @@ def filter_bigquery_homepage_event_data(
     if destination_countries is None:
         destination_countries = []
 
+    if origin_countries is None:
+        origin_countries = []
+
     if organisations is None:
         organisations = []
     if current_user.is_superuser:
@@ -271,14 +274,17 @@ def filter_bigquery_homepage_event_data(
     homepage_event_filters_q_object &= Q(event_date__range=(final_start_date, final_end_date))
 
     if user_destinations:
-        homepage_event_filters_q_object &= Q(destination__in=user_destinations)
+        homepage_event_filters_q_object &= Q(preference__destination__in=user_destinations)
     if destination_countries:
-        homepage_event_filters_q_object &= Q(destination__name__in=destination_countries)
+        homepage_event_filters_q_object &= Q(preference__destination__name__in=destination_countries)
 
     if user_orgs:
         homepage_event_filters_q_object &= Q(org_info__in=user_orgs)
     if organisations:
         homepage_event_filters_q_object &= Q(org_info__name__in=organisations)
+
+    if origin_countries:
+        homepage_event_filters_q_object &= Q(preference__origin__name__in=origin_countries)
 
     if immigration_status:
         homepage_event_filters_q_object &= Q(immigration_status__name__in=immigration_status)
