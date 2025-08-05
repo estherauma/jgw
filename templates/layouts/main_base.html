@@ -4,6 +4,7 @@
     <head>
         {% block main_base_head%}{% endblock main_base_head%}
         {% if google_analytics_id %}
+        {% if not request.session.user_email or request.session.user_email != 'superuser@fiftyeight.io' %}
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_id }}"></script>
         <script>
@@ -13,11 +14,20 @@
 
             const g4Id = "{{ google_analytics_id }}";
             if (g4Id) {
-                gtag('config', g4Id);
+                // Configure Google Analytics
+                const config = {
+                    'send_page_view': true
+                };
+                
+                {% if request.session.user_id and request.session.user_email and request.session.user_email != 'superuser@fiftyeight.io' %}
+                config.user_id = '{{ request.session.user_id }}';
+                {% endif %}
+                
+                gtag('config', g4Id, config);
             }
 
-            // Track login event
-            {% if request.session.login_time %}
+            // Track login event - only for non-superuser logged-in users
+            {% if request.session.login_time and request.session.user_email and request.session.user_email != 'superuser@fiftyeight.io' %}
             gtag('event', 'login', {
                 'user_id': '{{ request.session.user_id }}',
                 'user_email': '{{ request.session.user_email }}',
@@ -26,8 +36,8 @@
             });
             {% endif %}
 
-            // Track logout event
-            {% if request.session.logout_time %}
+            // Track logout event - only for non-superuser logged-in users
+            {% if request.session.logout_time and request.session.user_email and request.session.user_email != 'superuser@fiftyeight.io' %}
             gtag('event', 'logout', {
                 'user_id': '{{ request.session.user_id }}',
                 'user_email': '{{ request.session.user_email }}',
@@ -37,10 +47,12 @@
             {% endif %}
         </script>
         {% endif %}
-        <!-- User Analytics -->
+        {% endif %}
+        {% if not request.session.user_email or request.session.user_email != 'superuser@fiftyeight.io' %}
         <script src="{% static 'js/user_analytics.js' %}"></script>
+        {% endif %}
     </head>
-    <body data-user-id="{{ request.session.user_id }}" data-user-role="{{ request.session.user_role }}">
+    <body data-user-id="{{ request.session.user_id }}" data-user-role="{{ request.session.user_role }}" data-user-email="{{ request.session.user_email }}">
         {% block main_base_body%}{% endblock main_base_body%}
     </body>
 </html>
