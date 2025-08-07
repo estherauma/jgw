@@ -315,20 +315,20 @@ def export_to_excel_file(request, key):
     return response
 
 
-@login_required()
-def export_report(request):
-    form = ExportReportForm()
-    if request.method == "POST":
-        form = ExportReportForm(request.POST)
-        if form.is_valid():
-            start, end, category = itemgetter("start_date", "end_date", "category")(form.cleaned_data)
-            start, end = start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
-            filename = get_SWS_report(start, end, category)
-            response = FileResponse(open(filename, "rb"))
-            return response
-        else:
-            messages.error(request, "Error validating form!")
-    return render(request, "dashboard/batch_export.html", context={"form": form})
+# @login_required()
+# def export_report(request):
+#     form = ExportReportForm()
+#     if request.method == "POST":
+#         form = ExportReportForm(request.POST)
+#         if form.is_valid():
+#             start, end, category = itemgetter("start_date", "end_date", "category")(form.cleaned_data)
+#             start, end = start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
+#             filename = get_SWS_report(start, end, category)
+#             response = FileResponse(open(filename, "rb"))
+#             return response
+#         else:
+#             messages.error(request, "Error validating form!")
+#     return render(request, "dashboard/batch_export.html", context={"form": form})
 
 
 def test_sentry(request):

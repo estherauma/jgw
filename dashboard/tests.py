@@ -115,34 +115,34 @@ class DashboardTests(TestCase):
         self.assertTemplateUsed(response, "dashboard/visa_checklists.html")
         self.assertIsInstance(response.context["form"], FilterForm)
 
-    def test_batch_sws_report_export_renders_correctly(self):
-        url = reverse("dashboard:export_report")
-        response = self.client.get(url)
-        self.assertTemplateUsed(response, "dashboard/batch_export.html")
-        self.assertIsInstance(response.context["form"], ExportReportForm)
+    # def test_batch_sws_report_export_renders_correctly(self):
+    #     url = reverse("dashboard:export_report")
+    #     response = self.client.get(url)
+    #     self.assertTemplateUsed(response, "dashboard/batch_export.html")
+    #     self.assertIsInstance(response.context["form"], ExportReportForm)
 
-    def test_batch_sws_report_export(self):
-        url = reverse("dashboard:export_report")
-        form_data = {
-            "category": "preferences",
-            "start_date": f"{get_start_date(days=30)}",
-            "end_date": self.today,
-        }
-        response = self.client.post(url, form_data)
-        expected_filename = f"demographics_"
-        self.assertIn(expected_filename, response.headers["Content-Disposition"])
-        self.assertEqual(
-            response.headers["Content-Type"],
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
+    # def test_batch_sws_report_export(self):
+    #     url = reverse("dashboard:export_report")
+    #     form_data = {
+    #         "category": "preferences",
+    #         "start_date": f"{get_start_date(days=30)}",
+    #         "end_date": self.today,
+    #     }
+    #     response = self.client.post(url, form_data)
+    #     expected_filename = f"demographics_"
+    #     self.assertIn(expected_filename, response.headers["Content-Disposition"])
+    #     self.assertEqual(
+    #         response.headers["Content-Type"],
+    #         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    #     )
 
-    def test_batch_sws_report_export_form_validation(self):
-        url = reverse("dashboard:export_report")
-        form_data = {
-            "category": "preferences",
-            "start_date": f"{get_start_date(days=30)}",
-            "end_date": datetime.today(),
-        }
-        response = self.client.post(url, form_data)
-        form_errors = dict(response.context["form"].errors)
-        self.assertEqual(form_errors, {"end_date": ["Enter a valid date."]})
+    # def test_batch_sws_report_export_form_validation(self):
+    #     url = reverse("dashboard:export_report")
+    #     form_data = {
+    #         "category": "preferences",
+    #         "start_date": f"{get_start_date(days=30)}",
+    #         "end_date": datetime.today(),
+    #     }
+    #     response = self.client.post(url, form_data)
+    #     form_errors = dict(response.context["form"].errors)
+    #     self.assertEqual(form_errors, {"end_date": ["Enter a valid date."]})
