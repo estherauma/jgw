@@ -19,16 +19,18 @@ class JustGoodWorkAPIClient:
 
 
 class MessagingAPIClient:
-    default_headers = {"secret": os.environ.get("JGW_MESSAGING_API_SECRET")}
+    api_secret = os.environ.get("JGW_MESSAGING_API_SECRET")
+    default_headers = {"secret": api_secret}
 
     def __init__(self):
         self.base_url = "https://messaging.justgood.work/jgw/v1"
 
-    def get_data(self, endpoint):
+    def get_data(self, endpoint, headers=None):
         url = f"{self.base_url}{endpoint}"
-        return self._send_get_request(url)
+        return self._send_get_request(url, headers=headers or {})
 
-    def _send_get_request(self, url, headers={}):
+    def _send_get_request(self, url, headers=None):
+        headers = headers or {}
         response = requests.get(url, headers={**self.default_headers, **headers})
         if response.status_code == 200:
             return response.json()["data"]

@@ -122,7 +122,7 @@
             <div class="card h-100">
                 <div class="card-body chart">
                     <p class="chart-title">messaging question per destination</p>
-                    <div id="messaging-question-destination-chart-id-chart-box">
+                    <div class="messaging-question-destination-chart-id-chart-box">
                         <div id="messaging-question-destination-chart-id"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
@@ -257,22 +257,20 @@
     var originData = {{ messaging_question_per_origin|safe }};
     var destinationData = {{ messaging_question_per_destination|safe }};
     var organisationData = {{ messaging_question_per_organisation|safe }};
-    var allMessagingQuestionResponse = {{ each_messaging_question_response | safe }}
-    var messaging_question_by_age = {{ messaging_question_by_age | safe }}
-    var messaging_question_by_gender = {{ messaging_question_by_gender | safe }}
-    var messaging_question_by_sectors = {{ messaging_question_by_sectors | safe }}
-    var user_counts_by_geo_country = {{ user_counts_by_geo_country | safe }}
+    var allMessagingQuestionResponse = {{ each_messaging_question_response | safe }};
+    var messaging_question_by_age = {{ messaging_question_by_age|safe }};
+    var messaging_question_by_gender = {{ messaging_question_by_gender|safe }};
+    var messaging_question_by_sectors = {{ messaging_question_by_sectors|safe }};
+    var user_counts_by_geo_country = {{ user_counts_by_geo_country|safe }};
 
     messagingQuestionOriginChart(originData)
-
     messagingQuestionDestinationChart(destinationData)
-
     messagingQustionOrganisationPieChart(organisationData)
     reusablePieChart(messaging_question_by_age, 'messaging-question-by-age-chart-id')
-
     reusablePieChart(messaging_question_by_gender, 'messaging-question-by-gender-chart-id')
     createUserGeolocationMap(user_counts_by_geo_country, 'user_geolocation_map_messaging_question')
     usersBySectorsChart(messaging_question_by_sectors, 'messaging-question-sectors-chart-id')
+    
     document.addEventListener('DOMContentLoaded', function() {
         createDropdownItems();
         document.getElementById('selectAll').addEventListener('change', handleCheckboxChange);

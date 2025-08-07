@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import transaction
 from django.db.models import Q, F
 from django.db.models.functions import Replace
@@ -26,8 +27,9 @@ from question.models import (
     MessagingResponse,
     MessagingResponseOptionText,
 )
-from preference.models import Country, Organisation, Preference
+from preference.models import Country, FactoryFarm, Gender, ImmigrationStatus, Language, Organisation, OrganisationData, OrganisationSector, Preference
 from question.tasks import translate_and_clean_messaging_question_fields
+from django.conf import settings
 
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/messaging_question_tasks.log")
@@ -55,21 +57,43 @@ def fetch_messaging_question_from_api(client):
 
     return client.get_data(f"/question-responses?startDate={start_date}&endDate={end_date}")
 
+def fetch_messaging_question_v3_from_api(jgw_api_client):
+    start_date = APPLICATION_POSSIBLE_START_DATE
+    end_date = todays_date()
+
+    headers = {"secret": settings.MESSAGING_API_SECRET}
+
+    latest_messaging_question_v3 = MessagingQuestionStandard.objects.last()
+    if latest_messaging_question_v3:
+        start_date = latest_messaging_question_v3.created_at.strftime("%Y-%m-%d")
+
+    try:
+        return jgw_api_client.get_data(f"/question-responses/v2?startDate={start_date}&endDate={end_date}")
+    except Exception as e:
+        kunfu_panda_logger.error(f"Error fetching messaging questions v3: {str(e)}")
+        return []
 
 @transaction.atomic
 def fetch_messaging_questions_from_api_to_db():
     messaging_questions = []
+    lagacy_jgw_api_client = JustGoodWorkAPIClient()
+    jgw_api_client = MessagingAPIClient()
 
     # legacy
-    lagacy_jgw_api_client = JustGoodWorkAPIClient()
     legacy_messaging_questions_resp = fetch_legacy_messaging_question_from_api(lagacy_jgw_api_client)
     messaging_questions.extend(legacy_messaging_questions_resp)
 
     # new
-    jgw_api_client = MessagingAPIClient()
     messaging_questions_resp = fetch_messaging_question_from_api(jgw_api_client)
     messaging_questions.extend(messaging_questions_resp)
 
+    # new v3
+    try:
+        messaging_questions_resp_v3 = fetch_messaging_question_v3_from_api(jgw_api_client)
+    except Exception as e:
+        kunfu_panda_logger.error(f"Error fetching messaging questions v3: {str(e)}")
+        messaging_questions_resp_v3 = []
+    
     for messaging_question in messaging_questions:
         try:
             add_messaging_question_to_db(messaging_question)
@@ -77,7 +101,16 @@ def fetch_messaging_questions_from_api_to_db():
             print("An error occurred during inline questions creation:", str(e))
             transaction.set_rollback(True)
             raise
-    kunfu_panda_logger.info(f"Added {len(messaging_questions)} messaging questions to the database")
+    kunfu_panda_logger.info(f"Added {len(messaging_questions)} messaging questions version 1 and 2 to the database")
+
+    for messaging_question in messaging_questions_resp_v3:
+        try:
+            add_messaging_question_v3_to_db(messaging_question)
+        except Exception as e:
+            print("An error occurred during messaging questions v3 creation:", str(e))
+            transaction.set_rollback(True)
+            raise
+    kunfu_panda_logger.info(f"Added {len(messaging_questions_resp_v3)} messaging questions v3 to the database")
 
     # call to translate, question text, response
     translate_and_clean_messaging_question_fields()
@@ -138,6 +171,7 @@ def add_messaging_question_to_db(messaging_question):
         organisation=organisation_data,
         factory_farm=factory_farm_data,
         org_code=org_code,
+        question_version="V1_and_v2"
     )
     if sectors:
         sectors_of_work_list = add_original_sector_of_work_to_db(sectors)
@@ -214,6 +248,150 @@ def update_translations_from_localization(localization_data):
 
     except Exception as e:
         print(f"Error during translation update: {str(e)}")
+
+
+def add_messaging_question_v3_to_db(data):
+    try:
+        standard_data = {
+            'data_source_id': data.get('_id', ''),
+            'device_id': data.get('deviceId', ''),
+            'app_id': data.get('appId', ''),
+            'locale': data.get('locale', ''),
+            'org_code': data.get('organisationCode', ''),
+            'question_id': data.get('questionKey', ''),
+            'is_myvoice_organisation': False,  
+            'api_created_at': datetime.fromisoformat(data.get('createdAt').replace('Z', '+00:00')),
+            'api_updated_at': datetime.fromisoformat(data.get('updatedAt').replace('Z', '+00:00')),
+            'question_version':"V3"
+        }
+
+        # preference
+        preference = Preference.objects.filter(device_id=data.get('deviceId')).first()
+        standard_data['preference'] = preference
+
+        if data.get('language'):
+            language, _ = Language.objects.get_or_create(
+                code=data.get('language'),
+                defaults={'name': data.get('language')}
+            )
+            standard_data['language'] = language
+
+        if data.get('destination'):
+            destination_data = get_or_add_country_to_db(data.get('destination'), source="destination")
+            standard_data['destination'] = destination_data
+
+        if data.get('locale'):
+            origin = get_or_add_country_to_db(data.get('locale'), source="origin")
+            standard_data['origin'] = origin
+
+        if data.get('organisation'):
+            org, _ = Organisation.objects.get_or_create(
+                name=data.get('organisation')
+            )
+            standard_data['organisation'] = org
+
+            
+            if data.get('organisationCode'):
+                org_data = OrganisationData.objects.filter(
+                    org_code=data.get('organisationCode')
+                ).first()
+                if org_data:  
+                    standard_data['org_info'] = org_data
+
+        if data.get('organisationSector'):
+            sector, _ = OrganisationSector.objects.get_or_create(
+                name=data.get('organisationSector')
+            )
+            standard_data['organisation_sector'] = sector
+
+        if data.get('factoryFarm'):
+            farm, _ = FactoryFarm.objects.get_or_create(
+                name=data.get('factoryFarm')
+            )
+            standard_data['factory_farm'] = farm
+
+        if data.get('immigrationStatus'):
+            status, _ = ImmigrationStatus.objects.get_or_create(
+                name=data.get('immigrationStatus')
+            )
+            standard_data['immigration_status'] = status
+
+        standard, created = MessagingQuestionStandard.objects.update_or_create(
+            data_source_id=standard_data['data_source_id'],
+            defaults=standard_data
+        )
+
+        question_text, _ = MessagingQuestionText.objects.get_or_create(
+            text=data.get('questionText', ''),
+            defaults={
+                'translated_text': data.get('questionText', '')
+            }
+        )
+
+        question, _ = MessagingQuestion.objects.update_or_create(
+            messaging_question_standard=standard,
+            defaults={
+                'question': question_text
+            }
+        )
+
+        response_type = data.get('questionResponseType')
+        question_value = data.get('questionValue')
+
+        if response_type == 'select' and isinstance(question_value, list):
+            for value in question_value:
+                option_text, _ = MessagingResponseOptionText.objects.get_or_create(
+                    option=value.get('option', ''),
+                    defaults={
+                        'translated_option': None
+                    }
+                )
+                response, _ = MessagingResponse.objects.get_or_create(
+                    option=option_text,
+                    value=value.get('key', '')
+                )
+                question_response, _ = MessagingQuestionResponse.objects.get_or_create(
+                    messaging_question=question
+                )
+                question_response.responses.add(response)
+
+        elif response_type == 'radio' and isinstance(question_value, dict):
+            option_text, _ = MessagingResponseOptionText.objects.get_or_create(
+                option=question_value.get('option', ''),
+                defaults={
+                    'translated_option': None
+                }
+            )
+            response, _ = MessagingResponse.objects.get_or_create(
+                option=option_text,
+                value=question_value.get('key', '')
+            )
+            question_response, _ = MessagingQuestionResponse.objects.get_or_create(
+                messaging_question=question
+            )
+            question_response.responses.add(response)
+
+        elif response_type == 'text':
+            option_text, _ = MessagingResponseOptionText.objects.get_or_create(
+                option=question_value,
+                defaults={
+                    'translated_option': None
+                }
+            )
+            response, _ = MessagingResponse.objects.get_or_create(
+                option=option_text,
+                value=str(question_value)
+            )
+            question_response, _ = MessagingQuestionResponse.objects.get_or_create(
+                messaging_question=question
+            )
+            question_response.responses.add(response)
+
+        return True
+
+    except Exception as e:
+        print(f"Error processing messaging question v3: {str(e)}")
+        return False
 
 
 def update_myvoice_messaging_questions():
