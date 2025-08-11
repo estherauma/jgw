@@ -235,13 +235,11 @@ LOGGING = {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
-            # "stream": "sys.stdout",
             "formatter": "verbose",
         },
         "translation_file": {
             "level": "ERROR",
-            "class": "logging.FileHandler",
-            "filename": "translation_errors.log",  # Log file for translation errors
+            "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
     },
@@ -292,5 +290,5 @@ MAINTENANCE_MODE_ALLOWED_URLS = [
     '/admin/login/'
 ]
 
-# i18n
+
 LOCALE_PATHS = [os.path.join(BASE_DIR,'locale')]
