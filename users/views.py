@@ -267,7 +267,7 @@ def invite_user(request):
                 subject="Set up your account on Just Good Work Data Platform",
                 message=f"""
                 Please follow this link to set up your new account on Just Good Work Data Platform:
-                https://jgwpandas.herokuapp.com{reverse("users:verify_invite", args=(token,))}
+                https://data.justgood.work{reverse("users:verify_invite", args=(token,))}
                 \nPlease note that this link expires in 3 days.
                 """,
                 recipients=[email_address],
@@ -375,7 +375,7 @@ def request_password_reset(request):
                 if not user:
                     raise User.DoesNotExist()
                 token = generate_token(payload_data={"user_id": user.id}, days_to_expiry=1)
-                reset_link = f"https://jgwpandas.herokuapp.com{reverse('users:set_password', args=(token,))}"
+                reset_link = f"https://data.justgood.work{reverse('users:set_password', args=(token,))}"
 
                 logo_path = finders.find("../static/logo.jpg")
 
@@ -461,7 +461,7 @@ def change_email_address(request):
                     subject="Verify your email",
                     message=f"""
                     \n Click this link to verify this email for your account on Just Good Work Data Platform:
-                    \n https://jgwpandas.herokuapp.com{reverse("users:verify_email", args=(token,))}
+                    \n https://data.justgood.work{reverse("users:verify_email", args=(token,))}
                     \n This link expires in 1 day.
                     \n Reach out to your administrator if you didn't initiate this action.
                     """,
