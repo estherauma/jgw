@@ -88,13 +88,13 @@ jobs:
             coverage report
             coverage xml
 
-      - run:
-          name: Upload coverage report to codeclimate
-          command: |
-            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            chmod +x ./cc-test-reporter
-            ./cc-test-reporter format-coverage -t coverage.py
-            ./cc-test-reporter upload-coverage
+      # - run:
+      #     name: Upload coverage report to codeclimate
+      #     command: |
+      #       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      #       chmod +x ./cc-test-reporter
+      #       ./cc-test-reporter format-coverage -t coverage.py
+      #       ./cc-test-reporter upload-coverage
   deploy:
     docker:
       - image: cimg/python:3.9.1
