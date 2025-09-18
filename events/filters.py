@@ -255,6 +255,9 @@ def filter_bigquery_homepage_event_data(
     if destination_countries is None:
         destination_countries = []
 
+    if origin_countries is None:
+        origin_countries = []
+
     if organisations is None:
         organisations = []
     if current_user.is_superuser:

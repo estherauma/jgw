@@ -2,6 +2,7 @@
 
 from django.db import migrations
 from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.hashers import make_password
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 import os
 
@@ -13,16 +14,16 @@ def create_user_and_role(apps, schema_editor):
         name="Summerberry",
     )
     
+    # Create user with hashed password
     user = User.objects.create(
         email=os.getenv("SUMMERBERRY_DASHBOARD_EMAIL"),
-        password=os.getenv("SUMMERBERRY_DASHBOARD_PASSWORD"),
+        password=make_password(os.getenv("SUMMERBERRY_DASHBOARD_PASSWORD")),
         first_name="Summerberry",
         last_name="Dashboard Access",
         is_active=True,
         is_staff=False,
         receive_marketing_emails=False
     )
-    user.save()
     group.user_set.add(user)
 
 
@@ -32,7 +33,7 @@ def undo_create_user_and_role(apps, schema_editor):
     
     try:
         group = Group.objects.get(name='Summerberry')
-        user = User.objects.get(email=os.getenv("SUMMERBERRY_DASHBOADRD_EMAIL"))
+        user = User.objects.get(email=os.getenv("SUMMERBERRY_DASHBOARD_EMAIL"))
         group.user_set.remove(user)
     except Group.DoesNotExist:
         print("Group does not exist.")
@@ -41,7 +42,7 @@ def undo_create_user_and_role(apps, schema_editor):
         print("User does not exist.")
 
     try:
-        user = User.objects.get(email=os.getenv("SUMMERBERRY_DASHBOADRD_EMAIL"))
+        user = User.objects.get(email=os.getenv("SUMMERBERRY_DASHBOARD_EMAIL"))
         user.delete()
     except User.DoesNotExist:
         print("User does not exist.")
