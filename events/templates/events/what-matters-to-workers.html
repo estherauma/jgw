@@ -2,9 +2,10 @@
 {% load crispy_forms_tags %} 
 {% load static %}
 {% load waffle_tags %} 
+{% load i18n %}
 
 <!-- title -->
-{% block title %} Inline Questions {% endblock title %}
+{% block title %} {% translate "whatMattersTitle" %} {% endblock title %}
 
 <!-- page content -->
 {% block content %}
@@ -19,7 +20,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title" id="filter-modal-area-label">Filters</h4>
+        <h4 class="modal-title" id="filter-modal-area-label">{% translate "whatMattersFilters" %} </h4>
         <button
           type="button"
           class="btn-close"
@@ -30,8 +31,8 @@
       <div class="modal-body">
         <form method="post" id="what-matters-to-workers-filter-form">
           {% csrf_token %} {{filter_form|crispy}}
-          <button type="submit" class="btn btn-primary">Submit</button>
-          <button type="submit" name="reset" value="true" class="btn btn-secondary" >Reset</a>
+          <button type="submit" class="btn btn-primary">{% translate "whatMattersSubmitButton" %} </button>
+          <button type="submit" name="reset" value="true" class="btn btn-secondary">{% translate "whatMattersResetButton" %} </button>
         </form>
       </div>
     </div>
@@ -45,7 +46,7 @@
         <div class="row">
           <div class="col-9">
             <div class="text-start">
-              <h5 class="text-muted global-text-style">what matters to workers</h5>
+              <h5 class="text-muted global-text-style">{% translate "whatMattersHeading" %} </h5>
             </div>
           </div>
           <div class="col-3">
@@ -63,15 +64,15 @@
                       aria-haspopup="true"
                       aria-expanded="false"
                     >
-                      Export
+                      {% translate "whatMattersExportButton" %} 
                       <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
                     </a>
                   {% endflag %}
                   <div class="dropdown-menu" aria-labelledby="export-menu">
-                    <a class="dropdown-item" href="{% url 'events:export_telephone_clicks_data' %}?export=true">Export Telephone Clicks Data Report to Excel</a>
-                    <a class="dropdown-item" href="{% url 'events:export_link_clicks_data' %}?export=true">Export Link Clicks Data Report to Excel</a>
-                    <a class="dropdown-item" href="{% url 'events:export_report_issue_data' %}?export=true">Export Report Issue Data to Excel</a>
-                    <button class="dropdown-item" id="export-what-matters-to-workers-to-excel">Export Events Data Statistics to Excel</button>
+                    <a class="dropdown-item" href="{% url 'events:export_telephone_clicks_data' %}?export=true">{% translate "whatMattersExportTelephoneClicksDataReport" %} </a>
+                    <a class="dropdown-item" href="{% url 'events:export_link_clicks_data' %}?export=true">{% translate "whatMattersExportLinkClicksDataReport" %} </a>
+                    <a class="dropdown-item" href="{% url 'events:export_report_issue_data' %}?export=true">{% translate "whatMattersExportReportIssueData" %} </a>
+                    <button class="dropdown-item" id="export-what-matters-to-workers-to-excel">{% translate "whatMattersExportEventsDataStatistics" %} </button>
                   </div>
                 </div>
               </div>
@@ -82,7 +83,7 @@
                   role="button"
                   class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue"
                 >
-                  Filter
+                  {% translate "whatMattersFilterButton" %} 
                 </button>
               </div>
             </div>
@@ -101,13 +102,13 @@
     <div class="card h-100">
       <div class="card-body chart">
         <p class="chart-title">
-          what matters to workers (where people spend time in the app)
+          {% translate "whatMattersChartTitle" %} 
         </p>
         <div class="chapters-opened-graph-id-chart-box">
           <div id="chapters-opened-graph-id"></div>
             <div class="info-tooltip">
               <i class="fas fa-info-circle"></i>
-              What Matters to Workers: What issues are jobseekers or workers interested in / trying to find out information about?
+              {% translate "whatMattersChartTooltip" %} 
               <div class="tooltip-arrow"></div>
             </div>
           </div>
@@ -121,12 +122,12 @@
   <div class="col-md-12 mt-3">
     <div class="card h-100">
       <div class="card-body chart">
-        <p class="chart-title">user feedback - was this information helpful?</p>
+        <p class="chart-title"> {% translate "whatMattersUserFeedbackTitle" %}</p>
         <div class="was-this-helpful-graph-id-chart-box">
           <div id="was-this-helpful-graph-id"></div>
           <div class="info-tooltip">
             <i class="fas fa-info-circle"></i>
-            User Feedback: Shows responses from users to the question “Was this information helpful?” at the bottom of each section.
+            {% translate "whatMattersUserFeedbackTooltip" %}
           <div class="tooltip-arrow"></div>
         </div>
       </div>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-02 13:33+0000\n"
+"POT-Creation-Date: 2025-09-23 10:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,6 +98,66 @@ msgstr "Fecha de inicio"
 #: core/forms.py:196
 msgid "dateRangeFormEndDate"
 msgstr "Fecha de finalización"
+
+#: events/templates/events/what-matters-to-workers.html:8
+msgid "whatMattersTitle"
+msgstr "Lo que les importa a los trabajadores"
+
+#: events/templates/events/what-matters-to-workers.html:23
+msgid "whatMattersFilters"
+msgstr "Filtros"
+
+#: events/templates/events/what-matters-to-workers.html:34
+msgid "whatMattersSubmitButton"
+msgstr "Entregar"
+
+#: events/templates/events/what-matters-to-workers.html:35
+msgid "whatMattersResetButton"
+msgstr "Reiniciar"
+
+#: events/templates/events/what-matters-to-workers.html:49
+msgid "whatMattersHeading"
+msgstr "Lo que importa a los trabajadores"
+
+#: events/templates/events/what-matters-to-workers.html:67
+msgid "whatMattersExportButton"
+msgstr "Exportar"
+
+#: events/templates/events/what-matters-to-workers.html:72
+msgid "whatMattersExportTelephoneClicksDataReport"
+msgstr "Exportar informe de datos de clics telefónicos a Excel"
+
+#: events/templates/events/what-matters-to-workers.html:73
+msgid "whatMattersExportLinkClicksDataReport"
+msgstr "Exportar informe de datos de clics en enlaces a Excel"
+
+#: events/templates/events/what-matters-to-workers.html:74
+msgid "whatMattersExportReportIssueData"
+msgstr "Exportar datos de problemas de informes a Excel"
+
+#: events/templates/events/what-matters-to-workers.html:75
+msgid "whatMattersExportEventsDataStatistics"
+msgstr "Exportar estadísticas de datos de eventos a Excel"
+
+#: events/templates/events/what-matters-to-workers.html:86
+msgid "whatMattersFilterButton"
+msgstr "Filtrar"
+
+#: events/templates/events/what-matters-to-workers.html:105
+msgid "whatMattersChartTitle"
+msgstr "Lo que les importa a los trabajadores (dónde pasan el tiempo las personas en la aplicación)"
+
+#: events/templates/events/what-matters-to-workers.html:111
+msgid "whatMattersChartTooltip"
+msgstr "Qué les importa a los trabajadores: ¿Qué temas les interesan o sobre qué intentan encontrar información los solicitantes de empleo o los trabajadores?"
+
+#: events/templates/events/what-matters-to-workers.html:125
+msgid "whatMattersUserFeedbackTitle"
+msgstr "Comentarios de los usuarios: ¿fue útil esta información?"
+
+#: events/templates/events/what-matters-to-workers.html:130
+msgid "whatMattersUserFeedbackTooltip"
+msgstr "Comentarios de los usuarios: muestra las respuestas de los usuarios a la pregunta '¿Fue útil esta información?' en la parte inferior de cada sección."
 
 #: jgwpandas/settings.py:162
 msgid "English"
@@ -232,8 +292,8 @@ msgstr "Usuarios por país de destino"
 #: preference/templates/preference/user_overview.html:150
 msgid "userOverviewUsersByDestinationCountryTooltip"
 msgstr ""
-"Usuarios por país de destino: Los usuarios eligen el país en el que trabajan"
-" o buscan trabajo."
+"Usuarios por país de destino: Los usuarios eligen el país en el que trabajan "
+"o buscan trabajo."
 
 #: preference/templates/preference/user_overview.html:162
 msgid "userOverviewUsersByLanguageTitle"
@@ -242,8 +302,8 @@ msgstr "Usuarios por idioma"
 #: preference/templates/preference/user_overview.html:167
 msgid "userOverviewUsersByLanguageTooltip"
 msgstr ""
-"Usuarios por idioma: los usuarios eligen su idioma cuando usan la aplicación"
-" por primera vez."
+"Usuarios por idioma: los usuarios eligen su idioma cuando usan la aplicación "
+"por primera vez."
 
 #: preference/templates/preference/user_overview.html:180
 msgid "userOverviewUsersByStateTitle"
@@ -395,30 +455,26 @@ msgid "sideBarDataPipeline"
 msgstr "Canalización de datos"
 
 #: templates/includes/sidebar.html:84
-msgid "sideBarExportReports"
-msgstr "Informes de exportación"
-
-#: templates/includes/sidebar.html:90
 msgid "sideBarUserDiagnostics"
 msgstr "Diagnóstico de usuario"
 
-#: templates/includes/sidebar.html:96
+#: templates/includes/sidebar.html:90
 msgid "sideBarSettings"
 msgstr "Ajustes"
 
-#: templates/includes/sidebar.html:102
+#: templates/includes/sidebar.html:96
 msgid "sideBarAccounts"
 msgstr "Cuentas"
 
-#: templates/includes/sidebar.html:105
+#: templates/includes/sidebar.html:99
 msgid "sideBarInvitations"
 msgstr "Invitaciones"
 
-#: templates/includes/sidebar.html:109
+#: templates/includes/sidebar.html:103
 msgid "sideBarAddUser"
 msgstr "Agregar usuario"
 
-#: templates/includes/sidebar.html:123
+#: templates/includes/sidebar.html:117
 msgid "sideBarLogout"
 msgstr "Finalizar la sesión"
 
@@ -454,8 +510,8 @@ msgstr ""
 "afectan a los migrantes desde que buscan trabajo en sus países de origen, "
 "pasando por su experiencia migratoria y laboral, hasta que terminan su "
 "trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
-"problemas que no solo afectan a los trabajadores migrantes, sino que también"
-" provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también "
+"provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
 "recurso busca brindar información y apoyo que ayude a personas, "
 "organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
 "derechos de los trabajadores migrantes."
@@ -523,9 +579,9 @@ msgstr "Información precisa"
 #: templates/landing/landing_page.html:112
 msgid "landingPageBuildingTrustText"
 msgstr ""
-"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a"
-" migrantes en todo el mundo, lo que significa que tenemos las relaciones "
-"para obtener información precisa."
+"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a "
+"migrantes en todo el mundo, lo que significa que tenemos las relaciones para "
+"obtener información precisa."
 
 #: templates/landing/landing_page.html:142
 msgid "landingPageHaveAnyQuestions"
@@ -561,8 +617,8 @@ msgstr ""
 "afectan a los migrantes desde que buscan trabajo en sus países de origen, "
 "pasando por su experiencia migratoria y laboral, hasta que terminan su "
 "trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
-"problemas que no solo afectan a los trabajadores migrantes, sino que también"
-" provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también "
+"provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
 "recurso busca brindar información y apoyo que ayude a personas, "
 "organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
 "derechos de los trabajadores migrantes."
@@ -653,8 +709,7 @@ msgstr "Este enlace expirará en 1 día."
 #: templates/users/password_reset_email.html:74
 msgid "passwordResetEmailIfIssues"
 msgstr ""
-"Si tiene algún problema, envíe un correo electrónico a: "
-"support@justgood.work"
+"Si tiene algún problema, envíe un correo electrónico a: support@justgood.work"
 
 #: templates/users/password_reset_email.html:75
 msgid "passwordResetEmailJGWTeam"
@@ -713,8 +768,8 @@ msgstr "Iniciar sesión"
 #: templates/users/sign_in.html:10
 msgid "signInPageEnterEmail"
 msgstr ""
-"Introduzca su dirección de correo electrónico y contraseña para acceder a la"
-" cuenta."
+"Introduzca su dirección de correo electrónico y contraseña para acceder a la "
+"cuenta."
 
 #: templates/users/sign_in.html:40
 msgid "signInPageSignInButton"
@@ -798,61 +853,60 @@ msgstr "Nueva contraseña"
 msgid "setPasswordFormConfirmNewPassword"
 msgstr "Confirmar nueva contraseña"
 
-#: users/tests.py:92 users/views.py:152
+#: users/tests.py:92 users/views.py:163
 msgid "loginUserViewErrorNotUser"
 msgstr "¡No se puede iniciar sesión con las credenciales proporcionadas!"
 
-#: users/tests.py:266 users/views.py:392
+#: users/tests.py:266 users/views.py:403
 msgid "requestPasswordResetViewErrorMessage"
 msgstr ""
-"¡Ninguna cuenta de usuario coincide con esta dirección de correo "
-"electrónico!"
+"¡Ninguna cuenta de usuario coincide con esta dirección de correo electrónico!"
 
-#: users/views.py:118
+#: users/views.py:129
 msgid "createUserAccountViewInfo"
 msgstr "Su cuenta fue creada y se activará en breve."
 
-#: users/views.py:121
+#: users/views.py:132
 msgid "createUserAccountViewError"
 msgstr "¡Error al validar el formulario!"
 
-#: users/views.py:150
+#: users/views.py:161
 msgid "loginUserViewError"
 msgstr "¡No se puede iniciar sesión con las credenciales proporcionadas!"
 
-#: users/views.py:154
+#: users/views.py:165
 msgid "loginUserViewInvalidForm"
 msgstr "¡Error al validar el formulario!"
 
-#: users/views.py:378
+#: users/views.py:389
 msgid "requestPasswordResetViewEmailSubject"
 msgstr "Restablezca su contraseña en Just Good Work Data Platform"
 
-#: users/views.py:386
+#: users/views.py:397
 msgid "requestPasswordResetViewEmailSuccessText"
 msgstr ""
 "Se ha enviado un correo electrónico a {email_address}. Por favor, revise si "
-"recibió un correo electrónico de Just Good Work Data Platform y haga clic en"
-" el enlace incluido para restablecer su contraseña."
+"recibió un correo electrónico de Just Good Work Data Platform y haga clic en "
+"el enlace incluido para restablecer su contraseña."
 
-#: users/views.py:403
+#: users/views.py:414
 msgid "setPasswordViewInvalidTokenError"
 msgstr "¡Token inválido!"
 
-#: users/views.py:419
+#: users/views.py:430
 msgid "setPasswordViewSuccessText"
 msgstr ""
 "Su contraseña se ha restablecido correctamente. Ahora puede iniciar sesión "
 "con su nueva contraseña."
 
-#: users/views.py:423
+#: users/views.py:434
 msgid "setPasswordViewInvalidFormError"
 msgstr "¡Error al validar el formulario!"
 
-#: users/views.py:425
+#: users/views.py:436
 msgid "setPasswordViewLinkExpiredError"
 msgstr "¡Este enlace ha expirado!"
 
-#: users/views.py:427
+#: users/views.py:438
 msgid "setPasswordViewUserAccountNotFound"
 msgstr "¡Cuenta de usuario no encontrada!"

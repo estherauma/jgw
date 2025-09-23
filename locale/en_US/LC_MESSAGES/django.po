@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-02 13:32+0000\n"
+"POT-Creation-Date: 2025-09-23 10:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,6 +96,66 @@ msgstr "Start Date"
 #: core/forms.py:196
 msgid "dateRangeFormEndDate"
 msgstr "End Date"
+
+#: events/templates/events/what-matters-to-workers.html:8
+msgid "whatMattersTitle"
+msgstr "What Matters to Workers"
+
+#: events/templates/events/what-matters-to-workers.html:23
+msgid "whatMattersFilters"
+msgstr "Filters"
+
+#: events/templates/events/what-matters-to-workers.html:34
+msgid "whatMattersSubmitButton"
+msgstr "Submit"
+
+#: events/templates/events/what-matters-to-workers.html:35
+msgid "whatMattersResetButton"
+msgstr "Reset"
+
+#: events/templates/events/what-matters-to-workers.html:49
+msgid "whatMattersHeading"
+msgstr "What matters to workers"
+
+#: events/templates/events/what-matters-to-workers.html:67
+msgid "whatMattersExportButton"
+msgstr "Export"
+
+#: events/templates/events/what-matters-to-workers.html:72
+msgid "whatMattersExportTelephoneClicksDataReport"
+msgstr "Export Telephone Clicks Data Report to Excel"
+
+#: events/templates/events/what-matters-to-workers.html:73
+msgid "whatMattersExportLinkClicksDataReport"
+msgstr "Export Link Clicks Data Report to Excel"
+
+#: events/templates/events/what-matters-to-workers.html:74
+msgid "whatMattersExportReportIssueData"
+msgstr "Export Report Issue Data to Excel"
+
+#: events/templates/events/what-matters-to-workers.html:75
+msgid "whatMattersExportEventsDataStatistics"
+msgstr "Export Events Data Statistics to Excel"
+
+#: events/templates/events/what-matters-to-workers.html:86
+msgid "whatMattersFilterButton"
+msgstr "Filter"
+
+#: events/templates/events/what-matters-to-workers.html:105
+msgid "whatMattersChartTitle"
+msgstr "What matters to workers (where people spend time in the app)"
+
+#: events/templates/events/what-matters-to-workers.html:111
+msgid "whatMattersChartTooltip"
+msgstr "What Matters to Workers: What issues are jobseekers or workers interested in / trying to find out information about?"
+
+#: events/templates/events/what-matters-to-workers.html:125
+msgid "whatMattersUserFeedbackTitle"
+msgstr "User feedback - was this information helpful?"
+
+#: events/templates/events/what-matters-to-workers.html:130
+msgid "whatMattersUserFeedbackTooltip"
+msgstr "User Feedback: Shows responses from users to the question 'Was this information helpful?' at the bottom of each section."
 
 #: jgwpandas/settings.py:162
 msgid "English"
@@ -258,8 +318,8 @@ msgstr "Users by immigration status"
 #: preference/templates/preference/user_overview.html:202
 msgid "userOverviewUsersByImmigrationStatusTooltip"
 msgstr ""
-"Users by Immigration Status: Users select their immigration status when they"
-" first use the app."
+"Users by Immigration Status: Users select their immigration status when they "
+"first use the app."
 
 #: preference/templates/preference/user_overview.html:215
 msgid "userOverviewUsersByAgeTitle"
@@ -286,8 +346,8 @@ msgstr "Work code usage"
 #: preference/templates/preference/user_overview.html:258
 msgid "userOverviewWorkCodeUsageTooltip"
 msgstr ""
-"Work Code Usage: Users who have logged into the app using an organisation QR"
-" Code or Link."
+"Work Code Usage: Users who have logged into the app using an organisation QR "
+"Code or Link."
 
 #: preference/templates/preference/user_overview.html:275
 msgid "userOverviewNewUsersByMonthTitle"
@@ -385,30 +445,26 @@ msgid "sideBarDataPipeline"
 msgstr "Data Pipeline"
 
 #: templates/includes/sidebar.html:84
-msgid "sideBarExportReports"
-msgstr "Export reports"
-
-#: templates/includes/sidebar.html:90
 msgid "sideBarUserDiagnostics"
 msgstr "User Diagnostics"
 
-#: templates/includes/sidebar.html:96
+#: templates/includes/sidebar.html:90
 msgid "sideBarSettings"
 msgstr "Settings"
 
-#: templates/includes/sidebar.html:102
+#: templates/includes/sidebar.html:96
 msgid "sideBarAccounts"
 msgstr "Accounts"
 
-#: templates/includes/sidebar.html:105
+#: templates/includes/sidebar.html:99
 msgid "sideBarInvitations"
 msgstr "Invitations"
 
-#: templates/includes/sidebar.html:109
+#: templates/includes/sidebar.html:103
 msgid "sideBarAddUser"
 msgstr "Add User"
 
-#: templates/includes/sidebar.html:123
+#: templates/includes/sidebar.html:117
 msgid "sideBarLogout"
 msgstr "Log out"
 
@@ -439,15 +495,14 @@ msgstr "Welcome to the Just Good Work Data Platform."
 #: templates/landing/landing_page.html:19
 msgid "landingPageIntroText"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about"
-" migrant labour. This includes issues that affect migrants from when they "
-"are looking for work in their home countries, through their experience "
-"migrating and working until they finish. Through this platform, we hope to "
-"shed light on the issues that not only affect migrant workers, but also lead"
-" to inefficiencies in labour supply chains. This resource is to provide "
-"insight and support that will help individuals, organizations, and "
-"governments to combat modern slavery and protect the rights of migrant "
-"workers."
+"The Just Good Work data platform offers information, data and insights about "
+"migrant labour. This includes issues that affect migrants from when they are "
+"looking for work in their home countries, through their experience migrating "
+"and working until they finish. Through this platform, we hope to shed light "
+"on the issues that not only affect migrant workers, but also lead to "
+"inefficiencies in labour supply chains. This resource is to provide insight "
+"and support that will help individuals, organizations, and governments to "
+"combat modern slavery and protect the rights of migrant workers."
 
 #: templates/landing/landing_page.html:47
 msgid "landingPageJGWDataPlatformHelp"
@@ -490,8 +545,8 @@ msgstr "Improve your recruitment and retention"
 #: templates/landing/landing_page.html:92
 msgid "landingPageLowStaffTurnover"
 msgstr ""
-"Lower staff turnover and increase retention proactively understanding issues"
-" negatively affecting migrants."
+"Lower staff turnover and increase retention proactively understanding issues "
+"negatively affecting migrants."
 
 #: templates/landing/landing_page.html:101
 msgid "landingPageSafetyForWorkers"
@@ -533,8 +588,8 @@ msgstr "Email:"
 #: templates/landing/landing_page.html:162
 msgid "landingPagejgwDpOffersInfo"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about"
-" migrant labour."
+"The Just Good Work data platform offers information, data and insights about "
+"migrant labour."
 
 #: templates/layouts/auth_base.html:7
 msgid "authBaseTitle"
@@ -543,15 +598,14 @@ msgstr "JGW Data Dashboard"
 #: templates/layouts/auth_base.html:76
 msgid "authBaseJGWText"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about"
-" migrant labour. This includes issues that affect migrants from when they "
-"are looking for work in their home countries, through their experience "
-"migrating and working until they finish. Through this platform, we hope to "
-"shed light on the issues that not only affect migrant workers, but also lead"
-" to inefficiencies in labour supply chains. This resource is to provide "
-"insight and support that will help individuals, organizations, and "
-"governments to combat modern slavery and protect the rights of migrant "
-"workers."
+"The Just Good Work data platform offers information, data and insights about "
+"migrant labour. This includes issues that affect migrants from when they are "
+"looking for work in their home countries, through their experience migrating "
+"and working until they finish. Through this platform, we hope to shed light "
+"on the issues that not only affect migrant workers, but also lead to "
+"inefficiencies in labour supply chains. This resource is to provide insight "
+"and support that will help individuals, organizations, and governments to "
+"combat modern slavery and protect the rights of migrant workers."
 
 #: templates/layouts/non_auth_base.html:57
 msgid "nonAuthBaseHome"
@@ -625,8 +679,8 @@ msgstr "Hello,"
 msgid "passwordResetEmailBodyText"
 msgstr ""
 "We received a request to reset your password. If you didn't request this, "
-"please ignore this email. Otherwise, you can reset your password by clicking"
-" the button below:"
+"please ignore this email. Otherwise, you can reset your password by clicking "
+"the button below:"
 
 #: templates/users/password_reset_email.html:68
 msgid "passwordResetEmailResetPassword"
@@ -779,59 +833,59 @@ msgstr "New password"
 msgid "setPasswordFormConfirmNewPassword"
 msgstr "Confirm new password"
 
-#: users/tests.py:92 users/views.py:152
+#: users/tests.py:92 users/views.py:163
 msgid "loginUserViewErrorNotUser"
 msgstr "Can not log in with provided credentials!"
 
-#: users/tests.py:266 users/views.py:392
+#: users/tests.py:266 users/views.py:403
 msgid "requestPasswordResetViewErrorMessage"
 msgstr "No user account matches this email address!"
 
-#: users/views.py:118
+#: users/views.py:129
 msgid "createUserAccountViewInfo"
 msgstr "Your account was created and will be activated shortly."
 
-#: users/views.py:121
+#: users/views.py:132
 msgid "createUserAccountViewError"
 msgstr "Error validating form!"
 
-#: users/views.py:150
+#: users/views.py:161
 msgid "loginUserViewError"
 msgstr "Can not log in with provided credentials!"
 
-#: users/views.py:154
+#: users/views.py:165
 msgid "loginUserViewInvalidForm"
 msgstr "Error validating form!"
 
-#: users/views.py:378
+#: users/views.py:389
 msgid "requestPasswordResetViewEmailSubject"
 msgstr "Reset your password on Just Good Work Data Platform"
 
-#: users/views.py:386
+#: users/views.py:397
 msgid "requestPasswordResetViewEmailSuccessText"
 msgstr ""
 "An email has been sent to {email_address}. Please check for an email from "
 "Just Good Work Data Platform and click on the included link to reset your "
 "password."
 
-#: users/views.py:403
+#: users/views.py:414
 msgid "setPasswordViewInvalidTokenError"
 msgstr "Invalid token!"
 
-#: users/views.py:419
+#: users/views.py:430
 msgid "setPasswordViewSuccessText"
 msgstr ""
 "Your password has been successfully reset.You can now log in using your new "
 "password"
 
-#: users/views.py:423
+#: users/views.py:434
 msgid "setPasswordViewInvalidFormError"
 msgstr " Error validating form!"
 
-#: users/views.py:425
+#: users/views.py:436
 msgid "setPasswordViewLinkExpiredError"
 msgstr "This link is expired!"
 
-#: users/views.py:427
+#: users/views.py:438
 msgid "setPasswordViewUserAccountNotFound"
 msgstr "User account not found!"
