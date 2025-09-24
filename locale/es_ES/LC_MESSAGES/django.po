@@ -117,7 +117,7 @@ msgstr "Reiniciar"
 
 #: events/templates/events/what-matters-to-workers.html:49
 msgid "whatMattersHeading"
-msgstr "Lo que importa a los trabajadores"
+msgstr "Lo que les importa a los trabajadores"
 
 #: events/templates/events/what-matters-to-workers.html:67
 msgid "whatMattersExportButton"
