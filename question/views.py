@@ -1,9 +1,12 @@
 from datetime import datetime
 from django.shortcuts import render
 from django.utils import timezone
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
+from openpyxl.writer.excel import save_virtual_workbook
+import io
+import csv
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.utils.preferences import get_date_13_months_ago
 from common.utils.request import get_form_filter_params
@@ -48,6 +51,8 @@ from .models import (
     InlineQuestionResponse,
 )
 from events.models import BigqueryHomepageEventData
+from question.repository.messaging_questions_standard import message_data_sent_filtered_queryset
+from question.models import MessageDataSent
 
 
 def messaging_question(request):
@@ -315,26 +320,162 @@ def export_inline_question_data(request):
 
 
 def export_message_sent_data(request):
+    """
+    Optimized export function that handles large datasets without memory issues.
+    Uses streaming CSV export for better performance with large data.
+    """
     form_filter_params = get_form_filter_params(request=request, form_class=MessagingQuestionFilterForm)
     filters = form_filter_params["filters"]
     start_date = filters.get("start_date") or get_date_13_months_ago()
     end_date = filters.get("end_date") or datetime.now().date()
 
-    message_data = get_all_message_data_sent(**filters, current_user=request.user)
+    use_streaming = request.GET.get('streaming', 'true').lower() == 'true'
+    
+    if use_streaming:
+        return export_message_sent_data_streaming(filters, start_date, end_date, current_user=request.user)
+    else:
+        return export_message_sent_data_excel(filters, start_date, end_date, current_user=request.user)
 
+
+def export_message_sent_data_streaming(filters, start_date, end_date, current_user=None):
+    """
+    Streaming CSV export for large datasets - memory efficient
+    """
+    def data_generator():
+        headers = [
+            "API Created At",
+            "API Updated At", 
+            "Message ID",
+            "Device ID",
+            "Language",
+            "Destination",
+            "Organisation",
+            "Message Title",
+            "Message Title English",
+            "Actual Message Content",
+            "Message Date",
+            "Message Delivered",
+            "Message Delivered Date",
+            "Message Queued",
+            "Notification Sent to FCM",
+        ]
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        writer.writerow(headers)
+        yield output.getvalue()
+        output.seek(0)
+        output.truncate(0)
+
+        
+        queryset = message_data_sent_filtered_queryset(
+            queryset=MessageDataSent.objects.select_related("language", "destination", "organisation", "message_content"), 
+            current_user=current_user,
+            **filters
+        )
+        
+        
+        chunk_size = 1000
+        total_processed = 0
+        
+        for chunk_start in range(0, queryset.count(), chunk_size):
+            chunk = queryset[chunk_start:chunk_start + chunk_size]
+            
+            for message in chunk:
+                api_created_at = (
+                    timezone.localtime(message.api_created_at).strftime("%Y-%m-%d %H:%M:%S")
+                    if message.api_created_at
+                    else ""
+                )
+                api_updated_at = (
+                    timezone.localtime(message.api_updated_at).strftime("%Y-%m-%d %H:%M:%S")
+                    if message.api_updated_at
+                    else ""
+                )
+                message_date = (
+                    timezone.localtime(message.message_date).strftime("%Y-%m-%d %H:%M:%S")
+                    if message.message_date
+                    else ""
+                )
+                
+                row = [
+                    api_created_at,
+                    api_updated_at,
+                    message.message_id or "",
+                    message.device_id or "",
+                    message.language.name if message.language else "",
+                    message.destination.name if message.destination else "",
+                    message.organisation.name if message.organisation else "",
+                    message.message_title or "",
+                    message.message_title_english or "",
+                    message.message_content.message if message.message_content else "",
+                    message_date,
+                    str(message.message_delivered) if message.message_delivered is not None else "",
+                    str(message.message_delivered_date) if message.message_delivered_date else "",
+                    str(message.message_queued) if message.message_queued is not None else "",
+                    str(message.message_notification_sent_to_fcm) if message.message_notification_sent_to_fcm is not None else "",
+                ]
+                
+                writer.writerow(row)
+                total_processed += 1
+                
+                if total_processed % 100 == 0:
+                    yield output.getvalue()
+                    output.seek(0)
+                    output.truncate(0)
+            
+            if output.getvalue():
+                yield output.getvalue()
+                output.seek(0)
+                output.truncate(0)
+    
+    response = StreamingHttpResponse(
+        data_generator(),
+        content_type='text/csv'
+    )
+    response['Content-Disposition'] = f'attachment; filename="message_sent_data_{start_date}_to_{end_date}.csv"'
+    return response
+
+
+def export_message_sent_data_excel(filters, start_date, end_date, current_user=None):
+    """
+    Excel export for smaller datasets - uses chunked processing
+    """
+    
+    
+    queryset = message_data_sent_filtered_queryset(
+        queryset=MessageDataSent.objects.select_related("language", "destination", "organisation", "message_content"), 
+        current_user=current_user,
+        **filters
+    )
+    total_count = queryset.count()
+    
+    
+    if total_count > 50000:
+        return HttpResponse(
+            f"Dataset too large ({total_count:,} records). Please use streaming export by adding ?streaming=true to the URL.",
+            status=400
+        )
+    
     wb = Workbook()
     ws = wb.active
-
+    
+    
     heading = f"Message Sent Data Report for the Period Starting {start_date} to {end_date}"
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=15)
     heading_cell = ws.cell(row=2, column=1, value=heading)
     heading_cell.alignment = Alignment(horizontal="center", vertical="center")
     heading_cell.font = Font(bold=True)
-
+    
+    
+    info_cell = ws.cell(row=3, column=1, value=f"Total Records: {total_count:,}")
+    info_cell.font = Font(italic=True)
+    
     headers = [
         "API Created At",
         "API Updated At",
-        "Message ID",
+        "Message ID", 
         "Device ID",
         "Language",
         "Destination",
@@ -348,46 +489,54 @@ def export_message_sent_data(request):
         "Message Queued",
         "Notification Sent to FCM",
     ]
-
+         
     for idx, header in enumerate(headers, start=1):
-        ws.cell(row=4, column=idx, value=header)
-
-    for idx, data in enumerate(message_data, start=5):
-        api_created_at = (
-            timezone.localtime(data.get("api_created_at")).strftime("%Y-%m-%d %H:%M:%S")
-            if data.get("api_created_at")
-            else ""
-        )
-        api_updated_at = (
-            timezone.localtime(data.get("api_updated_at")).strftime("%Y-%m-%d %H:%M:%S")
-            if data.get("api_updated_at")
-            else ""
-        )
-
-        message_date = (
-            timezone.localtime(data.get("message_date")).strftime("%Y-%m-%d %H:%M:%S")
-            if data.get("message_date")
-            else ""
-        )
-
-        ws.cell(row=idx, column=1, value=api_created_at)
-        ws.cell(row=idx, column=2, value=api_updated_at)
-        ws.cell(row=idx, column=3, value=data.get("message_id", ""))
-        ws.cell(row=idx, column=4, value=data.get("device_id", ""))
-        ws.cell(row=idx, column=5, value=data.get("language", ""))
-        ws.cell(row=idx, column=6, value=data.get("destination", ""))
-        ws.cell(row=idx, column=7, value=data.get("organisation", ""))
-        ws.cell(row=idx, column=8, value=data.get("message_title", ""))
-        ws.cell(row=idx, column=9, value=data.get("message_title_english", ""))
-        ws.cell(row=idx, column=10, value=data.get("actual_message", ""))
-        ws.cell(row=idx, column=11, value=message_date)
-        ws.cell(row=idx, column=12, value=str(data.get("message_delivered", "")))
-        ws.cell(row=idx, column=13, value=str(data.get("message_delivered_date", "")))
-        ws.cell(row=idx, column=14, value=str(data.get("message_queued", "")))
-        ws.cell(row=idx, column=15, value=str(data.get("message_notification_sent_to_FCM", "")))
-
+        ws.cell(row=5, column=idx, value=header)
+        ws.cell(row=5, column=idx).font = Font(bold=True)
+    
+    chunk_size = 1000
+    row_number = 6
+    
+    for chunk_start in range(0, total_count, chunk_size):
+        chunk = queryset[chunk_start:chunk_start + chunk_size]
+        
+        for message in chunk:
+            api_created_at = (
+                timezone.localtime(message.api_created_at).strftime("%Y-%m-%d %H:%M:%S")
+                if message.api_created_at
+                else ""
+            )
+            api_updated_at = (
+                timezone.localtime(message.api_updated_at).strftime("%Y-%m-%d %H:%M:%S")
+                if message.api_updated_at
+                else ""
+            )
+            message_date = (
+                timezone.localtime(message.message_date).strftime("%Y-%m-%d %H:%M:%S")
+                if message.message_date
+                else ""
+            )
+            
+            ws.cell(row=row_number, column=1, value=api_created_at)
+            ws.cell(row=row_number, column=2, value=api_updated_at)
+            ws.cell(row=row_number, column=3, value=message.message_id or "")
+            ws.cell(row=row_number, column=4, value=message.device_id or "")
+            ws.cell(row=row_number, column=5, value=message.language.name if message.language else "")
+            ws.cell(row=row_number, column=6, value=message.destination.name if message.destination else "")
+            ws.cell(row=row_number, column=7, value=message.organisation.name if message.organisation else "")
+            ws.cell(row=row_number, column=8, value=message.message_title or "")
+            ws.cell(row=row_number, column=9, value=message.message_title_english or "")
+            ws.cell(row=row_number, column=10, value=message.message_content.message if message.message_content else "")
+            ws.cell(row=row_number, column=11, value=message_date)
+            ws.cell(row=row_number, column=12, value=str(message.message_delivered) if message.message_delivered is not None else "")
+            ws.cell(row=row_number, column=13, value=str(message.message_delivered_date) if message.message_delivered_date else "")
+            ws.cell(row=row_number, column=14, value=str(message.message_queued) if message.message_queued is not None else "")
+            ws.cell(row=row_number, column=15, value=str(message.message_notification_sent_to_fcm) if message.message_notification_sent_to_fcm is not None else "")
+            
+            row_number += 1
+    
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response["Content-Disposition"] = "attachment; filename=message_sent_data.xlsx"
+    response["Content-Disposition"] = f"attachment; filename=message_sent_data_{start_date}_to_{end_date}.xlsx"
     wb.save(response)
     return response
 
