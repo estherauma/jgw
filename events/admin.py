@@ -36,6 +36,7 @@ class ChapterAdminDisplay(admin.ModelAdmin):
 @admin.register(ChaptersFeedbackStandard)
 class ChaptersFeedbackStandardAdminDisplay(ExportActionModelAdmin, admin.ModelAdmin):
     list_display = [
+        "id",
         "api_created_at",
         "data_source_id",
         "documentId",
@@ -46,6 +47,7 @@ class ChaptersFeedbackStandardAdminDisplay(ExportActionModelAdmin, admin.ModelAd
         "is_myvoice_organisation",
         "immigration_status",
         "is_org_info_cleaned",
+        "soft_deleted",
     ]
     search_fields = ["api_created_at", "data_source_id", "destination", "feedback_title", "documentId"]
     ordering = ["-api_created_at"]

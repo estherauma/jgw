@@ -105,6 +105,7 @@ feedback_standard_fields = [
     "organisationAccessCode",
     "registrationToken",
     "version",
+    "softDeleted",
 ]
 
 
@@ -202,6 +203,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
             "organisation": organisation_data,
             "immigration_status": immigration_status_data,
             "documentId": documentId,
+            "soft_deleted": standard_fields_dict.get("softDeleted", False),
         }
         chapters_feedback_standard = ChaptersFeedbackStandard.objects.create(**data_params)
 

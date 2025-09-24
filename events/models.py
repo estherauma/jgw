@@ -203,6 +203,7 @@ class ChaptersFeedbackStandard(models.Model):
     sectors_of_work = models.ManyToManyField(SectorOfWork)
     is_myvoice_organisation = models.BooleanField(default=False)
     is_org_info_cleaned = models.BooleanField(default=False)
+    soft_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.data_source_id
