@@ -73,8 +73,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Updated {len(updated_keys)} keys in {po_path}'))
         else:
             self.stdout.write(self.style.WARNING(f'No matching keys found in {po_path}. No changes made.'))
-        print_keys_without_translation = self.print_keys_without_translation(po, language_code)
-        print(f"[DEBUG] keys_without_translation = {print_keys_without_translation}")
 
     def find_duplicates(self, po):
         msgid_map = defaultdict(list)
