@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: fiftyeight/jgw-pandas:develop
+    image: fiftyeight/jgw-pandas-staging:develop
     command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py create_super_user && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
@@ -37,7 +37,7 @@ services:
         max-file: "3"
 
   celery_worker:
-    image: fiftyeight/jgw-pandas:develop
+    image: fiftyeight/jgw-pandas-staging:develop
     command: bash -c "mkdir -p ./celery && celery -A jgwpandas worker -l info --logfile=./celery/celery.log"
     env_file:
       - .env
@@ -52,7 +52,7 @@ services:
         max-file: "3"
 
   celery_beat:
-    image: fiftyeight/jgw-pandas:develop
+    image: fiftyeight/jgw-pandas-staging:develop
     command: bash -c "mkdir -p ./celery && celery -A jgwpandas beat -l info --logfile=./celery/celery.beat.log"
     env_file:
       - .env
