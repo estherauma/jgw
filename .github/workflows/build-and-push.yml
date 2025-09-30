@@ -28,6 +28,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Debug secrets
+        run: |
+          echo "DOCKERHUB_USERNAME length: ${#DOCKERHUB_USERNAME}"
+          echo "DOCKERHUB_TOKEN length: ${#DOCKERHUB_TOKEN}"
+          echo "GOOGLE_CREDENTIALS_JSON length: ${#GOOGLE_CREDENTIALS_JSON}"
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -59,6 +69,8 @@ jobs:
             id=google_cred,env=GOOGLE_CREDENTIALS_JSON
         env:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Notify Slack - Build Success
         if: success()
