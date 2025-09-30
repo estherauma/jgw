@@ -57,6 +57,8 @@ jobs:
           cache-to: type=gha,mode=max
           secrets: |
             id=google_cred,env=GOOGLE_CREDENTIALS_JSON
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
 
       - name: Notify Slack - Build Success
         if: success()

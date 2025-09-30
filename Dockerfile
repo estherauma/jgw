@@ -27,9 +27,14 @@ RUN pip install --upgrade pip && pip install --no-cache-dir --timeout=60 --retri
 
 COPY . /app/
 
-# Copy google_cred.json from BuildKit secret
+# Copy google_cred.json from BuildKit secret (with fallback for local builds)
 RUN --mount=type=secret,id=google_cred,target=/tmp/google_cred.json \
-    cp /tmp/google_cred.json /app/google_cred.json
+    if [ -f /tmp/google_cred.json ]; then \
+        cp /tmp/google_cred.json /app/google_cred.json; \
+    else \
+        echo "Warning: GOOGLE_CREDENTIALS_JSON secret not found, creating placeholder"; \
+        echo '{"type": "placeholder", "project_id": "placeholder"}' > /app/google_cred.json; \
+    fi
 
 RUN chown -R celery:celery /app
 
