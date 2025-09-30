@@ -27,9 +27,9 @@ RUN pip install --upgrade pip && pip install --no-cache-dir --timeout=60 --retri
 
 COPY . /app/
 
-# Copy google_cred.json from BuildKit secret
-RUN --mount=type=secret,id=google_cred,target=/tmp/google_cred.json \
-    cp /tmp/google_cred.json /app/google_cred.json
+# Create google_cred.json from build argument
+ARG GOOGLE_CREDENTIALS_JSON
+RUN echo "$GOOGLE_CREDENTIALS_JSON" > /app/google_cred.json
 
 RUN chown -R celery:celery /app
 
