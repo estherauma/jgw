@@ -33,21 +33,20 @@ jobs:
             echo "Pulling latest code from develop branch..."
             git pull origin develop
             
-            echo "Comprehensive Docker cleanup..."
-            # Stop all containers
-            sudo docker compose down
+            echo "Logging into Docker Hub..."
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
             
-            # Remove all unused containers, networks, and images (BUT NOT VOLUMES)
-            sudo docker system prune -a -f
+            echo "Pulling latest images..."
+            sudo docker compose -f docker-compose.staging.yml pull
             
-            # Remove dangling images
+            echo "Stopping containers..."
+            sudo docker compose -f docker-compose.staging.yml down
+            
+            echo "Starting containers with latest images..."
+            sudo docker compose -f docker-compose.staging.yml up -d
+            
+            echo "Cleaning up unused images..."
             sudo docker image prune -f
-            
-            # Clean build cache
-            sudo docker builder prune -f
-            
-            echo "Building and starting containers..."
-            sudo docker compose up -d --build
             
             echo "Staging deployment completed!"
           EOF

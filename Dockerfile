@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.6
 FROM python:3.9-slim
 
 RUN addgroup --system celery && adduser --system --ingroup celery celery
@@ -26,11 +27,13 @@ RUN pip install --upgrade pip && pip install --no-cache-dir --timeout=60 --retri
 
 COPY . /app/
 
+# Create google_cred.json from build argument
+ARG GOOGLE_CREDENTIALS_JSON
+RUN echo "$GOOGLE_CREDENTIALS_JSON" > /app/google_cred.json
+
 RUN chown -R celery:celery /app
 
 USER celery
-
-COPY google_cred.json /app/google_cred.json
 
 EXPOSE 8000
 
