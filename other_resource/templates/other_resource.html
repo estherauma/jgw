@@ -3,8 +3,9 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% load waffle_tags %}
+{% load i18n %}
 
-{% block title %} Data Pipeline {% endblock title %}
+{% block title %} {% translate "otherResourceTitle" %} {% endblock title %}
 
 {% block content %}
 <div class="row">
@@ -14,18 +15,18 @@
                 <div class="row">
                     <div class="col-10">
                         <div class="text-start mt-3">
-                            <h5 class="text-muted global-text-style">Other Resources</h5>
+                            <h5 class="text-muted global-text-style">{% translate "otherResourceHeading" %} </h5>
                         </div>
                     </div>
                     {% if user.is_authenticated %}
                     {% if user.is_superuser %}
                     <div class="col-2 text-end">
-                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+ Add Resource</button>
+                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+{% translate "otherResourceAddResourceButtonSuperUser" %}</button>
                     </div>
                     {% else %}
                     {% flag 'can_add_other_resource' %}
                     <div class="col-2 text-end">
-                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+ Add Resource</button>
+                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+{% translate "otherResourceAddResourceButton" %}</button>
                     </div>
                     {% endflag %}
                     {% endif %}
@@ -47,7 +48,7 @@
                 <div class="mt-2 text-center">{{ resource.description }}<br></div>
                 <div class="mt-3 text-center" >
                         <a href="{{ resource.link }}" target="_blank" class="bg-jgw-deep-blue text-left btn btn-primary text-center bg-jgw-deep-blue resource-link-margin">
-                            Go to the Resource <i class="fas fa-link text-white" ></i>
+                            {% translate "otherResourceGoToResource" %}<i class="fas fa-link text-white" ></i>
                         </a>
                         {% if user.is_superuser %}
                         <a href="{% url 'other_resource:edit_resource' resource.id %}" class="btn btn-sm btn-primary bg-jgw-deep-blue">
@@ -77,17 +78,17 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteResourceModalLabel{{ resource.id }}">Confirm Deletion</h5>
+                    <h5 class="modal-title" id="deleteResourceModalLabel{{ resource.id }}">{% translate "otherResourceComfirmDeletion" %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center ">
-                    <p>Are you sure you want to delete "{{ resource.title }}"?</p>
+                    <p>{% translate "otherResourceSureToDelete" %} "{{ resource.title }}"?</p>
                 </div>
                 <div class="modal-footer d-flex justify-content-center">
-                    <button type="button" class="btn bg-jgw-deep-blue text-white" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn bg-jgw-deep-blue text-white" data-bs-dismiss="modal">{% translate "otherResourceCancelButton" %}</button>
                     <form action="{% url 'other_resource:delete_resource' resource.id %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-danger">{% translate "otherResourceDeleteButton" %}</button>
                     </form>
                 </div>
             </div>
@@ -101,26 +102,26 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-center" id="addResourceModalLabel">Add Resource</h5>
+                <h5 class="modal-title text-center" id="addResourceModalLabel">{% translate "otherResourceAddResourceHeading" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="addResourceForm" method="POST" action="{% url 'other_resource:other_resource' %}">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="title" class="form-label">Title</label>
+                        <label for="title" class="form-label">{% translate "otherResourceAddResourceTitleInput" %}</label>
                         <input type="text" class="form-control" id="title" name="title" required>
                     </div>
                     <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
+                        <label for="description" class="form-label">{% translate "otherResourceAddResourceDescription" %}</label>
                         <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="link" class="form-label">Link</label>
+                        <label for="link" class="form-label">{% translate "otherResourceAddResourceLink" %}</label>
                         <input type="url" class="form-control" id="link" name="link" required>
                     </div>
                     <div class="mb-3">
-                        <label for="group" class="form-label">Group</label>
+                        <label for="group" class="form-label">{% translate "otherResourceAddResourceGroup" %}</label>
                         <select class="form-control" id="group" name="group" required>
                             {% for group in groups %}
                             <option value="{{ group.id }}">{{ group.name }}</option>
@@ -128,7 +129,7 @@
                         </select>
                     </div>
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary ms-8">Add Resource</button>
+                        <button type="submit" class="btn btn-primary ms-8">{% translate "otherResourceAddResourceFormButton" %}</button>
                     </div>
                 </form>
             </div>
