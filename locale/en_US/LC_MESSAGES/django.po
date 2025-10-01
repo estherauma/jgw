@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-01 04:59+0000\n"
+"POT-Creation-Date: 2025-10-01 10:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -148,8 +148,8 @@ msgstr "What matters to workers (where people spend time in the app)"
 #: events/templates/events/what-matters-to-workers.html:111
 msgid "whatMattersChartTooltip"
 msgstr ""
-"What Matters to Workers: What issues are jobseekers or workers interested "
-"in / trying to find out information about?"
+"What Matters to Workers: What issues are jobseekers or workers interested in"
+" / trying to find out information about?"
 
 #: events/templates/events/what-matters-to-workers.html:125
 msgid "whatMattersUserFeedbackTitle"
@@ -402,8 +402,8 @@ msgstr "Users by immigration status"
 #: preference/templates/preference/user_overview.html:202
 msgid "userOverviewUsersByImmigrationStatusTooltip"
 msgstr ""
-"Users by Immigration Status: Users select their immigration status when they "
-"first use the app."
+"Users by Immigration Status: Users select their immigration status when they"
+" first use the app."
 
 #: preference/templates/preference/user_overview.html:215
 msgid "userOverviewUsersByAgeTitle"
@@ -430,8 +430,8 @@ msgstr "Work code usage"
 #: preference/templates/preference/user_overview.html:258
 msgid "userOverviewWorkCodeUsageTooltip"
 msgstr ""
-"Work Code Usage: Users who have logged into the app using an organisation QR "
-"Code or Link."
+"Work Code Usage: Users who have logged into the app using an organisation QR"
+" Code or Link."
 
 #: preference/templates/preference/user_overview.html:275
 msgid "userOverviewNewUsersByMonthTitle"
@@ -480,13 +480,145 @@ msgid "userOverviewUsersGeoMapUserEngagementTooltip"
 msgstr ""
 "User Geolocation Map: Shows users Geolocation at the time of using the app."
 
-#: preference/templates/preference/user_overview.html:452
-msgid "Search"
-msgstr ""
+#: question/templates/question/messaging_question.html:8
+msgid "messagingQuestionsTitle"
+msgstr "Messaging Questions"
 
-#: preference/templates/preference/user_overview.html:453
-msgid "None selected"
+#: question/templates/question/messaging_question.html:16
+msgid "messagingQuestionsFilters"
+msgstr "Filters"
+
+#: question/templates/question/messaging_question.html:23
+msgid "messagingQuestionsSubmitButton"
+msgstr "Submit"
+
+#: question/templates/question/messaging_question.html:24
+msgid "messagingQuestionsResetButton"
+msgstr "Reset"
+
+#: question/templates/question/messaging_question.html:40
+msgid "messagingQuestionsSpot"
+msgstr "Messaging/Spot Questions"
+
+#: question/templates/question/messaging_question.html:51
+msgid "messagingQuestionsExport"
+msgstr "Export"
+
+#: question/templates/question/messaging_question.html:57
+msgid "messagingQuestionsExportMessagingQuestionDataReport"
+msgstr "Export Messaging Question Data Report to Excel"
+
+#: question/templates/question/messaging_question.html:58
+msgid "messagingQuestionsExportMessagingPushedDataReport"
+msgstr "Export Messaging Pushed Data Report to Excel"
+
+#: question/templates/question/messaging_question.html:60
+msgid "messagingQuestionsExportMessagingQuestionStatistics"
+msgstr "Export Messaging Question Statistics to Excel"
+
+#: question/templates/question/messaging_question.html:66
+msgid "messagingQuestionsExportFilterButton"
+msgstr "Filter"
+
+#: question/templates/question/messaging_question.html:80
+msgid "messagingQuestionResponsePerAge"
+msgstr "Question Responses Per Age"
+
+#: question/templates/question/messaging_question.html:84
+msgid "messagingQuestionResponsePerAgeTooltip"
 msgstr ""
+"Messaging Questions by Age: Question responses by users of different age "
+"groups who have logged into the app using an organisation QR Code or Link."
+
+#: question/templates/question/messaging_question.html:94
+msgid "messagingQuestionResponsePerGender"
+msgstr "Question Responses Per Gender"
+
+#: question/templates/question/messaging_question.html:98
+msgid "messagingQuestionResponsePerGenderTooltip"
+msgstr ""
+"Messaging Questions by Gender: Question responses by users of different "
+"genders who have logged into the app using an organisation QR Code or Link."
+
+#: question/templates/question/messaging_question.html:109
+msgid "messagingQuestionResponsePerOrganisation"
+msgstr "Question Responses Per Organisation"
+
+#: question/templates/question/messaging_question.html:113
+msgid "messagingQuestionResponsePerOrganisationTooltip"
+msgstr ""
+"Messaging Questions by Organisation: Question responses by users of "
+"different organisations who have logged into the app using an organisation "
+"QR Code or Link."
+
+#: question/templates/question/messaging_question.html:125
+msgid "messagingQuestionResponsePerDestination"
+msgstr "Messaging Question per Destination"
+
+#: question/templates/question/messaging_question.html:130
+msgid "messagingQuestionResponsePerDestinationTooltip"
+msgstr ""
+"Messaging Question per Destination: Country users are working in or looking "
+"for work in who have responded to questions in the filtered timeframe."
+
+#: question/templates/question/messaging_question.html:144
+msgid "messagingQuestionResponsePerOrigin"
+msgstr "Messaging Question per Origin"
+
+#: question/templates/question/messaging_question.html:149
+msgid "messagingQuestionResponsePerOriginTooltip"
+msgstr ""
+"Messaging Question per Origin: Home country of users who have responded to "
+"questions in the filtered time frame."
+
+#: question/templates/question/messaging_question.html:162
+msgid "messagingQuestionResponsePerSector"
+msgstr "Messaging Question per Sector"
+
+#: question/templates/question/messaging_question.html:167
+msgid "messagingQuestionResponsePerSectorTooltip"
+msgstr ""
+"Messaging Question per Sector: Sector of work of users who have responded to"
+" questions in the filtered time frame."
+
+#: question/templates/question/messaging_question.html:180
+msgid "userGeolocationMapBasedOnMessagingQuestion"
+msgstr "Users Geolocation Map Basing On Messaging Question"
+
+#: question/templates/question/messaging_question.html:184
+msgid "userGeolocationMapTooltip"
+msgstr ""
+"User Geolocation Map: Shows users Geolocation at the time of using the app."
+
+#: question/templates/question/messaging_question.html:195
+msgid "messagingQuestionResponsesTitle"
+msgstr "Messaging Question Responses"
+
+#: question/templates/question/messaging_question.html:198
+msgid "messagingQuestionResponsesTooltip"
+msgstr ""
+"Messaging Question Responses: Detailed breakdown of responses to individual "
+"messaging questions within the filtered time frame."
+
+#: question/templates/question/messaging_question.html:204
+msgid "messagingQuestionResponsesDisplay"
+msgstr "Select questions to display"
+
+#: question/templates/question/messaging_question.html:208
+msgid "messagingQuestionResponsesSearchPlaceholder"
+msgstr "Search messaging questions ..."
+
+#: question/templates/question/messaging_question.html:222
+msgid "messagingQuestionSelectQuestions"
+msgstr "Select Questions"
+
+#: question/templates/question/messaging_question.html:228
+msgid "messagingQuestionResponsesSearchQuestions"
+msgstr "Search questions..."
+
+#: question/templates/question/messaging_question.html:233
+msgid "messagingQuestionSelectAll"
+msgstr "Select All"
 
 #: templates/includes/non_auth_banner_btns.html:10
 msgid "nonAuthBannerBtnsExport"
@@ -579,14 +711,15 @@ msgstr "Welcome to the Just Good Work Data Platform."
 #: templates/landing/landing_page.html:19
 msgid "landingPageIntroText"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about "
-"migrant labour. This includes issues that affect migrants from when they are "
-"looking for work in their home countries, through their experience migrating "
-"and working until they finish. Through this platform, we hope to shed light "
-"on the issues that not only affect migrant workers, but also lead to "
-"inefficiencies in labour supply chains. This resource is to provide insight "
-"and support that will help individuals, organizations, and governments to "
-"combat modern slavery and protect the rights of migrant workers."
+"The Just Good Work data platform offers information, data and insights about"
+" migrant labour. This includes issues that affect migrants from when they "
+"are looking for work in their home countries, through their experience "
+"migrating and working until they finish. Through this platform, we hope to "
+"shed light on the issues that not only affect migrant workers, but also lead"
+" to inefficiencies in labour supply chains. This resource is to provide "
+"insight and support that will help individuals, organizations, and "
+"governments to combat modern slavery and protect the rights of migrant "
+"workers."
 
 #: templates/landing/landing_page.html:47
 msgid "landingPageJGWDataPlatformHelp"
@@ -629,8 +762,8 @@ msgstr "Improve your recruitment and retention"
 #: templates/landing/landing_page.html:92
 msgid "landingPageLowStaffTurnover"
 msgstr ""
-"Lower staff turnover and increase retention proactively understanding issues "
-"negatively affecting migrants."
+"Lower staff turnover and increase retention proactively understanding issues"
+" negatively affecting migrants."
 
 #: templates/landing/landing_page.html:101
 msgid "landingPageSafetyForWorkers"
@@ -672,8 +805,8 @@ msgstr "Email:"
 #: templates/landing/landing_page.html:162
 msgid "landingPagejgwDpOffersInfo"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about "
-"migrant labour."
+"The Just Good Work data platform offers information, data and insights about"
+" migrant labour."
 
 #: templates/layouts/auth_base.html:7
 msgid "authBaseTitle"
@@ -682,14 +815,15 @@ msgstr "JGW Data Dashboard"
 #: templates/layouts/auth_base.html:76
 msgid "authBaseJGWText"
 msgstr ""
-"The Just Good Work data platform offers information, data and insights about "
-"migrant labour. This includes issues that affect migrants from when they are "
-"looking for work in their home countries, through their experience migrating "
-"and working until they finish. Through this platform, we hope to shed light "
-"on the issues that not only affect migrant workers, but also lead to "
-"inefficiencies in labour supply chains. This resource is to provide insight "
-"and support that will help individuals, organizations, and governments to "
-"combat modern slavery and protect the rights of migrant workers."
+"The Just Good Work data platform offers information, data and insights about"
+" migrant labour. This includes issues that affect migrants from when they "
+"are looking for work in their home countries, through their experience "
+"migrating and working until they finish. Through this platform, we hope to "
+"shed light on the issues that not only affect migrant workers, but also lead"
+" to inefficiencies in labour supply chains. This resource is to provide "
+"insight and support that will help individuals, organizations, and "
+"governments to combat modern slavery and protect the rights of migrant "
+"workers."
 
 #: templates/layouts/non_auth_base.html:57
 msgid "nonAuthBaseHome"
@@ -763,8 +897,8 @@ msgstr "Hello,"
 msgid "passwordResetEmailBodyText"
 msgstr ""
 "We received a request to reset your password. If you didn't request this, "
-"please ignore this email. Otherwise, you can reset your password by clicking "
-"the button below:"
+"please ignore this email. Otherwise, you can reset your password by clicking"
+" the button below:"
 
 #: templates/users/password_reset_email.html:68
 msgid "passwordResetEmailResetPassword"

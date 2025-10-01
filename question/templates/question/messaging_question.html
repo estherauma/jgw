@@ -3,8 +3,9 @@
 
 {% load static %}
 {% load waffle_tags %}
+{% load i18n %}
 
-{% block title %} Messaging Questions {% endblock title %}
+{% block title %} {% translate "messagingQuestionsTitle" %} {% endblock title %}
 
 {% block content %}
 
@@ -12,15 +13,15 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="filter-modal-area-label">Filters</h4>
+                <h4 class="modal-title" id="filter-modal-area-label">{% translate "messagingQuestionsFilters" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form method="post" id="messaging-question-filter-form">
                     {% csrf_token %}
                     {{filter_form|crispy}}
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="submit" name="reset" value="true" class="btn btn-secondary" >Reset</a>
+                    <button type="submit" class="btn btn-primary">{% translate "messagingQuestionsSubmitButton" %}</button>
+                    <button type="submit" name="reset" value="true" class="btn btn-secondary" >{% translate "messagingQuestionsResetButton" %}</a>
                 </form>
             </div>
         </div>
@@ -36,7 +37,7 @@
                         <div class="col-9">
                             <div class="text-start">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{total_messaging_questions}}</span></h3>
-                                <h5 class="text-muted global-text-style">messaging/spot questions</h5>
+                                <h5 class="text-muted global-text-style">{% translate "messagingQuestionsSpot" %} </h5>
                             </div>
                         </div>
                     {% endflag %}
@@ -47,22 +48,22 @@
                                     {% flag 'can_download_messaging_questions_excel_reports' %}
                                         <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
                                             id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            Export
+                                            {% translate "messagingQuestionsExport" %}
                                             <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
                                         </a>
                                     {% endflag %}
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
                                         {% flag 'can_view_messaging_question_report_export_button' %}
-                                            <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">Export Messaging Question Data Report to Excel</a>
-                                            <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">Export Messaging Pushed Data Report to Excel</a>
+                                            <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">{% translate "messagingQuestionsExportMessagingQuestionDataReport" %}</a>
+                                            <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">{% translate "messagingQuestionsExportMessagingPushedDataReport" %}</a>
                                         {% endflag %}
-                                        <button  class="dropdown-item" id="export-messaging-question-to-excel">Export Messaging Question Statistics to Excel</button>
+                                        <button  class="dropdown-item" id="export-messaging-question-to-excel">{% translate "messagingQuestionsExportMessagingQuestionStatistics" %}</button>
                                     </div>                                    
                                 </div>
                             </div>
                             <div class="col-md-6 button-margin">
                                 <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
+                                role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "messagingQuestionsExportFilterButton" %}</button>
                             </div>
                         </div>
                     </div>
@@ -76,11 +77,11 @@
         <div class="col-md-6 mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
-                    <p class="chart-title">Question Responses Per Age</p>
+                    <p class="chart-title">{% translate "messagingQuestionResponsePerAge" %}</p>
                     <canvas id="messaging-question-by-age-chart-id" class="canvas-chart"></canvas>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Messaging Questions by Age: Question responses by users of different age groups who have logged into the app using an organisation QR Code or Link.
+                        {% translate "messagingQuestionResponsePerAgeTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -90,11 +91,11 @@
     <div class="col-md-6 mt-3">
         <div class="card h-100">
             <div class="card-body chart">
-                <p class="chart-title">Question Responses Per Gender</p>
+                <p class="chart-title">{% translate "messagingQuestionResponsePerGender" %}</p>
                 <canvas id="messaging-question-by-gender-chart-id" class="canvas-chart"></canvas>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
-                    Messaging Questions by Gender: Question responses by users of different genders who have logged into the app using an organisation QR Code or Link.
+                    {% translate "messagingQuestionResponsePerGenderTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
             </div>
@@ -105,11 +106,11 @@
         <div class="col-md-6 mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
-                    <p class="chart-title">Question Responses Per Organisation</p>
+                    <p class="chart-title">{% translate "messagingQuestionResponsePerOrganisation" %}</p>
                     <canvas id="messaging-question-organisation-pie-chart-id" class="canvas-chart"></canvas>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Messaging Questions by Organisation: Question responses by users of different organisations who have logged into the app using an organisation QR Code or Link.
+                        {% translate "messagingQuestionResponsePerOrganisationTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -121,12 +122,12 @@
         <div class=" col-md-6 mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
-                    <p class="chart-title">messaging question per destination</p>
+                    <p class="chart-title">{% translate "messagingQuestionResponsePerDestination" %}</p>
                     <div class="messaging-question-destination-chart-id-chart-box">
                         <div id="messaging-question-destination-chart-id"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
-                            Messaging Question per Destination: Country users are working in or looking for work in who have responded to questions in the filtered timeframe. 
+                            {% translate "messagingQuestionResponsePerDestinationTooltip" %}
                             <div class="tooltip-arrow"></div>
                         </div>
                     </div>
@@ -140,12 +141,12 @@
         <div class="col-md-6 mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
-                    <p class="chart-title">messaging question per origin</p>
+                    <p class="chart-title">{% translate "messagingQuestionResponsePerOrigin" %}</p>
                     <div class="messaging-question-origin-chart-id-chart-box">
                         <div id="messaging-question-origin-chart-id"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
-                            Messaging Question per Origin: Home country of users who have responded to questions in the filtered timeframe. 
+                            {% translate "messagingQuestionResponsePerOriginTooltip" %}
                             <div class="tooltip-arrow"></div>
                         </div>
                     </div>
@@ -158,12 +159,12 @@
         <div class=" col-md-6 mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
-                    <p class="chart-title">messaging question per sector</p>
+                    <p class="chart-title">{% translate "messagingQuestionResponsePerSector" %}</p>
                     <div class="messaging-question-sectors-chart-id-chart-box">
                         <div id="messaging-question-sectors-chart-id"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
-                            Messaging Question per Sector: Sector of work of users who have responded to questions in the filtered timeframe. 
+                            {% translate "messagingQuestionResponsePerSectorTooltip" %}
                             <div class="tooltip-arrow"></div>
                         </div>
                     </div>
@@ -176,11 +177,11 @@
 <div class="row col-md-12 mt-3 user-geolocation-map-chart-box">
     <div class="card h-100">
         <div class="card-body chart wide-map">
-            <p class="chart-title mb-2">Users Geolocation Map Basing On Messaging Question</p>
+            <p class="chart-title mb-2">{% translate "userGeolocationMapBasedOnMessagingQuestion" %}</p>
             <div id="user_geolocation_map_messaging_question" class="user-geolocation-map"></div>
             <div class="info-tooltip user-geol-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
-                User Geolocation Map: Shows users Geolocation at the time of using the app.
+                {% translate "userGeolocationMapTooltip" %}
             </div>
         </div>
     </div>
@@ -191,20 +192,20 @@
         <div class="container mt-3">
             <div class="card">
                 <div class="card-body chart">
-                    <p class="chart-title">Messaging Question Responses</p>
+                    <p class="chart-title">{% translate "messagingQuestionResponsesTitle" %}</p>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Messaging Question Responses: Detailed breakdown of responses to individual messaging questions within the filtered timeframe.
+                        {% translate "messagingQuestionResponsesTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <button class="btn btn-primary bg-jgw-deep-blue w-100" type="button" data-bs-toggle="modal" data-bs-target="#questionSelectModal">
-                                Select questions to display <i class="fas fa-filter"></i>
+                                {% translate "messagingQuestionResponsesDisplay" %} <i class="fas fa-filter"></i>
                             </button>
                         </div>
                         <div class="col-md-8">
-                            <input type="text" class="form-control" id="questionSearch" placeholder="Search messaging questions..." oninput="searchQuestions()">
+                            <input type="text" class="form-control" id="questionSearch" placeholder='{% translate "messagingQuestionResponsesSearchPlaceholder" %}' oninput="searchQuestions()">
                         </div>
                     </div>
                     <div id="chartContainer" class="row"></div>
@@ -218,18 +219,18 @@
         <div class="modal-dialog modal-dialog-scrollable modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="questionSelectModalLabel">Select Questions</h5>
+                    <h5 class="modal-title" id="questionSelectModalLabel">{% translate "messagingQuestionSelectQuestions" %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
                         <div class="col-9">
-                            <input type="text" class="form-control" id="modalQuestionSearch" placeholder="Search questions...">
+                            <input type="text" class="form-control" id="modalQuestionSearch" placeholder='{% translate "messagingQuestionResponsesSearchQuestions" %}'>
                         </div>
                         <div class="col-3">
                             <div class="form-check d-flex align-items-center h-100 border rounded">
                                 <input class="form-check-input me-2 ms-2" type="checkbox" id="selectAll">
-                                <label class="form-check-label mb-0" for="selectAll">Select All</label>
+                                <label class="form-check-label mb-0" for="selectAll">{% translate "messagingQuestionSelectAll" %}</label>
                             </div>
                         </div>
                     </div>
