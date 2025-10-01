@@ -21,12 +21,12 @@
                     {% if user.is_authenticated %}
                     {% if user.is_superuser %}
                     <div class="col-2 text-end">
-                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+{% translate "otherResourceAddResourceButton" %}</button>
+                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+ {% translate "otherResourceAddResourceButton" %}</button>
                     </div>
                     {% else %}
                     {% flag 'can_add_other_resource' %}
                     <div class="col-2 text-end">
-                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+{% translate "otherResourceAddResourceButton" %}</button>
+                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+ {% translate "otherResourceAddResourceButton" %}</button>
                     </div>
                     {% endflag %}
                     {% endif %}
@@ -48,7 +48,7 @@
                 <div class="mt-2 text-center">{{ resource.description }}<br></div>
                 <div class="mt-3 text-center" >
                         <a href="{{ resource.link }}" target="_blank" class="bg-jgw-deep-blue text-left btn btn-primary text-center bg-jgw-deep-blue resource-link-margin">
-                            {% translate "otherResourceGoToResource" %}<i class="fas fa-link text-white" ></i>
+                            {% translate "otherResourceGoToResource" %} <i class="fas fa-link text-white" ></i>
                         </a>
                         {% if user.is_superuser %}
                         <a href="{% url 'other_resource:edit_resource' resource.id %}" class="btn btn-sm btn-primary bg-jgw-deep-blue">
