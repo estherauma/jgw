@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 14:35+0000\n"
+"POT-Creation-Date: 2025-10-01 05:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -190,11 +190,8 @@ msgid "editResourceGroup"
 msgstr "Grupo"
 
 #: other_resource/templates/edit_resource.html:5
-msgid "editResourceTitle"
-msgstr "Editar recurso"
-
 #: other_resource/templates/edit_resource.html:12
-msgid "editResourceHeader"
+msgid "editResourceTitle"
 msgstr "Editar recurso"
 
 #: other_resource/templates/edit_resource.html:19
@@ -206,18 +203,14 @@ msgid "editResourceCancelButton"
 msgstr "Cancelar"
 
 #: other_resource/templates/other_resource.html:8
+#: other_resource/templates/other_resource.html:18
 msgid "otherResourceTitle"
 msgstr "Otros recursos"
 
-#: other_resource/templates/other_resource.html:18
-msgid "otherResourceHeading"
-msgstr "Otros recursos"
-
 #: other_resource/templates/other_resource.html:24
-msgid "otherResourceAddResourceButtonSuperUser"
-msgstr "Agregar recurso"
-
 #: other_resource/templates/other_resource.html:29
+#: other_resource/templates/other_resource.html:105
+#: other_resource/templates/other_resource.html:132
 msgid "otherResourceAddResourceButton"
 msgstr "Agregar recurso"
 
@@ -226,7 +219,7 @@ msgid "otherResourceGoToResource"
 msgstr "Ir al recurso"
 
 #: other_resource/templates/other_resource.html:81
-msgid "otherResourceComfirmDeletion"
+msgid "otherResourceConfirmDeletion"
 msgstr "Confirmar eliminación"
 
 #: other_resource/templates/other_resource.html:85
@@ -240,10 +233,6 @@ msgstr "Cancelar"
 #: other_resource/templates/other_resource.html:91
 msgid "otherResourceDeleteButton"
 msgstr "Borrar"
-
-#: other_resource/templates/other_resource.html:105
-msgid "otherResourceAddResourceHeading"
-msgstr "Agregar recurso"
 
 #: other_resource/templates/other_resource.html:112
 msgid "otherResourceAddResourceTitleInput"
@@ -260,10 +249,6 @@ msgstr "Enlace"
 #: other_resource/templates/other_resource.html:124
 msgid "otherResourceAddResourceGroup"
 msgstr "Grupo"
-
-#: other_resource/templates/other_resource.html:132
-msgid "otherResourceAddResourceFormButton"
-msgstr "Agregar recurso"
 
 #: payment/templates/payment/payment-required.html:3
 msgid "paymentRequiredHeading"

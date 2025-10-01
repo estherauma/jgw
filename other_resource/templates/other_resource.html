@@ -15,13 +15,13 @@
                 <div class="row">
                     <div class="col-10">
                         <div class="text-start mt-3">
-                            <h5 class="text-muted global-text-style">{% translate "otherResourceHeading" %} </h5>
+                            <h5 class="text-muted global-text-style">{% translate "otherResourceTitle" %} </h5>
                         </div>
                     </div>
                     {% if user.is_authenticated %}
                     {% if user.is_superuser %}
                     <div class="col-2 text-end">
-                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+{% translate "otherResourceAddResourceButtonSuperUser" %}</button>
+                        <button data-bs-toggle="modal" data-bs-target="#addResourceModal" role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">+{% translate "otherResourceAddResourceButton" %}</button>
                     </div>
                     {% else %}
                     {% flag 'can_add_other_resource' %}
@@ -78,7 +78,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteResourceModalLabel{{ resource.id }}">{% translate "otherResourceComfirmDeletion" %}</h5>
+                    <h5 class="modal-title" id="deleteResourceModalLabel{{ resource.id }}">{% translate "otherResourceConfirmDeletion" %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center ">
@@ -102,7 +102,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-center" id="addResourceModalLabel">{% translate "otherResourceAddResourceHeading" %}</h5>
+                <h5 class="modal-title text-center" id="addResourceModalLabel">{% translate "otherResourceAddResourceButton" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -129,7 +129,7 @@
                         </select>
                     </div>
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary ms-8">{% translate "otherResourceAddResourceFormButton" %}</button>
+                        <button type="submit" class="btn btn-primary ms-8">{% translate "otherResourceAddResourceButton" %}</button>
                     </div>
                 </form>
             </div>

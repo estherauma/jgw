@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 13:47+0000\n"
+"POT-Creation-Date: 2025-10-01 04:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -186,11 +186,8 @@ msgid "editResourceGroup"
 msgstr "Group"
 
 #: other_resource/templates/edit_resource.html:5
-msgid "editResourceTitle"
-msgstr "Edit Resource"
-
 #: other_resource/templates/edit_resource.html:12
-msgid "editResourceHeader"
+msgid "editResourceTitle"
 msgstr "Edit Resource"
 
 #: other_resource/templates/edit_resource.html:19
@@ -202,27 +199,25 @@ msgid "editResourceCancelButton"
 msgstr "Cancel"
 
 #: other_resource/templates/other_resource.html:8
-msgid "otherResourceTitle"
-msgstr "Other Resource"
-
 #: other_resource/templates/other_resource.html:18
-msgid "otherResourceHeading"
+msgid "otherResourceTitle"
 msgstr "Other Resources"
 
-#: other_resource/templates/other_resource.html:24
-msgid "otherResourceAddResourceButtonSuperUser"
-msgstr "Add Resource"
 
+#: other_resource/templates/other_resource.html:24
 #: other_resource/templates/other_resource.html:29
+#: other_resource/templates/other_resource.html:105
+#: other_resource/templates/other_resource.html:132
 msgid "otherResourceAddResourceButton"
 msgstr "Add Resource"
+
 
 #: other_resource/templates/other_resource.html:51
 msgid "otherResourceGoToResource"
 msgstr "Go to the Resource"
 
 #: other_resource/templates/other_resource.html:81
-msgid "otherResourceComfirmDeletion"
+msgid "otherResourceConfirmDeletion"
 msgstr "Confirm Deletion"
 
 #: other_resource/templates/other_resource.html:85
@@ -236,10 +231,6 @@ msgstr "Cancel"
 #: other_resource/templates/other_resource.html:91
 msgid "otherResourceDeleteButton"
 msgstr "Delete"
-
-#: other_resource/templates/other_resource.html:105
-msgid "otherResourceAddResourceHeading"
-msgstr "Add Resource"
 
 #: other_resource/templates/other_resource.html:112
 msgid "otherResourceAddResourceTitleInput"
@@ -257,9 +248,6 @@ msgstr "Link"
 msgid "otherResourceAddResourceGroup"
 msgstr "Group"
 
-#: other_resource/templates/other_resource.html:132
-msgid "otherResourceAddResourceFormButton"
-msgstr "Add Resource"
 
 #: payment/templates/payment/payment-required.html:3
 msgid "paymentRequiredHeading"
