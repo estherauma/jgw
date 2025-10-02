@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - develop
-      - main
-  pull_request:
-    branches:
-      - develop
-      - main
 
 env:
   REGISTRY: docker.io
@@ -28,6 +23,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Clean up local Docker cache
+        run: |
+          echo "Cleaning up local Docker cache..."
+          docker system prune -a -f
+          docker builder prune -a -f
+          echo "Docker cache cleaned up"
+
       - name: Debug secrets
         run: |
           echo "DOCKERHUB_USERNAME length: ${#DOCKERHUB_USERNAME}"
@@ -44,6 +46,24 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           registry: docker.io
+
+      - name: Clean up old Docker Hub images
+        run: |
+          echo "Cleaning up old images from Docker Hub..."
+          
+          # Get all tags for the repository
+          TAGS=$(curl -s -H "Authorization: JWT $(curl -s -H "Content-Type: application/json" -X POST --data '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' https://hub.docker.com/v2/users/login/ | jq -r .token)" "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/?page_size=100" | jq -r '.results[].name' | grep -v 'latest')
+          
+          if [ -n "$TAGS" ]; then
+            echo "Found old tags to delete: $TAGS"
+            for tag in $TAGS; do
+              echo "Deleting tag: $tag"
+              curl -s -X DELETE -H "Authorization: JWT $(curl -s -H "Content-Type: application/json" -X POST --data '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' https://hub.docker.com/v2/users/login/ | jq -r .token)" "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$tag/"
+            done
+            echo "Old images cleaned up successfully"
+          else
+            echo "No old images found to clean up"
+          fi
 
       - name: Extract metadata
         id: meta
@@ -85,6 +105,7 @@ jobs:
             Tags: ${{ steps.meta.outputs.tags }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
+            ✨ Old images cleaned up, only latest kept
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         continue-on-error: true
