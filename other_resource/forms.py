@@ -5,6 +5,7 @@ from preference.models import Organisation
 from django.contrib.auth.models import Group
 from users.utils import get_user_organisations
 from .models import OtherResource
+from django.utils.translation import gettext_lazy as _
 
 class OtherResourceForm(forms.ModelForm):
     class Meta:
@@ -29,3 +30,9 @@ class EditResourceForm(forms.ModelForm):
     class Meta:
         model = OtherResource
         fields = ['title', 'description', 'link', 'group']
+        labels = {
+            'title': _("editResourceTitleInput"),
+            'description': _("editResourceDescription"),
+            'link': _("editResourceLink"),
+            'group': _("editResourceGroup"),
+        }

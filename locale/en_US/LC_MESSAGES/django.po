@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-23 10:37+0000\n"
+"POT-Creation-Date: 2025-10-01 04:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -147,7 +147,9 @@ msgstr "What matters to workers (where people spend time in the app)"
 
 #: events/templates/events/what-matters-to-workers.html:111
 msgid "whatMattersChartTooltip"
-msgstr "What Matters to Workers: What issues are jobseekers or workers interested in / trying to find out information about?"
+msgstr ""
+"What Matters to Workers: What issues are jobseekers or workers interested "
+"in / trying to find out information about?"
 
 #: events/templates/events/what-matters-to-workers.html:125
 msgid "whatMattersUserFeedbackTitle"
@@ -155,7 +157,9 @@ msgstr "User feedback - was this information helpful?"
 
 #: events/templates/events/what-matters-to-workers.html:130
 msgid "whatMattersUserFeedbackTooltip"
-msgstr "User Feedback: Shows responses from users to the question 'Was this information helpful?' at the bottom of each section."
+msgstr ""
+"User Feedback: Shows responses from users to the question 'Was this "
+"information helpful?' at the bottom of each section."
 
 #: jgwpandas/settings.py:162
 msgid "English"
@@ -164,6 +168,86 @@ msgstr "English"
 #: jgwpandas/settings.py:163
 msgid "Spanish"
 msgstr "Spanish"
+
+#: other_resource/forms.py:34
+msgid "editResourceTitleInput"
+msgstr "Title"
+
+#: other_resource/forms.py:35
+msgid "editResourceDescription"
+msgstr "Description"
+
+#: other_resource/forms.py:36
+msgid "editResourceLink"
+msgstr "Link"
+
+#: other_resource/forms.py:37
+msgid "editResourceGroup"
+msgstr "Group"
+
+#: other_resource/templates/edit_resource.html:5
+#: other_resource/templates/edit_resource.html:12
+msgid "editResourceTitle"
+msgstr "Edit Resource"
+
+#: other_resource/templates/edit_resource.html:19
+msgid "editResourceSaveChangesButton"
+msgstr "Save Changes"
+
+#: other_resource/templates/edit_resource.html:20
+msgid "editResourceCancelButton"
+msgstr "Cancel"
+
+#: other_resource/templates/other_resource.html:8
+#: other_resource/templates/other_resource.html:18
+msgid "otherResourceTitle"
+msgstr "Other Resources"
+
+
+#: other_resource/templates/other_resource.html:24
+#: other_resource/templates/other_resource.html:29
+#: other_resource/templates/other_resource.html:105
+#: other_resource/templates/other_resource.html:132
+msgid "otherResourceAddResourceButton"
+msgstr "Add Resource"
+
+
+#: other_resource/templates/other_resource.html:51
+msgid "otherResourceGoToResource"
+msgstr "Go to the Resource"
+
+#: other_resource/templates/other_resource.html:81
+msgid "otherResourceConfirmDeletion"
+msgstr "Confirm Deletion"
+
+#: other_resource/templates/other_resource.html:85
+msgid "otherResourceSureToDelete"
+msgstr "Are you sure you want to delete"
+
+#: other_resource/templates/other_resource.html:88
+msgid "otherResourceCancelButton"
+msgstr "Cancel"
+
+#: other_resource/templates/other_resource.html:91
+msgid "otherResourceDeleteButton"
+msgstr "Delete"
+
+#: other_resource/templates/other_resource.html:112
+msgid "otherResourceAddResourceTitleInput"
+msgstr "Title"
+
+#: other_resource/templates/other_resource.html:116
+msgid "otherResourceAddResourceDescription"
+msgstr "Description"
+
+#: other_resource/templates/other_resource.html:120
+msgid "otherResourceAddResourceLink"
+msgstr "Link"
+
+#: other_resource/templates/other_resource.html:124
+msgid "otherResourceAddResourceGroup"
+msgstr "Group"
+
 
 #: payment/templates/payment/payment-required.html:3
 msgid "paymentRequiredHeading"

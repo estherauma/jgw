@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-23 10:41+0000\n"
+"POT-Creation-Date: 2025-10-01 05:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -145,11 +145,15 @@ msgstr "Filtrar"
 
 #: events/templates/events/what-matters-to-workers.html:105
 msgid "whatMattersChartTitle"
-msgstr "Lo que les importa a los trabajadores (dónde pasan el tiempo las personas en la aplicación)"
+msgstr ""
+"Lo que les importa a los trabajadores (dónde pasan el tiempo las personas en "
+"la aplicación)"
 
 #: events/templates/events/what-matters-to-workers.html:111
 msgid "whatMattersChartTooltip"
-msgstr "Qué les importa a los trabajadores: ¿Qué temas les interesan o sobre qué intentan encontrar información los solicitantes de empleo o los trabajadores?"
+msgstr ""
+"Qué les importa a los trabajadores: ¿Qué temas les interesan o sobre qué "
+"intentan encontrar información los solicitantes de empleo o los trabajadores?"
 
 #: events/templates/events/what-matters-to-workers.html:125
 msgid "whatMattersUserFeedbackTitle"
@@ -157,7 +161,9 @@ msgstr "Comentarios de los usuarios: ¿fue útil esta información?"
 
 #: events/templates/events/what-matters-to-workers.html:130
 msgid "whatMattersUserFeedbackTooltip"
-msgstr "Comentarios de los usuarios: muestra las respuestas de los usuarios a la pregunta '¿Fue útil esta información?' en la parte inferior de cada sección."
+msgstr ""
+"Comentarios de los usuarios: muestra las respuestas de los usuarios a la "
+"pregunta '¿Fue útil esta información?' en la parte inferior de cada sección."
 
 #: jgwpandas/settings.py:162
 msgid "English"
@@ -166,6 +172,83 @@ msgstr "Inglés"
 #: jgwpandas/settings.py:163
 msgid "Spanish"
 msgstr "Español"
+
+#: other_resource/forms.py:34
+msgid "editResourceTitleInput"
+msgstr "Título"
+
+#: other_resource/forms.py:35
+msgid "editResourceDescription"
+msgstr "Descripción"
+
+#: other_resource/forms.py:36
+msgid "editResourceLink"
+msgstr "Enlace"
+
+#: other_resource/forms.py:37
+msgid "editResourceGroup"
+msgstr "Grupo"
+
+#: other_resource/templates/edit_resource.html:5
+#: other_resource/templates/edit_resource.html:12
+msgid "editResourceTitle"
+msgstr "Editar recurso"
+
+#: other_resource/templates/edit_resource.html:19
+msgid "editResourceSaveChangesButton"
+msgstr "Guardar cambios"
+
+#: other_resource/templates/edit_resource.html:20
+msgid "editResourceCancelButton"
+msgstr "Cancelar"
+
+#: other_resource/templates/other_resource.html:8
+#: other_resource/templates/other_resource.html:18
+msgid "otherResourceTitle"
+msgstr "Otros recursos"
+
+#: other_resource/templates/other_resource.html:24
+#: other_resource/templates/other_resource.html:29
+#: other_resource/templates/other_resource.html:105
+#: other_resource/templates/other_resource.html:132
+msgid "otherResourceAddResourceButton"
+msgstr "Agregar recurso"
+
+#: other_resource/templates/other_resource.html:51
+msgid "otherResourceGoToResource"
+msgstr "Ir al recurso"
+
+#: other_resource/templates/other_resource.html:81
+msgid "otherResourceConfirmDeletion"
+msgstr "Confirmar eliminación"
+
+#: other_resource/templates/other_resource.html:85
+msgid "otherResourceSureToDelete"
+msgstr "¿Estás seguro de que quieres eliminar?"
+
+#: other_resource/templates/other_resource.html:88
+msgid "otherResourceCancelButton"
+msgstr "Cancelar"
+
+#: other_resource/templates/other_resource.html:91
+msgid "otherResourceDeleteButton"
+msgstr "Borrar"
+
+#: other_resource/templates/other_resource.html:112
+msgid "otherResourceAddResourceTitleInput"
+msgstr "Título"
+
+#: other_resource/templates/other_resource.html:116
+msgid "otherResourceAddResourceDescription"
+msgstr "Descripción"
+
+#: other_resource/templates/other_resource.html:120
+msgid "otherResourceAddResourceLink"
+msgstr "Enlace"
+
+#: other_resource/templates/other_resource.html:124
+msgid "otherResourceAddResourceGroup"
+msgstr "Grupo"
 
 #: payment/templates/payment/payment-required.html:3
 msgid "paymentRequiredHeading"
