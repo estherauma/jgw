@@ -113,24 +113,3 @@ jobs:
             echo "total_count=$TOTAL_COUNT" >> $GITHUB_OUTPUT
             echo "repository=$REPO" >> $GITHUB_OUTPUT
           fi
-
-      - name: Notify Slack - Tag List
-        if: success()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          channel: '#deployments'
-          text: |
-            📋 **Available Docker Image Tags**
-            Repository: ${{ steps.tag-summary.outputs.repository }}
-            Total tags: ${{ steps.tag-summary.outputs.total_count }}
-            Recent tags: ${{ steps.tag-summary.outputs.recent_tags }}
-            
-            💡 **Quick Actions:**
-            • Use these tags for rollback workflows
-            • 'latest' = most recent build
-            • 'develop' = latest from develop branch
-            • 'sha-xxx' = specific commit builds
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        continue-on-error: true

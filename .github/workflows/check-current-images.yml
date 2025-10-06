@@ -73,22 +73,3 @@ jobs:
             echo "=================================================="
             echo "✅ Image check completed for ${{ github.event.inputs.environment }} environment"
           EOF
-
-      - name: Notify Slack - Image Check
-        if: success()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          channel: '#deployments'
-          text: |
-            🔍 **Current Image Versions Check**
-            Environment: ${{ github.event.inputs.environment }}
-            Checked by: ${{ github.actor }}
-            
-            💡 **Next Steps:**
-            • Use this information to choose rollback target
-            • Run rollback workflow with appropriate image tag
-            • Monitor environment after any changes
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        continue-on-error: true
