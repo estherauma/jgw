@@ -1,0 +1,105 @@
+name: List Available Image Tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'Docker Hub repository name'
+        required: false
+        default: 'fiftyeight/jgw-pandas-staging'
+        type: string
+      page_size:
+        description: 'Number of tags to show'
+        required: false
+        default: '20'
+        type: string
+
+jobs:
+  list-tags:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: List Docker Hub Image Tags
+        run: |
+          REPO="${{ github.event.inputs.repository }}"
+          PAGE_SIZE="${{ github.event.inputs.page_size }}"
+          
+          echo "🔍 Listing available tags for repository: $REPO"
+          echo "=================================================="
+          
+          # Get the first page of tags
+          RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=$PAGE_SIZE")
+          
+          # Check if repository exists
+          if echo "$RESPONSE" | jq -e '.results' > /dev/null 2>&1; then
+            echo "✅ Repository found!"
+            echo ""
+            echo "📋 Available tags:"
+            echo "$RESPONSE" | jq -r '.results[] | "  • \(.name) (updated: \(.last_updated))"'
+            
+            echo ""
+            echo "📊 Summary:"
+            TOTAL_COUNT=$(echo "$RESPONSE" | jq -r '.count')
+            echo "  Total tags available: $TOTAL_COUNT"
+            echo "  Showing: $PAGE_SIZE"
+            
+            if [ "$TOTAL_COUNT" -gt "$PAGE_SIZE" ]; then
+              echo "  Note: Only showing first $PAGE_SIZE tags. Use larger page_size to see more."
+            fi
+            
+            echo ""
+            echo "🎯 Recent tags (last 5):"
+            echo "$RESPONSE" | jq -r '.results[0:5] | .[] | "  • \(.name) (updated: \(.last_updated))"'
+            
+            echo ""
+            echo "💡 Usage:"
+            echo "  • Use 'latest' for the most recent build"
+            echo "  • Use 'develop' for the latest from develop branch"
+            echo "  • Use 'sha-abc123' for specific commit builds"
+            echo "  • Use custom tags for specific versions"
+            
+          else
+            echo "❌ Repository not found or inaccessible: $REPO"
+            echo "Please check the repository name and try again."
+            exit 1
+          fi
+
+      - name: Create tag summary
+        id: tag-summary
+        run: |
+          REPO="${{ github.event.inputs.repository }}"
+          PAGE_SIZE="${{ github.event.inputs.page_size }}"
+          
+          # Get tags and create summary
+          RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=$PAGE_SIZE")
+          
+          if echo "$RESPONSE" | jq -e '.results' > /dev/null 2>&1; then
+            # Get the most recent tags
+            RECENT_TAGS=$(echo "$RESPONSE" | jq -r '.results[0:5] | .[] | .name' | tr '\n' ',' | sed 's/,$//')
+            TOTAL_COUNT=$(echo "$RESPONSE" | jq -r '.count')
+            
+            echo "recent_tags=$RECENT_TAGS" >> $GITHUB_OUTPUT
+            echo "total_count=$TOTAL_COUNT" >> $GITHUB_OUTPUT
+            echo "repository=$REPO" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify Slack - Tag List
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#deployments'
+          text: |
+            📋 **Available Docker Image Tags**
+            Repository: ${{ steps.tag-summary.outputs.repository }}
+            Total tags: ${{ steps.tag-summary.outputs.total_count }}
+            Recent tags: ${{ steps.tag-summary.outputs.recent_tags }}
+            
+            💡 **Quick Actions:**
+            • Use these tags for rollback workflows
+            • 'latest' = most recent build
+            • 'develop' = latest from develop branch
+            • 'sha-xxx' = specific commit builds
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

@@ -1,9 +1,16 @@
 name: Deploy to Staging
 
 on:
-  push:
-    branches:
-      - develop
+  repository_dispatch:
+    types: [build-success]
+  # Keep the original trigger for manual deployments
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker image tag to deploy (default: latest)'
+        required: false
+        default: 'latest'
+        type: string
 
 env:
   DEPLOYMENT_ENV: staging
@@ -25,10 +32,33 @@ jobs:
           chmod 600 ~/.ssh/staging-deploy
           ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Set deployment variables
+        id: set-vars
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "image_name=${{ github.event.client_payload.image_name }}" >> $GITHUB_OUTPUT
+            echo "image_tag=latest" >> $GITHUB_OUTPUT
+            echo "commit_sha=${{ github.event.client_payload.commit }}" >> $GITHUB_OUTPUT
+            echo "actor=${{ github.event.client_payload.actor }}" >> $GITHUB_OUTPUT
+            echo "triggered_by=build-success" >> $GITHUB_OUTPUT
+          else
+            echo "image_name=fiftyeight/jgw-pandas-staging" >> $GITHUB_OUTPUT
+            echo "image_tag=${{ github.event.inputs.image_tag || 'latest' }}" >> $GITHUB_OUTPUT
+            echo "commit_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "actor=${{ github.actor }}" >> $GITHUB_OUTPUT
+            echo "triggered_by=manual" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy to Staging
         run: |
-          ssh -i ~/.ssh/staging-deploy ${{ secrets.STAGING_USERNAME }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          ssh -i ~/.ssh/staging-deploy ${{ secrets.STAGING_USERNAME }}@${{ secrets.STAGING_HOST }} << EOF
             cd ~/jgw-pandas
+            
+            echo "=== Staging Deployment Started ==="
+            echo "Image: ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}"
+            echo "Commit: ${{ steps.set-vars.outputs.commit_sha }}"
+            echo "Triggered by: ${{ steps.set-vars.outputs.triggered_by }}"
+            echo "Actor: ${{ steps.set-vars.outputs.actor }}"
             
             echo "Pulling latest code from develop branch..."
             git pull origin develop
@@ -48,7 +78,7 @@ jobs:
             echo "Cleaning up unused images..."
             sudo docker image prune -f
             
-            echo "Staging deployment completed!"
+            echo "=== Staging deployment completed! ==="
           EOF
 
       - name: Notify Slack - Staging Success
@@ -60,11 +90,12 @@ jobs:
           text: |
             🚀 **Staging Deployment Successful**
             Environment: Staging
+            Image: ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}
             Branch: ${{ env.DEPLOYMENT_BRANCH }}
-            Commit: ${{ github.sha }}
-            Author: ${{ github.actor }}
-            Changes: ${{ github.event.head_commit.message }}
-            URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+            Commit: ${{ steps.set-vars.outputs.commit_sha }}
+            Author: ${{ steps.set-vars.outputs.actor }}
+            Triggered by: ${{ steps.set-vars.outputs.triggered_by }}
+            URL: https://github.com/${{ github.repository }}/commit/${{ steps.set-vars.outputs.commit_sha }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         continue-on-error: true
@@ -78,9 +109,11 @@ jobs:
           text: |
             ❌ **Staging Deployment Failed**
             Environment: Staging
+            Image: ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}
             Branch: ${{ env.DEPLOYMENT_BRANCH }}
-            Commit: ${{ github.sha }}
-            Author: ${{ github.actor }}
+            Commit: ${{ steps.set-vars.outputs.commit_sha }}
+            Author: ${{ steps.set-vars.outputs.actor }}
+            Triggered by: ${{ steps.set-vars.outputs.triggered_by }}
             Check the logs for details.
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,0 +1,178 @@
+name: Rollback Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker image tag to rollback to'
+        required: true
+        type: choice
+        options:
+        - latest
+        - develop
+        - sha-latest
+        - custom
+      custom_tag:
+        description: 'Custom image tag (if "custom" is selected above)'
+        required: false
+        type: string
+      confirm_rollback:
+        description: 'Confirm you want to rollback staging'
+        required: true
+        type: boolean
+        default: false
+
+env:
+  DEPLOYMENT_ENV: staging
+  IMAGE_NAME: fiftyeight/jgw-pandas-staging
+
+jobs:
+  rollback-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    if: github.event.inputs.confirm_rollback == 'true'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ~/.ssh/staging-deploy
+          chmod 600 ~/.ssh/staging-deploy
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Set rollback variables
+        id: set-vars
+        run: |
+          if [ "${{ github.event.inputs.image_tag }}" = "custom" ]; then
+            if [ -z "${{ github.event.inputs.custom_tag }}" ]; then
+              echo "Error: Custom tag is required when 'custom' is selected"
+              exit 1
+            fi
+            echo "image_tag=${{ github.event.inputs.custom_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "image_tag=${{ github.event.inputs.image_tag }}" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "image_name=${{ env.IMAGE_NAME }}" >> $GITHUB_OUTPUT
+          echo "commit_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "actor=${{ github.actor }}" >> $GITHUB_OUTPUT
+          echo "triggered_by=manual-rollback" >> $GITHUB_OUTPUT
+
+      - name: Verify image exists
+        run: |
+          echo "Verifying image exists in Docker Hub..."
+          IMAGE_TAG="${{ steps.set-vars.outputs.image_tag }}"
+          IMAGE_NAME="${{ steps.set-vars.outputs.image_name }}"
+          
+          # Check if image exists in Docker Hub
+          if ! curl -s -f "https://hub.docker.com/v2/repositories/$IMAGE_NAME/tags/$IMAGE_TAG/" > /dev/null; then
+            echo "Error: Image $IMAGE_NAME:$IMAGE_TAG not found in Docker Hub"
+            echo "Available tags:"
+            curl -s "https://hub.docker.com/v2/repositories/$IMAGE_NAME/tags/?page_size=10" | jq -r '.results[].name' | head -10
+            exit 1
+          fi
+          
+          echo "✅ Image $IMAGE_NAME:$IMAGE_TAG verified in Docker Hub"
+
+      - name: Rollback Staging
+        run: |
+          ssh -i ~/.ssh/staging-deploy ${{ secrets.STAGING_USERNAME }}@${{ secrets.STAGING_HOST }} << EOF
+            cd ~/jgw-pandas
+            
+            echo "=== Staging Rollback Started ==="
+            echo "Rolling back to: ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}"
+            echo "Commit: ${{ steps.set-vars.outputs.commit_sha }}"
+            echo "Triggered by: ${{ steps.set-vars.outputs.triggered_by }}"
+            echo "Actor: ${{ steps.set-vars.outputs.actor }}"
+            
+            echo ""
+            echo "🔍 Checking current image versions..."
+            
+            # Get current image versions from running containers
+            echo "Current running images:"
+            sudo docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep -E "(web|celery_worker|celery_beat)" || echo "No containers currently running"
+            
+            # Get current image tag from docker-compose file
+            CURRENT_IMAGE_TAG=\$(grep "image: ${{ env.IMAGE_NAME }}:" docker-compose.staging.yml | head -1 | sed 's/.*://' | tr -d ' ')
+            echo "Current image tag in docker-compose: \$CURRENT_IMAGE_TAG"
+            
+            echo ""
+            echo "📋 Rollback Summary:"
+            echo "  FROM: ${{ env.IMAGE_NAME }}:\$CURRENT_IMAGE_TAG"
+            echo "  TO:   ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}"
+            echo ""
+            
+            echo "Pulling latest code from develop branch..."
+            git pull origin develop
+            
+            echo "Logging into Docker Hub..."
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            
+            echo "Updating docker-compose.staging.yml to use rollback image..."
+            # Update the image tag in docker-compose.staging.yml
+            sed -i "s|image: ${{ env.IMAGE_NAME }}:.*|image: ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}|g" docker-compose.staging.yml
+            
+            echo "Pulling rollback image..."
+            sudo docker compose -f docker-compose.staging.yml pull
+            
+            echo "Stopping current containers..."
+            sudo docker compose -f docker-compose.staging.yml down
+            
+            echo "Starting containers with rollback image..."
+            sudo docker compose -f docker-compose.staging.yml up -d
+            
+            echo ""
+            echo "✅ Verifying rollback completed successfully..."
+            echo "New running images:"
+            sudo docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep -E "(web|celery_worker|celery_beat)" || echo "No containers running"
+            
+            echo "Cleaning up unused images..."
+            sudo docker image prune -f
+            
+            echo "=== Staging rollback completed! ==="
+          EOF
+
+      - name: Notify Slack - Rollback Success
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#deployments'
+          text: |
+            🔄 **Staging Rollback Successful**
+            Environment: Staging
+            **Image Change:**
+            • FROM: ${{ env.IMAGE_NAME }}:previous
+            • TO:   ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}
+            Branch: develop
+            Commit: ${{ steps.set-vars.outputs.commit_sha }}
+            Rolled back by: ${{ steps.set-vars.outputs.actor }}
+            Triggered by: ${{ steps.set-vars.outputs.triggered_by }}
+            URL: https://github.com/${{ github.repository }}/commit/${{ steps.set-vars.outputs.commit_sha }}
+            ✅ **Staging has been rolled back successfully!**
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+      - name: Notify Slack - Rollback Failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#deployments'
+          text: |
+            ❌ **Staging Rollback Failed**
+            Environment: Staging
+            Attempted rollback to: ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}
+            Branch: develop
+            Commit: ${{ steps.set-vars.outputs.commit_sha }}
+            Rolled back by: ${{ steps.set-vars.outputs.actor }}
+            Triggered by: ${{ steps.set-vars.outputs.triggered_by }}
+            ⚠️ **URGENT: Staging rollback failed!**
+            Check the logs immediately.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
