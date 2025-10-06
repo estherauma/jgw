@@ -47,22 +47,83 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           registry: docker.io
 
-      - name: Clean up old Docker Hub images
+      - name: Clean up old Docker Hub images (keep recent for rollback)
         run: |
-          echo "Cleaning up old images from Docker Hub..."
+          # Configuration
+          KEEP_RECENT_IMAGES=2
+          PROTECTED_TAGS="latest develop"
+          MAX_TAGS_FETCH=100
           
-          # Get all tags for the repository
-          TAGS=$(curl -s -H "Authorization: JWT $(curl -s -H "Content-Type: application/json" -X POST --data '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' https://hub.docker.com/v2/users/login/ | jq -r .token)" "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/?page_size=100" | jq -r '.results[].name' | grep -v 'latest')
+          echo "🧹 Cleaning up old images from Docker Hub..."
+          echo "📋 Retention policy: Keep last $KEEP_RECENT_IMAGES images + protected tags ($PROTECTED_TAGS)"
           
-          if [ -n "$TAGS" ]; then
-            echo "Found old tags to delete: $TAGS"
-            for tag in $TAGS; do
-              echo "Deleting tag: $tag"
-              curl -s -X DELETE -H "Authorization: JWT $(curl -s -H "Content-Type: application/json" -X POST --data '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' https://hub.docker.com/v2/users/login/ | jq -r .token)" "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$tag/"
-            done
-            echo "Old images cleaned up successfully"
+          # Get authentication token
+          AUTH_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST --data '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+          
+          if [ "$AUTH_TOKEN" = "null" ] || [ -z "$AUTH_TOKEN" ]; then
+            echo "❌ Failed to authenticate with Docker Hub"
+            exit 1
+          fi
+          
+          # Get all tags sorted by last_updated (newest first)
+          TAGS_RESPONSE=$(curl -s -H "Authorization: JWT $AUTH_TOKEN" "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/?page_size=$MAX_TAGS_FETCH&ordering=-last_updated")
+          
+          if echo "$TAGS_RESPONSE" | jq -e '.results' > /dev/null 2>&1; then
+            # Get total count
+            TOTAL_TAGS=$(echo "$TAGS_RESPONSE" | jq -r '.count')
+            echo "📊 Total tags in repository: $TOTAL_TAGS"
+            
+            # Get all tags except protected ones
+            ALL_TAGS=$(echo "$TAGS_RESPONSE" | jq -r '.results[] | select(.name as $tag | ("$PROTECTED_TAGS" | split(" ") | index($tag) | not)) | .name')
+            
+            # Keep the most recent ones (skip the last KEEP_RECENT_IMAGES)
+            TAGS_TO_DELETE=$(echo "$ALL_TAGS" | head -n -$KEEP_RECENT_IMAGES)
+            
+            if [ -n "$TAGS_TO_DELETE" ]; then
+              echo ""
+              echo "📋 Current tags (keeping last $KEEP_RECENT_IMAGES + protected tags):"
+              echo "$TAGS_RESPONSE" | jq -r '.results[] | "  • \(.name) (updated: \(.last_updated))"' | head -10
+              
+              echo ""
+              echo "🗑️  Tags to delete (keeping last $KEEP_RECENT_IMAGES for rollback):"
+              echo "$TAGS_TO_DELETE" | while read -r tag; do
+                echo "  • $tag"
+              done
+              
+              echo ""
+              echo "Deleting old tags..."
+              DELETED_COUNT=0
+              FAILED_COUNT=0
+              
+              echo "$TAGS_TO_DELETE" | while read -r tag; do
+                if [ -n "$tag" ]; then
+                  echo "Deleting tag: $tag"
+                  DELETE_RESPONSE=$(curl -s -X DELETE -H "Authorization: JWT $AUTH_TOKEN" "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$tag/")
+                  
+                  if echo "$DELETE_RESPONSE" | jq -e '.detail' > /dev/null 2>&1; then
+                    echo "  ❌ Failed to delete $tag: $(echo "$DELETE_RESPONSE" | jq -r '.detail')"
+                    FAILED_COUNT=$((FAILED_COUNT + 1))
+                  else
+                    echo "  ✅ Successfully deleted $tag"
+                    DELETED_COUNT=$((DELETED_COUNT + 1))
+                  fi
+                fi
+              done
+              
+              echo ""
+              echo "✅ Cleanup completed:"
+              echo "  • Kept last $KEEP_RECENT_IMAGES images for rollback"
+              echo "  • Protected tags: $PROTECTED_TAGS"
+              echo "  • Total tags remaining: $((TOTAL_TAGS - $(echo "$TAGS_TO_DELETE" | wc -l)))"
+            else
+              echo "ℹ️  No old tags found to clean up (keeping all for rollback)"
+              echo "  • Total tags: $TOTAL_TAGS"
+              echo "  • All tags are recent or protected"
+            fi
           else
-            echo "No old images found to clean up"
+            echo "❌ Failed to fetch tags from Docker Hub"
+            echo "Response: $TAGS_RESPONSE"
+            exit 1
           fi
 
       - name: Extract metadata
@@ -93,6 +154,21 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Trigger Staging Deployment
+        if: success()
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: build-success
+          client-payload: |
+            {
+              "image_name": "${{ env.IMAGE_NAME }}",
+              "tags": "${{ steps.meta.outputs.tags }}",
+              "branch": "${{ github.ref_name }}",
+              "commit": "${{ github.sha }}",
+              "actor": "${{ github.actor }}"
+            }
+
       - name: Notify Slack - Build Success
         if: success()
         uses: 8398a7/action-slack@v3
@@ -105,7 +181,8 @@ jobs:
             Tags: ${{ steps.meta.outputs.tags }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
-            ✨ Old images cleaned up, only latest kept
+            ✨ Old images cleaned up, kept last 2 + latest + develop for rollback
+            🚀 Triggering staging deployment...
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         continue-on-error: true

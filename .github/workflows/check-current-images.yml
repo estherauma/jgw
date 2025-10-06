@@ -1,0 +1,94 @@
+name: Check Current Image Versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to check'
+        required: true
+        type: choice
+        options:
+        - staging
+        - production
+
+jobs:
+  check-images:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy-key
+            ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+            echo "STAGING_USERNAME=${{ secrets.STAGING_USERNAME }}" >> $GITHUB_ENV
+            echo "STAGING_HOST=${{ secrets.STAGING_HOST }}" >> $GITHUB_ENV
+            echo "COMPOSE_FILE=docker-compose.staging.yml" >> $GITHUB_ENV
+          else
+            echo "${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy-key
+            ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+            echo "STAGING_USERNAME=${{ secrets.USERNAME }}" >> $GITHUB_ENV
+            echo "STAGING_HOST=${{ secrets.PRODUCTION_HOST }}" >> $GITHUB_ENV
+            echo "COMPOSE_FILE=docker-compose.production.yml" >> $GITHUB_ENV
+          fi
+          chmod 600 ~/.ssh/deploy-key
+
+      - name: Check Current Images
+        run: |
+          ssh -i ~/.ssh/deploy-key $STAGING_USERNAME@$STAGING_HOST << EOF
+            cd ~/jgw-pandas
+            
+            echo "🔍 Checking current image versions in ${{ github.event.inputs.environment }} environment"
+            echo "=================================================="
+            
+            echo ""
+            echo "📋 Current Running Containers:"
+            sudo docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.CreatedAt}}" | head -10
+            
+            echo ""
+            echo "📋 Current Image Tags in Docker Compose:"
+            grep "image:" $COMPOSE_FILE | grep -v "#" | head -5
+            
+            echo ""
+            echo "📋 Available Images on Server:"
+            sudo docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}\t{{.Size}}" | grep "fiftyeight/jgw-pandas-staging" | head -10
+            
+            echo ""
+            echo "📋 Container Resource Usage:"
+            sudo docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}" | head -10
+            
+            echo ""
+            echo "📋 Recent Container Logs (last 5 lines):"
+            for container in \$(sudo docker ps --format "{{.Names}}" | grep -E "(web|celery_worker|celery_beat)"); do
+              echo "--- \$container ---"
+              sudo docker logs --tail 5 \$container 2>/dev/null || echo "No logs available"
+              echo ""
+            done
+            
+            echo "=================================================="
+            echo "✅ Image check completed for ${{ github.event.inputs.environment }} environment"
+          EOF
+
+      - name: Notify Slack - Image Check
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#deployments'
+          text: |
+            🔍 **Current Image Versions Check**
+            Environment: ${{ github.event.inputs.environment }}
+            Checked by: ${{ github.actor }}
+            
+            💡 **Next Steps:**
+            • Use this information to choose rollback target
+            • Run rollback workflow with appropriate image tag
+            • Monitor environment after any changes
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

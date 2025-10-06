@@ -1,0 +1,49 @@
+# GitHub Actions Workflow Configuration
+# This file contains configuration settings for all workflows
+
+# Docker Hub Image Retention Policy
+docker_hub:
+  # Number of recent images to keep for rollback purposes
+  # This excludes 'latest' and 'develop' tags which are always kept
+  keep_recent_images: 2
+  
+  # Tags that should never be deleted
+  protected_tags:
+    - latest
+    - develop
+  
+  # Maximum number of tags to fetch from Docker Hub API
+  max_tags_fetch: 100
+
+# Rollback Configuration
+rollback:
+  # Default image tag for emergency rollbacks
+  emergency_tag: latest
+  
+  # Tags to show in rollback dropdown
+  available_tags:
+    - latest
+    - develop
+    - sha-latest
+    - custom
+
+# Notification Settings
+notifications:
+  # Slack channel for deployment notifications
+  slack_channel: '#deployments'
+  
+  # Include image retention info in notifications
+  include_retention_info: true
+
+# Build Configuration
+build:
+  # Platform to build for
+  platform: linux/amd64
+  
+  # Enable multi-platform builds (currently disabled for speed)
+  multi_platform: false
+  
+  # Cache configuration
+  cache:
+    from: type=gha
+    to: type=gha,mode=max
