@@ -1,0 +1,99 @@
+services:
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_URL: ${REDIS_URL}
+    restart: unless-stopped
+
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py create_super_user && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./google_cred.json:/app/google_cred.json:ro
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  celery_worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    command: bash -c "mkdir -p ./celery && celery -A jgwpandas worker -l info --logfile=./celery/celery.log"
+    env_file:
+      - .env
+    volumes:
+      - ./google_cred.json:/app/google_cred.json:ro
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  celery_beat:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    command: bash -c "mkdir -p ./celery && celery -A jgwpandas beat -l info --logfile=./celery/celery.beat.log"
+    env_file:
+      - .env
+    volumes:
+      - ./google_cred.json:/app/google_cred.json:ro
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    ports:
+      - "9000:9000"
+
+volumes:
+  postgres_data:
+  portainer_data:

@@ -27,9 +27,14 @@ RUN pip install --upgrade pip && pip install --no-cache-dir --timeout=60 --retri
 
 COPY . /app/
 
-# Create google_cred.json from build argument
-ARG GOOGLE_CREDENTIALS_JSON
-RUN echo "$GOOGLE_CREDENTIALS_JSON" > /app/google_cred.json
+# Create google_cred.json from base64 encoded secret
+ARG GOOGLE_CREDENTIALS_BASE64
+RUN echo "$GOOGLE_CREDENTIALS_BASE64" | base64 -d > /app/google_cred.json && \
+    echo "Google credentials file created from base64" && \
+    ls -la /app/google_cred.json
+
+# Set Google Application Credentials environment variable
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/google_cred.json
 
 RUN chown -R celery:celery /app
 
