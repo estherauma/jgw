@@ -41,6 +41,14 @@ jobs:
             echo "commit_sha=${{ github.event.client_payload.commit }}" >> $GITHUB_OUTPUT
             echo "actor=${{ github.event.client_payload.actor }}" >> $GITHUB_OUTPUT
             echo "triggered_by=build-success" >> $GITHUB_OUTPUT
+            
+            # Log the received payload for debugging
+            echo "Received payload:"
+            echo "  Image name: ${{ github.event.client_payload.image_name }}"
+            echo "  Tags: ${{ github.event.client_payload.tags }}"
+            echo "  Branch: ${{ github.event.client_payload.branch }}"
+            echo "  Commit: ${{ github.event.client_payload.commit }}"
+            echo "  Actor: ${{ github.event.client_payload.actor }}"
           else
             echo "image_name=fiftyeight/jgw-pandas-staging" >> $GITHUB_OUTPUT
             echo "image_tag=${{ github.event.inputs.image_tag || 'latest' }}" >> $GITHUB_OUTPUT
