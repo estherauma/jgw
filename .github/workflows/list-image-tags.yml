@@ -17,6 +17,7 @@ on:
 jobs:
   list-tags:
     runs-on: ubuntu-latest
+    environment: staging
 
     steps:
       - name: List Docker Hub Image Tags
@@ -27,8 +28,19 @@ jobs:
           echo "🔍 Listing available tags for repository: $REPO"
           echo "=================================================="
           
-          # Get the first page of tags
-          RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=$PAGE_SIZE")
+          # Get authentication token
+          AUTH_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST --data '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+          
+          if [ "$AUTH_TOKEN" = "null" ] || [ -z "$AUTH_TOKEN" ]; then
+            echo "❌ Failed to authenticate with Docker Hub"
+            echo "Please check DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets"
+            exit 1
+          fi
+          
+          echo "✅ Authenticated with Docker Hub"
+          
+          # Get the first page of tags with authentication
+          RESPONSE=$(curl -s -H "Authorization: JWT $AUTH_TOKEN" "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=$PAGE_SIZE&ordering=-last_updated")
           
           # Check if repository exists
           if echo "$RESPONSE" | jq -e '.results' > /dev/null 2>&1; then
@@ -60,6 +72,17 @@ jobs:
             
           else
             echo "❌ Repository not found or inaccessible: $REPO"
+            echo ""
+            echo "🔍 Debug information:"
+            echo "  Repository: $REPO"
+            echo "  Response: $RESPONSE"
+            echo ""
+            echo "💡 Possible causes:"
+            echo "  • Repository name is incorrect"
+            echo "  • Repository is private and requires authentication"
+            echo "  • Docker Hub API is temporarily unavailable"
+            echo "  • Authentication failed"
+            echo ""
             echo "Please check the repository name and try again."
             exit 1
           fi
@@ -70,8 +93,16 @@ jobs:
           REPO="${{ github.event.inputs.repository }}"
           PAGE_SIZE="${{ github.event.inputs.page_size }}"
           
-          # Get tags and create summary
-          RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=$PAGE_SIZE")
+          # Get authentication token
+          AUTH_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST --data '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+          
+          if [ "$AUTH_TOKEN" = "null" ] || [ -z "$AUTH_TOKEN" ]; then
+            echo "❌ Failed to authenticate with Docker Hub"
+            exit 1
+          fi
+          
+          # Get tags and create summary with authentication
+          RESPONSE=$(curl -s -H "Authorization: JWT $AUTH_TOKEN" "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=$PAGE_SIZE&ordering=-last_updated")
           
           if echo "$RESPONSE" | jq -e '.results' > /dev/null 2>&1; then
             # Get the most recent tags

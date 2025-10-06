@@ -154,20 +154,33 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Prepare deployment payload
+        if: success()
+        id: prepare-payload
+        run: |
+          # Convert tags to a single line JSON array
+          TAGS_JSON=$(echo "${{ steps.meta.outputs.tags }}" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          
+          # Create the payload
+          cat > payload.json << EOF
+          {
+            "image_name": "${{ env.IMAGE_NAME }}",
+            "tags": $TAGS_JSON,
+            "branch": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}",
+            "actor": "${{ github.actor }}"
+          }
+          EOF
+          
+          echo "payload=$(cat payload.json)" >> $GITHUB_OUTPUT
+
       - name: Trigger Staging Deployment
         if: success()
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           event-type: build-success
-          client-payload: |
-            {
-              "image_name": "${{ env.IMAGE_NAME }}",
-              "tags": "${{ steps.meta.outputs.tags }}",
-              "branch": "${{ github.ref_name }}",
-              "commit": "${{ github.sha }}",
-              "actor": "${{ github.actor }}"
-            }
+          client-payload: ${{ steps.prepare-payload.outputs.payload }}
 
       - name: Notify Slack - Build Success
         if: success()
