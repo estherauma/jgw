@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: Build and Deploy to Staging
 
 on:
   push:
@@ -8,15 +8,21 @@ on:
 env:
   REGISTRY: docker.io
   IMAGE_NAME: fiftyeight/jgw-pandas-staging
+  DEPLOYMENT_ENV: staging
+  DEPLOYMENT_BRANCH: develop
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
+      # ===========================================
+      # BUILD PHASE
+      # ===========================================
+      
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -154,48 +160,87 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Prepare deployment payload
-        if: success()
-        id: prepare-payload
+      # ===========================================
+      # DEPLOYMENT PHASE
+      # ===========================================
+
+      - name: Setup SSH for Staging
         run: |
-          # Convert tags to a single line JSON array
-          TAGS_JSON=$(echo "${{ steps.meta.outputs.tags }}" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ~/.ssh/staging-deploy
+          chmod 600 ~/.ssh/staging-deploy
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Set deployment variables
+        id: set-vars
+        run: |
+          echo "image_name=${{ env.IMAGE_NAME }}" >> $GITHUB_OUTPUT
+          echo "image_tag=latest" >> $GITHUB_OUTPUT
+          echo "commit_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "actor=${{ github.actor }}" >> $GITHUB_OUTPUT
+          echo "triggered_by=build-success" >> $GITHUB_OUTPUT
           
-          # Create the payload
-          cat > payload.json << EOF
-          {
-            "image_name": "${{ env.IMAGE_NAME }}",
-            "tags": $TAGS_JSON,
-            "branch": "${{ github.ref_name }}",
-            "commit": "${{ github.sha }}",
-            "actor": "${{ github.actor }}"
-          }
+          # Log deployment information
+          echo "=== Deployment Information ==="
+          echo "Image: ${{ env.IMAGE_NAME }}:latest"
+          echo "Tags built: ${{ steps.meta.outputs.tags }}"
+          echo "Branch: ${{ env.DEPLOYMENT_BRANCH }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Triggered by: build-success"
+
+      - name: Deploy to Staging
+        run: |
+          ssh -i ~/.ssh/staging-deploy ${{ secrets.STAGING_USERNAME }}@${{ secrets.STAGING_HOST }} << EOF
+            cd ~/jgw-pandas
+            
+            echo "=== Staging Deployment Started ==="
+            echo "Image: ${{ steps.set-vars.outputs.image_name }}:${{ steps.set-vars.outputs.image_tag }}"
+            echo "Commit: ${{ steps.set-vars.outputs.commit_sha }}"
+            echo "Triggered by: ${{ steps.set-vars.outputs.triggered_by }}"
+            echo "Actor: ${{ steps.set-vars.outputs.actor }}"
+            
+            echo "Pulling latest code from develop branch..."
+            git pull origin develop
+            
+            echo "Logging into Docker Hub..."
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            
+            echo "Pulling latest images..."
+            sudo docker compose -f docker-compose.staging.yml pull
+            
+            echo "Stopping containers..."
+            sudo docker compose -f docker-compose.staging.yml down
+            
+            echo "Starting containers with latest images..."
+            sudo docker compose -f docker-compose.staging.yml up -d
+            
+            echo "Cleaning up unused images..."
+            sudo docker image prune -f
+            
+            echo "=== Staging deployment completed! ==="
           EOF
-          
-          echo "payload=$(cat payload.json)" >> $GITHUB_OUTPUT
 
-      - name: Trigger Staging Deployment
-        if: success()
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: build-success
-          client-payload: ${{ steps.prepare-payload.outputs.payload }}
+      # ===========================================
+      # NOTIFICATIONS
+      # ===========================================
 
-      - name: Notify Slack - Build Success
+      - name: Notify Slack - Build and Deploy Success
         if: success()
         uses: 8398a7/action-slack@v3
         with:
           status: success
           channel: '#deployments'
           text: |
-            🐳 **Docker Image Built Successfully**
+            🚀 **Build and Deploy to Staging Successful**
+            Environment: Staging
             Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             Tags: ${{ steps.meta.outputs.tags }}
-            Branch: ${{ github.ref_name }}
+            Branch: ${{ env.DEPLOYMENT_BRANCH }}
             Commit: ${{ github.sha }}
+            Deployed by: ${{ github.actor }}
             ✨ Old images cleaned up, kept last 2 + latest + develop for rollback
-            🚀 Triggering staging deployment...
+            ✅ **Staging environment updated successfully!**
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         continue-on-error: true
@@ -207,10 +252,12 @@ jobs:
           status: failure
           channel: '#deployments'
           text: |
-            ❌ **Docker Image Build Failed**
+            ❌ **Build and Deploy to Staging Failed**
+            Environment: Staging
             Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            Branch: ${{ github.ref_name }}
+            Branch: ${{ env.DEPLOYMENT_BRANCH }}
             Commit: ${{ github.sha }}
+            Deployed by: ${{ github.actor }}
             Check the logs for details.
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
