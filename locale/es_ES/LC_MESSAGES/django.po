@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-01 05:19+0000\n"
+"POT-Creation-Date: 2025-10-01 10:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -117,7 +117,7 @@ msgstr "Reiniciar"
 
 #: events/templates/events/what-matters-to-workers.html:49
 msgid "whatMattersHeading"
-msgstr "Lo que les importa a los trabajadores"
+msgstr "Lo que importa a los trabajadores"
 
 #: events/templates/events/what-matters-to-workers.html:67
 msgid "whatMattersExportButton"
@@ -146,14 +146,15 @@ msgstr "Filtrar"
 #: events/templates/events/what-matters-to-workers.html:105
 msgid "whatMattersChartTitle"
 msgstr ""
-"Lo que les importa a los trabajadores (dónde pasan el tiempo las personas en "
-"la aplicación)"
+"Lo que les importa a los trabajadores (dónde pasan el tiempo las personas en"
+" la aplicación)"
 
 #: events/templates/events/what-matters-to-workers.html:111
 msgid "whatMattersChartTooltip"
 msgstr ""
 "Qué les importa a los trabajadores: ¿Qué temas les interesan o sobre qué "
-"intentan encontrar información los solicitantes de empleo o los trabajadores?"
+"intentan encontrar información los solicitantes de empleo o los "
+"trabajadores?"
 
 #: events/templates/events/what-matters-to-workers.html:125
 msgid "whatMattersUserFeedbackTitle"
@@ -375,8 +376,8 @@ msgstr "Usuarios por país de destino"
 #: preference/templates/preference/user_overview.html:150
 msgid "userOverviewUsersByDestinationCountryTooltip"
 msgstr ""
-"Usuarios por país de destino: Los usuarios eligen el país en el que trabajan "
-"o buscan trabajo."
+"Usuarios por país de destino: Los usuarios eligen el país en el que trabajan"
+" o buscan trabajo."
 
 #: preference/templates/preference/user_overview.html:162
 msgid "userOverviewUsersByLanguageTitle"
@@ -385,8 +386,8 @@ msgstr "Usuarios por idioma"
 #: preference/templates/preference/user_overview.html:167
 msgid "userOverviewUsersByLanguageTooltip"
 msgstr ""
-"Usuarios por idioma: los usuarios eligen su idioma cuando usan la aplicación "
-"por primera vez."
+"Usuarios por idioma: los usuarios eligen su idioma cuando usan la aplicación"
+" por primera vez."
 
 #: preference/templates/preference/user_overview.html:180
 msgid "userOverviewUsersByStateTitle"
@@ -489,13 +490,149 @@ msgstr ""
 "Mapa de Geolocalización del Usuario: Muestra la Geolocalización del usuario "
 "al momento de utilizar la app."
 
-#: preference/templates/preference/user_overview.html:452
-msgid "Search"
-msgstr ""
+#: question/templates/question/messaging_question.html:8
+msgid "messagingQuestionsTitle"
+msgstr "Preguntas sobre mensajería"
 
-#: preference/templates/preference/user_overview.html:453
-msgid "None selected"
+#: question/templates/question/messaging_question.html:16
+msgid "messagingQuestionsFilters"
+msgstr "Filtros"
+
+#: question/templates/question/messaging_question.html:23
+msgid "messagingQuestionsSubmitButton"
+msgstr "Entregar"
+
+#: question/templates/question/messaging_question.html:24
+msgid "messagingQuestionsResetButton"
+msgstr "Reiniciar"
+
+#: question/templates/question/messaging_question.html:40
+msgid "messagingQuestionsSpot"
+msgstr "Preguntas de mensajería/spot"
+
+#: question/templates/question/messaging_question.html:51
+msgid "messagingQuestionsExport"
+msgstr "Exportar"
+
+#: question/templates/question/messaging_question.html:57
+msgid "messagingQuestionsExportMessagingQuestionDataReport"
+msgstr "Exportar informe de datos de preguntas de mensajería a Excel"
+
+#: question/templates/question/messaging_question.html:58
+msgid "messagingQuestionsExportMessagingPushedDataReport"
+msgstr "Exportar informe de datos enviados por mensajería a Excel"
+
+#: question/templates/question/messaging_question.html:60
+msgid "messagingQuestionsExportMessagingQuestionStatistics"
+msgstr "Exportar estadísticas de preguntas de mensajería a Excel"
+
+#: question/templates/question/messaging_question.html:66
+msgid "messagingQuestionsExportFilterButton"
+msgstr "Filtrar"
+
+#: question/templates/question/messaging_question.html:80
+msgid "messagingQuestionResponsePerAge"
+msgstr "Respuestas a las preguntas por edad"
+
+#: question/templates/question/messaging_question.html:84
+msgid "messagingQuestionResponsePerAgeTooltip"
 msgstr ""
+"Preguntas de mensajería por edad: respuestas a preguntas de usuarios de "
+"diferentes grupos de edad que han iniciado sesión en la aplicación mediante "
+"un código QR o enlace de la organización."
+
+#: question/templates/question/messaging_question.html:94
+msgid "messagingQuestionResponsePerGender"
+msgstr "Respuestas a las preguntas por género"
+
+#: question/templates/question/messaging_question.html:98
+msgid "messagingQuestionResponsePerGenderTooltip"
+msgstr ""
+"Preguntas de mensajería por género: respuestas a preguntas de usuarios de "
+"diferentes géneros que han iniciado sesión en la aplicación mediante un "
+"código QR o enlace de la organización."
+
+#: question/templates/question/messaging_question.html:109
+msgid "messagingQuestionResponsePerOrganisation"
+msgstr "Respuestas a las preguntas por organización"
+
+#: question/templates/question/messaging_question.html:113
+msgid "messagingQuestionResponsePerOrganisationTooltip"
+msgstr ""
+"Preguntas de mensajería por organización: respuestas a preguntas de usuarios"
+" de diferentes organizaciones que han iniciado sesión en la aplicación "
+"mediante un código QR o enlace de la organización."
+
+#: question/templates/question/messaging_question.html:125
+msgid "messagingQuestionResponsePerDestination"
+msgstr "Pregunta de mensajería por destino"
+
+#: question/templates/question/messaging_question.html:130
+msgid "messagingQuestionResponsePerDestinationTooltip"
+msgstr ""
+"Pregunta de mensajería por destino: País en el que trabajan o buscan trabajo"
+" los usuarios que respondieron las preguntas en el período de tiempo "
+"filtrado."
+
+#: question/templates/question/messaging_question.html:144
+msgid "messagingQuestionResponsePerOrigin"
+msgstr "Pregunta de mensajería por origen"
+
+#: question/templates/question/messaging_question.html:149
+msgid "messagingQuestionResponsePerOriginTooltip"
+msgstr ""
+"Pregunta de mensajería por origen: País de origen de los usuarios que han "
+"respondido a las preguntas en el período de tiempo filtrado."
+
+#: question/templates/question/messaging_question.html:162
+msgid "messagingQuestionResponsePerSector"
+msgstr "Pregunta de mensajería por sector"
+
+#: question/templates/question/messaging_question.html:167
+msgid "messagingQuestionResponsePerSectorTooltip"
+msgstr ""
+"Pregunta de Mensajería por Sector: Sector de trabajo de los usuarios que han"
+" respondido preguntas en el marco de tiempo filtrado."
+
+#: question/templates/question/messaging_question.html:180
+msgid "userGeolocationMapBasedOnMessagingQuestion"
+msgstr "Mapa de geolocalización de usuarios basado en preguntas de mensajería"
+
+#: question/templates/question/messaging_question.html:184
+msgid "userGeolocationMapTooltip"
+msgstr ""
+"Mapa de Geolocalización del Usuario: Muestra la Geolocalización del usuario "
+"al momento de utilizar la app."
+
+#: question/templates/question/messaging_question.html:195
+msgid "messagingQuestionResponsesTitle"
+msgstr "Respuestas a preguntas de mensajería"
+
+#: question/templates/question/messaging_question.html:198
+msgid "messagingQuestionResponsesTooltip"
+msgstr ""
+"Respuestas a preguntas de mensajería: desglose detallado de las respuestas a"
+" preguntas de mensajería individuales dentro del período de tiempo filtrado."
+
+#: question/templates/question/messaging_question.html:204
+msgid "messagingQuestionResponsesDisplay"
+msgstr "Seleccione preguntas para mostrar"
+
+#: question/templates/question/messaging_question.html:208
+msgid "messagingQuestionResponsesSearchPlaceholder"
+msgstr "Buscar preguntas de mensajería..."
+
+#: question/templates/question/messaging_question.html:222
+msgid "messagingQuestionSelectQuestions"
+msgstr "Preguntas seleccionadas"
+
+#: question/templates/question/messaging_question.html:228
+msgid "messagingQuestionResponsesSearchQuestions"
+msgstr "Preguntas de búsqueda..."
+
+#: question/templates/question/messaging_question.html:233
+msgid "messagingQuestionSelectAll"
+msgstr "Seleccionar todo"
 
 #: templates/includes/non_auth_banner_btns.html:10
 msgid "nonAuthBannerBtnsExport"
@@ -593,8 +730,8 @@ msgstr ""
 "afectan a los migrantes desde que buscan trabajo en sus países de origen, "
 "pasando por su experiencia migratoria y laboral, hasta que terminan su "
 "trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
-"problemas que no solo afectan a los trabajadores migrantes, sino que también "
-"provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también"
+" provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
 "recurso busca brindar información y apoyo que ayude a personas, "
 "organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
 "derechos de los trabajadores migrantes."
@@ -662,9 +799,9 @@ msgstr "Información precisa"
 #: templates/landing/landing_page.html:112
 msgid "landingPageBuildingTrustText"
 msgstr ""
-"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a "
-"migrantes en todo el mundo, lo que significa que tenemos las relaciones para "
-"obtener información precisa."
+"Hemos pasado años construyendo confianza con migrantes y agencias de apoyo a"
+" migrantes en todo el mundo, lo que significa que tenemos las relaciones "
+"para obtener información precisa."
 
 #: templates/landing/landing_page.html:142
 msgid "landingPageHaveAnyQuestions"
@@ -700,8 +837,8 @@ msgstr ""
 "afectan a los migrantes desde que buscan trabajo en sus países de origen, "
 "pasando por su experiencia migratoria y laboral, hasta que terminan su "
 "trabajo. A través de esta plataforma, esperamos arrojar luz sobre los "
-"problemas que no solo afectan a los trabajadores migrantes, sino que también "
-"provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
+"problemas que no solo afectan a los trabajadores migrantes, sino que también"
+" provocan ineficiencias en las cadenas de suministro de mano de obra. Este "
 "recurso busca brindar información y apoyo que ayude a personas, "
 "organizaciones y gobiernos a combatir la esclavitud moderna y proteger los "
 "derechos de los trabajadores migrantes."
@@ -792,7 +929,8 @@ msgstr "Este enlace expirará en 1 día."
 #: templates/users/password_reset_email.html:74
 msgid "passwordResetEmailIfIssues"
 msgstr ""
-"Si tiene algún problema, envíe un correo electrónico a: support@justgood.work"
+"Si tiene algún problema, envíe un correo electrónico a: "
+"support@justgood.work"
 
 #: templates/users/password_reset_email.html:75
 msgid "passwordResetEmailJGWTeam"
@@ -851,8 +989,8 @@ msgstr "Iniciar sesión"
 #: templates/users/sign_in.html:10
 msgid "signInPageEnterEmail"
 msgstr ""
-"Introduzca su dirección de correo electrónico y contraseña para acceder a la "
-"cuenta."
+"Introduzca su dirección de correo electrónico y contraseña para acceder a la"
+" cuenta."
 
 #: templates/users/sign_in.html:40
 msgid "signInPageSignInButton"
@@ -943,7 +1081,8 @@ msgstr "¡No se puede iniciar sesión con las credenciales proporcionadas!"
 #: users/tests.py:266 users/views.py:403
 msgid "requestPasswordResetViewErrorMessage"
 msgstr ""
-"¡Ninguna cuenta de usuario coincide con esta dirección de correo electrónico!"
+"¡Ninguna cuenta de usuario coincide con esta dirección de correo "
+"electrónico!"
 
 #: users/views.py:129
 msgid "createUserAccountViewInfo"
@@ -969,8 +1108,8 @@ msgstr "Restablezca su contraseña en Just Good Work Data Platform"
 msgid "requestPasswordResetViewEmailSuccessText"
 msgstr ""
 "Se ha enviado un correo electrónico a {email_address}. Por favor, revise si "
-"recibió un correo electrónico de Just Good Work Data Platform y haga clic en "
-"el enlace incluido para restablecer su contraseña."
+"recibió un correo electrónico de Just Good Work Data Platform y haga clic en"
+" el enlace incluido para restablecer su contraseña."
 
 #: users/views.py:414
 msgid "setPasswordViewInvalidTokenError"
