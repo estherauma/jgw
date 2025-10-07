@@ -3,8 +3,9 @@
 
 {% load static %}
 {% load waffle_tags %}
+{% load i18n %}
 
-{% block title %} Inline Questions {% endblock title %}
+{% block title %} {% translate "inlineQuestionsTitle" %} {% endblock title %}
 
 {% block content %}
 
@@ -12,15 +13,15 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="filter-modal-area-label">Filters</h4>
+                <h4 class="modal-title" id="filter-modal-area-label">{% translate "inlineQuestionsFilters" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form method="post" id="inline-question-filter-form">
                     {% csrf_token %}
                     {{filter_form|crispy}}
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="submit" name="reset" value="true" class="btn btn-secondary" >Reset</a>
+                    <button type="submit" class="btn btn-primary">{% translate "inlineQuestionsSubmitButton" %}</button>
+                    <button type="submit" name="reset" value="true" class="btn btn-secondary" >{% translate "inlineQuestionsResetButton" %}</button>
                 </form>
             </div>
         </div>
@@ -36,7 +37,7 @@
                         <div class="col-9">
                             <div class="text-start">
                                 <h3 class="text-dark"><span data-plugin="counterup">{{total_inline_question_responses}}</span></h3>
-                                <h5 class="text-muted global-text-style">total question responses</h5>
+                                <h5 class="text-muted global-text-style">{% translate "inlineQuestionsTotalResponses" %} </h5>
                             </div>
                         </div>
                     {% endflag %}
@@ -48,20 +49,20 @@
                                         {% flag 'can_download_inline_questions_excel_reports' %}
                                             <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
                                                 id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                Export
+                                               {% translate "inlineQuestionsExportButton" %} 
                                                 <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
                                             </a>
                                         {% endflag %}
                                         <div class="dropdown-menu" aria-labelledby="export-menu">
-                                            <a class="dropdown-item" href="{% url 'question:export_inline_question_data' %}?export=true">Export Inline Question Data Report to Excel</a>
-                                            <button  class="dropdown-item" id="export-inline-question-to-excel">Export Inline Questions Statistics to Excel</button>
-                                            <a class="dropdown-item" href="{% url 'question:export_payment_inline_questions' %}">Export Payment Inline Questions (Yes Responses) to Excel</a>
+                                            <a class="dropdown-item" href="{% url 'question:export_inline_question_data' %}?export=true">{% translate "inlineQuestionsExportDataReport" %} </a>
+                                            <button  class="dropdown-item" id="export-inline-question-to-excel">{% translate "inlineQuestionsExportStatistics" %} </button>
+                                            <a class="dropdown-item" href="{% url 'question:export_payment_inline_questions' %}">{% translate "inlineQuestionsExportPayment" %} </a>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6 button-margin">
                                     <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">Filter</button>
+                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "inlineQuestionsFilterButton" %}</button>
                                 </div>
                             </div>
                         {% else %}
@@ -80,11 +81,11 @@
                 <div class="chart-column-width mt-3">
                     <div class="card h-100">
                         <div class="card-body chart">
-                            <p class="chart-title">organisation</p>
+                            <p class="chart-title">{% translate "inlineQuestionsOrganisation" %} </p>
                             <canvas id="inline-question-organisation-pie-chart-id" class="canvas-chart"></canvas>
                             <div class="info-tooltip">
                                 <i class="fas fa-info-circle"></i>
-                                Inline Questions: Organisation: Question responses by users who have logged into the app using an organisation QR Code or Link.
+                                {% translate "inlineQuestionsOrganisationTooltip" %}
                                 <div class="tooltip-arrow"></div>
                             </div>
                         </div>
@@ -96,12 +97,12 @@
                 <div class="chart-column-width mt-3">
                     <div class="card h-100">
                         <div class="card-body chart">
-                            <p class="chart-title">selected user language</p>
+                            <p class="chart-title">{% translate "inlineQuestionsLanguage" %} </p>
                             <div class="inline-question-language-graph-id-chart-box">
                                 <div id="inline-question-language-graph-id"></div>
                                 <div class="info-tooltip">
                                     <i class="fas fa-info-circle"></i>
-                                    Selected User Language: Number of Question responses by users of that language
+                                    {% translate "inlineQuestionsLanguageTooltip" %}
                                     <div class="tooltip-arrow"></div>
                                 </div>
                             </div>
@@ -114,12 +115,12 @@
         <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
-                    <p class="chart-title">responses per origin country</p>
+                    <p class="chart-title">{% translate "inlineQuestionsOriginCountry" %} </p>
                     <div class="inline-question-destination-graph-id-chart-box">
                         <div id="inline-question-destination-graph-id"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
-                            Responses per Origin country: Home country of users who have responded to questions in the filtered timeframe
+                            {% translate "inlineQuestionsOriginCountryTooltip" %} 
                             <div class="tooltip-arrow"></div>
                         </div>
                     </div>
@@ -131,7 +132,7 @@
         <div class="chart-column-width mt-3">
             <div class="card h-100">
                 <div class="card-body chart">
-                    <p class="chart-title">responses per destination country</p>
+                    <p class="chart-title">{% translate "inlineQuestionsDestinationCountry" %} </p>
                     <div class="scrollable-table-container" onscroll="stopScrollPropagation(event)">
                         <table class="table" id="inline-question-origin-table-id">
                             <thead>
@@ -142,7 +143,7 @@
                     </div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Responses per Destination Country: Country users working in or looking for work in who have responded to questions in the filtered timeframe.
+                        {% translate "inlineQuestionsDestinationCountryTooltip" %} 
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
@@ -156,21 +157,21 @@
         <div class="container mt-3">
             <div class="card">
                 <div class="card-body chart">
-                    <p class="chart-title">Inline Question Responses</p>
+                    <p class="chart-title">{% translate "inlineQuestionsResponses" %} </p>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
-                        Inline Question Responses: Detailed breakdown of responses to individual inline questions within the filtered timeframe.
+                        {% translate "inlineQuestionsResponsesTooltip" %} 
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
                 <div class="row mb-3 px-3">
                         <div class="col-md-4">
                             <button class="btn btn-primary bg-jgw-deep-blue w-100" type="button" data-bs-toggle="modal" data-bs-target="#questionSelectModal">
-                                Select questions to display <i class="fas fa-filter"></i>
+                                {% translate "inlineQuestionsSelect" %} <i class="fas fa-filter"></i>
                             </button>
                         </div>
                         <div class="col-md-8">
-                            <input type="text" class="form-control" id="questionSearch" placeholder="Search inline questions..." oninput="searchQuestions()">
+                            <input type="text" class="form-control" id="questionSearch" placeholder='{% translate "inlineQuestionsSearchInlineQuestions" %}' oninput="searchQuestions()">
                         </div>
                     </div>
                     <div id="chartContainer" class="row"></div>
@@ -183,18 +184,18 @@
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="questionSelectModalLabel">Select Questions</h5>
+                <h5 class="modal-title" id="questionSelectModalLabel">{% translate "inlineQuestionsSelectQuestions" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row mb-3">
                     <div class="col-9">
-                        <input type="text" class="form-control" id="modalQuestionSearch" placeholder="Search questions...">
+                        <input type="text" class="form-control" id="modalQuestionSearch" placeholder='{% translate "inlineQuestionsSearchQuestions" %}' >
                     </div>
                     <div class="col-3">
                         <div class="form-check d-flex align-items-center h-100 border rounded">
                             <input class="form-check-input me-2 ms-2" type="checkbox" id="selectAll">
-                            <label class="form-check-label mb-0" for="selectAll">Select All</label>
+                            <label class="form-check-label mb-0" for="selectAll">{% translate "inlineQuestionsSelectAll" %} </label>
                         </div>
                     </div>
                 </div>
