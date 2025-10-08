@@ -244,13 +244,18 @@ def each_inline_question_response(**filters):
         question_text = translated_text
         camel_case_question_text = convert_to_camel_case(question_text)
         question_in_result_dict = result_dict.get(camel_case_question_text)
-
+        normalized_response_text = response_text.strip().capitalize()
+        
         if question_in_result_dict:
-            question_in_result_dict["labels"].append(response_text.capitalize())
-            question_in_result_dict["counts"].append(response_count)
+            if normalized_response_text in question_in_result_dict["labels"]:
+                index = question_in_result_dict["labels"].index(normalized_response_text)
+                question_in_result_dict["counts"][index] += response_count
+            else:
+                question_in_result_dict["labels"].append(normalized_response_text)
+                question_in_result_dict["counts"].append(response_count)
         else:
             result_dict[convert_to_camel_case(question_text)] = {
-                "labels": [response_text.capitalize()],
+                "labels": [normalized_response_text],
                 "counts": [response_count],
                 "title": title_text,
             }
