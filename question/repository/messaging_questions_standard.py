@@ -182,8 +182,15 @@ def each_messaging_question_response(**filters):
             response_count = response.get("num_responses")
 
             if question_text and response_text is not None:
-                result_dict[question_text]["labels"].append(response_text)
-                result_dict[question_text]["counts"].append(response_count)
+                normalized_response_text = response_text.strip()
+
+                if normalized_response_text in result_dict[question_text]["labels"]:
+                    index = result_dict[question_text]["labels"].index(normalized_response_text)
+                    result_dict[question_text]["counts"][index] += response_count
+                else:
+                    result_dict[question_text]["labels"].append(normalized_response_text)
+                    result_dict[question_text]["counts"].append(response_count)
+                
                 result_dict[question_text]["title"] = question_text
 
         return dict(result_dict)
