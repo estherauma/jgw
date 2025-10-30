@@ -3,128 +3,121 @@
 {% load waffle_tags %}
 {% load i18n %}
 
-<div class="left-side-menu">
-
+<div class="left-side-menu enhanced-sidebar">
     <div class="h-100" data-simplebar>
         <!--- Sidemenu -->
         <div id="sidebar-menu">
-
             <ul id="side-menu">
                 {% if request.user|has_group:"Summerberry" %}
-                    <li>
-                        <a href="{% url 'dashboard:summerberry-dashboard' %}">
-                            <i data-feather="bar-chart"></i>
-                            <span>{% translate "sideBarSummerberryDashboard" %}</span>
+                    <li class="menu-item">
+                        <a href="{% url 'dashboard:summerberry-dashboard' %}" class="menu-link">
+                            <i data-feather="bar-chart" class="menu-icon"></i>
+                            <span class="menu-text">{% translate "sideBarSummerberryDashboard" %}</span>
                         </a>
                     </li>
                 {% else %}
-                    <li>
-                        <a href="{% url 'preference:user_overview' %}">
-                            <i data-feather="home"></i>
-                            <span>{% translate "sideBarUsersOverview" %}</span>
+                    <li class="menu-item">
+                        <a href="{% url 'preference:user_overview' %}" class="menu-link">
+                            <i data-feather="home" class="menu-icon"></i>
+                            <span class="menu-text">{% translate "sideBarUsersOverview" %}</span>
                         </a>
                     </li>
+                    
                     {% flag 'can_view_what_matters_to_workers_page' %}
-                        <li>
-                            <a href="{% url 'events:what_matters_to_workers' %}">
-                                <i data-feather="bar-chart-2"></i>
-                                <span>{% translate "sideBarWhatMattersToWorkers" %}</span>
+                        <li class="menu-item">
+                            <a href="{% url 'events:what_matters_to_workers' %}" class="menu-link">
+                                <i data-feather="bar-chart-2" class="menu-icon"></i>
+                                <span class="menu-text">{% translate "sideBarWhatMattersToWorkers" %}</span>
                             </a>
                         </li>
                     {% endflag %}
 
                     {% flag 'can_view_messaging_questions_page' %}
-                        <li>
+                        <li class="menu-item">
                             {% if user.is_authenticated %}
-                                <a href="{% url 'question:messaging_question' %}">
-                                    <i data-feather="message-square"></i>
-                                    <span>{% translate "sideBarMessagingQuestions" %}</span>
+                                <a href="{% url 'question:messaging_question' %}" class="menu-link">
+                                    <i data-feather="message-square" class="menu-icon"></i>
+                                    <span class="menu-text">{% translate "sideBarMessagingQuestions" %}</span>
                                 </a>
                             {% else %}
-                                <a
-                                    href="{% url 'payment:payment_required' %}"
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#make-payment-modal"
-                                >
-                                    <i data-feather="message-square"></i>
-                                    <span>{% translate "sideBarPaymentRequiredMessagingQuestions" %}</span>
+                                <a href="{% url 'payment:payment_required' %}" data-bs-toggle="modal" data-bs-target="#make-payment-modal" class="menu-link">
+                                    <i data-feather="message-square" class="menu-icon"></i>
+                                    <span class="menu-text">{% translate "sideBarPaymentRequiredMessagingQuestions" %}</span>
                                 </a>
                             {% endif %}
                         </li>
                     {% endflag %}
 
                     {% flag 'can_view_inline_questions_page' %}
-                        <li>
-                            <a href="{% url 'question:inline_question' %}">
-                                <i data-feather="help-circle"></i>
-                                <span>{% translate "sideBarInlineQuestions" %}</span>
+                        <li class="menu-item">
+                            <a href="{% url 'question:inline_question' %}" class="menu-link">
+                                <i data-feather="help-circle" class="menu-icon"></i>
+                                <span class="menu-text">{% translate "sideBarInlineQuestions" %}</span>
                             </a>
                         </li>
                     {% endflag %}
 
                     {% flag 'can_view_other_resources' %}
-                        <li>
-                            <a href="{% url 'other_resource:other_resource' %}">
-                                <i data-feather="book"></i>
-                                <span>{% translate "sideBarOtherResources" %}</span>
+                        <li class="menu-item">
+                            <a href="{% url 'other_resource:other_resource' %}" class="menu-link">
+                                <i data-feather="book" class="menu-icon"></i>
+                                <span class="menu-text">{% translate "sideBarOtherResources" %}</span>
                             </a>
                         </li>
                     {% endflag %}
 
-                {% if user.is_admin or user.is_superuser %}
-                    <li>
-                        <a href="{% url 'pipeline:pipeline_status' %}">
-                            <i data-feather="database"></i>
-                            <span>{% translate "sideBarDataPipeline" %}</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'preference:user_diagnostics' %}">
-                            <i data-feather="activity"></i>
-                            <span>{% translate "sideBarUserDiagnostics" %}</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#sidebarUsers" data-bs-toggle="collapse">
-                            <i data-feather="settings"></i>
-                            <span>{% translate "sideBarSettings" %}</span>
-                            <span class="menu-arrow"></span>
-                        </a>
-                        <div class="collapse" id="sidebarUsers">
-                            <ul class="nav-second-level">
-                                <li>
-                                    <a href="{% url 'users:list_users' %}">{% translate "sideBarAccounts" %}</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'users:list_invitations' %}">{% translate "sideBarInvitations" %}</a>
-                                </li>
-                                {% if user.is_superuser %}
-                                 <li>
-                                     <a href="{% url 'users:create_user_from_admin' %}">{% translate "sideBarAddUser" %}</a>
-                                </li>
-                                {% endif %}
-                            </ul>
-                        </div>
-                    </li>
-
+                    {% if user.is_admin or user.is_superuser %}
+                        <li class="menu-item">
+                            <a href="{% url 'pipeline:pipeline_status' %}" class="menu-link">
+                                <i data-feather="database" class="menu-icon"></i>
+                                <span class="menu-text">{% translate "sideBarDataPipeline" %}</span>
+                            </a>
+                        </li>
+                        
+                        <li class="menu-item">
+                            <a href="{% url 'preference:user_diagnostics' %}" class="menu-link">
+                                <i data-feather="activity" class="menu-icon"></i>
+                                <span class="menu-text">{% translate "sideBarUserDiagnostics" %}</span>
+                            </a>
+                        </li>
+                        
+                        <li class="menu-item has-submenu">
+                            <a href="#sidebarUsers" data-bs-toggle="collapse" class="menu-link">
+                                <i data-feather="settings" class="menu-icon"></i>
+                                <span class="menu-text">{% translate "sideBarSettings" %}</span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <div class="collapse" id="sidebarUsers">
+                                <ul class="nav-second-level">
+                                    <li>
+                                        <a href="{% url 'users:list_users' %}">{% translate "sideBarAccounts" %}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'users:list_invitations' %}">{% translate "sideBarInvitations" %}</a>
+                                    </li>
+                                    {% if user.is_superuser %}
+                                     <li>
+                                         <a href="{% url 'users:create_user_from_admin' %}">{% translate "sideBarAddUser" %}</a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </li>
+                    {% endif %}
                 {% endif %}
-
-                {% endif %}
+                
                 {% if user.is_authenticated %}
-                    <li>
-                        <a href="{% url 'users:logout_user' %}">
-                            <i data-feather="log-out"></i>
-                            <span>{% translate "sideBarLogout" %}</span>
+                    <li class="menu-item logout-item">
+                        <a href="{% url 'users:logout_user' %}" class="menu-link">
+                            <i data-feather="log-out" class="menu-icon"></i>
+                            <span class="menu-text">{% translate "sideBarLogout" %}</span>
                         </a>
                     </li>
                 {% endif %}
-            </ul>
             </ul>
         </div>
         <!-- End Sidebar -->
-
         <div class="clearfix"></div>
-
     </div>
     <!-- Sidebar -left -->
 </div>

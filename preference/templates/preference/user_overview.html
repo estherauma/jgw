@@ -5,11 +5,215 @@
 {% load waffle_tags %}
 {% load i18n %}
 
-<!-- title -->
+
 {% block title %} {% translate "userOverviewTitle" %}{% endblock title %}
 
 <!-- page content -->
 {% block content %}
+
+<!-- Fullscreen Chart Modal -->
+<div class="modal fade" id="monthly-active-users-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="fullscreen-modal-label">Monthly Active Users</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-metrics">
+                        <div class="metric-item">
+                            <span class="metric-label">New Users:</span>
+                            <span class="metric-value" data-plugin="counterup">{{total_user_overview_responses}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Active Users:</span>
+                            <span class="metric-value" data-plugin="counterup">{{total_active_user_count}}</span>
+                        </div>
+                    </div>
+                    <div class="fullscreen-date-selector">
+                        <input type="text" class="form-control" placeholder="Select date range" id="fullscreen-date-range" readonly>
+                        <i class="fas fa-calendar" id="fullscreen-date-range-icon"></i>
+                    </div>
+                </div>
+                <div id="monthly-active-users-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Users by Origin Country -->
+<div class="modal fade" id="users-by-origin-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="origin-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="origin-fullscreen-modal-label">User by Origin Country</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="users-by-origin-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Users by Gender -->
+<div class="modal fade" id="users-by-gender-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="gender-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gender-fullscreen-modal-label">User Age</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="users-by-gender-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Users by Destination Country -->
+<div class="modal fade" id="users-by-destination-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="destination-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="destination-fullscreen-modal-label">User Destination Country</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="users-by-destination-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Users by Language -->
+<div class="modal fade" id="users-by-language-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="language-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="language-fullscreen-modal-label">{% translate "userOverviewUsersByLanguageTitle" %}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="users-by-language-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Users by State -->
+<div class="modal fade" id="users-by-state-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="state-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="state-fullscreen-modal-label">{% translate "userOverviewUsersByStateTitle" %}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="users-by-state-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Users by Immigration Status -->
+<div class="modal fade" id="users-by-immigration-status-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="immigration-status-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="immigration-status-fullscreen-modal-label">{% translate "userOverviewUsersByImmigrationStatusTitle" %}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="users-by-immigration-status-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Users by Age -->
+<div class="modal fade" id="users-by-age-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="age-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="age-fullscreen-modal-label">{% translate "userOverviewUsersByAgeTitle" %}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="users-by-age-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Users by Sector -->
+<div class="modal fade" id="users-by-sector-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="sector-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="sector-fullscreen-modal-label">{% translate "userOverviewUsersBySectorTitle" %}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="users-by-sector-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Monthly Users Overview (New + Active + Cumulative) -->
+<div class="modal fade" id="monthly-users-overview-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="monthly-users-overview-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="monthly-users-overview-fullscreen-modal-label">{% translate "userOverviewNewUsersByMonthTitle" %}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="monthly-users-overview-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Work Code Usage -->
+<div class="modal fade" id="work-code-usage-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="work-code-usage-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="work-code-usage-fullscreen-modal-label">{% translate "userOverviewWorkCodeUsageTitle" %}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="work-code-usage-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="messaging-question-filter-modal" tabindex="-1" role="dialog" aria-labelledby="filter-modal-area-label">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -30,32 +234,16 @@
         </div>
     </div>
 </div>
-<div class="row mb">
-    <div class="col-md-12">
-        <div class="widget-rounded-circle card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="{% if user.is_superuser %} col-9 {% else %} col-11 {% endif %}">
-                        <div class="row">
-                            {% flag 'can_view_new_users_total_count' %}
-                            <div class="col-3">
-                                <h3 class="text-dark"><span data-plugin="counterup">{{total_user_overview_responses}}</span></h3>
-                                <h5 class="text-muted general-title-text">{% translate "userOverviewNewUsers" %}</h5>
+<div class="row user-overview-header-row">
+    <div class="col-md-6">
+        <header class="user-overview-header">Home Overview</header>
                             </div>
-                            <div class="col-3">
-                                <h3 class="text-dark"><span data-plugin="counterup">{{total_active_user_count}}</span></h3>
-                                <h5 class="text-muted general-title-text">{% translate "userOverviewActiveUsers" %}</h5>
-                            </div>
-                            {% endflag %}
-                        </div>
-                    </div>
-                    <div class=" col-3 position-absolute top-2 end-0">
+    <div class="col-md-6 text-end">
                         {% if user.is_authenticated %}
-                        <div class="row">
-                            <div class="col-md-6 button-margin">
-                                <div class="dropdown w-100">
+        <div class="user-overview-actions">
+            <div class="dropdown d-inline-block me-2">
                                     {% flag 'can_download_preferences_excel_reports' %}
-                                    <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue"
+                <a class="btn btn-primary dropdown-toggle waves-effect text-center bg-jgw-deep-blue"
                                         href="#" role="button" id="export-menu" data-bs-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
                                         {% translate "userOverviewExport" %}
@@ -68,30 +256,47 @@
                                         <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">{% translate "userOverviewExportPreferencesStatistics" %}</a>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6 button-margin">
                                 <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "userOverviewFilterButton" %}</button>
-                            </div>
+                role="button" class="btn btn-primary waves-effect text-center bg-jgw-deep-blue">
+                {% translate "userOverviewFilterButton" %}
+            </button>
                         </div>
                         {% else %}
                         {% include 'includes/non_auth_banner_btns.html' %}
                         {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
-{% flag 'can_view_monthly_active_users_chart' %}
+
 
 <div class="row">
-    <div class="col-md-12 user-by-month">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewMonthlyActiveUsersTitle" %}</p>
-                <canvas id="monthly-active-users-graph-id" class="canvas-user-by-month"></canvas>
+    {% flag 'can_view_monthly_active_users_chart' %}
+    <div class="col-md-6">
+        <div class="card h-100 monthly-active-users-card">
+            <div class="card-body">
+                <div class="chart-header">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title">Monthly Active Users</h4>
+                        <div class="chart-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label">New Users:</span>
+                                <span class="metric-value" data-plugin="counterup">{{total_user_overview_responses}}</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Active Users:</span>
+                                <span class="metric-value" data-plugin="counterup">{{total_active_user_count}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#monthly-active-users-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="monthly-active-users-graph-id" style="height:500px;"></div>
+                
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewMonthlyActiveUsersTooltip" %}
@@ -100,33 +305,53 @@
             </div>
         </div>
     </div>
-</div>
-{% endflag %}
-<div class="row">
+    {% endflag %}
+
     {% flag 'can_view_users_by_origin_country_chart' %}
-    <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewUsersByOriginCountryTitle" %}</p>
-                <div class="preference-origin-graph-id-chart-box">
-                    <div id="preference-origin-graph-id"></div>
+    <div class="col-md-6">
+        <div class="card h-100 users-by-origin-card">
+            <div class="card-body">
+                <div class="chart-header">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title">User Origin Country</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-origin-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="preference-origin-graph-id" style="height: 500px; width: 100%; margin-top: -10px;"></div>
+                
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersByOriginCountryTooltip" %}
                         <div class="tooltip-arrow"></div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
     {% endflag %}
-
+</div>
+<div class="row">
     {% flag 'can_view_users_by_gender_chart' %}
     <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewUsersByGenderTitle" %}</p>
-                <canvas id="preference-gender-pie-chart-id" class="canvas-chart"></canvas>
+        <div class="card h-100 users-by-gender-card">
+            <div class="card-body">
+                <div class="chart-header">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title">User by Gender</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-gender-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="preference-gender-chart-id" style="height: 400px; width: 100%;"></div>
+                
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewUsersByGenderTooltip" %}
@@ -141,32 +366,54 @@
     {% if user.role != 'SCHEME' or user.is_superuser%}
     {% flag 'can_view_users_by_destination_country_chart' %}
     <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewUsersByDestinationCountryTitle" %}</p>
-                <canvas id="preference-destination-pie-chart-id" class="canvas-chart"></canvas>
+        <div class="card h-100 users-by-destination-card">
+            <div class="card-body">
+                <div class="chart-header">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title">User Destination Country</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-destination-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="preference-destination-chart-id" style="height: 400px; width: 100%;"></div>
+                
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewUsersByDestinationCountryTooltip" %}
+                    <div class="tooltip-arrow"></div>
                 </div>
             </div>
         </div>
     </div>
     {% endflag %}
     {% endif %}
-
+</div>
+<div class="row">
     {% flag 'can_view_selected_users_language_chart' %}
     <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewUsersByLanguageTitle" %}</p>
-                <div class="preference-language-graph-id-chart-box">
-                    <div id="preference-language-graph-id"></div>
+        <div class="card h-100 users-by-language-card">
+            <div class="card-body">
+                <div class="chart-header" style="margin-bottom: 0;">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByLanguageTitle" %}</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-language-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="preference-language-graph-id" style="height: 500px; width: 100%; margin-top: -10px;"></div>
+                
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersByLanguageTooltip" %}
                         <div class="tooltip-arrow"></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -175,28 +422,50 @@
 
     {% flag 'can_view_get_users_by_country_state_chart' %}
     <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewUsersByStateTitle" %}</p>
-                <div class="users-by-country-state-graph-id-chart-box">
-                    <div id="users-by-country-state-graph-id"></div>
+        <div class="card h-100 users-by-state-card">
+            <div class="card-body">
+                <div class="chart-header" style="margin-bottom: 0;">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByStateTitle" %}</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-state-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="users-by-country-state-graph-id" style="height: 500px; width: 100%; margin-top: -10px;"></div>
+                
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersByStateTooltip" %}
                         <div class="tooltip-arrow"></div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
     {% endflag %}
+</div>
 
+<div class="row">
     {% flag 'can_view_users_by_immigration_status_chart' %}
     <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewUsersByImmigrationStatusTitle" %}</p>
-                <canvas id="preference-immigration-status-pie-chart-id" class="canvas-chart"></canvas>
+        <div class="card h-100 users-by-immigration-status-card">
+            <div class="card-body">
+                <div class="chart-header" style="margin-bottom: 0;">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByImmigrationStatusTitle" %}</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-immigration-status-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="preference-immigration-status-chart-id" style="height: 400px; width: 100%;"></div>
+                
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewUsersByImmigrationStatusTooltip" %}
@@ -210,10 +479,21 @@
 
     {% flag 'can_view_users_by_age_chart' %}
     <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewUsersByAgeTitle" %}</p>
-                <canvas id="preference-age-graph-id" class="canvas-chart"></canvas>
+        <div class="card h-100 users-by-age-card">
+            <div class="card-body">
+                <div class="chart-header" style="margin-bottom: 0;">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByAgeTitle" %}</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-age-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="preference-age-chart-id" style="height: 400px; width: 100%;"></div>
+                
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewUsersByAgeTooltip" %}
@@ -223,42 +503,57 @@
         </div>
     </div>
     {% endflag %}
-
+</div>
+<div class="row">
     {% flag 'can_view_get_users_by_sector_chart' %}
     <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewUsersBySectorTitle" %}</p>
-                <div class="users-by-sector-graph-id-chart-box">
-                    <div id="users-by-sector-graph-id"></div>
+        <div class="card h-100 users-by-sector-card">
+            <div class="card-body">
+                <div class="chart-header" style="margin-bottom: 0;">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersBySectorTitle" %}</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-sector-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                    <div id="users-by-sector-graph-id" style="height: 500px; width: 100%; margin-top: -10px;"></div>
+                
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersBySectorTooltip" %}
                         <div class="tooltip-arrow"></div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
     {% endflag %}
-</div>
 
-{% if user.is_authenticated %}
-{% flag 'can_view_work_code_usage_chart' %}
-<div class="row">
-    <div class="col-12 mt-3 user-by-month">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewWorkCodeUsageTitle" %}</p>
-                <div class="chart-container">
-                    <div class="organisation-work-code-usage-graph-id-chart-box chart-column-width">
-                        <div id="organisation-work-code-usage-graph-id"></div>
-                        <div class="info-tooltip">
-                            <i class="fas fa-info-circle"></i>
-                            {% translate "userOverviewWorkCodeUsageTooltip" %}
-                            <div class="tooltip-arrow"></div>
-                        </div>
+    {% if user.is_authenticated %}
+    {% flag 'can_view_work_code_usage_chart' %}
+    <div class="col-md-6 mt-3">
+        <div class="card h-100 work-code-usage-card">
+            <div class="card-body">
+                <div class="chart-header" style="margin-bottom: 0;">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewWorkCodeUsageTitle" %}</h4>
                     </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#work-code-usage-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="organisation-work-code-usage-graph-id" style="height: 500px; width: 100%; margin-top: -10px;"></div>
+                
+                <div class="info-tooltip">
+                    <i class="fas fa-info-circle"></i>
+                    {% translate "userOverviewWorkCodeUsageTooltip" %}
+                    <div class="tooltip-arrow"></div>
                 </div>
             </div>
         </div>
@@ -270,10 +565,20 @@
 {% flag 'can_view_new_monthly_users_chart' %}
 <div class="row">
     <div class="col-md-12 user-by-month">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "userOverviewNewUsersByMonthTitle" %}</p>
-                <canvas id="preference-monthly-cumulative-users-graph-id" class="canvas-user-by-month"></canvas>
+        <div class="card h-100 monthly-active-users-card">
+            <div class="card-body">
+                <div class="chart-header">
+                    <div class="chart-header-left">
+                        <h4 class="chart-main-title">{% translate "userOverviewNewUsersByMonthTitle" %}</h4>
+                    </div>
+                    <div class="chart-header-actions">
+                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#monthly-users-overview-fullscreen-modal">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="preference-monthly-cumulative-users-graph-id" style="height: 420px; width: 100%;"></div>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewNewUsersByMonthTooltip" %}
@@ -308,7 +613,7 @@
 {% if user.is_authenticated %}
 {% flag 'can_view_user_route_map_chart' %}
 <div class="row col-md-12 mt-3 user-route-map-chart-box">
-    <div class="card h-100">
+    <div class="card h-100 users-route-map-card">
         <div class="card-body chart">
             <p class="chart-title mb-2">{% translate "userOverviewUserRouteMapTitle" %}</p>
             <div id="user_route_map" class="user-route-map"></div>
@@ -324,7 +629,7 @@
 
 {% flag 'can_view_user_geolocation_map' %}
 <div class="row col-md-12 user-route-map-chart-box">
-    <div class="card h-100">
+    <div class="card h-100 users-geolocation-map-card">
         <div class="card-body chart">
             <p class="chart-title mb-2">{% translate "userOverviewUserGeolocationMapForActiveUsersTitle" %}</p>
             <div id="user_geolocation_map" class="user-geolocation-map"></div>
@@ -340,7 +645,7 @@
 
 {% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
 <div class="row col-md-12 mt-1 user-geolocation-map-chart-box">
-    <div class="card h-100">
+    <div class="card h-100 users-interaction-map-card">
         <div class="card-body chart wide-map">
             <p class="chart-title mb-2">{% translate "userOverviewUsersGeoMapUserEngagementTitle" %}</p>
             <div id="user_geolocation_map_user_engagement" class="user-geolocation-map"></div>
@@ -356,16 +661,34 @@
 
 {% endblock content %}
 {% block scripts %}
+<script src="{% static 'js/charts/echarts/monthly_active_users.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/users_by_origin.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/users_by_gender.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/users_by_destination.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/users_by_language.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/users_by_state.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/users_by_immigration_status.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/users_by_age.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/users_by_sector.js' %}"></script>
+
+<script src="{% static 'js/charts/echarts/work_code_usage.js' %}"></script>
+
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_gender_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/bar/preference_language_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/preference_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/preference_work-code-usage_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_destination_pie_chart.js' %}"></script>
-<script src="{% static 'js/charts/line/preferences_monthly_users.js' %}"></script>
-<script src="{% static 'js/charts/bar/users_by_country_state.js' %}"></script>
-<script src="{% static 'js/charts/bar/work_code_usage_stack_bar.js' %}"></script>
-<script src="{% static 'js/charts/bar/user_by_sector_graph.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences_monthly_users.js' %}"></script>
+<!-- Removed legacy bar chart scripts no longer used on this page -->
 <script src="{% static 'js/app/user_overview.js' %}"></script>
 <script src="{% static 'js/charts/line/active_users_monthly_stat.js' %}"></script>
 <script src="{% static 'js/charts/map/user_route_map.js' %}"></script>
@@ -374,7 +697,6 @@
 <script src="{% static 'js/charts/bar/link_clicks_graph.js' %}"></script>
 <script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
 <script type="text/javascript">
-    // get data from context
     var ageData = {{ preferences_by_age | safe }};
     var genderData = {{ preferences_by_gender | safe }};
     var originData = {{ preferences_per_origin_country | safe }};
@@ -393,56 +715,597 @@
     const linkClicksData = {{ link_clicks_data | safe }}
     const userGeoCountryData = {{ user_counts_by_geo_country | safe }}
 
-    // plots the age piechart
-    preferenceAgePieChart(ageData)
-
-    // plots the gender piechart
-    preferenceGenderPieChart(genderData)
-
-    // plots the language graph
-    preferenceLanguageGraph(languageData)
-
-    // plots the destination piechart
-    preferenceDestinationPieChart(destinationData)
-
-    // plots the origin graph
-    preferenceOriginGraph(originData)
-
-    // plots the work code usage graph
+    initUsersByAgeChart(ageData);
+    
+    initUsersByGenderChart(genderData);
+    
+    initUsersByLanguageChart(languageData);
+    
+    initUsersByDestinationChart(destinationData);
+    
+    initUsersByOriginChart(originData);
+    
     preferenceWorkCodeUsageGraph(workCodeData)
 
-    // users by country state graph
-    usersByCountryStateChart(usersByCountryStateChartData)
+    initUsersByStateChart(usersByCountryStateChartData);
+    
+    initUsersBySectorChart(usersBySectorsChartData);
+    
+    try {
+        if (typeof swsWorkcodesWithAccessCode !== 'undefined' && swsWorkcodesWithAccessCode) {
+            initWorkCodeUsageChart(swsWorkcodesWithAccessCode);
+        }
+    } catch (error) {
+        console.error('Error initializing Work Code Usage chart:', error);
+    }
+    
+    initPreferencesMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData)
 
-    // users by sectors chart data
-    usersBySectorsChart(usersBySectorsChartData, "users-by-sector-graph-id", "Users")
-    // Organisation work code stack bar chart
-    workCodeUsageStackBar(swsWorkcodesWithAccessCode)
-    // preferenceMonthlyUsersChart
-    preferenceMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData)
+    initMonthlyActiveUsersChart(monthlyActiveUserCountData);
 
-    monthlyActiveUsersChart(monthlyActiveUserCountData);
-
-    preferenceImmigrationStatusPieChart(immigrationStatusData)
+    initUsersByImmigrationStatusChart(immigrationStatusData);
+    
 
     linkClicksGraph(linkClicksData)
 
-    // Count the number of flex items
-    const chartContainer = document.querySelector('.chart-container');
-    const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
-    const numColumns = chartColumns.length;
+    try {
+        const chartContainer = document.querySelector('.chart-container');
+        if (chartContainer) {
+            const chartColumns = chartContainer.querySelectorAll('.chart-column-width');
+            const numColumns = chartColumns.length;
 
-    if (numColumns % 2 !== 0) {
-        const lastColumn = chartColumns[numColumns - 1];
-        lastColumn.style.flex = '0 0 100%';
-        lastColumn.style.maxWidth = '100%';
+            if (numColumns > 0 && numColumns % 2 !== 0) {
+                const lastColumn = chartColumns[numColumns - 1];
+                if (lastColumn) {
+                    lastColumn.style.flex = '0 0 100%';
+                    lastColumn.style.maxWidth = '100%';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error setting up chart container flex layout:', error);
     }
 
-    createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
+    try {
+        if (typeof createUserRouteMap !== 'undefined' && getUserCountsByOriginDestination && countryCoords) {
+            createUserRouteMap(getUserCountsByOriginDestination, 'user_route_map', countryCoords);
+        }
+    } catch (error) {
+        console.error('Error initializing User Route Map:', error);
+    }
 
-    createUserGeolocationMap(getUserCountsByGeolocation, 'user_geolocation_map_user_engagement', countryCoords);
+    try {
+        if (typeof createUserGeolocationMap !== 'undefined' && getUserCountsByGeolocation && countryCoords) {
+            createUserGeolocationMap(getUserCountsByGeolocation, 'user_geolocation_map_user_engagement', countryCoords);
+        }
+    } catch (error) {
+        console.error('Error initializing User Geolocation Map (Engagement):', error);
+    }
 
-    createUserGeolocationMap(userGeoCountryData, 'user_geolocation_map');
+    try {
+        if (typeof createUserGeolocationMap !== 'undefined' && userGeoCountryData) {
+            createUserGeolocationMap(userGeoCountryData, 'user_geolocation_map');
+        }
+    } catch (error) {
+        console.error('Error initializing User Geolocation Map:', error);
+    }
+    
+    let fullscreenChartInstance = null;
+    let currentDateRange = null;
+    
+    $('#monthly-active-users-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('monthly-active-users-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+        }
+        
+        const datePickerInput = $('#fullscreen-date-range');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+        const defaultStartDate = '{{filter_form.start_date.value}}';
+        const defaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+        const defaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+        const defaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        datePickerInput.daterangepicker({
+            startDate: defaultStartDate,
+            endDate: defaultEndDate,
+            maxDate: moment(),
+            locale: {
+                format: 'DD MMM, YYYY'
+            },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'Last 13 Months': [moment().subtract(13, 'months'), moment()],
+            }
+        }, function(start, end) {
+            const formattedRange = start.format('DD MMM, YYYY') + ' - ' + end.format('DD MMM, YYYY');
+            datePickerInput.val(formattedRange);
+            
+            currentDateRange = {
+                start: start.format('YYYY-MM-DD'),
+                end: end.format('YYYY-MM-DD')
+            };
+            
+            reloadFullscreenChart(currentDateRange);
+        });
+        
+        const initialStart = moment(defaultStartDate);
+        const initialEnd = moment(defaultEndDate);
+        datePickerInput.val(initialStart.format('DD MMM, YYYY') + ' - ' + initialEnd.format('DD MMM, YYYY'));
+        currentDateRange = {
+            start: defaultStartDate,
+            end: defaultEndDate
+        };
+        
+        setTimeout(() => {
+            reloadFullscreenChart(currentDateRange);
+        }, 50);
+        
+        $('#fullscreen-date-range-icon').on('click', function() {
+            datePickerInput.focus();
+            datePickerInput.data('daterangepicker').show();
+        });
+    });
+    
+    $('#monthly-active-users-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('monthly-active-users-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+        const daterangepicker = $('#fullscreen-date-range').data('daterangepicker');
+        if (daterangepicker) {
+            daterangepicker.remove();
+        }
+        $('#fullscreen-date-range-icon').off('click');
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#monthly-active-users-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('monthly-active-users-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    let monthlyUsersOverviewFullscreenChart = null;
+    $('#monthly-users-overview-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('monthly-users-overview-fullscreen-chart');
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) existingChart.dispose();
+            setTimeout(() => {
+                monthlyUsersOverviewFullscreenChart = initPreferencesMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData, 'monthly-users-overview-fullscreen-chart');
+                if (monthlyUsersOverviewFullscreenChart) monthlyUsersOverviewFullscreenChart.resize();
+            }, 50);
+        }
+    });
+    $('#monthly-users-overview-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('monthly-users-overview-fullscreen-chart'));
+        if (fullscreenChart) fullscreenChart.dispose();
+    });
+    $(window).on('resize', function() {
+        if ($('#monthly-users-overview-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('monthly-users-overview-fullscreen-chart'));
+            if (fullscreenChart) fullscreenChart.resize();
+        }
+    });
+
+    function reloadFullscreenChart(dateRange) {
+        const fullscreenContainer = document.getElementById('monthly-active-users-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (fullscreenChartInstance) {
+            fullscreenChartInstance.dispose();
+        }
+        
+        const filteredData = filterDataByDateRange(monthlyActiveUserCountData, dateRange.start, dateRange.end);
+        
+        fullscreenChartInstance = initMonthlyActiveUsersChart(filteredData, 'monthly-active-users-fullscreen-chart');
+        
+        setTimeout(() => {
+            if (fullscreenChartInstance) {
+                fullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
+    function filterDataByDateRange(data, startDate, endDate) {
+        if (!data || !Array.isArray(data)) return data;
+        
+        const start = moment(startDate);
+        const end = moment(endDate);
+        
+        return data.filter(item => {
+            const itemDate = moment(item.month || item.Month, 'MMM YYYY');
+            return itemDate.isSameOrAfter(start, 'month') && itemDate.isSameOrBefore(end, 'month');
+        });
+    }
+    
+    let originFullscreenChartInstance = null;
+    
+    $('#users-by-origin-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('users-by-origin-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+            
+            setTimeout(() => {
+                originFullscreenChartInstance = initUsersByOriginChart(originData, 'users-by-origin-fullscreen-chart');
+                if (originFullscreenChartInstance) {
+                    originFullscreenChartInstance.resize();
+                }
+            }, 50);
+        }
+    });
+    
+    $('#users-by-origin-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-origin-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#users-by-origin-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-origin-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    let genderFullscreenChartInstance = null;
+    
+    $('#users-by-gender-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('users-by-gender-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+            
+            setTimeout(() => {
+                genderFullscreenChartInstance = initUsersByGenderChart(genderData, 'users-by-gender-fullscreen-chart');
+                if (genderFullscreenChartInstance) {
+                    genderFullscreenChartInstance.resize();
+                }
+            }, 50);
+        }
+    });
+    
+    $('#users-by-gender-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-gender-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#users-by-gender-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-gender-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    let destinationFullscreenChartInstance = null;
+    
+    $('#users-by-destination-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('users-by-destination-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+            
+            setTimeout(() => {
+                destinationFullscreenChartInstance = initUsersByDestinationChart(destinationData, 'users-by-destination-fullscreen-chart');
+                if (destinationFullscreenChartInstance) {
+                    destinationFullscreenChartInstance.resize();
+                }
+            }, 50);
+        }
+    });
+    
+    $('#users-by-destination-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-destination-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#users-by-destination-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-destination-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    let languageFullscreenChartInstance = null;
+    
+    $('#users-by-language-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('users-by-language-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+            
+            setTimeout(() => {
+                languageFullscreenChartInstance = initUsersByLanguageChart(languageData, 'users-by-language-fullscreen-chart');
+                if (languageFullscreenChartInstance) {
+                    languageFullscreenChartInstance.resize();
+                }
+            }, 50);
+        }
+    });
+    
+    $('#users-by-language-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-language-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#users-by-language-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-language-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    let stateFullscreenChartInstance = null;
+    
+    $('#users-by-state-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('users-by-state-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+            
+            setTimeout(() => {
+                stateFullscreenChartInstance = initUsersByStateChart(usersByCountryStateChartData, 'users-by-state-fullscreen-chart');
+                if (stateFullscreenChartInstance) {
+                    stateFullscreenChartInstance.resize();
+                }
+            }, 50);
+        }
+    });
+    
+    $('#users-by-state-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-state-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#users-by-state-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-state-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+        
+    let immigrationStatusFullscreenChartInstance = null;
+    
+    $('#users-by-immigration-status-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('users-by-immigration-status-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+            
+            setTimeout(() => {
+                immigrationStatusFullscreenChartInstance = initUsersByImmigrationStatusChart(immigrationStatusData, 'users-by-immigration-status-fullscreen-chart');
+                if (immigrationStatusFullscreenChartInstance) {
+                    immigrationStatusFullscreenChartInstance.resize();
+                }
+            }, 50);
+        }
+    });
+    
+    $('#users-by-immigration-status-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-immigration-status-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#users-by-immigration-status-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-immigration-status-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    let ageFullscreenChartInstance = null;
+    
+    $('#users-by-age-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('users-by-age-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+            
+            setTimeout(() => {
+                ageFullscreenChartInstance = initUsersByAgeChart(ageData, 'users-by-age-fullscreen-chart');
+                if (ageFullscreenChartInstance) {
+                    ageFullscreenChartInstance.resize();
+                }
+            }, 50);
+        }
+    });
+    
+    $('#users-by-age-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-age-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#users-by-age-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-age-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    let sectorFullscreenChartInstance = null;
+    
+    $('#users-by-sector-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('users-by-sector-fullscreen-chart');
+        
+        if (fullscreenContainer) {
+            const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+            
+            setTimeout(() => {
+                sectorFullscreenChartInstance = initUsersBySectorChart(usersBySectorsChartData, 'users-by-sector-fullscreen-chart');
+                if (sectorFullscreenChartInstance) {
+                    sectorFullscreenChartInstance.resize();
+                }
+            }, 50);
+        }
+    });
+    
+    $('#users-by-sector-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-sector-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+    });
+    
+    $(window).on('resize', function() {
+        if ($('#users-by-sector-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('users-by-sector-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    let workCodeUsageFullscreenChartInstance = null;
+    
+    $('#work-code-usage-fullscreen-modal').on('shown.bs.modal', function () {
+        const fullscreenContainer = document.getElementById('work-code-usage-fullscreen-chart');
+        
+        if (!fullscreenContainer) {
+            console.error('Work Code Usage fullscreen container not found');
+            return;
+        }
+        
+        const existingChart = echarts.getInstanceByDom(fullscreenContainer);
+        if (existingChart) {
+            existingChart.dispose();
+        }
+        
+        setTimeout(() => {
+            if (typeof swsWorkcodesWithAccessCode !== 'undefined' && swsWorkcodesWithAccessCode) {
+                workCodeUsageFullscreenChartInstance = initWorkCodeUsageChart(swsWorkcodesWithAccessCode, 'work-code-usage-fullscreen-chart');
+                if (workCodeUsageFullscreenChartInstance) {
+                    setTimeout(() => {
+                        workCodeUsageFullscreenChartInstance.resize();
+                    }, 100);
+                }
+            } else {
+                console.error('Work Code Usage data not available:', swsWorkcodesWithAccessCode);
+            }
+        }, 50);
+    });
+    
+    $(window).on('resize.work-code-usage-modal', function() {
+        if ($('#work-code-usage-fullscreen-modal').hasClass('show')) {
+            const fullscreenChart = echarts.getInstanceByDom(document.getElementById('work-code-usage-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.resize();
+            }
+        }
+    });
+    
+    $('#work-code-usage-fullscreen-modal').on('hidden.bs.modal', function () {
+        const fullscreenChart = echarts.getInstanceByDom(document.getElementById('work-code-usage-fullscreen-chart'));
+        if (fullscreenChart) {
+            fullscreenChart.dispose();
+        }
+        workCodeUsageFullscreenChartInstance = null;
+        $(window).off('resize.work-code-usage-modal');
+    });
+
+function registerFullscreenModal(modalId, chartInitFn, chartData) {
+    let chartInstance = null;
+    $('#' + modalId).on('shown.bs.modal', function () {
+        const container = document.getElementById(modalId + '-chart');
+        if (container) {
+            const existingChart = echarts.getInstanceByDom(container);
+            if (existingChart) existingChart.dispose();
+            setTimeout(() => {
+                chartInstance = chartInitFn(chartData, modalId + '-chart');
+                if (chartInstance) chartInstance.resize();
+            }, 50);
+        }
+    });
+    $('#' + modalId).on('hidden.bs.modal', function () {
+        const container = document.getElementById(modalId + '-chart');
+        if (container) {
+            const chart = echarts.getInstanceByDom(container);
+            if (chart) chart.dispose();
+        }
+        chartInstance = null;
+    });
+    $(window).on('resize.' + modalId, function() {
+        if ($('#' + modalId).hasClass('show')) {
+            const container = document.getElementById(modalId + '-chart');
+            if (container) {
+                const chart = echarts.getInstanceByDom(container);
+                if (chart) chart.resize();
+            }
+        }
+    });
+}
+registerFullscreenModal('users-by-origin-fullscreen-modal', initUsersByOriginChart, originData);
+registerFullscreenModal('users-by-gender-fullscreen-modal', initUsersByGenderChart, genderData);
+registerFullscreenModal('users-by-destination-fullscreen-modal', initUsersByDestinationChart, destinationData);
+registerFullscreenModal('users-by-language-fullscreen-modal', initUsersByLanguageChart, languageData);
+registerFullscreenModal('users-by-state-fullscreen-modal', initUsersByStateChart, usersByCountryStateChartData);
+registerFullscreenModal('users-by-immigration-status-fullscreen-modal', initUsersByImmigrationStatusChart, immigrationStatusData);
+registerFullscreenModal('users-by-age-fullscreen-modal', initUsersByAgeChart, ageData);
+registerFullscreenModal('users-by-sector-fullscreen-modal', initUsersBySectorChart, usersBySectorsChartData);
 
 </script>
 
