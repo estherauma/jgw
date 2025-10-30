@@ -60,7 +60,7 @@
 
 
             <!-- Start Page Content here -->
-            <div class="content-page" style="margin-top: 100px;">
+            <div class="content-page enhanced-content">
                 <div class="content">
                     {% include 'includes/messages.html' %}
                     {% block content%}{% endblock content %}
@@ -103,6 +103,9 @@
 
         <!-- App js-->
         <script src="{% static 'themes/modern/js/app.min.js' %}"></script>
+        
+        <!-- Enhanced Navigation js -->
+        <script src="{% static 'js/enhanced-navigation.js' %}"></script>
 
         <!-- Chart |  charts configs -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

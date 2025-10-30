@@ -38,7 +38,7 @@
 {% endblock main_base_head %}
 
 {% block main_base_body %}
-    <body  data-layout-mode="detached" data-theme="light" data-topbar-color="dark" data-menu-position="fixed" data-leftbar-color="light" data-leftbar-size='default' data-sidebar-user='true'>
+    <body class="enhanced-layout" data-layout-mode="detached" data-theme="light" data-topbar-color="dark" data-menu-position="fixed" data-leftbar-color="light" data-leftbar-size='default' data-sidebar-user='true'>
 
         <!-- Begin page -->
         <div id="wrapper">
@@ -57,7 +57,7 @@
 
 
             <!-- Start Page Content here -->
-            <div class="content-page" style="margin-top: 100px;">
+            <div class="content-page enhanced-content" style="margin-top:100px;">
                 <div class="content">
                     {% include 'includes/messages.html' %}
                     {% block content%}{% endblock content %}
@@ -93,12 +93,18 @@
 
         <!-- App js-->
         <script src="{% static 'themes/modern/js/app.min.js' %}"></script>
+        
+        <!-- Enhanced Navigation js -->
+        <script src="{% static 'js/enhanced-navigation.js' %}"></script>
 
         <!-- Chart |  charts configs -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        
+        <!-- Apache ECharts -->
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
         <script src="{% static 'dashboard/js/bootstrap-multiselect.js' %} "></script>
         <script src="{% static 'dashboard/js/index.js' %}"></script>
