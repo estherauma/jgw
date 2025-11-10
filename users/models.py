@@ -70,6 +70,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     immigration_status = models.ManyToManyField(ImmigrationStatus, blank=True)
     total_logged_hours = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, help_text="Total number of hours the user has been logged in")
+    dashboard_preferences = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="User's dashboard customization preferences"
+    )
+    dashboard_preferences_version = models.IntegerField(default=1, help_text="Version of dashboard preferences schema")
 
     class Meta:
         indexes = [

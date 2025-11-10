@@ -3,11 +3,12 @@ function initUsersByStateChart(stateData, customContainerId) {
     const chartDom = document.getElementById(containerId);
     
     if (!chartDom || !stateData) {
-        console.error('Users by State Chart: Container or data not found', {
-            container: containerId,
-            data: stateData
-        });
         return;
+    }
+    
+    const existingChart = echarts.getInstanceByDom(chartDom);
+    if (existingChart) {
+        existingChart.dispose();
     }
     
     const myChart = echarts.init(chartDom);
@@ -39,7 +40,6 @@ function initUsersByStateChart(stateData, customContainerId) {
     }
     
     if (states.length === 0 || counts.length === 0) {
-        console.error('No valid data found for Users by State chart');
         return myChart;
     }
     

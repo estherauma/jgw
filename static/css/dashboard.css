@@ -1126,3 +1126,829 @@ body.modal-open {
         width: 100%;
     }
 }
+
+/**
+ * Dashboard Customization Styles - WPBakery Page Builder Style
+ * Professional, polished interface matching application color scheme
+ */
+
+/* Application Color Variables */
+:root {
+    --jgw-primary: #193560;
+    --jgw-primary-light: #2a4a7a;
+    --jgw-primary-dark: #0f1f3a;
+    --jgw-accent: #37C1E3;
+    --jgw-accent-light: #5fd1eb;
+    --jgw-success: #9dbe3b;
+    --jgw-success-light: #b5d85a;
+    --jgw-gray: #6c757d;
+    --jgw-gray-light: #f8f9fa;
+    --jgw-gray-border: #dee2e6;
+    --jgw-white: #ffffff;
+    --jgw-shadow: rgba(25, 53, 96, 0.15);
+    --jgw-shadow-hover: rgba(25, 53, 96, 0.25);
+}
+
+/* Main Floating Toolbar - WPBakery Style */
+#dashboard-toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--jgw-primary) 0%, var(--jgw-primary-light) 100%);
+    box-shadow: 0 4px 20px var(--jgw-shadow);
+    z-index: 1050;
+    padding: 12px 24px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--jgw-white);
+    border-bottom: 2px solid var(--jgw-accent);
+    backdrop-filter: blur(10px);
+}
+
+#dashboard-toolbar .toolbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+#dashboard-toolbar .toolbar-brand i {
+    font-size: 20px;
+    color: var(--jgw-accent);
+}
+
+#dashboard-toolbar .toolbar-left,
+#dashboard-toolbar .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toolbar-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--jgw-white);
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    backdrop-filter: blur(5px);
+}
+
+.toolbar-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toolbar-btn:active {
+    transform: translateY(0);
+}
+
+.toolbar-btn.primary {
+    background: var(--jgw-accent);
+    border-color: var(--jgw-accent);
+    color: var(--jgw-white);
+    font-weight: 600;
+}
+
+.toolbar-btn.primary:hover {
+    background: var(--jgw-accent-light);
+    border-color: var(--jgw-accent-light);
+    box-shadow: 0 4px 15px rgba(55, 193, 227, 0.4);
+}
+
+.toolbar-btn.danger {
+    background: rgba(220, 53, 69, 0.2);
+    border-color: rgba(220, 53, 69, 0.3);
+}
+
+.toolbar-btn.danger:hover {
+    background: rgba(220, 53, 69, 0.3);
+    border-color: rgba(220, 53, 69, 0.4);
+}
+
+.toolbar-btn i {
+    font-size: 16px;
+}
+
+.toolbar-btn span {
+    display: inline-block;
+}
+
+/* Customization Mode Padding */
+.dashboard-customize-mode {
+    padding-top: 70px;
+}
+
+/* Row Styles - WPBakery Style */
+.dashboard-customize-mode .dashboard-row {
+    position: relative;
+    margin-top: 50px;
+    margin-bottom: 30px;
+    padding: 40px 20px 20px 20px;
+    border: 2px dashed var(--jgw-primary);
+    border-radius: 10px;
+    background: linear-gradient(to bottom, rgba(25, 53, 96, 0.02), rgba(25, 53, 96, 0.05));
+    transition: all 0.3s ease;
+    min-height: 100px;
+}
+
+.dashboard-customize-mode .dashboard-row:hover {
+    margin-top: 50px;
+    border-color: var(--jgw-accent);
+    background: linear-gradient(to bottom, rgba(55, 193, 227, 0.05), rgba(55, 193, 227, 0.1));
+    box-shadow: 0 6px 20px var(--jgw-shadow);
+    transform: translateY(-2px);
+}
+
+.dashboard-customize-mode .dashboard-row.row-selected {
+    border-color: var(--jgw-accent);
+    border-style: solid;
+    background: linear-gradient(to bottom, rgba(55, 193, 227, 0.1), rgba(55, 193, 227, 0.15));
+    box-shadow: 0 8px 25px rgba(55, 193, 227, 0.3);
+}
+
+/* Row Floating Toolbar - WPBakery Style */
+.row-toolbar {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: var(--jgw-primary);
+    padding: 8px 12px;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 -4px 12px var(--jgw-shadow);
+    z-index: 100;
+    white-space: nowrap;
+}
+
+.dashboard-customize-mode .dashboard-row .row-toolbar {
+    display: none;
+}
+
+.dashboard-customize-mode .dashboard-row:hover .row-toolbar,
+.dashboard-customize-mode .dashboard-row.row-selected .row-toolbar {
+    display: flex;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.row-toolbar-label {
+    color: var(--jgw-white);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-right: 10px;
+    margin-right: 10px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.row-toolbar-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: var(--jgw-white);
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 13px;
+}
+
+.row-toolbar-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.row-toolbar-btn.drag-handle {
+    cursor: move;
+}
+
+.row-toolbar-btn.drag-handle:hover {
+    background: var(--jgw-accent);
+}
+
+/* Chart Styles - WPBakery Style */
+.dashboard-customize-mode .dashboard-chart {
+    position: relative;
+    border: 2px dashed var(--jgw-success);
+    border-radius: 8px;
+    padding: 15px;
+    background: linear-gradient(to bottom, rgba(157, 190, 59, 0.03), rgba(157, 190, 59, 0.08));
+    transition: all 0.3s ease;
+    min-height: 150px;
+}
+
+.dashboard-customize-mode .dashboard-chart:hover {
+    border-color: var(--jgw-success-light);
+    border-style: solid;
+    background: linear-gradient(to bottom, rgba(157, 190, 59, 0.08), rgba(157, 190, 59, 0.12));
+    box-shadow: 0 4px 15px rgba(157, 190, 59, 0.2);
+    transform: translateY(-2px);
+}
+
+.dashboard-customize-mode .dashboard-chart.chart-selected {
+    border-color: var(--jgw-success-light);
+    border-style: solid;
+    background: linear-gradient(to bottom, rgba(157, 190, 59, 0.12), rgba(157, 190, 59, 0.18));
+    box-shadow: 0 6px 20px rgba(157, 190, 59, 0.3);
+}
+
+/* Chart Floating Toolbar - WPBakery Style */
+.chart-toolbar {
+    position: absolute;
+    top: -35px;
+    right: 0;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: var(--jgw-success);
+    padding: 6px 10px;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 -4px 12px rgba(157, 190, 59, 0.3);
+    z-index: 100;
+}
+
+.dashboard-customize-mode .dashboard-chart .chart-toolbar {
+    display: none;
+}
+
+.dashboard-customize-mode .dashboard-chart:hover .chart-toolbar,
+.dashboard-customize-mode .dashboard-chart.chart-selected .chart-toolbar {
+    display: flex;
+    animation: slideDown 0.2s ease-out;
+}
+
+.chart-toolbar-label {
+    color: var(--jgw-white);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-right: 8px;
+    margin-right: 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chart-toolbar-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: var(--jgw-white);
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+.chart-toolbar-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(1.1);
+}
+
+.chart-toolbar-btn.drag-handle {
+    cursor: move;
+}
+
+.chart-toolbar-btn.drag-handle:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.chart-toolbar-btn.edit-btn:hover {
+    background: var(--jgw-accent);
+}
+
+.chart-toolbar-btn.duplicate-btn:hover {
+    background: var(--jgw-primary-light);
+}
+
+.chart-toolbar-btn.remove-btn:hover {
+    background: rgba(220, 53, 69, 0.8);
+}
+
+/* Column Controls - Between Charts */
+.column-drop-zone {
+    min-height: 60px;
+    border: 2px dashed var(--jgw-gray-border);
+    border-radius: 8px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--jgw-gray-light);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.dashboard-customize-mode .column-drop-zone {
+    display: flex;
+}
+
+.column-drop-zone:hover {
+    border-color: var(--jgw-accent);
+    background: rgba(55, 193, 227, 0.05);
+}
+
+.column-drop-zone::before {
+    content: '+ Add Chart';
+    color: var(--jgw-gray);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.column-drop-zone.drag-over {
+    border-color: var(--jgw-accent);
+    background: rgba(55, 193, 227, 0.1);
+    box-shadow: inset 0 0 20px rgba(55, 193, 227, 0.2);
+}
+
+/* Legacy Control Buttons - Keep for compatibility but hidden */
+.row-controls,
+.chart-controls {
+    display: none !important;
+}
+
+/* Drag and Drop Styles - Enhanced */
+.sortable-ghost {
+    opacity: 0.5;
+    background: linear-gradient(to bottom, rgba(55, 193, 227, 0.1), rgba(55, 193, 227, 0.2)) !important;
+    border: 2px dashed var(--jgw-accent) !important;
+    transform: scale(0.95);
+}
+
+.sortable-chosen {
+    border-color: var(--jgw-accent) !important;
+    border-style: solid !important;
+    box-shadow: 0 8px 30px rgba(55, 193, 227, 0.4) !important;
+    transform: scale(1.02);
+    z-index: 999;
+}
+
+.sortable-drag {
+    opacity: 0.9;
+    transform: rotate(1deg) scale(1.05);
+    box-shadow: 0 10px 40px var(--jgw-shadow-hover);
+}
+
+/* Chart Library Modal - Enhanced */
+#chart-library-modal .modal-header {
+    background: linear-gradient(135deg, var(--jgw-primary) 0%, var(--jgw-primary-light) 100%);
+    color: var(--jgw-white);
+    border-bottom: 2px solid var(--jgw-accent);
+}
+
+#chart-library-modal .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+#chart-library-modal .charts-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.chart-library-item {
+    padding: 20px;
+    border: 2px solid var(--jgw-gray-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--jgw-white);
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-library-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--jgw-primary), var(--jgw-accent));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.chart-library-item:hover {
+    border-color: var(--jgw-accent);
+    background: linear-gradient(to bottom, rgba(55, 193, 227, 0.05), rgba(55, 193, 227, 0.1));
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px var(--jgw-shadow);
+}
+
+.chart-library-item:hover::before {
+    transform: scaleX(1);
+}
+
+.chart-library-item i {
+    font-size: 36px;
+    color: var(--jgw-primary);
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+.chart-library-item:hover i {
+    color: var(--jgw-accent);
+    transform: scale(1.1);
+}
+
+.chart-library-item strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--jgw-primary);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.chart-library-item:hover strong {
+    color: var(--jgw-accent);
+}
+
+.chart-library-item small {
+    color: var(--jgw-gray);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Chart Settings Modal - Enhanced */
+#chart-settings-modal .modal-header {
+    background: linear-gradient(135deg, var(--jgw-primary) 0%, var(--jgw-primary-light) 100%);
+    color: var(--jgw-white);
+    border-bottom: 2px solid var(--jgw-accent);
+}
+
+#chart-settings-modal .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+#chart-settings-modal .modal-body {
+    padding: 30px;
+}
+
+#chart-settings-modal .form-group {
+    margin-bottom: 25px;
+}
+
+#chart-settings-modal label {
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+    color: var(--jgw-primary);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 12px;
+}
+
+#chart-settings-modal select,
+#chart-settings-modal input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--jgw-gray-border);
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: var(--jgw-white);
+}
+
+#chart-settings-modal select:focus,
+#chart-settings-modal input:focus {
+    outline: none;
+    border-color: var(--jgw-accent);
+    box-shadow: 0 0 0 3px rgba(55, 193, 227, 0.1);
+}
+
+#chart-settings-modal .modal-footer {
+    border-top: 1px solid var(--jgw-gray-border);
+    padding: 20px 30px;
+}
+
+#chart-settings-modal .modal-footer .btn-primary {
+    background: var(--jgw-accent);
+    border-color: var(--jgw-accent);
+    color: var(--jgw-white);
+    font-weight: 600;
+    padding: 10px 24px;
+}
+
+#chart-settings-modal .modal-footer .btn-primary:hover {
+    background: var(--jgw-accent-light);
+    border-color: var(--jgw-accent-light);
+}
+
+/* Add Row Indicator - Enhanced */
+.dashboard-customize-mode .add-row-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+    margin: 30px 0;
+    border: 2px dashed var(--jgw-gray-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(to bottom, rgba(25, 53, 96, 0.02), rgba(25, 53, 96, 0.05));
+    position: relative;
+}
+
+.dashboard-customize-mode .add-row-indicator:hover {
+    border-color: var(--jgw-accent);
+    background: linear-gradient(to bottom, rgba(55, 193, 227, 0.05), rgba(55, 193, 227, 0.1));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--jgw-shadow);
+}
+
+.dashboard-customize-mode .add-row-indicator::before {
+    content: '+ Add New Row';
+    font-size: 16px;
+    color: var(--jgw-primary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.dashboard-customize-mode .add-row-indicator:hover::before {
+    color: var(--jgw-accent);
+}
+
+.dashboard-customize-mode .add-row-indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--jgw-accent);
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.dashboard-customize-mode .add-row-indicator:hover::after {
+    width: 60px;
+    height: 60px;
+    opacity: 0.3;
+}
+
+/* Preview Mode */
+.dashboard-preview-mode .row-toolbar,
+.dashboard-preview-mode .chart-toolbar,
+.dashboard-preview-mode #dashboard-toolbar {
+    display: none !important;
+}
+
+.dashboard-preview-mode .dashboard-row,
+.dashboard-preview-mode .dashboard-chart {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Notifications - Enhanced */
+.dashboard-notification {
+    animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 8px 30px var(--jgw-shadow-hover);
+    border-left: 4px solid;
+}
+
+.dashboard-notification.notification-success {
+    border-left-color: var(--jgw-success);
+    background: linear-gradient(135deg, var(--jgw-success) 0%, var(--jgw-success-light) 100%);
+}
+
+.dashboard-notification.notification-error {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, #dc3545 0%, #e85d6a 100%);
+}
+
+.dashboard-notification.notification-info {
+    border-left-color: var(--jgw-accent);
+    background: linear-gradient(135deg, var(--jgw-accent) 0%, var(--jgw-accent-light) 100%);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Customize Dashboard Button - Enhanced */
+#customize-dashboard-btn {
+    margin-left: 10px;
+    background: var(--jgw-primary);
+    border-color: var(--jgw-primary);
+    color: var(--jgw-white);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#customize-dashboard-btn:hover {
+    background: var(--jgw-primary-light);
+    border-color: var(--jgw-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--jgw-shadow);
+}
+
+#customize-dashboard-btn i {
+    margin-right: 6px;
+}
+
+/* Ensure charts are properly contained */
+.dashboard-customize-mode .card {
+    position: relative;
+    overflow: visible;
+}
+
+.dashboard-customize-mode .card-body {
+    position: relative;
+}
+
+/* Loading State - Enhanced */
+.dashboard-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.dashboard-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -25px 0 0 -25px;
+    border: 4px solid rgba(25, 53, 96, 0.1);
+    border-top: 4px solid var(--jgw-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Row Number Badge */
+.row-number-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--jgw-primary);
+    color: var(--jgw-white);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 10;
+}
+
+.dashboard-customize-mode .dashboard-row .row-number-badge {
+    display: flex;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #dashboard-toolbar {
+        flex-direction: column;
+        padding: 10px 15px;
+        gap: 10px;
+    }
+    
+    #dashboard-toolbar .toolbar-brand {
+        font-size: 14px;
+    }
+    
+    #dashboard-toolbar .toolbar-left,
+    #dashboard-toolbar .toolbar-right {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .toolbar-btn {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+    
+    .toolbar-btn span {
+        display: none;
+    }
+    
+    .chart-toolbar {
+        top: -30px;
+        flex-wrap: wrap;
+    }
+    
+    .chart-toolbar-label {
+        display: none;
+    }
+    
+    .chart-toolbar-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+    
+    .row-toolbar {
+        top: -35px;
+        flex-wrap: wrap;
+        padding: 6px 8px;
+    }
+    
+    .row-toolbar-label {
+        display: none;
+    }
+    
+    .row-toolbar-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+}
+
+/* Smooth Transitions */
+* {
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Focus States */
+.dashboard-customize-mode .dashboard-row:focus-within,
+.dashboard-customize-mode .dashboard-chart:focus-within {
+    outline: 2px solid var(--jgw-accent);
+    outline-offset: 2px;
+}
+
+/* Empty State */
+.empty-row-placeholder {
+    padding: 40px;
+    text-align: center;
+    color: var(--jgw-gray);
+    border: 2px dashed var(--jgw-gray-border);
+    border-radius: 8px;
+    background: var(--jgw-gray-light);
+}
+
+.empty-row-placeholder::before {
+    content: '📊';
+    font-size: 48px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.empty-row-placeholder-text {
+    font-size: 14px;
+    font-weight: 500;
+}

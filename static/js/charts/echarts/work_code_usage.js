@@ -1,7 +1,6 @@
 function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
     try {
         if (typeof echarts === 'undefined') {
-            console.error('Work Code Usage Chart: ECharts library not loaded');
             return null;
         }
         
@@ -9,12 +8,10 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
         const chartDom = document.getElementById(containerId);
         
         if (!chartDom) {
-            console.error('Work Code Usage Chart: Container not found', { container: containerId });
             return null;
         }
         
         if (!workCodeUsageParams || !Array.isArray(workCodeUsageParams) || workCodeUsageParams.length === 0) {
-            console.error('Work Code Usage Chart: Invalid data', { data: workCodeUsageParams });
             return null;
         }
         
@@ -29,7 +26,6 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
         const accessCodes = [...new Set(workCodeUsageParams.map(item => item.mapped_access_code))].filter(Boolean);
         
         if (organizations.length === 0 || accessCodes.length === 0) {
-            console.error('Work Code Usage Chart: No valid organizations or access codes found');
             return myChart;
         }
         
@@ -178,7 +174,6 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
                     myChart.resize();
                 }
             } catch (resizeError) {
-                console.error('Work Code Usage Chart: Error resizing chart', resizeError);
             }
         }, 100);
         
@@ -191,7 +186,6 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
                     myChart.resize();
                 }
             } catch (error) {
-                console.error('Work Code Usage Chart: Error in resize handler', error);
             }
         };
         
@@ -201,7 +195,6 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
         
         return myChart;
     } catch (error) {
-        console.error('Work Code Usage Chart: Error initializing chart', error);
         return null;
     }
 }
