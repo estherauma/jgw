@@ -14,4 +14,6 @@ urlpatterns = [
     path('user-overview/export-help-contacts/', views.export_help_contacts_data, name='export_help_contacts'),
     path('user-overview/export-preferences', views.export_preferences_data, name='export_preferences'),
     path('user-diagnostics/', views.user_diagnostics, name='user_diagnostics'),
+    path('api/dashboard/customize/', views.dashboard_customization, name='dashboard_customize'),
+    path('api/dashboard/reset/', views.reset_dashboard, name='dashboard_reset'),
 ]

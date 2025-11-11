@@ -1,4 +1,4 @@
-function initUsersByImmigrationStatusChart(immigrationData, customContainerId) {
+function initUsersByImmigrationStatusChart(immigrationData, customContainerId, chartType) {
     const containerId = customContainerId || 'preference-immigration-status-chart-id';
     const chartDom = document.getElementById(containerId);
     
@@ -10,7 +10,14 @@ function initUsersByImmigrationStatusChart(immigrationData, customContainerId) {
         return;
     }
 
+    const existingChart = echarts.getInstanceByDom(chartDom);
+    if (existingChart) {
+        existingChart.dispose();
+    }
+
     const myChart = echarts.init(chartDom);
+    
+    const type = chartType || 'bar';
     
     let statuses = [];
     let counts = [];
@@ -83,113 +90,132 @@ function initUsersByImmigrationStatusChart(immigrationData, customContainerId) {
     const numItems = reversedStatuses.length;
     const showScrollbar = numItems > 8;
     
-    const option = {
-        tooltip: {
-            trigger: 'item',
-            backgroundColor: 'rgba(50, 50, 93, 0.95)',
-            borderColor: '#e5e8eb',
-            borderWidth: 1,
-            textStyle: {
-                color: '#fff',
-                fontSize: 12
+    let option = {};
+    
+    if (type === 'pie' || type === 'doughnut') {
+        const radius = type === 'doughnut' ? ['40%', '70%'] : ['0%', '70%'];
+        option = {
+            tooltip: {
+                trigger: 'item',
+                backgroundColor: 'rgba(50, 50, 93, 0.95)',
+                borderColor: '#e5e8eb',
+                borderWidth: 1,
+                textStyle: {
+                    color: '#fff',
+                    fontSize: 12
+                },
+                formatter: function(params) {
+                    return params.name + ': ' + params.value + ' (' + params.percent + '%)';
+                }
             },
-            formatter: function(params) {
-                return params.name + ': ' + params.value + ' (' + params.percent + '%)';
-            }
-        },
-        series: [
-            {
-                name: 'Immigration Status',
-                type: 'pie',
-                center: ['25%', '50%'],
-                radius: ['40%', '70%'],
-                avoidLabelOverlap: false,
-                itemStyle: {
-                    borderColor: '#fff',
-                    borderWidth: 5,
-                    borderRadius: 10
-                },
-                label: {
-                    show: false
-                },
-                emphasis: {
+            series: [
+                {
+                    name: 'Immigration Status',
+                    type: 'pie',
+                    radius: radius,
+                    center: ['50%', '50%'],
+                    data: sortedStatuses.map((status, index) => ({
+                        name: status,
+                        value: sortedCounts[index]
+                    })),
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
                     label: {
                         show: true,
-                        fontSize: 12,
-                        fontWeight: 'bold'
-                    }
-                },
-                labelLine: {
-                    show: false
-                },
-                data: sortedStatuses.map((status, index) => ({
-                    name: status,
-                    value: sortedCounts[index]
-                })),
-                color: colors
-            },
-            {
-                name: 'User Count',
-                type: 'bar',
-                xAxisIndex: 0,
-                yAxisIndex: 0,
-                barWidth: '50%',
-                data: reversedCounts.map((count, index) => ({
-                    value: count,
-                    itemStyle: {
-                        color: reversedColors[index],
-                        borderRadius: [0, 5, 5, 0]
-                    }
-                })),
-                label: {
-                    show: true,
-                    position: 'right',
-                    color: '#193560',
-                    fontWeight: 'bold',
-                    fontSize: 12,
-                    formatter: function(params) {
-                        return params.value;
-                    }
+                        formatter: '{b}: {c} ({d}%)'
+                    },
+                    labelLine: {
+                        show: true
+                    },
+                    color: colors
                 }
-            }
-        ],
-        dataZoom: [
-            {
-                type: 'slider',
-                yAxisIndex: 0,
-                filterMode: 'none',
-                start: 100,
-                end: 0,
-                right: 2,
-                width: 15,
-                show: showScrollbar,
-                realtime: true,
-                textStyle: {
-                    color: '#6c757d'
+            ],
+            graphic: type === 'doughnut' ? [
+                {
+                    type: 'text',
+                    left: '50%',
+                    top: '50%',
+                    style: {
+                        text: `Total Users\n${totalUsers}`,
+                        textAlign: 'center',
+                        fill: '#193560',
+                        fontSize: 14,
+                        fontWeight: 'bold'
+                    },
+                    z: 100
+                }
+            ] : []
+        };
+    } else {
+        option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
                 },
+                backgroundColor: 'rgba(50, 50, 93, 0.95)',
                 borderColor: '#e5e8eb',
-                fillerColor: 'rgba(211, 220, 230, 0.3)'
-            }
-        ],
-        grid: [
-            {
-                left: '60%',
-                right: '0%',
+                borderWidth: 1,
+                textStyle: {
+                    color: '#fff',
+                    fontSize: 12
+                }
+            },
+            grid: {
+                left: '5%',
+                right: '5%',
+                bottom: '0%',
                 top: '5%',
-                bottom: '5%',
-                containLabel: false
-            }
-        ],
-        xAxis: [
-            {
-                gridIndex: 0,
+                containLabel: true
+            },
+            dataZoom: [
+                {
+                    type: 'slider',
+                    yAxisIndex: 0,
+                    filterMode: 'none',
+                    start: 100,
+                    end: 0,
+                    right: 2,
+                    width: 15,
+                    show: showScrollbar,
+                    realtime: true,
+                    textStyle: {
+                        color: '#6c757d'
+                    },
+                    borderColor: '#e5e8eb',
+                    fillerColor: 'rgba(211, 220, 230, 0.3)'
+                }
+            ],
+            yAxis: {
+                type: 'category',
+                data: reversedStatuses,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: '#e5e8eb'
+                    }
+                },
+                axisLabel: {
+                    color: '#6c757d',
+                    fontSize: 12
+                },
+                splitLine: {
+                    show: false
+                }
+            },
+            xAxis: {
                 type: 'value',
-                position: 'top',
                 axisLine: {
                     show: false
                 },
                 axisLabel: {
-                    show: false
+                    color: '#6c757d',
+                    fontSize: 12
                 },
                 splitLine: {
                     show: true,
@@ -198,38 +224,37 @@ function initUsersByImmigrationStatusChart(immigrationData, customContainerId) {
                         type: 'dashed'
                     }
                 }
-            }
-        ],
-        yAxis: [
-            {
-                gridIndex: 0,
-                type: 'category',
-                data: reversedStatuses,
-                axisLine: {
-                    show: false
-                },
-                axisLabel: {
-                    color: '#6c757d',
-                    fontSize: 12
+            },
+            series: [
+                {
+                    name: 'User Count',
+                    type: 'bar',
+                    data: reversedCounts.map((count, index) => ({
+                        value: count,
+                        itemStyle: {
+                            color: reversedColors[index] || '#D3DCE6',
+                            borderRadius: [0, 4, 4, 0]
+                        }
+                    })),
+                    emphasis: {
+                        itemStyle: {
+                            color: '#B0C4DE'
+                        }
+                    },
+                    label: {
+                        show: true,
+                        position: 'right',
+                        color: '#193560',
+                        fontWeight: 'bold',
+                        fontSize: 12,
+                        formatter: function(params) {
+                            return params.value;
+                        }
+                    }
                 }
-            }
-        ],
-        graphic: [
-            {
-                type: 'text',
-                left: '25%',
-                top: '50%',
-                style: {
-                    text: `Total Users\n${totalUsers}`,
-                    textAlign: 'center',
-                    fill: '#193560',
-                    fontSize: 14,
-                    fontWeight: 'bold'
-                },
-                z: 100
-            }
-        ]
-    };
+            ]
+        };
+    }
     
         myChart.setOption(option);
     

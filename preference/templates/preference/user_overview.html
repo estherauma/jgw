@@ -260,20 +260,47 @@
                 role="button" class="btn btn-primary waves-effect text-center bg-jgw-deep-blue">
                 {% translate "userOverviewFilterButton" %}
             </button>
+            <button id="customize-dashboard-btn" class="btn btn-primary waves-effect text-center bg-jgw-deep-blue">
+                <i class="fe-settings"></i> Customize Dashboard
+            </button>
                         </div>
                         {% else %}
                         {% include 'includes/non_auth_banner_btns.html' %}
                         {% endif %}
+                    </div>
+                </div>
+
+<!-- Dashboard Customization Toolbar - WPBakery Style -->
+<div id="dashboard-toolbar" style="display: none;">
+    <div class="toolbar-brand">
+        <i class="fe-layers"></i>
+        <span>Dashboard Builder</span>
+    </div>
+   
+    <div class="toolbar-right">
+        <button class="toolbar-btn" id="add-row-btn" title="Add Row">
+            <i class="fe-plus"></i> <span>Add Row</span>
+        </button>
+        <button class="toolbar-btn primary" id="save-dashboard-btn" title="Save Layout">
+            <i class="fe-save"></i> <span>Save Layout</span>
+        </button>
+        <button class="toolbar-btn" id="reset-dashboard-btn" title="Reset to Default">
+            <i class="fe-refresh-cw"></i> <span>Reset</span>
+        </button>
+        <button class="toolbar-btn danger" id="exit-customize-btn" title="Exit Customization">
+            <i class="fe-x"></i> <span>Exit</span>
+        </button>
     </div>
 </div>
 
-
-
-<div class="row">
-    {% flag 'can_view_monthly_active_users_chart' %}
+<!-- Dashboard Container -->
+<div id="dashboard-rows-container">
+<div class="row dashboard-row" data-row-id="row-0">
+{% flag 'can_view_monthly_active_users_chart' %}
     <div class="col-md-6">
         <div class="card h-100 monthly-active-users-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart" >
+                <div data-chart-id="monthly_active_users" id="chart-monthly_active_users">
                 <div class="chart-header">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title">Monthly Active Users</h4>
@@ -302,15 +329,17 @@
                     {% translate "userOverviewMonthlyActiveUsersTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
-    {% endflag %}
+{% endflag %}
 
     {% flag 'can_view_users_by_origin_country_chart' %}
     <div class="col-md-6">
         <div class="card h-100 users-by-origin-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="users_by_origin_country" id="chart-users_by_origin_country">
                 <div class="chart-header">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title">User Origin Country</h4>
@@ -322,23 +351,25 @@
                     </div>
                 </div>
                 
-                <div id="preference-origin-graph-id" style="height: 500px; width: 100%; margin-top: -10px;"></div>
+                <div id="preference-origin-graph-id" style="height: 500px; width: 100%;"></div>
                 
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersByOriginCountryTooltip" %}
                         <div class="tooltip-arrow"></div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
     {% endflag %}
 </div>
-<div class="row">
+<div class="row dashboard-row" data-row-id="row-1">
     {% flag 'can_view_users_by_gender_chart' %}
     <div class="col-md-6 mt-3">
         <div class="card h-100 users-by-gender-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="users_by_gender" id="chart-users_by_gender">
                 <div class="chart-header">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title">User by Gender</h4>
@@ -350,12 +381,13 @@
                     </div>
                 </div>
 
-                <div id="preference-gender-chart-id" style="height: 400px; width: 100%;"></div>
+                <div id="preference-gender-chart-id" style="height: 500px; width: 100%;"></div>
                 
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewUsersByGenderTooltip" %}
                     <div class="tooltip-arrow"></div>
+                </div>
                 </div>
             </div>
         </div>
@@ -367,7 +399,8 @@
     {% flag 'can_view_users_by_destination_country_chart' %}
     <div class="col-md-6 mt-3">
         <div class="card h-100 users-by-destination-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="users_by_destination_country" id="chart-users_by_destination_country">
                 <div class="chart-header">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title">User Destination Country</h4>
@@ -379,12 +412,13 @@
                     </div>
                 </div>
                 
-                <div id="preference-destination-chart-id" style="height: 400px; width: 100%;"></div>
+                <div id="preference-destination-chart-id" style="height: 500px; width: 100%;"></div>
                 
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewUsersByDestinationCountryTooltip" %}
                     <div class="tooltip-arrow"></div>
+                </div>
                 </div>
             </div>
         </div>
@@ -392,11 +426,12 @@
     {% endflag %}
     {% endif %}
 </div>
-<div class="row">
+<div class="row dashboard-row" data-row-id="row-2">
     {% flag 'can_view_selected_users_language_chart' %}
     <div class="col-md-6 mt-3">
         <div class="card h-100 users-by-language-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="users_by_language" id="chart-users_by_language">
                 <div class="chart-header" style="margin-bottom: 0;">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByLanguageTitle" %}</h4>
@@ -415,6 +450,7 @@
                         {% translate "userOverviewUsersByLanguageTooltip" %}
                         <div class="tooltip-arrow"></div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
@@ -423,7 +459,8 @@
     {% flag 'can_view_get_users_by_country_state_chart' %}
     <div class="col-md-6 mt-3">
         <div class="card h-100 users-by-state-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="users_by_country_state" id="chart-users_by_country_state">
                 <div class="chart-header" style="margin-bottom: 0;">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByStateTitle" %}</h4>
@@ -442,17 +479,19 @@
                         {% translate "userOverviewUsersByStateTooltip" %}
                         <div class="tooltip-arrow"></div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
     {% endflag %}
 </div>
 
-<div class="row">
+<div class="row dashboard-row" data-row-id="row-3">
     {% flag 'can_view_users_by_immigration_status_chart' %}
     <div class="col-md-6 mt-3">
         <div class="card h-100 users-by-immigration-status-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="users_by_immigration_status" id="chart-users_by_immigration_status">
                 <div class="chart-header" style="margin-bottom: 0;">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByImmigrationStatusTitle" %}</h4>
@@ -464,12 +503,13 @@
                     </div>
                 </div>
                 
-                <div id="preference-immigration-status-chart-id" style="height: 400px; width: 100%;"></div>
+                <div id="preference-immigration-status-chart-id" style="height: 500px; width: 100%;"></div>
                 
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewUsersByImmigrationStatusTooltip" %}
                     <div class="tooltip-arrow"></div>
+                </div>
                 </div>
             </div>
         </div>
@@ -480,7 +520,8 @@
     {% flag 'can_view_users_by_age_chart' %}
     <div class="col-md-6 mt-3">
         <div class="card h-100 users-by-age-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="users_by_age" id="chart-users_by_age">
                 <div class="chart-header" style="margin-bottom: 0;">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByAgeTitle" %}</h4>
@@ -492,23 +533,25 @@
                     </div>
                 </div>
                 
-                <div id="preference-age-chart-id" style="height: 400px; width: 100%;"></div>
+                <div id="preference-age-chart-id" style="height: 500px; width: 100%;"></div>
                 
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewUsersByAgeTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
     {% endflag %}
 </div>
-<div class="row">
+<div class="row dashboard-row" data-row-id="row-4">
     {% flag 'can_view_get_users_by_sector_chart' %}
     <div class="col-md-6 mt-3">
         <div class="card h-100 users-by-sector-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="users_by_sector" id="chart-users_by_sector">
                 <div class="chart-header" style="margin-bottom: 0;">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersBySectorTitle" %}</h4>
@@ -527,16 +570,18 @@
                         {% translate "userOverviewUsersBySectorTooltip" %}
                         <div class="tooltip-arrow"></div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
     {% endflag %}
 
-    {% if user.is_authenticated %}
-    {% flag 'can_view_work_code_usage_chart' %}
+{% if user.is_authenticated %}
+{% flag 'can_view_work_code_usage_chart' %}
     <div class="col-md-6 mt-3">
         <div class="card h-100 work-code-usage-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="work_code_usage" id="chart-work_code_usage">
                 <div class="chart-header" style="margin-bottom: 0;">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewWorkCodeUsageTitle" %}</h4>
@@ -550,10 +595,11 @@
                 
                 <div id="organisation-work-code-usage-graph-id" style="height: 500px; width: 100%; margin-top: -10px;"></div>
                 
-                <div class="info-tooltip">
-                    <i class="fas fa-info-circle"></i>
-                    {% translate "userOverviewWorkCodeUsageTooltip" %}
-                    <div class="tooltip-arrow"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            {% translate "userOverviewWorkCodeUsageTooltip" %}
+                            <div class="tooltip-arrow"></div>
+                </div>
                 </div>
             </div>
         </div>
@@ -563,10 +609,11 @@
 {% endif %}
 
 {% flag 'can_view_new_monthly_users_chart' %}
-<div class="row">
+<div class="row dashboard-row" data-row-id="row-5">
     <div class="col-md-12 user-by-month">
         <div class="card h-100 monthly-active-users-card">
-            <div class="card-body">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="new_monthly_users" id="chart-new_monthly_users">
                 <div class="chart-header">
                     <div class="chart-header-left">
                         <h4 class="chart-main-title">{% translate "userOverviewNewUsersByMonthTitle" %}</h4>
@@ -578,11 +625,12 @@
                     </div>
                 </div>
 
-                <div id="preference-monthly-cumulative-users-graph-id" style="height: 420px; width: 100%;"></div>
+                <div id="preference-monthly-cumulative-users-graph-id" style="height: 500px; width: 100%;"></div>
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewNewUsersByMonthTooltip" %}
                     <div class="tooltip-arrow"></div>
+                </div>
                 </div>
             </div>
         </div>
@@ -591,10 +639,11 @@
 {% endflag %}
 
 {% flag 'can_view_link_clicks_chart' %}
-<div class="row">
+<div class="row dashboard-row" data-row-id="row-6">
     <div class="col-md-12 user-by-month">
         <div class="card h-100">
-            <div class="card-body chart">
+            <div class="card-body chart dashboard-chart">
+                <div data-chart-id="link_clicks" id="chart-link_clicks">
                 <p class="chart-title">{% translate "userOverviewLinkClicksByUsersTitle" %}</p>
                 <div class="link-clicks-graph-id-chart-box">
                     <div id="link-clicks-graph-id"></div>
@@ -604,6 +653,7 @@
                         <div class="tooltip-arrow"></div>
                     </div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
@@ -612,9 +662,10 @@
 
 {% if user.is_authenticated %}
 {% flag 'can_view_user_route_map_chart' %}
-<div class="row col-md-12 mt-3 user-route-map-chart-box">
+<div class="row dashboard-row col-md-12 mt-3 user-route-map-chart-box" data-row-id="row-7">
     <div class="card h-100 users-route-map-card">
-        <div class="card-body chart">
+        <div class="card-body chart dashboard-chart">
+            <div class="dashboard-chart" data-chart-id="user_route_map" id="chart-user_route_map">
             <p class="chart-title mb-2">{% translate "userOverviewUserRouteMapTitle" %}</p>
             <div id="user_route_map" class="user-route-map"></div>
             <div class="info-tooltip user-route-map-info-tooltip">
@@ -622,15 +673,17 @@
                 {% translate "userOverviewUserRouteMapTooltip" %}
                 <div class="tooltip-arrow"></div>
             </div>
+            </div>
         </div>
     </div>
 </div>
 {% endflag %}
 
 {% flag 'can_view_user_geolocation_map' %}
-<div class="row col-md-12 user-route-map-chart-box">
+<div class="row dashboard-row col-md-12 user-route-map-chart-box" data-row-id="row-8">
     <div class="card h-100 users-geolocation-map-card">
-        <div class="card-body chart">
+        <div class="card-body chart dashboard-chart">
+            <div data-chart-id="user_geolocation_map" id="chart-user_geolocation_map">
             <p class="chart-title mb-2">{% translate "userOverviewUserGeolocationMapForActiveUsersTitle" %}</p>
             <div id="user_geolocation_map" class="user-geolocation-map"></div>
             <div class="info-tooltip user-geolocation-map-info-tooltip">
@@ -638,26 +691,88 @@
                 {% translate "userOverviewUserGeolocationMapForActiveUsersTooltip" %}
                 <div class="tooltip-arrow"></div>
             </div>
+            </div>
         </div>
     </div>
 </div>
 {% endflag %}
 
 {% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
-<div class="row col-md-12 mt-1 user-geolocation-map-chart-box">
+<div class="row dashboard-row col-md-12 mt-1 user-geolocation-map-chart-box" data-row-id="row-9">
     <div class="card h-100 users-interaction-map-card">
-        <div class="card-body chart wide-map">
+        <div class="card-body chart wide-map dashboard-chart">
+            <div data-chart-id="user_geolocation_map_user_engagement" id="chart-user_geolocation_map_user_engagement">
             <p class="chart-title mb-2">{% translate "userOverviewUsersGeoMapUserEngagementTitle" %}</p>
             <div id="user_geolocation_map_user_engagement" class="user-geolocation-map"></div>
             <div class="info-tooltip user-geol-map-info-tooltip">
                 <i class="fas fa-info-circle"></i>
                 {% translate "userOverviewUsersGeoMapUserEngagementTooltip" %}
             </div>
+            </div>
         </div>
     </div>
 </div>
 {% endflag %}
 {% endif %}
+
+</div> <!-- End dashboard-rows-container -->
+
+<!-- Chart Library Modal -->
+<div class="modal fade" id="chart-library-modal" tabindex="-1" aria-labelledby="chart-library-modal-label">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chart-library-modal-label">Add Chart to Dashboard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="charts-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Settings Modal -->
+<div class="modal fade" id="chart-settings-modal" tabindex="-1" aria-labelledby="chart-settings-modal-label">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chart-settings-modal-label">Chart Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="chart-settings-form">
+                    <div class="form-group">
+                        <label for="chart-type-select">Chart Type</label>
+                        <select id="chart-type-select" class="form-control" name="chart_type">
+                                    <option value="bar">Bar Chart</option>
+                                    <option value="line">Line Chart</option>
+                            <option value="pie">Pie Chart</option>
+                                    <option value="doughnut">Doughnut Chart</option>
+                                    <option value="area">Area Chart</option>
+                                </select>
+                            </div>
+                    <div class="form-group">
+                        <label for="chart-size-select">Column Size</label>
+                        <select id="chart-size-select" class="form-control" name="column_size">
+                            <option value="3">Quarter (25%)</option>
+                            <option value="6" selected>Half (50%)</option>
+                            <option value="9">Three Quarters (75%)</option>
+                            <option value="12">Full (100%)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="window.dashboardCustomizer.applyChartSettings()">Apply Settings</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock content %}
 {% block scripts %}
@@ -696,6 +811,9 @@
 <script src="{% static 'js/charts/pie/preference_immigration_status_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/bar/link_clicks_graph.js' %}"></script>
 <script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
+<!-- Dashboard Customization Scripts -->
+<script src="{% static 'js/dashboard/chart-renderer.js' %}"></script>
+<script src="{% static 'js/dashboard/dashboard-customize.js' %}"></script>
 <script type="text/javascript">
     var ageData = {{ preferences_by_age | safe }};
     var genderData = {{ preferences_by_gender | safe }};
@@ -708,16 +826,22 @@
     var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
     const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }};
     const monthlyActiveUserCountData = {{ monthly_active_user_count | safe }};
+    window.monthlyActiveUserCountData = monthlyActiveUserCountData; 
     const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }};
     const getUserCountsByGeolocation = {{ get_user_counts_by_geolocation | safe }};
     const countryCoords = {{ country_coords | safe }};
     var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
+    window.immigrationStatusData = immigrationStatusData; 
     const linkClicksData = {{ link_clicks_data | safe }}
     const userGeoCountryData = {{ user_counts_by_geo_country | safe }}
+    
+    // Dashboard layout data
+    const dashboardLayout = {{ dashboard_layout | safe }};
+    const availableCharts = {{ available_charts | safe }};
 
     initUsersByAgeChart(ageData);
     
-    initUsersByGenderChart(genderData);
+    initUsersByGenderChart(genderData, undefined, 'pie');
     
     initUsersByLanguageChart(languageData);
     
@@ -743,7 +867,7 @@
 
     initMonthlyActiveUsersChart(monthlyActiveUserCountData);
 
-    initUsersByImmigrationStatusChart(immigrationStatusData);
+    initUsersByImmigrationStatusChart(immigrationStatusData, undefined, 'bar');
     
 
     linkClicksGraph(linkClicksData)
