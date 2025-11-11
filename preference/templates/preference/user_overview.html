@@ -826,10 +826,12 @@
     var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
     const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }};
     const monthlyActiveUserCountData = {{ monthly_active_user_count | safe }};
+    window.monthlyActiveUserCountData = monthlyActiveUserCountData; 
     const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }};
     const getUserCountsByGeolocation = {{ get_user_counts_by_geolocation | safe }};
     const countryCoords = {{ country_coords | safe }};
     var immigrationStatusData = {{ preferences_by_immigration_status | safe }};
+    window.immigrationStatusData = immigrationStatusData; 
     const linkClicksData = {{ link_clicks_data | safe }}
     const userGeoCountryData = {{ user_counts_by_geo_country | safe }}
     
@@ -839,7 +841,7 @@
 
     initUsersByAgeChart(ageData);
     
-    initUsersByGenderChart(genderData);
+    initUsersByGenderChart(genderData, undefined, 'pie');
     
     initUsersByLanguageChart(languageData);
     

@@ -3,10 +3,6 @@ function initUsersBySectorChart(sectorData, customContainerId, chartType) {
     const chartDom = document.getElementById(containerId);
     
     if (!chartDom || !sectorData) {
-        console.error('Users by Sector Chart: Container or data not found', {
-            container: containerId,
-            data: sectorData
-        });
         return;
     }
     
@@ -46,7 +42,6 @@ function initUsersBySectorChart(sectorData, customContainerId, chartType) {
     }
     
     if (sectors.length === 0 || counts.length === 0) {
-        console.error('No valid data found for Users by Sector chart');
         return myChart;
     }
     

@@ -63,7 +63,7 @@ CHART_DEFINITIONS = {
         'name': 'Users by Country State',
         'description': 'Distribution of users by country state',
         'icon': 'fe-map-pin',
-        'supported_types': ['bar'],
+        'supported_types': ['bar', 'pie', 'doughnut'],
         'waffle_flag': 'can_view_get_users_by_country_state_chart',
         'default_size': 6,
         'default_type': 'bar',

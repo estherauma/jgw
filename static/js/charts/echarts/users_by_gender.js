@@ -3,10 +3,6 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
     const chartDom = document.getElementById(containerId);
     
     if (!chartDom || !genderData) {
-        console.error('Users by Gender Chart: Container or data not found', {
-            container: containerId,
-            data: genderData
-        });
         return;
     }
     
@@ -14,15 +10,13 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
     if (existingChart) {
         existingChart.dispose();
     }
-
+    
     const myChart = echarts.init(chartDom);
     
     const type = chartType || 'pie';
     
     let genders = [];
     let counts = [];
-    
-    console.log('Users by Gender Chart Data:', genderData);
     
     if (typeof genderData === 'object' && genderData.labels && genderData.counts) {
         genders = [...genderData.labels];
@@ -47,10 +41,7 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
         });
     }
     
-    console.log('Extracted Gender Data:', { genders, counts });
-    
     if (genders.length === 0 || counts.length === 0) {
-        console.error('No valid data found for Users by Gender chart');
         return myChart;
     }
     
@@ -65,8 +56,6 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
     
     const sortedGenders = indexed.map(item => item.gender);
     const sortedCounts = indexed.map(item => item.count);
-    
-    console.log('Processed Gender Data:', { genders: sortedGenders, counts: sortedCounts });
     
     const colorMap = {
         'Male': 'rgba(50, 50, 93, 0.95)',
@@ -121,10 +110,13 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
                         show: true,
                         formatter: '{b}: {c} ({d}%)'
                     },
+                    labelLine: {
+                        show: true
+                    },
                     color: colors
                 }
             ],
-            graphic: [
+            graphic: type === 'doughnut' ? [
                 {
                     type: 'text',
                     left: '50%',
@@ -138,7 +130,7 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
                     },
                     z: 100
                 }
-            ]
+            ] : []
         };
     } else {
         option = {
@@ -168,7 +160,7 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
                     yAxisIndex: 0,
                     filterMode: 'none',
                     start: 100,
-                    end: 50,
+                    end: 0,
                     right: 2,
                     width: 15,
                     show: showScrollbar,
@@ -246,6 +238,10 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
     }
     
     myChart.setOption(option);
+    
+    setTimeout(() => {
+        myChart.resize();
+    }, 100);
     
     window.addEventListener('resize', function() {
         myChart.resize();

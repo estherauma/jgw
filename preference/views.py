@@ -85,6 +85,7 @@ def user_overview(request):
     link_clicks_data = get_link_clicked_data(**filters, current_user=request.user)
     user_counts_by_geo_country = get_user_counts_by_geo_country(**filters, current_user=request.user)
 
+    # Get user's dashboard preferences and available charts
     user_prefs = request.user.dashboard_preferences or {}
     available_charts = get_available_charts(request.user, request)
     
@@ -392,12 +393,14 @@ def get_available_charts(user, request=None):
         flag_name = config['waffle_flag']
         is_active = False
         
+        # Check flag using request if available, otherwise check flag directly
         if request:
             try:
                 is_active = flag_is_active(flag_name, request)
                 logger.debug(f"Flag {flag_name} (chart: {chart_id}) - flag_is_active result: {is_active}")
             except Exception as e:
                 logger.warning(f"Error checking flag {flag_name} with flag_is_active: {e}")
+                # Fallback: check flag directly from database
                 try:
                     flag = Flag.objects.filter(name=flag_name).first()
                     if flag:
@@ -410,6 +413,7 @@ def get_available_charts(user, request=None):
                     logger.error(f"Error checking flag {flag_name} from database: {ex}")
                     is_active = False
         else:
+            # Check flag directly from database
             try:
                 flag = Flag.objects.filter(name=flag_name).first()
                 if flag:
@@ -443,6 +447,7 @@ def get_default_dashboard_layout(user, request=None):
     current_row = {'id': 'row-0', 'columns': []}
     
     for i, chart_id in enumerate(available_charts):
+        # Start new row every 2 charts (or if current row is full)
         if len(current_row['columns']) >= 2 and i > 0:
             default_layout['rows'].append(current_row)
             current_row = {'id': f'row-{len(default_layout["rows"])}', 'columns': []}
@@ -450,9 +455,12 @@ def get_default_dashboard_layout(user, request=None):
         chart_config = CHART_DEFINITIONS[chart_id]
         col_size = chart_config.get('default_size', 6)
         
+        # Adjust size if it's the only chart in row
         if len(current_row['columns']) == 0 and col_size < 12:
+            # Check if next chart exists
             if i + 1 < len(available_charts):
                 next_chart = CHART_DEFINITIONS[available_charts[i + 1]]
+                # If next chart is full width, make this one full too
                 if next_chart.get('default_size', 6) >= 12:
                     col_size = 12
         
@@ -464,6 +472,7 @@ def get_default_dashboard_layout(user, request=None):
             'settings': get_default_chart_settings(chart_id)
         })
     
+    # Add last row if it has columns
     if current_row['columns']:
         default_layout['rows'].append(current_row)
     
@@ -475,9 +484,11 @@ def get_default_dashboard_layout(user, request=None):
 def dashboard_customization(request):
     """Get or save user's dashboard preferences"""
     if request.method == 'GET':
+        # Return user's preferences or defaults
         preferences = request.user.dashboard_preferences or {}
         default_layout = get_default_dashboard_layout(request.user, request)
         
+        # Merge user preferences with defaults
         layout = preferences.get('layout', default_layout)
         available_charts = get_available_charts(request.user, request)
         
@@ -485,10 +496,15 @@ def dashboard_customization(request):
         logger.info(f"Dashboard customization API called. Available charts: {available_charts}")
         logger.info(f"Total CHART_DEFINITIONS in config: {len(CHART_DEFINITIONS)}")
         
+        # FALLBACK: If no charts are available via flags, return ALL chart definitions
+        # This ensures the customization UI always has chart definitions available
+        # The frontend will handle visibility based on what's actually in the DOM
         if not available_charts or len(available_charts) == 0:
             logger.warning("No charts available via flags, returning ALL chart definitions as fallback")
             available_charts = list(CHART_DEFINITIONS.keys())
         
+        # Build chart definitions for frontend
+        # IMPORTANT: Include render_function so ChartRenderer can actually render charts
         chart_defs = {}
         for chart_id in available_charts:
             if chart_id in CHART_DEFINITIONS:
@@ -499,8 +515,8 @@ def dashboard_customization(request):
                     'supported_types': CHART_DEFINITIONS[chart_id]['supported_types'],
                     'default_size': CHART_DEFINITIONS[chart_id]['default_size'],
                     'default_type': CHART_DEFINITIONS[chart_id]['default_type'],
-                    'render_function': CHART_DEFINITIONS[chart_id]['render_function'],
-                    'data_variable': CHART_DEFINITIONS[chart_id].get('data_variable', '')
+                    'render_function': CHART_DEFINITIONS[chart_id]['render_function'],  # CRITICAL: Needed for rendering
+                    'data_variable': CHART_DEFINITIONS[chart_id].get('data_variable', '')  # Helpful for debugging
                 }
             else:
                 logger.warning(f"Chart ID {chart_id} not found in CHART_DEFINITIONS")
@@ -515,11 +531,14 @@ def dashboard_customization(request):
         })
     
     elif request.method == 'POST':
+        # Save user's preferences
         try:
             data = json.loads(request.body)
             
+            # Validate that user only includes charts they have access to
             available_charts = get_available_charts(request.user, request)
             
+            # Validate layout structure
             if 'layout' in data and 'rows' in data['layout']:
                 validated_rows = []
                 for row in data['layout']['rows']:

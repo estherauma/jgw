@@ -4,9 +4,6 @@
  */
 
 const ChartRenderer = {
-    /**
-     * Render a chart based on chart ID, type, and settings
-     */
     renderChart(chartId, chartType, containerId, settings = {}) {
         const chartConfig = window.CHART_DEFINITIONS && window.CHART_DEFINITIONS[chartId];
         if (!chartConfig) {
@@ -14,14 +11,12 @@ const ChartRenderer = {
             return false;
         }
         
-        // Get chart data from global variables
         const chartData = this.getChartData(chartId);
         if (!chartData) {
             console.warn(`Chart data not available for: ${chartId}`);
             return false;
         }
         
-        // Get render function name
         const renderFunction = chartConfig.render_function;
         
         if (!window[renderFunction]) {
@@ -30,7 +25,6 @@ const ChartRenderer = {
         }
         
         try {
-            // Call the appropriate render function based on chart type
             switch(chartId) {
                 case 'monthly_active_users':
                     if (typeof initMonthlyActiveUsersChart === 'function') {
@@ -142,9 +136,6 @@ const ChartRenderer = {
         }
     },
     
-    /**
-     * Get chart data from global variables
-     */
     getChartData(chartId) {
         const dataMap = {
             'monthly_active_users': window.monthlyActiveUserCountData,
@@ -164,17 +155,29 @@ const ChartRenderer = {
             'user_geolocation_map_user_engagement': window.getUserCountsByGeolocation
         };
         
-        return dataMap[chartId];
+        let data = dataMap[chartId];
+        
+        if (!data) {
+            const chartConfig = window.CHART_DEFINITIONS && window.CHART_DEFINITIONS[chartId];
+            if (chartConfig && chartConfig.data_variable) {
+                const dataVarName = chartConfig.data_variable;
+                if (window[dataVarName]) {
+                    data = window[dataVarName];
+                } else {
+                    console.warn(`Chart data not found for ${chartId}. Tried window.${dataVarName} but it's undefined.`);
+                }
+            } else {
+                console.warn(`Chart data not found for ${chartId} and no data_variable in chart definition.`);
+            }
+        }
+        
+        return data;
     },
     
-    /**
-     * Destroy a chart instance
-     */
     destroyChart(containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
         
-        // Destroy ECharts instances
         if (typeof echarts !== 'undefined' && echarts.getInstanceByDom) {
             const echartsInstance = echarts.getInstanceByDom(container);
             if (echartsInstance) {
@@ -183,7 +186,6 @@ const ChartRenderer = {
             }
         }
         
-        // Destroy Chart.js instances
         const canvas = container.querySelector('canvas');
         if (canvas && window.Chart && window.Chart.getChart) {
             const chartInstance = window.Chart.getChart(canvas.id);
@@ -193,7 +195,6 @@ const ChartRenderer = {
             }
         }
         
-        // Also check window.chartInstances
         if (window.chartInstances && window.chartInstances[containerId]) {
             const chartInstance = window.chartInstances[containerId];
             if (chartInstance && typeof chartInstance.destroy === 'function') {
@@ -203,11 +204,9 @@ const ChartRenderer = {
             }
         }
         
-        // Clear container
         container.innerHTML = '';
     }
 };
 
-// Make available globally
 window.ChartRenderer = ChartRenderer;
 

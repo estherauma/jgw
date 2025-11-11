@@ -1,7 +1,5 @@
 /**
  * Dashboard Customizer
- * Main class for managing dashboard customization functionality
- * WPBakery Page Builder style implementation
  */
 
 class DashboardCustomizer {
@@ -14,15 +12,10 @@ class DashboardCustomizer {
         this.availableCharts = [];
     }
     
-    /**
-     * Initialize the customizer
-     */
     async init() {
         this.setupEventListeners();
-        // Only load layout if user has saved preferences, otherwise let existing charts render
-        await this.loadLayout(true); // Pass flag to indicate initial load
-        
-        // CRITICAL: Ensure chart definitions are available globally after initial load
+        await this.loadLayout(true);
+
         if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
             window.CHART_DEFINITIONS = this.chartDefinitions;
             console.log('Initialized window.CHART_DEFINITIONS on init:', Object.keys(window.CHART_DEFINITIONS));
@@ -30,23 +23,17 @@ class DashboardCustomizer {
             console.warn('Chart definitions not loaded on init');
         }
         
-        // Apply spacing to existing charts on initial load
         setTimeout(() => {
             this.applySpacingToAllCharts();
         }, 600);
     }
     
-    /**
-     * Setup event listeners for toolbar buttons
-     */
     setupEventListeners() {
-        // Customize button
         const customizeBtn = document.getElementById('customize-dashboard-btn');
         if (customizeBtn) {
             customizeBtn.addEventListener('click', () => this.enterCustomizeMode());
         }
         
-        // Toolbar buttons
         const addRowBtn = document.getElementById('add-row-btn');
         if (addRowBtn) {
             addRowBtn.addEventListener('click', () => this.addNewRow());
@@ -78,10 +65,6 @@ class DashboardCustomizer {
         }
     }
     
-    /**
-     * Load layout from API or use default
-     * @param {boolean} isInitialLoad - If true, don't render if no custom layout exists
-     */
     async loadLayout(isInitialLoad = false) {
         try {
             console.log('Loading dashboard layout from API...');
@@ -105,32 +88,25 @@ class DashboardCustomizer {
             this.chartDefinitions = data.chart_definitions || {};
             this.availableCharts = data.available_charts || [];
             
-            // Store chart definitions globally for ChartRenderer
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
                 window.CHART_DEFINITIONS = this.chartDefinitions;
                 console.log('✓ Set window.CHART_DEFINITIONS with', Object.keys(this.chartDefinitions).length, 'charts');
             } else {
                 console.warn('⚠ No chart definitions received from API!');
             }
-            
-            // Check if user has a custom layout saved
+
             const hasCustomLayout = this.layout && this.layout.rows && this.layout.rows.length > 0;
             
-            // On initial load, NEVER render - just extract structure for later use
             if (isInitialLoad) {
                 if (!hasCustomLayout) {
-                    // Extract structure from existing DOM
                     this.layout = this.extractLayoutFromDOM();
                 }
-                // Don't render on initial load - let existing charts stay
                 return;
             }
             
-            // Only render if explicitly requested (not initial load) and not in customize mode
             if (!this.isCustomizing && hasCustomLayout) {
                 this.renderLayout();
             } else if (!hasCustomLayout) {
-                // Extract structure if needed
                 this.layout = this.extractLayoutFromDOM();
             }
         } catch (error) {
@@ -141,9 +117,6 @@ class DashboardCustomizer {
         }
     }
     
-    /**
-     * Enter customization mode
-     */
     async enterCustomizeMode() {
         this.isCustomizing = true;
         document.body.classList.add('dashboard-customize-mode');
@@ -153,12 +126,10 @@ class DashboardCustomizer {
             toolbar.style.display = 'flex';
         }
         
-        // Load chart definitions if not already loaded
         if (!this.chartDefinitions || Object.keys(this.chartDefinitions).length === 0) {
             await this.loadLayout(false);
         }
         
-        // Ensure chart definitions are available globally
         if (!window.CHART_DEFINITIONS || Object.keys(window.CHART_DEFINITIONS).length === 0) {
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
                 window.CHART_DEFINITIONS = this.chartDefinitions;
@@ -166,7 +137,6 @@ class DashboardCustomizer {
             }
         }
         
-        // Ensure we have the latest layout structure
         if (!this.layout || !this.layout.rows || this.layout.rows.length === 0) {
             this.layout = this.extractLayoutFromDOM();
         }
@@ -174,18 +144,13 @@ class DashboardCustomizer {
         this.addCustomizationControls();
         this.initializeDragAndDrop();
         
-        // Apply spacing to all charts when entering customization mode
         setTimeout(() => {
             this.applySpacingToAllCharts();
         }, 100);
         
-        // Show notification
         this.showNotification('Customization mode enabled', 'info');
     }
     
-    /**
-     * Exit customization mode
-     */
     exitCustomizeMode() {
         if (!confirm('Exit customization mode? Unsaved changes will be lost.')) {
             return;
@@ -202,27 +167,19 @@ class DashboardCustomizer {
         this.removeCustomizationControls();
         this.destroyDragAndDrop();
         
-        // Reload layout but don't re-render - let existing charts stay
         this.loadLayout(false).then(() => {
-            // Only re-render if user has a custom layout saved
             const hasCustomLayout = this.layout && this.layout.rows && this.layout.rows.length > 0;
             if (hasCustomLayout) {
                 this.renderLayout();
             }
-            // Otherwise, just let the existing DOM structure remain
         });
     }
     
-    /**
-     * Add customization controls to rows and charts - WPBakery Style
-     */
     addCustomizationControls() {
-        // Add row toolbars and badges
         document.querySelectorAll('.dashboard-row').forEach((row, index) => {
             if (!row.querySelector('.row-toolbar')) {
                 row.appendChild(this.createRowToolbar(row, index));
             }
-            // Add row number badge
             if (!row.querySelector('.row-number-badge')) {
                 const badge = document.createElement('div');
                 badge.className = 'row-number-badge';
@@ -231,50 +188,36 @@ class DashboardCustomizer {
             }
         });
         
-        // Add chart toolbars - only to outermost dashboard-chart elements (not nested ones)
-        // Find all dashboard-chart elements that are direct children of dashboard-row or within a col
         document.querySelectorAll('.dashboard-row').forEach(row => {
-            // Find all dashboard-chart elements within this row
             row.querySelectorAll('.dashboard-chart').forEach(chart => {
-                // Skip if this chart is nested inside another dashboard-chart
                 const parentChart = chart.parentElement.closest('.dashboard-chart');
                 if (parentChart && parentChart !== chart) {
-                    return; // This is a nested chart, skip it
+                    return;
                 }
                 
-                // Skip if toolbar already exists
                 if (chart.querySelector('.chart-toolbar')) {
                     return;
                 }
                 
-                // Find the actual chart element with data-chart-id (may be a child of dashboard-chart)
                 const chartElementWithId = chart.querySelector('[data-chart-id]') || chart;
                 
-                // Only add toolbar to the outermost dashboard-chart element
                 chart.appendChild(this.createChartToolbar(chartElementWithId));
             });
         });
         
-        // Also wrap charts in cards that don't have dashboard-chart wrapper
-        // BUT only if the card doesn't already contain a dashboard-chart
         document.querySelectorAll('.dashboard-row .card').forEach(card => {
-            // Skip if already wrapped in dashboard-chart
             if (card.closest('.dashboard-chart')) return;
             
-            // Skip if card already contains a dashboard-chart (it's already properly wrapped)
             if (card.querySelector('.dashboard-chart')) return;
             
-            // Check if this card contains a chart (but doesn't have dashboard-chart wrapper)
             const chartId = this.detectChartId(card);
             if (chartId) {
-                // Wrap the card in dashboard-chart
                 const wrapper = document.createElement('div');
                 wrapper.className = 'dashboard-chart';
                 wrapper.dataset.chartId = chartId;
                 card.parentNode.insertBefore(wrapper, card);
                 wrapper.appendChild(card);
                 
-                // Add chart toolbar (only if not already added)
                 if (!wrapper.querySelector('.chart-toolbar')) {
                     wrapper.appendChild(this.createChartToolbar(wrapper));
                 }
@@ -282,11 +225,7 @@ class DashboardCustomizer {
         });
     }
     
-    /**
-     * Detect chart ID from card element
-     */
     detectChartId(card) {
-        // Try to find chart ID from various selectors
         const chartSelectors = [
             '#monthly-active-users-graph-id',
             '#preference-origin-graph-id',
@@ -304,12 +243,10 @@ class DashboardCustomizer {
         
         for (const selector of chartSelectors) {
             if (card.querySelector(selector)) {
-                // Extract chart ID from selector
                 return selector.replace('#', '').replace('-graph-id', '').replace('-chart-id', '');
             }
         }
         
-        // Try data attributes
         if (card.dataset.chartId) return card.dataset.chartId;
         if (card.id) {
             const idMatch = card.id.match(/(\w+)-(card|chart)/);
@@ -319,18 +256,12 @@ class DashboardCustomizer {
         return null;
     }
     
-    /**
-     * Remove customization controls
-     */
     removeCustomizationControls() {
         document.querySelectorAll('.row-toolbar, .chart-toolbar, .row-number-badge').forEach(ctrl => {
             ctrl.remove();
         });
     }
     
-    /**
-     * Create row toolbar - WPBakery Style
-     */
     createRowToolbar(rowElement, rowIndex) {
         const toolbar = document.createElement('div');
         toolbar.className = 'row-toolbar';
@@ -350,18 +281,12 @@ class DashboardCustomizer {
         return toolbar;
     }
     
-    /**
-     * Create chart toolbar - WPBakery Style
-     */
     createChartToolbar(chartElement) {
         const toolbar = document.createElement('div');
         toolbar.className = 'chart-toolbar';
         
-        // Get chart ID from multiple sources
-        // First, check if this element itself has data-chart-id
         let chartId = chartElement.dataset.chartId;
         
-        // If not, look for a child element with data-chart-id (common structure)
         if (!chartId) {
             const childWithId = chartElement.querySelector('[data-chart-id]');
             if (childWithId) {
@@ -369,7 +294,6 @@ class DashboardCustomizer {
             }
         }
         
-        // If still not found, try to find it from closest parent with data-chart-id
         if (!chartId) {
             const parentWithId = chartElement.closest('[data-chart-id]');
             if (parentWithId) {
@@ -377,38 +301,28 @@ class DashboardCustomizer {
             }
         }
         
-        // If still no chart ID, try to detect from the chart element's ID or content
         if (!chartId) {
-            // Try to extract from element ID
             if (chartElement.id && chartElement.id.startsWith('chart-')) {
                 chartId = chartElement.id.replace('chart-', '');
             } else {
-                // Try to detect from chart content
                 chartId = this.detectChartId(chartElement);
             }
         }
         
-        console.log(`Creating toolbar for chart element:`, chartElement, `detected chartId:`, chartId);
-        
-        // Get chart name from multiple sources
         let chartName = 'Chart';
         
-        // First try this.chartDefinitions (loaded from API)
         if (chartId && this.chartDefinitions && this.chartDefinitions[chartId]) {
             chartName = this.chartDefinitions[chartId].name;
         }
-        // Fallback to window.CHART_DEFINITIONS (global)
         else if (chartId && window.CHART_DEFINITIONS && window.CHART_DEFINITIONS[chartId]) {
             chartName = window.CHART_DEFINITIONS[chartId].name;
         }
-        // Try to extract from chart title in DOM
         else if (chartElement) {
             const titleElement = chartElement.querySelector('.chart-main-title, .chart-title, h4');
             if (titleElement) {
                 chartName = titleElement.textContent.trim();
             }
         }
-        // Fallback to formatted chart ID
         if (chartName === 'Chart' && chartId) {
             chartName = chartId.replace(/_/g, ' ')
                 .replace(/\b\w/g, l => l.toUpperCase())
@@ -416,7 +330,6 @@ class DashboardCustomizer {
                 .replace(/\bBy\b/g, 'by');
         }
         
-        // Ensure we have a chart ID for the buttons
         if (!chartId) {
             console.warn('Could not determine chart ID for element:', chartElement);
             chartId = 'unknown';
@@ -437,14 +350,10 @@ class DashboardCustomizer {
                 <i class="fe-x"></i>
             </button>
         `;
-        return toolbar;
+        return toolbar; 
     }
     
-    /**
-     * Initialize drag and drop using SortableJS
-     */
     initializeDragAndDrop() {
-        // Get SortableJS library
         const sortableScript = document.createElement('script');
         sortableScript.src = '/static/themes/modern/libs/sortablejs/Sortable.min.js';
         sortableScript.onload = () => {
@@ -452,7 +361,6 @@ class DashboardCustomizer {
             this.setupChartSortable();
         };
         
-        // Check if already loaded
         if (window.Sortable) {
             this.setupRowSortable();
             this.setupChartSortable();
@@ -461,14 +369,10 @@ class DashboardCustomizer {
         }
     }
     
-    /**
-     * Setup row sorting
-     */
     setupRowSortable() {
         const rowsContainer = document.getElementById('dashboard-rows-container');
         if (!rowsContainer || !window.Sortable) return;
         
-        // Destroy existing instance
         if (this.sortableInstances['rows']) {
             this.sortableInstances['rows'].destroy();
         }
@@ -485,22 +389,13 @@ class DashboardCustomizer {
         });
     }
     
-    /**
-     * Setup chart sorting
-     */
     setupChartSortable() {
         if (!window.Sortable) return;
         
         document.querySelectorAll('.dashboard-row').forEach((row, rowIndex) => {
-            // Handle both cases:
-            // 1. When .dashboard-row has a nested .row container (dynamically created)
-            // 2. When .dashboard-row IS the .row (existing HTML - same element has both classes)
             let columnsContainer = row.querySelector('.row:not(.dashboard-row)');
             
-            // If no nested .row found, check if this row itself is a .row
-            // In existing HTML: <div class="row dashboard-row">
             if (!columnsContainer && row.classList.contains('row')) {
-                // The row itself is the container, columns are direct children
                 columnsContainer = row;
             }
             
@@ -511,25 +406,23 @@ class DashboardCustomizer {
             
             const instanceKey = `chart-row-${rowIndex}`;
             
-            // Destroy existing instance
             if (this.sortableInstances[instanceKey]) {
                 this.sortableInstances[instanceKey].destroy();
             }
             
-            // When using the row itself as container, we need to filter out non-column elements
             const draggableSelector = row === columnsContainer 
                 ? '[class*="col-md-"]' 
-                : null; // Let SortableJS auto-detect children when using nested .row
+                : null;
             
             this.sortableInstances[instanceKey] = new Sortable(columnsContainer, {
                 animation: 150,
                 handle: '.chart-toolbar .drag-handle',
-                group: 'charts', // Allow dragging between rows
+                group: 'charts',
                 ghostClass: 'sortable-ghost',
                 chosenClass: 'sortable-chosen',
                 dragClass: 'sortable-drag',
-                draggable: draggableSelector, // Only drag columns when row itself is container
-                filter: '.row-toolbar, .row-number-badge', // Filter out row controls
+                draggable: draggableSelector,
+                filter: '.row-toolbar, .row-number-badge',
                 onEnd: () => {
                     this.updateColumnSizes();
                     this.saveLayout();
@@ -538,9 +431,6 @@ class DashboardCustomizer {
         });
     }
     
-    /**
-     * Destroy drag and drop instances
-     */
     destroyDragAndDrop() {
         Object.values(this.sortableInstances).forEach(instance => {
             if (instance && instance.destroy) {
@@ -550,24 +440,17 @@ class DashboardCustomizer {
         this.sortableInstances = [];
     }
     
-    /**
-     * Render layout from JSON structure
-     */
     renderLayout() {
         const container = document.getElementById('dashboard-rows-container');
         if (!container) return;
         
-        // Don't clear if charts are already rendered and we're not in customize mode
         const hasExistingCharts = container.querySelectorAll('.dashboard-chart, .card').length > 0;
         if (!this.isCustomizing && !hasExistingCharts) {
-            // Only clear if there's nothing there
             container.innerHTML = '';
         } else if (!this.isCustomizing && hasExistingCharts) {
-            // If charts exist, don't clear - just update structure
             console.log('Charts already rendered, skipping layout render');
             return;
         } else if (this.isCustomizing) {
-            // In customize mode, we can clear and re-render
             container.innerHTML = '';
         }
         
@@ -580,24 +463,17 @@ class DashboardCustomizer {
             container.appendChild(rowEl);
         });
         
-        // Apply spacing to all charts after layout is rendered
         setTimeout(() => {
             this.applySpacingToAllCharts();
         }, 50);
         
-        // Render all charts
         setTimeout(() => {
             this.renderAllCharts();
         }, 100);
     }
     
-    /**
-     * Apply spacing to all charts in the dashboard
-     * This method recalculates spacing for all charts based on their row's total column size
-     */
     applySpacingToAllCharts() {
         document.querySelectorAll('.dashboard-row').forEach(row => {
-            // First, calculate total size for this row
             const columns = row.querySelectorAll('[class*="col-md-"]');
             let totalSize = 0;
             columns.forEach(col => {
@@ -605,7 +481,6 @@ class DashboardCustomizer {
                 totalSize += colSize;
             });
             
-            // Then apply spacing to each column based on row total
             columns.forEach(col => {
                 const size = parseInt(col.className.match(/col-md-(\d+)/)?.[1] || '6');
                 this.updateChartSpacing(col, size);
@@ -613,15 +488,11 @@ class DashboardCustomizer {
         });
     }
     
-    /**
-     * Create row element
-     */
     createRowElement(rowData, rowIndex) {
         const row = document.createElement('div');
         row.className = 'dashboard-row';
         row.dataset.rowId = rowData.id || `row-${rowIndex}`;
         
-        // Add row toolbar and badge (always created, shown only in customize mode via CSS)
         row.appendChild(this.createRowToolbar(row, rowIndex));
         const badge = document.createElement('div');
         badge.className = 'row-number-badge';
@@ -642,19 +513,14 @@ class DashboardCustomizer {
         return row;
     }
     
-    /**
-     * Create column element
-     */
     createColumnElement(colData, colIndex) {
         const col = document.createElement('div');
         const colSize = colData.size || 6;
         col.className = `col-md-${colSize}`;
         col.dataset.columnId = colData.id || `col-${colIndex}`;
         
-        // Apply spacing for full-width charts
         this.updateChartSpacing(col, colSize);
         
-        // Create card structure similar to existing charts
         const card = document.createElement('div');
         card.className = 'card h-100';
         
@@ -663,19 +529,15 @@ class DashboardCustomizer {
         
         const chartContainer = document.createElement('div');
         chartContainer.className = 'dashboard-chart';
-        // Don't set ID on chartContainer - the wrapper will have it
         chartContainer.dataset.chartId = colData.chart_id;
         
-        // Create inner chart wrapper (matches existing structure)
         const chartWrapper = document.createElement('div');
         chartWrapper.dataset.chartId = colData.chart_id;
         chartWrapper.id = `chart-${colData.chart_id}`;
         
-        // Get chart definition for name
         const chartDef = this.chartDefinitions[colData.chart_id] || window.CHART_DEFINITIONS?.[colData.chart_id];
         const chartName = chartDef ? chartDef.name : colData.chart_id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         
-        // Create chart header
         const chartHeader = document.createElement('div');
         chartHeader.className = 'chart-header';
         chartHeader.innerHTML = `
@@ -685,7 +547,6 @@ class DashboardCustomizer {
         `;
         chartWrapper.appendChild(chartHeader);
         
-        // Create graph container placeholder (will be used by ChartRenderer)
         const graphContainerId = this.getGraphContainerId(colData.chart_id);
         if (graphContainerId) {
             const graphContainer = document.createElement('div');
@@ -695,7 +556,6 @@ class DashboardCustomizer {
             chartWrapper.appendChild(graphContainer);
         }
         
-        // Add chart toolbar (always created, shown only in customize mode)
         chartWrapper.appendChild(this.createChartToolbar(chartWrapper));
         
         chartContainer.appendChild(chartWrapper);
@@ -706,9 +566,6 @@ class DashboardCustomizer {
         return col;
     }
     
-    /**
-     * Render all charts
-     */
     renderAllCharts() {
         if (!this.layout || !this.layout.rows) return;
         
@@ -719,19 +576,16 @@ class DashboardCustomizer {
                         const settings = col.settings || {};
                         const containerId = `chart-${col.chart_id}`;
                         
-                        // Check if chart container exists
                         const container = document.getElementById(containerId);
                         if (!container) {
                             console.warn(`Chart container not found: ${containerId}`);
                             return;
                         }
                         
-                        // Destroy existing chart if any
                         if (window.ChartRenderer) {
                             window.ChartRenderer.destroyChart(containerId);
                         }
                         
-                        // Render new chart
                         setTimeout(() => {
                             if (window.ChartRenderer) {
                                 const success = window.ChartRenderer.renderChart(
@@ -751,19 +605,14 @@ class DashboardCustomizer {
         });
     }
     
-    /**
-     * Extract current layout from DOM
-     */
     extractLayoutFromDOM() {
         const rows = [];
         const rowsContainer = document.getElementById('dashboard-rows-container');
         
         if (!rowsContainer) {
-            // Fallback: extract from existing structure
             document.querySelectorAll('.dashboard-row').forEach((rowEl, rowIndex) => {
                 const row = { id: rowEl.dataset.rowId || `row-${rowIndex}`, columns: [] };
                 
-                // Find all column elements (col-md-X) that contain charts
                 rowEl.querySelectorAll('[class*="col-md-"]').forEach((colEl) => {
                     const chartEl = colEl.querySelector('.dashboard-chart');
                     if (chartEl) {
@@ -790,7 +639,6 @@ class DashboardCustomizer {
             rowsContainer.querySelectorAll('.dashboard-row').forEach((rowEl, rowIndex) => {
                 const row = { id: rowEl.dataset.rowId || `row-${rowIndex}`, columns: [] };
                 
-                // Find all column elements (col-md-X) that contain charts
                 rowEl.querySelectorAll('[class*="col-md-"]').forEach((colEl) => {
                     const chartEl = colEl.querySelector('.dashboard-chart');
                     if (chartEl) {
@@ -818,11 +666,7 @@ class DashboardCustomizer {
         return { rows };
     }
     
-    /**
-     * Detect chart ID from element
-     */
-    detectChartId(element) {
-        // Try to detect from container IDs or classes
+        detectChartId(element) {
         const id = element.id || '';
         const classList = element.className || '';
         
@@ -852,9 +696,6 @@ class DashboardCustomizer {
         return null;
     }
     
-    /**
-     * Save current layout
-     */
     async saveLayout() {
         const layout = this.extractLayoutFromDOM();
         
@@ -882,9 +723,6 @@ class DashboardCustomizer {
         }
     }
     
-    /**
-     * Reset dashboard to default
-     */
     async resetDashboard() {
         if (!confirm('Reset dashboard to default layout? This cannot be undone.')) {
             return;
@@ -938,21 +776,14 @@ class DashboardCustomizer {
         const rowEl = this.createRowElement(newRow, this.layout.rows.length - 1);
         container.appendChild(rowEl);
         
-        // Reinitialize sortable
         this.setupRowSortable();
         this.setupChartSortable();
     }
     
-    /**
-     * Add column to row
-     */
     addColumnToRow(button) {
         this.showChartLibrary(button);
     }
     
-    /**
-     * Show chart library modal
-     */
     async showChartLibrary(button = null) {
         const modal = document.getElementById('chart-library-modal');
         if (!modal) {
@@ -960,18 +791,15 @@ class DashboardCustomizer {
             return;
         }
         
-        // Ensure chart definitions are loaded
         if (!this.chartDefinitions || Object.keys(this.chartDefinitions).length === 0) {
             console.log('Loading chart definitions for chart library...');
             await this.loadLayout(false);
         }
         
-        // Use all available charts or fallback to all chart definitions
         const chartsToShow = this.availableCharts.length > 0 
             ? this.availableCharts 
             : Object.keys(this.chartDefinitions || window.CHART_DEFINITIONS || {});
         
-        // Populate available charts
         const chartsList = modal.querySelector('.charts-list');
         if (chartsList) {
             chartsList.innerHTML = '';
@@ -1011,7 +839,6 @@ class DashboardCustomizer {
             });
         }
         
-        // Store target button for adding chart
         if (button) {
             modal.dataset.targetButton = 'true';
         }
@@ -1020,9 +847,6 @@ class DashboardCustomizer {
         bsModal.show();
     }
     
-    /**
-     * Add chart to dashboard
-     */
     addChartToDashboard(chartId, targetButton = null) {
         console.log(`Adding chart to dashboard: ${chartId}`);
         
@@ -1031,7 +855,6 @@ class DashboardCustomizer {
         if (targetButton) {
             targetRow = targetButton.closest('.dashboard-row');
         } else {
-            // Add to last row or create new row
             const rows = document.querySelectorAll('.dashboard-row');
             targetRow = rows[rows.length - 1] || null;
         }
@@ -1048,10 +871,8 @@ class DashboardCustomizer {
             return;
         }
         
-        // Find the columns container - it might be a nested .row or the dashboard-row itself
         let columnsContainer = targetRow.querySelector('.row:not(.dashboard-row)');
         if (!columnsContainer && targetRow.classList.contains('row')) {
-            // The dashboard-row itself is the container
             columnsContainer = targetRow;
         }
         
@@ -1060,11 +881,10 @@ class DashboardCustomizer {
             return;
         }
         
-        // Create new column with 50% width (col-md-6) as requested
         const colData = {
             id: `col-${chartId}-${Date.now()}`,
             chart_id: chartId,
-            size: 6, // 50% width (col-md-6)
+            size: 6,
             enabled: true,
             settings: {
                 chart_type: chartDef.default_type || 'bar'
@@ -1074,21 +894,17 @@ class DashboardCustomizer {
         const colEl = this.createColumnElement(colData, columnsContainer.children.length);
         columnsContainer.appendChild(colEl);
         
-        // Get the chart wrapper element (the one with data-chart-id)
         const chartWrapper = colEl.querySelector(`[data-chart-id="${chartId}"]`);
         if (!chartWrapper) {
             console.error('Chart wrapper not found in column element');
             return;
         }
         
-        // Apply spacing to the new column
         this.updateChartSpacing(colEl, 6);
         
-        // Update layout data
         if (!this.layout) this.layout = { rows: [] };
         if (!this.layout.rows) this.layout.rows = [];
         
-        // Find or create row in layout
         const rowId = targetRow.dataset.rowId || `row-${Date.now()}`;
         let rowData = this.layout.rows.find(r => r.id === rowId);
         if (!rowData) {
@@ -1098,32 +914,25 @@ class DashboardCustomizer {
         if (!rowData.columns) rowData.columns = [];
         rowData.columns.push(colData);
         
-        // Get graph container ID
         const graphContainerId = this.getGraphContainerId(chartId);
         console.log(`Rendering chart ${chartId} in container: ${graphContainerId}`);
         
-        // Render chart - use the actual graph container ID
         setTimeout(() => {
             if (window.ChartRenderer && graphContainerId) {
-                // Ensure the graph container exists
                 let graphContainer = chartWrapper.querySelector(`#${graphContainerId}`);
                 if (!graphContainer && graphContainerId) {
-                    // Create the graph container element if it wasn't created in createColumnElement
                     graphContainer = document.createElement('div');
                     graphContainer.id = graphContainerId;
                     graphContainer.style.height = '500px';
                     graphContainer.style.width = '100%';
-                    // Insert before the toolbar
                     const toolbar = chartWrapper.querySelector('.chart-toolbar');
                     if (toolbar) {
                         chartWrapper.insertBefore(graphContainer, toolbar);
                     } else {
                         chartWrapper.appendChild(graphContainer);
-                    }
-                    console.log(`Created graph container: ${graphContainerId}`);
+                    };
                 }
                 
-                // Render the chart
                 const success = window.ChartRenderer.renderChart(
                     chartId,
                     chartDef.default_type || 'bar',
@@ -1141,29 +950,21 @@ class DashboardCustomizer {
             }
         }, 200);
         
-        // Reinitialize sortable
         this.setupChartSortable();
         
-        // Update spacing for all charts in the row
         setTimeout(() => {
             this.applySpacingToAllCharts();
         }, 100);
         
-        // Save layout
         this.saveLayout();
         
-        // Show notification
         this.showNotification(`Chart "${chartDef.name}" added successfully`, 'success');
     }
     
-    /**
-     * Edit chart settings
-     */
     editChart(chartId) {
         console.log(`Editing chart: ${chartId}`);
         this.selectedChart = chartId;
         
-        // Ensure chart definitions are loaded
         if (!this.chartDefinitions || Object.keys(this.chartDefinitions).length === 0) {
             console.warn('Chart definitions not loaded, attempting to load...');
             this.loadLayout(false).then(() => {
@@ -1175,9 +976,6 @@ class DashboardCustomizer {
         this.showChartSettingsModal(chartId);
     }
     
-    /**
-     * Show chart settings modal
-     */
     showChartSettingsModal(chartId) {
         console.log(`showChartSettingsModal called for: ${chartId}`);
         const modal = document.getElementById('chart-settings-modal');
@@ -1186,7 +984,6 @@ class DashboardCustomizer {
             return;
         }
         
-        // Try multiple sources for chart definition
         let chartDef = this.chartDefinitions?.[chartId];
         if (!chartDef) {
             chartDef = window.CHART_DEFINITIONS?.[chartId];
@@ -1197,13 +994,12 @@ class DashboardCustomizer {
             console.error('Available in this.chartDefinitions:', Object.keys(this.chartDefinitions || {}));
             console.error('Available in window.CHART_DEFINITIONS:', Object.keys(window.CHART_DEFINITIONS || {}));
             
-            // Try to load definitions and retry
             if (!this.chartDefinitions || Object.keys(this.chartDefinitions).length === 0) {
                 console.warn('Loading chart definitions and retrying...');
                 this.loadLayout(false).then(() => {
                     if (this.chartDefinitions && this.chartDefinitions[chartId]) {
                         window.CHART_DEFINITIONS = this.chartDefinitions;
-                        this.showChartSettingsModal(chartId); // Retry
+                        this.showChartSettingsModal(chartId);
                     } else {
                         alert(`Chart settings not available for this chart. Please try again.`);
                     }
@@ -1217,7 +1013,6 @@ class DashboardCustomizer {
         console.log('Chart definition found:', chartDef);
         const chartElement = document.querySelector(`[data-chart-id="${chartId}"]`);
         
-        // Populate modal with current settings
         const typeSelect = modal.querySelector('#chart-type-select');
         if (typeSelect && chartDef) {
             typeSelect.innerHTML = '';
@@ -1229,7 +1024,6 @@ class DashboardCustomizer {
                     typeSelect.appendChild(option);
                 });
                 
-                // Set current selected type
                 const currentType = this.getCurrentChartType(chartId) || chartDef.default_type;
                 typeSelect.value = currentType;
             } else {
@@ -1237,7 +1031,6 @@ class DashboardCustomizer {
             }
         }
         
-        // Set current size in size select
         const sizeSelect = modal.querySelector('#chart-size-select');
         if (sizeSelect && chartElement) {
             const colElement = chartElement.closest('[class*="col-md-"]');
@@ -1252,9 +1045,6 @@ class DashboardCustomizer {
         bsModal.show();
     }
     
-    /**
-     * Apply chart settings
-     */
     applyChartSettings() {
         if (!this.selectedChart) {
             console.error('No chart selected');
@@ -1269,7 +1059,6 @@ class DashboardCustomizer {
         
         console.log(`Settings - Type: ${type}, Size: ${size}`);
         
-        // Find the chart element using the selected chart ID
         const chartElement = document.querySelector(`[data-chart-id="${this.selectedChart}"]`);
         if (!chartElement) {
             console.error(`Chart element not found for chartId: ${this.selectedChart}`);
@@ -1283,21 +1072,18 @@ class DashboardCustomizer {
         const newSize = size ? parseInt(size) : null;
         const sizeChanged = oldSize !== null && newSize !== null && oldSize !== newSize;
         
-        // Get current chart type from layout or default
         const chartDef = this.chartDefinitions[this.selectedChart] || window.CHART_DEFINITIONS?.[this.selectedChart];
-        const currentType = this.getCurrentChartType(this.selectedChart) || chartDef?.default_type || 'bar';
-        const typeChanged = type && type !== currentType;
+        const currentType = (this.getCurrentChartType(this.selectedChart) || chartDef?.default_type || 'bar').toLowerCase();
+        const normalizedNewType = type ? type.toLowerCase() : null;
+        const typeChanged = normalizedNewType && normalizedNewType !== currentType;
         
         console.log(`Size change - Old: ${oldSize}, New: ${newSize}, Changed: ${sizeChanged}`);
-        console.log(`Type change - Current: ${currentType}, New: ${type}, Changed: ${typeChanged}`);
+        console.log(`Type change - Current: ${currentType}, New: ${normalizedNewType}, Changed: ${typeChanged}`);
         
-        // Update column size
         if (colElement && newSize) {
             colElement.className = colElement.className.replace(/col-md-\d+/, `col-md-${newSize}`);
             console.log(`Updated column size to: col-md-${newSize}`);
             
-            // After updating this column, recalculate spacing for ALL columns in the row
-            // This ensures spacing is correct if total exceeds 12 or wrapping occurs
             const rowElement = colElement.closest('.dashboard-row');
             if (rowElement) {
                 const columns = rowElement.querySelectorAll('[class*="col-md-"]');
@@ -1306,14 +1092,12 @@ class DashboardCustomizer {
                     this.updateChartSpacing(col, colSize);
                 });
             } else {
-                // Fallback: just update this column if row not found
                 this.updateChartSpacing(colElement, newSize);
             }
         }
         
         const containerId = chartElement.id || `chart-${this.selectedChart}`;
         
-        // Map chart IDs to their actual graph container IDs
         const chartContainerMap = {
             'monthly_active_users': 'monthly-active-users-graph-id',
             'users_by_origin_country': 'preference-origin-graph-id',
@@ -1335,16 +1119,15 @@ class DashboardCustomizer {
         const graphContainerId = chartContainerMap[this.selectedChart];
         console.log(`Graph container ID: ${graphContainerId}`);
         
-        // Update layout data
         if (this.layout && this.layout.rows) {
             this.layout.rows.forEach(row => {
                 if (row.columns) {
                     row.columns.forEach(col => {
                         if (col.chart_id === this.selectedChart) {
                             if (newSize) col.size = newSize;
-                            if (type) {
+                            if (normalizedNewType) {
                                 if (!col.settings) col.settings = {};
-                                col.settings.chart_type = type;
+                                col.settings.chart_type = normalizedNewType;
                             }
                         }
                     });
@@ -1352,54 +1135,44 @@ class DashboardCustomizer {
             });
         }
         
-        // Ensure chart definitions are available globally BEFORE rendering
-        // CRITICAL: Set window.CHART_DEFINITIONS with full definitions from dashboard_config.py
         if (!window.CHART_DEFINITIONS || Object.keys(window.CHART_DEFINITIONS).length === 0) {
-            // Try to get from this.chartDefinitions first
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
                 window.CHART_DEFINITIONS = this.chartDefinitions;
                 console.log('Set window.CHART_DEFINITIONS from this.chartDefinitions');
             } 
-            // Fallback: Try to load from API
             else {
                 console.warn('Chart definitions not loaded, attempting to load...');
                 this.loadLayout(false).then(() => {
                     if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
                         window.CHART_DEFINITIONS = this.chartDefinitions;
                         console.log('Loaded and set window.CHART_DEFINITIONS from API');
-                        // Retry applying settings after definitions are loaded
                         setTimeout(() => this.applyChartSettings(), 100);
                     }
                 });
-                return; // Exit early, will retry after loading
+                return;
             }
         }
         
-        // Double-check the specific chart definition exists
         if (!window.CHART_DEFINITIONS[this.selectedChart]) {
             console.error(`Chart definition not found for ${this.selectedChart}. Available charts:`, Object.keys(window.CHART_DEFINITIONS || {}));
             console.error('Current window.CHART_DEFINITIONS:', window.CHART_DEFINITIONS);
             return;
         }
         
-        // Re-render chart with new type ONLY if type actually changed
-        if (typeChanged && window.ChartRenderer && graphContainerId) {
-            console.log(`Chart type changed from ${currentType} to ${type}, re-rendering chart: ${this.selectedChart}`);
+        if (typeChanged && normalizedNewType && window.ChartRenderer && graphContainerId) {
+            console.log(`Chart type changed from ${currentType} to ${normalizedNewType}, re-rendering chart: ${this.selectedChart}`);
             
-            // Destroy existing chart instance
             window.ChartRenderer.destroyChart(graphContainerId);
             
-            // Wait for destruction to complete, then re-render
             setTimeout(() => {
-                const success = window.ChartRenderer.renderChart(this.selectedChart, type, graphContainerId, {});
+                const success = window.ChartRenderer.renderChart(this.selectedChart, normalizedNewType, graphContainerId, {});
                 if (!success) {
-                    console.error(`Failed to render chart: ${this.selectedChart} with type: ${type}`);
+                    console.error(`Failed to render chart: ${this.selectedChart} with type: ${normalizedNewType}`);
                 } else {
-                    console.log(`Successfully re-rendered chart: ${this.selectedChart} with type: ${type}`);
+                    console.log(`Successfully re-rendered chart: ${this.selectedChart} with type: ${normalizedNewType}`);
                 }
             }, 100);
-        } else if (sizeChanged && !typeChanged) {
-            // If only size changed, resize existing charts without re-rendering
+        } else if (sizeChanged && !typeChanged) {   
             console.log(`Only size changed (${oldSize} -> ${newSize}), resizing chart: ${this.selectedChart} (NO re-render)`);
             setTimeout(() => {
                 this.resizeChart(containerId);
@@ -1408,10 +1181,6 @@ class DashboardCustomizer {
             console.log(`No changes detected, skipping resize/render`);
         }
         
-        // IMPORTANT: Only close modal if settings were successfully applied
-        // Don't close if there were errors
-        
-        // Close modal
         const bsModal = bootstrap.Modal.getInstance(modal);
         if (bsModal) {
             bsModal.hide();
@@ -1420,9 +1189,6 @@ class DashboardCustomizer {
         this.saveLayout();
     }
     
-    /**
-     * Get current chart type from layout
-     */
     getCurrentChartType(chartId) {
         if (!this.layout || !this.layout.rows) return null;
         
@@ -1430,7 +1196,7 @@ class DashboardCustomizer {
             if (row.columns) {
                 for (const col of row.columns) {
                     if (col.chart_id === chartId && col.settings && col.settings.chart_type) {
-                        return col.settings.chart_type;
+                        return col.settings.chart_type.toLowerCase();
                     }
                 }
             }
@@ -1439,20 +1205,15 @@ class DashboardCustomizer {
         return null;
     }
     
-    /**
-     * Resize chart after container size change
-     */
     resizeChart(containerId) {
         console.log(`Resizing chart with containerId: ${containerId}`);
         
-        // Find the actual chart container element (the wrapper with data-chart-id)
         const chartElement = document.getElementById(containerId);
         if (!chartElement) {
             console.warn(`Chart container not found: ${containerId}`);
             return;
         }
         
-        // Get the chart ID from the element - this is the KEY to identify the correct chart
         const chartId = chartElement.dataset.chartId || containerId.replace('chart-', '');
         console.log(`Detected chartId: ${chartId}`);
         
@@ -1461,7 +1222,6 @@ class DashboardCustomizer {
             return;
         }
         
-        // Map chart IDs to their actual graph container IDs
         const chartContainerMap = {
             'monthly_active_users': 'monthly-active-users-graph-id',
             'users_by_origin_country': 'preference-origin-graph-id',
@@ -1480,20 +1240,15 @@ class DashboardCustomizer {
             'user_geolocation_map_user_engagement': 'user_geolocation_map_user_engagement'
         };
         
-        // Find the specific graph container ID for this chart
         const graphContainerId = chartContainerMap[chartId];
         if (!graphContainerId) {
             console.warn(`No graph container ID mapped for chartId: ${chartId}`);
             return;
         }
         
-        console.log(`Looking for graph container: ${graphContainerId}`);
-        
-        // Find the specific graph container WITHIN this chart element (scoped search)
         const graphContainer = chartElement.querySelector(`[id="${graphContainerId}"]`);
         if (!graphContainer) {
             console.warn(`Graph container not found: ${graphContainerId} within chart element`);
-            // Try to find it by ID anywhere (fallback)
             const fallbackContainer = document.getElementById(graphContainerId);
             if (fallbackContainer) {
                 console.log(`Found graph container outside chart element, using fallback`);
@@ -1505,30 +1260,23 @@ class DashboardCustomizer {
         
         console.log(`Found graph container: ${graphContainer.id}`);
         
-        // Resize this specific container
         this.resizeSingleContainer(graphContainer, chartId);
         
-        // Also try to find canvas elements within this specific container
         const canvasElements = graphContainer.querySelectorAll('canvas');
         canvasElements.forEach(canvas => {
             this.resizeSingleContainer(canvas, chartId);
         });
         
-        // Trigger window resize event to help charts that listen to it
         setTimeout(() => {
             window.dispatchEvent(new Event('resize'));
         }, 150);
     }
     
-    /**
-     * Resize a single chart container element
-     */
     resizeSingleContainer(element, chartId) {
         if (!element || !element.id) return;
         
         let resizeAttempted = false;
         
-        // Try Chart.js resize from window.chartInstances
         if (window.chartInstances && window.chartInstances[element.id]) {
             const chartInstance = window.chartInstances[element.id];
             if (chartInstance && typeof chartInstance.resize === 'function') {
@@ -1538,7 +1286,6 @@ class DashboardCustomizer {
             }
         }
         
-        // Try Chart.js global registry (using canvas element)
         if (window.Chart && typeof window.Chart.getChart === 'function') {
             const canvas = element.tagName === 'CANVAS' ? element : element.querySelector('canvas');
             if (canvas) {
@@ -1551,7 +1298,6 @@ class DashboardCustomizer {
             }
         }
         
-        // Try ECharts resize
         if (typeof echarts !== 'undefined' && echarts.getInstanceByDom) {
             const echartsInstance = echarts.getInstanceByDom(element);
             if (echartsInstance && typeof echartsInstance.resize === 'function') {
@@ -1561,7 +1307,6 @@ class DashboardCustomizer {
             }
         }
         
-        // If no resize was attempted, try to re-render the chart
         if (!resizeAttempted) {
             console.log(`No resize method found for ${element.id}, attempting to re-render chart: ${chartId}`);
             const chartDef = this.chartDefinitions[chartId] || window.CHART_DEFINITIONS?.[chartId];
@@ -1576,22 +1321,172 @@ class DashboardCustomizer {
         }
     }
     
-    /**
-     * Duplicate chart
-     */
     duplicateChart(chartId) {
+        
         const chartElement = document.querySelector(`[data-chart-id="${chartId}"]`);
-        if (!chartElement) return;
+        if (!chartElement) {
+            console.error(`Chart element not found for: ${chartId}`);
+            return;
+        }
         
         const row = chartElement.closest('.dashboard-row');
-        if (!row) return;
+        if (!row) {
+            console.error('Row not found for chart element');
+            return;
+        }
         
-        this.addChartToDashboard(chartId);
+        const colElement = chartElement.closest('[class*="col-md-"]');
+        if (!colElement) {
+            console.error('Column element not found for chart');
+            return;
+        }
+        
+        let originalColData = null;
+        if (this.layout && this.layout.rows) {
+            for (const rowData of this.layout.rows) {
+                if (rowData.columns) {
+                    for (const col of rowData.columns) {
+                        if (col.chart_id === chartId) {
+                            originalColData = col;
+                            break;
+                        }
+                    }
+                }
+                if (originalColData) break;
+            }
+        }
+        
+        if (!originalColData) {
+            const currentSize = parseInt(colElement.className.match(/col-md-(\d+)/)?.[1] || '6');
+            const chartDef = this.chartDefinitions[chartId] || window.CHART_DEFINITIONS?.[chartId];
+            const currentType = this.getCurrentChartType(chartId) || chartDef?.default_type || 'bar';
+            
+            originalColData = {
+                chart_id: chartId,
+                size: currentSize,
+                enabled: true,
+                settings: {
+                    chart_type: currentType
+                }
+            };
+        }
+        
+        const timestamp = Date.now();
+        const duplicateId = `duplicate_${timestamp}`;
+        
+        const newColData = {
+            id: `col-${chartId}-${duplicateId}`,
+            chart_id: chartId,
+            size: originalColData.size || 6,
+            enabled: originalColData.enabled !== false,
+            settings: {
+                ...originalColData.settings,
+                chart_type: originalColData.settings?.chart_type || this.chartDefinitions[chartId]?.default_type || 'bar',
+                is_duplicate: true,
+                duplicate_id: duplicateId
+            }
+        };
+        
+        let columnsContainer = row.querySelector('.row:not(.dashboard-row)');
+        if (!columnsContainer && row.classList.contains('row')) {
+            columnsContainer = row;
+        }
+        
+        if (!columnsContainer) {
+            console.error('Columns container not found in row');
+            return;
+        }
+        
+        const baseGraphContainerId = this.getGraphContainerId(chartId);
+        const graphContainerId = `${baseGraphContainerId}-${duplicateId}`;
+        
+        const colEl = this.createColumnElement(newColData, columnsContainer.children.length);
+        
+        const chartWrapper = colEl.querySelector(`[data-chart-id="${chartId}"]`);
+        if (!chartWrapper) {
+            console.error('Chart wrapper not found in duplicated column');
+            return;
+        }
+        
+        chartWrapper.id = `chart-${chartId}-${duplicateId}`;
+        
+        const existingGraphContainer = chartWrapper.querySelector(`#${baseGraphContainerId}`);
+        if (existingGraphContainer) {
+            existingGraphContainer.id = graphContainerId;
+            console.log(`Updated graph container ID from ${baseGraphContainerId} to ${graphContainerId}`);
+        } else {
+            const graphContainer = document.createElement('div');
+            graphContainer.id = graphContainerId;
+            graphContainer.style.height = '500px';
+            graphContainer.style.width = '100%';
+
+            const chartHeader = chartWrapper.querySelector('.chart-header');
+            if (chartHeader) {
+                chartHeader.insertAdjacentElement('afterend', graphContainer);
+            } else {
+                chartWrapper.appendChild(graphContainer);
+            }
+            console.log(`Created unique graph container: ${graphContainerId}`);
+        }
+        
+        columnsContainer.appendChild(colEl);
+        
+        if (!this.layout) this.layout = { rows: [] };
+        if (!this.layout.rows) this.layout.rows = [];
+        
+        const rowId = row.dataset.rowId || `row-${timestamp}`;
+        let rowData = this.layout.rows.find(r => r.id === rowId);
+        if (!rowData) {
+            rowData = { id: rowId, columns: [] };
+            this.layout.rows.push(rowData);
+        }
+        if (!rowData.columns) rowData.columns = [];
+        rowData.columns.push(newColData);
+
+        this.updateChartSpacing(colEl, newColData.size);
+        
+        setTimeout(() => {
+            if (window.ChartRenderer && graphContainerId) {
+                const graphContainer = document.getElementById(graphContainerId);
+                if (!graphContainer) {
+                    console.error(`Graph container not found: ${graphContainerId}`);
+                    return;
+                }
+                
+                const chartType = newColData.settings?.chart_type || this.chartDefinitions[chartId]?.default_type || 'bar';
+                
+                console.log(`Rendering duplicate chart: ${chartId}, type: ${chartType}, container: ${graphContainerId}`);
+                
+                const success = window.ChartRenderer.renderChart(
+                    chartId,
+                    chartType,
+                    graphContainerId,
+                    newColData.settings || {}
+                );
+                
+                if (!success) {
+                    console.error(`Failed to render duplicated chart: ${chartId}`);
+                } else {
+                    console.log(`Successfully rendered duplicated chart: ${chartId} with type: ${chartType} in container: ${graphContainerId}`);
+                }
+            } else {
+                console.error(`ChartRenderer not available or graph container ID not found: ${graphContainerId}`);
+            }
+        }, 200);
+        
+        this.setupChartSortable();
+        
+        setTimeout(() => {
+            this.applySpacingToAllCharts();
+        }, 100);
+        
+        this.saveLayout();
+        
+        const chartDef = this.chartDefinitions[chartId] || window.CHART_DEFINITIONS?.[chartId];
+        const chartName = chartDef ? chartDef.name : chartId;
+        this.showNotification(`Chart "${chartName}" duplicated successfully`, 'success');
     }
     
-    /**
-     * Remove chart
-     */
     removeChart(chartId) {
         if (!confirm('Remove this chart from dashboard?')) {
             return;
@@ -1608,9 +1503,6 @@ class DashboardCustomizer {
         this.saveLayout();
     }
     
-    /**
-     * Delete row
-     */
     deleteRow(button) {
         const row = button.closest('.dashboard-row');
         if (!row) return;
@@ -1623,9 +1515,6 @@ class DashboardCustomizer {
         this.saveLayout();
     }
     
-    /**
-     * Update column sizes after drag
-     */
     updateColumnSizes() {
         document.querySelectorAll('.dashboard-row').forEach(row => {
             const columns = row.querySelectorAll('[class*="col-md-"]');
@@ -1634,7 +1523,6 @@ class DashboardCustomizer {
                 return sum + size;
             }, 0);
             
-            // If total size is not 12, adjust
             if (totalSize !== 12 && columns.length > 0) {
                 const sizePerCol = Math.floor(12 / columns.length);
                 columns.forEach(col => {
@@ -1643,8 +1531,6 @@ class DashboardCustomizer {
                 });
             }
             
-            // Always update spacing for all columns after size changes
-            // This ensures spacing is correct even if total exceeds 12
             columns.forEach(col => {
                 const size = parseInt(col.className.match(/col-md-(\d+)/)?.[1] || '6');
                 this.updateChartSpacing(col, size);
@@ -1652,9 +1538,6 @@ class DashboardCustomizer {
         });
     }
     
-    /**
-     * Get graph container ID for a chart
-     */
     getGraphContainerId(chartId) {
         const chartContainerMap = {
             'monthly_active_users': 'monthly-active-users-graph-id',
@@ -1676,19 +1559,11 @@ class DashboardCustomizer {
         return chartContainerMap[chartId] || null;
     }
     
-    /**
-     * Update chart spacing based on column size
-     * Adds margin-bottom for charts that:
-     * - Are full width (size 12), OR
-     * - Are in a row where total column size exceeds 12 (wrapping occurs)
-     */
     updateChartSpacing(colElement, size) {
         if (!colElement) return;
         
-        // Find the parent row
         const rowElement = colElement.closest('.dashboard-row');
         if (!rowElement) {
-            // If no row found, just apply basic logic
             if (size === 12) {
                 colElement.style.marginBottom = '25px';
             } else {
@@ -1697,7 +1572,6 @@ class DashboardCustomizer {
             return;
         }
         
-        // Calculate total column size in the row
         const columns = rowElement.querySelectorAll('[class*="col-md-"]');
         let totalSize = 0;
         columns.forEach(col => {
@@ -1705,27 +1579,19 @@ class DashboardCustomizer {
             totalSize += colSize;
         });
         
-        // If total size exceeds 12 OR chart is full width (size 12), add margin-bottom
         if (totalSize > 12 || size === 12) {
             colElement.style.marginBottom = '25px';
         } else {
-            // Remove margin-bottom for charts that don't need spacing
             colElement.style.marginBottom = '';
         }
     }
     
-    /**
-     * Toggle preview mode
-     */
     togglePreview() {
         document.body.classList.toggle('dashboard-preview-mode');
         const isPreview = document.body.classList.contains('dashboard-preview-mode');
         this.showNotification(isPreview ? 'Preview mode enabled' : 'Preview mode disabled', 'info');
     }
     
-    /**
-     * Get CSRF token
-     */
     getCsrfToken() {
         const cookieValue = document.cookie
             .split('; ')
@@ -1737,12 +1603,8 @@ class DashboardCustomizer {
         const metaTag = document.querySelector('meta[name="csrf-token"]');
         return metaTag ? metaTag.getAttribute('content') : '';
     }
-    
-    /**
-     * Show notification
-     */
+
     showNotification(message, type = 'info') {
-        // Simple notification implementation
         const notification = document.createElement('div');
         notification.className = `dashboard-notification notification-${type}`;
         notification.textContent = message;
@@ -1768,10 +1630,8 @@ class DashboardCustomizer {
     }
 }
 
-// Initialize on page load - but delay to let existing charts render first
 document.addEventListener('DOMContentLoaded', () => {
     window.dashboardCustomizer = new DashboardCustomizer();
-    // Wait for existing charts to render before initializing
     setTimeout(() => {
         window.dashboardCustomizer.init();
     }, 500);

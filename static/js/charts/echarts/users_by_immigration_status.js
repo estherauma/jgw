@@ -1,9 +1,15 @@
 function initUsersByImmigrationStatusChart(immigrationData, customContainerId, chartType) {
     const containerId = customContainerId || 'preference-immigration-status-chart-id';
     const chartDom = document.getElementById(containerId);
+    
     if (!chartDom || !immigrationData) {
+        console.error('Users by Immigration Status Chart: Container or data not found', {
+            container: containerId,
+            data: immigrationData
+        });
         return;
     }
+
     const existingChart = echarts.getInstanceByDom(chartDom);
     if (existingChart) {
         existingChart.dispose();
@@ -15,6 +21,8 @@ function initUsersByImmigrationStatusChart(immigrationData, customContainerId, c
     
     let statuses = [];
     let counts = [];
+    
+    console.log('Users by Immigration Status Chart Data:', immigrationData);
     
     if (typeof immigrationData === 'object' && immigrationData.labels && immigrationData.counts) {
         statuses = [...immigrationData.labels];

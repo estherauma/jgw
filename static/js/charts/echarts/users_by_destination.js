@@ -17,7 +17,7 @@ function initUsersByDestinationChart(destinationData, customContainerId, chartTy
     
     const myChart = echarts.init(chartDom);
     
-    const type = chartType || 'pie';
+    const type = chartType || 'doughnut';
     
     let destinations = [];
     let counts = [];
