@@ -270,12 +270,12 @@
                     </div>
                 </div>
 
-<!-- Dashboard Customization Toolbar - WPBakery Style -->
+
 <div id="dashboard-toolbar" style="display: none;">
     <div class="toolbar-brand">
         <i class="fe-layers"></i>
         <span>Dashboard Builder</span>
-    </div>
+            </div>
    
     <div class="toolbar-right">
         <button class="toolbar-btn" id="add-row-btn" title="Add Row">
@@ -322,17 +322,17 @@
                     </div>
                 </div>
                 
-                <div id="monthly-active-users-graph-id" style="height:500px;"></div>
+                <div id="monthly-active-users-graph-id" style="height:500px; width: 100%; max-width: 100%; box-sizing: border-box;"></div>
                 
                 <div class="info-tooltip">
                     <i class="fas fa-info-circle"></i>
                     {% translate "userOverviewMonthlyActiveUsersTooltip" %}
                     <div class="tooltip-arrow"></div>
                 </div>
-                </div>
             </div>
         </div>
     </div>
+</div>
 {% endflag %}
 
     {% flag 'can_view_users_by_origin_country_chart' %}
@@ -357,7 +357,7 @@
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersByOriginCountryTooltip" %}
                         <div class="tooltip-arrow"></div>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -449,7 +449,7 @@
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersByLanguageTooltip" %}
                         <div class="tooltip-arrow"></div>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -478,7 +478,7 @@
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersByStateTooltip" %}
                         <div class="tooltip-arrow"></div>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -569,7 +569,7 @@
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewUsersBySectorTooltip" %}
                         <div class="tooltip-arrow"></div>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -599,7 +599,7 @@
                             <i class="fas fa-info-circle"></i>
                             {% translate "userOverviewWorkCodeUsageTooltip" %}
                             <div class="tooltip-arrow"></div>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -646,13 +646,13 @@
                 <div data-chart-id="link_clicks" id="chart-link_clicks">
                 <p class="chart-title">{% translate "userOverviewLinkClicksByUsersTitle" %}</p>
                 <div class="link-clicks-graph-id-chart-box">
-                    <div id="link-clicks-graph-id"></div>
+                    <div id="link-clicks-graph-id" style="width: 100%; max-width: 100%; box-sizing: border-box;"></div>
                     <div class="info-tooltip">
                         <i class="fas fa-info-circle"></i>
                         {% translate "userOverviewLinkClicksByUsersTooltip" %}
                         <div class="tooltip-arrow"></div>
                     </div>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -930,11 +930,11 @@
         const datePickerInput = $('#fullscreen-date-range');
         
         {% if filter_form.start_date.value and filter_form.end_date.value %}
-        const defaultStartDate = '{{filter_form.start_date.value}}';
-        const defaultEndDate = '{{filter_form.end_date.value}}';
+            const defaultStartDate = '{{filter_form.start_date.value}}';
+            const defaultEndDate = '{{filter_form.end_date.value}}';
         {% else %}
-        const defaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
-        const defaultEndDate = moment().format('YYYY-MM-DD');
+            const defaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            const defaultEndDate = moment().format('YYYY-MM-DD');
         {% endif %}
         
         datePickerInput.daterangepicker({

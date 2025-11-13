@@ -1,8 +1,6 @@
 /**
- * Chart Renderer
- * Handles dynamic rendering of charts based on chart ID and type
+ * Chart Renderer - Handles dynamic rendering of charts based on chart ID and type
  */
-
 const ChartRenderer = {
     renderChart(chartId, chartType, containerId, settings = {}) {
         const chartConfig = window.CHART_DEFINITIONS && window.CHART_DEFINITIONS[chartId];
@@ -28,55 +26,64 @@ const ChartRenderer = {
             switch(chartId) {
                 case 'monthly_active_users':
                     if (typeof initMonthlyActiveUsersChart === 'function') {
-                        initMonthlyActiveUsersChart(chartData, containerId, chartType || 'bar');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
+                        initMonthlyActiveUsersChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_origin_country':
                     if (typeof initUsersByOriginChart === 'function') {
-                        initUsersByOriginChart(chartData, containerId, chartType || 'bar');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
+                        initUsersByOriginChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_gender':
                     if (typeof initUsersByGenderChart === 'function') {
-                        initUsersByGenderChart(chartData, containerId, chartType || 'pie');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'pie';
+                        initUsersByGenderChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_destination_country':
                     if (typeof initUsersByDestinationChart === 'function') {
-                        initUsersByDestinationChart(chartData, containerId, chartType || 'pie');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'doughnut';
+                        initUsersByDestinationChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_language':
                     if (typeof initUsersByLanguageChart === 'function') {
-                        initUsersByLanguageChart(chartData, containerId, chartType || 'bar');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
+                        initUsersByLanguageChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_country_state':
                     if (typeof initUsersByStateChart === 'function') {
-                        initUsersByStateChart(chartData, containerId, chartType || 'bar');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
+                        initUsersByStateChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_immigration_status':
                     if (typeof initUsersByImmigrationStatusChart === 'function') {
-                        initUsersByImmigrationStatusChart(chartData, containerId, chartType || 'bar');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
+                        initUsersByImmigrationStatusChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_age':
                     if (typeof initUsersByAgeChart === 'function') {
-                        initUsersByAgeChart(chartData, containerId, chartType || 'pie');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'pie';
+                        initUsersByAgeChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_sector':
                     if (typeof initUsersBySectorChart === 'function') {
-                        initUsersBySectorChart(chartData, containerId, chartType || 'bar');
+                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
+                        initUsersBySectorChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
@@ -175,36 +182,60 @@ const ChartRenderer = {
     },
     
     destroyChart(containerId) {
+        if (!containerId) {
+            console.warn('destroyChart called with empty containerId');
+            return;
+        }
+        
         const container = document.getElementById(containerId);
-        if (!container) return;
+        if (!container) {
+            console.warn(`Container with ID "${containerId}" does not exist`);
+            return;
+        }
         
         if (typeof echarts !== 'undefined' && echarts.getInstanceByDom) {
-            const echartsInstance = echarts.getInstanceByDom(container);
-            if (echartsInstance) {
-                echartsInstance.dispose();
-                console.log(`Destroyed ECharts instance for: ${containerId}`);
+            try {
+                const echartsInstance = echarts.getInstanceByDom(container);
+                if (echartsInstance) {
+                    echartsInstance.dispose();
+                    console.log(`Destroyed ECharts instance for: ${containerId}`);
+                }
+            } catch (error) {
+                console.warn(`Error disposing ECharts instance for ${containerId}:`, error);
             }
         }
         
-        const canvas = container.querySelector('canvas');
-        if (canvas && window.Chart && window.Chart.getChart) {
-            const chartInstance = window.Chart.getChart(canvas.id);
-            if (chartInstance) {
-                chartInstance.destroy();
-                console.log(`Destroyed Chart.js instance for: ${canvas.id}`);
+        try {
+            const canvas = container.querySelector('canvas');
+            if (canvas && window.Chart && window.Chart.getChart) {
+                const chartInstance = window.Chart.getChart(canvas.id || canvas);
+                if (chartInstance) {
+                    chartInstance.destroy();
+                    console.log(`Destroyed Chart.js instance for: ${canvas.id || 'canvas'}`);
+                }
             }
+        } catch (error) {
+            console.warn(`Error destroying Chart.js instance for ${containerId}:`, error);
         }
         
         if (window.chartInstances && window.chartInstances[containerId]) {
-            const chartInstance = window.chartInstances[containerId];
-            if (chartInstance && typeof chartInstance.destroy === 'function') {
-                chartInstance.destroy();
-                delete window.chartInstances[containerId];
-                console.log(`Destroyed chart instance from window.chartInstances for: ${containerId}`);
+            try {
+                const chartInstance = window.chartInstances[containerId];
+                if (chartInstance && typeof chartInstance.destroy === 'function') {
+                    chartInstance.destroy();
+                    delete window.chartInstances[containerId];
+                    console.log(`Destroyed chart instance from window.chartInstances for: ${containerId}`);
+                }
+            } catch (error) {
+                console.warn(`Error destroying chart instance from window.chartInstances for ${containerId}:`, error);
             }
         }
         
-        container.innerHTML = '';
+        try {
+            container.innerHTML = '';
+        } catch (error) {
+            console.warn(`Error clearing container ${containerId}:`, error);
+        }
     }
 };
 
