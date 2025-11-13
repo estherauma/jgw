@@ -8,8 +8,11 @@ class DashboardCustomizer {
         this.layout = null;
         this.sortableInstances = [];
         this.selectedChart = null;
+        this.selectedChartElement = null;
+        this.selectedChartUniqueId = null;
         this.chartDefinitions = {};
         this.availableCharts = [];
+        this.sidebarResizeTimeout = null;
     }
     
     async init() {
@@ -18,7 +21,6 @@ class DashboardCustomizer {
 
         if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
             window.CHART_DEFINITIONS = this.chartDefinitions;
-            console.log('Initialized window.CHART_DEFINITIONS on init:', Object.keys(window.CHART_DEFINITIONS));
         } else {
             console.warn('Chart definitions not loaded on init');
         }
@@ -26,6 +28,146 @@ class DashboardCustomizer {
         setTimeout(() => {
             this.applySpacingToAllCharts();
         }, 600);
+        this.setupSidebarResizeListeners();
+    }
+    
+    setupSidebarResizeListeners() {
+        const sidebar = document.querySelector('.enhanced-sidebar, .left-side-menu');
+        const content = document.querySelector('.enhanced-content');
+        
+        if (!sidebar) {
+            return;
+        }
+        
+        this.ensureChartContainersWidth();
+        
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    clearTimeout(this.sidebarResizeTimeout);
+                    this.sidebarResizeTimeout = setTimeout(() => {
+                        this.ensureChartContainersWidth();
+                        this.resizeAllCharts();
+                    }, 100);
+                }
+            });
+        });
+        
+        observer.observe(sidebar, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+        
+        if (content) {
+            observer.observe(content, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+        
+        sidebar.addEventListener('mouseenter', () => {
+            clearTimeout(this.sidebarResizeTimeout);
+            this.sidebarResizeTimeout = setTimeout(() => {
+                this.ensureChartContainersWidth();
+                this.resizeAllCharts();
+            }, 350);
+        });
+        
+        sidebar.addEventListener('mouseleave', () => {
+            clearTimeout(this.sidebarResizeTimeout);
+            this.sidebarResizeTimeout = setTimeout(() => {
+                this.ensureChartContainersWidth();
+                this.resizeAllCharts();
+            }, 300);
+        });
+        
+        window.addEventListener('resize', () => {
+            clearTimeout(this.sidebarResizeTimeout);
+            this.sidebarResizeTimeout = setTimeout(() => {
+                this.ensureChartContainersWidth();
+                this.resizeAllCharts();
+            }, 150);
+        });
+        
+        const sidebarToggle = document.querySelector('[data-bs-toggle="collapse"]');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('shown.bs.collapse', () => {
+                setTimeout(() => {
+                    this.ensureChartContainersWidth();
+                    this.resizeAllCharts();
+                }, 100);
+            });
+            sidebarToggle.addEventListener('hidden.bs.collapse', () => {
+                setTimeout(() => {
+                    this.ensureChartContainersWidth();
+                    this.resizeAllCharts();
+                }, 100);
+            });
+        }
+    }
+    
+    ensureChartContainersWidth() {
+        const chartContainers = document.querySelectorAll('[id*="-graph-id"], [id*="-chart-id"], [id="user_route_map"], [id="user_geolocation_map"], [id="user_geolocation_map_user_engagement"], [id="link-clicks-graph-id"]');
+        
+        chartContainers.forEach(container => {
+            if (!container || !container.id) return;
+            
+            if (!container.style.width || !container.style.width.includes('%')) {
+                container.style.width = '100%';
+            }
+            container.style.maxWidth = '100%';
+            container.style.boxSizing = 'border-box';
+        });
+    }
+    
+    resizeAllCharts() {
+        const chartContainers = document.querySelectorAll('[id*="-graph-id"], [id*="-chart-id"], [id="user_route_map"], [id="user_geolocation_map"], [id="user_geolocation_map_user_engagement"], [id="link-clicks-graph-id"]');
+        
+        chartContainers.forEach(container => {
+            if (!container || !container.id) return;
+            
+            if (container.style.width && !container.style.width.includes('%')) {
+                container.style.width = '100%';
+            } else if (!container.style.width) {
+                container.style.width = '100%';
+            }
+            
+            if (typeof echarts !== 'undefined' && echarts.getInstanceByDom) {
+                try {
+                    const echartsInstance = echarts.getInstanceByDom(container);
+                    if (echartsInstance && typeof echartsInstance.resize === 'function') {
+                        echartsInstance.resize();
+                    }
+                } catch (error) {
+                    console.warn(`Error resizing ECharts instance for ${container.id}:`, error);
+                }
+            }
+            
+            try {
+                const canvas = container.querySelector('canvas');
+                if (canvas && window.Chart && window.Chart.getChart) {
+                    const chartInstance = window.Chart.getChart(canvas.id || canvas);
+                    if (chartInstance && typeof chartInstance.resize === 'function') {
+                        chartInstance.resize();
+                    }
+                }
+            } catch (error) {
+                console.warn(`Error resizing Chart.js instance for ${container.id}:`, error);
+            }
+            
+            if (window.chartInstances && window.chartInstances[container.id]) {
+                try {
+                    const chartInstance = window.chartInstances[container.id];
+                    if (chartInstance && typeof chartInstance.resize === 'function') {
+                        chartInstance.resize();
+                    }
+                } catch (error) {
+                    console.warn(`Error resizing chart instance from window.chartInstances for ${container.id}:`, error);
+                }
+            }
+        });
+        
+        window.dispatchEvent(new Event('resize'));
     }
     
     setupEventListeners() {
@@ -67,7 +209,6 @@ class DashboardCustomizer {
     
     async loadLayout(isInitialLoad = false) {
         try {
-            console.log('Loading dashboard layout from API...');
             const response = await fetch('/preference/api/dashboard/customize/');
             
             if (!response.ok) {
@@ -76,13 +217,6 @@ class DashboardCustomizer {
             }
             
             const data = await response.json();
-            console.log('API response received:', {
-                hasLayout: !!data.layout,
-                hasChartDefinitions: !!data.chart_definitions,
-                chartDefinitionsCount: data.chart_definitions ? Object.keys(data.chart_definitions).length : 0,
-                availableChartsCount: data.available_charts ? data.available_charts.length : 0,
-                chartDefinitions: data.chart_definitions
-            });
             
             this.layout = data.layout || { rows: [] };
             this.chartDefinitions = data.chart_definitions || {};
@@ -90,7 +224,6 @@ class DashboardCustomizer {
             
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
                 window.CHART_DEFINITIONS = this.chartDefinitions;
-                console.log('✓ Set window.CHART_DEFINITIONS with', Object.keys(this.chartDefinitions).length, 'charts');
             } else {
                 console.warn('⚠ No chart definitions received from API!');
             }
@@ -133,7 +266,6 @@ class DashboardCustomizer {
         if (!window.CHART_DEFINITIONS || Object.keys(window.CHART_DEFINITIONS).length === 0) {
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
                 window.CHART_DEFINITIONS = this.chartDefinitions;
-                console.log('Set window.CHART_DEFINITIONS on entering customize mode');
             }
         }
         
@@ -340,13 +472,13 @@ class DashboardCustomizer {
             <button class="chart-toolbar-btn drag-handle" title="Drag Chart" onclick="event.stopPropagation();">
                 <i class="fe-move"></i>
             </button>
-            <button class="chart-toolbar-btn edit-btn" title="Edit Chart" onclick="event.stopPropagation(); dashboardCustomizer.editChart('${chartId}');">
+            <button class="chart-toolbar-btn edit-btn" title="Edit Chart" onclick="event.stopPropagation(); dashboardCustomizer.editChartFromButton(this);">
                 <i class="fe-edit"></i>
             </button>
             <button class="chart-toolbar-btn duplicate-btn" title="Duplicate Chart" onclick="event.stopPropagation(); dashboardCustomizer.duplicateChart('${chartId}');">
                 <i class="fe-copy"></i>
             </button>
-            <button class="chart-toolbar-btn remove-btn" title="Remove Chart" onclick="event.stopPropagation(); dashboardCustomizer.removeChart('${chartId}');">
+            <button class="chart-toolbar-btn remove-btn" title="Remove Chart" onclick="event.stopPropagation(); dashboardCustomizer.removeChartFromButton(this);">
                 <i class="fe-x"></i>
             </button>
         `;
@@ -553,6 +685,8 @@ class DashboardCustomizer {
             graphContainer.id = graphContainerId;
             graphContainer.style.height = '500px';
             graphContainer.style.width = '100%';
+            graphContainer.style.maxWidth = '100%';
+            graphContainer.style.boxSizing = 'border-box';
             chartWrapper.appendChild(graphContainer);
         }
         
@@ -757,9 +891,6 @@ class DashboardCustomizer {
         }
     }
     
-    /**
-     * Add new row
-     */
     addNewRow() {
         const container = document.getElementById('dashboard-rows-container');
         if (!container) return;
@@ -880,9 +1011,16 @@ class DashboardCustomizer {
             console.error('Columns container not found in target row');
             return;
         }
+            
+        const existingCharts = document.querySelectorAll(`[data-chart-id="${chartId}"]`);
+        const timestamp = Date.now();
+        const uniqueId = existingCharts.length > 0 ? `added_${timestamp}` : '';
+        
+        const baseGraphContainerId = this.getGraphContainerId(chartId);
+        const graphContainerId = uniqueId ? `${baseGraphContainerId}-${uniqueId}` : baseGraphContainerId;
         
         const colData = {
-            id: `col-${chartId}-${Date.now()}`,
+            id: `col-${chartId}-${timestamp}`,
             chart_id: chartId,
             size: 6,
             enabled: true,
@@ -892,7 +1030,6 @@ class DashboardCustomizer {
         };
         
         const colEl = this.createColumnElement(colData, columnsContainer.children.length);
-        columnsContainer.appendChild(colEl);
         
         const chartWrapper = colEl.querySelector(`[data-chart-id="${chartId}"]`);
         if (!chartWrapper) {
@@ -900,12 +1037,37 @@ class DashboardCustomizer {
             return;
         }
         
+        if (uniqueId) {
+            chartWrapper.id = `chart-${chartId}-${uniqueId}`;
+        }
+        
+        const existingGraphContainer = chartWrapper.querySelector(`#${baseGraphContainerId}`);
+        if (existingGraphContainer) {
+            existingGraphContainer.id = graphContainerId;
+            console.log(`Updated graph container ID from ${baseGraphContainerId} to ${graphContainerId}`);
+        } else {
+            const graphContainer = document.createElement('div');
+            graphContainer.id = graphContainerId;
+            graphContainer.style.height = '500px';
+            graphContainer.style.width = '100%';
+            
+            const chartHeader = chartWrapper.querySelector('.chart-header');
+            if (chartHeader) {
+                chartHeader.insertAdjacentElement('afterend', graphContainer);
+            } else {
+                chartWrapper.appendChild(graphContainer);
+            }
+            console.log(`Created unique graph container: ${graphContainerId}`);
+        }
+        
+        columnsContainer.appendChild(colEl);
+        
         this.updateChartSpacing(colEl, 6);
         
         if (!this.layout) this.layout = { rows: [] };
         if (!this.layout.rows) this.layout.rows = [];
         
-        const rowId = targetRow.dataset.rowId || `row-${Date.now()}`;
+        const rowId = targetRow.dataset.rowId || `row-${timestamp}`;
         let rowData = this.layout.rows.find(r => r.id === rowId);
         if (!rowData) {
             rowData = { id: rowId, columns: [] };
@@ -914,23 +1076,15 @@ class DashboardCustomizer {
         if (!rowData.columns) rowData.columns = [];
         rowData.columns.push(colData);
         
-        const graphContainerId = this.getGraphContainerId(chartId);
         console.log(`Rendering chart ${chartId} in container: ${graphContainerId}`);
         
         setTimeout(() => {
             if (window.ChartRenderer && graphContainerId) {
-                let graphContainer = chartWrapper.querySelector(`#${graphContainerId}`);
-                if (!graphContainer && graphContainerId) {
-                    graphContainer = document.createElement('div');
-                    graphContainer.id = graphContainerId;
-                    graphContainer.style.height = '500px';
-                    graphContainer.style.width = '100%';
-                    const toolbar = chartWrapper.querySelector('.chart-toolbar');
-                    if (toolbar) {
-                        chartWrapper.insertBefore(graphContainer, toolbar);
-                    } else {
-                        chartWrapper.appendChild(graphContainer);
-                    };
+                // Verify the graph container exists
+                const graphContainer = document.getElementById(graphContainerId);
+                if (!graphContainer) {
+                    console.error(`Graph container not found: ${graphContainerId}`);
+                    return;
                 }
                 
                 const success = window.ChartRenderer.renderChart(
@@ -943,7 +1097,7 @@ class DashboardCustomizer {
                 if (!success) {
                     console.error(`Failed to render chart: ${chartId}`);
                 } else {
-                    console.log(`Successfully rendered chart: ${chartId}`);
+                    console.log(`Successfully rendered chart: ${chartId} in container: ${graphContainerId}`);
                 }
             } else {
                 console.error(`ChartRenderer not available or graph container ID not found for: ${chartId}`);
@@ -961,23 +1115,75 @@ class DashboardCustomizer {
         this.showNotification(`Chart "${chartDef.name}" added successfully`, 'success');
     }
     
-    editChart(chartId) {
-        console.log(`Editing chart: ${chartId}`);
+    getChartInfoFromButton(button) {
+        const toolbar = button.closest('.chart-toolbar');
+        if (!toolbar) {
+            console.error('Chart toolbar not found');
+            return null;
+        }
+        
+        const dashboardChart = toolbar.closest('.dashboard-chart');
+        if (!dashboardChart) {
+            console.error('Dashboard chart container not found');
+            return null;
+        }
+        
+        let chartWrapper = null;
+        
+        if (dashboardChart.dataset && dashboardChart.dataset.chartId) {
+            chartWrapper = dashboardChart;
+        } else {
+            chartWrapper = dashboardChart.querySelector('[data-chart-id]');
+        }
+        
+        if (!chartWrapper) {
+            console.error('Chart wrapper with data-chart-id not found in dashboard-chart container');
+            return null;
+        }
+        
+        const chartId = chartWrapper.dataset.chartId;
+        if (!chartId) {
+            console.error('Chart ID not found in wrapper:', chartWrapper);
+            return null;
+        }
+        
+        const uniqueId = chartWrapper.id || null;
+        
+        return {
+            chartId: chartId,
+            chartWrapper: chartWrapper,
+            uniqueId: uniqueId
+        };
+    }
+    
+    editChartFromButton(button) {
+        const chartInfo = this.getChartInfoFromButton(button);
+        if (!chartInfo) {
+            return;
+        }
+        
+        this.editChart(chartInfo.chartId, chartInfo.chartWrapper, chartInfo.uniqueId);
+    }
+    
+    editChart(chartId, chartElement = null, uniqueId = null) {
+        console.log(`Editing chart: ${chartId}, uniqueId: ${uniqueId}`);
         this.selectedChart = chartId;
+        this.selectedChartElement = chartElement;
+        this.selectedChartUniqueId = uniqueId;
         
         if (!this.chartDefinitions || Object.keys(this.chartDefinitions).length === 0) {
             console.warn('Chart definitions not loaded, attempting to load...');
             this.loadLayout(false).then(() => {
-                this.showChartSettingsModal(chartId);
+                this.showChartSettingsModal(chartId, chartElement, uniqueId);
             });
             return;
         }
         
-        this.showChartSettingsModal(chartId);
+        this.showChartSettingsModal(chartId, chartElement, uniqueId);
     }
     
-    showChartSettingsModal(chartId) {
-        console.log(`showChartSettingsModal called for: ${chartId}`);
+    showChartSettingsModal(chartId, chartElement = null, uniqueId = null) {
+        console.log(`showChartSettingsModal called for: ${chartId}, uniqueId: ${uniqueId}`);
         const modal = document.getElementById('chart-settings-modal');
         if (!modal) {
             console.error('Chart settings modal not found in DOM');
@@ -999,7 +1205,7 @@ class DashboardCustomizer {
                 this.loadLayout(false).then(() => {
                     if (this.chartDefinitions && this.chartDefinitions[chartId]) {
                         window.CHART_DEFINITIONS = this.chartDefinitions;
-                        this.showChartSettingsModal(chartId);
+                        this.showChartSettingsModal(chartId, chartElement, uniqueId);
                     } else {
                         alert(`Chart settings not available for this chart. Please try again.`);
                     }
@@ -1010,8 +1216,26 @@ class DashboardCustomizer {
             return;
         }
         
-        console.log('Chart definition found:', chartDef);
-        const chartElement = document.querySelector(`[data-chart-id="${chartId}"]`);
+        
+        if (!chartElement) {
+            if (uniqueId) {
+                chartElement = document.getElementById(uniqueId);
+            }
+            
+            if (!chartElement) {
+                const allCharts = document.querySelectorAll(`[data-chart-id="${chartId}"]`);
+                if (uniqueId) {
+                    chartElement = Array.from(allCharts).find(el => {
+                        const wrapperId = el.id || '';
+                        return wrapperId === uniqueId || wrapperId.includes(uniqueId.split('-').pop());
+                    });
+                }
+                
+                if (!chartElement && allCharts.length > 0) {
+                    chartElement = allCharts[0];
+                }
+            }
+        }
         
         const typeSelect = modal.querySelector('#chart-type-select');
         if (typeSelect && chartDef) {
@@ -1024,8 +1248,10 @@ class DashboardCustomizer {
                     typeSelect.appendChild(option);
                 });
                 
-                const currentType = this.getCurrentChartType(chartId) || chartDef.default_type;
-                typeSelect.value = currentType;
+                const storedType = this.getCurrentChartType(chartId, chartElement, uniqueId);
+                const currentType = storedType || chartDef.default_type;
+                const normalizedCurrentType = currentType ? currentType.toLowerCase() : chartDef.default_type;
+                typeSelect.value = normalizedCurrentType;
             } else {
                 console.warn('supported_types not found in chartDef:', chartDef);
             }
@@ -1040,7 +1266,6 @@ class DashboardCustomizer {
             }
         }
         
-        console.log('Showing chart settings modal');
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
     }
@@ -1051,21 +1276,38 @@ class DashboardCustomizer {
             return;
         }
         
-        console.log(`Applying settings for chart: ${this.selectedChart}`);
-        
         const modal = document.getElementById('chart-settings-modal');
         const type = modal.querySelector('#chart-type-select')?.value;
         const size = modal.querySelector('#chart-size-select')?.value;
         
-        console.log(`Settings - Type: ${type}, Size: ${size}`);
         
-        const chartElement = document.querySelector(`[data-chart-id="${this.selectedChart}"]`);
+        let chartElement = this.selectedChartElement;
+        
         if (!chartElement) {
-            console.error(`Chart element not found for chartId: ${this.selectedChart}`);
-            return;
+            if (this.selectedChartUniqueId) {
+                chartElement = document.getElementById(this.selectedChartUniqueId);
+            }
+            
+            if (!chartElement) {
+                const allCharts = document.querySelectorAll(`[data-chart-id="${this.selectedChart}"]`);
+                
+                if (this.selectedChartUniqueId) {
+                    chartElement = Array.from(allCharts).find(el => {
+                        const wrapperId = el.id || '';
+                        return wrapperId === this.selectedChartUniqueId || wrapperId.includes(this.selectedChartUniqueId.split('-').pop());
+                    });
+                }
+                
+                if (!chartElement && allCharts.length > 0) {
+                    chartElement = allCharts[0];
+                }
+            }
         }
         
-        console.log(`Found chart element: ${chartElement.id || 'no-id'}, data-chart-id: ${chartElement.dataset.chartId}`);
+        if (!chartElement) {
+            console.error(`Chart element not found for chartId: ${this.selectedChart}, uniqueId: ${this.selectedChartUniqueId}`);
+            return;
+        }
         
         const colElement = chartElement.closest('[class*="col-md-"]');
         const oldSize = colElement ? parseInt(colElement.className.match(/col-md-(\d+)/)?.[1] || '6') : null;
@@ -1073,12 +1315,17 @@ class DashboardCustomizer {
         const sizeChanged = oldSize !== null && newSize !== null && oldSize !== newSize;
         
         const chartDef = this.chartDefinitions[this.selectedChart] || window.CHART_DEFINITIONS?.[this.selectedChart];
-        const currentType = (this.getCurrentChartType(this.selectedChart) || chartDef?.default_type || 'bar').toLowerCase();
-        const normalizedNewType = type ? type.toLowerCase() : null;
+        
+        const storedType = this.getCurrentChartType(this.selectedChart, chartElement, this.selectedChartUniqueId);
+        const defaultType = (chartDef?.default_type || 'bar').toLowerCase();
+        const currentType = storedType ? storedType.toLowerCase() : defaultType;
+        const normalizedNewType = type ? type.toLowerCase().trim() : null;
+        
+        const shouldRerender = normalizedNewType !== null;
         const typeChanged = normalizedNewType && normalizedNewType !== currentType;
         
         console.log(`Size change - Old: ${oldSize}, New: ${newSize}, Changed: ${sizeChanged}`);
-        console.log(`Type change - Current: ${currentType}, New: ${normalizedNewType}, Changed: ${typeChanged}`);
+        console.log(`Type change - Stored: ${storedType}, Default: ${defaultType}, Current: ${currentType}, New: ${normalizedNewType}, Changed: ${typeChanged}, Should Rerender: ${shouldRerender}`);
         
         if (colElement && newSize) {
             colElement.className = colElement.className.replace(/col-md-\d+/, `col-md-${newSize}`);
@@ -1098,36 +1345,42 @@ class DashboardCustomizer {
         
         const containerId = chartElement.id || `chart-${this.selectedChart}`;
         
-        const chartContainerMap = {
-            'monthly_active_users': 'monthly-active-users-graph-id',
-            'users_by_origin_country': 'preference-origin-graph-id',
-            'users_by_gender': 'preference-gender-chart-id',
-            'users_by_destination_country': 'preference-destination-chart-id',
-            'users_by_language': 'preference-language-graph-id',
-            'users_by_country_state': 'users-by-country-state-graph-id',
-            'users_by_immigration_status': 'preference-immigration-status-chart-id',
-            'users_by_age': 'preference-age-chart-id',
-            'users_by_sector': 'users-by-sector-graph-id',
-            'work_code_usage': 'organisation-work-code-usage-graph-id',
-            'new_monthly_users': 'preference-monthly-cumulative-users-graph-id',
-            'link_clicks': 'link-clicks-graph-id',
-            'user_route_map': 'user_route_map',
-            'user_geolocation_map': 'user_geolocation_map',
-            'user_geolocation_map_user_engagement': 'user_geolocation_map_user_engagement'
-        };
+        const columnId = colElement.dataset.columnId || colElement.id || null;
         
-        const graphContainerId = chartContainerMap[this.selectedChart];
-        console.log(`Graph container ID: ${graphContainerId}`);
+        const baseGraphContainerId = this.getGraphContainerId(this.selectedChart);
+        let graphContainerId = baseGraphContainerId;
+        
+        const graphContainer = colElement.querySelector(`[id*="${baseGraphContainerId}"]`);
+        if (graphContainer && graphContainer.id && graphContainer.id !== baseGraphContainerId) {
+            graphContainerId = graphContainer.id;
+        }
         
         if (this.layout && this.layout.rows) {
             this.layout.rows.forEach(row => {
                 if (row.columns) {
                     row.columns.forEach(col => {
                         if (col.chart_id === this.selectedChart) {
-                            if (newSize) col.size = newSize;
-                            if (normalizedNewType) {
-                                if (!col.settings) col.settings = {};
-                                col.settings.chart_type = normalizedNewType;
+                            let shouldUpdate = false;
+                            
+                            if (this.selectedChartUniqueId && columnId) {
+                                const uniqueSuffix = this.selectedChartUniqueId.split('-').pop();
+                                if (col.id && col.id.includes(uniqueSuffix)) {
+                                    shouldUpdate = true;
+                                } else if (col.id === columnId) {
+                                    shouldUpdate = true;
+                                }
+                            } else if (columnId && col.id === columnId) {
+                                shouldUpdate = true;
+                            } else if (!this.selectedChartUniqueId && !columnId) {
+                                shouldUpdate = true;
+                            }
+                            
+                            if (shouldUpdate) {
+                                if (newSize) col.size = newSize;
+                                if (normalizedNewType) {
+                                    if (!col.settings) col.settings = {};
+                                    col.settings.chart_type = normalizedNewType;
+                                }
                             }
                         }
                     });
@@ -1138,14 +1391,12 @@ class DashboardCustomizer {
         if (!window.CHART_DEFINITIONS || Object.keys(window.CHART_DEFINITIONS).length === 0) {
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
                 window.CHART_DEFINITIONS = this.chartDefinitions;
-                console.log('Set window.CHART_DEFINITIONS from this.chartDefinitions');
             } 
             else {
                 console.warn('Chart definitions not loaded, attempting to load...');
                 this.loadLayout(false).then(() => {
                     if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
                         window.CHART_DEFINITIONS = this.chartDefinitions;
-                        console.log('Loaded and set window.CHART_DEFINITIONS from API');
                         setTimeout(() => this.applyChartSettings(), 100);
                     }
                 });
@@ -1159,25 +1410,50 @@ class DashboardCustomizer {
             return;
         }
         
-        if (typeChanged && normalizedNewType && window.ChartRenderer && graphContainerId) {
-            console.log(`Chart type changed from ${currentType} to ${normalizedNewType}, re-rendering chart: ${this.selectedChart}`);
+        if (shouldRerender && normalizedNewType && window.ChartRenderer && graphContainerId) {
             
-            window.ChartRenderer.destroyChart(graphContainerId);
+            let graphContainerElement = document.getElementById(graphContainerId);
+            if (!graphContainerElement) {
+                console.warn(`Graph container not found: ${graphContainerId}, trying to find within column...`);
+                const fallbackContainer = colElement.querySelector(`[id*="${baseGraphContainerId}"]`);
+                if (fallbackContainer && fallbackContainer.id) {
+                    graphContainerId = fallbackContainer.id;
+                    graphContainerElement = fallbackContainer;
+                } else {
+                    console.error(`Could not find graph container for chart: ${this.selectedChart}`);
+                }
+            }
+            
+            if (graphContainerElement) {
+                window.ChartRenderer.destroyChart(graphContainerId);
+            }
             
             setTimeout(() => {
-                const success = window.ChartRenderer.renderChart(this.selectedChart, normalizedNewType, graphContainerId, {});
-                if (!success) {
-                    console.error(`Failed to render chart: ${this.selectedChart} with type: ${normalizedNewType}`);
-                } else {
-                    console.log(`Successfully re-rendered chart: ${this.selectedChart} with type: ${normalizedNewType}`);
+                const container = document.getElementById(graphContainerId);
+                if (!container) {
+                    console.error(`Graph container still not found after destroy: ${graphContainerId}`);
+                    const retryContainer = colElement.querySelector(`[id*="${baseGraphContainerId}"]`);
+                    if (retryContainer && retryContainer.id) {
+                        graphContainerId = retryContainer.id;
+                    } else {
+                        return;
+                    }
                 }
-            }, 100);
-        } else if (sizeChanged && !typeChanged) {   
+                
+                const chartTypeToRender = normalizedNewType;
+                const success = window.ChartRenderer.renderChart(this.selectedChart, chartTypeToRender, graphContainerId, {});
+                if (!success) {
+                    console.error(`Failed to render chart: ${this.selectedChart} with type: ${chartTypeToRender}`);
+                } else {
+                    console.log(`Successfully re-rendered chart: ${this.selectedChart} with type: ${chartTypeToRender}`);
+                }
+            }, 150);
+        } else if (sizeChanged && !shouldRerender) {   
             console.log(`Only size changed (${oldSize} -> ${newSize}), resizing chart: ${this.selectedChart} (NO re-render)`);
             setTimeout(() => {
                 this.resizeChart(containerId);
             }, 100);
-        } else if (!typeChanged && !sizeChanged) {
+        } else if (!shouldRerender && !sizeChanged) {
             console.log(`No changes detected, skipping resize/render`);
         }
         
@@ -1189,14 +1465,42 @@ class DashboardCustomizer {
         this.saveLayout();
     }
     
-    getCurrentChartType(chartId) {
-        if (!this.layout || !this.layout.rows) return null;
+    getCurrentChartType(chartId, chartElement = null, uniqueId = null) {
+        if (this.layout && this.layout.rows) {
+            for (const row of this.layout.rows) {
+                if (row.columns) {
+                    for (const col of row.columns) {
+                        if (col.chart_id === chartId && col.settings && col.settings.chart_type) {
+                            if (uniqueId && col.id) {
+                                const uniqueSuffix = uniqueId.split('-').pop();
+                                if (col.id.includes(uniqueSuffix)) {
+                                    const chartType = col.settings.chart_type;
+                                    return chartType ? chartType.toLowerCase().trim() : null;
+                                }
+                            } else if (!uniqueId) {
+                                const chartType = col.settings.chart_type;
+                                return chartType ? chartType.toLowerCase().trim() : null;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         
-        for (const row of this.layout.rows) {
-            if (row.columns) {
-                for (const col of row.columns) {
-                    if (col.chart_id === chartId && col.settings && col.settings.chart_type) {
-                        return col.settings.chart_type.toLowerCase();
+        if (chartElement) {
+            const colElement = chartElement.closest('[class*="col-md-"]');
+            if (colElement) {
+                const columnId = colElement.dataset.columnId || colElement.id;
+                if (columnId && this.layout && this.layout.rows) {
+                    for (const row of this.layout.rows) {
+                        if (row.columns) {
+                            for (const col of row.columns) {
+                                if (col.id === columnId && col.settings && col.settings.chart_type) {
+                                    const chartType = col.settings.chart_type;
+                                    return chartType ? chartType.toLowerCase().trim() : null;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1206,8 +1510,6 @@ class DashboardCustomizer {
     }
     
     resizeChart(containerId) {
-        console.log(`Resizing chart with containerId: ${containerId}`);
-        
         const chartElement = document.getElementById(containerId);
         if (!chartElement) {
             console.warn(`Chart container not found: ${containerId}`);
@@ -1215,7 +1517,6 @@ class DashboardCustomizer {
         }
         
         const chartId = chartElement.dataset.chartId || containerId.replace('chart-', '');
-        console.log(`Detected chartId: ${chartId}`);
         
         if (!chartId) {
             console.error('Could not determine chartId from element');
@@ -1251,14 +1552,11 @@ class DashboardCustomizer {
             console.warn(`Graph container not found: ${graphContainerId} within chart element`);
             const fallbackContainer = document.getElementById(graphContainerId);
             if (fallbackContainer) {
-                console.log(`Found graph container outside chart element, using fallback`);
                 this.resizeSingleContainer(fallbackContainer, chartId);
                 return;
             }
             return;
         }
-        
-        console.log(`Found graph container: ${graphContainer.id}`);
         
         this.resizeSingleContainer(graphContainer, chartId);
         
@@ -1419,6 +1717,8 @@ class DashboardCustomizer {
             graphContainer.id = graphContainerId;
             graphContainer.style.height = '500px';
             graphContainer.style.width = '100%';
+            graphContainer.style.maxWidth = '100%';
+            graphContainer.style.boxSizing = 'border-box';
 
             const chartHeader = chartWrapper.querySelector('.chart-header');
             if (chartHeader) {
@@ -1487,20 +1787,98 @@ class DashboardCustomizer {
         this.showNotification(`Chart "${chartName}" duplicated successfully`, 'success');
     }
     
-    removeChart(chartId) {
+    removeChartFromButton(button) {
+        const chartInfo = this.getChartInfoFromButton(button);
+        if (!chartInfo) {
+            return;
+        }
+        
+        this.removeChart(chartInfo.chartId, chartInfo.chartWrapper, chartInfo.uniqueId);
+    }
+    
+    removeChart(chartId, chartElement = null, uniqueId = null) {
         if (!confirm('Remove this chart from dashboard?')) {
             return;
         }
         
-        const chartElement = document.querySelector(`[data-chart-id="${chartId}"]`);
-        if (!chartElement) return;
-        
-        const colElement = chartElement.closest('[class*="col-md-"]');
-        if (colElement) {
-            colElement.remove();
+        if (!chartElement) {
+            if (uniqueId) {
+                chartElement = document.getElementById(uniqueId);
+            }
+            
+            if (!chartElement) {
+                const allCharts = document.querySelectorAll(`[data-chart-id="${chartId}"]`);
+                
+                if (uniqueId) {
+                    chartElement = Array.from(allCharts).find(el => {
+                        const wrapperId = el.id || '';
+                        return wrapperId === uniqueId || wrapperId.includes(uniqueId.split('-').pop());
+                    });
+                }
+                
+                if (!chartElement && allCharts.length > 0) {
+                    chartElement = allCharts[0];
+                }
+            }
         }
         
+        if (!chartElement) {
+            console.error(`Chart element not found for chartId: ${chartId}, uniqueId: ${uniqueId}`);
+            return;
+        }
+        
+        const colElement = chartElement.closest('[class*="col-md-"]');
+        if (!colElement) {
+            console.error('Column element not found for chart');
+            return;
+        }
+        
+        const graphContainer = colElement.querySelector('[id*="-graph-id"], [id*="-chart-id"], [id*="user_route_map"], [id*="user_geolocation_map"], [id="link-clicks-graph-id"]');
+        if (graphContainer && graphContainer.id) {
+            const containerElement = document.getElementById(graphContainer.id);
+            if (containerElement && window.ChartRenderer) {
+                try {
+                    window.ChartRenderer.destroyChart(graphContainer.id);
+                } catch (error) {
+                    console.warn(`Error destroying chart for container ${graphContainer.id}:`, error);
+                }
+            }
+        }
+        
+        const columnId = colElement.dataset.columnId || colElement.id || null;
+        
+        colElement.remove();
+        
+        if (this.layout && this.layout.rows) {
+            this.layout.rows.forEach(row => {
+                if (row.columns) {
+                    row.columns = row.columns.filter(col => {
+                        if (columnId && col.id === columnId) {
+                            return false;
+                        }
+                        
+                        if (uniqueId && col.id) {
+                            const uniqueSuffix = uniqueId.split('-').pop();
+                            if (col.id.includes(uniqueSuffix)) {
+                                return false;
+                            }
+                        }
+                        
+                        return true;
+                    });
+                }
+            });
+        }
+        
+        setTimeout(() => {
+            this.applySpacingToAllCharts();
+        }, 100);
+        
         this.saveLayout();
+        
+        const chartDef = this.chartDefinitions[chartId] || window.CHART_DEFINITIONS?.[chartId];
+        const chartName = chartDef ? chartDef.name : chartId;
+        this.showNotification(`Chart "${chartName}" removed successfully`, 'success');
     }
     
     deleteRow(button) {

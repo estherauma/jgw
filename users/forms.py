@@ -180,6 +180,8 @@ class UserAdminForm(forms.ModelForm):
             "is_active",
             "groups",
             "receive_marketing_emails",
+            "dashboard_preferences",
+            "dashboard_preferences_version",
         ]
 
     def __init__(self, *args, **kwargs):

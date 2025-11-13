@@ -44,7 +44,7 @@ CHART_DEFINITIONS = {
         'supported_types': ['pie', 'doughnut', 'bar'],
         'waffle_flag': 'can_view_users_by_destination_country_chart',
         'default_size': 6,
-        'default_type': 'pie',
+        'default_type': 'doughnut',
         'render_function': 'initUsersByDestinationChart',
         'data_variable': 'destinationData'
     },
