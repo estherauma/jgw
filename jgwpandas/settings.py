@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     "waffle",
     "import_export",
     # added/developed packages
-    "core",
+    "core.apps.CoreConfig",  # Use CoreConfig to initialize PostHog
     "events",
     "dashboard",
     "users",
