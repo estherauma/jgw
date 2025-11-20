@@ -23,6 +23,7 @@ from django.contrib.staticfiles import finders
 
 from users.tasks import send_email_notification
 from users.utils import get_user_destinations, get_user_factories, get_user_organisations
+from common.utils.posthog_helper import track_event, identify_user
 
 from .forms import (
     ChangeEmailForm,
@@ -88,7 +89,6 @@ def list_invitations(request):
 
 @login_required
 def logout_user(request):
-    # Calculate session duration if login time exists
     if 'login_time' in request.session:
         login_time = datetime.fromisoformat(request.session['login_time'])
         logout_time = datetime.now(timezone.utc)
@@ -109,6 +109,19 @@ def logout_user(request):
         request.session['logout_time'] = logout_time.isoformat()
         request.session['session_duration'] = session_duration
         
+        # Track logout event with PostHog before clearing session
+        user_id = request.session.get('user_id')
+        if user_id:
+            track_event(
+                event_name="user_logged_out",
+                user_id=str(user_id),
+                properties={
+                    "session_duration_seconds": session_duration,
+                    "session_duration_hours": round(session_duration / 3600, 2),
+                },
+                request=request
+            )
+        
         # Clear session data
         request.session.flush()
         
@@ -125,10 +138,39 @@ def create_user_account(request):
     if request.method == "POST":
         form = CreateUserForm(request.POST)
         if form.is_valid():
-            form.save(commit=True)
+            user = form.save(commit=True)
+            # Track user signup event with PostHog
+            track_event(
+                event_name="user_signed_up",
+                user_id=str(user.id),
+                user_email=user.email,
+                properties={
+                    "signup_method": "email",
+                    "is_active": user.is_active,
+                },
+                request=request
+            )
+            # Identify the user in PostHog
+            identify_user(
+                user_id=str(user.id),
+                user_email=user.email,
+                properties={
+                    "first_name": getattr(user, 'first_name', ''),
+                    "last_name": getattr(user, 'last_name', ''),
+                },
+                request=request
+            )
             messages.info(request, _("createUserAccountViewInfo"))
             return redirect("users:login_user")
         else:
+            # Track failed signup attempt
+            track_event(
+                event_name="user_signup_failed",
+                properties={
+                    "errors": form.errors,
+                },
+                request=request
+            )
             messages.error(request, _("createUserAccountViewError"))
     return render(request, "users/sign_up.html", context={"form": form})
 
@@ -153,11 +195,38 @@ def login_user(request):
                     request.session['user_id'] = user.id
                     request.session['user_role'] = user.groups.first().name if user.groups.exists() else 'No Role'
 
+                    # Track successful login with PostHog
+                    track_event(
+                        event_name="user_logged_in",
+                        user_id=str(user.id),
+                        user_email=user.email,
+                        properties={
+                            "user_role": request.session.get('user_role'),
+                            "is_staff": user.is_staff,
+                        },
+                        request=request
+                    )
+                    # Identify the user in PostHog
+                    identify_user(
+                        user_id=str(user.id),
+                        user_email=user.email,
+                        request=request
+                    )
+
                     if has_group(user, "Summerberry"):
                         return redirect("dashboard:summerberry-dashboard")
                     else:
                         return redirect("preference:user_overview")
                 else:
+                    # Track failed login attempt
+                    track_event(
+                        event_name="user_login_failed",
+                        user_email=email,
+                        properties={
+                            "reason": "invalid_password",
+                        },
+                        request=request
+                    )
                     messages.error(request, _("loginUserViewError"))
             except User.DoesNotExist:
                 messages.error(request, _("loginUserViewErrorNotUser"))
