@@ -1024,33 +1024,68 @@ body.modal-open {
 }
 
 .fullscreen-date-selector {
-    position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    background: #f8f9fa;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(25, 53, 96, 0.08);
 }
 
-.fullscreen-date-selector .form-control {
+.fullscreen-date-selector .date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+}
+
+.fullscreen-date-selector label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.fullscreen-date-selector input[type="date"] {
     border: 1px solid #dee2e6;
     border-radius: 6px;
-    padding: 8px 40px 8px 12px;
+    padding: 8px 12px;
+    background: #fff;
     font-size: 14px;
-    color: #6c757d;
-    background: #f8f9fa;
-    cursor: pointer;
-    min-width: 200px;
+    color: #193560;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-.fullscreen-date-selector i {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d;
-    pointer-events: none;
+.fullscreen-date-selector input[type="date"]:focus {
+    border-color: #37C1E3;
+    box-shadow: 0 0 0 2px rgba(55, 193, 227, 0.2);
+    outline: none;
 }
 
-#fullscreen-date-range-icon {
-    cursor: pointer;
-    pointer-events: all;
+.fullscreen-date-selector .filter-action {
+    display: flex;
+    align-items: flex-end;
+}
+
+.fullscreen-date-selector .filter-action .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+@media (max-width: 576px) {
+    .fullscreen-date-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .fullscreen-date-selector .date-field {
+        width: 100%;
+    }
 }
 
 /* Modal Backdrop with White Opacity */
