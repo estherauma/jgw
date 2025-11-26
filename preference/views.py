@@ -70,8 +70,6 @@ def user_overview(request):
     preferences_by_sectors = get_preferences_by_sectors(**filters, current_user=request.user)
     sws_workcodes_with_access_code = get_sws_workcodes_with_access_code(**filters, current_user=request.user)
     monthly_active_users = get_monthly_active_user_count(**filters, current_user=request.user)
-    print(monthly_active_users)
-    print("--------------------------------")
     total_active_users = get_total_active_user_within_period(**filters, current_user=request.user)
     user_counts_by_origin_destination = get_user_counts_by_origin_destination(
         **filters, current_user=request.user
