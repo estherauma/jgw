@@ -1,7 +1,13 @@
 import os
-from django.apps import AppConfig
-from posthog import Posthog
 import sys
+
+from django.apps import AppConfig
+from django.conf import settings
+
+try:
+    import posthog
+except ImportError:
+    posthog = None
 
 
 class CoreConfig(AppConfig):
@@ -14,16 +20,19 @@ class CoreConfig(AppConfig):
         PostHog configuration is loaded from environment variables.
         Exception autocapture requires PostHog SDK v3.7.0 or higher.
         """
-        if 'migrate' not in sys.argv and 'makemigrations' not in sys.argv:
-            try:
-                posthog_api_key = os.getenv('POSTHOG_API_KEY')
-                posthog_host = os.getenv('POSTHOG_HOST', 'https://us.i.posthog.com')
-                
-                if posthog_api_key:
-                        self.posthog = Posthog(
-                            posthog_api_key,
-                            host=posthog_host,
-                            enable_exception_autocapture=True
-                        )
-            except ImportError:
-                pass
+        if posthog is None:
+            return
+
+        if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
+            return
+
+        posthog_api_key = getattr(settings, 'POSTHOG_PROJECT_API_KEY', None)
+        posthog_host = getattr(settings, 'POSTHOG_HOST', os.getenv('POSTHOG_HOST', 'https://us.i.posthog.com'))
+
+        if not posthog_api_key:
+            return
+
+        posthog.project_api_key = posthog_api_key
+        posthog.host = posthog_host
+        posthog.disabled = False
+        posthog.debug = bool(getattr(settings, 'DEBUG', False))

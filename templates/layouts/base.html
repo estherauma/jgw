@@ -39,9 +39,7 @@
         <link rel="stylesheet" href="{% static 'dashboard/css/bootstrap-multiselect.css' %} " />
         <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
         
-        <style>
-            {% block styles %}{% endblock %}
-        </style>
+        {% block styles %}{% endblock %}
     </head>
 
     <body  data-layout-mode="detached" data-theme="light" data-topbar-color="dark" data-menu-position="fixed" data-leftbar-color="light" data-leftbar-size='default' data-sidebar-user='true'>
@@ -120,6 +118,7 @@
         <script src="{% static 'dashboard/js/charts/bar.js' %}"></script>
 
         {% block scripts %}{% endblock scripts %}
+        {% include 'includes/posthog_snippet.html' %}
         <script>
 
             var start = moment().subtract(29, 'days');
