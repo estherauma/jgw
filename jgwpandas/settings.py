@@ -43,6 +43,13 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(" ")
 
+# PostHog configuration
+POSTHOG_PROJECT_API_KEY = os.getenv("POSTHOG_PROJECT_API_KEY") or os.getenv("POSTHOG_API_KEY")
+POSTHOG_HOST = os.getenv("POSTHOG_HOST", "https://us.i.posthog.com")
+POSTHOG_DEFAULTS_DATE = os.getenv("POSTHOG_DEFAULTS_DATE", "")
+POSTHOG_WEB_ENABLED = os.getenv("POSTHOG_WEB_ENABLED", "True").lower() == "true"
+POSTHOG_SKIP_LOCALHOST = os.getenv("POSTHOG_SKIP_LOCALHOST", "False").lower() == "true"
+
 
 # Application definition
 
@@ -108,6 +115,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "common.custom_utils_context_preprocessors.google_analytics_id",
+                "common.custom_utils_context_preprocessors.posthog_web_config",
                 "common.custom_context_processor.export_buttons_config_list",
             ],
         },
