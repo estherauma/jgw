@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from django.shortcuts import render
 from common.const.value_const import COUNTRY_COORDS
 from common.utils.request import get_form_filter_params
@@ -550,5 +551,589 @@ def reset_dashboard(request):
         return JsonResponse({'status': 'success', 'message': 'Dashboard reset to default'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_monthly_active_users(request):
+    """Return monthly active user data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        results = get_monthly_active_user_count(
+            start_date=start_date,
+            end_date=end_date,
+            current_user=request.user
+        )
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger = logging.getLogger(__name__)
+        logger.error("Error filtering monthly active users: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_users_by_origin(request):
+    """Return users by origin country data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = preferences_by_origin(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering users by origin: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_users_by_gender(request):
+    """Return users by gender data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = preferences_by_gender(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering users by gender: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_users_by_destination(request):
+    """Return users by destination country data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = preferences_by_destination(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering users by destination: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_users_by_language(request):
+    """Return users by language data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = preferences_by_language(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering users by language: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_users_by_state(request):
+    """Return users by state data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = get_users_by_country_state(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering users by state: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_users_by_immigration(request):
+    """Return users by immigration status data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = preferences_by_immigration_status(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering users by immigration status: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_users_by_age(request):
+    """Return users by age data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = preferences_by_age(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering users by age: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_users_by_sector(request):
+    """Return users by sector data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = get_preferences_by_sectors(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering users by sector: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_work_code_usage(request):
+    """Return work code usage data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = get_sws_workcodes_with_access_code(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering work code usage: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
+
+
+@login_required
+@require_http_methods(["POST"])
+def filter_new_users_by_month(request):
+    """Return new monthly users data for provided date range"""
+    logger = logging.getLogger(__name__)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload'}, status=400)
+    
+    start_date = payload.get('start_date')
+    end_date = payload.get('end_date')
+    
+    if not start_date or not end_date:
+        return JsonResponse(
+            {'status': 'error', 'message': 'start_date and end_date are required'},
+            status=400
+        )
+    
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Dates must be in YYYY-MM-DD format'},
+            status=400
+        )
+    
+    try:
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        results = get_cumulative_monthly_new_users(**filters, current_user=request.user)
+        serialized_results = json.loads(json.dumps(results, cls=DjangoJSONEncoder))
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': serialized_results,
+            'metadata': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        })
+    except Exception as exc:
+        logger.error("Error filtering new users by month: %s", exc, exc_info=True)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
+            status=500
+        )
 
 

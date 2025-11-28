@@ -34,8 +34,19 @@
                         </div>
                     </div>
                     <div class="fullscreen-date-selector">
-                        <input type="text" class="form-control" placeholder="Select date range" id="fullscreen-date-range" readonly>
-                        <i class="fas fa-calendar" id="fullscreen-date-range-icon"></i>
+                        <div class="date-field">
+                            <label for="fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="fullscreen-start-date">
+                        </div>
+                        <div class="date-field">
+                            <label for="fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="fullscreen-end-date">
+                        </div>
+                        <div class="filter-action">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="monthly-active-users-fullscreen-chart" style="height: 500px;"></div>
@@ -55,6 +66,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="origin-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="origin-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="origin-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="origin-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="origin-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="users-by-origin-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -66,12 +94,29 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content fullscreen-chart-modal">
             <div class="modal-header">
-                <h4 class="modal-title" id="gender-fullscreen-modal-label">User Age</h4>
+                <h4 class="modal-title" id="gender-fullscreen-modal-label">User by Gender</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="gender-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="gender-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="gender-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="gender-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="gender-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="users-by-gender-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -89,6 +134,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="destination-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="destination-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="destination-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="destination-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="destination-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="users-by-destination-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -106,6 +168,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="language-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="language-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="language-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="language-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="language-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="users-by-language-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -123,6 +202,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="state-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="state-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="state-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="state-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="state-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="users-by-state-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -140,6 +236,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="immigration-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="immigration-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="immigration-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="immigration-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="immigration-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="users-by-immigration-status-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -157,6 +270,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="age-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="age-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="age-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="age-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="age-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="users-by-age-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -174,6 +304,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="sector-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="sector-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="sector-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="sector-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="sector-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="users-by-sector-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -191,6 +338,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="new-users-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="new-users-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="new-users-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="new-users-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="new-users-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="monthly-users-overview-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -208,6 +372,23 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="fullscreen-chart-header">
+                    <div class="fullscreen-date-selector col-md-12">
+                        <div class="date-field col-md-4">
+                            <label for="workcode-fullscreen-start-date">{% translate "genericFilterFormStartDate" %}</label>
+                            <input type="date" class="form-control" id="workcode-fullscreen-start-date">
+                        </div>
+                        <div class="date-field col-md-4">
+                            <label for="workcode-fullscreen-end-date">{% translate "genericFilterFormEndDate" %}</label>
+                            <input type="date" class="form-control" id="workcode-fullscreen-end-date">
+                        </div>
+                        <div class="filter-action col-md-4">
+                            <button type="button" class="btn btn-primary text-center bg-jgw-deep-blue text-white" id="workcode-fullscreen-apply-filter">
+                                <i class="fe-filter me-1"></i> {% translate "userOverviewFilterButton" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="work-code-usage-fullscreen-chart" style="height: 500px;"></div>
             </div>
         </div>
@@ -825,7 +1006,7 @@
     var usersByCountryStateChartData = {{ users_by_country_state | safe }};
     var usersBySectorsChartData = {{ preferences_by_sectors | safe }};
     const swsWorkcodesWithAccessCode = {{ sws_workcodes_with_access_code | safe }};
-    const monthlyActiveUserCountData = {{ monthly_active_user_count | safe }};
+    let monthlyActiveUserCountData = {{ monthly_active_user_count | safe }};
     window.monthlyActiveUserCountData = monthlyActiveUserCountData; 
     const getUserCountsByOriginDestination = {{ get_user_counts_by_origin_destination | safe }};
     const getUserCountsByGeolocation = {{ get_user_counts_by_geolocation | safe }};
@@ -916,6 +1097,148 @@
     
     let fullscreenChartInstance = null;
     let currentDateRange = null;
+    let currentFullscreenChartType = 'bar'; 
+    const fullscreenStartInput = document.getElementById('fullscreen-start-date');
+    const fullscreenEndInput = document.getElementById('fullscreen-end-date');
+    const fullscreenFilterButton = document.getElementById('fullscreen-apply-filter');
+    let fullscreenDefaultStartDate = null;
+    let fullscreenDefaultEndDate = null;
+    
+    function getCsrfToken() {
+        const match = document.cookie.match(/csrftoken=([^;]+)/);
+        return match ? match[1] : '';
+    }
+    
+    function getCurrentChartType(chartId) {
+        if (window.dashboardCustomizer && window.dashboardCustomizer.layout && window.dashboardCustomizer.layout.rows) {
+            for (const row of window.dashboardCustomizer.layout.rows) {
+                if (row.columns) {
+                    for (const col of row.columns) {
+                        if (col.chart_id === chartId && col.settings && col.settings.chart_type) {
+                            return col.settings.chart_type.toLowerCase().trim();
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (typeof dashboardLayout !== 'undefined' && dashboardLayout && dashboardLayout.rows) {
+            for (const row of dashboardLayout.rows) {
+                if (row.columns) {
+                    for (const col of row.columns) {
+                        if (col.chart_id === chartId && col.settings && col.settings.chart_type) {
+                            return col.settings.chart_type.toLowerCase().trim();
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (window.CHART_DEFINITIONS && window.CHART_DEFINITIONS[chartId]) {
+            return window.CHART_DEFINITIONS[chartId].default_type || 'bar';
+        }
+        
+        return 'bar'; 
+    }
+    
+    function setFullscreenDateInputs(startDate, endDate) {
+        fullscreenDefaultStartDate = startDate;
+        fullscreenDefaultEndDate = endDate;
+
+        if (fullscreenStartInput) {
+            fullscreenStartInput.value = startDate;
+            fullscreenStartInput.setAttribute('max', endDate);
+        }
+
+        if (fullscreenEndInput) {
+            fullscreenEndInput.value = endDate;
+            fullscreenEndInput.setAttribute('min', startDate);
+        }
+
+        currentDateRange = { start: startDate, end: endDate };
+    }
+
+    function handleFullscreenDateChange(changedField) {
+        if (!fullscreenStartInput || !fullscreenEndInput) {
+            return;
+        }
+
+        let startVal = fullscreenStartInput.value || fullscreenDefaultStartDate;
+        let endVal = fullscreenEndInput.value || fullscreenDefaultEndDate;
+
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                fullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                fullscreenStartInput.value = startVal;
+            }
+        }
+
+        fullscreenStartInput.setAttribute('max', endVal);
+        fullscreenEndInput.setAttribute('min', startVal);
+
+        fullscreenDefaultStartDate = startVal;
+        fullscreenDefaultEndDate = endVal;
+
+        currentDateRange = { start: startVal, end: endVal };
+    }
+
+    if (fullscreenStartInput && fullscreenEndInput) {
+        fullscreenStartInput.addEventListener('change', () => handleFullscreenDateChange('start'));
+        fullscreenEndInput.addEventListener('change', () => handleFullscreenDateChange('end'));
+    }
+
+    if (fullscreenFilterButton) {
+        fullscreenFilterButton.addEventListener('click', () => {
+            applyFullscreenFilter();
+        });
+    }
+    
+    async function applyFullscreenFilter() {
+        if (!currentDateRange || !currentDateRange.start || !currentDateRange.end) {
+            return;
+        }
+        
+        if (fullscreenFilterButton) {
+            fullscreenFilterButton.disabled = true;
+            fullscreenFilterButton.dataset.originalText = fullscreenFilterButton.innerHTML;
+            fullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/monthly-active-users/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: currentDateRange.start,
+                    end_date: currentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            monthlyActiveUserCountData = data.data || [];
+            window.monthlyActiveUserCountData = monthlyActiveUserCountData;
+            reloadFullscreenChart(currentDateRange, currentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (fullscreenFilterButton) {
+                fullscreenFilterButton.disabled = false;
+                fullscreenFilterButton.innerHTML = fullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
     
     $('#monthly-active-users-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('monthly-active-users-fullscreen-chart');
@@ -927,58 +1250,24 @@
             }
         }
         
-        const datePickerInput = $('#fullscreen-date-range');
+        // Get current chart type from dashboard preferences
+        currentFullscreenChartType = getCurrentChartType('monthly_active_users');
         
+        let defaultStartDate;
+        let defaultEndDate;
         {% if filter_form.start_date.value and filter_form.end_date.value %}
-            const defaultStartDate = '{{filter_form.start_date.value}}';
-            const defaultEndDate = '{{filter_form.end_date.value}}';
+            defaultStartDate = '{{filter_form.start_date.value}}';
+            defaultEndDate = '{{filter_form.end_date.value}}';
         {% else %}
-            const defaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
-            const defaultEndDate = moment().format('YYYY-MM-DD');
+            defaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            defaultEndDate = moment().format('YYYY-MM-DD');
         {% endif %}
         
-        datePickerInput.daterangepicker({
-            startDate: defaultStartDate,
-            endDate: defaultEndDate,
-            maxDate: moment(),
-            locale: {
-                format: 'DD MMM, YYYY'
-            },
-            ranges: {
-                'Today': [moment(), moment()],
-                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'Last 13 Months': [moment().subtract(13, 'months'), moment()],
-            }
-        }, function(start, end) {
-            const formattedRange = start.format('DD MMM, YYYY') + ' - ' + end.format('DD MMM, YYYY');
-            datePickerInput.val(formattedRange);
-            
-            currentDateRange = {
-                start: start.format('YYYY-MM-DD'),
-                end: end.format('YYYY-MM-DD')
-            };
-            
-            reloadFullscreenChart(currentDateRange);
-        });
-        
-        const initialStart = moment(defaultStartDate);
-        const initialEnd = moment(defaultEndDate);
-        datePickerInput.val(initialStart.format('DD MMM, YYYY') + ' - ' + initialEnd.format('DD MMM, YYYY'));
-        currentDateRange = {
-            start: defaultStartDate,
-            end: defaultEndDate
-        };
+        setFullscreenDateInputs(defaultStartDate, defaultEndDate);
         
         setTimeout(() => {
-            reloadFullscreenChart(currentDateRange);
+            reloadFullscreenChart(currentDateRange, currentFullscreenChartType);
         }, 50);
-        
-        $('#fullscreen-date-range-icon').on('click', function() {
-            datePickerInput.focus();
-            datePickerInput.data('daterangepicker').show();
-        });
     });
     
     $('#monthly-active-users-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -986,11 +1275,6 @@
         if (fullscreenChart) {
             fullscreenChart.dispose();
         }
-        const daterangepicker = $('#fullscreen-date-range').data('daterangepicker');
-        if (daterangepicker) {
-            daterangepicker.remove();
-        }
-        $('#fullscreen-date-range-icon').off('click');
     });
     
     $(window).on('resize', function() {
@@ -1001,23 +1285,155 @@
             }
         }
     });
-    
+
+    // New users fullscreen chart 
     let monthlyUsersOverviewFullscreenChart = null;
+    let newUsersCurrentDateRange = null;
+    
+    const newUsersFullscreenStartInput = document.getElementById('new-users-fullscreen-start-date');
+    const newUsersFullscreenEndInput = document.getElementById('new-users-fullscreen-end-date');
+    const newUsersFullscreenFilterButton = document.getElementById('new-users-fullscreen-apply-filter');
+    let newUsersFullscreenDefaultStartDate;
+    let newUsersFullscreenDefaultEndDate;
+    
+    function setNewUsersFullscreenDateInputs(startDate, endDate) {
+        if (newUsersFullscreenStartInput && newUsersFullscreenEndInput) {
+            newUsersFullscreenStartInput.value = startDate;
+            newUsersFullscreenEndInput.value = endDate;
+            newUsersFullscreenDefaultStartDate = startDate;
+            newUsersFullscreenDefaultEndDate = endDate;
+            newUsersCurrentDateRange = { start: startDate, end: endDate };
+            
+            newUsersFullscreenStartInput.setAttribute('min', startDate);
+            newUsersFullscreenStartInput.setAttribute('max', endDate);
+            newUsersFullscreenEndInput.setAttribute('min', startDate);
+            newUsersFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleNewUsersFullscreenDateChange(changedField) {
+        if (!newUsersFullscreenStartInput || !newUsersFullscreenEndInput) return;
+        
+        let startVal = newUsersFullscreenStartInput.value || newUsersFullscreenDefaultStartDate;
+        let endVal = newUsersFullscreenEndInput.value || newUsersFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                newUsersFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                newUsersFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        newUsersFullscreenStartInput.setAttribute('max', endVal);
+        newUsersFullscreenEndInput.setAttribute('min', startVal);
+        
+        newUsersFullscreenDefaultStartDate = startVal;
+        newUsersFullscreenDefaultEndDate = endVal;
+        
+        newUsersCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (newUsersFullscreenStartInput && newUsersFullscreenEndInput) {
+        newUsersFullscreenStartInput.addEventListener('change', () => handleNewUsersFullscreenDateChange('start'));
+        newUsersFullscreenEndInput.addEventListener('change', () => handleNewUsersFullscreenDateChange('end'));
+    }
+    
+    if (newUsersFullscreenFilterButton) {
+        newUsersFullscreenFilterButton.addEventListener('click', () => {
+            applyNewUsersFullscreenFilter();
+        });
+    }
+    
+    async function applyNewUsersFullscreenFilter() {
+        if (!newUsersCurrentDateRange || !newUsersCurrentDateRange.start || !newUsersCurrentDateRange.end) {
+            return;
+        }
+        
+        if (newUsersFullscreenFilterButton) {
+            newUsersFullscreenFilterButton.disabled = true;
+            newUsersFullscreenFilterButton.dataset.originalText = newUsersFullscreenFilterButton.innerHTML;
+            newUsersFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/new-users-by-month/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: newUsersCurrentDateRange.start,
+                    end_date: newUsersCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            preferenceMonthlyUsersChartData = data.data || { labels: [], counts: [], cummulative_counts: [] };
+            window.preferenceMonthlyUsersChartData = preferenceMonthlyUsersChartData;
+            reloadNewUsersFullscreenChart();
+        } catch (error) {
+            console.error('Error fetching filtered new users data:', error);
+        } finally {
+            if (newUsersFullscreenFilterButton) {
+                newUsersFullscreenFilterButton.disabled = false;
+                newUsersFullscreenFilterButton.innerHTML = newUsersFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadNewUsersFullscreenChart() {
+        const fullscreenContainer = document.getElementById('monthly-users-overview-fullscreen-chart');
+        if (!fullscreenContainer) return;
+        
+        if (monthlyUsersOverviewFullscreenChart) {
+            monthlyUsersOverviewFullscreenChart.dispose();
+        }
+        
+        monthlyUsersOverviewFullscreenChart = initPreferencesMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData, 'monthly-users-overview-fullscreen-chart');
+        if (monthlyUsersOverviewFullscreenChart) {
+            setTimeout(() => {
+                monthlyUsersOverviewFullscreenChart.resize();
+            }, 100);
+        }
+    }
+    
     $('#monthly-users-overview-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('monthly-users-overview-fullscreen-chart');
         if (fullscreenContainer) {
             const existingChart = echarts.getInstanceByDom(fullscreenContainer);
             if (existingChart) existingChart.dispose();
+            
+            {% if filter_form.start_date.value and filter_form.end_date.value %}
+                newUsersFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+                newUsersFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+            {% else %}
+                newUsersFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+                newUsersFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+            {% endif %}
+            
+            setNewUsersFullscreenDateInputs(newUsersFullscreenDefaultStartDate, newUsersFullscreenDefaultEndDate);
+            
             setTimeout(() => {
-                monthlyUsersOverviewFullscreenChart = initPreferencesMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData, 'monthly-users-overview-fullscreen-chart');
-                if (monthlyUsersOverviewFullscreenChart) monthlyUsersOverviewFullscreenChart.resize();
+                reloadNewUsersFullscreenChart();
             }, 50);
         }
     });
+    
     $('#monthly-users-overview-fullscreen-modal').on('hidden.bs.modal', function () {
         const fullscreenChart = echarts.getInstanceByDom(document.getElementById('monthly-users-overview-fullscreen-chart'));
         if (fullscreenChart) fullscreenChart.dispose();
     });
+    
     $(window).on('resize', function() {
         if ($('#monthly-users-overview-fullscreen-modal').hasClass('show')) {
             const fullscreenChart = echarts.getInstanceByDom(document.getElementById('monthly-users-overview-fullscreen-chart'));
@@ -1025,7 +1441,7 @@
         }
     });
 
-    function reloadFullscreenChart(dateRange) {
+    function reloadFullscreenChart(dateRange, chartType) {
         const fullscreenContainer = document.getElementById('monthly-active-users-fullscreen-chart');
         
         if (!fullscreenContainer) return;
@@ -1036,7 +1452,10 @@
         
         const filteredData = filterDataByDateRange(monthlyActiveUserCountData, dateRange.start, dateRange.end);
         
-        fullscreenChartInstance = initMonthlyActiveUsersChart(filteredData, 'monthly-active-users-fullscreen-chart');
+        // Use provided chartType or fallback to current stored type
+        const typeToUse = chartType || currentFullscreenChartType || 'bar';
+        
+        fullscreenChartInstance = initMonthlyActiveUsersChart(filteredData, 'monthly-active-users-fullscreen-chart', typeToUse);
         
         setTimeout(() => {
             if (fullscreenChartInstance) {
@@ -1055,8 +1474,133 @@
             return itemDate.isSameOrAfter(start, 'month') && itemDate.isSameOrBefore(end, 'month');
         });
     }
+
+    // Users by origin country fullscreen chart
     
     let originFullscreenChartInstance = null;
+    let originCurrentDateRange = null;
+    let originCurrentFullscreenChartType = 'bar';
+    
+    const originFullscreenStartInput = document.getElementById('origin-fullscreen-start-date');
+    const originFullscreenEndInput = document.getElementById('origin-fullscreen-end-date');
+    const originFullscreenFilterButton = document.getElementById('origin-fullscreen-apply-filter');
+    let originFullscreenDefaultStartDate;
+    let originFullscreenDefaultEndDate;
+    
+    function setOriginFullscreenDateInputs(startDate, endDate) {
+        if (originFullscreenStartInput && originFullscreenEndInput) {
+            originFullscreenStartInput.value = startDate;
+            originFullscreenEndInput.value = endDate;
+            originFullscreenDefaultStartDate = startDate;
+            originFullscreenDefaultEndDate = endDate;
+            originCurrentDateRange = { start: startDate, end: endDate };
+            
+            originFullscreenStartInput.setAttribute('min', startDate);
+            originFullscreenStartInput.setAttribute('max', endDate);
+            originFullscreenEndInput.setAttribute('min', startDate);
+            originFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleOriginFullscreenDateChange(changedField) {
+        if (!originFullscreenStartInput || !originFullscreenEndInput) return;
+        
+        let startVal = originFullscreenStartInput.value || originFullscreenDefaultStartDate;
+        let endVal = originFullscreenEndInput.value || originFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                originFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                originFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        originFullscreenStartInput.setAttribute('max', endVal);
+        originFullscreenEndInput.setAttribute('min', startVal);
+        
+        originFullscreenDefaultStartDate = startVal;
+        originFullscreenDefaultEndDate = endVal;
+        
+        originCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (originFullscreenStartInput && originFullscreenEndInput) {
+        originFullscreenStartInput.addEventListener('change', () => handleOriginFullscreenDateChange('start'));
+        originFullscreenEndInput.addEventListener('change', () => handleOriginFullscreenDateChange('end'));
+    }
+    
+    if (originFullscreenFilterButton) {
+        originFullscreenFilterButton.addEventListener('click', () => {
+            applyOriginFullscreenFilter();
+        });
+    }
+    
+    async function applyOriginFullscreenFilter() {
+        if (!originCurrentDateRange || !originCurrentDateRange.start || !originCurrentDateRange.end) {
+            return;
+        }
+        
+        if (originFullscreenFilterButton) {
+            originFullscreenFilterButton.disabled = true;
+            originFullscreenFilterButton.dataset.originalText = originFullscreenFilterButton.innerHTML;
+            originFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/users-by-origin/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: originCurrentDateRange.start,
+                    end_date: originCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            originData = data.data || { labels: [], counts: [] };
+            window.originData = originData;
+            reloadOriginFullscreenChart(originCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (originFullscreenFilterButton) {
+                originFullscreenFilterButton.disabled = false;
+                originFullscreenFilterButton.innerHTML = originFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadOriginFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('users-by-origin-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (originFullscreenChartInstance) {
+            originFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || originCurrentFullscreenChartType || 'bar';
+        
+        originFullscreenChartInstance = initUsersByOriginChart(originData, 'users-by-origin-fullscreen-chart', typeToUse);
+        
+        setTimeout(() => {
+            if (originFullscreenChartInstance) {
+                originFullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
     
     $('#users-by-origin-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('users-by-origin-fullscreen-chart');
@@ -1066,14 +1610,23 @@
             if (existingChart) {
                 existingChart.dispose();
             }
-            
-            setTimeout(() => {
-                originFullscreenChartInstance = initUsersByOriginChart(originData, 'users-by-origin-fullscreen-chart');
-                if (originFullscreenChartInstance) {
-                    originFullscreenChartInstance.resize();
-                }
-            }, 50);
         }
+        
+        originCurrentFullscreenChartType = getCurrentChartType('users_by_origin_country');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            originFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            originFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            originFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            originFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setOriginFullscreenDateInputs(originFullscreenDefaultStartDate, originFullscreenDefaultEndDate);
+        
+        setTimeout(() => {
+            reloadOriginFullscreenChart(originCurrentFullscreenChartType);
+        }, 50);
     });
     
     $('#users-by-origin-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -1092,7 +1645,131 @@
         }
     });
     
+    // Users by gender fullscreen chart
     let genderFullscreenChartInstance = null;
+    let genderCurrentDateRange = null;
+    let genderCurrentFullscreenChartType = 'pie';
+    
+    const genderFullscreenStartInput = document.getElementById('gender-fullscreen-start-date');
+    const genderFullscreenEndInput = document.getElementById('gender-fullscreen-end-date');
+    const genderFullscreenFilterButton = document.getElementById('gender-fullscreen-apply-filter');
+    let genderFullscreenDefaultStartDate;
+    let genderFullscreenDefaultEndDate;
+    
+    function setGenderFullscreenDateInputs(startDate, endDate) {
+        if (genderFullscreenStartInput && genderFullscreenEndInput) {
+            genderFullscreenStartInput.value = startDate;
+            genderFullscreenEndInput.value = endDate;
+            genderFullscreenDefaultStartDate = startDate;
+            genderFullscreenDefaultEndDate = endDate;
+            genderCurrentDateRange = { start: startDate, end: endDate };
+            
+            genderFullscreenStartInput.setAttribute('min', startDate);
+            genderFullscreenStartInput.setAttribute('max', endDate);
+            genderFullscreenEndInput.setAttribute('min', startDate);
+            genderFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleGenderFullscreenDateChange(changedField) {
+        if (!genderFullscreenStartInput || !genderFullscreenEndInput) return;
+        
+        let startVal = genderFullscreenStartInput.value || genderFullscreenDefaultStartDate;
+        let endVal = genderFullscreenEndInput.value || genderFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                genderFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                genderFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        genderFullscreenStartInput.setAttribute('max', endVal);
+        genderFullscreenEndInput.setAttribute('min', startVal);
+        
+        genderFullscreenDefaultStartDate = startVal;
+        genderFullscreenDefaultEndDate = endVal;
+        
+        genderCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (genderFullscreenStartInput && genderFullscreenEndInput) {
+        genderFullscreenStartInput.addEventListener('change', () => handleGenderFullscreenDateChange('start'));
+        genderFullscreenEndInput.addEventListener('change', () => handleGenderFullscreenDateChange('end'));
+    }
+    
+    if (genderFullscreenFilterButton) {
+        genderFullscreenFilterButton.addEventListener('click', () => {
+            applyGenderFullscreenFilter();
+        });
+    }
+    
+    async function applyGenderFullscreenFilter() {
+        if (!genderCurrentDateRange || !genderCurrentDateRange.start || !genderCurrentDateRange.end) {
+            return;
+        }
+        
+        if (genderFullscreenFilterButton) {
+            genderFullscreenFilterButton.disabled = true;
+            genderFullscreenFilterButton.dataset.originalText = genderFullscreenFilterButton.innerHTML;
+            genderFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/users-by-gender/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: genderCurrentDateRange.start,
+                    end_date: genderCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            genderData = data.data || { labels: [], counts: [] };
+            window.genderData = genderData;
+            reloadGenderFullscreenChart(genderCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (genderFullscreenFilterButton) {
+                genderFullscreenFilterButton.disabled = false;
+                genderFullscreenFilterButton.innerHTML = genderFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadGenderFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('users-by-gender-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (genderFullscreenChartInstance) {
+            genderFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || genderCurrentFullscreenChartType || 'pie';
+        
+        genderFullscreenChartInstance = initUsersByGenderChart(genderData, 'users-by-gender-fullscreen-chart', typeToUse);
+        
+        setTimeout(() => {
+            if (genderFullscreenChartInstance) {
+                genderFullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
     
     $('#users-by-gender-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('users-by-gender-fullscreen-chart');
@@ -1102,14 +1779,23 @@
             if (existingChart) {
                 existingChart.dispose();
             }
-            
-            setTimeout(() => {
-                genderFullscreenChartInstance = initUsersByGenderChart(genderData, 'users-by-gender-fullscreen-chart');
-                if (genderFullscreenChartInstance) {
-                    genderFullscreenChartInstance.resize();
-                }
-            }, 50);
         }
+        
+        genderCurrentFullscreenChartType = getCurrentChartType('users_by_gender');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            genderFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            genderFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            genderFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            genderFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setGenderFullscreenDateInputs(genderFullscreenDefaultStartDate, genderFullscreenDefaultEndDate);
+        
+        setTimeout(() => {
+            reloadGenderFullscreenChart(genderCurrentFullscreenChartType);
+        }, 50);
     });
     
     $('#users-by-gender-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -1128,7 +1814,131 @@
         }
     });
     
+    // Users by destination country fullscreen chart
     let destinationFullscreenChartInstance = null;
+    let destinationCurrentDateRange = null;
+    let destinationCurrentFullscreenChartType = 'doughnut';
+    
+    const destinationFullscreenStartInput = document.getElementById('destination-fullscreen-start-date');
+    const destinationFullscreenEndInput = document.getElementById('destination-fullscreen-end-date');
+    const destinationFullscreenFilterButton = document.getElementById('destination-fullscreen-apply-filter');
+    let destinationFullscreenDefaultStartDate;
+    let destinationFullscreenDefaultEndDate;
+    
+    function setDestinationFullscreenDateInputs(startDate, endDate) {
+        if (destinationFullscreenStartInput && destinationFullscreenEndInput) {
+            destinationFullscreenStartInput.value = startDate;
+            destinationFullscreenEndInput.value = endDate;
+            destinationFullscreenDefaultStartDate = startDate;
+            destinationFullscreenDefaultEndDate = endDate;
+            destinationCurrentDateRange = { start: startDate, end: endDate };
+            
+            destinationFullscreenStartInput.setAttribute('min', startDate);
+            destinationFullscreenStartInput.setAttribute('max', endDate);
+            destinationFullscreenEndInput.setAttribute('min', startDate);
+            destinationFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleDestinationFullscreenDateChange(changedField) {
+        if (!destinationFullscreenStartInput || !destinationFullscreenEndInput) return;
+        
+        let startVal = destinationFullscreenStartInput.value || destinationFullscreenDefaultStartDate;
+        let endVal = destinationFullscreenEndInput.value || destinationFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                destinationFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                destinationFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        destinationFullscreenStartInput.setAttribute('max', endVal);
+        destinationFullscreenEndInput.setAttribute('min', startVal);
+        
+        destinationFullscreenDefaultStartDate = startVal;
+        destinationFullscreenDefaultEndDate = endVal;
+        
+        destinationCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (destinationFullscreenStartInput && destinationFullscreenEndInput) {
+        destinationFullscreenStartInput.addEventListener('change', () => handleDestinationFullscreenDateChange('start'));
+        destinationFullscreenEndInput.addEventListener('change', () => handleDestinationFullscreenDateChange('end'));
+    }
+    
+    if (destinationFullscreenFilterButton) {
+        destinationFullscreenFilterButton.addEventListener('click', () => {
+            applyDestinationFullscreenFilter();
+        });
+    }
+    
+    async function applyDestinationFullscreenFilter() {
+        if (!destinationCurrentDateRange || !destinationCurrentDateRange.start || !destinationCurrentDateRange.end) {
+            return;
+        }
+        
+        if (destinationFullscreenFilterButton) {
+            destinationFullscreenFilterButton.disabled = true;
+            destinationFullscreenFilterButton.dataset.originalText = destinationFullscreenFilterButton.innerHTML;
+            destinationFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/users-by-destination/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: destinationCurrentDateRange.start,
+                    end_date: destinationCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            destinationData = data.data || { labels: [], counts: [] };
+            window.destinationData = destinationData;
+            reloadDestinationFullscreenChart(destinationCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (destinationFullscreenFilterButton) {
+                destinationFullscreenFilterButton.disabled = false;
+                destinationFullscreenFilterButton.innerHTML = destinationFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadDestinationFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('users-by-destination-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (destinationFullscreenChartInstance) {
+            destinationFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || destinationCurrentFullscreenChartType || 'doughnut';
+        
+        destinationFullscreenChartInstance = initUsersByDestinationChart(destinationData, 'users-by-destination-fullscreen-chart', typeToUse);
+        
+        setTimeout(() => {
+            if (destinationFullscreenChartInstance) {
+                destinationFullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
     
     $('#users-by-destination-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('users-by-destination-fullscreen-chart');
@@ -1138,14 +1948,23 @@
             if (existingChart) {
                 existingChart.dispose();
             }
-            
-            setTimeout(() => {
-                destinationFullscreenChartInstance = initUsersByDestinationChart(destinationData, 'users-by-destination-fullscreen-chart');
-                if (destinationFullscreenChartInstance) {
-                    destinationFullscreenChartInstance.resize();
-                }
-            }, 50);
         }
+        
+        destinationCurrentFullscreenChartType = getCurrentChartType('users_by_destination_country');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            destinationFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            destinationFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            destinationFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            destinationFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setDestinationFullscreenDateInputs(destinationFullscreenDefaultStartDate, destinationFullscreenDefaultEndDate);
+        
+        setTimeout(() => {
+            reloadDestinationFullscreenChart(destinationCurrentFullscreenChartType);
+        }, 50);
     });
     
     $('#users-by-destination-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -1164,7 +1983,131 @@
         }
     });
     
+    // Users by language fullscreen chart
     let languageFullscreenChartInstance = null;
+    let languageCurrentDateRange = null;
+    let languageCurrentFullscreenChartType = 'bar';
+    
+    const languageFullscreenStartInput = document.getElementById('language-fullscreen-start-date');
+    const languageFullscreenEndInput = document.getElementById('language-fullscreen-end-date');
+    const languageFullscreenFilterButton = document.getElementById('language-fullscreen-apply-filter');
+    let languageFullscreenDefaultStartDate;
+    let languageFullscreenDefaultEndDate;
+    
+    function setLanguageFullscreenDateInputs(startDate, endDate) {
+        if (languageFullscreenStartInput && languageFullscreenEndInput) {
+            languageFullscreenStartInput.value = startDate;
+            languageFullscreenEndInput.value = endDate;
+            languageFullscreenDefaultStartDate = startDate;
+            languageFullscreenDefaultEndDate = endDate;
+            languageCurrentDateRange = { start: startDate, end: endDate };
+            
+            languageFullscreenStartInput.setAttribute('min', startDate);
+            languageFullscreenStartInput.setAttribute('max', endDate);
+            languageFullscreenEndInput.setAttribute('min', startDate);
+            languageFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleLanguageFullscreenDateChange(changedField) {
+        if (!languageFullscreenStartInput || !languageFullscreenEndInput) return;
+        
+        let startVal = languageFullscreenStartInput.value || languageFullscreenDefaultStartDate;
+        let endVal = languageFullscreenEndInput.value || languageFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                languageFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                languageFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        languageFullscreenStartInput.setAttribute('max', endVal);
+        languageFullscreenEndInput.setAttribute('min', startVal);
+        
+        languageFullscreenDefaultStartDate = startVal;
+        languageFullscreenDefaultEndDate = endVal;
+        
+        languageCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (languageFullscreenStartInput && languageFullscreenEndInput) {
+        languageFullscreenStartInput.addEventListener('change', () => handleLanguageFullscreenDateChange('start'));
+        languageFullscreenEndInput.addEventListener('change', () => handleLanguageFullscreenDateChange('end'));
+    }
+    
+    if (languageFullscreenFilterButton) {
+        languageFullscreenFilterButton.addEventListener('click', () => {
+            applyLanguageFullscreenFilter();
+        });
+    }
+    
+    async function applyLanguageFullscreenFilter() {
+        if (!languageCurrentDateRange || !languageCurrentDateRange.start || !languageCurrentDateRange.end) {
+            return;
+        }
+        
+        if (languageFullscreenFilterButton) {
+            languageFullscreenFilterButton.disabled = true;
+            languageFullscreenFilterButton.dataset.originalText = languageFullscreenFilterButton.innerHTML;
+            languageFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/users-by-language/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: languageCurrentDateRange.start,
+                    end_date: languageCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+            return;
+        }
+        
+            languageData = data.data || { labels: [], counts: [] };
+            window.languageData = languageData;
+            reloadLanguageFullscreenChart(languageCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (languageFullscreenFilterButton) {
+                languageFullscreenFilterButton.disabled = false;
+                languageFullscreenFilterButton.innerHTML = languageFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadLanguageFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('users-by-language-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (languageFullscreenChartInstance) {
+            languageFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || languageCurrentFullscreenChartType || 'bar';
+        
+        languageFullscreenChartInstance = initUsersByLanguageChart(languageData, 'users-by-language-fullscreen-chart', typeToUse);
+        
+        setTimeout(() => {
+            if (languageFullscreenChartInstance) {
+                languageFullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
     
     $('#users-by-language-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('users-by-language-fullscreen-chart');
@@ -1174,14 +2117,23 @@
             if (existingChart) {
                 existingChart.dispose();
             }
-            
-            setTimeout(() => {
-                languageFullscreenChartInstance = initUsersByLanguageChart(languageData, 'users-by-language-fullscreen-chart');
-                if (languageFullscreenChartInstance) {
-                    languageFullscreenChartInstance.resize();
-                }
-            }, 50);
         }
+        
+        languageCurrentFullscreenChartType = getCurrentChartType('users_by_language');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            languageFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            languageFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            languageFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            languageFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setLanguageFullscreenDateInputs(languageFullscreenDefaultStartDate, languageFullscreenDefaultEndDate);
+        
+        setTimeout(() => {
+            reloadLanguageFullscreenChart(languageCurrentFullscreenChartType);
+        }, 50);
     });
     
     $('#users-by-language-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -1200,7 +2152,131 @@
         }
     });
     
+    // Users by state fullscreen chart
     let stateFullscreenChartInstance = null;
+    let stateCurrentDateRange = null;
+    let stateCurrentFullscreenChartType = 'bar';
+    
+    const stateFullscreenStartInput = document.getElementById('state-fullscreen-start-date');
+    const stateFullscreenEndInput = document.getElementById('state-fullscreen-end-date');
+    const stateFullscreenFilterButton = document.getElementById('state-fullscreen-apply-filter');
+    let stateFullscreenDefaultStartDate;
+    let stateFullscreenDefaultEndDate;
+    
+    function setStateFullscreenDateInputs(startDate, endDate) {
+        if (stateFullscreenStartInput && stateFullscreenEndInput) {
+            stateFullscreenStartInput.value = startDate;
+            stateFullscreenEndInput.value = endDate;
+            stateFullscreenDefaultStartDate = startDate;
+            stateFullscreenDefaultEndDate = endDate;
+            stateCurrentDateRange = { start: startDate, end: endDate };
+            
+            stateFullscreenStartInput.setAttribute('min', startDate);
+            stateFullscreenStartInput.setAttribute('max', endDate);
+            stateFullscreenEndInput.setAttribute('min', startDate);
+            stateFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleStateFullscreenDateChange(changedField) {
+        if (!stateFullscreenStartInput || !stateFullscreenEndInput) return;
+        
+        let startVal = stateFullscreenStartInput.value || stateFullscreenDefaultStartDate;
+        let endVal = stateFullscreenEndInput.value || stateFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                stateFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                stateFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        stateFullscreenStartInput.setAttribute('max', endVal);
+        stateFullscreenEndInput.setAttribute('min', startVal);
+        
+        stateFullscreenDefaultStartDate = startVal;
+        stateFullscreenDefaultEndDate = endVal;
+        
+        stateCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (stateFullscreenStartInput && stateFullscreenEndInput) {
+        stateFullscreenStartInput.addEventListener('change', () => handleStateFullscreenDateChange('start'));
+        stateFullscreenEndInput.addEventListener('change', () => handleStateFullscreenDateChange('end'));
+    }
+    
+    if (stateFullscreenFilterButton) {
+        stateFullscreenFilterButton.addEventListener('click', () => {
+            applyStateFullscreenFilter();
+        });
+    }
+    
+    async function applyStateFullscreenFilter() {
+        if (!stateCurrentDateRange || !stateCurrentDateRange.start || !stateCurrentDateRange.end) {
+            return;
+        }
+        
+        if (stateFullscreenFilterButton) {
+            stateFullscreenFilterButton.disabled = true;
+            stateFullscreenFilterButton.dataset.originalText = stateFullscreenFilterButton.innerHTML;
+            stateFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/users-by-state/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: stateCurrentDateRange.start,
+                    end_date: stateCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            usersByCountryStateChartData = data.data || { labels: [], counts: [] };
+            window.usersByCountryStateChartData = usersByCountryStateChartData;
+            reloadStateFullscreenChart(stateCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (stateFullscreenFilterButton) {
+                stateFullscreenFilterButton.disabled = false;
+                stateFullscreenFilterButton.innerHTML = stateFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadStateFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('users-by-state-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (stateFullscreenChartInstance) {
+            stateFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || stateCurrentFullscreenChartType || 'bar';
+        
+        stateFullscreenChartInstance = initUsersByStateChart(usersByCountryStateChartData, 'users-by-state-fullscreen-chart', typeToUse);
+        
+        setTimeout(() => {
+            if (stateFullscreenChartInstance) {
+                stateFullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
     
     $('#users-by-state-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('users-by-state-fullscreen-chart');
@@ -1210,14 +2286,23 @@
             if (existingChart) {
                 existingChart.dispose();
             }
-            
-            setTimeout(() => {
-                stateFullscreenChartInstance = initUsersByStateChart(usersByCountryStateChartData, 'users-by-state-fullscreen-chart');
-                if (stateFullscreenChartInstance) {
-                    stateFullscreenChartInstance.resize();
-                }
-            }, 50);
         }
+        
+        stateCurrentFullscreenChartType = getCurrentChartType('users_by_country_state');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            stateFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            stateFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            stateFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            stateFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setStateFullscreenDateInputs(stateFullscreenDefaultStartDate, stateFullscreenDefaultEndDate);
+        
+        setTimeout(() => {
+            reloadStateFullscreenChart(stateCurrentFullscreenChartType);
+        }, 50);
     });
     
     $('#users-by-state-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -1236,7 +2321,131 @@
         }
     });
         
+    // Users by immigration status fullscreen chart
     let immigrationStatusFullscreenChartInstance = null;
+    let immigrationCurrentDateRange = null;
+    let immigrationCurrentFullscreenChartType = 'bar';
+    
+    const immigrationFullscreenStartInput = document.getElementById('immigration-fullscreen-start-date');
+    const immigrationFullscreenEndInput = document.getElementById('immigration-fullscreen-end-date');
+    const immigrationFullscreenFilterButton = document.getElementById('immigration-fullscreen-apply-filter');
+    let immigrationFullscreenDefaultStartDate;
+    let immigrationFullscreenDefaultEndDate;
+    
+    function setImmigrationFullscreenDateInputs(startDate, endDate) {
+        if (immigrationFullscreenStartInput && immigrationFullscreenEndInput) {
+            immigrationFullscreenStartInput.value = startDate;
+            immigrationFullscreenEndInput.value = endDate;
+            immigrationFullscreenDefaultStartDate = startDate;
+            immigrationFullscreenDefaultEndDate = endDate;
+            immigrationCurrentDateRange = { start: startDate, end: endDate };
+            
+            immigrationFullscreenStartInput.setAttribute('min', startDate);
+            immigrationFullscreenStartInput.setAttribute('max', endDate);
+            immigrationFullscreenEndInput.setAttribute('min', startDate);
+            immigrationFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleImmigrationFullscreenDateChange(changedField) {
+        if (!immigrationFullscreenStartInput || !immigrationFullscreenEndInput) return;
+        
+        let startVal = immigrationFullscreenStartInput.value || immigrationFullscreenDefaultStartDate;
+        let endVal = immigrationFullscreenEndInput.value || immigrationFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                immigrationFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                immigrationFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        immigrationFullscreenStartInput.setAttribute('max', endVal);
+        immigrationFullscreenEndInput.setAttribute('min', startVal);
+        
+        immigrationFullscreenDefaultStartDate = startVal;
+        immigrationFullscreenDefaultEndDate = endVal;
+        
+        immigrationCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (immigrationFullscreenStartInput && immigrationFullscreenEndInput) {
+        immigrationFullscreenStartInput.addEventListener('change', () => handleImmigrationFullscreenDateChange('start'));
+        immigrationFullscreenEndInput.addEventListener('change', () => handleImmigrationFullscreenDateChange('end'));
+    }
+    
+    if (immigrationFullscreenFilterButton) {
+        immigrationFullscreenFilterButton.addEventListener('click', () => {
+            applyImmigrationFullscreenFilter();
+        });
+    }
+    
+    async function applyImmigrationFullscreenFilter() {
+        if (!immigrationCurrentDateRange || !immigrationCurrentDateRange.start || !immigrationCurrentDateRange.end) {
+            return;
+        }
+        
+        if (immigrationFullscreenFilterButton) {
+            immigrationFullscreenFilterButton.disabled = true;
+            immigrationFullscreenFilterButton.dataset.originalText = immigrationFullscreenFilterButton.innerHTML;
+            immigrationFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/users-by-immigration/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: immigrationCurrentDateRange.start,
+                    end_date: immigrationCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            immigrationStatusData = data.data || { labels: [], counts: [] };
+            window.immigrationStatusData = immigrationStatusData;
+            reloadImmigrationFullscreenChart(immigrationCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (immigrationFullscreenFilterButton) {
+                immigrationFullscreenFilterButton.disabled = false;
+                immigrationFullscreenFilterButton.innerHTML = immigrationFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadImmigrationFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('users-by-immigration-status-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (immigrationStatusFullscreenChartInstance) {
+            immigrationStatusFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || immigrationCurrentFullscreenChartType || 'bar';
+        
+        immigrationStatusFullscreenChartInstance = initUsersByImmigrationStatusChart(immigrationStatusData, 'users-by-immigration-status-fullscreen-chart', typeToUse);
+        
+        setTimeout(() => {
+            if (immigrationStatusFullscreenChartInstance) {
+                immigrationStatusFullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
     
     $('#users-by-immigration-status-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('users-by-immigration-status-fullscreen-chart');
@@ -1246,14 +2455,23 @@
             if (existingChart) {
                 existingChart.dispose();
             }
-            
-            setTimeout(() => {
-                immigrationStatusFullscreenChartInstance = initUsersByImmigrationStatusChart(immigrationStatusData, 'users-by-immigration-status-fullscreen-chart');
-                if (immigrationStatusFullscreenChartInstance) {
-                    immigrationStatusFullscreenChartInstance.resize();
-                }
-            }, 50);
         }
+        
+        immigrationCurrentFullscreenChartType = getCurrentChartType('users_by_immigration_status');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            immigrationFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            immigrationFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            immigrationFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            immigrationFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setImmigrationFullscreenDateInputs(immigrationFullscreenDefaultStartDate, immigrationFullscreenDefaultEndDate);
+        
+        setTimeout(() => {
+            reloadImmigrationFullscreenChart(immigrationCurrentFullscreenChartType);
+        }, 50);
     });
     
     $('#users-by-immigration-status-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -1272,7 +2490,131 @@
         }
     });
     
+    // Users by age fullscreen chart
     let ageFullscreenChartInstance = null;
+    let ageCurrentDateRange = null;
+    let ageCurrentFullscreenChartType = 'pie';
+    
+    const ageFullscreenStartInput = document.getElementById('age-fullscreen-start-date');
+    const ageFullscreenEndInput = document.getElementById('age-fullscreen-end-date');
+    const ageFullscreenFilterButton = document.getElementById('age-fullscreen-apply-filter');
+    let ageFullscreenDefaultStartDate;
+    let ageFullscreenDefaultEndDate;
+    
+    function setAgeFullscreenDateInputs(startDate, endDate) {
+        if (ageFullscreenStartInput && ageFullscreenEndInput) {
+            ageFullscreenStartInput.value = startDate;
+            ageFullscreenEndInput.value = endDate;
+            ageFullscreenDefaultStartDate = startDate;
+            ageFullscreenDefaultEndDate = endDate;
+            ageCurrentDateRange = { start: startDate, end: endDate };
+            
+            ageFullscreenStartInput.setAttribute('min', startDate);
+            ageFullscreenStartInput.setAttribute('max', endDate);
+            ageFullscreenEndInput.setAttribute('min', startDate);
+            ageFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleAgeFullscreenDateChange(changedField) {
+        if (!ageFullscreenStartInput || !ageFullscreenEndInput) return;
+        
+        let startVal = ageFullscreenStartInput.value || ageFullscreenDefaultStartDate;
+        let endVal = ageFullscreenEndInput.value || ageFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                ageFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                ageFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        ageFullscreenStartInput.setAttribute('max', endVal);
+        ageFullscreenEndInput.setAttribute('min', startVal);
+        
+        ageFullscreenDefaultStartDate = startVal;
+        ageFullscreenDefaultEndDate = endVal;
+        
+        ageCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (ageFullscreenStartInput && ageFullscreenEndInput) {
+        ageFullscreenStartInput.addEventListener('change', () => handleAgeFullscreenDateChange('start'));
+        ageFullscreenEndInput.addEventListener('change', () => handleAgeFullscreenDateChange('end'));
+    }
+    
+    if (ageFullscreenFilterButton) {
+        ageFullscreenFilterButton.addEventListener('click', () => {
+            applyAgeFullscreenFilter();
+        });
+    }
+    
+    async function applyAgeFullscreenFilter() {
+        if (!ageCurrentDateRange || !ageCurrentDateRange.start || !ageCurrentDateRange.end) {
+            return;
+        }
+        
+        if (ageFullscreenFilterButton) {
+            ageFullscreenFilterButton.disabled = true;
+            ageFullscreenFilterButton.dataset.originalText = ageFullscreenFilterButton.innerHTML;
+            ageFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/users-by-age/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: ageCurrentDateRange.start,
+                    end_date: ageCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            ageData = data.data || { labels: [], counts: [] };
+            window.ageData = ageData;
+            reloadAgeFullscreenChart(ageCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (ageFullscreenFilterButton) {
+                ageFullscreenFilterButton.disabled = false;
+                ageFullscreenFilterButton.innerHTML = ageFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadAgeFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('users-by-age-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (ageFullscreenChartInstance) {
+            ageFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || ageCurrentFullscreenChartType || 'pie';
+        
+        ageFullscreenChartInstance = initUsersByAgeChart(ageData, 'users-by-age-fullscreen-chart', typeToUse);
+        
+        setTimeout(() => {
+            if (ageFullscreenChartInstance) {
+                ageFullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
     
     $('#users-by-age-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('users-by-age-fullscreen-chart');
@@ -1282,14 +2624,23 @@
             if (existingChart) {
                 existingChart.dispose();
             }
-            
-            setTimeout(() => {
-                ageFullscreenChartInstance = initUsersByAgeChart(ageData, 'users-by-age-fullscreen-chart');
-                if (ageFullscreenChartInstance) {
-                    ageFullscreenChartInstance.resize();
-                }
-            }, 50);
         }
+        
+        ageCurrentFullscreenChartType = getCurrentChartType('users_by_age');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            ageFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            ageFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            ageFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            ageFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setAgeFullscreenDateInputs(ageFullscreenDefaultStartDate, ageFullscreenDefaultEndDate);
+        
+        setTimeout(() => {
+            reloadAgeFullscreenChart(ageCurrentFullscreenChartType);
+        }, 50);
     });
     
     $('#users-by-age-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -1308,7 +2659,131 @@
         }
     });
     
+    // Users by sector fullscreen chart
     let sectorFullscreenChartInstance = null;
+    let sectorCurrentDateRange = null;
+    let sectorCurrentFullscreenChartType = 'bar';
+    
+    const sectorFullscreenStartInput = document.getElementById('sector-fullscreen-start-date');
+    const sectorFullscreenEndInput = document.getElementById('sector-fullscreen-end-date');
+    const sectorFullscreenFilterButton = document.getElementById('sector-fullscreen-apply-filter');
+    let sectorFullscreenDefaultStartDate;
+    let sectorFullscreenDefaultEndDate;
+    
+    function setSectorFullscreenDateInputs(startDate, endDate) {
+        if (sectorFullscreenStartInput && sectorFullscreenEndInput) {
+            sectorFullscreenStartInput.value = startDate;
+            sectorFullscreenEndInput.value = endDate;
+            sectorFullscreenDefaultStartDate = startDate;
+            sectorFullscreenDefaultEndDate = endDate;
+            sectorCurrentDateRange = { start: startDate, end: endDate };
+            
+            sectorFullscreenStartInput.setAttribute('min', startDate);
+            sectorFullscreenStartInput.setAttribute('max', endDate);
+            sectorFullscreenEndInput.setAttribute('min', startDate);
+            sectorFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleSectorFullscreenDateChange(changedField) {
+        if (!sectorFullscreenStartInput || !sectorFullscreenEndInput) return;
+        
+        let startVal = sectorFullscreenStartInput.value || sectorFullscreenDefaultStartDate;
+        let endVal = sectorFullscreenEndInput.value || sectorFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                sectorFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                sectorFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        sectorFullscreenStartInput.setAttribute('max', endVal);
+        sectorFullscreenEndInput.setAttribute('min', startVal);
+        
+        sectorFullscreenDefaultStartDate = startVal;
+        sectorFullscreenDefaultEndDate = endVal;
+        
+        sectorCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (sectorFullscreenStartInput && sectorFullscreenEndInput) {
+        sectorFullscreenStartInput.addEventListener('change', () => handleSectorFullscreenDateChange('start'));
+        sectorFullscreenEndInput.addEventListener('change', () => handleSectorFullscreenDateChange('end'));
+    }
+    
+    if (sectorFullscreenFilterButton) {
+        sectorFullscreenFilterButton.addEventListener('click', () => {
+            applySectorFullscreenFilter();
+        });
+    }
+    
+    async function applySectorFullscreenFilter() {
+        if (!sectorCurrentDateRange || !sectorCurrentDateRange.start || !sectorCurrentDateRange.end) {
+            return;
+        }
+        
+        if (sectorFullscreenFilterButton) {
+            sectorFullscreenFilterButton.disabled = true;
+            sectorFullscreenFilterButton.dataset.originalText = sectorFullscreenFilterButton.innerHTML;
+            sectorFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/users-by-sector/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: sectorCurrentDateRange.start,
+                    end_date: sectorCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            usersBySectorsChartData = data.data || { labels: [], counts: [] };
+            window.usersBySectorsChartData = usersBySectorsChartData;
+            reloadSectorFullscreenChart(sectorCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (sectorFullscreenFilterButton) {
+                sectorFullscreenFilterButton.disabled = false;
+                sectorFullscreenFilterButton.innerHTML = sectorFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadSectorFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('users-by-sector-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (sectorFullscreenChartInstance) {
+            sectorFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || sectorCurrentFullscreenChartType || 'bar';
+        
+        sectorFullscreenChartInstance = initUsersBySectorChart(usersBySectorsChartData, 'users-by-sector-fullscreen-chart', typeToUse);
+        
+        setTimeout(() => {
+            if (sectorFullscreenChartInstance) {
+                sectorFullscreenChartInstance.resize();
+            }
+        }, 100);
+    }
     
     $('#users-by-sector-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('users-by-sector-fullscreen-chart');
@@ -1318,14 +2793,23 @@
             if (existingChart) {
                 existingChart.dispose();
             }
-            
-            setTimeout(() => {
-                sectorFullscreenChartInstance = initUsersBySectorChart(usersBySectorsChartData, 'users-by-sector-fullscreen-chart');
-                if (sectorFullscreenChartInstance) {
-                    sectorFullscreenChartInstance.resize();
-                }
-            }, 50);
         }
+        
+        sectorCurrentFullscreenChartType = getCurrentChartType('users_by_sector');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            sectorFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            sectorFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            sectorFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            sectorFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setSectorFullscreenDateInputs(sectorFullscreenDefaultStartDate, sectorFullscreenDefaultEndDate);
+        
+        setTimeout(() => {
+            reloadSectorFullscreenChart(sectorCurrentFullscreenChartType);
+        }, 50);
     });
     
     $('#users-by-sector-fullscreen-modal').on('hidden.bs.modal', function () {
@@ -1344,7 +2828,135 @@
         }
     });
     
+    // Work code usage fullscreen chart
     let workCodeUsageFullscreenChartInstance = null;
+    let workCodeCurrentDateRange = null;
+    let workCodeCurrentFullscreenChartType = 'bar';
+    
+    const workCodeFullscreenStartInput = document.getElementById('workcode-fullscreen-start-date');
+    const workCodeFullscreenEndInput = document.getElementById('workcode-fullscreen-end-date');
+    const workCodeFullscreenFilterButton = document.getElementById('workcode-fullscreen-apply-filter');
+    let workCodeFullscreenDefaultStartDate;
+    let workCodeFullscreenDefaultEndDate;
+    
+    function setWorkCodeFullscreenDateInputs(startDate, endDate) {
+        if (workCodeFullscreenStartInput && workCodeFullscreenEndInput) {
+            workCodeFullscreenStartInput.value = startDate;
+            workCodeFullscreenEndInput.value = endDate;
+            workCodeFullscreenDefaultStartDate = startDate;
+            workCodeFullscreenDefaultEndDate = endDate;
+            workCodeCurrentDateRange = { start: startDate, end: endDate };
+            
+            workCodeFullscreenStartInput.setAttribute('min', startDate);
+            workCodeFullscreenStartInput.setAttribute('max', endDate);
+            workCodeFullscreenEndInput.setAttribute('min', startDate);
+            workCodeFullscreenEndInput.setAttribute('max', endDate);
+        }
+    }
+    
+    function handleWorkCodeFullscreenDateChange(changedField) {
+        if (!workCodeFullscreenStartInput || !workCodeFullscreenEndInput) return;
+        
+        let startVal = workCodeFullscreenStartInput.value || workCodeFullscreenDefaultStartDate;
+        let endVal = workCodeFullscreenEndInput.value || workCodeFullscreenDefaultEndDate;
+        
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            if (changedField === 'start') {
+                endVal = startVal;
+                workCodeFullscreenEndInput.value = endVal;
+            } else {
+                startVal = endVal;
+                workCodeFullscreenStartInput.value = startVal;
+            }
+        }
+        
+        workCodeFullscreenStartInput.setAttribute('max', endVal);
+        workCodeFullscreenEndInput.setAttribute('min', startVal);
+        
+        workCodeFullscreenDefaultStartDate = startVal;
+        workCodeFullscreenDefaultEndDate = endVal;
+        
+        workCodeCurrentDateRange = { start: startVal, end: endVal };
+    }
+    
+    if (workCodeFullscreenStartInput && workCodeFullscreenEndInput) {
+        workCodeFullscreenStartInput.addEventListener('change', () => handleWorkCodeFullscreenDateChange('start'));
+        workCodeFullscreenEndInput.addEventListener('change', () => handleWorkCodeFullscreenDateChange('end'));
+    }
+    
+    if (workCodeFullscreenFilterButton) {
+        workCodeFullscreenFilterButton.addEventListener('click', () => {
+            applyWorkCodeFullscreenFilter();
+        });
+    }
+    
+    async function applyWorkCodeFullscreenFilter() {
+        if (!workCodeCurrentDateRange || !workCodeCurrentDateRange.start || !workCodeCurrentDateRange.end) {
+            return;
+        }
+        
+        if (workCodeFullscreenFilterButton) {
+            workCodeFullscreenFilterButton.disabled = true;
+            workCodeFullscreenFilterButton.dataset.originalText = workCodeFullscreenFilterButton.innerHTML;
+            workCodeFullscreenFilterButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Filtering...';
+        }
+        
+        try {
+            const response = await fetch('/preference/api/work-code-usage/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    start_date: workCodeCurrentDateRange.start,
+                    end_date: workCodeCurrentDateRange.end
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.status !== 'success') {
+                console.error('Failed to fetch filtered data:', data);
+                return;
+            }
+            
+            swsWorkcodesWithAccessCode = data.data || [];
+            window.swsWorkcodesWithAccessCode = swsWorkcodesWithAccessCode;
+            reloadWorkCodeFullscreenChart(workCodeCurrentFullscreenChartType);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        } finally {
+            if (workCodeFullscreenFilterButton) {
+                workCodeFullscreenFilterButton.disabled = false;
+                workCodeFullscreenFilterButton.innerHTML = workCodeFullscreenFilterButton.dataset.originalText || 'Filter';
+            }
+        }
+    }
+    
+    function reloadWorkCodeFullscreenChart(chartType) {
+        const fullscreenContainer = document.getElementById('work-code-usage-fullscreen-chart');
+        
+        if (!fullscreenContainer) return;
+        
+        if (workCodeUsageFullscreenChartInstance) {
+            workCodeUsageFullscreenChartInstance.dispose();
+        }
+        
+        const typeToUse = chartType || workCodeCurrentFullscreenChartType || 'bar';
+        
+        if (typeof swsWorkcodesWithAccessCode !== 'undefined' && swsWorkcodesWithAccessCode) {
+            workCodeUsageFullscreenChartInstance = initWorkCodeUsageChart(swsWorkcodesWithAccessCode, 'work-code-usage-fullscreen-chart', typeToUse);
+            
+            setTimeout(() => {
+                if (workCodeUsageFullscreenChartInstance) {
+                    workCodeUsageFullscreenChartInstance.resize();
+                }
+            }, 100);
+        } else {
+            console.error('Work Code Usage data not available:', swsWorkcodesWithAccessCode);
+        }
+    }
     
     $('#work-code-usage-fullscreen-modal').on('shown.bs.modal', function () {
         const fullscreenContainer = document.getElementById('work-code-usage-fullscreen-chart');
@@ -1359,17 +2971,20 @@
             existingChart.dispose();
         }
         
+        workCodeCurrentFullscreenChartType = getCurrentChartType('work_code_usage');
+        
+        {% if filter_form.start_date.value and filter_form.end_date.value %}
+            workCodeFullscreenDefaultStartDate = '{{filter_form.start_date.value}}';
+            workCodeFullscreenDefaultEndDate = '{{filter_form.end_date.value}}';
+        {% else %}
+            workCodeFullscreenDefaultStartDate = moment().subtract(13, 'months').format('YYYY-MM-DD');
+            workCodeFullscreenDefaultEndDate = moment().format('YYYY-MM-DD');
+        {% endif %}
+        
+        setWorkCodeFullscreenDateInputs(workCodeFullscreenDefaultStartDate, workCodeFullscreenDefaultEndDate);
+        
         setTimeout(() => {
-            if (typeof swsWorkcodesWithAccessCode !== 'undefined' && swsWorkcodesWithAccessCode) {
-                workCodeUsageFullscreenChartInstance = initWorkCodeUsageChart(swsWorkcodesWithAccessCode, 'work-code-usage-fullscreen-chart');
-                if (workCodeUsageFullscreenChartInstance) {
-                    setTimeout(() => {
-                        workCodeUsageFullscreenChartInstance.resize();
-                    }, 100);
-                }
-            } else {
-                console.error('Work Code Usage data not available:', swsWorkcodesWithAccessCode);
-            }
+            reloadWorkCodeFullscreenChart(workCodeCurrentFullscreenChartType);
         }, 50);
     });
     
@@ -1422,14 +3037,22 @@ function registerFullscreenModal(modalId, chartInitFn, chartData) {
         }
     });
 }
-registerFullscreenModal('users-by-origin-fullscreen-modal', initUsersByOriginChart, originData);
-registerFullscreenModal('users-by-gender-fullscreen-modal', initUsersByGenderChart, genderData);
-registerFullscreenModal('users-by-destination-fullscreen-modal', initUsersByDestinationChart, destinationData);
-registerFullscreenModal('users-by-language-fullscreen-modal', initUsersByLanguageChart, languageData);
-registerFullscreenModal('users-by-state-fullscreen-modal', initUsersByStateChart, usersByCountryStateChartData);
-registerFullscreenModal('users-by-immigration-status-fullscreen-modal', initUsersByImmigrationStatusChart, immigrationStatusData);
-registerFullscreenModal('users-by-age-fullscreen-modal', initUsersByAgeChart, ageData);
-registerFullscreenModal('users-by-sector-fullscreen-modal', initUsersBySectorChart, usersBySectorsChartData);
+// Origin modal is handled with custom filtering - see above
+// registerFullscreenModal('users-by-origin-fullscreen-modal', initUsersByOriginChart, originData);
+// Gender modal is handled with custom filtering - see above
+// registerFullscreenModal('users-by-gender-fullscreen-modal', initUsersByGenderChart, genderData);
+// Destination modal is handled with custom filtering - see above
+// registerFullscreenModal('users-by-destination-fullscreen-modal', initUsersByDestinationChart, destinationData);
+// Language modal is handled with custom filtering - see above
+// registerFullscreenModal('users-by-language-fullscreen-modal', initUsersByLanguageChart, languageData);
+// State modal is handled with custom filtering - see above
+// registerFullscreenModal('users-by-state-fullscreen-modal', initUsersByStateChart, usersByCountryStateChartData);
+// Immigration modal is handled with custom filtering - see above
+// registerFullscreenModal('users-by-immigration-status-fullscreen-modal', initUsersByImmigrationStatusChart, immigrationStatusData);
+// Age modal is handled with custom filtering - see above
+// registerFullscreenModal('users-by-age-fullscreen-modal', initUsersByAgeChart, ageData);
+// Sector modal is handled with custom filtering - see above
+// registerFullscreenModal('users-by-sector-fullscreen-modal', initUsersBySectorChart, usersBySectorsChartData);
 
 </script>
 
