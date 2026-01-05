@@ -259,8 +259,6 @@
     var messaging_question_by_age, messaging_question_by_gender, messaging_question_by_sectors, user_counts_by_geo_country;
     
     (function() {
-  
-        try {
             originData = {{ messaging_question_per_origin|safe }};
             destinationData = {{ messaging_question_per_destination|safe }};
             organisationData = {{ messaging_question_per_organisation|safe }};
@@ -325,11 +323,7 @@
             } catch (e) {
                 console.error('Error initializing usersBySectorsChart:', e);
             }
-    
-        } catch (error) {
-            console.error('Error in messaging question script initialization:', error);
-            console.error('Error stack:', error.stack);
-        }
+
     })();
     
     function initializeMessagingQuestionPage() {
