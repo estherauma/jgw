@@ -2,11 +2,13 @@ from datetime import datetime
 from django.shortcuts import render
 from django.utils import timezone
 from django.http import HttpResponse, StreamingHttpResponse
+from django.core.serializers.json import DjangoJSONEncoder
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 from openpyxl.writer.excel import save_virtual_workbook
 import io
 import csv
+import json
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.utils.preferences import get_date_13_months_ago
 from common.utils.request import get_form_filter_params
@@ -86,7 +88,7 @@ def messaging_question(request):
         "messaging_question_per_origin": messaging_question_per_origin,
         "messaging_question_per_destination": messaging_question_per_destination,
         "messaging_question_per_organisation": messaging_question_per_organisation,
-        "each_messaging_question_response": each_messaging_question_response_data,
+        "each_messaging_question_response": json.dumps(each_messaging_question_response_data, cls=DjangoJSONEncoder),
         "messaging_question_by_age": messaging_question_by_age,
         "messaging_question_by_gender": messaging_question_by_gender,
         "user_counts_by_geo_country": user_counts_by_geo_country,
