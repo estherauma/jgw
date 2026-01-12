@@ -13,6 +13,7 @@ urlpatterns = [
     path('user-overview/export-returning-users/', views.export_returning_users_to_excel, name='export_returning_users'),
     path('user-overview/export-help-contacts/', views.export_help_contacts_data, name='export_help_contacts'),
     path('user-overview/export-preferences', views.export_preferences_data, name='export_preferences'),
+    path('user-overview/export-pay-calculator-statistics', views.export_pay_calculator_statistics, name='export_pay_calculator_statistics'),
     path('user-diagnostics/', views.user_diagnostics, name='user_diagnostics'),
     path('api/dashboard/customize/', views.dashboard_customization, name='dashboard_customize'),
     path('api/monthly-active-users/', views.filter_monthly_active_users, name='filter_monthly_active_users'),

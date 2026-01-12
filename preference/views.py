@@ -22,6 +22,7 @@ from help_contacts.repository.help_contacts_data import get_help_contacts_betwee
 from preference.repository.preference_repository import (
     extract_preference_for_export,
     get_cumulative_monthly_new_users,
+    get_pay_calculator_statistics,
     get_preferences_by_sectors,
     get_returning_users_grouped_by_original_device_id,
     get_sws_workcodes_with_access_code,
@@ -377,6 +378,63 @@ def export_preferences_data(request):
     )
     wb.save(response)
 
+    return response
+
+
+def export_pay_calculator_statistics(request):
+    """Export PayCalculator statistics grouped by origin, Organisation, and Organisation Access Code"""
+    statistics_data = get_pay_calculator_statistics()
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Pay Calculator Statistics"
+    
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=5)
+    heading_cell = ws.cell(row=2, column=1, value="Pay Calculator Statistics")
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True, size=14)
+    
+    headers = [
+        "Country of Origin",
+        "Organisation",
+        "Organisation Access Code",
+        "Number of Users",
+        "Total Records Created",
+    ]
+    
+    for idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=4, column=idx, value=header)
+        cell.font = Font(bold=True)
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    for idx, data in enumerate(statistics_data, start=5):
+        ws.cell(row=idx, column=1, value=data.get("origin__name") or "N/A")
+        ws.cell(row=idx, column=2, value=data.get("organisation__name") or "N/A")
+        ws.cell(row=idx, column=3, value=data.get("organisation_access_code__code") or "N/A")
+        ws.cell(row=idx, column=4, value=data.get("unique_device_count", 0))
+        ws.cell(row=idx, column=5, value=data.get("total_records", 0))
+    
+    for col_num, col in enumerate(ws.columns, 1):
+        max_length = 0
+        column = get_column_letter(col_num)
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = max_length + 2
+        ws.column_dimensions[column].width = adjusted_width
+    
+    total_row = len(statistics_data) + 6
+    ws.cell(row=total_row, column=1, value="TOTAL").font = Font(bold=True)
+    ws.cell(row=total_row, column=4, value=sum(d.get("unique_device_count", 0) for d in statistics_data)).font = Font(bold=True)
+    ws.cell(row=total_row, column=5, value=sum(d.get("total_records", 0) for d in statistics_data)).font = Font(bold=True)
+    
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="pay_calculator_statistics.xlsx"'
+    wb.save(response)
+    
     return response
 
 

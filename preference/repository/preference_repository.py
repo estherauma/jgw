@@ -11,7 +11,7 @@ from common.helpers.preference_helpers.organisation import format_org_name_from_
 from common.utils.preferences import get_date_13_months_ago
 from common.utils.strings import format_thousands_with_commas
 from preference.filters import preference_filtered_queryset_for_active_users_data, preference_filtered_queryset_for_new_user_data
-from preference.models import Organisation, Preference, PreferenceHistory
+from preference.models import Organisation, Preference, PreferenceHistory, PayCalculator
 from events.models import BigqueryHomepageEventData
 
 from django.db.models import Count
@@ -805,6 +805,32 @@ def get_preferences_by_device_id(device_id):
         'organisation',
     ).order_by('-api_created_at')
     return preferences
+
+def get_pay_calculator_statistics():
+    """
+    Extract PayCalculator data with unique device_id grouped by origin, Organisation, and Organisation Access Code.
+    
+    Returns:
+        list: List of dictionaries containing grouped statistics
+    """
+    statistics = (
+        PayCalculator.objects
+        .select_related('origin', 'organisation', 'organisation_access_code', 'destination')
+        .values(
+            'origin__name',
+            'organisation__name',
+            'organisation__org_code',
+            'organisation_access_code__code',
+        )
+        .annotate(
+            unique_device_count=Count('device_id', distinct=True),
+            total_records=Count('id'),
+        )
+        .order_by('origin__name', 'organisation__name', 'organisation_access_code__code')
+    )
+    
+    return list(statistics)
+
 
 def get_base_queryset(show_new_user_data, start_date, end_date):
     """Centralized function to get base queryset with optimized querying"""
