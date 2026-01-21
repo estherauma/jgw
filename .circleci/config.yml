@@ -80,13 +80,33 @@ jobs:
       - *cmd_collect_static
       - *cmd_run_db_migrations
       # - *cmd_restore_cache
+      
+      - run:
+          name: Install test dependencies
+          command: |
+            . venv/bin/activate
+            pip install unittest-xml-reporting
+      
       - run:
           name: Running and generating report
           command: |
             . venv/bin/activate
+            mkdir -p test-results
+            python manage.py test --testrunner=xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
+            # Find and move XML test result files
+            find . -name "TEST-*.xml" -exec mv {} test-results/ \;
+            # Verify files are in test-results
+            echo "Contents of test-results directory:"
+            ls -la test-results/
             coverage run manage.py test
             coverage report
             coverage xml
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
 
       # - run:
       #     name: Upload coverage report to codeclimate
