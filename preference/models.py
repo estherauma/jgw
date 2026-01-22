@@ -346,3 +346,50 @@ class PreferenceHistory(models.Model):
     is_missing_organisation_info_cleaned = models.BooleanField(default=False)
 
 
+class PayCalculator(models.Model):
+    device_id = models.CharField(max_length=255, db_index=True)
+    preference = models.ForeignKey(Preference, on_delete=models.SET_NULL, null=True, blank=True)
+    age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    immigration_status = models.ForeignKey(ImmigrationStatus, on_delete=models.SET_NULL, null=True, blank=True)
+    destination = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="pay_calculator_destination")
+    origin = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="pay_calculator_origin")
+    destination_state = models.ForeignKey(CountryState, on_delete=models.SET_NULL, null=True, blank=True)
+    organisation = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
+    organisation_access_code = models.ForeignKey(OrganisationAccessCode, on_delete=models.SET_NULL, null=True, blank=True)
+    factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
+    sectors_of_work = models.ManyToManyField(SectorOfWork, related_name="pay_calculator_sectors_of_work")
+    sectors = models.ManyToManyField(OriginalSectorOfWork, related_name="pay_calculator_sectors")
+    
+    total_left = models.FloatField(null=True, blank=True)
+    tax_reclaim = models.FloatField(null=True, blank=True)
+
+    total_estimated_pay = models.FloatField(null=True, blank=True)
+    weeks_worked = models.IntegerField(null=True, blank=True)
+    income_tax = models.FloatField(null=True, blank=True)
+    national_insurance = models.FloatField(null=True, blank=True)
+    average_week_hours = models.IntegerField(null=True, blank=True)
+
+    total_estimated_cost = models.FloatField(null=True, blank=True)
+    accomadation_per_week = models.FloatField(null=True, blank=True)
+    transportation_within_uk = models.FloatField(null=True, blank=True)
+    visa_appointment_one_off = models.FloatField(null=True, blank=True)
+    travel_home_to_uk_one_off = models.FloatField(null=True, blank=True)
+    food_per_week = models.FloatField(null=True, blank=True)
+
+    api_created_at = models.DateTimeField()
+    api_updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['device_id']),
+            models.Index(fields=['api_created_at']),
+            models.Index(fields=['destination']),
+        ]
+        ordering = ['-api_created_at']
+    
+    def __str__(self):
+        return f"PayCalculator - {self.device_id} - {self.api_created_at}"
+

@@ -11,6 +11,7 @@ from preference.models import (
     OrganisationData,
     OrganisationSector,
     OriginalSectorOfWork,
+    PayCalculator,
     Preference,
     SectorOfWork,
     Route,
@@ -230,3 +231,45 @@ class PreferenceHistoryAdmin(ExportActionModelAdmin, admin.ModelAdmin):
 
     def get_org_workcode(self, obj):
         return obj.organisation_access_code.code if obj.organisation_access_code else None
+
+
+@admin.register(PayCalculator)
+class PayCalculatorAdmin(admin.ModelAdmin):
+    list_display = [
+        "device_id",
+        "preference",
+        "organisation",
+        "organisation_access_code",
+        "origin",
+        "destination",
+        "age",
+        "gender",
+        "total_left",
+        "total_estimated_pay",
+        "api_created_at",
+        "created_at",
+    ]
+    search_fields = [
+        "device_id",
+        "organisation__name",
+        "destination__name",
+        "age__range",
+        "gender__name",
+    ]
+    list_filter = [
+        "destination",
+        "organisation",
+        "age",
+        "gender",
+        "immigration_status",
+        "api_created_at",
+    ]
+    readonly_fields = [
+        "device_id",
+        "api_created_at",
+        "api_updated_at",
+        "created_at",
+        "updated_at",
+    ]
+    date_hierarchy = "api_created_at"
+    raw_id_fields = ["preference"]
