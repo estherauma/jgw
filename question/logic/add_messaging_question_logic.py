@@ -1,12 +1,20 @@
+import os
+import requests
 from datetime import datetime
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, F
 from django.db.models.functions import Replace
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from common.custom_libs.google_translate import pandas_translator_translate
+from preference.utils import format_text_for_db
 from common.const.localization_const import meassaging_question_response_localization
 from common.helpers.model_helpers.preference import (
     get_or_add_country_to_db,
     get_or_add_factory_farm_to_db,
+    get_or_add_immigration_status_to_db,
     get_or_add_language_to_db,
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
@@ -26,10 +34,16 @@ from question.models import (
     MessagingQuestionText,
     MessagingResponse,
     MessagingResponseOptionText,
+    LeadMessagingQuestionResponse,
+    FollowupMessagingQuestionResponse,
+    FollowupFollowupMessagingQuestionResponse,
+    MessagingQuestionV1,
+    MessagingQuestionResponseV1,
+    QuestionCategory,
 )
 from preference.models import Country, FactoryFarm, Gender, ImmigrationStatus, Language, Organisation, OrganisationData, OrganisationSector, Preference
 from question.tasks import translate_and_clean_messaging_question_fields
-from django.conf import settings
+
 
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/messaging_question_tasks.log")
@@ -425,3 +439,439 @@ def reverse_myvoice_messaging_questions():
         )
 
     return updated_count
+
+
+def translate_and_update_response_text(response_obj, response_text):
+    """
+    Translates response text to English and updates the response_text_translated field.
+    
+    Args:
+        response_obj: MessagingQuestionResponseV1 or InlineQuestionResponseV1 instance
+        response_text: The original response text to translate
+    """
+    if response_obj and response_text and not response_obj.response_text_translated:
+        try:
+            translated_text = pandas_translator_translate(response_text)
+            if translated_text:
+                response_obj.response_text_translated = format_text_for_db(translated_text)
+                response_obj.save()
+        except Exception as e:
+            kunfu_panda_logger.error(f"Error translating response text: {str(e)}")
+
+
+def extract_question_value_data(question_value):
+    """
+    Helper function to extract key, option and followup key from question_value.
+    
+    Args:
+        question_value: Can be a dict, list, string, or other type
+        
+    Returns:
+        tuple: (key, option, followup_key)
+        - key: For lists, comma-separated keys; for dict, the 'key' field; for strings, 'text_input'
+        - option: For lists, semicolon-separated options; for dict, the 'option' field; for strings, the string itself
+        - followup_key: The followup question key (only for single dict responses, None for lists)
+    """
+    key = None
+    option = None
+    followup_key = None
+    
+    if isinstance(question_value, dict):
+        key = question_value.get('key')
+        option = question_value.get('option')
+        followup_key = question_value.get('followUpQuestionKey')
+    elif isinstance(question_value, list):
+        keys = []
+        options = []
+        followup_keys = []
+        
+        for item in question_value:
+            if isinstance(item, dict):
+                item_key = item.get('key')
+                item_option = item.get('option')
+                item_followup = item.get('followUpQuestionKey')
+                
+                if item_key:
+                    keys.append(item_key)
+                if item_option:
+                    options.append(item_option)
+                if item_followup:
+                    followup_keys.append(item_followup)
+            else:
+                keys.append(str(item))
+                options.append(str(item))
+        
+        key = ', '.join(keys) if keys else 'multiple_selection'
+        option = '; '.join(options) if options else ''
+        
+        followup_key = followup_keys[0] if followup_keys and followup_keys[0] else None
+    elif isinstance(question_value, str):
+        key = 'text_input'
+        option = question_value
+    else:
+        key = 'unknown'
+        option = str(question_value) if question_value is not None else ''
+        
+    return key, option, followup_key
+
+
+def fetch_messaging_question_v2_from_api(client):
+    """
+    Fetches messaging questions version 2 from the API.
+
+    This function retrieves messaging questions data from the API, starting from either
+    the application's possible start date or the date of the last fetched question,
+    up to the current date.
+
+    Args:
+        client: An instance of the API client used to make requests.
+
+    Returns:
+        A list of messaging questions (version 2) retrieved from the API.
+    """
+    
+    start_date = APPLICATION_POSSIBLE_START_DATE
+    end_date = todays_date()
+
+    try:
+        latest_messaging_question = (
+            LeadMessagingQuestionResponse.objects.order_by("-api_created_at").first()
+        )
+        if latest_messaging_question:
+            start_date = latest_messaging_question.api_created_at.strftime("%Y-%m-%d %H:%M:%S")
+    except Exception as e:
+        kunfu_panda_logger.info(f"Could not query existing records (table may not exist): {str(e)}. Using default start date: {start_date}")
+
+    base_url = settings.MESSAGING_API_BASE_URL
+    endpoint = f"/v1/question-responses/v2?startDate={start_date}&endDate={end_date}"
+    url = f"{base_url}{endpoint}"
+    
+    api_secret = getattr(settings, 'MESSAGING_API_SECRET', None) or os.environ.get("JGW_MESSAGING_API_SECRET")
+    headers = {"secret": api_secret} if api_secret else {}
+    
+    kunfu_panda_logger.info(f"Fetching messaging questions v2 from: {url}")
+    kunfu_panda_logger.info(f"Date range: {start_date} to {end_date}")
+    
+    try:
+        response = requests.get(url, headers=headers)
+        
+        kunfu_panda_logger.info(f"API Response Status: {response.status_code}")
+        
+        if response.status_code != 200:
+            kunfu_panda_logger.error(
+                f"API returned status {response.status_code}. Response: {response.text[:500]}"
+            )
+            return []
+        
+        response_data = response.json()
+        kunfu_panda_logger.info(f"API Response type: {type(response_data)}")
+        
+        if isinstance(response_data, dict):
+            if "data" in response_data:
+                data = response_data.get("data", [])
+                kunfu_panda_logger.info(f"Found 'data' key in response. Length: {len(data) if isinstance(data, list) else 'N/A'}")
+                return data if isinstance(data, list) else []
+            elif "status" in response_data and response_data.get("status") == "OK":
+                data = response_data.get("data", [])
+                kunfu_panda_logger.info(f"Found status OK response. Data length: {len(data) if isinstance(data, list) else 'N/A'}")
+                return data if isinstance(data, list) else []
+            else:
+                kunfu_panda_logger.warning(f"Unexpected dict response structure: {list(response_data.keys())}")
+                return []
+        elif isinstance(response_data, list):
+            kunfu_panda_logger.info(f"Response is a list. Length: {len(response_data)}")
+            return response_data
+        else:
+            kunfu_panda_logger.warning(f"Unexpected response type: {type(response_data)}")
+            return []
+            
+    except requests.exceptions.RequestException as e:
+        kunfu_panda_logger.error(f"Request exception when fetching messaging questions v2: {str(e)}")
+        return []
+    except ValueError as e:
+        kunfu_panda_logger.error(f"JSON decode error when fetching messaging questions v2: {str(e)}")
+        return []
+    except Exception as e:
+        kunfu_panda_logger.error(f"Unexpected error when fetching messaging questions v2: {str(e)}")
+        import traceback
+        kunfu_panda_logger.error(traceback.format_exc())
+        return []
+
+
+def store_new_v2_messaging_questions(jgw_api_client):
+    """
+    Stores v2 messaging questions in the new chain structure.
+    Similar to store_new_v3_inline_questions but for messaging questions.
+    """
+    messaging_questions_v2 = fetch_messaging_question_v2_from_api(jgw_api_client)
+
+    if messaging_questions_v2 is None or not isinstance(messaging_questions_v2, list):
+        raise ValueError(
+            f"Invalid messaging questions v2 response type: {type(messaging_questions_v2)}"
+        )
+
+    if len(messaging_questions_v2) == 0:
+        kunfu_panda_logger.info("No new messaging questions v2 received from API (empty list)")
+        return 0
+
+    kunfu_panda_logger.info(f"Fetched {len(messaging_questions_v2)} messaging questions v2")
+
+    created_leads = 0
+    created_followups = 0
+    created_followup_followups = 0
+
+    questions_map = {}
+    for question in messaging_questions_v2:
+        if isinstance(question, dict):
+            device_id = question.get('deviceId')
+            if device_id:
+                if device_id not in questions_map:
+                    questions_map[device_id] = {}
+                questions_map[device_id][question.get('questionKey')] = question
+
+    for question in messaging_questions_v2:
+        if not isinstance(question, dict):
+            continue
+        if question.get('isLeadQuestion'):
+            try:
+                question_value = question.get('questionValue')
+                value_key, value_option, followup_key = extract_question_value_data(question_value)
+
+                language_data = get_or_add_language_to_db(question.get("language"))
+                destination_data = get_or_add_country_to_db(question.get("destination"), source="destination")
+                origin_data = get_or_add_country_to_db(question.get("locale"), source="origin")
+                immigration_status_data = get_or_add_immigration_status_to_db(question.get("immigrationStatus"))
+                organisation_sector_data = get_or_add_organisation_sector_to_db(question.get("organisationSector"))
+
+                locale_data = get_or_add_country_to_db(question.get("locale"), source="destination")
+
+                try:
+                    organisation_data = None
+                    org_code = question.get("organisationCode")
+                    org_name = question.get("organisation")
+                    
+                    if org_code:
+                        organisation_data = OrganisationData.objects.filter(org_code=org_code).first()
+                    
+                    if not organisation_data and org_name:
+                        organisation_data = OrganisationData.objects.filter(name=org_name).first()
+                    
+                    if not organisation_data:
+                        organisation_data = OrganisationData.objects.get(name="Organisation Not Specified")
+                        
+                except Exception as e:
+                    kunfu_panda_logger.error(f"Error finding organisation data: {e}")
+                    organisation_data = OrganisationData.objects.get(name="Organisation Not Specified")
+
+                device_id = question.get('deviceId')
+                preference = Preference.objects.filter(device_id=device_id).first()
+                route_data = None
+                if preference and preference.route:
+                    route_data = preference.route
+                else:
+                    route_data = get_or_add_route_to_db(None)
+
+                question_category = None
+                question_categories = question.get('questionCategories', [])
+                if question_categories and isinstance(question_categories, list) and len(question_categories) > 0:
+                    category_code = question_categories[0] if isinstance(question_categories[0], str) else question_categories[0].get('code')
+                    category_name = question_categories[0] if isinstance(question_categories[0], str) else question_categories[0].get('name')
+                    if category_code:
+                        question_category = QuestionCategory.objects.filter(code=category_code).first()
+                    elif category_name:
+                        question_category = QuestionCategory.objects.filter(name=category_name).first()
+
+                question_response_date = None
+                if question.get('questionResponseDate'):
+                    question_response_date = parse_datetime(question.get('questionResponseDate'))
+                
+                api_created_at = parse_datetime(question.get('createdAt')) if question.get('createdAt') else timezone.now()
+                api_updated_at = parse_datetime(question.get('updatedAt')) if question.get('updatedAt') else timezone.now()
+
+                if LeadMessagingQuestionResponse.objects.filter(data_source_id=question.get("_id")).exists():
+                    continue
+
+                messaging_question_v1, _ = MessagingQuestionV1.objects.get_or_create(
+                    page_id=question.get('pageId', ''),
+                    question_key=question.get('questionKey'),
+                    defaults={
+                        'page_title': question.get('pageTitle'),
+                        'question_text': question.get('questionText'),
+                        'question_category': question_category,
+                    }
+                )
+
+                messaging_question_response_v1, _ = MessagingQuestionResponseV1.objects.get_or_create(
+                    response_key=value_key,
+                    response_text=value_option,
+                    defaults={
+                        'response_text_translated': None,
+                    }
+                )
+
+                if value_option:
+                    translate_and_update_response_text(messaging_question_response_v1, value_option)
+
+                lead_response = LeadMessagingQuestionResponse.objects.create(
+                    data_source_id=question.get('_id'),
+                    device_id=device_id,
+                    app_id=question.get('appId'),
+                    messaging_question=messaging_question_v1,
+                    messaging_question_response=messaging_question_response_v1,
+                    response_value=value_key,
+                    route=route_data,
+                    preference=preference,
+                    origin=origin_data,
+                    destination=destination_data,
+                    immigration_status=immigration_status_data,
+                    organisation_sector=organisation_sector_data,
+                    org_info=organisation_data,
+                    language=language_data,
+                    locale=locale_data,
+                    question_response_date=question_response_date,
+                    api_created_at=api_created_at,
+                    api_updated_at=api_updated_at,
+                )
+                created_leads += 1
+
+                if followup_key:
+                    followup_question = questions_map.get(device_id, {}).get(followup_key)
+                    
+                    if followup_question:
+                        followup_value = followup_question.get('questionValue')
+                        f_value_key, f_value_option, f_followup_key = extract_question_value_data(followup_value)
+
+                        f_question_response_date = None
+                        if followup_question.get('questionResponseDate'):
+                            f_question_response_date = parse_datetime(followup_question.get('questionResponseDate'))
+                        
+                        f_api_created_at = parse_datetime(followup_question.get('createdAt')) if followup_question.get('createdAt') else timezone.now()
+                        f_api_updated_at = parse_datetime(followup_question.get('updatedAt')) if followup_question.get('updatedAt') else timezone.now()
+
+                        f_question_category = None
+                        f_question_categories = followup_question.get('questionCategories', [])
+                        if f_question_categories and isinstance(f_question_categories, list) and len(f_question_categories) > 0:
+                            f_category_code = f_question_categories[0] if isinstance(f_question_categories[0], str) else f_question_categories[0].get('code')
+                            f_category_name = f_question_categories[0] if isinstance(f_question_categories[0], str) else f_question_categories[0].get('name')
+                            if f_category_code:
+                                f_question_category = QuestionCategory.objects.filter(code=f_category_code).first()
+                            elif f_category_name:
+                                f_question_category = QuestionCategory.objects.filter(name=f_category_name).first()
+
+                        if FollowupMessagingQuestionResponse.objects.filter(
+                            lead_question=lead_response,
+                            data_source_id=followup_question.get("_id")
+                        ).exists():
+                            followup_response = FollowupMessagingQuestionResponse.objects.filter(
+                                lead_question=lead_response,
+                                data_source_id=followup_question.get("_id")
+                            ).first()
+                        else:
+                            f_messaging_question_v1, _ = MessagingQuestionV1.objects.get_or_create(
+                                page_id=followup_question.get('pageId', ''),
+                                question_key=followup_question.get('questionKey'),
+                                defaults={
+                                    'page_title': followup_question.get('pageTitle'),
+                                    'question_text': followup_question.get('questionText'),
+                                    'question_category': f_question_category,
+                                }
+                            )
+
+                            f_messaging_question_response_v1, _ = MessagingQuestionResponseV1.objects.get_or_create(
+                                response_key=f_value_key,
+                                response_text=f_value_option,
+                                defaults={
+                                    'response_text_translated': None,
+                                }
+                            )
+
+                            if f_value_option:
+                                translate_and_update_response_text(f_messaging_question_response_v1, f_value_option)
+
+                            followup_response = FollowupMessagingQuestionResponse.objects.create(
+                                lead_question=lead_response,
+                                data_source_id=followup_question.get('_id'),
+                                device_id=followup_question.get('deviceId'),
+                                messaging_question=f_messaging_question_v1,
+                                messaging_question_response=f_messaging_question_response_v1,
+                                response_value=f_value_key,
+                                question_response_date=f_question_response_date,
+                                api_created_at=f_api_created_at,
+                                api_updated_at=f_api_updated_at,
+                            )
+                            created_followups += 1
+
+                        if f_followup_key:
+                            followup_followup_question = questions_map.get(device_id, {}).get(f_followup_key)
+                            
+                            if followup_followup_question:
+                                ff_value = followup_followup_question.get('questionValue')
+                                ff_value_key, ff_value_option, _ = extract_question_value_data(ff_value)
+
+                                ff_question_response_date = None
+                                if followup_followup_question.get('questionResponseDate'):
+                                    ff_question_response_date = parse_datetime(followup_followup_question.get('questionResponseDate'))
+                                
+                                ff_api_created_at = parse_datetime(followup_followup_question.get('createdAt')) if followup_followup_question.get('createdAt') else timezone.now()
+                                ff_api_updated_at = parse_datetime(followup_followup_question.get('updatedAt')) if followup_followup_question.get('updatedAt') else timezone.now()
+
+                                ff_question_category = None
+                                ff_question_categories = followup_followup_question.get('questionCategories', [])
+                                if ff_question_categories and isinstance(ff_question_categories, list) and len(ff_question_categories) > 0:
+                                    ff_category_code = ff_question_categories[0] if isinstance(ff_question_categories[0], str) else ff_question_categories[0].get('code')
+                                    ff_category_name = ff_question_categories[0] if isinstance(ff_question_categories[0], str) else ff_question_categories[0].get('name')
+                                    if ff_category_code:
+                                        ff_question_category = QuestionCategory.objects.filter(code=ff_category_code).first()
+                                    elif ff_category_name:
+                                        ff_question_category = QuestionCategory.objects.filter(name=ff_category_name).first()
+
+                                if not FollowupFollowupMessagingQuestionResponse.objects.filter(
+                                    followup_question=followup_response,
+                                    data_source_id=followup_followup_question.get("_id")
+                                ).exists():
+                                    ff_messaging_question_v1, _ = MessagingQuestionV1.objects.get_or_create(
+                                        page_id=followup_followup_question.get('pageId', ''),
+                                        question_key=followup_followup_question.get('questionKey'),
+                                        defaults={
+                                            'page_title': followup_followup_question.get('pageTitle'),
+                                            'question_text': followup_followup_question.get('questionText'),
+                                            'question_category': ff_question_category,
+                                        }
+                                    )
+
+                                    ff_messaging_question_response_v1, _ = MessagingQuestionResponseV1.objects.get_or_create(
+                                        response_key=ff_value_key,
+                                        response_text=ff_value_option,
+                                        defaults={
+                                            'response_text_translated': None,
+                                        }
+                                    )
+
+                                    if ff_value_option:
+                                        translate_and_update_response_text(ff_messaging_question_response_v1, ff_value_option)
+
+                                    FollowupFollowupMessagingQuestionResponse.objects.create(
+                                        followup_question=followup_response,
+                                        data_source_id=followup_followup_question.get('_id'),
+                                        device_id=followup_followup_question.get('deviceId'),
+                                        messaging_question=ff_messaging_question_v1,
+                                        messaging_question_response=ff_messaging_question_response_v1,
+                                        response_value=ff_value_key,
+                                        question_response_date=ff_question_response_date,
+                                        api_created_at=ff_api_created_at,
+                                        api_updated_at=ff_api_updated_at,
+                                    )
+                                    created_followup_followups += 1
+
+            except Exception as e:
+                kunfu_panda_logger.error(f"Error processing messaging question {question.get('_id')}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                continue
+
+    kunfu_panda_logger.info(
+        "Finished storing new v2 messaging questions. "
+        f"leads={created_leads}, followups={created_followups}, followup_followups={created_followup_followups}"
+    )
+
+    return created_leads + created_followups + created_followup_followups

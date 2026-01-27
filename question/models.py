@@ -12,6 +12,7 @@ from preference.models import (
     OrganisationSector,
     Route,
     OriginalSectorOfWork,
+    SectorOfWork,
 )
 
 
@@ -271,6 +272,301 @@ class MessagingQuestionResponse(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class QuestionCategory(models.Model):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class InlineQuestionV1(models.Model):
+    """
+    Stores inline question data (page_id, page_title, question_key, question_text, question_category).
+    This table normalizes question data so it can be referenced by Lead, Followup, and FollowupFollowup tables.
+    """
+    page_id = models.CharField(max_length=255)
+    page_title = models.TextField(blank=True, null=True)
+    question_key = models.TextField(blank=True, null=True, db_index=True)
+    question_text = models.TextField(blank=True, null=True)
+    question_category = models.ForeignKey(
+        QuestionCategory, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name="inline_questions_v1"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["question_key"]),
+            models.Index(fields=["question_text"]),
+        ]
+
+    def __str__(self):
+        return f"{self.question_key or self.question_text}"
+
+
+class InlineQuestionResponseV1(models.Model):
+    """
+    Stores inline question response data (response_key, response_text, response_text_translated).
+    This table normalizes response data so it can be referenced by Lead, Followup, and FollowupFollowup tables.
+    """
+    response_key = models.TextField(blank=True, null=True, db_index=True)
+    response_text = models.TextField(blank=True, null=True)
+    response_text_translated = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["response_key"]),
+            models.Index(fields=["response_text"]),
+        ]
+
+    def __str__(self):
+        return f"{self.response_key or self.response_text}"
+
+
+class MessagingQuestionV1(models.Model):
+    """
+    Stores messaging question data (question_key, question_text, question_category).
+    This table normalizes question data so it can be referenced by Lead, Followup, and FollowupFollowup tables.
+    """
+    page_id = models.CharField(max_length=255)
+    page_title = models.TextField(blank=True, null=True)
+    question_key = models.TextField(blank=True, null=True, db_index=True)
+    question_text = models.TextField(blank=True, null=True)
+    question_category = models.ForeignKey(
+        QuestionCategory, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name="messaging_questions_v1"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["question_key"]),
+            models.Index(fields=["question_text"]),
+        ]
+
+    def __str__(self):
+        return f"{self.question_key or self.question_text}"
+
+
+class MessagingQuestionResponseV1(models.Model):
+    """
+    Stores messaging question response data (response_key, response_text, response_text_translated).
+    This table normalizes response data so it can be referenced by Lead, Followup, and FollowupFollowup tables.
+    """
+    response_key = models.TextField(blank=True, null=True, db_index=True)
+    response_text = models.TextField(blank=True, null=True)
+    response_text_translated = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["response_key"]),
+            models.Index(fields=["response_text"]),
+        ]
+
+    def __str__(self):
+        return f"{self.response_key or self.response_text}"
+
+
+class LeadMessagingQuestionResponse(models.Model):
+    """
+    Lead/initial messaging question response.
+    Contains all metadata and references to MessagingQuestionV1 and MessagingQuestionResponseV1.
+    """
+    data_source_id = models.CharField(max_length=24)
+    device_id = models.CharField(max_length=255)
+    app_id = models.CharField(max_length=255, blank=True, null=True)
+
+    messaging_question = models.ForeignKey(
+        MessagingQuestionV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="lead_responses"
+    )
+    
+    messaging_question_response = models.ForeignKey(
+        MessagingQuestionResponseV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="lead_responses"
+    )
+    
+    response_value = models.TextField(blank=True, null=True)
+    
+    route = models.ForeignKey(
+        Route, on_delete=models.CASCADE, null=True, blank=True, related_name="lead_messaging_question_route"
+    )
+    preference = models.ForeignKey(
+        "preference.Preference",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="lead_messaging_question_preference",
+    )
+    origin = models.ForeignKey(
+        Country, on_delete=models.CASCADE, null=True, blank=True, related_name="lead_messaging_question_origin"
+    )
+    destination = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="lead_messaging_question_destination",
+    )
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="lead_messaging_question_immigration_status",
+    )
+    organisation_sector = models.ForeignKey(
+        OrganisationSector,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="lead_messaging_question_organisation_sector",
+    )
+    org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
+    language = models.ForeignKey(
+        Language, on_delete=models.CASCADE, null=True, blank=True, related_name="lead_messaging_question_language"
+    )
+    locale = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="lead_messaging_question_locale")
+    
+    question_response_date = models.DateTimeField(blank=True, null=True)
+    api_created_at = models.DateTimeField(default=timezone.now)
+    api_updated_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["data_source_id"]),
+            models.Index(fields=["device_id"]),
+            models.Index(fields=["api_created_at"]),
+        ]
+
+    def __str__(self):
+        question_text = self.messaging_question.question_text if self.messaging_question else "No question"
+        return f"{question_text} - {self.device_id}"
+
+
+class FollowupMessagingQuestionResponse(models.Model):
+    """
+    Follow-up messaging question response.
+    References the lead question and MessagingQuestionV1/MessagingQuestionResponseV1.
+    """
+    lead_question = models.ForeignKey(
+        LeadMessagingQuestionResponse,
+        on_delete=models.CASCADE,
+        related_name='followup_responses'
+    )
+    data_source_id = models.CharField(max_length=24)
+    device_id = models.CharField(max_length=255)
+
+    messaging_question = models.ForeignKey(
+        MessagingQuestionV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="followup_responses"
+    )
+    
+    messaging_question_response = models.ForeignKey(
+        MessagingQuestionResponseV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="followup_responses"
+    )
+    
+    # Keep response_value for backward compatibility or additional data
+    response_value = models.TextField(blank=True, null=True)
+    
+    question_response_date = models.DateTimeField(blank=True, null=True)
+    api_created_at = models.DateTimeField(default=timezone.now)
+    api_updated_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["lead_question"]),
+            models.Index(fields=["data_source_id"]),
+            models.Index(fields=["device_id"]),
+        ]
+
+    def __str__(self):
+        question_text = self.messaging_question.question_text if self.messaging_question else "No question"
+        return f"{question_text} - {self.device_id}"
+
+
+class FollowupFollowupMessagingQuestionResponse(models.Model):
+    """
+    Follow-up of follow-up messaging question response.
+    References the followup question and MessagingQuestionV1/MessagingQuestionResponseV1.
+    """
+    followup_question = models.ForeignKey(
+        FollowupMessagingQuestionResponse,
+        on_delete=models.CASCADE,
+        related_name='followup_followup_responses'
+    )
+    data_source_id = models.CharField(max_length=24)
+    device_id = models.CharField(max_length=255)
+    
+    # Reference to normalized question data
+    messaging_question = models.ForeignKey(
+        MessagingQuestionV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="followup_followup_responses"
+    )
+    
+    # Reference to normalized response data
+    messaging_question_response = models.ForeignKey(
+        MessagingQuestionResponseV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="followup_followup_responses"
+    )
+    
+    response_value = models.TextField(blank=True, null=True)
+    
+    question_response_date = models.DateTimeField(blank=True, null=True)
+    api_created_at = models.DateTimeField(default=timezone.now)
+    api_updated_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["followup_question"]),
+            models.Index(fields=["data_source_id"]),
+            models.Index(fields=["device_id"]),
+        ]
+
+    def __str__(self):
+        question_text = self.messaging_question.question_text if self.messaging_question else "No question"
+        return f"{question_text} - {self.device_id}"
+
 
 class ActualMessageSent(models.Model):
     message_id = models.CharField(max_length=255)
@@ -338,5 +634,191 @@ class MessageDataSent(models.Model):
 
     def __str__(self):
         return f"{self.message_id} - {self.device_id}"
+
+
+class LeadInlineQuestionResponse(models.Model):
+    """
+    Lead/initial inline question response.
+    Contains all metadata and references to InlineQuestionV1 and InlineQuestionResponseV1.
+    """
+    data_source_id = models.CharField(max_length=24)  
+    device_id = models.CharField(max_length=255)
+    app_id = models.CharField(max_length=255, blank=True, null=True)
+
+    inline_question = models.ForeignKey(
+        InlineQuestionV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="lead_inline_responses"
+    )
+    
+    # Reference to normalized response data
+    inline_question_response = models.ForeignKey(
+        InlineQuestionResponseV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="lead_inline_responses"
+    )
+    
+    # Keep response_value for backward compatibility or additional data
+    response_value = models.TextField(blank=True, null=True)
+    
+    organisation = models.ForeignKey(
+        OrganisationData, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name='lead_question_organisation'
+    )
+    organisation_code = models.CharField(max_length=255, blank=True, null=True)
+    language = models.ForeignKey(
+        Language, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name='lead_question_language'
+    )
+    destination = models.ForeignKey(
+        Country, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name='lead_question_destination'
+    )
+    immigration_status = models.ForeignKey(
+        ImmigrationStatus, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name='lead_question_immigration_status'
+    )
+    factory_farm = models.ForeignKey(
+        FactoryFarm, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name='lead_question_factory_farm'
+    )
+    locale = models.ForeignKey(
+        Country, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name='lead_question_locale'
+    )
+    question_response_date = models.DateTimeField()
+    api_created_at = models.DateTimeField()
+    api_updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["data_source_id"]),
+            models.Index(fields=["device_id"]),
+            models.Index(fields=["api_created_at"]),
+        ]
+
+    def __str__(self):
+        question_text = self.inline_question.question_text if self.inline_question else "No question"
+        return f"{question_text} - {self.device_id}"
+
+class FollowupInlineQuestionResponse(models.Model):
+    """
+    Follow-up inline question response.
+    References the lead question and InlineQuestionV1/InlineQuestionResponseV1.
+    """
+    lead_question = models.ForeignKey(
+        LeadInlineQuestionResponse, 
+        on_delete=models.CASCADE,
+        related_name='followup_responses'
+    )
+    data_source_id = models.CharField(max_length=24)
+    device_id = models.CharField(max_length=255)
+
+    inline_question = models.ForeignKey(
+        InlineQuestionV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="followup_inline_responses"
+    )
+    
+    inline_question_response = models.ForeignKey(
+        InlineQuestionResponseV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="followup_inline_responses"
+    )
+    
+    response_value = models.TextField(blank=True, null=True)
+    
+    question_response_date = models.DateTimeField()
+    api_created_at = models.DateTimeField()
+    api_updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["lead_question"]),
+            models.Index(fields=["data_source_id"]),
+            models.Index(fields=["device_id"]),
+        ]
+
+    def __str__(self):
+        question_text = self.inline_question.question_text if self.inline_question else "No question"
+        return f"{question_text} - {self.device_id}"
+
+class FollowupFollowupInlineQuestionResponse(models.Model):
+    """
+    Follow-up of follow-up inline question response.
+    References the followup question and InlineQuestionV1/InlineQuestionResponseV1.
+    """
+    followup_question = models.ForeignKey(
+        FollowupInlineQuestionResponse,
+        on_delete=models.CASCADE,
+        related_name='followup_followup_responses'
+    )
+    data_source_id = models.CharField(max_length=24)
+    device_id = models.CharField(max_length=255)
+    
+    inline_question = models.ForeignKey(
+        InlineQuestionV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="followup_followup_inline_responses"
+    )
+    
+    inline_question_response = models.ForeignKey(
+        InlineQuestionResponseV1,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="followup_followup_inline_responses"
+    )
+    
+    response_value = models.TextField(blank=True, null=True)
+    
+    question_response_date = models.DateTimeField()
+    api_created_at = models.DateTimeField()
+    api_updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["followup_question"]),
+            models.Index(fields=["data_source_id"]),
+            models.Index(fields=["device_id"]),
+        ]
+
+    def __str__(self):
+        question_text = self.inline_question.question_text if self.inline_question else "No question"
+        return f"{question_text} - {self.device_id}"
 
 
