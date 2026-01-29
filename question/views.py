@@ -9,6 +9,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 import io
 import csv
 import json
+from openpyxl.styles import Alignment, Font, PatternFill
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.utils.preferences import get_date_13_months_ago
 from common.utils.request import get_form_filter_params
@@ -55,6 +56,7 @@ from .models import (
 from events.models import BigqueryHomepageEventData
 from question.repository.messaging_questions_standard import message_data_sent_filtered_queryset
 from question.models import MessageDataSent
+from question.models import LeadInlineQuestionResponse
 
 
 def messaging_question(request):
@@ -726,4 +728,300 @@ def export_payment_inline_questions(request):
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
     response["Content-Disposition"] = "attachment; filename=payment_inline_questions.xlsx"
+def export_lead_questions_with_followups(request):
+    """
+    Exports lead questions with their follow-up and follow-up-to-follow-up questions to Excel
+    in a hierarchical and easy-to-read format.
+    """
+    wb = Workbook()
+    ws = wb.active
+
+    heading = "Lead Questions with Follow-up Chain Report"
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=15)
+    heading_cell = ws.cell(row=2, column=1, value=heading)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
+
+    lead_headers = [
+        "Lead Question Details",
+        "Created At",
+        "Updated At",
+        "Device ID",
+        "Language",
+        "Destination",
+        "Organisation",
+        "Organisation Code",
+        "Immigration Status",
+        "Factory Farm",
+        "Page ID",
+        "Page Title",
+        "Question Key",
+        "Question Text",
+        "Value Key",
+        "Value Option",
+    ]
+
+    followup_headers = [
+        "Follow-up Question Details",
+        "Question Key",
+        "Question Text",
+        "Value Key",
+        "Value Option",
+    ]
+
+    followup_followup_headers = [
+        "Follow-up-to-Follow-up Question Details",
+        "Question Key",
+        "Question Text",
+        "Value Key",
+        "Value Option",
+    ]
+
+    for idx, header in enumerate(lead_headers, start=1):
+        cell = ws.cell(row=4, column=idx, value=header)
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
+
+    lead_questions = LeadInlineQuestionResponse.objects.select_related(
+        'language',
+        'destination',
+        'organisation',
+        'immigration_status',
+        'factory_farm'
+    ).prefetch_related(
+        'followup_responses__followup_followup_responses'
+    ).all()
+
+    row_idx = 5
+    for lead in lead_questions:
+        ws.cell(row=row_idx, column=1, value="Lead Question")
+        ws.cell(row=row_idx, column=2, value=lead.created_at.strftime("%Y-%m-%d %H:%M:%S"))
+        ws.cell(row=row_idx, column=3, value=lead.updated_at.strftime("%Y-%m-%d %H:%M:%S"))
+        ws.cell(row=row_idx, column=4, value=lead.device_id)
+        ws.cell(row=row_idx, column=5, value=lead.language.name if lead.language else None)
+        ws.cell(row=row_idx, column=6, value=lead.destination.name if lead.destination else None)
+        ws.cell(row=row_idx, column=7, value=lead.organisation.name if lead.organisation else None)
+        ws.cell(row=row_idx, column=8, value=lead.organisation_code)
+        ws.cell(row=row_idx, column=9, value=lead.immigration_status.name if lead.immigration_status else None)
+        ws.cell(row=row_idx, column=10, value=lead.factory_farm.name if lead.factory_farm else None)
+        ws.cell(row=row_idx, column=11, value=lead.page_id)
+        ws.cell(row=row_idx, column=12, value=lead.page_title)
+        ws.cell(row=row_idx, column=13, value=lead.question_key)
+        ws.cell(row=row_idx, column=14, value=lead.question_text)
+        ws.cell(row=row_idx, column=15, value=lead.question_value_key)
+        ws.cell(row=row_idx, column=16, value=lead.question_value_option)
+
+        for col in range(1, 17):
+            cell = ws.cell(row=row_idx, column=col)
+            cell.fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
+
+        row_idx += 1
+
+        followups = lead.followup_responses.all()
+        
+        if followups:
+            for followup in followups:
+                ws.cell(row=row_idx, column=1, value="Follow-up Question")
+                ws.cell(row=row_idx, column=13, value=followup.question_key)
+                ws.cell(row=row_idx, column=14, value=followup.question_text)
+                ws.cell(row=row_idx, column=15, value=followup.question_value_key)
+                ws.cell(row=row_idx, column=16, value=followup.question_value_option)
+
+                for col in range(1, 6):
+                    cell = ws.cell(row=row_idx, column=col)
+                    cell.fill = PatternFill(start_color="F8F8F8", end_color="F8F8F8", fill_type="solid")
+
+                row_idx += 1
+
+                followup_followups = followup.followup_followup_responses.all()
+                
+                if followup_followups:
+                    for ff in followup_followups:
+                        ws.cell(row=row_idx, column=1, value="Follow-up-to-Follow-up Question")
+                        ws.cell(row=row_idx, column=13, value=ff.question_key)
+                        ws.cell(row=row_idx, column=14, value=ff.question_text)
+                        ws.cell(row=row_idx, column=15, value=ff.question_value_key)
+                        ws.cell(row=row_idx, column=16, value=ff.question_value_option)
+
+                        for col in range(1, 6):
+                            cell = ws.cell(row=row_idx, column=col)
+                            cell.fill = PatternFill(start_color="FCFCFC", end_color="FCFCFC", fill_type="solid")
+
+                        row_idx += 1
+
+                row_idx += 1
+
+        row_idx += 1
+
+    for column in ws.columns:
+        max_length = 0
+        column = [cell for cell in column]
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column[0].column_letter].width = adjusted_width
+
+    ws.freeze_panes = 'A5'
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = "attachment; filename=lead_questions_with_followups.xlsx"
+
+    wb.save(response)
+    return response
+
+def export_lead_questions_with_followups(request):
+    """
+    Exports lead questions with their follow-up and follow-up-to-follow-up questions to Excel
+    in a hierarchical and easy-to-read format.
+    """
+    wb = Workbook()
+    ws = wb.active
+
+    heading = "Lead Questions with Follow-up Chain Report"
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=15)
+    heading_cell = ws.cell(row=2, column=1, value=heading)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
+
+    lead_headers = [
+        "Lead Question Details",
+        "Created At",
+        "Updated At",
+        "Device ID",
+        "Language",
+        "Destination",
+        "Organisation",
+        "Organisation Code",
+        "Immigration Status",
+        "Factory Farm",
+        "Page ID",
+        "Page Title",
+        "Question Key",
+        "Question Text",
+        "Value Key",
+        "Value Option",
+    ]
+
+    followup_headers = [
+        "Follow-up Question Details",
+        "Question Key",
+        "Question Text",
+        "Value Key",
+        "Value Option",
+    ]
+
+    followup_followup_headers = [
+        "Follow-up-to-Follow-up Question Details",
+        "Question Key",
+        "Question Text",
+        "Value Key",
+        "Value Option",
+    ]
+
+    for idx, header in enumerate(lead_headers, start=1):
+        cell = ws.cell(row=4, column=idx, value=header)
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
+
+    lead_questions = LeadInlineQuestionResponse.objects.select_related(
+        'language',
+        'destination',
+        'organisation',
+        'immigration_status',
+        'factory_farm',
+        'inline_question',
+        'inline_question__question_category',
+        'inline_question_response'
+    ).prefetch_related(
+        'followup_responses__inline_question',
+        'followup_responses__inline_question__question_category',
+        'followup_responses__inline_question_response',
+        'followup_responses__followup_followup_responses__inline_question',
+        'followup_responses__followup_followup_responses__inline_question__question_category',
+        'followup_responses__followup_followup_responses__inline_question_response'
+    ).all()
+
+    row_idx = 5
+    for lead in lead_questions:
+        ws.cell(row=row_idx, column=1, value="Lead Question")
+        ws.cell(row=row_idx, column=2, value=lead.created_at.strftime("%Y-%m-%d %H:%M:%S"))
+        ws.cell(row=row_idx, column=3, value=lead.updated_at.strftime("%Y-%m-%d %H:%M:%S"))
+        ws.cell(row=row_idx, column=4, value=lead.device_id)
+        ws.cell(row=row_idx, column=5, value=lead.language.name if lead.language else None)
+        ws.cell(row=row_idx, column=6, value=lead.destination.name if lead.destination else None)
+        ws.cell(row=row_idx, column=7, value=lead.organisation.name if lead.organisation else None)
+        ws.cell(row=row_idx, column=8, value=lead.organisation_code)
+        ws.cell(row=row_idx, column=9, value=lead.immigration_status.name if lead.immigration_status else None)
+        ws.cell(row=row_idx, column=10, value=lead.factory_farm.name if lead.factory_farm else None)
+        ws.cell(row=row_idx, column=11, value=lead.inline_question.page_id if lead.inline_question else None)
+        ws.cell(row=row_idx, column=12, value=lead.inline_question.page_title if lead.inline_question else None)
+        ws.cell(row=row_idx, column=13, value=lead.inline_question.question_key if lead.inline_question else None)
+        ws.cell(row=row_idx, column=14, value=lead.inline_question.question_text if lead.inline_question else None)
+        ws.cell(row=row_idx, column=15, value=lead.inline_question_response.response_key if lead.inline_question_response else None)
+        ws.cell(row=row_idx, column=16, value=lead.inline_question_response.response_text if lead.inline_question_response else None)
+
+        for col in range(1, 17):
+            cell = ws.cell(row=row_idx, column=col)
+            cell.fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
+
+        row_idx += 1
+
+        followups = lead.followup_responses.all()
+        
+        if followups:
+            for followup in followups:
+                ws.cell(row=row_idx, column=1, value="Follow-up Question")
+                ws.cell(row=row_idx, column=13, value=followup.inline_question.question_key if followup.inline_question else None)
+                ws.cell(row=row_idx, column=14, value=followup.inline_question.question_text if followup.inline_question else None)
+                ws.cell(row=row_idx, column=15, value=followup.inline_question_response.response_key if followup.inline_question_response else None)
+                ws.cell(row=row_idx, column=16, value=followup.inline_question_response.response_text if followup.inline_question_response else None)
+
+                for col in range(1, 6):
+                    cell = ws.cell(row=row_idx, column=col)
+                    cell.fill = PatternFill(start_color="F8F8F8", end_color="F8F8F8", fill_type="solid")
+
+                row_idx += 1
+
+                followup_followups = followup.followup_followup_responses.all()
+                
+                if followup_followups:
+                    for ff in followup_followups:
+                        ws.cell(row=row_idx, column=1, value="Follow-up-to-Follow-up Question")
+                        ws.cell(row=row_idx, column=13, value=ff.inline_question.question_key if ff.inline_question else None)
+                        ws.cell(row=row_idx, column=14, value=ff.inline_question.question_text if ff.inline_question else None)
+                        ws.cell(row=row_idx, column=15, value=ff.inline_question_response.response_key if ff.inline_question_response else None)
+                        ws.cell(row=row_idx, column=16, value=ff.inline_question_response.response_text if ff.inline_question_response else None)
+
+                        for col in range(1, 6):
+                            cell = ws.cell(row=row_idx, column=col)
+                            cell.fill = PatternFill(start_color="FCFCFC", end_color="FCFCFC", fill_type="solid")
+
+                        row_idx += 1
+
+                row_idx += 1
+
+        row_idx += 1
+
+    for column in ws.columns:
+        max_length = 0
+        column = [cell for cell in column]
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column[0].column_letter].width = adjusted_width
+
+    ws.freeze_panes = 'A5'
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = "attachment; filename=lead_questions_with_followups.xlsx"
+
+    wb.save(response)
     return response

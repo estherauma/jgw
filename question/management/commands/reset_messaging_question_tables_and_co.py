@@ -18,5 +18,10 @@ class Command(BaseCommand):
         MessagingResponse.objects.all().delete()
         MessagingQuestionText.objects.all().delete()
         MessagingResponseOptionText.objects.all().delete()
+        LeadMessagingQuestionResponse.objects.all().delete()
+        FollowupMessagingQuestionResponse.objects.all().delete()
+        FollowupFollowupMessagingQuestionResponse.objects.all().delete()
+        MessagingQuestionV1.objects.all().delete()
+        MessagingQuestionResponseV1.objects.all().delete()
 
         self.stdout.write(self.style.SUCCESS("Successfully reset questions tables and co tables"))

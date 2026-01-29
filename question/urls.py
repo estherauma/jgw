@@ -11,6 +11,7 @@ from .views import (
     inline_question,
     export_message_sent_data,
     export_payment_inline_questions,
+    export_lead_questions_with_followups,
 )
 
 
@@ -40,5 +41,10 @@ urlpatterns = [
     path("export-message-sent-data/", export_message_sent_data, name="export_message_sent_data"),
     path(
         "inline/export_payment_inline_questions/", export_payment_inline_questions, name="export_payment_inline_questions"
+    ),
+    path(
+        "inline/export_lead_questions_with_followups/", 
+        export_lead_questions_with_followups, 
+        name="export_lead_questions_with_followups"
     ),
 ]
