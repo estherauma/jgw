@@ -186,3 +186,59 @@ def get_default_chart_settings(chart_id):
         'responsive': True
     }
 
+
+def get_default_dashboard_preferences(available_charts):
+    """Get default dashboard preferences (layout and chart_definitions) for given charts"""
+    if not available_charts:
+        return {
+            'layout': {'rows': []},
+            'chart_definitions': {}
+        }
+    
+    default_layout = {'rows': []}
+    current_row = {'id': 'row-0', 'columns': []}
+    
+    for i, chart_id in enumerate(available_charts):
+        if len(current_row['columns']) >= 2 and i > 0:
+            default_layout['rows'].append(current_row)
+            current_row = {'id': f'row-{len(default_layout["rows"])}', 'columns': []}
+        
+        chart_config = CHART_DEFINITIONS.get(chart_id, {})
+        col_size = chart_config.get('default_size', 6)
+        
+        if len(current_row['columns']) == 0 and col_size < 12:
+            if i + 1 < len(available_charts):
+                next_chart = CHART_DEFINITIONS.get(available_charts[i + 1], {})
+                if next_chart.get('default_size', 6) >= 12:
+                    col_size = 12
+        
+        current_row['columns'].append({
+            'id': f'col-{chart_id}',
+            'chart_id': chart_id,
+            'size': col_size,
+            'enabled': True,
+            'settings': get_default_chart_settings(chart_id)
+        })
+    
+    if current_row['columns']:
+        default_layout['rows'].append(current_row)
+    
+    chart_defs = {}
+    for chart_id in available_charts:
+        if chart_id in CHART_DEFINITIONS:
+            chart_defs[chart_id] = {
+                'name': CHART_DEFINITIONS[chart_id]['name'],
+                'description': CHART_DEFINITIONS[chart_id]['description'],
+                'icon': CHART_DEFINITIONS[chart_id]['icon'],
+                'supported_types': CHART_DEFINITIONS[chart_id]['supported_types'],
+                'default_size': CHART_DEFINITIONS[chart_id]['default_size'],
+                'default_type': CHART_DEFINITIONS[chart_id]['default_type'],
+                'render_function': CHART_DEFINITIONS[chart_id]['render_function'],
+                'data_variable': CHART_DEFINITIONS[chart_id].get('data_variable', '')
+            }
+    
+    return {
+        'layout': default_layout,
+        'chart_definitions': chart_defs
+    }
+

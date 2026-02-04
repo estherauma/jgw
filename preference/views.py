@@ -46,6 +46,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from preference.dashboard_config import CHART_DEFINITIONS, get_default_chart_settings
+from preference.models import DashboardPreferences, ChartSettings
 from waffle import flag_is_active
 from waffle.models import Flag
 import logging
@@ -89,7 +90,9 @@ def user_overview(request):
     link_clicks_data = get_link_clicked_data(**filters, current_user=request.user)
     user_counts_by_geo_country = get_user_counts_by_geo_country(**filters, current_user=request.user)
 
-    user_prefs = request.user.dashboard_preferences or {}
+    # Get DashboardPreferences and ChartSettings from database
+    layout, chart_settings, chart_settings_dict, chart_sizes = get_user_dashboard_data(request.user)
+    
     available_charts = get_available_charts(request.user, request)
     
     context = {
@@ -119,10 +122,55 @@ def user_overview(request):
         "link_clicks_data": link_clicks_data,
         "user_counts_by_geo_country": user_counts_by_geo_country,
         "available_charts": available_charts,
-        "dashboard_layout": json.dumps(user_prefs.get('layout', {}), cls=DjangoJSONEncoder),
+        "dashboard_layout": json.dumps(layout, cls=DjangoJSONEncoder),
+        "chart_settings": json.dumps(chart_settings, cls=DjangoJSONEncoder),
+        "chart_settings_dict": chart_settings_dict, 
+        "chart_sizes": chart_sizes,  
     }
     return render(request, "preference/user_overview.html", context=context)
 
+def get_user_dashboard_data(user):
+    """
+    Get dashboard preferences and chart settings for a user.
+    
+    Returns:
+        tuple: (layout, chart_settings, chart_settings_dict, chart_sizes)
+            - layout: Dashboard layout dictionary
+            - chart_settings: Chart settings dict with ISO date strings (for JSON)
+            - chart_settings_dict: Chart settings dict with date objects (for template)
+            - chart_sizes: Simple dict mapping chart_id to size
+    """
+    try:
+        dashboard_prefs = user.dashboard_prefs
+        layout = dashboard_prefs.get_layout()
+        chart_settings = {}
+        chart_settings_dict = {}  
+        chart_sizes = {}  
+        
+        for chart_setting in dashboard_prefs.chart_settings.all():
+            chart_settings[chart_setting.chart_id] = {
+                'chart_type': chart_setting.chart_type,
+                'size': chart_setting.size,
+                'enabled': chart_setting.enabled,
+                'start_date': chart_setting.start_date.isoformat() if chart_setting.start_date else None,
+                'end_date': chart_setting.end_date.isoformat() if chart_setting.end_date else None,
+            }
+            chart_settings_dict[chart_setting.chart_id] = {
+                'chart_type': chart_setting.chart_type,
+                'size': chart_setting.size,
+                'enabled': chart_setting.enabled,
+                'start_date': chart_setting.start_date,
+                'end_date': chart_setting.end_date,
+            }
+            chart_sizes[chart_setting.chart_id] = chart_setting.size
+    except DashboardPreferences.DoesNotExist:
+        user_prefs = user.dashboard_preferences or {}
+        layout = user_prefs.get('layout', {'rows': []})
+        chart_settings = user_prefs.get('chart_settings', {})
+        chart_settings_dict = chart_settings
+        chart_sizes = {k: v.get('size', 6) for k, v in chart_settings.items() if isinstance(v, dict)}
+    
+    return layout, chart_settings, chart_settings_dict, chart_sizes
 
 @login_required
 def user_diagnostics(request):
@@ -439,52 +487,29 @@ def export_pay_calculator_statistics(request):
 
 
 def get_available_charts(user, request=None):
-    """Get list of chart IDs available to user based on waffle flags"""
+    """Get list of chart IDs available to user from ChartSettings database"""
     
     logger = logging.getLogger(__name__)
     available = []
     
-    logger.info(f"Checking available charts for user. Total CHART_DEFINITIONS: {len(CHART_DEFINITIONS)}")
-    
-    for chart_id, config in CHART_DEFINITIONS.items():
-        flag_name = config['waffle_flag']
-        is_active = False
+    try:
+        dashboard_prefs = DashboardPreferences.objects.get(user=user)
         
-        if request:
-            try:
-                is_active = flag_is_active(flag_name, request)
-                logger.debug(f"Flag {flag_name} (chart: {chart_id}) - flag_is_active result: {is_active}")
-            except Exception as e:
-                logger.warning(f"Error checking flag {flag_name} with flag_is_active: {e}")
-                try:
-                    flag = Flag.objects.filter(name=flag_name).first()
-                    if flag:
-                        is_active = flag.is_active(request=request)
-                        logger.debug(f"Flag {flag_name} (chart: {chart_id}) - database flag.is_active result: {is_active}")
-                    else:
-                        logger.warning(f"Flag {flag_name} not found in database")
-                        is_active = False
-                except Exception as ex:
-                    logger.error(f"Error checking flag {flag_name} from database: {ex}")
-                    is_active = False
-        else:
-            try:
-                flag = Flag.objects.filter(name=flag_name).first()
-                if flag:
-                    is_active = flag.is_active(request=request)
-                    logger.debug(f"Flag {flag_name} (chart: {chart_id}) - database flag.is_active (no request) result: {is_active}")
-                else:
-                    logger.warning(f"Flag {flag_name} not found in database (no request)")
-                    is_active = False
-            except Exception as ex:
-                logger.error(f"Error checking flag {flag_name} from database (no request): {ex}")
-                is_active = False
+        chart_settings = ChartSettings.objects.filter(
+            dashboard_preferences=dashboard_prefs,
+            enabled=True  
+        ).values_list('chart_id', flat=True).distinct()
         
-        if is_active:
-            available.append(chart_id)
-            logger.info(f"✓ Chart {chart_id} is available (flag: {flag_name})")
-        else:
-            logger.debug(f"✗ Chart {chart_id} is NOT available (flag: {flag_name})")
+        available = list(chart_settings)
+        
+        logger.info(f"Found {len(available)} charts from ChartSettings for user {user.email}: {available}")
+        
+    except DashboardPreferences.DoesNotExist:
+        logger.info(f"DashboardPreferences not found for user {user.email}, returning empty list")
+        return []
+    except Exception as e:
+        logger.error(f"Error getting available charts from ChartSettings: {str(e)}")
+        return []
     
     logger.info(f"Total available charts: {len(available)} - {available}")
     return available
@@ -532,19 +557,27 @@ def get_default_dashboard_layout(user, request=None):
 def dashboard_customization(request):
     """Get or save user's dashboard preferences"""
     if request.method == 'GET':
-        preferences = request.user.dashboard_preferences or {}
-        default_layout = get_default_dashboard_layout(request.user, request)
+        try:
+            dashboard_prefs = request.user.dashboard_prefs
+            layout = dashboard_prefs.get_layout()
+            chart_settings = {}
+            for chart_setting in dashboard_prefs.chart_settings.all():
+                chart_settings[chart_setting.chart_id] = {
+                    'chart_type': chart_setting.chart_type,
+                    'size': chart_setting.size,
+                    'enabled': chart_setting.enabled,
+                    'start_date': chart_setting.start_date.isoformat() if chart_setting.start_date else None,
+                    'end_date': chart_setting.end_date.isoformat() if chart_setting.end_date else None,
+                }
+        except DashboardPreferences.DoesNotExist:
+            preferences = request.user.dashboard_preferences or {}
+            layout = preferences.get('layout', get_default_dashboard_layout(request.user, request))
+            chart_settings = preferences.get('chart_settings', {})
         
-        layout = preferences.get('layout', default_layout)
         available_charts = get_available_charts(request.user, request)
         
         logger = logging.getLogger(__name__)
         logger.info(f"Dashboard customization API called. Available charts: {available_charts}")
-        logger.info(f"Total CHART_DEFINITIONS in config: {len(CHART_DEFINITIONS)}")
-        
-        if not available_charts or len(available_charts) == 0:
-            logger.warning("No charts available via flags, returning ALL chart definitions as fallback")
-            available_charts = list(CHART_DEFINITIONS.keys())
         
         chart_defs = {}
         for chart_id in available_charts:
@@ -559,8 +592,6 @@ def dashboard_customization(request):
                     'render_function': CHART_DEFINITIONS[chart_id]['render_function'],
                     'data_variable': CHART_DEFINITIONS[chart_id].get('data_variable', '')
                 }
-            else:
-                logger.warning(f"Chart ID {chart_id} not found in CHART_DEFINITIONS")
         
         logger.info(f"Built {len(chart_defs)} chart definitions for frontend")
         
@@ -568,7 +599,7 @@ def dashboard_customization(request):
             'layout': layout,
             'available_charts': available_charts,
             'chart_definitions': chart_defs,
-            'user_preferences': preferences
+            'chart_settings': chart_settings  
         })
     
     elif request.method == 'POST':
@@ -576,6 +607,10 @@ def dashboard_customization(request):
             data = json.loads(request.body)
             
             available_charts = get_available_charts(request.user, request)
+            
+            dashboard_prefs, created = DashboardPreferences.objects.get_or_create(
+                user=request.user
+            )
             
             if 'layout' in data and 'rows' in data['layout']:
                 validated_rows = []
@@ -585,18 +620,189 @@ def dashboard_customization(request):
                         for col in row['columns']:
                             if 'chart_id' in col and col['chart_id'] in available_charts:
                                 validated_columns.append(col)
+                                
+                                chart_id = col['chart_id']
+                                settings = col.get('settings', {})
+                                
+                                chart_setting, _ = ChartSettings.objects.get_or_create(
+                                    dashboard_preferences=dashboard_prefs,
+                                    chart_id=chart_id,
+                                    defaults={
+                                        'chart_type': settings.get('chart_type', 'bar'),
+                                        'size': col.get('size', 6),
+                                        'enabled': col.get('enabled', True),
+                                    }
+                                )
+                                
+                                if 'chart_type' in settings:
+                                    chart_setting.chart_type = settings['chart_type']
+                                if 'size' in col:
+                                    chart_setting.size = col['size']
+                                if 'enabled' in col:
+                                    chart_setting.enabled = col['enabled']
+                                if 'start_date' in settings:
+                                    from django.utils.dateparse import parse_date
+                                    chart_setting.start_date = parse_date(settings['start_date']) if settings['start_date'] else None
+                                if 'end_date' in settings:
+                                    from django.utils.dateparse import parse_date
+                                    chart_setting.end_date = parse_date(settings['end_date']) if settings['end_date'] else None
+                                
+                                chart_setting.save()
+                                
                         if validated_columns:
                             row['columns'] = validated_columns
                             validated_rows.append(row)
                 data['layout']['rows'] = validated_rows
+                dashboard_prefs.layout = data['layout']
+                dashboard_prefs.save()
             
-            request.user.dashboard_preferences = data
-            request.user.save()
             return JsonResponse({'status': 'success', 'message': 'Dashboard layout saved successfully'})
         except json.JSONDecodeError:
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
         except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f'Error saving dashboard: {str(e)}')
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["GET", "POST", "PUT"])
+def chart_settings_api(request, chart_id=None):
+    """Get or update individual chart settings"""
+    try:
+        dashboard_prefs, created = DashboardPreferences.objects.get_or_create(
+            user=request.user
+        )
+        
+        if request.method == 'GET':
+            if chart_id:
+                print(f"Chart ID: {chart_id}")
+                available_charts = get_available_charts(request.user, request)
+                print(f"Available charts: {available_charts}")
+                if chart_id not in available_charts:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'Chart {chart_id} is not available for this user'
+                    }, status=403)
+                
+                chart_def = None
+                if chart_id in CHART_DEFINITIONS:
+                    chart_def = {
+                        'name': CHART_DEFINITIONS[chart_id]['name'],
+                        'description': CHART_DEFINITIONS[chart_id]['description'],
+                        'icon': CHART_DEFINITIONS[chart_id]['icon'],
+                        'supported_types': CHART_DEFINITIONS[chart_id]['supported_types'],
+                        'default_size': CHART_DEFINITIONS[chart_id]['default_size'],
+                        'default_type': CHART_DEFINITIONS[chart_id]['default_type'],
+                        'render_function': CHART_DEFINITIONS[chart_id]['render_function'],
+                        'data_variable': CHART_DEFINITIONS[chart_id].get('data_variable', '')
+                    }
+                
+                try:
+                    chart_setting = ChartSettings.objects.get(
+                        dashboard_preferences=dashboard_prefs,
+                        chart_id=chart_id
+                    )
+                    return JsonResponse({
+                        'status': 'success',
+                        'chart_id': chart_id,
+                        'chart_definition': chart_def,
+                        'settings': {
+                            'chart_type': chart_setting.chart_type,
+                            'size': chart_setting.size,
+                            'enabled': chart_setting.enabled,
+                            'start_date': chart_setting.start_date.isoformat() if chart_setting.start_date else None,
+                            'end_date': chart_setting.end_date.isoformat() if chart_setting.end_date else None,
+                        }
+                    })
+                except ChartSettings.DoesNotExist:
+                    return JsonResponse({
+                        'status': 'success',
+                        'chart_id': chart_id,
+                        'chart_definition': chart_def,
+                        'settings': {
+                            'chart_type': chart_def['default_type'] if chart_def else 'bar',
+                            'size': chart_def['default_size'] if chart_def else 6,
+                            'enabled': True,
+                            'start_date': None,
+                            'end_date': None,
+                        }
+                    })
+            else:
+                chart_settings = {}
+                for chart_setting in dashboard_prefs.chart_settings.all():
+                    chart_settings[chart_setting.chart_id] = {
+                        'chart_type': chart_setting.chart_type,
+                        'size': chart_setting.size,
+                        'enabled': chart_setting.enabled,
+                        'start_date': chart_setting.start_date.isoformat() if chart_setting.start_date else None,
+                        'end_date': chart_setting.end_date.isoformat() if chart_setting.end_date else None,
+                    }
+                return JsonResponse({
+                    'status': 'success',
+                    'settings': chart_settings
+                })
+        
+        elif request.method in ['POST', 'PUT']:
+            if not chart_id:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'chart_id is required'
+                }, status=400)
+            
+            data = json.loads(request.body)
+            
+            available_charts = get_available_charts(request.user, request)
+            if chart_id not in available_charts:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Chart {chart_id} is not available for this user'
+                }, status=403)
+            
+            chart_setting, created = ChartSettings.objects.get_or_create(
+                dashboard_preferences=dashboard_prefs,
+                chart_id=chart_id,
+                defaults={
+                    'chart_type': data.get('chart_type', 'bar'),
+                    'size': data.get('size', 6),
+                    'enabled': data.get('enabled', True),
+                }
+            )
+            
+            if 'chart_type' in data:
+                chart_setting.chart_type = data['chart_type']
+            if 'size' in data:
+                chart_setting.size = int(data['size'])
+            if 'enabled' in data:
+                chart_setting.enabled = bool(data['enabled'])
+            if 'start_date' in data:
+                from django.utils.dateparse import parse_date
+                chart_setting.start_date = parse_date(data['start_date']) if data['start_date'] else None
+            if 'end_date' in data:
+                from django.utils.dateparse import parse_date
+                chart_setting.end_date = parse_date(data['end_date']) if data['end_date'] else None
+            
+            chart_setting.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Chart settings {"created" if created else "updated"} successfully',
+                'chart_id': chart_id,
+                'settings': {
+                    'chart_type': chart_setting.chart_type,
+                    'size': chart_setting.size,
+                    'enabled': chart_setting.enabled,
+                    'start_date': chart_setting.start_date.isoformat() if chart_setting.start_date else None,
+                    'end_date': chart_setting.end_date.isoformat() if chart_setting.end_date else None,
+                }
+            })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f'Error in chart_settings_api: {str(e)}')
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 @login_required

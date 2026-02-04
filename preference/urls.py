@@ -28,4 +28,6 @@ urlpatterns = [
     path('api/work-code-usage/', views.filter_work_code_usage, name='filter_work_code_usage'),
     path('api/new-users-by-month/', views.filter_new_users_by_month, name='filter_new_users_by_month'),
     path('api/dashboard/reset/', views.reset_dashboard, name='dashboard_reset'),
+    path('api/chart-settings/', views.chart_settings_api, name='chart_settings_api'),
+    path('api/chart-settings/<str:chart_id>/', views.chart_settings_api, name='chart_settings_api_detail'),
 ]

@@ -20,14 +20,18 @@ class DashboardCustomizer {
         await this.loadLayout(true);
 
         if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
-            window.CHART_DEFINITIONS = this.chartDefinitions;
+            window.chartDefinitions = this.chartDefinitions;
         } else {
             console.warn('Chart definitions not loaded on init');
         }
         
+        if (typeof window.chartSettings === 'undefined') {
+            window.chartSettings = {};
+        }
+        
         setTimeout(() => {
             this.applySpacingToAllCharts();
-        }, 600);
+        }, 100);
         this.setupSidebarResizeListeners();
     }
     
@@ -223,9 +227,13 @@ class DashboardCustomizer {
             this.availableCharts = data.available_charts || [];
             
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
-                window.CHART_DEFINITIONS = this.chartDefinitions;
+                window.chartDefinitions = this.chartDefinitions;
             } else {
                 console.warn('⚠ No chart definitions received from API!');
+            }
+            
+            if (data.chart_settings) {
+                window.chartSettings = data.chart_settings;
             }
 
             const hasCustomLayout = this.layout && this.layout.rows && this.layout.rows.length > 0;
@@ -263,9 +271,9 @@ class DashboardCustomizer {
             await this.loadLayout(false);
         }
         
-        if (!window.CHART_DEFINITIONS || Object.keys(window.CHART_DEFINITIONS).length === 0) {
+        if (!window.chartDefinitions || Object.keys(window.chartDefinitions).length === 0) {
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
-                window.CHART_DEFINITIONS = this.chartDefinitions;
+                window.chartDefinitions = this.chartDefinitions;
             }
         }
         
@@ -446,8 +454,8 @@ class DashboardCustomizer {
         if (chartId && this.chartDefinitions && this.chartDefinitions[chartId]) {
             chartName = this.chartDefinitions[chartId].name;
         }
-        else if (chartId && window.CHART_DEFINITIONS && window.CHART_DEFINITIONS[chartId]) {
-            chartName = window.CHART_DEFINITIONS[chartId].name;
+        else if (chartId && window.chartDefinitions && window.chartDefinitions[chartId]) {
+            chartName = window.chartDefinitions[chartId].name;
         }
         else if (chartElement) {
             const titleElement = chartElement.querySelector('.chart-main-title, .chart-title, h4');
@@ -667,7 +675,7 @@ class DashboardCustomizer {
         chartWrapper.dataset.chartId = colData.chart_id;
         chartWrapper.id = `chart-${colData.chart_id}`;
         
-        const chartDef = this.chartDefinitions[colData.chart_id] || window.CHART_DEFINITIONS?.[colData.chart_id];
+        const chartDef = this.chartDefinitions[colData.chart_id] || window.chartDefinitions?.[colData.chart_id];
         const chartName = chartDef ? chartDef.name : colData.chart_id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         
         const chartHeader = document.createElement('div');
@@ -833,6 +841,42 @@ class DashboardCustomizer {
     async saveLayout() {
         const layout = this.extractLayoutFromDOM();
         
+        if (window.chartSettings && layout && layout.rows) {
+            layout.rows.forEach(row => {
+                if (row.columns) {
+                    row.columns.forEach(col => {
+                        if (col.chart_id && window.chartSettings[col.chart_id]) {
+                            const chartSetting = window.chartSettings[col.chart_id];
+                            
+                            if (chartSetting.size !== undefined) {
+                                col.size = chartSetting.size;
+                            }
+                            
+                            if (!col.settings) {
+                                col.settings = {};
+                            }
+                            
+                            if (chartSetting.chart_type) {
+                                col.settings.chart_type = chartSetting.chart_type;
+                            }
+                            
+                            if (chartSetting.enabled !== undefined) {
+                                col.enabled = chartSetting.enabled;
+                            }
+                            
+                            if (chartSetting.start_date !== undefined) {
+                                col.settings.start_date = chartSetting.start_date;
+                            }
+                            
+                            if (chartSetting.end_date !== undefined) {
+                                col.settings.end_date = chartSetting.end_date;
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
         try {
             const response = await fetch('/preference/api/dashboard/customize/', {
                 method: 'POST',
@@ -929,7 +973,7 @@ class DashboardCustomizer {
         
         const chartsToShow = this.availableCharts.length > 0 
             ? this.availableCharts 
-            : Object.keys(this.chartDefinitions || window.CHART_DEFINITIONS || {});
+            : Object.keys(this.chartDefinitions || window.chartDefinitions || {});
         
         const chartsList = modal.querySelector('.charts-list');
         if (chartsList) {
@@ -943,7 +987,7 @@ class DashboardCustomizer {
             }
             
             chartsToShow.forEach(chartId => {
-                const chartDef = this.chartDefinitions[chartId] || window.CHART_DEFINITIONS?.[chartId];
+                const chartDef = this.chartDefinitions[chartId] || window.chartDefinitions?.[chartId];
                 if (!chartDef) {
                     console.warn(`Chart definition not found for: ${chartId}`);
                     return;
@@ -1080,7 +1124,6 @@ class DashboardCustomizer {
         
         setTimeout(() => {
             if (window.ChartRenderer && graphContainerId) {
-                // Verify the graph container exists
                 const graphContainer = document.getElementById(graphContainerId);
                 if (!graphContainer) {
                     console.error(`Graph container not found: ${graphContainerId}`);
@@ -1182,7 +1225,7 @@ class DashboardCustomizer {
         this.showChartSettingsModal(chartId, chartElement, uniqueId);
     }
     
-    showChartSettingsModal(chartId, chartElement = null, uniqueId = null) {
+    async showChartSettingsModal(chartId, chartElement = null, uniqueId = null) {
         console.log(`showChartSettingsModal called for: ${chartId}, uniqueId: ${uniqueId}`);
         const modal = document.getElementById('chart-settings-modal');
         if (!modal) {
@@ -1190,32 +1233,94 @@ class DashboardCustomizer {
             return;
         }
         
-        let chartDef = this.chartDefinitions?.[chartId];
+        if (!chartId) {
+            console.error('Chart ID is required');
+            alert('Chart ID is required to open settings');
+            return;
+        }
+        
+        const loadingDiv = modal.querySelector('#chart-settings-loading');
+        const formDiv = modal.querySelector('#chart-settings-form');
+        if (loadingDiv) loadingDiv.style.display = 'block';
+        if (formDiv) formDiv.style.display = 'none';
+        
+        let chartDef = null;
+        let currentSettings = null;
+        
+        try {
+            const response = await fetch(`/preference/api/chart-settings/${chartId}/`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.status === 'success') {
+                    chartDef = data.chart_definition;
+                    currentSettings = data.settings;
+                    
+                    if (!window.chartSettings) window.chartSettings = {};
+                    window.chartSettings[chartId] = currentSettings;
+                    
+                    if (chartDef && (!window.chartDefinitions || !window.chartDefinitions[chartId])) {
+                        if (!window.chartDefinitions) window.chartDefinitions = {};
+                        window.chartDefinitions[chartId] = chartDef;
+                    }
+                } else {
+                    console.error('API returned error:', data.message);
+                    alert(`Error loading chart settings: ${data.message || 'Unknown error'}`);
+                    if (loadingDiv) loadingDiv.style.display = 'none';
+                    return;
+                }
+            } else if (response.status === 403) {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.message || 'Chart not available'}`);
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                return;
+            } else {
+                console.error(`API request failed with status: ${response.status}`);
+                alert('Error loading chart settings. Please try again.');
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                return;
+            }
+        } catch (error) {
+            console.error('Error fetching chart settings:', error);
+            alert('Error loading chart settings. Please try again.');
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            return;
+        }
+        
         if (!chartDef) {
-            chartDef = window.CHART_DEFINITIONS?.[chartId];
+            chartDef = this.chartDefinitions?.[chartId] || window.chartDefinitions?.[chartId];
+            if (!chartDef) {
+                console.warn(`Chart definition not found for ${chartId}, attempting to load...`);
+                await this.loadLayout(false);
+                chartDef = this.chartDefinitions?.[chartId] || window.chartDefinitions?.[chartId];
+            }
         }
         
         if (!chartDef) {
             console.error(`Chart definition not found for: ${chartId}`);
-            console.error('Available in this.chartDefinitions:', Object.keys(this.chartDefinitions || {}));
-            console.error('Available in window.CHART_DEFINITIONS:', Object.keys(window.CHART_DEFINITIONS || {}));
-            
-            if (!this.chartDefinitions || Object.keys(this.chartDefinitions).length === 0) {
-                console.warn('Loading chart definitions and retrying...');
-                this.loadLayout(false).then(() => {
-                    if (this.chartDefinitions && this.chartDefinitions[chartId]) {
-                        window.CHART_DEFINITIONS = this.chartDefinitions;
-                        this.showChartSettingsModal(chartId, chartElement, uniqueId);
-                    } else {
-                        alert(`Chart settings not available for this chart. Please try again.`);
-                    }
-                });
-                return;
-            }
             alert(`Chart settings not available for this chart. Please try again.`);
+            if (loadingDiv) loadingDiv.style.display = 'none';
             return;
         }
         
+        if (!chartElement) {
+            if (uniqueId) {
+                chartElement = document.getElementById(uniqueId);
+            }
+            
+            if (!chartElement) {
+                const allCharts = document.querySelectorAll(`[data-chart-id="${chartId}"]`);
+                if (uniqueId) {
+                    chartElement = Array.from(allCharts).find(el => {
+                        const wrapperId = el.id || '';
+                        return wrapperId === uniqueId || wrapperId.includes(uniqueId.split('-').pop());
+                    });
+                }
+                
+                if (!chartElement && allCharts.length > 0) {
+                    chartElement = allCharts[0];
+                }
+            }
+        }
         
         if (!chartElement) {
             if (uniqueId) {
@@ -1248,29 +1353,54 @@ class DashboardCustomizer {
                     typeSelect.appendChild(option);
                 });
                 
-                const storedType = this.getCurrentChartType(chartId, chartElement, uniqueId);
-                const currentType = storedType || chartDef.default_type;
-                const normalizedCurrentType = currentType ? currentType.toLowerCase() : chartDef.default_type;
-                typeSelect.value = normalizedCurrentType;
+                const chartType = currentSettings?.chart_type || chartDef.default_type || 'bar';
+                typeSelect.value = chartType.toLowerCase();
             } else {
                 console.warn('supported_types not found in chartDef:', chartDef);
+                const commonTypes = ['bar', 'line', 'pie', 'doughnut', 'area', 'map'];
+                commonTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+                    typeSelect.appendChild(option);
+                });
+                typeSelect.value = currentSettings?.chart_type || 'bar';
             }
         }
         
         const sizeSelect = modal.querySelector('#chart-size-select');
-        if (sizeSelect && chartElement) {
-            const colElement = chartElement.closest('[class*="col-md-"]');
-            if (colElement) {
-                const currentSize = parseInt(colElement.className.match(/col-md-(\d+)/)?.[1] || '6');
-                sizeSelect.value = currentSize;
+        if (sizeSelect) {
+            let currentSize = currentSettings?.size;
+            if (!currentSize && chartElement) {
+                const colElement = chartElement.closest('[class*="col-md-"]');
+                if (colElement) {
+                    currentSize = parseInt(colElement.className.match(/col-md-(\d+)/)?.[1] || '6');
+                }
             }
+            if (!currentSize) {
+                currentSize = chartDef.default_size || 6;
+            }
+            sizeSelect.value = currentSize;
+        }
+        
+        const enabledCheckbox = modal.querySelector('#chart-enabled-checkbox');
+        if (enabledCheckbox) {
+            enabledCheckbox.checked = currentSettings?.enabled !== false; 
+        }
+        
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        if (formDiv) formDiv.style.display = 'block';
+        
+        const modalTitle = modal.querySelector('#chart-settings-modal-label');
+        if (modalTitle && chartDef) {
+            modalTitle.textContent = `Chart Settings - ${chartDef.name}`;
         }
         
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
     }
     
-    applyChartSettings() {
+    async applyChartSettings() {
         if (!this.selectedChart) {
             console.error('No chart selected');
             return;
@@ -1279,6 +1409,54 @@ class DashboardCustomizer {
         const modal = document.getElementById('chart-settings-modal');
         const type = modal.querySelector('#chart-type-select')?.value;
         const size = modal.querySelector('#chart-size-select')?.value;
+        const enabled = modal.querySelector('#chart-enabled-checkbox')?.checked;
+        
+        const applyBtn = modal.querySelector('#apply-chart-settings-btn');
+        const originalBtnText = applyBtn ? applyBtn.textContent : 'Apply Settings';
+        if (applyBtn) {
+            applyBtn.disabled = true;
+            applyBtn.textContent = 'Saving...';
+        }
+        
+        try {
+            const response = await fetch(`/preference/api/chart-settings/${this.selectedChart}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({
+                    chart_type: type,
+                    size: parseInt(size),
+                    enabled: enabled === true || enabled === undefined
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                if (!window.chartSettings) window.chartSettings = {};
+                window.chartSettings[this.selectedChart] = data.settings;
+                
+                console.log(`Chart settings saved successfully for ${this.selectedChart}`);
+            } else {
+                console.error('Error saving chart settings:', data.message);
+                alert(`Error saving chart settings: ${data.message || 'Unknown error'}`);
+                if (applyBtn) {
+                    applyBtn.disabled = false;
+                    applyBtn.textContent = originalBtnText;
+                }
+                return;
+            }
+        } catch (error) {
+            console.error('Error saving chart settings to API:', error);
+            alert('Error saving chart settings. Please try again.');
+            if (applyBtn) {
+                applyBtn.disabled = false;
+                applyBtn.textContent = originalBtnText;
+            }
+            return;
+        }
         
         
         let chartElement = this.selectedChartElement;
@@ -1314,7 +1492,7 @@ class DashboardCustomizer {
         const newSize = size ? parseInt(size) : null;
         const sizeChanged = oldSize !== null && newSize !== null && oldSize !== newSize;
         
-        const chartDef = this.chartDefinitions[this.selectedChart] || window.CHART_DEFINITIONS?.[this.selectedChart];
+        const chartDef = this.chartDefinitions[this.selectedChart] || window.chartDefinitions?.[this.selectedChart];
         
         const storedType = this.getCurrentChartType(this.selectedChart, chartElement, this.selectedChartUniqueId);
         const defaultType = (chartDef?.default_type || 'bar').toLowerCase();
@@ -1388,15 +1566,37 @@ class DashboardCustomizer {
             });
         }
         
-        if (!window.CHART_DEFINITIONS || Object.keys(window.CHART_DEFINITIONS).length === 0) {
+        if (!window.chartSettings) {
+            window.chartSettings = {};
+        }
+        
+        if (normalizedNewType || newSize !== null) {
+            if (!window.chartSettings[this.selectedChart]) {
+                window.chartSettings[this.selectedChart] = {};
+            }
+            
+            if (normalizedNewType) {
+                window.chartSettings[this.selectedChart].chart_type = normalizedNewType;
+            }
+            
+            if (newSize !== null) {
+                window.chartSettings[this.selectedChart].size = newSize;
+            }
+            
+            if (window.chartSettings[this.selectedChart].enabled === undefined) {
+                window.chartSettings[this.selectedChart].enabled = true;
+            }
+        }
+        
+        if (!window.chartDefinitions || Object.keys(window.chartDefinitions).length === 0) {
             if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
-                window.CHART_DEFINITIONS = this.chartDefinitions;
+                window.chartDefinitions = this.chartDefinitions;
             } 
             else {
                 console.warn('Chart definitions not loaded, attempting to load...');
                 this.loadLayout(false).then(() => {
                     if (this.chartDefinitions && Object.keys(this.chartDefinitions).length > 0) {
-                        window.CHART_DEFINITIONS = this.chartDefinitions;
+                        window.chartDefinitions = this.chartDefinitions;
                         setTimeout(() => this.applyChartSettings(), 100);
                     }
                 });
@@ -1404,9 +1604,9 @@ class DashboardCustomizer {
             }
         }
         
-        if (!window.CHART_DEFINITIONS[this.selectedChart]) {
-            console.error(`Chart definition not found for ${this.selectedChart}. Available charts:`, Object.keys(window.CHART_DEFINITIONS || {}));
-            console.error('Current window.CHART_DEFINITIONS:', window.CHART_DEFINITIONS);
+        if (!window.chartDefinitions[this.selectedChart]) {
+            console.error(`Chart definition not found for ${this.selectedChart}. Available charts:`, Object.keys(window.chartDefinitions || {}));
+            console.error('Current window.chartDefinitions:', window.chartDefinitions);
             return;
         }
         
@@ -1457,6 +1657,11 @@ class DashboardCustomizer {
             console.log(`No changes detected, skipping resize/render`);
         }
         
+        if (applyBtn) {
+            applyBtn.disabled = false;
+            applyBtn.textContent = originalBtnText;
+        }
+        
         const bsModal = bootstrap.Modal.getInstance(modal);
         if (bsModal) {
             bsModal.hide();
@@ -1466,6 +1671,10 @@ class DashboardCustomizer {
     }
     
     getCurrentChartType(chartId, chartElement = null, uniqueId = null) {
+        if (window.chartSettings && window.chartSettings[chartId] && window.chartSettings[chartId].chart_type) {
+            return window.chartSettings[chartId].chart_type.toLowerCase().trim();
+        }
+        
         if (this.layout && this.layout.rows) {
             for (const row of this.layout.rows) {
                 if (row.columns) {
@@ -1607,7 +1816,7 @@ class DashboardCustomizer {
         
         if (!resizeAttempted) {
             console.log(`No resize method found for ${element.id}, attempting to re-render chart: ${chartId}`);
-            const chartDef = this.chartDefinitions[chartId] || window.CHART_DEFINITIONS?.[chartId];
+            const chartDef = this.chartDefinitions[chartId] || window.chartDefinitions?.[chartId];
             const chartType = chartDef?.default_type || 'bar';
             
             if (window.ChartRenderer) {
@@ -1782,7 +1991,7 @@ class DashboardCustomizer {
         
         this.saveLayout();
         
-        const chartDef = this.chartDefinitions[chartId] || window.CHART_DEFINITIONS?.[chartId];
+        const chartDef = this.chartDefinitions[chartId] || window.chartDefinitions?.[chartId];
         const chartName = chartDef ? chartDef.name : chartId;
         this.showNotification(`Chart "${chartName}" duplicated successfully`, 'success');
     }
@@ -1876,7 +2085,7 @@ class DashboardCustomizer {
         
         this.saveLayout();
         
-        const chartDef = this.chartDefinitions[chartId] || window.CHART_DEFINITIONS?.[chartId];
+        const chartDef = this.chartDefinitions[chartId] || window.chartDefinitions?.[chartId];
         const chartName = chartDef ? chartDef.name : chartId;
         this.showNotification(`Chart "${chartName}" removed successfully`, 'success');
     }

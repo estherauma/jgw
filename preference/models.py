@@ -288,6 +288,110 @@ class SectorsOfWorkMapper(models.Model):
         return self.mapper
 
 
+class DashboardPreferences(models.Model):
+    """User dashboard customization preferences"""
+    user = models.OneToOneField(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='dashboard_prefs',
+        primary_key=True
+    )
+    layout = models.JSONField(default=dict, blank=True, help_text="Dashboard layout configuration")
+    chart_definitions = models.JSONField(default=dict, blank=True, help_text="Chart definitions metadata")
+    version = models.IntegerField(default=1, help_text="Version of dashboard preferences schema")
+
+    filter_start_date = models.DateField(null=True, blank=True, help_text="Default start date for dashboard filters")
+    filter_end_date = models.DateField(null=True, blank=True, help_text="Default end date for dashboard filters")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Dashboard Preferences"
+        verbose_name_plural = "Dashboard Preferences"
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['updated_at']),
+            models.Index(fields=['filter_start_date', 'filter_end_date']),
+        ]
+
+    def __str__(self):
+        return f"Dashboard Preferences for {self.user.email}"
+
+    def get_layout(self):
+        """Get layout or return empty dict"""
+        return self.layout if self.layout else {'rows': []}
+
+    def get_chart_settings_dict(self):
+        """Get all chart settings as a dictionary (for backward compatibility)"""
+        settings_dict = {}
+        for chart_setting in self.chart_settings.all():
+            settings_dict[chart_setting.chart_id] = {
+                'chart_type': chart_setting.chart_type,
+                'size': chart_setting.size,
+                'enabled': bool(chart_setting.enabled), 
+                'start_date': chart_setting.start_date.isoformat() if chart_setting.start_date else None,
+                'end_date': chart_setting.end_date.isoformat() if chart_setting.end_date else None,
+            }
+        return settings_dict
+
+
+class ChartSettings(models.Model):
+    """Individual chart settings for dashboard preferences"""
+    CHART_TYPE_CHOICES = [
+        ('bar', 'Bar Chart'),
+        ('line', 'Line Chart'),
+        ('pie', 'Pie Chart'),
+        ('doughnut', 'Doughnut Chart'),
+        ('area', 'Area Chart'),
+        ('map', 'Map'),
+    ]
+    
+    dashboard_preferences = models.ForeignKey(
+        DashboardPreferences,
+        on_delete=models.CASCADE,
+        related_name='chart_settings'
+    )
+    chart_id = models.CharField(max_length=100, db_index=True, help_text="Chart identifier from CHART_DEFINITIONS")
+    chart_type = models.CharField(
+        max_length=20,
+        choices=CHART_TYPE_CHOICES,
+        default='bar',
+        help_text="Type of chart to display"
+    )
+    size = models.IntegerField(default=6, help_text="Column size (1-12 for Bootstrap grid)")
+    enabled = models.BooleanField(default=True, help_text="Whether this chart is enabled")
+    
+    start_date = models.DateField(null=True, blank=True, help_text="Start date filter for this chart")
+    end_date = models.DateField(null=True, blank=True, help_text="End date filter for this chart")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Chart Setting"
+        verbose_name_plural = "Chart Settings"
+        unique_together = [['dashboard_preferences', 'chart_id']]
+        indexes = [
+            models.Index(fields=['dashboard_preferences', 'chart_id']),
+            models.Index(fields=['chart_id']),
+            models.Index(fields=['start_date', 'end_date']),
+        ]
+
+    def __str__(self):
+        return f"{self.chart_id} settings for {self.dashboard_preferences.user.email}"
+
+    def to_dict(self):
+        """Convert to dictionary format"""
+        return {
+            'chart_type': self.chart_type,
+            'size': self.size,
+            'enabled': self.enabled,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+        }
+
+
 class PreferenceHistory(models.Model):
     data_source_id = models.CharField(max_length=255)
     device_id = models.CharField(max_length=255)
