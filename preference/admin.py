@@ -25,6 +25,8 @@ from preference.models import (
     CountryState,
     SwsCountry,
     PreferenceHistory,
+    DashboardPreferences,
+    ChartSettings,
 )
 
 
@@ -231,6 +233,53 @@ class PreferenceHistoryAdmin(ExportActionModelAdmin, admin.ModelAdmin):
 
     def get_org_workcode(self, obj):
         return obj.organisation_access_code.code if obj.organisation_access_code else None
+
+@admin.register(DashboardPreferences)
+class DashboardPreferencesAdmin(admin.ModelAdmin):
+    list_display = ['user', 'version', 'filter_start_date', 'filter_end_date', 'updated_at', 'created_at']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name']
+    readonly_fields = ['user', 'created_at', 'updated_at']
+    list_filter = ['version', 'created_at', 'updated_at', 'filter_start_date', 'filter_end_date']
+    
+    fieldsets = (
+        ('User Information', {
+            'fields': ('user', 'version')
+        }),
+        ('Date Filters', {
+            'fields': ('filter_start_date', 'filter_end_date')
+        }),
+        ('Preferences', {
+            'fields': ('layout', 'chart_definitions'),
+            'classes': ('wide',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    inlines = []
+
+
+@admin.register(ChartSettings)
+class ChartSettingsAdmin(admin.ModelAdmin):
+    list_display = ['dashboard_preferences', 'chart_id', 'chart_type', 'size', 'enabled', 'start_date', 'end_date', 'updated_at']
+    search_fields = ['chart_id', 'dashboard_preferences__user__email']
+    list_filter = ['chart_id', 'chart_type', 'enabled', 'size', 'start_date', 'end_date', 'created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Chart Information', {
+            'fields': ('dashboard_preferences', 'chart_id', 'chart_type', 'size', 'enabled')
+        }),
+        ('Date Filters', {
+            'fields': ('start_date', 'end_date')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
 
 @admin.register(PayCalculator)

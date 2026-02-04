@@ -24,7 +24,9 @@ from django.contrib.staticfiles import finders
 from users.tasks import send_email_notification
 from users.utils import get_user_destinations, get_user_factories, get_user_organisations
 from common.utils.posthog_helper import track_event, identify_user
-
+from preference.models import DashboardPreferences, ChartSettings
+from preference.dashboard_config import get_default_dashboard_preferences, CHART_DEFINITIONS
+from preference.views import get_available_charts
 from .forms import (
     ChangeEmailForm,
     CreateUserForm,
@@ -42,6 +44,48 @@ from users.templatetags.user_role_tags import has_group
 
 from django.utils.translation import gettext as _ 
 
+
+def initialize_user_dashboard_preferences(user, request=None):
+    """Initialize dashboard preferences for a newly created user"""
+    try:
+        if request is None:
+            class MockRequest:
+                def __init__(self, user):
+                    self.user = user
+            mock_request = MockRequest(user)
+        else:
+            mock_request = request
+        
+        available_charts = get_available_charts(user, mock_request)
+
+        if not available_charts:
+            available_charts = list(CHART_DEFINITIONS.keys())
+
+        default_prefs = get_default_dashboard_preferences(available_charts)
+
+        dashboard_prefs = DashboardPreferences.objects.create(
+            user=user,
+            layout=default_prefs['layout'],
+            chart_definitions=default_prefs['chart_definitions'],
+            filter_start_date=None,
+            filter_end_date=None
+        )
+
+        for chart_id in available_charts:
+            if chart_id in CHART_DEFINITIONS:
+                ChartSettings.objects.create(
+                    dashboard_preferences=dashboard_prefs,
+                    chart_id=chart_id,
+                    chart_type=CHART_DEFINITIONS[chart_id]['default_type'],
+                    size=CHART_DEFINITIONS[chart_id]['default_size'],
+                    enabled=True,
+                    start_date=None,
+                    end_date=None
+                )
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'Error initializing dashboard preferences for user {user.email}: {str(e)}')
 
 @login_required
 @admin_required
@@ -94,7 +138,6 @@ def logout_user(request):
         logout_time = datetime.now(timezone.utc)
         session_duration = (logout_time - login_time).total_seconds()
         
-        # Update the latest user session
         try:
             latest_session = UserSession.objects.filter(
                 user_id=request.session['user_id'],
@@ -105,11 +148,9 @@ def logout_user(request):
         except UserSession.DoesNotExist:
             pass
         
-        # Store logout data for tracking
         request.session['logout_time'] = logout_time.isoformat()
         request.session['session_duration'] = session_duration
         
-        # Track logout event with PostHog before clearing session
         user_id = request.session.get('user_id')
         if user_id:
             track_event(
@@ -122,7 +163,6 @@ def logout_user(request):
                 request=request
             )
         
-        # Clear session data
         request.session.flush()
         
         logout(request)
@@ -139,7 +179,9 @@ def create_user_account(request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             user = form.save(commit=True)
-            # Track user signup event with PostHog
+            
+            initialize_user_dashboard_preferences(user, request)
+            
             track_event(
                 event_name="user_signed_up",
                 user_id=str(user.id),
@@ -150,7 +192,6 @@ def create_user_account(request):
                 },
                 request=request
             )
-            # Identify the user in PostHog
             identify_user(
                 user_id=str(user.id),
                 user_email=user.email,
@@ -163,7 +204,6 @@ def create_user_account(request):
             messages.info(request, _("createUserAccountViewInfo"))
             return redirect("users:login_user")
         else:
-            # Track failed signup attempt
             track_event(
                 event_name="user_signup_failed",
                 properties={
@@ -188,14 +228,12 @@ def login_user(request):
                 user = authenticate(request, username=user.email, password=password)
                 if user is not None:
                     login(request, user)
-                    # Create new user session
                     UserSession.objects.create(user=user)
                     request.session['login_time'] = datetime.now(timezone.utc).isoformat()
                     request.session['user_email'] = user.email
                     request.session['user_id'] = user.id
                     request.session['user_role'] = user.groups.first().name if user.groups.exists() else 'No Role'
 
-                    # Track successful login with PostHog
                     track_event(
                         event_name="user_logged_in",
                         user_id=str(user.id),
@@ -206,7 +244,6 @@ def login_user(request):
                         },
                         request=request
                     )
-                    # Identify the user in PostHog
                     identify_user(
                         user_id=str(user.id),
                         user_email=user.email,
@@ -218,7 +255,6 @@ def login_user(request):
                     else:
                         return redirect("preference:user_overview")
                 else:
-                    # Track failed login attempt
                     track_event(
                         event_name="user_login_failed",
                         user_email=email,
@@ -291,7 +327,6 @@ def activate_account(request, id):
             inline_images=None
         )
     
-    # Construct return URL with all parameters
     return_params = {
         'page': return_page,
         'search': search_query,
@@ -495,7 +530,9 @@ def set_password(request, token):
                         "email", "role", "scheme", "factory", "organisation"
                     ).get(id=invite_id)
                     user_obj = {"email": invite["email"], "role": invite["scheme"]}
-                    User.objects.create_user(**user_obj, password=password, is_active=True)
+                    new_user = User.objects.create_user(**user_obj, password=password, is_active=True)
+                    # Initialize dashboard preferences for the new user
+                    initialize_user_dashboard_preferences(new_user, request)
                 success_text = _("setPasswordViewSuccessText")
                 
                 return render(request, "users/email_sent.html", {"success_text": success_text})
@@ -600,6 +637,9 @@ def create_user(request):
             new_user.user_languages.clear()
             for lang in all_langs:
                 new_user.user_languages.add(lang)
+
+            # Initialize dashboard preferences for the new user
+            initialize_user_dashboard_preferences(new_user, request)
 
             messages.success(request, f"User {user.email} created successfully!")
             return render(request, "users/create_user.html", context={"form": CreateNewUserForm(), "show_modal": True})

@@ -84,8 +84,6 @@ def track_event(
             event=event_name,
             properties=event_properties
         )
-        
-        logger.debug(f"PostHog: Tracked event '{event_name}' for user '{distinct_id}'")
         return True
         
     except ImportError:
@@ -135,8 +133,6 @@ def identify_user(
             distinct_id=str(user_id),
             properties=user_properties
         )
-        
-        logger.debug(f"PostHog: Identified user '{user_id}'")
         return True
         
     except ImportError:
@@ -163,8 +159,6 @@ def alias_user(previous_id: str, current_id: str) -> bool:
             previous_id=previous_id,
             distinct_id=current_id
         )
-        
-        logger.debug(f"PostHog: Aliased '{previous_id}' to '{current_id}'")
         return True
         
     except ImportError:

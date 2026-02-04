@@ -1,9 +1,18 @@
 /**
  * Chart Renderer - Handles dynamic rendering of charts based on chart ID and type
+ * Uses ChartSettings from database instead of CHART_DEFINITIONS
  */
 const ChartRenderer = {
     renderChart(chartId, chartType, containerId, settings = {}) {
-        const chartConfig = window.CHART_DEFINITIONS && window.CHART_DEFINITIONS[chartId];
+        const chartSettings = window.chartSettings || {};
+        const chartSetting = chartSettings[chartId];
+        
+        const typeToUse = chartType || 
+                         (chartSetting && chartSetting.chart_type) || 
+                         this.getDefaultChartType(chartId) || 
+                         'bar';
+        
+        const chartConfig = window.chartDefinitions && window.chartDefinitions[chartId];
         if (!chartConfig) {
             console.warn(`Chart definition not found for: ${chartId}`);
             return false;
@@ -26,63 +35,54 @@ const ChartRenderer = {
             switch(chartId) {
                 case 'monthly_active_users':
                     if (typeof initMonthlyActiveUsersChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
                         initMonthlyActiveUsersChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_origin_country':
                     if (typeof initUsersByOriginChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
                         initUsersByOriginChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_gender':
                     if (typeof initUsersByGenderChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'pie';
                         initUsersByGenderChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_destination_country':
                     if (typeof initUsersByDestinationChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'doughnut';
                         initUsersByDestinationChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_language':
                     if (typeof initUsersByLanguageChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
                         initUsersByLanguageChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_country_state':
                     if (typeof initUsersByStateChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
                         initUsersByStateChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_immigration_status':
                     if (typeof initUsersByImmigrationStatusChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
                         initUsersByImmigrationStatusChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_age':
                     if (typeof initUsersByAgeChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'pie';
                         initUsersByAgeChart(chartData, containerId, typeToUse);
                     }
                     break;
                     
                 case 'users_by_sector':
                     if (typeof initUsersBySectorChart === 'function') {
-                        const typeToUse = chartType !== null && chartType !== undefined ? chartType : 'bar';
                         initUsersBySectorChart(chartData, containerId, typeToUse);
                     }
                     break;
@@ -143,6 +143,11 @@ const ChartRenderer = {
         }
     },
     
+    getDefaultChartType(chartId) {
+        const chartConfig = window.chartDefinitions && window.chartDefinitions[chartId];
+        return chartConfig ? chartConfig.default_type : 'bar';
+    },
+    
     getChartData(chartId) {
         const dataMap = {
             'monthly_active_users': window.monthlyActiveUserCountData,
@@ -165,7 +170,7 @@ const ChartRenderer = {
         let data = dataMap[chartId];
         
         if (!data) {
-            const chartConfig = window.CHART_DEFINITIONS && window.CHART_DEFINITIONS[chartId];
+            const chartConfig = window.chartDefinitions && window.chartDefinitions[chartId];
             if (chartConfig && chartConfig.data_variable) {
                 const dataVarName = chartConfig.data_variable;
                 if (window[dataVarName]) {

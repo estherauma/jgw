@@ -428,7 +428,7 @@
                                         href="#" role="button" id="export-menu" data-bs-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
                                         {% translate "userOverviewExport" %}
-                                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>                                    
                                     </a>
                                     {% endflag %}
                                     <div class="dropdown-menu" aria-labelledby="export-menu">
@@ -478,47 +478,50 @@
 <!-- Dashboard Container -->
 <div id="dashboard-rows-container">
 <div class="row dashboard-row" data-row-id="row-0">
-{% flag 'can_view_monthly_active_users_chart' %}
-    <div class="col-md-6">
-        <div class="card h-100 monthly-active-users-card">
-            <div class="card-body dashboard-chart" >
-                <div data-chart-id="monthly_active_users" id="chart-monthly_active_users">
-                <div class="chart-header">
-                    <div class="chart-header-left">
-                        <h4 class="chart-main-title">Monthly Active Users</h4>
-                        <div class="chart-metrics">
-                            <div class="metric-item">
-                                <span class="metric-label">New Users:</span>
-                                <span class="metric-value" data-plugin="counterup">{{total_user_overview_responses}}</span>
-                            </div>
-                            <div class="metric-item">
-                                <span class="metric-label">Active Users:</span>
-                                <span class="metric-value" data-plugin="counterup">{{total_active_user_count}}</span>
+    {% flag 'can_view_monthly_active_users_chart' %}
+    {% with monthly_active_users_size=chart_sizes.monthly_active_users|default:6 %}
+        <div class="col-md-{{ monthly_active_users_size }}{% if monthly_active_users_size < 12 %} mx-auto{% endif %}">
+            <div class="card h-100 monthly-active-users-card">
+                <div class="card-body dashboard-chart" >
+                    <div data-chart-id="monthly_active_users" id="chart-monthly_active_users">
+                    <div class="chart-header">
+                        <div class="chart-header-left">
+                            <h4 class="chart-main-title">Monthly Active Users</h4>
+                            <div class="chart-metrics">
+                                <div class="metric-item">
+                                    <span class="metric-label">New Users:</span>
+                                    <span class="metric-value" data-plugin="counterup">{{total_user_overview_responses}}</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Active Users:</span>
+                                    <span class="metric-value" data-plugin="counterup">{{total_active_user_count}}</span>
+                                </div>
                             </div>
                         </div>
+                        <div class="chart-header-actions">
+                            <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#monthly-active-users-fullscreen-modal">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="chart-header-actions">
-                        <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#monthly-active-users-fullscreen-modal">
-                            <i class="fas fa-expand"></i>
-                        </button>
+                    
+                    <div id="monthly-active-users-graph-id" style="height:500px; width: 100%;"></div>
+                    
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        {% translate "userOverviewMonthlyActiveUsersTooltip" %}
+                        <div class="tooltip-arrow"></div>
                     </div>
-                </div>
-                
-                <div id="monthly-active-users-graph-id" style="height:500px; width: 100%; max-width: 100%; box-sizing: border-box;"></div>
-                
-                <div class="info-tooltip">
-                    <i class="fas fa-info-circle"></i>
-                    {% translate "userOverviewMonthlyActiveUsersTooltip" %}
-                    <div class="tooltip-arrow"></div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endflag %}
+    {% endwith %}
+    {% endflag %}
 
     {% flag 'can_view_users_by_origin_country_chart' %}
-    <div class="col-md-6">
+    {% with users_by_origin_country_size=chart_sizes.users_by_origin_country|default:6 %}
+    <div class="col-md-{{ users_by_origin_country_size }}{% if users_by_origin_country_size < 12 %} mx-auto{% endif %}">
         <div class="card h-100 users-by-origin-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="users_by_origin_country" id="chart-users_by_origin_country">
@@ -544,11 +547,13 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endflag %}
 </div>
 <div class="row dashboard-row" data-row-id="row-1">
     {% flag 'can_view_users_by_gender_chart' %}
-    <div class="col-md-6 mt-3">
+    {% with users_by_gender_size=chart_sizes.users_by_gender|default:6 %}
+    <div class="col-md-{{ users_by_gender_size }}{% if users_by_gender_size < 12 %} mx-auto{% endif %} mt-3">
         <div class="card h-100 users-by-gender-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="users_by_gender" id="chart-users_by_gender">
@@ -574,12 +579,13 @@
             </div>
         </div>
     </div>
-
+    {% endwith %}
     {% endflag %}
 
     {% if user.role != 'SCHEME' or user.is_superuser%}
     {% flag 'can_view_users_by_destination_country_chart' %}
-    <div class="col-md-6 mt-3">
+    {% with users_by_destination_country_size=chart_sizes.users_by_destination_country|default:6 %}
+    <div class="col-md-{{ users_by_destination_country_size }}{% if users_by_destination_country_size < 12 %} mx-auto{% endif %} mt-3">
         <div class="card h-100 users-by-destination-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="users_by_destination_country" id="chart-users_by_destination_country">
@@ -605,12 +611,14 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endflag %}
     {% endif %}
 </div>
 <div class="row dashboard-row" data-row-id="row-2">
     {% flag 'can_view_selected_users_language_chart' %}
-    <div class="col-md-6 mt-3">
+    {% with users_by_language_size=chart_sizes.users_by_language|default:6 %}
+    <div class="col-md-{{ users_by_language_size }}{% if users_by_language_size < 12 %} mx-auto{% endif %} mt-3">
         <div class="card h-100 users-by-language-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="users_by_language" id="chart-users_by_language">
@@ -636,10 +644,12 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endflag %}
 
     {% flag 'can_view_get_users_by_country_state_chart' %}
-    <div class="col-md-6 mt-3">
+    {% with users_by_country_state_size=chart_sizes.users_by_country_state|default:6 %}
+    <div class="col-md-{{ users_by_country_state_size }}{% if users_by_country_state_size < 12 %} mx-auto{% endif %} mt-3">
         <div class="card h-100 users-by-state-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="users_by_country_state" id="chart-users_by_country_state">
@@ -665,12 +675,14 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endflag %}
 </div>
 
 <div class="row dashboard-row" data-row-id="row-3">
     {% flag 'can_view_users_by_immigration_status_chart' %}
-    <div class="col-md-6 mt-3">
+    {% with users_by_immigration_status_size=chart_sizes.users_by_immigration_status|default:6 %}
+    <div class="col-md-{{ users_by_immigration_status_size }}{% if users_by_immigration_status_size < 12 %} mx-auto{% endif %} mt-3">
         <div class="card h-100 users-by-immigration-status-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="users_by_immigration_status" id="chart-users_by_immigration_status">
@@ -696,11 +708,12 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endflag %}
 
-
     {% flag 'can_view_users_by_age_chart' %}
-    <div class="col-md-6 mt-3">
+    {% with users_by_age_size=chart_sizes.users_by_age|default:6 %}
+    <div class="col-md-{{ users_by_age_size }}{% if users_by_age_size < 12 %} mx-auto{% endif %} mt-3">
         <div class="card h-100 users-by-age-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="users_by_age" id="chart-users_by_age">
@@ -726,11 +739,13 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endflag %}
 </div>
 <div class="row dashboard-row" data-row-id="row-4">
     {% flag 'can_view_get_users_by_sector_chart' %}
-    <div class="col-md-6 mt-3">
+    {% with users_by_sector_size=chart_sizes.users_by_sector|default:6 %}
+    <div class="col-md-{{ users_by_sector_size }}{% if users_by_sector_size < 12 %} mx-auto{% endif %} mt-3">
         <div class="card h-100 users-by-sector-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="users_by_sector" id="chart-users_by_sector">
@@ -756,11 +771,13 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endflag %}
 
 {% if user.is_authenticated %}
 {% flag 'can_view_work_code_usage_chart' %}
-    <div class="col-md-6 mt-3">
+{% with work_code_usage_size=chart_sizes.work_code_usage|default:6 %}
+    <div class="col-md-{{ work_code_usage_size }}{% if work_code_usage_size < 12 %} mx-auto{% endif %} mt-3">
         <div class="card h-100 work-code-usage-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="work_code_usage" id="chart-work_code_usage">
@@ -787,12 +804,14 @@
         </div>
     </div>
 </div>
+{% endwith %}
 {% endflag %}
 {% endif %}
 
 {% flag 'can_view_new_monthly_users_chart' %}
+{% with new_monthly_users_size=chart_sizes.new_monthly_users|default:12 %}
 <div class="row dashboard-row" data-row-id="row-5">
-    <div class="col-md-12 user-by-month">
+    <div class="col-md-{{ new_monthly_users_size }}{% if new_monthly_users_size < 12 %} mx-auto{% endif %} user-by-month">
         <div class="card h-100 monthly-active-users-card">
             <div class="card-body dashboard-chart">
                 <div data-chart-id="new_monthly_users" id="chart-new_monthly_users">
@@ -818,11 +837,13 @@
         </div>
     </div>
 </div>
+{% endwith %}
 {% endflag %}
 
 {% flag 'can_view_link_clicks_chart' %}
+{% with link_clicks_size=chart_sizes.link_clicks|default:12 %}
 <div class="row dashboard-row" data-row-id="row-6">
-    <div class="col-md-12 user-by-month">
+    <div class="col-md-{{ link_clicks_size }}{% if link_clicks_size < 12 %} mx-auto{% endif %} user-by-month">
         <div class="card h-100">
             <div class="card-body chart dashboard-chart">
                 <div data-chart-id="link_clicks" id="chart-link_clicks">
@@ -840,11 +861,13 @@
         </div>
     </div>
 </div>
+{% endwith %}
 {% endflag %}
 
 {% if user.is_authenticated %}
 {% flag 'can_view_user_route_map_chart' %}
-<div class="row dashboard-row col-md-12 mt-3 user-route-map-chart-box" data-row-id="row-7">
+{% with user_route_map_size=chart_sizes.user_route_map|default:12 %}
+<div class="row dashboard-row col-md-{{ user_route_map_size }}{% if user_route_map_size < 12 %} mx-auto{% endif %} mt-3 user-route-map-chart-box" data-row-id="row-7">
     <div class="card h-100 users-route-map-card">
         <div class="card-body chart dashboard-chart">
             <div class="dashboard-chart" data-chart-id="user_route_map" id="chart-user_route_map">
@@ -859,10 +882,12 @@
         </div>
     </div>
 </div>
+{% endwith %}
 {% endflag %}
 
 {% flag 'can_view_user_geolocation_map' %}
-<div class="row dashboard-row col-md-12 user-route-map-chart-box" data-row-id="row-8">
+{% with user_geolocation_map_size=chart_sizes.user_geolocation_map|default:12 %}
+<div class="row dashboard-row col-md-{{ user_geolocation_map_size }}{% if user_geolocation_map_size < 12 %} mx-auto{% endif %} user-route-map-chart-box" data-row-id="row-8">
     <div class="card h-100 users-geolocation-map-card">
         <div class="card-body chart dashboard-chart">
             <div data-chart-id="user_geolocation_map" id="chart-user_geolocation_map">
@@ -877,10 +902,12 @@
         </div>
     </div>
 </div>
+{% endwith %}
 {% endflag %}
 
 {% flag 'can_view_user_geolocation_map_chart_on_user_engagement' %}
-<div class="row dashboard-row col-md-12 mt-1 user-geolocation-map-chart-box" data-row-id="row-9">
+{% with user_geolocation_map_user_engagement_size=chart_sizes.user_geolocation_map_user_engagement|default:12 %}
+<div class="row dashboard-row col-md-{{ user_geolocation_map_user_engagement_size }}{% if user_geolocation_map_user_engagement_size < 12 %} mx-auto{% endif %} mt-1 user-geolocation-map-chart-box" data-row-id="row-9">
     <div class="card h-100 users-interaction-map-card">
         <div class="card-body chart wide-map dashboard-chart">
             <div data-chart-id="user_geolocation_map_user_engagement" id="chart-user_geolocation_map_user_engagement">
@@ -894,6 +921,7 @@
         </div>
     </div>
 </div>
+{% endwith %}
 {% endflag %}
 {% endif %}
 
@@ -926,22 +954,29 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="chart-settings-form">
-                    <div class="form-group">
+                <div id="chart-settings-loading" class="text-center" style="display: none;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading chart settings...</p>
+                </div>
+                <form id="chart-settings-form" style="display: none;">
+                    <div class="form-group mb-3">
                         <label for="chart-type-select">Chart Type</label>
                         <select id="chart-type-select" class="form-control" name="chart_type">
-                                    <option value="bar">Bar Chart</option>
-                                    <option value="line">Line Chart</option>
+                            <option value="bar">Bar Chart</option>
+                            <option value="line">Line Chart</option>
                             <option value="pie">Pie Chart</option>
-                                    <option value="doughnut">Doughnut Chart</option>
-                                    <option value="area">Area Chart</option>
-                                </select>
-                            </div>
-                    <div class="form-group">
+                            <option value="doughnut">Doughnut Chart</option>
+                            <option value="area">Area Chart</option>
+                            <option value="map">Map</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
                         <label for="chart-size-select">Column Size</label>
                         <select id="chart-size-select" class="form-control" name="column_size">
                             <option value="3">Quarter (25%)</option>
-                            <option value="6" selected>Half (50%)</option>
+                            <option value="6">Half (50%)</option>
                             <option value="9">Three Quarters (75%)</option>
                             <option value="12">Full (100%)</option>
                         </select>
@@ -950,7 +985,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="window.dashboardCustomizer.applyChartSettings()">Apply Settings</button>
+                <button type="button" class="btn btn-primary" id="apply-chart-settings-btn" onclick="window.dashboardCustomizer.applyChartSettings()">Apply Settings</button>
             </div>
         </div>
     </div>
@@ -1020,36 +1055,72 @@
     // Dashboard layout data
     const dashboardLayout = {{ dashboard_layout | safe }};
     const availableCharts = {{ available_charts | safe }};
+    const chartSettings = {{ chart_settings | safe }};
 
-    initUsersByAgeChart(ageData);
+    function getChartTypeFromSettings(chartId, fallbackType) {
+        if (typeof chartSettings !== 'undefined' && chartSettings && chartSettings[chartId]) {
+            return chartSettings[chartId].chart_type || fallbackType;
+        }
+        return fallbackType;
+    }
+
+    function isChartEnabled(chartId) {
+        if (typeof chartSettings !== 'undefined' && chartSettings && chartSettings[chartId]) {
+            return chartSettings[chartId].enabled !== false;
+        }
+        return true; 
+    }
+
+    // Initialize charts with types from ChartSettings
+    if (isChartEnabled('users_by_age')) {
+        initUsersByAgeChart(ageData, undefined, getChartTypeFromSettings('users_by_age', 'pie'));
+    }
     
-    initUsersByGenderChart(genderData, undefined, 'pie');
+    if (isChartEnabled('users_by_gender')) {
+        initUsersByGenderChart(genderData, undefined, getChartTypeFromSettings('users_by_gender', 'pie'));
+    }
     
-    initUsersByLanguageChart(languageData);
+    if (isChartEnabled('users_by_language')) {
+        initUsersByLanguageChart(languageData, undefined, getChartTypeFromSettings('users_by_language', 'bar'));
+    }
     
-    initUsersByDestinationChart(destinationData);
+    if (isChartEnabled('users_by_destination_country')) {
+        initUsersByDestinationChart(destinationData, undefined, getChartTypeFromSettings('users_by_destination_country', 'doughnut'));
+    }
     
-    initUsersByOriginChart(originData);
+    if (isChartEnabled('users_by_origin_country')) {
+        initUsersByOriginChart(originData, undefined, getChartTypeFromSettings('users_by_origin_country', 'bar'));
+    }
     
     preferenceWorkCodeUsageGraph(workCodeData)
 
-    initUsersByStateChart(usersByCountryStateChartData);
+    if (isChartEnabled('users_by_country_state')) {
+        initUsersByStateChart(usersByCountryStateChartData, undefined, getChartTypeFromSettings('users_by_country_state', 'bar'));
+    }
     
-    initUsersBySectorChart(usersBySectorsChartData);
+    if (isChartEnabled('users_by_sector')) {
+        initUsersBySectorChart(usersBySectorsChartData, undefined, getChartTypeFromSettings('users_by_sector', 'bar'));
+    }
     
     try {
-        if (typeof swsWorkcodesWithAccessCode !== 'undefined' && swsWorkcodesWithAccessCode) {
-            initWorkCodeUsageChart(swsWorkcodesWithAccessCode);
+        if (typeof swsWorkcodesWithAccessCode !== 'undefined' && swsWorkcodesWithAccessCode && isChartEnabled('work_code_usage')) {
+            initWorkCodeUsageChart(swsWorkcodesWithAccessCode, undefined, getChartTypeFromSettings('work_code_usage', 'bar'));
         }
     } catch (error) {
         console.error('Error initializing Work Code Usage chart:', error);
     }
     
-    initPreferencesMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData)
+    if (isChartEnabled('new_monthly_users')) {
+        initPreferencesMonthlyUsersChart(preferenceMonthlyUsersChartData, monthlyActiveUserCountData);
+    }
 
-    initMonthlyActiveUsersChart(monthlyActiveUserCountData);
+    if (isChartEnabled('monthly_active_users')) {
+        initMonthlyActiveUsersChart(monthlyActiveUserCountData, undefined, getChartTypeFromSettings('monthly_active_users', 'bar'));
+    }
 
-    initUsersByImmigrationStatusChart(immigrationStatusData, undefined, 'bar');
+    if (isChartEnabled('users_by_immigration_status')) {
+        initUsersByImmigrationStatusChart(immigrationStatusData, undefined, getChartTypeFromSettings('users_by_immigration_status', 'bar'));
+    }
     
 
     linkClicksGraph(linkClicksData)
@@ -1475,8 +1546,6 @@
             return itemDate.isSameOrAfter(start, 'month') && itemDate.isSameOrBefore(end, 'month');
         });
     }
-
-    // Users by origin country fullscreen chart
     
     let originFullscreenChartInstance = null;
     let originCurrentDateRange = null;
@@ -3038,23 +3107,6 @@ function registerFullscreenModal(modalId, chartInitFn, chartData) {
         }
     });
 }
-// Origin modal is handled with custom filtering - see above
-// registerFullscreenModal('users-by-origin-fullscreen-modal', initUsersByOriginChart, originData);
-// Gender modal is handled with custom filtering - see above
-// registerFullscreenModal('users-by-gender-fullscreen-modal', initUsersByGenderChart, genderData);
-// Destination modal is handled with custom filtering - see above
-// registerFullscreenModal('users-by-destination-fullscreen-modal', initUsersByDestinationChart, destinationData);
-// Language modal is handled with custom filtering - see above
-// registerFullscreenModal('users-by-language-fullscreen-modal', initUsersByLanguageChart, languageData);
-// State modal is handled with custom filtering - see above
-// registerFullscreenModal('users-by-state-fullscreen-modal', initUsersByStateChart, usersByCountryStateChartData);
-// Immigration modal is handled with custom filtering - see above
-// registerFullscreenModal('users-by-immigration-status-fullscreen-modal', initUsersByImmigrationStatusChart, immigrationStatusData);
-// Age modal is handled with custom filtering - see above
-// registerFullscreenModal('users-by-age-fullscreen-modal', initUsersByAgeChart, ageData);
-// Sector modal is handled with custom filtering - see above
-// registerFullscreenModal('users-by-sector-fullscreen-modal', initUsersBySectorChart, usersBySectorsChartData);
-
 </script>
 
 {% endblock %}
