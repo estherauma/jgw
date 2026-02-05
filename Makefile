@@ -35,3 +35,12 @@ docker_migrate:
 
 docker_makemigrations:
 	docker-compose -f docker-compose.dev.yml exec web python manage.py makemigrations
+
+docker_up:
+    docker compose -f docker-compose.dev.yml up
+
+docker_down:
+	docker compose -f docker-compose.dev.yml down
+	
+docker_restart_web:
+    docker compose -f docker-compose.dev.yml restart web
