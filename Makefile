@@ -29,3 +29,11 @@ compilemessages:
 
 export-cms:
 	python manage.py export_cms_labels
+docker_migrate:
+	docker-compose -f docker-compose.dev.yml exec web python manage.py migrate
+
+docker_makemigrations:
+	docker-compose -f docker-compose.dev.yml exec web python manage.py makemigrations
+
+docker_runserver:
+	docker-compose -f docker-compose.dev.yml exec web python manage.py runserver
