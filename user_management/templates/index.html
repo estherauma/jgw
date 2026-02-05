@@ -1,0 +1,171 @@
+{% extends 'core/layouts/base.html' %} 
+{% load crispy_forms_tags %} 
+{% load static %}
+{% load waffle_tags %} 
+{% load i18n %}
+
+<!-- title -->
+{% block title %} {% translate "userManagement" %} {% endblock title %}
+
+<!-- page content -->
+{% block content %}
+<div class="um-page">
+    <div class="um-header">
+        <h1 class="um-title">User Management</h1>
+    </div>
+
+    <div class="um-grid">
+        <div>
+            <div class="um-card">
+                <div class="um-row">
+                    <div class="um-card-title">Organisations</div>
+                    <button class="um-btn">Add organisation</button>
+                </div>
+                <div class="um-row">
+                    <div class="um-search">
+                        <span>Search</span>
+                        <input type="text" placeholder="" />
+                    </div>
+                </div>
+                <table class="um-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Required login?</th>
+                            <th>Prismic Repo Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for org in organizations %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ org.name }}</td>
+                            <td>{{ org.code }}</td>
+                            <td>{{ org.required_login }}</td>
+                            <td>{{ org.prismic_repo }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="um-card">
+                <div class="um-card-title">Selected organisation</div>
+                <div class="um-row">
+                    <div class="um-pill">{{ selected_org }}</div>
+                    <button class="um-btn">Create work code</button>
+                </div>
+                <div class="um-subtext">
+                    This is where you can assign work codes to any group of users. Please choose
+                    the group that works with a particular site, business, or coverage in the business.
+                </div>
+            </div>
+
+            <div class="um-card">
+                <div class="um-card-title">Unassigned work codes</div>
+                <div class="um-list">
+                    {% for code in unassigned_work_codes %}
+                    <div class="um-list-item">
+                        <div><strong>WORK CODE</strong> {{ code.code }}</div>
+                        <div class="um-action">
+                            <button class="um-btn um-btn-outline">Edit</button>
+                            <button class="um-btn um-btn-outline">Assign</button>
+                            <button class="um-btn um-btn-outline">Delete</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="um-card">
+                <div class="um-card-title">Assigned work codes</div>
+                <table class="um-table">
+                    <thead>
+                        <tr>
+                            <th>Work code</th>
+                            <th>Work group assigned</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for code in assigned_work_codes %}
+                        <tr>
+                            <td>{{ code.code }}</td>
+                            <td>{{ code.group }}</td>
+                            <td>
+                                <div class="um-action">
+                                    <button class="um-btn um-btn-outline">Edit</button>
+                                    <button class="um-btn um-btn-outline">Unassign</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="um-card">
+                <div class="um-row">
+                    <div class="um-card-title">Organisation details</div>
+                    <button class="um-btn um-btn-outline">Edit details</button>
+                </div>
+                <div class="um-details">
+                    <div>Name: <span>{{ org_details.name }}</span></div>
+                    <div>Should only authenticated users access organisation data? <span>{{ org_details.requires_auth }}</span></div>
+                    <div>Organisation code: <span>{{ org_details.code }}</span></div>
+                    <div>Organisation prismic repository: <span>{{ org_details.prismic_repo }}</span></div>
+                    <div>Organisation prismic messaging repository: <span>{{ org_details.prismic_messaging_repo }}</span></div>
+                    <div>Organisation was created by: <span>{{ org_details.created_by }}</span></div>
+                    <div>Organisation was created on: <span>{{ org_details.created_at }}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="um-card">
+                <div class="um-row">
+                    <div class="um-card-title">Users</div>
+                    <div class="um-action">
+                        <button class="um-btn um-btn-outline">Actions</button>
+                        <button class="um-btn">Add user</button>
+                    </div>
+                </div>
+                <div class="um-row">
+                    <div class="um-search">
+                        <span>Search</span>
+                        <input type="text" placeholder="" />
+                    </div>
+                </div>
+                <table class="um-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Workgroup</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ u.name }}</td>
+                            <td>{{ u.email }}</td>
+                            <td>{{ u.role }}</td>
+                            <td>{{ u.workgroup }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %} 
+{% block scripts %}
+<link rel="stylesheet" href="{% static 'user_management/css/common.css' %}">
+{% endblock %}

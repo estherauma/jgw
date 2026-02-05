@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "other_resource",
     "maintenance",
     'content',
+    "user_management",
 ]
 
 MIDDLEWARE = [
