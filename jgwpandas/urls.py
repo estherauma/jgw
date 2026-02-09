@@ -44,6 +44,7 @@ urlpatterns = [
     path("help-contacts/", include("help_contacts.urls")),
     path("events/", include("events.urls")),
     path("payment/", include("payment.urls")),
+    path("user-management/", include("user_management.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
 
     path('set-language/', set_language, name='set_language'),
