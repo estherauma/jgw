@@ -69,15 +69,16 @@
     color: #4f647f;
 }
 .um-btn {
-    background: #1ea3d8;
-    color: #ffffff;
+    background: #37C1E3;
+    color: #193560;
     border: none;
     padding: 6px 12px;
     border-radius: 16px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
+    font-family: Monstserrat;
 }
 .um-btn-outline {
     background: #ffffff;
