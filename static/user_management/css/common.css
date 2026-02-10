@@ -74,7 +74,6 @@
     padding: 6px 12px;
     border-radius: 16px;
     font-size: 14px;
-    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
 }
@@ -83,7 +82,7 @@
     color: #24AACC;
     border: 1px solid #bfe7f7;
 }
-.btn-assign, .btn-unassign, .btn-delete {
+.um-btn-outline-black {
     background: #ffffff;
     color: #193560;
     border: 1px solid #193560;
