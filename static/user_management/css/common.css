@@ -87,21 +87,8 @@
     color: #193560;
     border: 1px solid #193560;
 }
-.um-pill-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex: 1;
-    min-width: 0;
-}
 
-.dropdown-icon {
-    position: absolute;
-    right: 20px;
-    color: #193560;
-    font-size: 12px;
-    pointer-events: none;
-}
+
 .um-table {
     width: 100%;
     border-collapse: collapse;
