@@ -177,7 +177,7 @@ class AgeAdmin(admin.ModelAdmin):
 @admin.register(OrganisationAccessCode)
 class OrganisationAccessCodeAdmin(admin.ModelAdmin):
     search_fields = ["code"]
-    list_display = ["code", "created_at", "updated_at"]
+    list_display = ["code", "organisation", "created_at", "updated_at"]
 
 
 @admin.register(ImmigrationStatus)

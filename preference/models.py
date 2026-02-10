@@ -151,6 +151,13 @@ class Age(models.Model):
 
 class OrganisationAccessCode(models.Model):
     code = models.CharField(max_length=255, unique=True)
+    organisation = models.ForeignKey(
+        "OrganisationData",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="organisation_access_codes",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
