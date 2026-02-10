@@ -7,6 +7,10 @@
 <!-- title -->
 {% block title %} {% translate "userManagement" %} {% endblock title %}
 
+{% block styles %}
+@import url("{% static 'user_management/css/common.css' %}");
+{% endblock %}
+
 <!-- page content -->
 {% block content %}
 <div class="um-page">
@@ -176,7 +180,6 @@
 
 {% endblock content %} 
 {% block scripts %}
-<link rel="stylesheet" href="{% static 'user_management/css/common.css' %}">
 <script src="{% static 'js/user_management/common.js' %}"></script>
 <script src="{% static 'js/user_management/organization.js' %}"></script>
 {% endblock %}

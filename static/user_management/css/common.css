@@ -1,7 +1,37 @@
+.modal-content{
+    border-radius: 22px;
+}
+.modal-body{
+    padding: 20px 50px;
+}
 .um-page {
     background: #eef2f6;
     padding: 24px;
     min-height: 100vh;
+}
+.um-navy {
+    color:#193560 !important;
+}
+.um-gray {
+    color:#CBD3DF !important;
+}
+.um-lime {
+    color: #9DBE3B !important;
+}
+.um-btn-lime {
+    color:#ffffff !important;
+    background: #9DBE3B !important;
+}
+.um-btn-gray {
+    color:#ffffff !important;
+    background-color: #CBD3DF !important;
+}
+.um-cyan {
+    color:#37C1E3;
+}
+.um-btn-blue {
+    color:#ffffff;
+    background-color: #37C1E3;
 }
 .um-header {
     display: flex;
@@ -69,23 +99,28 @@
     color: #4f647f;
 }
 .um-input {
-    border: 1px solid #d9e4f2;
+    border: 0.62px solid #CBD3DF;
     background: #ffffff;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 6px 10px;
     font-size: 12px;
     color: #4f647f;
     min-width: 160px;
+    height: 40px;
 }
+  .um-input::placeholder {
+      color: #CBD3DF;
+      font-size: 13px;
+  }
 .um-btn {
-    background: #1ea3d8;
+    background: #37C1E3;
     color: #ffffff;
     border: none;
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
+    padding: 8px 24px;
+    border-radius: 50rem !important;
+    font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
+    cursor: pointer !important;
     white-space: nowrap;
 }
 .um-btn-outline {
@@ -93,21 +128,18 @@
     color: #1ea3d8;
     border: 1px solid #bfe7f7;
 }
-.um-modal-header {
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-}
+/* Modal styles */
 .um-modal-divider {
-    height: 1px;
-    background: #e6eef8;
+    height: 0.5px;
+    background: #19356080;
     width: 100%;
     margin: 10px 0 0;
 }
 .um-modal-title {
     margin: 0;
     font-size: 16px;
-    color: #2a3b4f;
     font-weight: 700;
+    line-height: 150%;    
 }
 .um-modal-body {
     display: grid;
@@ -116,19 +148,18 @@
 }
 .um-field {
     display: grid;
-    gap: 6px;
-    font-size: 12px;
-    color: #6b7f98;
+    gap: 10px;
+    font-size: 14px;
+    color: #193560;
+    margin-top: 20px;
 }
 .um-modal-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 10px;
     width: 100%;
 }
-.um-modal-footer-spacer {
-    flex: 1;
-}
+
 .um-modal .um-input {
     width: 100%;
     min-width: 0;
@@ -136,11 +167,7 @@
 .um-modal .um-input::placeholder {
     color: #c3cedd;
 }
-.um-btn-cancel {
-    background: #cfd6df;
-    color: #ffffff;
-    border: none;
-}
+
 .um-btn-save {
     background: #9ac43d;
     color: #ffffff;
@@ -283,3 +310,4 @@ body .modal-backdrop.show {
         grid-template-columns: 1fr;
     }
 }
+

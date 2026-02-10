@@ -1,8 +1,8 @@
 <div class="modal fade" id="create-org-modal" tabindex="-1" role="dialog" aria-labelledby="create-org-title" aria-hidden="true" data-home-url="{% url 'user_management:home' %}">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="um-modal-header modal-header">
-                <h5 class="um-modal-title modal-title" id="create-org-title">Create new organisation</h5>
+            <div class="modal-header">
+                <h5 class="um-modal-title um-dark-blue" id="create-org-title">Create new organisation</h5>
                 <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -10,14 +10,14 @@
             <div class="um-modal-divider"></div>
             <form id="create-org-form" method="post" action="{% url 'user_management:create_organisation' %}" data-home-url="{% url 'user_management:home' %}">
                 {% csrf_token %}
-                <div class="um-modal-body modal-body">
+                <div class="modal-body">
                     <div class="alert alert-danger d-none" id="create-org-form-error" role="alert"></div>
                     {% if create_org_form.non_field_errors %}
                         <div class="alert alert-danger" role="alert">
                             {{ create_org_form.non_field_errors }}
                         </div>
                     {% endif %}
-                    <label class="um-field form-group">
+                    <label class="um-field form-group mt-1">
                         <span>Name</span>
                         {{ create_org_form.name }}
                         <div class="text-danger small" data-error-for="name"></div>
@@ -35,11 +35,10 @@
                     </label>
                 </div>
                 <div class="um-modal-footer modal-footer">
-                    <button type="button" class="um-btn um-btn-cancel btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">
+                    <button type="button" class="um-btn um-btn-gray" data-dismiss="modal" data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <span class="um-modal-footer-spacer"></span>
-                    <button type="submit" class="um-btn um-btn-save btn btn-success">Save</button>
+                    <button type="submit" class="um-btn um-btn-lime px-4">Save</button>
                 </div>
             </form>
         </div>

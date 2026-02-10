@@ -11,10 +11,10 @@ class CreateOrganisationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].widget.attrs.update(
-            {"class": "form-control form-control-sm um-input", "placeholder": "Organisation name"}
+            {"class": "form-control  um-input", "placeholder": "Organisation name"}
         )
         self.fields["org_code"].widget.attrs.update(
-            {"class": "form-control form-control-sm um-input", "placeholder": "Organisation code"}
+            {"class": "form-control  um-input", "placeholder": "Organisation code"}
         )
 
     def clean_name(self):
