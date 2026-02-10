@@ -88,7 +88,6 @@
     border: 1px solid #193560;
 }
 
-
 .um-table {
     width: 100%;
     border-collapse: collapse;
@@ -108,19 +107,6 @@
     font-weight: 600;
     font-size: 11px;
     text-transform: uppercase;
-}
-.um-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #d9e4f2;
-    border-radius: 16px;
-    padding: 4px 10px;
-    font-size: 12px;
-    color: #193560;
-    background: #FFFFFF;
-    width: 100%;
-    font-weight: bold;           
 }
 .um-muted {
     color: #7a8aa3;
