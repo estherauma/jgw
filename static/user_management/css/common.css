@@ -90,6 +90,20 @@
     color: #193560;
     border: 1px solid #193560;
 }
+.um-pill-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.dropdown-icon {
+    position: absolute;
+    right: 20px;
+    color: #193560;
+    font-size: 12px;
+    pointer-events: none;
+}
 .um-table {
     width: 100%;
     border-collapse: collapse;
@@ -117,8 +131,10 @@
     border-radius: 16px;
     padding: 4px 10px;
     font-size: 12px;
-    color: #425269;
-    background: #f7faff;
+    color: #193560;
+    background: #FFFFFF;
+    width: 100%;
+    font-weight: bold;           
 }
 .um-muted {
     color: #7a8aa3;

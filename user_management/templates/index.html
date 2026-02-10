@@ -18,13 +18,16 @@
         <div>
             <div class="um-card">
                 <div class="um-row">
-                    <div class="um-card-title">Organisations</div>
+                    <div class="um-card-title">
+                        <span class="title-icon">🏢</span>
+                        <span class="title-text">Organisations:</span>
+                    </div>
                     <button class="um-btn">Add organisation</button>
                 </div>
                 <div class="um-row">
                     <div class="um-search">
-                        <span>Search</span>
-                        <input type="text" placeholder="" />
+                        <span class="search-icon">🔍</span> 
+                        <input type="text" placeholder="Search..." />
                     </div>
                 </div>
                 <table class="um-table">
@@ -54,7 +57,10 @@
             <div class="um-card">
                 <div class="um-card-title">Selected organisation</div>
                 <div class="um-row">
-                    <div class="um-pill">{{ selected_org }}</div>
+                    <div class="um-pill-container">
+                        <div class="um-pill">{{ selected_org }}</div>
+                        <span class="dropdown-icon">▼</span>
+                    </div>
                     <button class="um-btn">Create work code</button>
                 </div>
                 <div class="um-subtext">
@@ -126,16 +132,22 @@
         <div>
             <div class="um-card">
                 <div class="um-row">
-                    <div class="um-card-title">Users</div>
+                    <div class="um-card-title">
+                        <span class="wave-emoji">👋</span>
+                        <span class="title-text">USERS:</span>
+                    </div>
                     <div class="um-action">
-                        <button class="um-btn um-btn-outline">Actions</button>
+                        <button class="um-btn um-btn-outline">
+                            Actions
+                            <span class="dropdown-icon">▼</span>
+                        </button>
                         <button class="um-btn">Add user</button>
                     </div>
                 </div>
                 <div class="um-row">
                     <div class="um-search">
-                        <span>Search</span>
-                        <input type="text" placeholder="" />
+                        <span class="search-icon">🔍</span> 
+                        <input type="text" placeholder="Search..." />
                     </div>
                 </div>
                 <table class="um-table">
