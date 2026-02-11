@@ -116,7 +116,7 @@
     padding: 8px 24px;
     border-radius: 50rem !important;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer !important;
     white-space: nowrap;
 }
@@ -309,7 +309,4 @@ body .modal-backdrop.show {
     .um-grid {
         grid-template-columns: 1fr;
     }
-}
-.um-navy{
-    color: #193560;
 }
