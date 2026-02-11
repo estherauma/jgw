@@ -1,11 +1,12 @@
 from django.contrib import messages
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render,get_object_or_404
 from django.views import View
 
 from preference.models import OrganisationData
 
 from .forms import CreateOrganisationForm
+
 
 
 def user_management(request):
@@ -74,3 +75,10 @@ class CreateOrganisationView(View):
             return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+class OrganizationDetailsView(View):
+    def get(self,request,organization_id):
+        organisation = get_object_or_404(OrganisationData, pk=organization_id)
+        form = CreateOrganisationForm(instance=organisation)
+        return render(request, "org-details.html", {"form": form, "organization": organisation})
+        
