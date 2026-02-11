@@ -292,6 +292,64 @@ body .modal-backdrop.show {
     color: #2f3e52;
     font-weight: 600;
 }
+.um-select {
+    position: relative;
+    width: 100%;
+}
+.um-select-toggle {
+    width: 100%;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    padding: 6px 12px;
+    font-size: 14px;
+    color: #193560;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.um-select-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #d9e4f2;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(25, 45, 85, 0.12);
+    padding: 8px;
+    display: none;
+    z-index: 5;
+}
+.um-select-menu.is-open {
+    display: block;
+}
+
+.um-select-options {
+    max-height: 180px;
+    overflow-y: auto;
+    display: grid;
+    gap: 4px;
+}
+.um-select-option {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: #f8fbff;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #193560;
+    cursor: pointer;
+}
+.um-select-option:hover {
+    background: #e9f7fb;
+}
+.um-select-option.is-selected {
+    background: #37C1E3;
+    color: #ffffff;
+}
 @media (max-width: 960px) {
     .um-grid {
         grid-template-columns: 1fr;

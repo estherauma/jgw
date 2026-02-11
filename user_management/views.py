@@ -39,20 +39,17 @@ def user_management(request):
         {"code": "TEST CODE", "group": "Accounts"},
     ]
 
-    org_details = {
-        "name": "Test Organisation",
-        "requires_auth": "YES",
-        "code": "TESTORCODE",
-        "prismic_repo": "TEST",
-        "prismic_messaging_repo": "TEST",
-        "created_by": "TEST",
-        "created_at": "Feb 6, 2024, 12:57pm",
-    }
+    selected_org = "Select organisation"
 
-    selected_org = "No organisation"
-    first_org = organizations.first()
-    if first_org:
-        selected_org = f"{first_org.id} - {first_org.name}"
+    org_details = {
+        "name": "No organisation",
+        "requires_auth": "N/A",
+        "code": "N/A",
+        "prismic_repo": "N/A",
+        "prismic_messaging_repo": "N/A",
+        "created_by": "N/A",
+        "created_at": "N/A",
+    }
 
     context = {
         "organizations": organizations,
