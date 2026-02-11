@@ -188,6 +188,7 @@ body .modal-backdrop.show {
 .um-btn-outline-black {
     background: #ffffff;
     border: 1px solid #193560;
+    color: #193560;
 }
 
 .um-table {
@@ -264,10 +265,6 @@ body .modal-backdrop.show {
 .um-action .um-btn {
     padding: 4px 10px;
     font-size: 11px;
-}
-.um-subtext {
-    font-size: 12px;
-    margin: 6px 0 10px 0;
 }
 .um-list {
     display: flex;
