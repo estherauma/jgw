@@ -255,17 +255,7 @@ body .modal-backdrop.show {
 .um-scrollbar-thumb:active {
     cursor: grabbing;
 }
-.um-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #d9e4f2;
-    border-radius: 16px;
-    padding: 4px 10px;
-    font-size: 12px;
-    color: #425269;
-    background: #f7faff;
-}
+
 .um-action {
     display: inline-flex;
     align-items: center;
