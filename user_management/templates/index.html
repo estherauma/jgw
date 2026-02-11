@@ -7,6 +7,10 @@
 <!-- title -->
 {% block title %} {% translate "userManagement" %} {% endblock title %}
 
+{% block styles %}
+@import url("{% static 'user_management/css/common.css' %}");
+{% endblock %}
+
 <!-- page content -->
 {% block content %}
 <div class="um-page">
@@ -29,29 +33,37 @@
                         <span class="search-icon">🔍</span> 
                         <input type="text" placeholder="Search..." />
                     </div>
+                    <button class="um-btn btn btn-primary btn-sm" type="button" data-toggle="modal" data-target="#create-org-modal" data-bs-toggle="modal" data-bs-target="#create-org-modal">
+                        Add organisation
+                    </button>
                 </div>
-                <table class="um-table um-navy">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Code</th>
-                            <th>Required login?</th>
-                            <th>Prismic Repo Name</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for org in organizations %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ org.name }}</td>
-                            <td>{{ org.code }}</td>
-                            <td>{{ org.required_login }}</td>
-                            <td>{{ org.prismic_repo }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="um-table-scroll-wrapper">
+                    <div class="um-scrollbar">
+                        <div class="um-scrollbar-thumb"></div>
+                    </div>
+                    <div class="um-table-scroll">
+                        <table class="um-table table table-sm um-navy">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Code</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for org in organizations %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ org.name }}</td>
+                                <td>{{ org.org_code }}</td>
+                                <td></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <div class="um-card um-navy">
@@ -177,8 +189,11 @@
         </div>
     </div>
 </div>
+<!-- include create organisation modal -->
+{% include 'create-org-modal.html' %}
 
 {% endblock content %} 
 {% block scripts %}
-<link rel="stylesheet" href="{% static 'user_management/css/common.css' %}">
+<script src="{% static 'js/user_management/common.js' %}"></script>
+<script src="{% static 'js/user_management/organization.js' %}"></script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.db import transaction
 from jgwpandas import settings
-from preference.models import OrganisationData
+from preference.models import OrganisationAccessCode, OrganisationData
 from common.logger import KunfuPandaLogger
 import requests
 
@@ -42,6 +42,12 @@ def add_organisation_data_to_db():
                         else:
                             updated_count += 1
                             logger.info(f"Updated organization from API: {display_name} with code {code}")
+                        for access_code_str in org.get('accessCode', []) or []:
+                            if access_code_str:
+                                OrganisationAccessCode.objects.update_or_create(
+                                    code=access_code_str,
+                                    defaults={"organisation": obj}
+                                )
 
                 except Exception as e:
                     logger.error(f"Error processing API organization {org.get('displayName', 'Unknown')}: {str(e)}")

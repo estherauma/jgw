@@ -1,50 +1,15 @@
-from django.shortcuts import render
+from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.views import View
 
-# Create your views here.
-from django.http import HttpResponse
-from django.shortcuts import render
-from datetime import datetime
+from preference.models import OrganisationData
+
+from .forms import CreateOrganisationForm
 
 
 def user_management(request):
-    organizations = [
-        {
-            "name": "Organisation Name",
-            "code": "XXXXXX",
-            "required_login": "YES",
-            "prismic_repo": "Text Example",
-        },
-        {
-            "name": "Test Organisation",
-            "code": "XXXXXX",
-            "required_login": "YES",
-            "prismic_repo": "Text Example",
-        },
-        {
-            "name": "Organisation Name",
-            "code": "XXXXXX",
-            "required_login": "YES",
-            "prismic_repo": "Text Example",
-        },
-        {
-            "name": "Organisation Name",
-            "code": "XXXXXX",
-            "required_login": "YES",
-            "prismic_repo": "Text Example",
-        },
-        {
-            "name": "Organisation Name",
-            "code": "XXXXXX",
-            "required_login": "YES",
-            "prismic_repo": "Text Example",
-        },
-        {
-            "name": "Organisation Name",
-            "code": "XXXXXX",
-            "required_login": "YES",
-            "prismic_repo": "Text Example",
-        },
-    ]
+    organizations = OrganisationData.objects.order_by("name")
 
     users = [
         {"name": "Name Surname", "email": "name@email.com", "role": "Admin", "workgroup": "Accounts"},
@@ -84,12 +49,28 @@ def user_management(request):
         "created_at": "Feb 6, 2024, 12:57pm",
     }
 
+    selected_org = "No organisation"
+    first_org = organizations.first()
+    if first_org:
+        selected_org = f"{first_org.id} - {first_org.name}"
+
     context = {
         "organizations": organizations,
         "users": users,
         "unassigned_work_codes": unassigned_work_codes,
         "assigned_work_codes": assigned_work_codes,
-        "selected_org": "84 - Test Organisation",
+        "selected_org": selected_org,
         "org_details": org_details,
+        "create_org_form": CreateOrganisationForm(),
     }
     return render(request, "index.html", context=context)
+
+
+class CreateOrganisationView(View):
+    def post(self, request):
+        form = CreateOrganisationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"ok": True})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
