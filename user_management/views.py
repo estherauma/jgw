@@ -3,9 +3,9 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
 
-from preference.models import OrganisationData
+from preference.models import OrganisationAccessCode, OrganisationData
 
-from .forms import CreateOrganisationForm
+from .forms import AddWorkCodeForm, CreateOrganisationForm
 
 
 def user_management(request):
@@ -27,38 +27,45 @@ def user_management(request):
         {"name": "Name Surname", "email": "name@email.com", "role": "Admin", "workgroup": "Accounts"},
     ]
 
-    unassigned_work_codes = [
-        {"code": "HKEL5B5HD"},
-        {"code": "HKEL5B5HD"},
-        {"code": "HKEL5B5HD"},
-    ]
+    work_codes = []
+    assigned_work_codes = []
 
-    assigned_work_codes = [
-        {"code": "TEST CODE", "group": "Devs"},
-        {"code": "TEST CODE", "group": "Support"},
-        {"code": "TEST CODE", "group": "Accounts"},
-    ]
+    selected_org = None
+    selected_org_id = None
+    selected_org_name = None
 
-    selected_org = "Select organisation"
+    requested_org_id = request.GET.get("selected_org_id")
+    if requested_org_id:
+        selected_org = organizations.filter(id=requested_org_id).first()
+        if selected_org:
+            selected_org_id = str(selected_org.id)
+            selected_org_name = selected_org.name
 
     org_details = {
-        "name": "No organisation",
-        "requires_auth": "N/A",
-        "code": "N/A",
-        "prismic_repo": "N/A",
-        "prismic_messaging_repo": "N/A",
-        "created_by": "N/A",
-        "created_at": "N/A",
     }
+    if selected_org:
+        work_codes = (
+            OrganisationAccessCode.objects.select_related("organisation")
+            .filter(organisation=selected_org)
+            .order_by("-created_at")
+        )
+        org_details = {
+            "name": selected_org.name,
+            "code": selected_org.org_code,
+            "created_by": "N/A",
+            "created_at": selected_org.created_at,
+        }
 
     context = {
         "organizations": organizations,
         "users": users,
-        "unassigned_work_codes": unassigned_work_codes,
+        "work_codes": work_codes,
         "assigned_work_codes": assigned_work_codes,
-        "selected_org": selected_org,
+        "selected_org_id": selected_org_id,
+        "selected_org_name": selected_org_name,
         "org_details": org_details,
         "create_org_form": CreateOrganisationForm(),
+        "add_work_code_form": AddWorkCodeForm(),
     }
     return render(request, "index.html", context=context)
 
@@ -69,5 +76,32 @@ class CreateOrganisationView(View):
         if form.is_valid():
             form.save()
             return JsonResponse({"ok": True})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class CreateWorkCodeView(View):
+    def post(self, request):
+        form = AddWorkCodeForm(request.POST)
+        org_id = request.GET.get("selected_org_id")
+        organisation = None
+        if org_id:
+            organisation = OrganisationData.objects.filter(id=org_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
+                status=400,
+            )
+        if form.is_valid():
+            work_code = form.save(commit=False)
+            work_code.organisation = organisation
+            work_code.save()
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "code": work_code.code,
+                    "org_id": work_code.organisation_id,
+                }
+            )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
