@@ -76,9 +76,12 @@ class CreateOrganisationView(View):
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
-class OrganizationDetailsView(View):
-    def get(self,request,organization_id):
+class EditOrganisationView(View):
+    def post(self, request, organization_id):
         organisation = get_object_or_404(OrganisationData, pk=organization_id)
-        form = CreateOrganisationForm(instance=organisation)
-        return render(request, "org-details.html", {"form": form, "organization": organisation})
-        
+        form = CreateOrganisationForm(request.POST, instance=organisation)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"ok": True})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
