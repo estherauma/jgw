@@ -19,55 +19,41 @@
     }
     var errorBox = document.getElementById('create-org-form-error');
 
-    form.addEventListener('submit', function (event) {
+    form.addEventListener('submit', async function (event) {
       event.preventDefault();
       safeClearFormErrors(form, errorBox);
       var submitButton = form.querySelector("button[type='submit']");
       if (submitButton) {
         submitButton.disabled = true;
       }
-      fetch(form.action, {
-        method: 'POST',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: new FormData(form),
-      })
-        .then(function (response) {
-          if (response.ok) {
-            return response.json();
-          }
-          return response.json().then(function (data) {
-            throw data;
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        var homeUrl = form.getAttribute('data-home-url');
+        if (homeUrl) {
+          window.location.href = homeUrl;
+        } else {
+          window.location.reload();
+        }
+      } catch (data) {
+        if (data && data.errors) {
+          Object.keys(data.errors).forEach(function (field) {
+            var el = form.querySelector("[data-error-for='" + field + "']");
+            if (el) {
+              el.textContent = data.errors[field].join(' ');
+            }
           });
-        })
-        .then(function () {
-          var homeUrl = form.getAttribute('data-home-url');
-          if (homeUrl) {
-            window.location.href = homeUrl;
-          } else {
-            window.location.reload();
-          }
-        })
-        .catch(function (data) {
-          if (data && data.errors) {
-            Object.keys(data.errors).forEach(function (field) {
-              var el = form.querySelector("[data-error-for='" + field + "']");
-              if (el) {
-                el.textContent = data.errors[field].join(' ');
-              }
-            });
-          }
-          if (errorBox) {
-            errorBox.textContent = 'Please fix the errors and try again.';
-            errorBox.classList.remove('d-none');
-          }
-        })
-        .finally(function () {
-          if (submitButton) {
-            submitButton.disabled = false;
-          }
-        });
+        }
+        if (errorBox) {
+          errorBox.textContent = 'Please fix the errors and try again.';
+          errorBox.classList.remove('d-none');
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
     });
   }
 
@@ -115,7 +101,7 @@
       targetLabel.textContent = text 
     }
 
-    form.addEventListener('submit', function (event) {
+    form.addEventListener('submit', async function (event) {
       event.preventDefault();
       safeClearFormErrors(form, errorBox);
       syncOrganisation();
@@ -132,50 +118,37 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
-      fetch(form.action, {
-        method: 'POST',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: new FormData(form),
-      })
-        .then(function (response) {
-          if (response.ok) {
-            return response.json();
-          }
-          return response.json().then(function (data) {
-            throw data;
+      try {
+        var data = null;
+        if (window.postFormJson) {
+          data = await window.postFormJson(form);
+        }
+        if (data && data.org_id) {
+          var homeUrl = form.getAttribute('data-home-url') || window.location.pathname;
+          var target =
+            homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
+          window.location.href = target;
+        } else {
+          window.location.reload();
+        }
+      } catch (data) {
+        if (data && data.errors) {
+          Object.keys(data.errors).forEach(function (field) {
+            var el = form.querySelector("[data-error-for='" + field + "']");
+            if (el) {
+              el.textContent = data.errors[field].join(' ');
+            }
           });
-        })
-        .then(function (data) {
-          if (data && data.org_id) {
-            var homeUrl = form.getAttribute('data-home-url') || window.location.pathname;
-            var target =
-              homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
-            window.location.href = target;
-          } else {
-            window.location.reload();
-          }
-        })
-        .catch(function (data) {
-          if (data && data.errors) {
-            Object.keys(data.errors).forEach(function (field) {
-              var el = form.querySelector("[data-error-for='" + field + "']");
-              if (el) {
-                el.textContent = data.errors[field].join(' ');
-              }
-            });
-          }
-          if (errorBox) {
-            errorBox.textContent = 'Please fix the errors and try again.';
-            errorBox.classList.remove('d-none');
-          }
-        })
-        .finally(function () {
-          if (submitButton) {
-            submitButton.disabled = false;
-          }
-        });
+        }
+        if (errorBox) {
+          errorBox.textContent = 'Please fix the errors and try again.';
+          errorBox.classList.remove('d-none');
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
     });
 
     var modalEl = document.getElementById('add-workcode-modal');

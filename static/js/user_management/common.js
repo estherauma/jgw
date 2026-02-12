@@ -14,6 +14,23 @@
   }
   window.clearFormErrors = clearFormErrors;
 
+  async function postFormJson(form) {
+    var response = await fetch(form.action, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: new FormData(form),
+    });
+    var data = await response.json();
+    if (!response.ok) {
+      throw data;
+    }
+    return data;
+  }
+
+  window.postFormJson = postFormJson;
+
   function syncThumb(container, track, thumb) {
     if (!thumb || !track || !container) {
       return;

@@ -334,6 +334,7 @@ body .modal-backdrop.show {
 .um-select {
     position: relative;
     width: 100%;
+    max-width: 360px;
 }
 .um-select-toggle {
     width: 100%;
