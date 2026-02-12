@@ -193,9 +193,10 @@
         </div>
     </div>
 </div>
+{% url 'user_management:create_work_code' as create_work_code_url %}
 <!-- include create organisation modal -->
 {% include 'create-org-modal.html' %}
-{% include 'add-workcode-modal.html' %}
+{% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 
 {% endblock content %} 
 {% block scripts %}
