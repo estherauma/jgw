@@ -5,7 +5,6 @@
     padding: 20px 50px;
 }
 .um-page {
-    background: #eef2f6;
     padding: 24px;
     min-height: 100vh;
 }
@@ -42,7 +41,7 @@
 .um-title {
     font-size: 22px;
     font-weight: 700;
-    color: #2a3b4f;
+    color: #FFFFFF;
     margin: 0;
 }
 .um-grid {
@@ -64,7 +63,6 @@
     font-size: 12px;
     letter-spacing: 0.4px;
     text-transform: uppercase;
-    color: #7a8aa3;
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
@@ -114,18 +112,17 @@
   }
 .um-btn {
     background: #37C1E3;
-    color: #ffffff;
     border: none;
     padding: 8px 24px;
     border-radius: 50rem !important;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer !important;
     white-space: nowrap;
 }
 .um-btn-outline {
     background: #ffffff;
-    color: #1ea3d8;
+    color: #24AACC;
     border: 1px solid #bfe7f7;
 }
 /* Modal styles */
@@ -188,6 +185,12 @@ body .modal-backdrop.show {
     background-color: #80808099 !important;
     opacity: 1 !important;
 }
+.um-btn-outline-black {
+    background: #ffffff;
+    border: 1px solid #193560;
+    color: #193560;
+}
+
 .um-table {
     width: 100%;
     border-collapse: collapse;
@@ -202,7 +205,6 @@ body .modal-backdrop.show {
     vertical-align: middle;
 }
 .um-table th {
-    color: #7a8aa3;
     font-weight: 600;
     font-size: 11px;
     text-transform: uppercase;
@@ -254,17 +256,7 @@ body .modal-backdrop.show {
 .um-scrollbar-thumb:active {
     cursor: grabbing;
 }
-.um-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #d9e4f2;
-    border-radius: 16px;
-    padding: 4px 10px;
-    font-size: 12px;
-    color: #425269;
-    background: #f7faff;
-}
+
 .um-action {
     display: inline-flex;
     align-items: center;
@@ -273,11 +265,6 @@ body .modal-backdrop.show {
 .um-action .um-btn {
     padding: 4px 10px;
     font-size: 11px;
-}
-.um-subtext {
-    font-size: 11px;
-    color: #7a8aa3;
-    margin: 6px 0 10px 0;
 }
 .um-list {
     display: flex;
@@ -310,4 +297,3 @@ body .modal-backdrop.show {
         grid-template-columns: 1fr;
     }
 }
-
