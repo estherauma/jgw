@@ -191,6 +191,37 @@ body .modal-backdrop.show {
     color: #193560;
 }
 
+.um-btn-icon {
+    background: #ffffff;
+    border: 1px solid #d9e4f2;
+    color: #193560;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.um-btn-icon:hover {
+    background: #f5f8fc;
+}
+
+.um-btn-icon i {
+    font-size: 14px;
+}
+
+.form-check-input:checked {
+    background-color: #37C1E3;
+    border-color: #37C1E3;
+}
+
+.form-check-input:focus {
+    border-color: #37C1E3;
+    box-shadow: 0 0 0 0.2rem rgba(55, 193, 227, 0.25);
+}
+
 .um-table {
     width: 100%;
     border-collapse: collapse;
@@ -216,12 +247,20 @@ body .modal-backdrop.show {
     border: 1px solid #e6eef8;
     background: #ffffff;
 }
+.um-table-scroll-wrapper-sm {
+    height: auto;
+    max-height: 220px;
+}
 .um-table-scroll {
     height: 100%;
     overflow-y: scroll;
     border-radius: 8px;
     padding-right: 16px;
     scrollbar-gutter: stable;
+}
+.um-table-scroll-wrapper-sm .um-table-scroll {
+    height: auto;
+    max-height: 220px;
 }
 .um-table-scroll {
     scrollbar-width: none;
