@@ -22,13 +22,14 @@
                         <button
                             class="um-select-option"
                             type="button"
+                            id="org-option-{{ org.id }}"
                             data-org-option
                             data-org-value="{{ org.id }}"
                             data-org-label="{{ org.name }}"
                             data-org-name="{{ org.name }}"
                             data-org-code="{{ org.org_code }}"
                             data-org-created-at="{{ org.created_at|date:'M j, Y, P' }}"
-                            {% if org.name == selected %}data-org-selected="true"{% endif %}
+                            {% if selected_id and org.id|stringformat:"s" == selected_id %}data-org-selected="true"{% endif %}
                         >
                             {{ org.name }}
                         </button>
@@ -38,7 +39,27 @@
                 <input type="hidden" name="selected_org" data-org-hidden />
             </div>
         </div>
-        <button class="um-btn um-navy" data-org-dependent>Create work code</button>
+        <div class="um-action">
+            <button
+                class="um-btn-icon"
+                type="button"
+                data-org-clear
+                data-org-dependent
+                aria-label="Clear selection"
+                title="Clear selection"
+            >
+                <i class="bi bi-x-circle"></i>
+            </button>
+            <button
+                class="um-btn um-navy"
+                type="button"
+                data-org-dependent
+                data-toggle="modal"
+                data-target="#add-workcode-modal"
+            >
+                Create work code
+            </button>
+        </div>
     </div>
     <div class="um-navy mt-2 mb-3">
         This is where you can assign work codes to any group of users. Please choose
@@ -78,8 +99,13 @@
         var label = option.getAttribute('data-org-label') || '';
         var value = option.getAttribute('data-org-value') || '';
         selectedLabel.textContent = label || 'Select organisation';
+        updateWorkCodeOrgLabel(label);
         toggleDependents(true);
         updateDetails(option);
+        filterWorkCodes(value);
+        syncWorkCodeForm(value);
+        var current = new URL(window.location.href).searchParams.get('selected_org_id') || '';
+        updateQueryParam(value, current !== value);
         if (hiddenInput) {
           hiddenInput.value = value;
         }
@@ -102,6 +128,74 @@
             target.textContent = detailMap[key];
           }
         });
+      }
+
+      function resetDetails() {
+        var details = document.querySelectorAll('[data-org-detail]');
+        details.forEach(function (item) {
+          var fallback = item.getAttribute('data-org-default') || 'N/A';
+          item.textContent = fallback;
+        });
+      }
+
+      function updateQueryParam(orgId, navigate) {
+        if (!window.history || !window.history.replaceState) {
+          return;
+        }
+        var url = new URL(window.location.href);
+        if (orgId) {
+          url.searchParams.set('selected_org_id', orgId);
+        } else {
+          url.searchParams.delete('selected_org_id');
+        }
+        if (navigate) {
+          window.location.href = url.toString();
+        } else {
+          window.history.replaceState({}, '', url.toString());
+        }
+      }
+
+      function updateWorkCodeOrgLabel(label) {
+        var targetLabel = document.querySelector('[data-workcode-org-label]');
+        if (targetLabel) {
+          targetLabel.textContent = label || 'None selected';
+        }
+      }
+
+      function filterWorkCodes(orgId) {
+        var items = document.querySelectorAll('[data-org-workcode]');
+        var visibleCount = 0;
+        items.forEach(function (item) {
+          var matches = item.getAttribute('data-org-id') === orgId;
+          item.hidden = !matches;
+          if (matches) {
+            visibleCount += 1;
+          }
+        });
+        var emptyState = document.querySelector('[data-org-workcode-empty]');
+        if (emptyState) {
+          emptyState.classList.toggle('d-none', visibleCount > 0);
+        }
+      }
+
+      window.updateOrgWorkCodeFilter = filterWorkCodes;
+
+      function syncWorkCodeForm(orgId) {
+        var form = document.getElementById('add-workcode-form');
+        if (!form) {
+          return;
+        }
+        var action = form.getAttribute('action');
+        if (!action) {
+          return;
+        }
+        var url = new URL(action, window.location.origin);
+        if (orgId) {
+          url.searchParams.set('selected_org_id', orgId);
+        } else {
+          url.searchParams.delete('selected_org_id');
+        }
+        form.setAttribute('action', url.toString());
       }
 
       function toggleDependents(show) {
@@ -154,6 +248,28 @@
         setSelected(initial);
       } else {
         toggleDependents(false);
+        updateWorkCodeOrgLabel('');
+        filterWorkCodes('');
+        syncWorkCodeForm('');
+      }
+
+      var clearButton = document.querySelector('[data-org-clear]');
+      if (clearButton) {
+        clearButton.addEventListener('click', function () {
+          selectedLabel.textContent = 'Select organisation';
+          if (hiddenInput) {
+            hiddenInput.value = '';
+          }
+          options.forEach(function (item) {
+            item.classList.remove('is-selected');
+          });
+          resetDetails();
+          toggleDependents(false);
+          updateWorkCodeOrgLabel('');
+          filterWorkCodes('');
+          syncWorkCodeForm('');
+          updateQueryParam('');
+        });
       }
     }
 
