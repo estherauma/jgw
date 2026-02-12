@@ -57,7 +57,7 @@
                                 <td>{{ org.name }}</td>
                                 <td>{{ org.org_code }}</td>
                                 <td>
-                                    <button class="um-btn um-btn-outline btn-edit-org" type="button" data-toggle="modal" data-target="#edit-org-modal" data-bs-toggle="modal" data-bs-target="#edit-org-modal" data-org-id="{{ org.id }}" data-org-name="{{ org.name }}" data-org-code="{{ org.org_code }}">
+                                    <button class="um-btn um-btn-outline btn-edit-org" type="button" data-toggle="modal" data-target="#create-org-modal" data-bs-toggle="modal" data-bs-target="#create-org-modal" data-org-id="{{ org.id }}" data-org-name="{{ org.name }}" data-org-code="{{ org.org_code }}">
                                         Edit
                                     </button>
                                 </td>
@@ -192,10 +192,8 @@
         </div>
     </div>
 </div>
-<!-- include create organisation modal -->
+<!-- include organisation modal (used for both create and edit) -->
 {% include 'create-org-modal.html' %}
-<!-- include edit organisation modal -->
-{% include 'edit-org-modal.html' %}
 
 {% endblock content %} 
 {% block scripts %}

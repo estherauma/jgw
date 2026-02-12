@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="um-modal-divider"></div>
-            <form id="create-org-form" method="post" action="{% url 'user_management:create_organisation' %}" data-home-url="{% url 'user_management:home' %}">
+            <form id="create-org-form" method="post" action="{% url 'user_management:create_organisation' %}" data-home-url="{% url 'user_management:home' %}" data-base-url="{% url 'user_management:home' %}organisations/" data-create-url="{% url 'user_management:create_organisation' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="alert alert-danger d-none" id="create-org-form-error" role="alert"></div>
