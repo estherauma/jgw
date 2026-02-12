@@ -27,11 +27,15 @@
         submitButton.disabled = true;
       }
       try {
+        var data = null;
         if (window.postFormJson) {
-          await window.postFormJson(form);
+          data = await window.postFormJson(form);
         }
-        var homeUrl = form.getAttribute('data-home-url');
-        if (homeUrl) {
+        var homeUrl = form.getAttribute('data-home-url') || window.location.pathname;
+        if (data && data.org_id) {
+          window.location.href =
+            homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
+        } else if (homeUrl) {
           window.location.href = homeUrl;
         } else {
           window.location.reload();

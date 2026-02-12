@@ -74,8 +74,8 @@ class CreateOrganisationView(View):
     def post(self, request):
         form = CreateOrganisationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return JsonResponse({"ok": True})
+            organisation = form.save()
+            return JsonResponse({"ok": True, "org_id": organisation.id})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
