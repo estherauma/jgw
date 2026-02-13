@@ -1,6 +1,6 @@
 from django import forms
 
-from preference.models import OrganisationData
+from preference.models import OrganisationAccessCode, OrganisationData
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -34,3 +34,24 @@ class CreateOrganisationForm(forms.ModelForm):
         if qs.exists():
             raise forms.ValidationError("Organisation code already exists.")
         return org_code
+
+
+class AddWorkCodeForm(forms.ModelForm):
+    class Meta:
+        model = OrganisationAccessCode
+        fields = ["code", "requires_login"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["code"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Work code"}
+        )
+        self.fields["requires_login"].widget.attrs.update(
+            {"class": "form-check-input", "role": "switch"}
+        )
+
+    def clean_code(self):
+        code = self.cleaned_data.get("code", "").strip().upper()
+        if OrganisationAccessCode.objects.filter(code__iexact=code).exists():
+            raise forms.ValidationError("Work code already exists.")
+        return code

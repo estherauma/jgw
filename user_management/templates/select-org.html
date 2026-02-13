@@ -1,0 +1,278 @@
+<div class="um-card um-navy mb-2">
+    <div class="um-card-title">Selected organisation</div>
+    <div class="um-row">
+        <div class="input-group">
+            <div class="um-select" data-org-select>
+                <button class="um-select-toggle rounded-pill fw-bold text-start" type="button" data-org-toggle>
+                    <span data-org-selected-label>
+                        {% if selected %}{{ selected }}{% else %}Select organisation{% endif %}
+                    </span>
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="um-select-menu" data-org-menu>
+                    <input
+                        class="form-control"
+                        type="text"
+                        placeholder="Search organisation..."
+                        aria-label="Search organisation"
+                        data-org-filter
+                    />
+                    <div class="um-select-options">
+                        {% for org in options %}
+                        <button
+                            class="um-select-option"
+                            type="button"
+                            id="org-option-{{ org.id }}"
+                            data-org-option
+                            data-org-value="{{ org.id }}"
+                            data-org-label="{{ org.name }}"
+                            data-org-name="{{ org.name }}"
+                            data-org-code="{{ org.org_code }}"
+                            data-org-created-at="{{ org.created_at|date:'M j, Y, P' }}"
+                            {% if selected_id and org.id|stringformat:"s" == selected_id %}data-org-selected="true"{% endif %}
+                        >
+                            {{ org.name }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                <input type="hidden" name="selected_org" data-org-hidden />
+            </div>
+        </div>
+        <div class="um-action">
+            <button
+                class="um-btn-icon"
+                type="button"
+                data-org-clear
+                data-org-dependent
+                aria-label="Clear selection"
+                title="Clear selection"
+            >
+                <i class="bi bi-x-circle"></i>
+            </button>
+            <button
+                class="um-btn um-navy"
+                type="button"
+                data-org-dependent
+                data-toggle="modal"
+                data-target="#add-workcode-modal"
+            >
+                Create work code
+            </button>
+        </div>
+    </div>
+    <div class="um-navy mt-2 mb-3">
+        This is where you can assign work codes to any group of users. Please choose
+        the group that works with a particular site, business, or coverage in the business.
+    </div>
+</div>
+<script>
+  (function () {
+    function initOrgDropdown() {
+      var wrapper = document.querySelector('[data-org-select]');
+      if (!wrapper) {
+        return;
+      }
+      var toggle = wrapper.querySelector('[data-org-toggle]');
+      var menu = wrapper.querySelector('[data-org-menu]');
+      var filterInput = wrapper.querySelector('[data-org-filter]');
+      var hiddenInput = wrapper.querySelector('[data-org-hidden]');
+      var selectedLabel = wrapper.querySelector('[data-org-selected-label]');
+      var options = Array.prototype.slice.call(
+        wrapper.querySelectorAll('[data-org-option]'),
+      );
+
+      if (!toggle || !menu || !selectedLabel || options.length === 0) {
+        return;
+      }
+
+      function closeMenu() {
+        wrapper.classList.remove('is-open');
+        menu.classList.remove('is-open');
+        if (filterInput) {
+          filterInput.value = '';
+          filterOptions('');
+        }
+      }
+
+      function setSelected(option) {
+        var label = option.getAttribute('data-org-label') || '';
+        var value = option.getAttribute('data-org-value') || '';
+        selectedLabel.textContent = label || 'Select organisation';
+        updateWorkCodeOrgLabel(label);
+        toggleDependents(true);
+        updateDetails(option);
+        filterWorkCodes(value);
+        syncWorkCodeForm(value);
+        var current = new URL(window.location.href).searchParams.get('selected_org_id') || '';
+        updateQueryParam(value, current !== value);
+        if (hiddenInput) {
+          hiddenInput.value = value;
+        }
+        options.forEach(function (item) {
+          item.classList.remove('is-selected');
+        });
+        option.classList.add('is-selected');
+        closeMenu();
+      }
+
+      function updateDetails(option) {
+        var detailMap = {
+          name: option.getAttribute('data-org-name'),
+          code: option.getAttribute('data-org-code'),
+          created_at: option.getAttribute('data-org-created-at'),
+        };
+        Object.keys(detailMap).forEach(function (key) {
+          var target = document.querySelector('[data-org-detail="' + key + '"]');
+          if (target && detailMap[key]) {
+            target.textContent = detailMap[key];
+          }
+        });
+      }
+
+      function resetDetails() {
+        var details = document.querySelectorAll('[data-org-detail]');
+        details.forEach(function (item) {
+          var fallback = item.getAttribute('data-org-default') || 'N/A';
+          item.textContent = fallback;
+        });
+      }
+
+      function updateQueryParam(orgId, navigate) {
+        if (!window.history || !window.history.replaceState) {
+          return;
+        }
+        var url = new URL(window.location.href);
+        if (orgId) {
+          url.searchParams.set('selected_org_id', orgId);
+        } else {
+          url.searchParams.delete('selected_org_id');
+        }
+        if (navigate) {
+          window.location.href = url.toString();
+        } else {
+          window.history.replaceState({}, '', url.toString());
+        }
+      }
+
+      function updateWorkCodeOrgLabel(label) {
+        var targetLabel = document.querySelector('[data-workcode-org-label]');
+        if (targetLabel) {
+          targetLabel.textContent = label || 'None selected';
+        }
+      }
+
+      function filterWorkCodes(orgId) {
+        var items = document.querySelectorAll('[data-org-workcode]');
+        var visibleCount = 0;
+        items.forEach(function (item) {
+          var matches = item.getAttribute('data-org-id') === orgId;
+          item.hidden = !matches;
+          if (matches) {
+            visibleCount += 1;
+          }
+        });
+        var emptyState = document.querySelector('[data-org-workcode-empty]');
+        if (emptyState) {
+          emptyState.classList.toggle('d-none', visibleCount > 0);
+        }
+      }
+
+      window.updateOrgWorkCodeFilter = filterWorkCodes;
+
+      function syncWorkCodeForm(orgId) {
+        var form = document.getElementById('add-workcode-form');
+        if (!form) {
+          return;
+        }
+        var action = form.getAttribute('action');
+        if (!action) {
+          return;
+        }
+        var url = new URL(action, window.location.origin);
+        if (orgId) {
+          url.searchParams.set('selected_org_id', orgId);
+        } else {
+          url.searchParams.delete('selected_org_id');
+        }
+        form.setAttribute('action', url.toString());
+      }
+
+      function toggleDependents(show) {
+        var dependents = document.querySelectorAll('[data-org-dependent]');
+        dependents.forEach(function (el) {
+          el.hidden = !show;
+        });
+      }
+
+      function filterOptions() {
+        var query = (filterInput && filterInput.value) || '';
+        var normalized = query.toLowerCase().trim();
+        options.forEach(function (option) {
+          var text = option.getAttribute('data-org-label') || '';
+          var matches =
+            normalized.length === 0 ||
+            text.toLowerCase().indexOf(normalized) !== -1;
+          option.hidden = !matches;
+        });
+      }
+
+      toggle.addEventListener('click', function () {
+        var isOpen = !wrapper.classList.contains('is-open');
+        wrapper.classList.toggle('is-open', isOpen);
+        menu.classList.toggle('is-open', isOpen);
+        if (isOpen && filterInput) {
+          filterInput.focus();
+          filterInput.select();
+        }
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!wrapper.contains(event.target)) {
+          closeMenu();
+        }
+      });
+
+      options.forEach(function (option) {
+        option.addEventListener('click', function () {
+          setSelected(option);
+        });
+      });
+
+      if (filterInput) {
+        filterInput.addEventListener('input', filterOptions);
+      }
+
+      var initial = wrapper.querySelector('[data-org-selected="true"]');
+      if (initial) {
+        setSelected(initial);
+      } else {
+        toggleDependents(false);
+        updateWorkCodeOrgLabel('');
+        filterWorkCodes('');
+        syncWorkCodeForm('');
+      }
+
+      var clearButton = document.querySelector('[data-org-clear]');
+      if (clearButton) {
+        clearButton.addEventListener('click', function () {
+          selectedLabel.textContent = 'Select organisation';
+          if (hiddenInput) {
+            hiddenInput.value = '';
+          }
+          options.forEach(function (item) {
+            item.classList.remove('is-selected');
+          });
+          resetDetails();
+          toggleDependents(false);
+          updateWorkCodeOrgLabel('');
+          filterWorkCodes('');
+          syncWorkCodeForm('');
+          updateQueryParam('');
+        });
+      }
+    }
+
+    window.addEventListener('load', initOrgDropdown);
+  })();
+</script>
