@@ -1,9 +1,6 @@
 from django.db import models
 from django.db.models import Index
 
-
-from django.db import models
-
 from preference.models import (
     Age,
     Country,
@@ -75,6 +72,13 @@ class Chapter(models.Model):
         null=True,
         blank=True,
         related_name="chapter_tittle_opened_destination",
+    )
+    origin = models.ForeignKey(
+        Country,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="chapter_tittle_opened_origin",
     )
 
     def __str__(self):
