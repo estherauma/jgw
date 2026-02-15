@@ -10,7 +10,7 @@
             <div class="um-modal-divider"></div>
             <form id="{{ action_type }}-org-form" method="post" action="{{ form_action }}" 
             data-home-url="{% url 'user_management:home' %}" data-create-url="{% url 'user_management:create_organisation' %}"
-            data-edit-url-base="{% url 'user_management:edit_organisation' organization_id=0 %}">
+            data-edit-url-base="{% url 'user_management:edit_organisation' organisation_id=0 %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="alert alert-danger d-none" id="{{ action_type }}-org-form-error" role="alert"></div>

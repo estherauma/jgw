@@ -6,6 +6,6 @@ app_name = "user_management"
 urlpatterns = [
     path('', user_management, name="home"),
     path('organisations/create/', CreateOrganisationView.as_view(), name="create_organisation"),
-    path('organisations/<int:organization_id>/edit/', EditOrganisationView.as_view(), name="edit_organisation"),
+    path('organisations/<int:organisation_id>/edit/', EditOrganisationView.as_view(), name="edit_organisation"),
     path('work-codes/create/', CreateWorkCodeView.as_view(), name="create_work_code"),
 ]
