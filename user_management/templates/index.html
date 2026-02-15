@@ -26,9 +26,7 @@
                         <span class="title-icon">🏢</span>
                         <span class="title-text">Organisations:</span>
                     </div>
-                    <button class="um-btn btn btn-primary btn-sm" type="button" data-toggle="modal" data-target="#create-org-modal" data-bs-toggle="modal" data-bs-target="#create-org-modal">
-                        Add organisation
-                    </button>
+                    <button class="um-btn" type="button" data-toggle="modal" data-target="#create-org-modal" data-bs-toggle="modal" data-bs-target="#create-org-modal">Add organisation</button>
                 </div>
                 <div class="um-row">
                     <div class="um-search">
@@ -69,78 +67,58 @@
                 </div>
             </div>
 
-            <div class="um-card um-navy">
-                <div class="um-card-title">Selected organisation</div>
-                <div class="um-row">
-                    <div class="input-group">
-                        <button class="form-select rounded-pill fw-bold text-start" type="button">
-                            {{ selected_org }}
-                        </button>
+            {% include "select-org.html" with options=organizations selected=selected_org_name selected_id=selected_org_id %}
+
+            <div class="um-card" data-org-dependent>
+                <div class="um-card-title um-navy">Work Codes</div>
+                <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm" data-org-workcode-list>
+                    <div class="um-scrollbar">
+                        <div class="um-scrollbar-thumb"></div>
                     </div>
-                    <button class="um-btn um-navy">Create work code</button>
-                </div>
-                <div class="um-navy mt-2 mb-3">
-                    This is where you can assign work codes to any group of users. Please choose
-                    the group that works with a particular site, business, or coverage in the business.
-                </div>
-            </div>
-
-            <div class="um-card">
-                <div class="um-card-title um-navy">Unassigned work codes</div>
-                <div class="um-list um-navy">
-                    {% for code in unassigned_work_codes %}
-                    <div class="um-list-item">
-                        <div><strong>WORK CODE</strong> {{ code.code }}</div>
-                        <div class="um-action">
-                            <button class="um-btn um-btn-outline">Edit</button>
-                            <button class="um-btn um-btn-outline">Assign</button>
-                            <button class="um-btn um-btn-outline-black um-navy">Delete</button>
-                        </div>
+                    <div class="um-table-scroll">
+                        <table class="um-table um-navy">
+                            <thead>
+                                <tr>
+                                    <th>Work code</th>
+                                    <th>Requires authentication</th>
+                                    <th>Assigned work groups</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="d-none" data-org-workcode-empty>
+                                    <td colspan="4">No work codes yet.</td>
+                                </tr>
+                                {% for code in work_codes %}
+                                <tr data-org-workcode data-org-id="{{ code.organisation_id }}">
+                                    <td data-workcode-value>{{ code.code }}</td>
+                                    <td>{% if code.requires_login %}Yes{% else %}No{% endif %}</td>
+                                    <td>0</td>
+                                    <td>
+                                        <div class="um-action">
+                                            <button class="um-btn um-btn-outline">Edit</button>
+                                            <button class="um-btn um-btn-outline">Assign</button>
+                                            <button class="um-btn um-btn-outline-black um-navy">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
 
-            <div class="um-card">
-                <div class="um-card-title um-navy">Assigned work codes</div>
-                <table class="um-table um-navy">
-                    <thead>
-                        <tr>
-                            <th>Work code</th>
-                            <th>Work group assigned</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for code in assigned_work_codes %}
-                        <tr>
-                            <td>{{ code.code }}</td>
-                            <td>{{ code.group }}</td>
-                            <td>
-                                <div class="um-action">
-                                    <button class="um-btn um-btn-outline">Edit</button>
-                                    <button class="um-btn um-btn-outline-black um-navy">Unassign</button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="um-card um-navy">
+            <div class="um-card um-navy" data-org-dependent>
                 <div class="um-row">
                     <div class="um-card-title">Organisation details</div>
                     <button class="um-btn um-btn-outline">Edit details</button>
                 </div>
                 <div class="um-details um-navy">
-                    <div>Name: <span class='um-navy'>{{ org_details.name }}</span></div>
-                    <div>Should only authenticated users access organisation data? <span class='um-navy'>{{ org_details.requires_auth }}</span></div>
-                    <div>Organisation code: <span class='um-navy'>{{ org_details.code }}</span></div>
-                    <div>Organisation prismic repository: <span class='um-navy'>{{ org_details.prismic_repo }}</span></div>
-                    <div>Organisation prismic messaging repository: <span class='um-navy'>{{ org_details.prismic_messaging_repo }}</span></div>
-                    <div>Organisation was created by: <span class='um-navy'>{{ org_details.created_by }}</span></div>
-                    <div>Organisation was created on: <span class='um-navy'>{{ org_details.created_at }}</span></div>
+                    <div>Name: <span class="um-navy" data-org-detail="name" data-org-default="{{ org_details.name }}">{{ org_details.name }}</span></div>
+                    <div>Organisation code: <span class="um-navy" data-org-detail="code" data-org-default="{{ org_details.code }}">{{ org_details.code }}</span></div>
+                    <div>Organisation was created by: <span class="um-navy" data-org-detail="created_by" data-org-default="{{ org_details.created_by }}">{{ org_details.created_by }}</span></div>
+                    <div>Organisation was created on: <span class="um-navy" data-org-detail="created_at" data-org-default="{{ org_details.created_at }}">{{ org_details.created_at }}</span></div>
                 </div>
             </div>
         </div>
@@ -189,11 +167,42 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="um-card" data-org-dependent>
+                <div class="um-card-title um-navy">Work Groups</div>
+                <table class="um-table um-navy">
+                    <thead>
+                        <tr>
+                            <th>Work code</th>
+                            <th>Work group assigned</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for code in assigned_work_codes %}
+                        <tr>
+                            <td>{{ code.code }}</td>
+                            <td>{{ code.group }}</td>
+                            <td>
+                                <div class="um-action">
+                                    <button class="um-btn um-btn-outline">Edit</button>
+                                    <button class="um-btn um-btn-outline-black um-navy">Unassign</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
-<!-- include organisation modal (used for both create and edit) -->
-{% include 'create-org-modal.html' %}
+{% url 'user_management:create_work_code' as create_work_code_url %}
+{% url 'user_management:create_organisation' as create_org_url %}
+<!-- include create organisation modal -->
+{% include 'edit-org-modal.html' %}
+{% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
+{% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 
 {% endblock content %} 
 {% block scripts %}

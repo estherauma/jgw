@@ -1,4 +1,36 @@
 (function () {
+  function clearFormErrors(form, errorBox) {
+    if (errorBox) {
+      errorBox.classList.add('d-none');
+      errorBox.textContent = '';
+    }
+    if (!form) {
+      return;
+    }
+    var fieldErrors = form.querySelectorAll('[data-error-for]');
+    fieldErrors.forEach(function (el) {
+      el.textContent = '';
+    });
+  }
+  window.clearFormErrors = clearFormErrors;
+
+  async function postFormJson(form) {
+    var response = await fetch(form.action, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: new FormData(form),
+    });
+    var data = await response.json();
+    if (!response.ok) {
+      throw data;
+    }
+    return data;
+  }
+
+  window.postFormJson = postFormJson;
+
   function syncThumb(container, track, thumb) {
     if (!thumb || !track || !container) {
       return;
@@ -6,10 +38,12 @@
     var scrollHeight = container.scrollHeight;
     var clientHeight = container.clientHeight;
     if (scrollHeight <= clientHeight) {
+      track.style.display = 'none';
       thumb.style.height = track.clientHeight + 'px';
       thumb.style.top = '0px';
       return;
     }
+    track.style.display = '';
     var thumbHeight = Math.max(
       24,
       Math.floor((clientHeight / scrollHeight) * track.clientHeight),
