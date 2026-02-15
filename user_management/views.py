@@ -108,8 +108,8 @@ class CreateWorkCodeView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 class EditOrganisationView(View):
-    def post(self, request, organization_id):
-        organisation = get_object_or_404(OrganisationData, pk=organization_id)
+    def post(self, request, organisation_id):
+        organisation = get_object_or_404(OrganisationData, pk=organisation_id)
         form = CreateOrganisationForm(request.POST, instance=organisation)
         if form.is_valid():
             form.save()
