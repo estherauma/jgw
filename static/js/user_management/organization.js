@@ -1,95 +1,176 @@
 (function () {
-  function initOrgForm() {
-    var modal = document.getElementById('create-org-modal');
-    if (!modal) {
-      return;
+  
+  function safeClearFormErrors(form, errorBox) {
+    if (window.clearFormErrors) {
+      window.clearFormErrors(form, errorBox);
+    } else {
+      if (errorBox) {
+        errorBox.classList.add('d-none');
+        errorBox.textContent = '';
+      }
+      form.querySelectorAll('[data-error-for]').forEach(el => el.textContent = '');
     }
+  }
+
+  function initOrgForm() {
+    const modal = document.getElementById('create-org-modal');
+    if (!modal) return;
 
     const form = modal.querySelector('form');
     const modalTitle = modal.querySelector('.um-modal-title');
     const submitBtn = form.querySelector("button[type='submit']");
-    const errorBox = modal.querySelector('.alert-danger'); 
-    const fieldErrors = modal.querySelectorAll('[data-error-for]');
-
+    const errorBox = modal.querySelector('.alert-danger');
+    
     const nameInput = form.querySelector('input[name="name"]');
     const codeInput = form.querySelector('input[name="org_code"]');
 
-    function clearErrors() {
-      if (errorBox) {
-          errorBox.classList.add('d-none');
-          errorBox.textContent = '';
-      }
-      fieldErrors.forEach(el => { el.textContent = ''; });
-    }
-
     modal.addEventListener('show.bs.modal', function (event) {
-      const button = event.relatedTarget; 
-      clearErrors();
+      const button = event.relatedTarget;
+      safeClearFormErrors(form, errorBox);
 
       if (button && button.classList.contains('btn-edit-org')) {
         const orgId = button.getAttribute('data-org-id');
-        const orgName = button.getAttribute('data-org-name');
-        const orgCode = button.getAttribute('data-org-code');
         const editBaseUrl = form.getAttribute('data-edit-url-base');
+        
         form.action = editBaseUrl.replace('0', orgId);
-
         modalTitle.textContent = 'Edit Organisation';
         submitBtn.textContent = 'Save Changes';
-
-        if (nameInput) nameInput.value = orgName;
-        if (codeInput) codeInput.value = orgCode;
-
-      } 
-
-      else {
+        
+        if (nameInput) nameInput.value = button.getAttribute('data-org-name');
+        if (codeInput) codeInput.value = button.getAttribute('data-org-code');
+      } else {
         modalTitle.textContent = 'Create New Organisation';
-        submitBtn.textContent = 'Create';
+        submitBtn.textContent = 'Save';
         form.action = form.getAttribute('data-create-url');
-        form.reset(); 
+        form.reset();
       }
     });
 
-    form.addEventListener('submit', function (event) {
+    form.addEventListener('submit', async function (event) {
       event.preventDefault();
-      clearErrors();
-      submitBtn.disabled = true;
+      safeClearFormErrors(form, errorBox);
+      if (submitBtn) submitBtn.disabled = true;
 
-      fetch(form.action, {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        body: new FormData(form),
-      })
-        .then((response) => {
-          if (response.ok) return response.json();
-          return response.json().then((err) => {
-            throw err;
+      try {
+        let data = null;
+        if (window.postFormJson) {
+          data = await window.postFormJson(form);
+        } else {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: new FormData(form),
           });
-        })
-        .then(() => {
-          const homeUrl = form.getAttribute('data-home-url');
-          window.location.href = homeUrl || window.location.pathname;
-        })
-        .catch(data => {
-            if (data && data.errors) {
-                Object.keys(data.errors).forEach(field => {
-                    const el = form.querySelector(`[data-error-for="${field}"]`);
-                    if (el) {
-                        const error = data.errors[field];
-                        el.textContent = Array.isArray(error) ? error[0] : error;
-                    }
-                });
+          data = await response.json();
+          if (!response.ok) throw data;
+        }
 
-                if (errorBox) {
-                    errorBox.textContent = "Please correct the errors highlighted below.";
-                    errorBox.classList.remove('d-none');
-                }
+        const homeUrl = form.getAttribute('data-home-url') || window.location.pathname;
+        if (data && data.org_id) {
+          window.location.href = `${homeUrl}?selected_org_id=${encodeURIComponent(data.org_id)}`;
+        } else {
+          window.location.href = homeUrl;
+        }
+      } catch (err) {
+        if (err && err.errors) {
+          Object.keys(err.errors).forEach(field => {
+            const el = form.querySelector(`[data-error-for="${field}"]`);
+            if (el) {
+              const error = err.errors[field];
+              el.textContent = Array.isArray(error) ? (error[0].message || error[0]) : error;
             }
-        })
-        .finally(() => {
-          submitBtn.disabled = false;
-        });
+          });
+        }
+        if (errorBox) {
+          errorBox.textContent = 'Please fix the errors and try again.';
+          errorBox.classList.remove('d-none');
+        }
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
     });
   }
 
-  window.addEventListener('DOMContentLoaded', initOrgForm);
+  
+  function initModalRedirect() {
+    var modal = document.getElementById('create-org-modal');
+    if (!modal) return;
+    modal.addEventListener('hidden.bs.modal', function () {
+      var homeUrl = modal.getAttribute('data-home-url');
+      if (homeUrl && window.location.pathname !== homeUrl) {
+        window.location.href = homeUrl;
+      }
+    });
+  }
+
+  
+  function initWorkCodeForm() {
+    var form = document.getElementById('add-workcode-form');
+    if (!form) return;
+    var errorBox = document.getElementById('add-workcode-form-error');
+
+    function syncOrganisation() {
+      var selected = document.querySelector('[data-org-hidden]');
+      var selectedId = selected?.value || '';
+      if (form) {
+        var actionUrl = form.getAttribute('action');
+        var url = new URL(actionUrl, window.location.origin);
+        if (selectedId) url.searchParams.set('selected_org_id', selectedId);
+        else url.searchParams.delete('selected_org_id');
+        form.setAttribute('action', url.toString());
+      }
+      var targetLabel = document.querySelector('[data-workcode-org-label]');
+      if (!targetLabel) return;
+
+      var selected_option = document.getElementById('org-option-' + selectedId);
+      if (selected_option) {
+        targetLabel.textContent = selected_option.getAttribute('data-org-label') || 'None selected';
+      }
+    }
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      safeClearFormErrors(form, errorBox);
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) submitButton.disabled = true;
+
+      try {
+        var data = null;
+        if (window.postFormJson) data = await window.postFormJson(form);
+        if (data && data.org_id) {
+          var homeUrl = form.getAttribute('data-home-url') || window.location.pathname;
+          window.location.href = homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
+        } else {
+          window.location.reload();
+        }
+      } catch (err) {
+        if (err && err.errors) {
+          Object.keys(err.errors).forEach(field => {
+            var el = form.querySelector("[data-error-for='" + field + "']");
+            if (el) el.textContent = Array.isArray(err.errors[field]) ? err.errors[field].join(' ') : err.errors[field];
+          });
+        }
+        if (errorBox) {
+          errorBox.textContent = 'Please fix the errors and try again.';
+          errorBox.classList.remove('d-none');
+        }
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
+    });
+
+    var modalEl = document.getElementById('add-workcode-modal');
+    if (modalEl) {
+      modalEl.addEventListener('show.bs.modal', syncOrganisation);
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        safeClearFormErrors(form, errorBox);
+        form.reset();
+        syncOrganisation();
+      });
+    }
+  }
+
+  window.addEventListener('load', initModalRedirect);
+  window.addEventListener('load', initOrgForm);
+  window.addEventListener('load', initWorkCodeForm);
 })();

@@ -4,14 +4,12 @@
 {% load waffle_tags %} 
 {% load i18n %}
 
-<!-- title -->
 {% block title %} {% translate "userManagement" %} {% endblock title %}
 
 {% block styles %}
 @import url("{% static 'user_management/css/common.css' %}");
 {% endblock %}
 
-<!-- page content -->
 {% block content %}
 <div class="um-page">
     <div class="um-header">
@@ -26,7 +24,7 @@
                         <span class="title-icon">🏢</span>
                         <span class="title-text">Organisations:</span>
                     </div>
-                    <button class="um-btn" type="button" data-toggle="modal" data-target="#create-org-modal" data-bs-toggle="modal" data-bs-target="#create-org-modal">Add organisation</button>
+                    <button class="um-btn" type="button" data-bs-toggle="modal" data-bs-target="#create-org-modal" data-bs-toggle="modal" data-bs-target="#create-org-modal">Add organisation</button>
                 </div>
                 <div class="um-row">
                     <div class="um-search">
@@ -55,7 +53,13 @@
                                 <td>{{ org.name }}</td>
                                 <td>{{ org.org_code }}</td>
                                 <td>
-                                    <button class="um-btn um-btn-outline btn-edit-org" type="button" data-toggle="modal" data-target="#create-org-modal" data-bs-toggle="modal" data-bs-target="#create-org-modal" data-org-id="{{ org.id }}" data-org-name="{{ org.name }}" data-org-code="{{ org.org_code }}">
+                                    <button class="um-btn um-btn-outline btn-edit-org" 
+                                            type="button" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#create-org-modal" 
+                                            data-org-id="{{ org.id }}" 
+                                            data-org-name="{{ org.name }}" 
+                                            data-org-code="{{ org.org_code }}">
                                         Edit
                                     </button>
                                 </td>
@@ -197,10 +201,13 @@
         </div>
     </div>
 </div>
+
 {% url 'user_management:create_work_code' as create_work_code_url %}
 {% url 'user_management:create_organisation' as create_org_url %}
-<!-- include create organisation modal -->
-{% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
+{% url 'user_management:edit_organisation' organisation_id=0 as edit_org_url_base %}
+
+{% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form edit_url_base=edit_org_url_base %}
+
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 
 {% endblock content %} 
