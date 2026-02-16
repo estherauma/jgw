@@ -1,6 +1,7 @@
 from django import forms
 
 from preference.models import OrganisationAccessCode, OrganisationData
+from .models import WorkGroup
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -49,3 +50,15 @@ class AddWorkCodeForm(forms.ModelForm):
         if OrganisationAccessCode.objects.filter(code__iexact=code).exists():
             raise forms.ValidationError("Work code already exists.")
         return code
+
+
+class WorkGroupForm(forms.ModelForm):
+    class Meta:
+        model = WorkGroup
+        fields = ["name"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Work group name"}
+        )

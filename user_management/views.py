@@ -5,7 +5,8 @@ from django.views import View
 
 from preference.models import OrganisationAccessCode, OrganisationData
 
-from .forms import AddWorkCodeForm, CreateOrganisationForm
+from .forms import AddWorkCodeForm, CreateOrganisationForm, WorkGroupForm
+from .models import WorkGroup
 
 
 def user_management(request):
@@ -28,6 +29,7 @@ def user_management(request):
     ]
 
     work_codes = []
+    work_groups = []
     assigned_work_codes = []
 
     selected_org = None
@@ -49,6 +51,12 @@ def user_management(request):
             .filter(organisation=selected_org)
             .order_by("-created_at")
         )
+        work_groups = (
+            WorkGroup.objects.select_related("organisation")
+            .prefetch_related("access_codes")
+            .filter(organisation=selected_org)
+            .order_by("-created_at")
+        )
         org_details = {
             "name": selected_org.name,
             "code": selected_org.org_code,
@@ -60,12 +68,14 @@ def user_management(request):
         "organizations": organizations,
         "users": users,
         "work_codes": work_codes,
+        "work_groups": work_groups,
         "assigned_work_codes": assigned_work_codes,
         "selected_org_id": selected_org_id,
         "selected_org_name": selected_org_name,
         "org_details": org_details,
         "create_org_form": CreateOrganisationForm(),
         "add_work_code_form": AddWorkCodeForm(),
+        "work_group_form": WorkGroupForm(),
     }
     return render(request, "index.html", context=context)
 
@@ -83,7 +93,7 @@ class CreateOrganisationView(View):
 class CreateWorkCodeView(View):
     def post(self, request):
         form = AddWorkCodeForm(request.POST)
-        org_id = request.GET.get("selected_org_id")
+        org_id = request.POST.get("selected_org_id")
         organisation = None
         if org_id:
             organisation = OrganisationData.objects.filter(id=org_id).first()
@@ -101,6 +111,33 @@ class CreateWorkCodeView(View):
                     "ok": True,
                     "code": work_code.code,
                     "org_id": work_code.organisation_id,
+                }
+            )
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class CreateWorkGroupView(View):
+    def post(self, request):
+        form = WorkGroupForm(request.POST)
+        org_id = request.POST.get("selected_org_id")
+        organisation = None
+        if org_id:
+            organisation = OrganisationData.objects.filter(id=org_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
+                status=400,
+            )
+        if form.is_valid():
+            work_group = form.save(commit=False)
+            work_group.organisation = organisation
+            work_group.save()
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "work_group_id": work_group.id,
+                    "org_id": work_group.organisation_id,
                 }
             )
 
