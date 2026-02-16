@@ -57,10 +57,9 @@
                                         <button class="um-btn um-btn-outline btn-edit-org" 
                                             type="button" 
                                             data-bs-toggle="modal" 
-                                            data-bs-target="#create-org-modal" 
+                                            data-bs-target="#edit-org-modal" 
                                             data-org-id="{{ org.id }}" 
-                                            data-org-name="{{ org.name }}" 
-                                            data-org-code="{{ org.org_code }}">
+                                            >
                                         Edit
                                     </button>
                                     </div>
@@ -211,7 +210,7 @@
 
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
 
-{% include 'create-org-modal.html' with action_type='edit' modal_title='Edit organisation' submit_label='Save changes' edit_url_base=edit_org_url_base form=edit_org_form %}
+{% include 'create-org-modal.html' with action_type='edit' modal_id='edit-org-modal' modal_title='Edit organisation' submit_label='Save changes' edit_url_base=edit_org_url_base form=edit_org_form %}
 
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% endblock content %} 

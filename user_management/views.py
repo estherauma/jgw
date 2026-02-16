@@ -67,6 +67,7 @@ def user_management(request):
         "org_details": org_details,
         "create_org_form": CreateOrganisationForm(),
         "add_work_code_form": AddWorkCodeForm(),
+        "edit_org_form": CreateOrganisationForm(instance=selected_org) if selected_org else None,
     }
     return render(request, "index.html", context=context)
 

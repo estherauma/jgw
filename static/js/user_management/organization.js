@@ -13,33 +13,28 @@
   }
 
   function initOrgForm() {
-    const modal = document.getElementById('create-org-modal');
-    if (!modal) return;
+    const modals = document.querySelectorAll('[id$="-org-modal"]');
+  
+    modals.forEach((modal) => {
+        const form = modal.querySelector('form');
+        if (!form) return;
 
-    const form = modal.querySelector('form');
-    const submitBtn = form.querySelector("button[type='submit']");
-    const errorBox = modal.querySelector('.alert-danger');
-    
-    const nameInput = form.querySelector('input[name="name"]');
-    const codeInput = form.querySelector('input[name="org_code"]');
+        const submitBtn = form.querySelector("button[type='submit']");
+        const errorBox = modal.querySelector('.alert-danger');
 
-    modal.addEventListener('show.bs.modal', function (event) {
-      const button = event.relatedTarget;
-      safeClearFormErrors(form, errorBox);
+        modal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            safeClearFormErrors(form, errorBox);
 
-      if (button && button.classList.contains('btn-edit-org')) {
-        const orgId = button.getAttribute('data-org-id');
-        const editBaseUrl = form.getAttribute('data-edit-url-base');
-        
-        form.action = editBaseUrl.replace('0', orgId);
-        
-        if (nameInput) nameInput.value = button.getAttribute('data-org-name');
-        if (codeInput) codeInput.value = button.getAttribute('data-org-code');
-      } else {
-        form.action = form.getAttribute('data-create-url');
-        form.reset();
-      }
-    });
+            if (modal.id === 'edit-org-modal' && button) {
+                const orgId = button.getAttribute('data-org-id');
+                const editBaseUrl = form.getAttribute('data-edit-url-base');
+                form.action = editBaseUrl.replace('0', orgId);
+            } else {
+                form.action = form.getAttribute('data-create-url');
+                if (modal.id === 'create-org-modal') form.reset();
+            }
+        });
 
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
@@ -84,6 +79,7 @@
         if (submitBtn) submitBtn.disabled = false;
       }
     });
+  });
   }
 
   
