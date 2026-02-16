@@ -53,7 +53,8 @@
                                 <td>{{ org.name }}</td>
                                 <td>{{ org.org_code }}</td>
                                 <td>
-                                    <button class="um-btn um-btn-outline btn-edit-org" 
+                                    <div class="um-action">
+                                        <button class="um-btn um-btn-outline btn-edit-org" 
                                             type="button" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#create-org-modal" 
@@ -62,6 +63,8 @@
                                             data-org-code="{{ org.org_code }}">
                                         Edit
                                     </button>
+                                    </div>
+                                    
                                 </td>
                             </tr>
                             {% endfor %}
