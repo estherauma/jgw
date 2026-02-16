@@ -17,7 +17,6 @@
     if (!modal) return;
 
     const form = modal.querySelector('form');
-    const modalTitle = modal.querySelector('.um-modal-title');
     const submitBtn = form.querySelector("button[type='submit']");
     const errorBox = modal.querySelector('.alert-danger');
     
@@ -33,14 +32,10 @@
         const editBaseUrl = form.getAttribute('data-edit-url-base');
         
         form.action = editBaseUrl.replace('0', orgId);
-        modalTitle.textContent = 'Edit Organisation';
-        submitBtn.textContent = 'Save Changes';
         
         if (nameInput) nameInput.value = button.getAttribute('data-org-name');
         if (codeInput) codeInput.value = button.getAttribute('data-org-code');
       } else {
-        modalTitle.textContent = 'Create New Organisation';
-        submitBtn.textContent = 'Save';
         form.action = form.getAttribute('data-create-url');
         form.reset();
       }
