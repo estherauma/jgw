@@ -118,7 +118,12 @@
             <div class="um-card um-navy" data-org-dependent>
                 <div class="um-row">
                     <div class="um-card-title">Organisation details</div>
-                    <button class="um-btn um-btn-outline">Edit details</button>
+                    <div class="um-action">
+                        <button class="um-btn um-btn-outline btn-edit-org" data-bs-toggle="modal" data-bs-target="#edit-org-modal" data-org-id="{{ org.id }}" >
+                            Edit details
+                        </button>
+                    </div>
+                    
                 </div>
                 <div class="um-details um-navy">
                     <div>Name: <span class="um-navy" data-org-detail="name" data-org-default="{{ org_details.name }}">{{ org_details.name }}</span></div>
