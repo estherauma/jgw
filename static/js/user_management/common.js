@@ -14,6 +14,79 @@
   }
   window.clearFormErrors = clearFormErrors;
 
+  function storeSelectedOrganisation(orgId, orgName) {
+    if (!window.localStorage) {
+      return;
+    }
+    if (!orgId) {
+      window.localStorage.removeItem('selectedOrg');
+      return;
+    }
+    window.localStorage.setItem(
+      'selectedOrg',
+      JSON.stringify({ id: orgId, name: orgName || '' }),
+    );
+  }
+
+  function getSelectedOrgData() {
+    if (!window.localStorage) {
+      return null;
+    }
+    try {
+      var stored = window.localStorage.getItem('selectedOrg');
+      console.log('Retrieved stored organization data:', stored);
+      return stored ? JSON.parse(stored) : null;
+    } catch (err) {
+      console.error('Error parsing stored organization data:', err);
+      return null;
+    }
+  }
+
+  window.storeSelectedOrganisation = storeSelectedOrganisation;
+  window.getSelectedOrgData = getSelectedOrgData;
+
+  function syncSelectedOrganization(formId, labelSelector) {
+    var form = document.getElementById(formId);
+    var selectedId = '';
+    var selectedName = '';
+    var storedOrg = window.getSelectedOrgData();
+      if (storedOrg) {
+        selectedId = storedOrg.id ? String(storedOrg.id) : '';
+        selectedName = storedOrg.name 
+      }
+    if (!selectedId) {
+      var selected = document.querySelector('[data-org-hidden]');
+      selectedId =  selected?.value || '';
+      if (!selectedId) {
+        var initialOption = document.querySelector('[data-org-selected="true"]');
+        if (initialOption) {
+          selectedId = initialOption.getAttribute('data-org-value') || '';
+        }
+      }
+      if (selected && selectedId) {
+        selected.value = selectedId;
+      }
+    }
+    if (form) {
+      var hiddenInput = form.querySelector('[data-selected-org-id]');
+      if (hiddenInput) {
+        hiddenInput.value = selectedId;
+      }
+    }
+    var selectedHidden = document.querySelector('[data-org-hidden]');
+    if (selectedHidden && selectedId) {
+      selectedHidden.value = selectedId;
+    }
+    var targetLabel = document.querySelector(labelSelector);
+    if (!targetLabel) {
+      return;
+    }
+    targetLabel.textContent = selectedName;
+  }
+
+  window.syncSelectedOrganization = syncSelectedOrganization;
+
+
   async function postFormJson(form) {
     var response = await fetch(form.action, {
       method: 'POST',
