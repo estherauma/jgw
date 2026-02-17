@@ -26,7 +26,7 @@
                         <span class="title-icon">🏢</span>
                         <span class="title-text">Organisations:</span>
                     </div>
-                    <button class="um-btn" type="button" data-toggle="modal" data-target="#create-org-modal" data-bs-toggle="modal" data-bs-target="#create-org-modal">Add organisation</button>
+                    <button class="um-btn" type="button" data-toggle="modal" data-target="#create-org-modal" >Add organisation</button>
                 </div>
                 <div class="um-row">
                     <div class="um-search">
@@ -165,24 +165,40 @@
             </div>
 
             <div class="um-card" data-org-dependent>
-                <div class="um-card-title um-navy">Work Groups</div>
+                <div class="um-row">
+                    <div class="um-card-title um-navy">Work Groups</div>
+                    <button
+                        class="um-btn um-navy"
+                        type="button"
+                        data-toggle="modal"
+                        data-target="#add-workgroup-modal"
+                    >
+                        Create work group
+                    </button>
+                </div>
                 <table class="um-table um-navy">
                     <thead>
                         <tr>
-                            <th>Work code</th>
-                            <th>Work group assigned</th>
+                            <th>Work group</th>
+                            <th>Work codes</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for code in assigned_work_codes %}
+                        {% for group in work_groups %}
                         <tr>
-                            <td>{{ code.code }}</td>
-                            <td>{{ code.group }}</td>
+                            <td>{{ group.name }}</td>
+                            <td>
+                                {% for code in group.access_codes.all %}
+                                    {{ code.code }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    —
+                                {% endfor %}
+                            </td>
                             <td>
                                 <div class="um-action">
                                     <button class="um-btn um-btn-outline">Edit</button>
-                                    <button class="um-btn um-btn-outline-black um-navy">Unassign</button>
+                                    <button class="um-btn um-btn-outline-black um-navy">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -195,9 +211,11 @@
 </div>
 {% url 'user_management:create_work_code' as create_work_code_url %}
 {% url 'user_management:create_organisation' as create_org_url %}
+{% url 'user_management:create_work_group' as create_work_group_url %}
 <!-- include create organisation modal -->
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
+{% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add work group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
 
 {% endblock content %} 
 {% block scripts %}
