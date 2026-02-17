@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="um-modal-divider"></div>
-            <form id="{{ action_type }}-workcode-form" method="post" action="{{ form_action }}" data-home-url="{% url 'user_management:home' %}">
+            <form id="{{ action_type }}-workcode-form" method="post" action="{{ form_action }}" >
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="alert alert-danger d-none" id="{{ action_type }}-workcode-form-error" role="alert"></div>
@@ -17,6 +17,7 @@
                             {{ form.non_field_errors }}
                         </div>
                     {% endif %}
+                    <input type="hidden" name="selected_org_id" data-selected-org-id />
                     <div class="um-navy mb-2">
                         Organisation: <span class="fw-bold" data-workcode-org-label>None selected</span>
                     </div>
