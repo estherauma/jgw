@@ -39,7 +39,7 @@
                 <input type="hidden" name="selected_org" data-org-hidden />
             </div>
         </div>
-        <div class="um-action">
+        <div class="d-inline-flex align-items-center gap-5" >
             <button
                 class="um-btn-icon"
                 type="button"
@@ -51,7 +51,7 @@
                 <i class="bi bi-x-circle"></i>
             </button>
             <button
-                class="um-btn um-navy"
+                class="um-btn"
                 type="button"
                 data-org-dependent
                 data-toggle="modal"
@@ -99,11 +99,12 @@
         var label = option.getAttribute('data-org-label') || '';
         var value = option.getAttribute('data-org-value') || '';
         selectedLabel.textContent = label || 'Select organisation';
-        updateWorkCodeOrgLabel(label);
+        if (window.storeSelectedOrganisation) {
+          window.storeSelectedOrganisation(value, label);
+        }
         toggleDependents(true);
         updateDetails(option);
         filterWorkCodes(value);
-        syncWorkCodeForm(value);
         var current = new URL(window.location.href).searchParams.get('selected_org_id') || '';
         updateQueryParam(value, current !== value);
         if (hiddenInput) {
@@ -155,12 +156,6 @@
         }
       }
 
-      function updateWorkCodeOrgLabel(label) {
-        var targetLabel = document.querySelector('[data-workcode-org-label]');
-        if (targetLabel) {
-          targetLabel.textContent = label || 'None selected';
-        }
-      }
 
       function filterWorkCodes(orgId) {
         var items = document.querySelectorAll('[data-org-workcode]');
@@ -248,9 +243,7 @@
         setSelected(initial);
       } else {
         toggleDependents(false);
-        updateWorkCodeOrgLabel('');
         filterWorkCodes('');
-        syncWorkCodeForm('');
       }
 
       var clearButton = document.querySelector('[data-org-clear]');
@@ -265,9 +258,10 @@
           });
           resetDetails();
           toggleDependents(false);
-          updateWorkCodeOrgLabel('');
           filterWorkCodes('');
-          syncWorkCodeForm('');
+          if (window.storeSelectedOrganisation) {
+            window.storeSelectedOrganisation('', '');
+          }
           updateQueryParam('');
         });
       }
