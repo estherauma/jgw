@@ -16,3 +16,10 @@ class WorkGroup(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "name"], name="unique_workgroup_name_per_org"
+            )
+        ]

@@ -62,3 +62,7 @@ class WorkGroupForm(forms.ModelForm):
         self.fields["name"].widget.attrs.update(
             {"class": "form-control  um-input", "placeholder": "Work group name"}
         )
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name", "").strip()
+        return name

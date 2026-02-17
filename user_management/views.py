@@ -130,6 +130,13 @@ class CreateWorkGroupView(View):
                 status=400,
             )
         if form.is_valid():
+            if WorkGroup.objects.filter(
+                organisation=organisation, name__iexact=form.cleaned_data["name"]
+            ).exists():
+                return JsonResponse(
+                    {"ok": False, "errors": {"name": ["Work group already exists."]}},
+                    status=400,
+                )
             work_group = form.save(commit=False)
             work_group.organisation = organisation
             work_group.save()
