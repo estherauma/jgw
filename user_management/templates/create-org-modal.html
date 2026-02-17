@@ -1,4 +1,4 @@
-<div class="modal fade" id="{{ action_type }}-org-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-org-title" aria-hidden="true" data-home-url="{% url 'user_management:home' %}">
+<div class="modal fade" id="{{ action_type }}-org-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-org-title" aria-hidden="true" >
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="um-modal-divider"></div>
-            <form id="{{ action_type }}-org-form" method="post" action="{{ form_action }}" data-home-url="{% url 'user_management:home' %}">
+            <form id="{{ action_type }}-org-form" method="post" action="{{ form_action }}" >
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="alert alert-danger d-none" id="{{ action_type }}-org-form-error" role="alert"></div>
