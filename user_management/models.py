@@ -1,6 +1,14 @@
 from django.db import models
 
-from preference.models import OrganisationAccessCode, OrganisationData
+from preference.models import (
+    Country,
+    FactoryFarm,
+    ImmigrationStatus,
+    Language,
+    Organisation,
+    OrganisationAccessCode,
+    OrganisationData,
+)
 
 
 class WorkGroup(models.Model):
@@ -23,3 +31,35 @@ class WorkGroup(models.Model):
                 fields=["organisation", "name"], name="unique_workgroup_name_per_org"
             )
         ]
+
+
+class AppUser(models.Model):
+    password = models.CharField(blank=False, max_length=128)
+    must_reset_password = models.BooleanField(default=False)
+    first_name = models.CharField(blank=True, null=False, max_length=128)
+    last_name = models.CharField(blank=True, null=False, max_length=128)
+    email = models.EmailField(null=False, blank=False, max_length=128, unique=True)
+    organisation_data = models.ForeignKey(
+        OrganisationData, on_delete=models.PROTECT, null=True, blank=True
+    )
+    work_groups = models.ManyToManyField(WorkGroup, blank=True, related_name="users")
+    user_languages = models.ManyToManyField(Language, blank=True)
+
+    is_staff = models.BooleanField(
+        default=False,
+        help_text="Designates whether the user can log into this admin site.",
+    )
+    is_active = models.BooleanField(
+        default=False,
+        help_text="Designates whether this user should be treated as active.\nUnselect this instead of deleting accounts.",
+    )
+    receive_marketing_emails = models.BooleanField(
+        default=False, help_text="Designates whether this user should receive marketing emails."
+    )
+    class Meta:
+        indexes = [
+            models.Index(fields=['email']),
+        ]
+
+    def __str__(self):
+        return f"{self.email}"
