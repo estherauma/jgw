@@ -56,12 +56,9 @@
                                     <div class="um-action">
                                         <button class="um-btn um-btn-outline btn-edit-org" 
                                             type="button" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#edit-org-modal" 
-                                            data-org-id="{{ org.id }}" 
-                                            >
-                                        Edit
-                                    </button>
+                                            onclick="window.location.href='?selected_org_id={{ selected_org_id|default:'' }}&edit_org_id={{ org.id }}&show_edit=true'">
+                                            Edit
+                                        </button>
                                     </div>
                                     
                                 </td>
@@ -119,7 +116,9 @@
                 <div class="um-row">
                     <div class="um-card-title">Organisation details</div>
                     <div class="um-action">
-                        <button class="um-btn um-btn-outline btn-edit-org" data-bs-toggle="modal" data-bs-target="#edit-org-modal" data-org-id="{{ org.id }}" >
+                        <button class="um-btn um-btn-outline btn-edit-org" 
+                            type="button" 
+                            onclick="window.location.href='?selected_org_id={{ selected_org_id }}&edit_org_id={{ selected_org_id }}&show_edit=true'">
                             Edit details
                         </button>
                     </div>

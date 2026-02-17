@@ -23,64 +23,93 @@
         const errorBox = modal.querySelector('.alert-danger');
 
         modal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
             safeClearFormErrors(form, errorBox);
 
-            if (modal.id === 'edit-org-modal' && button) {
-                const orgId = button.getAttribute('data-org-id');
+            if (modal.id === 'edit-org-modal') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const editId = urlParams.get('edit_org_id');
                 const editBaseUrl = form.getAttribute('data-edit-url-base');
-                form.action = editBaseUrl.replace('0', orgId);
-            } else {
+                
+                if (editId && editBaseUrl) {
+                    form.action = editBaseUrl.replace('0', editId);
+                }
+            } else if (modal.id === 'create-org-modal') {
                 form.action = form.getAttribute('data-create-url');
-                if (modal.id === 'create-org-modal') form.reset();
+                form.reset();
             }
         });
 
-    form.addEventListener('submit', async function (event) {
-      event.preventDefault();
-      safeClearFormErrors(form, errorBox);
-      if (submitBtn) submitBtn.disabled = true;
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            safeClearFormErrors(form, errorBox);
+            if (submitBtn) submitBtn.disabled = true;
 
-      try {
-        let data = null;
-        if (window.postFormJson) {
-          data = await window.postFormJson(form);
-        } else {
-          const response = await fetch(form.action, {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            body: new FormData(form),
-          });
-          data = await response.json();
-          if (!response.ok) throw data;
-        }
+            try {
+                let data = null;
+                if (window.postFormJson) {
+                    data = await window.postFormJson(form);
+                } else {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: new FormData(form),
+                    });
+                    data = await response.json();
+                    if (!response.ok) throw data;
+                }
 
-        const homeUrl = form.getAttribute('data-home-url') || window.location.pathname;
-        if (data && data.org_id) {
-          window.location.href = `${homeUrl}?selected_org_id=${encodeURIComponent(data.org_id)}`;
-        } else {
-          window.location.href = homeUrl;
-        }
-      } catch (err) {
-        if (err && err.errors) {
-          Object.keys(err.errors).forEach(field => {
-            const el = form.querySelector(`[data-error-for="${field}"]`);
-            if (el) {
-              const error = err.errors[field];
-              el.textContent = Array.isArray(error) ? (error[0].message || error[0]) : error;
+                const homeUrl = form.getAttribute('data-home-url') || window.location.pathname;
+                const urlParams = new URLSearchParams(window.location.search);
+                
+                const nextSelectedId = (data && data.org_id) ? data.org_id : urlParams.get('selected_org_id');
+                
+                let nextUrl = homeUrl;
+                if (nextSelectedId) {
+                    nextUrl += `?selected_org_id=${encodeURIComponent(nextSelectedId)}`;
+                }
+                
+                window.location.href = nextUrl;
+                
+            } catch (err) {
+                if (err && err.errors) {
+                    Object.keys(err.errors).forEach(field => {
+                        const el = form.querySelector(`[data-error-for="${field}"]`);
+                        if (el) {
+                            const error = err.errors[field];
+                            el.textContent = Array.isArray(error) ? (error[0].message || error[0]) : error;
+                        }
+                    });
+                }
+                if (errorBox) {
+                    errorBox.textContent = 'Please fix the errors and try again.';
+                    errorBox.classList.remove('d-none');
+                }
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
             }
-          });
-        }
-        if (errorBox) {
-          errorBox.textContent = 'Please fix the errors and try again.';
-          errorBox.classList.remove('d-none');
-        }
-      } finally {
-        if (submitBtn) submitBtn.disabled = false;
-      }
+        });
     });
-  });
-  }
+
+    const editModalEl = document.getElementById('edit-org-modal');
+    if (editModalEl) {
+        editModalEl.addEventListener('hidden.bs.modal', function () {
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('show_edit')) {
+                url.searchParams.delete('edit_org_id');
+                url.searchParams.delete('show_edit');
+                window.history.replaceState({}, '', url);
+            }
+        });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('show_edit') === 'true') {
+        if (editModalEl) {
+            const editModal = new bootstrap.Modal(editModalEl);
+            editModal.show();
+        }
+    }
+}
 
   
   function initModalRedirect() {
