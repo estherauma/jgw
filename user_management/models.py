@@ -1,11 +1,7 @@
 from django.db import models
 
 from preference.models import (
-    Country,
-    FactoryFarm,
-    ImmigrationStatus,
     Language,
-    Organisation,
     OrganisationAccessCode,
     OrganisationData,
 )
@@ -34,8 +30,7 @@ class WorkGroup(models.Model):
 
 
 class AppUser(models.Model):
-    password = models.CharField(blank=False, max_length=128)
-    must_reset_password = models.BooleanField(default=False)
+    password = models.CharField(blank=True, max_length=128)
     first_name = models.CharField(blank=True, null=False, max_length=128)
     last_name = models.CharField(blank=True, null=False, max_length=128)
     email = models.EmailField(null=False, blank=False, max_length=128, unique=True)
