@@ -60,7 +60,10 @@
         form.reset();
       }
       if (window.syncSelectedOrganization) {
-        window.syncSelectedOrganization('add-workcode-form', '[data-workcode-org-label]');
+        window.syncSelectedOrganization(
+          'add-workcode-form',
+          '[data-workcode-org-label]',
+        );
       }
     }
 
@@ -68,7 +71,10 @@
       event.preventDefault();
       safeClearFormErrors(form, errorBox);
       if (window.syncSelectedOrganization) {
-        window.syncSelectedOrganization('add-workcode-form', '[data-workcode-org-label]');
+        window.syncSelectedOrganization(
+          'add-workcode-form',
+          '[data-workcode-org-label]',
+        );
       }
       var selectedInput = form.querySelector('[data-selected-org-id]');
       var selectedId = selectedInput ? selectedInput.value || '' : '';
@@ -115,9 +121,9 @@
         }
       }
     });
-    
+
     $('[data-target="#add-workcode-modal"]').on('click', function () {
-     resetWorkCodeForm();
+      resetWorkCodeForm();
     });
   }
 
@@ -134,19 +140,24 @@
         form.reset();
       }
       if (window.syncSelectedOrganization) {
-        window.syncSelectedOrganization('add-workgroup-form', '[data-workgroup-org-label]');
+        window.syncSelectedOrganization(
+          'add-workgroup-form',
+          '[data-workgroup-org-label]',
+        );
       }
     }
-
 
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
       safeClearFormErrors(form, errorBox);
       if (window.syncSelectedOrganization) {
-        window.syncSelectedOrganization('add-workgroup-form', '[data-workgroup-org-label]');
+        window.syncSelectedOrganization(
+          'add-workgroup-form',
+          '[data-workgroup-org-label]',
+        );
       }
       var selectedInput = form.querySelector('[data-selected-org-id]');
-      var selectedId = selectedInput?.value ||  '';
+      var selectedId = selectedInput?.value || '';
       if (!selectedId) {
         if (errorBox) {
           errorBox.textContent = 'Select an organisation first.';
@@ -205,5 +216,4 @@
       window.clearFormErrors(form, errorBox);
     }
   }
-
 })();

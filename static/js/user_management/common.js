@@ -50,15 +50,17 @@
     var selectedId = '';
     var selectedName = '';
     var storedOrg = window.getSelectedOrgData();
-      if (storedOrg) {
-        selectedId = storedOrg.id ? String(storedOrg.id) : '';
-        selectedName = storedOrg.name 
-      }
+    if (storedOrg) {
+      selectedId = storedOrg.id ? String(storedOrg.id) : '';
+      selectedName = storedOrg.name;
+    }
     if (!selectedId) {
       var selected = document.querySelector('[data-org-hidden]');
-      selectedId =  selected?.value || '';
+      selectedId = selected?.value || '';
       if (!selectedId) {
-        var initialOption = document.querySelector('[data-org-selected="true"]');
+        var initialOption = document.querySelector(
+          '[data-org-selected="true"]',
+        );
         if (initialOption) {
           selectedId = initialOption.getAttribute('data-org-value') || '';
         }
@@ -85,7 +87,6 @@
   }
 
   window.syncSelectedOrganization = syncSelectedOrganization;
-
 
   async function postFormJson(form) {
     var response = await fetch(form.action, {

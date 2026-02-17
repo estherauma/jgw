@@ -1,70 +1,70 @@
 <div class="um-card um-navy mb-2">
-    <div class="um-card-title">Selected organisation</div>
-    <div class="um-row">
-        <div class="input-group">
-            <div class="um-select" data-org-select>
-                <button class="um-select-toggle rounded-pill fw-bold text-start" type="button" data-org-toggle>
-                    <span data-org-selected-label>
-                        {% if selected %}{{ selected }}{% else %}Select organisation{% endif %}
-                    </span>
-                    <i class="bi bi-chevron-down"></i>
-                </button>
-                <div class="um-select-menu" data-org-menu>
-                    <input
-                        class="form-control"
-                        type="text"
-                        placeholder="Search organisation..."
-                        aria-label="Search organisation"
-                        data-org-filter
-                    />
-                    <div class="um-select-options">
-                        {% for org in options %}
-                        <button
-                            class="um-select-option"
-                            type="button"
-                            id="org-option-{{ org.id }}"
-                            data-org-option
-                            data-org-value="{{ org.id }}"
-                            data-org-label="{{ org.name }}"
-                            data-org-name="{{ org.name }}"
-                            data-org-code="{{ org.org_code }}"
-                            data-org-created-at="{{ org.created_at|date:'M j, Y, P' }}"
-                            {% if selected_id and org.id|stringformat:"s" == selected_id %}data-org-selected="true"{% endif %}
-                        >
-                            {{ org.name }}
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
-                <input type="hidden" name="selected_org" data-org-hidden />
-            </div>
-        </div>
-        <div class="d-inline-flex align-items-center gap-5" >
+  <div class="um-card-title">Selected organisation</div>
+  <div class="um-row">
+    <div class="input-group">
+      <div class="um-select" data-org-select>
+        <button class="um-select-toggle rounded-pill fw-bold text-start" type="button" data-org-toggle>
+          <span data-org-selected-label>
+            {% if selected %}{{ selected }}{% else %}Select organisation{% endif %}
+          </span>
+          <i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="um-select-menu" data-org-menu>
+          <input
+            class="form-control"
+            type="text"
+            placeholder="Search organisation..."
+            aria-label="Search organisation"
+            data-org-filter
+          />
+          <div class="um-select-options">
+            {% for org in options %}
             <button
-                class="um-btn-icon"
-                type="button"
-                data-org-clear
-                data-org-dependent
-                aria-label="Clear selection"
-                title="Clear selection"
+              class="um-select-option"
+              type="button"
+              id="org-option-{{ org.id }}"
+              data-org-option
+              data-org-value="{{ org.id }}"
+              data-org-label="{{ org.name }}"
+              data-org-name="{{ org.name }}"
+              data-org-code="{{ org.org_code }}"
+              data-org-created-at="{{ org.created_at|date:'M j, Y, P' }}"
+              {% if selected_id and org.id|stringformat:"s" == selected_id %}data-org-selected="true"{% endif %}
             >
-                <i class="bi bi-x-circle"></i>
+              {{ org.name }}
             </button>
-            <button
-                class="um-btn"
-                type="button"
-                data-org-dependent
-                data-toggle="modal"
-                data-target="#add-workcode-modal"
-            >
-                Create work code
-            </button>
+            {% endfor %}
+          </div>
         </div>
+        <input type="hidden" name="selected_org" data-org-hidden />
+      </div>
     </div>
-    <div class="um-navy mt-2 mb-3">
-        This is where you can assign work codes to any group of users. Please choose
-        the group that works with a particular site, business, or coverage in the business.
+    <div class="d-inline-flex align-items-center gap-5" >
+      <button
+        class="um-btn-icon"
+        type="button"
+        data-org-clear
+        data-org-dependent
+        aria-label="Clear selection"
+        title="Clear selection"
+      >
+        <i class="bi bi-x-circle"></i>
+      </button>
+      <button
+        class="um-btn"
+        type="button"
+        data-org-dependent
+        data-toggle="modal"
+        data-target="#add-workcode-modal"
+      >
+        Create work code
+      </button>
     </div>
+  </div>
+  <div class="um-navy mt-2 mb-3">
+    This is where you can assign work codes to any group of users. Please choose
+    the group that works with a particular site, business, or coverage in the business.
+  </div>
 </div>
 <script>
   (function () {
