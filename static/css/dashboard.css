@@ -1987,3 +1987,13 @@ body.modal-open {
     font-size: 14px;
     font-weight: 500;
 }
+
+/* What matters to workers - chapters opened tree chart */
+.chapters-opened-tree-chart-box {
+    min-height: 400px;
+}
+
+#chapters-opened-tree-chart-id {
+    width: 100%;
+    height: 500px;
+}

@@ -37,59 +37,43 @@ def fetch_data_from_api(destination_codes):
 
 
 def extract_relevant_data(combined_data):
-
+    """
+    Extract chapter details from API response.
+    Response items have destinationCode, countriesOfOriginCode,
+    and chapters (list of documentId, uid, title, etc).
+    """
     chapters_list = []
-    for destination in combined_data:
-        destination_name = destination["destinationName"]
-        for chapter in destination["chapters"]:
+    for item in combined_data:
+        destination_code = item.get("destinationCode")
+        origin_code = item.get("countriesOfOriginCode")
+        for chapter in item.get("chapters", []):
             chapter_info = {
-                "immigrationStatus": destination["immigrationStatus"],
-                "destinationName": destination_name,
-                "jgwDestinationCode": chapter["documentId"],
+                "destinationCode": destination_code,
+                "originCode": origin_code,
                 "uid": chapter["uid"],
                 "title": chapter["title"],
             }
             chapters_list.append(chapter_info)
-
     return chapters_list
 
 
 def filter_unique_chapters(chapters_list):
-
+    """
+    Deduplicate by (destinationCode, originCode, uid) so each Chapter row
+    is unique per destination, origin, and chapter uid.
+    """
     unique_chapters = []
     seen_combinations = set()
     for chapter in chapters_list:
         transformed_uid = chapter["uid"].replace(".", "_")
-        jgw_code = chapter["jgwDestinationCode"]
-        if "jgw-saudi-arabia" in jgw_code:
-            transformed_destination_name = "saudi arabia"
-        elif "jgw-uae" in jgw_code:
-            transformed_destination_name = "united arab emirates"
-        elif "jgw-qatar" in jgw_code:
-            transformed_destination_name = "qatar"
-        elif "jgw-verite-jordan" in jgw_code:
-            transformed_destination_name = "jordan"
-        elif "jgw-uk" in jgw_code:
-            transformed_destination_name = "united kingdom"
-        elif "jgw-malaysia" in jgw_code:
-            transformed_destination_name = "malaysia"
-        elif "jgw-spain" in jgw_code:
-            transformed_destination_name = "spain"
-        elif "jgw-jersey" in jgw_code:
-            transformed_destination_name = "jersey"
-        elif "jgw-poland" in jgw_code:
-            transformed_destination_name = "poland"
-        elif "jgw-mexico" in jgw_code:
-            transformed_destination_name = "mexico"
-        else:
-            transformed_destination_name = None
-
-        combination = (transformed_uid, transformed_destination_name, chapter["title"])
+        destination_code = (chapter.get("destinationCode")).lower()
+        origin_code = (chapter.get("originCode")).lower()
+        combination = (destination_code, origin_code, transformed_uid)
         if combination not in seen_combinations:
             unique_chapters.append(
                 {
-                    "jgwDestinationCode": jgw_code,
-                    "destinationName": transformed_destination_name,
+                    "destinationCode": destination_code,
+                    "originCode": origin_code,
                     "uid": transformed_uid,
                     "title": chapter["title"],
                 }
@@ -99,23 +83,33 @@ def filter_unique_chapters(chapters_list):
 
 
 def update_or_create_chapters(unique_chapters):
-
     for chapter_data in unique_chapters:
         try:
+            destination = None
+            if chapter_data.get("destinationCode"):
+                destination = Country.objects.filter(
+                    code=chapter_data["destinationCode"]
+                ).first()
+            if not destination:
+                print(
+                    f"Destination {chapter_data.get('destinationCode')} not found."
+                )
+                continue
 
-            destination = Country.objects.get(name=chapter_data["destinationName"])
+            origin = None
+            if chapter_data.get("originCode"):
+                origin = Country.objects.filter(code=chapter_data["originCode"]).first()
 
-            chapter, created = Chapter.objects.update_or_create(
+            chapter= Chapter.objects.create(
                 number_key=chapter_data["uid"],
                 destination=destination,
-                defaults={"chapter_text": chapter_data["title"]},
+                origin=origin,
+               chapter_text=chapter_data["title"],
             )
-            if created:
-                print(f"Created new chapter: {chapter_data['uid']}")
+            if chapter:
+                print(f"Created new chapter: {chapter_data['uid']} (dest={destination.code}, origin={origin.code if origin else None})")
             else:
                 print(f"Updated existing chapter: {chapter_data['uid']}")
-        except Country.DoesNotExist:
-            print(f"Destination {chapter_data['destinationName']} does not exist.")
         except Exception as e:
             print(f"Error processing chapter {chapter_data['uid']}: {e}")
 
