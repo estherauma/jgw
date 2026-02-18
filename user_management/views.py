@@ -125,6 +125,8 @@ class EditOrganisationView(View):
             form.save()
             return JsonResponse({"ok": True})
 
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
 class CreateWorkGroupView(View):
     def post(self, request):
         form = WorkGroupForm(request.POST)
