@@ -131,7 +131,9 @@
                             Actions
                             <span class="dropdown-icon">▼</span>
                         </button>
-                        <button class="um-btn um-navy">Add user</button>
+                        <button class="um-btn um-navy" type="button" data-toggle="modal" data-target="#add-appuser-modal" data-org-dependent>
+                            Add user
+                        </button>
                     </div>
                 </div>
                 <div class="um-row">
@@ -140,28 +142,49 @@
                         <input type="text" placeholder="Search..." />
                     </div>
                 </div>
-                <table class="um-table um-navy">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Workgroup</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for u in users %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ u.name }}</td>
-                            <td>{{ u.email }}</td>
-                            <td>{{ u.role }}</td>
-                            <td>{{ u.workgroup }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="um-table-scroll-wrapper um-table-scroll-wrapper-lg">
+                    <div class="um-scrollbar">
+                        <div class="um-scrollbar-thumb"></div>
+                    </div>
+                    <div class="um-table-scroll">
+                        <table class="um-table um-navy">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th class="w-25">Name</th>
+                                    <th>Email</th>
+                                    {% if not selected_org_id %}
+                                    <th>Organisation</th>
+                                    {% endif %}
+                                    {% if selected_org_id %}
+                                    <th>Work group</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in users %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
+                                    <td>{{ u.email }}</td>
+                                    {% if not selected_org_id %}
+                                    <td>{% if u.organisation_data %}{{ u.organisation_data.name }}{% else %}—{% endif %}</td>
+                                    {% endif %}
+                                    {% if selected_org_id %}
+                                    <td>
+                                        {% for group in u.work_groups.all %}
+                                            {{ group.name }}{% if not forloop.last %}, {% endif %}
+                                        {% empty %}
+                                            —
+                                        {% endfor %}
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <div class="um-card" data-org-dependent>
@@ -212,13 +235,16 @@
 {% url 'user_management:create_work_code' as create_work_code_url %}
 {% url 'user_management:create_organisation' as create_org_url %}
 {% url 'user_management:create_work_group' as create_work_group_url %}
+{% url 'user_management:create_app_user' as create_app_user_url %}
 <!-- include create organisation modal -->
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add work group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
+{% include 'add-appuser-modal.html' with action_type='add' modal_title='Add user' submit_label='Save' form_action=create_app_user_url form=app_user_form %}
 
 {% endblock content %} 
 {% block scripts %}
 <script src="{% static 'js/user_management/common.js' %}"></script>
 <script src="{% static 'js/user_management/organization.js' %}"></script>
+<script src="{% static 'js/user_management/users.js' %}"></script>
 {% endblock %}
