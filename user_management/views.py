@@ -64,11 +64,6 @@ def user_management(request):
             "created_by": "N/A",
             "created_at": selected_org.created_at,
         }
-        
-    edit_org_id = request.GET.get("edit_org_id")
-    org_to_edit = None
-    if edit_org_id:
-        org_to_edit = organizations.filter(id=edit_org_id).first()
 
     context = {
         "organizations": organizations,
@@ -81,7 +76,6 @@ def user_management(request):
         "org_details": org_details,
         "create_org_form": CreateOrganisationForm(),
         "add_work_code_form": AddWorkCodeForm(),
-        "edit_org_form": CreateOrganisationForm(instance=org_to_edit) if org_to_edit else None,
         "work_group_form": WorkGroupForm(),
     }
     return render(request, "index.html", context=context)
