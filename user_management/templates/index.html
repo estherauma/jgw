@@ -113,9 +113,9 @@
                 <div class="um-row">
                     <div class="um-card-title">Organisation details</div>
                     <div class="um-action">
-                        <button class="um-btn um-btn-outline btn-edit-org">
-                            Edit details
-                        </button>
+                        <button class="um-btn um-btn-outline btn-edit-org" data-toggle="modal" 
+                        data-target="#edit-org-modal" data-org-id="{{ selected_org_id }}" 
+                        data-org-name="{{ org_details.name }}" data-org-code="{{ org_details.code }}">Edit details</button>
                     </div>
                     
                 </div>
