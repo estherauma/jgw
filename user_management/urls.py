@@ -1,6 +1,12 @@
 from django.urls import path
-from .views import CreateOrganisationView, user_management, EditOrganisationView,CreateWorkCodeView,CreateWorkGroupView
-
+from .views import (
+    CreateAppUserView,
+    CreateOrganisationView,
+    EditOrganisationView,
+    CreateWorkCodeView,
+    CreateWorkGroupView,
+    user_management,
+)
 
 app_name = "user_management"
 
@@ -10,4 +16,5 @@ urlpatterns = [
     path('organisations/<int:organisation_id>/edit/', EditOrganisationView.as_view(), name="edit_organisation"),
     path('work-codes/create/', CreateWorkCodeView.as_view(), name="create_work_code"),
     path('work-groups/create/', CreateWorkGroupView.as_view(), name="create_work_group"),
+    path('app-users/create/', CreateAppUserView.as_view(), name="create_app_user"),
 ]
