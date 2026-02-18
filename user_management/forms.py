@@ -1,7 +1,7 @@
 from django import forms
 
 from preference.models import OrganisationAccessCode, OrganisationData
-from .models import WorkGroup
+from .models import AppUser, WorkGroup
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -66,3 +66,36 @@ class WorkGroupForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data.get("name", "").strip()
         return name
+
+
+class AppUserForm(forms.ModelForm):
+    class Meta:
+        model = AppUser
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "work_groups",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        work_groups_qs = kwargs.pop("work_groups_qs", None)
+        super().__init__(*args, **kwargs)
+        self.fields["email"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Email"}
+        )
+        self.fields["first_name"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "First name"}
+        )
+        self.fields["last_name"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Last name"}
+        )
+        self.fields["work_groups"].widget = forms.CheckboxSelectMultiple()
+        if work_groups_qs is not None:
+            self.fields["work_groups"].queryset = work_groups_qs
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if AppUser.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Email already exists.")
+        return email
