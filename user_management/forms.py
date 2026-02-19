@@ -1,6 +1,7 @@
 from django import forms
 
-from preference.models import OrganisationData
+from preference.models import OrganisationAccessCode, OrganisationData
+from .models import AppUser, WorkGroup
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -28,3 +29,73 @@ class CreateOrganisationForm(forms.ModelForm):
         if OrganisationData.objects.filter(org_code__iexact=org_code).exists():
             raise forms.ValidationError("Organisation code already exists.")
         return org_code
+
+
+class AddWorkCodeForm(forms.ModelForm):
+    class Meta:
+        model = OrganisationAccessCode
+        fields = ["code", "requires_login"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["code"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Work code"}
+        )
+        self.fields["requires_login"].widget.attrs.update(
+            {"class": "form-check-input", "role": "switch"}
+        )
+
+    def clean_code(self):
+        code = self.cleaned_data.get("code", "").strip().upper()
+        if OrganisationAccessCode.objects.filter(code__iexact=code).exists():
+            raise forms.ValidationError("Work code already exists.")
+        return code
+
+
+class WorkGroupForm(forms.ModelForm):
+    class Meta:
+        model = WorkGroup
+        fields = ["name"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Work group name"}
+        )
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name", "").strip()
+        return name
+
+
+class AppUserForm(forms.ModelForm):
+    class Meta:
+        model = AppUser
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "work_groups",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        work_groups_qs = kwargs.pop("work_groups_qs", None)
+        super().__init__(*args, **kwargs)
+        self.fields["email"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Email"}
+        )
+        self.fields["first_name"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "First name"}
+        )
+        self.fields["last_name"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Last name"}
+        )
+        self.fields["work_groups"].widget = forms.CheckboxSelectMultiple()
+        if work_groups_qs is not None:
+            self.fields["work_groups"].queryset = work_groups_qs
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if AppUser.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Email already exists.")
+        return email
