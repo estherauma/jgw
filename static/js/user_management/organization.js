@@ -55,7 +55,7 @@
     var form = modal.querySelector('form');
     var errorBox = document.getElementById('edit-org-form-error');
   
-    $('.btn-edit-org').on('click', function() {
+    $('[data-edit-btn]').on('click', function() {
       var $btn = $(this);
       form.querySelector('[name="name"]').value = $btn.data('org-name');
       form.querySelector('[name="org_code"]').value = $btn.data('org-code');
@@ -100,7 +100,9 @@
 
   function initWorkCodeForm() {
     var form = document.getElementById('add-workcode-form');
-    if (!form) return;
+    if (!form) {
+      return;
+    }
     var errorBox = document.getElementById('add-workcode-form-error');
     function resetWorkCodeForm() {
       safeClearFormErrors(form, errorBox);
@@ -134,11 +136,14 @@
         return;
       }
       var submitButton = form.querySelector("button[type='submit']");
-      if (submitButton) submitButton.disabled = true;
-
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
       try {
         var data = null;
-        if (window.postFormJson) data = await window.postFormJson(form);
+        if (window.postFormJson) {
+          data = await window.postFormJson(form);
+        }
         if (data && data.org_id) {
           var homeUrl = window.location.pathname;
           var target =
@@ -147,11 +152,13 @@
         } else {
           window.location.reload();
         }
-      } catch (err) {
-        if (err && err.errors) {
-          Object.keys(err.errors).forEach(field => {
+      } catch (data) {
+        if (data && data.errors) {
+          Object.keys(data.errors).forEach(function (field) {
             var el = form.querySelector("[data-error-for='" + field + "']");
-            if (el) el.textContent = Array.isArray(err.errors[field]) ? err.errors[field].join(' ') : err.errors[field];
+            if (el) {
+              el.textContent = data.errors[field].join(' ');
+            }
           });
         }
         if (errorBox) {
@@ -159,7 +166,9 @@
           errorBox.classList.remove('d-none');
         }
       } finally {
-        if (submitButton) submitButton.disabled = false;
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
       }
     });
 
