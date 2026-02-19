@@ -2004,6 +2004,12 @@ body.modal-open {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     margin-bottom: 24px;  
 }
+.messaging-question-echarts-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;  
+}
 /* What matters to workers - chapters opened tree chart */
 .chapters-opened-tree-chart-box {
     min-height: 400px;
