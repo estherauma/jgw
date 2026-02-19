@@ -29,74 +29,277 @@
 </div>
 
 <div class="row">
-    <div class="col-md-12">
-        <div class="widget-rounded-circle card">
-            <div class="card-body">
-                <div class="row">
-                    {% flag 'can_view_total_messaging_questions_count_on_messaging_page' %}
-                        <div class="col-9">
-                            <div class="text-start">
-                                <h3 class="text-dark"><span data-plugin="counterup">{{total_messaging_questions}}</span></h3>
-                                <h5 class="text-muted global-text-style">{% translate "messagingQuestionsSpot" %} </h5>
-                            </div>
-                        </div>
+    <div class="col-md-9">
+        <header class="user-overview-header">Messaging Questions Responses</header>
+    </div>
+    <div class="col-3 user-overview-actions">     
+        <div class="col-md-6 button-margin">
+            <div class="dropdown w-100">
+                {% flag 'can_download_messaging_questions_excel_reports' %}
+                    <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                        id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {% translate "messagingQuestionsExport" %}
+                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                    </a>
                     {% endflag %}
-                    <div class="col-3">
-                        <div class="row">
-                            <div class="col-md-6 button-margin">
-                                <div class="dropdown w-100">
-                                    {% flag 'can_download_messaging_questions_excel_reports' %}
-                                        <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
-                                            id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            {% translate "messagingQuestionsExport" %}
-                                            <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                                        </a>
-                                    {% endflag %}
-                                    <div class="dropdown-menu" aria-labelledby="export-menu">
-                                        {% flag 'can_view_messaging_question_report_export_button' %}
-                                            <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">{% translate "messagingQuestionsExportMessagingQuestionDataReport" %}</a>
-                                            <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">{% translate "messagingQuestionsExportMessagingPushedDataReport" %}</a>
-                                        {% endflag %}
-                                        <button  class="dropdown-item" id="export-messaging-question-to-excel">{% translate "messagingQuestionsExportMessagingQuestionStatistics" %}</button>
-                                    </div>                                    
-                                </div>
-                            </div>
-                            <div class="col-md-6 button-margin">
-                                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "messagingQuestionsExportFilterButton" %}</button>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="dropdown-menu" aria-labelledby="export-menu">
+                        {% flag 'can_view_messaging_question_report_export_button' %}
+                            <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">{% translate "messagingQuestionsExportMessagingQuestionDataReport" %}</a>
+                            <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">{% translate "messagingQuestionsExportMessagingPushedDataReport" %}</a>
+                        {% endflag %}
+                        <button  class="dropdown-item" id="export-messaging-question-to-excel">{% translate "messagingQuestionsExportMessagingQuestionStatistics" %}</button>
+                    </div>                                    
                 </div>
+            </div>
+            <div class="col-md-6 button-margin">
+                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
+                role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "messagingQuestionsExportFilterButton" %}</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Fullscreen Modal for Messaging Questions Responses by Age -->
+<div class="modal fade" id="messaging-question-age-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="messaging-question-age-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="messaging-question-age-fullscreen-modal-label">{% translate "messagingQuestionResponsePerAge" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-age-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="messaging-question-age-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Messaging Questions Responses by Gender -->
+<div class="modal fade" id="messaging-question-gender-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="messaging-question-gender-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="messaging-question-gender-fullscreen-modal-label">{% translate "messagingQuestionResponsePerGender" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-gender-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="messaging-question-gender-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Messaging Questions Responses by Organisation -->
+<div class="modal fade" id="messaging-question-organisation-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="messaging-question-organisation-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="messaging-question-organisation-fullscreen-modal-label">{% translate "messagingQuestionResponsePerOrganisation" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-organisation-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="messaging-question-organisation-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Messaging Questions Responses by Destination Country -->
+<div class="modal fade" id="messaging-question-destination-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="messaging-question-destination-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="messaging-question-destination-fullscreen-modal-label">{% translate "messagingQuestionResponsePerDestination" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-destination-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="messaging-question-destination-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Messaging Questions Responses by Origin Country -->
+<div class="modal fade" id="messaging-question-origin-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="messaging-question-origin-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="messaging-question-origin-fullscreen-modal-label">{% translate "messagingQuestionResponsePerOrigin" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-origin-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="messaging-question-origin-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Messaging Questions Responses by Sector -->
+<div class="modal fade" id="messaging-question-sector-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="messaging-question-sector-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="messaging-question-sector-fullscreen-modal-label">{% translate "messagingQuestionResponsePerSector" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-sector-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="messaging-question-sector-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     {% flag 'can_view_age_chart_on_messaging_question_page'%}
         <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">{% translate "messagingQuestionResponsePerAge" %}</p>
-                    <canvas id="messaging-question-by-age-chart-id" class="canvas-chart"></canvas>
-                    <div class="info-tooltip">
-                        <i class="fas fa-info-circle"></i>
-                        {% translate "messagingQuestionResponsePerAgeTooltip" %}
-                        <div class="tooltip-arrow"></div>
+            <div class="card h-100 messaging-question-echarts-card">
+                <div class="card-body dashboard-chart">
+                    <div data-chart-id="messaging_question_responses_by_age" id="chart-messaging_question_responses_by_age">
+                        <div class="chart-header">
+                            <div class="chart-header-left">
+                                <h4 class="chart-main-title">{% translate "messagingQuestionResponsePerAge" %}</h4>
+                            </div>
+                            <div class="chart-header-actions">
+                                <div class="dropdown">
+                                    <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-age-chart-type-menu">
+                                        <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                    </ul>
+                                </div>
+                                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#messaging-question-age-fullscreen-modal">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="messaging-question-age-echarts-chart" style="height: 500px; width: 100%;"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            {% translate "messagingQuestionResponsePerAgeTooltip" %}
+                            <div class="tooltip-arrow"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     {% endflag %}{% flag 'can_view_gender_chart_on_messaging_question_page'%}
     <div class="col-md-6 mt-3">
-        <div class="card h-100">
-            <div class="card-body chart">
-                <p class="chart-title">{% translate "messagingQuestionResponsePerGender" %}</p>
-                <canvas id="messaging-question-by-gender-chart-id" class="canvas-chart"></canvas>
-                <div class="info-tooltip">
-                    <i class="fas fa-info-circle"></i>
-                    {% translate "messagingQuestionResponsePerGenderTooltip" %}
-                    <div class="tooltip-arrow"></div>
+        <div class="card h-100 messaging-question-echarts-card">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="messaging_question_responses_by_gender" id="chart-messaging_question_responses_by_gender">
+                    <div class="chart-header">
+                        <div class="chart-header-left">
+                            <h4 class="chart-main-title">{% translate "messagingQuestionResponsePerGender" %}</h4>
+                        </div>
+                        <div class="chart-header-actions">
+                            <div class="dropdown">
+                                <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-gender-chart-type-menu">
+                                    <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                    <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                    <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                </ul>
+                            </div>
+                            <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#messaging-question-gender-fullscreen-modal">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="messaging-question-gender-echarts-chart" style="height: 500px; width: 100%;"></div>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        {% translate "messagingQuestionResponsePerGenderTooltip" %}
+                        <div class="tooltip-arrow"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -104,14 +307,35 @@
 {% endflag %}
     {% flag 'can_view_organisation_chart_on_messaging_question_page'%}
         <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">{% translate "messagingQuestionResponsePerOrganisation" %}</p>
-                    <canvas id="messaging-question-organisation-pie-chart-id" class="canvas-chart"></canvas>
-                    <div class="info-tooltip">
-                        <i class="fas fa-info-circle"></i>
-                        {% translate "messagingQuestionResponsePerOrganisationTooltip" %}
-                        <div class="tooltip-arrow"></div>
+            <div class="card h-100 messaging-question-echarts-card">
+                <div class="card-body dashboard-chart">
+                    <div data-chart-id="messaging_question_responses_by_organisation" id="chart-messaging_question_responses_by_organisation">
+                        <div class="chart-header">
+                            <div class="chart-header-left">
+                                <h4 class="chart-main-title">{% translate "messagingQuestionResponsePerOrganisation" %}</h4>
+                            </div>
+                            <div class="chart-header-actions">
+                                <div class="dropdown">
+                                    <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-organisation-chart-type-menu">
+                                        <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                    </ul>
+                                </div>
+                                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#messaging-question-organisation-fullscreen-modal">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="messaging-question-organisation-echarts-chart" style="height: 500px; width: 100%;"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            {% translate "messagingQuestionResponsePerOrganisationTooltip" %}
+                            <div class="tooltip-arrow"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -119,12 +343,31 @@
     {% endflag %}
 
     {% flag 'can_view_messaging_question_per_destination_on_messaging_page' %}
-        <div class=" col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">{% translate "messagingQuestionResponsePerDestination" %}</p>
-                    <div class="messaging-question-destination-chart-id-chart-box">
-                        <div id="messaging-question-destination-chart-id"></div>
+        <div class="col-md-6 mt-3">
+            <div class="card h-100 messaging-question-echarts-card">
+                <div class="card-body dashboard-chart">
+                    <div data-chart-id="messaging_question_responses_by_destination" id="chart-messaging_question_responses_by_destination">
+                        <div class="chart-header">
+                            <div class="chart-header-left">
+                                <h4 class="chart-main-title">{% translate "messagingQuestionResponsePerDestination" %}</h4>
+                            </div>
+                            <div class="chart-header-actions">
+                                <div class="dropdown">
+                                    <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-destination-chart-type-menu">
+                                        <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                    </ul>
+                                </div>
+                                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#messaging-question-destination-fullscreen-modal">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="messaging-question-destination-echarts-chart" style="height: 500px; width: 100%;"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
                             {% translate "messagingQuestionResponsePerDestinationTooltip" %}
@@ -139,11 +382,30 @@
 <div class="row">
     {% flag 'can_view_messaging_question_per_origin_on_messaging_page' %}
         <div class="col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">{% translate "messagingQuestionResponsePerOrigin" %}</p>
-                    <div class="messaging-question-origin-chart-id-chart-box">
-                        <div id="messaging-question-origin-chart-id"></div>
+            <div class="card h-100 messaging-question-echarts-card">
+                <div class="card-body dashboard-chart">
+                    <div data-chart-id="messaging_question_responses_by_origin" id="chart-messaging_question_responses_by_origin">
+                        <div class="chart-header">
+                            <div class="chart-header-left">
+                                <h4 class="chart-main-title">{% translate "messagingQuestionResponsePerOrigin" %}</h4>
+                            </div>
+                            <div class="chart-header-actions">
+                                <div class="dropdown">
+                                    <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-origin-chart-type-menu">
+                                        <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                    </ul>
+                                </div>
+                                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#messaging-question-origin-fullscreen-modal">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="messaging-question-origin-echarts-chart" style="height: 500px; width: 100%;"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
                             {% translate "messagingQuestionResponsePerOriginTooltip" %}
@@ -156,12 +418,31 @@
     {% endflag %}
 
     {% flag 'can_view_messaging_question_by_sectors_on_messaging_page' %}
-        <div class=" col-md-6 mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">{% translate "messagingQuestionResponsePerSector" %}</p>
-                    <div class="messaging-question-sectors-chart-id-chart-box">
-                        <div id="messaging-question-sectors-chart-id"></div>
+        <div class="col-md-6 mt-3">
+            <div class="card h-100 messaging-question-echarts-card">
+                <div class="card-body dashboard-chart">
+                    <div data-chart-id="messaging_question_responses_by_sector" id="chart-messaging_question_responses_by_sector">
+                        <div class="chart-header">
+                            <div class="chart-header-left">
+                                <h4 class="chart-main-title">{% translate "messagingQuestionResponsePerSector" %}</h4>
+                            </div>
+                            <div class="chart-header-actions">
+                                <div class="dropdown">
+                                    <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="messaging-question-sector-chart-type-menu">
+                                        <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                    </ul>
+                                </div>
+                                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#messaging-question-sector-fullscreen-modal">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="messaging-question-sector-echarts-chart" style="height: 500px; width: 100%;"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
                             {% translate "messagingQuestionResponsePerSectorTooltip" %}
@@ -250,6 +531,12 @@
 <script src="{% static 'js/charts/bar/messaging_question_destination_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/messaging_question_organisation_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/bar/messaging_question_graph.js' %}"></script>
+<script src="{% static 'js/charts/echarts/messaging_questions/responses_by_age.js' %}"></script>
+<script src="{% static 'js/charts/echarts/messaging_questions/responses_by_gender.js' %}"></script>
+<script src="{% static 'js/charts/echarts/messaging_questions/responses_by_organisation.js' %}"></script>
+<script src="{% static 'js/charts/echarts/messaging_questions/responses_by_destination.js' %}"></script>
+<script src="{% static 'js/charts/echarts/messaging_questions/responses_by_origin.js' %}"></script>
+<script src="{% static 'js/charts/echarts/messaging_questions/responses_by_sector.js' %}"></script>
 <script src="{% static 'js/app/messaging_question.js' %}"></script>
 <script src="{% static 'js/charts/pie/reusable_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/map/user_geolocation_map.js' %}"></script>
@@ -269,43 +556,261 @@
             user_counts_by_geo_country = {{ user_counts_by_geo_country|safe }};
 
             try {
-                if (typeof messagingQuestionOriginChart === 'function' && originData) {
-                    messagingQuestionOriginChart(originData);
+                var messagingQuestionOriginChartType = 'doughnut';
+                if (typeof initMessagingQuestionsResponsesByOriginChart === 'function' && originData) {
+                    initMessagingQuestionsResponsesByOriginChart(originData, undefined, messagingQuestionOriginChartType);
                 }
+                function renderMessagingQuestionOriginCharts(type) {
+                    messagingQuestionOriginChartType = type;
+                    if (typeof initMessagingQuestionsResponsesByOriginChart === 'function' && originData) {
+                        initMessagingQuestionsResponsesByOriginChart(originData, 'messaging-question-origin-echarts-chart', type);
+                        if ($('#messaging-question-origin-fullscreen-modal').hasClass('show')) {
+                            initMessagingQuestionsResponsesByOriginChart(originData, 'messaging-question-origin-fullscreen-chart', type);
+                        }
+                    }
+                }
+                $(document).on('click', '#messaging-question-origin-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionOriginCharts($(this).data('chart-type'));
+                });
+                $(document).on('click', '#messaging-question-origin-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionOriginCharts($(this).data('chart-type'));
+                });
+                $('#messaging-question-origin-fullscreen-modal').on('shown.bs.modal', function () {
+                    var fullscreenContainer = document.getElementById('messaging-question-origin-fullscreen-chart');
+                    if (fullscreenContainer) {
+                        var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+                        if (existingChart) existingChart.dispose();
+                    }
+                    setTimeout(function() {
+                        if (typeof initMessagingQuestionsResponsesByOriginChart === 'function' && originData) {
+                            initMessagingQuestionsResponsesByOriginChart(originData, 'messaging-question-origin-fullscreen-chart', messagingQuestionOriginChartType);
+                        }
+                    }, 50);
+                });
+                $('#messaging-question-origin-fullscreen-modal').on('hidden.bs.modal', function () {
+                    if (typeof echarts !== 'undefined') {
+                        var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-origin-fullscreen-chart'));
+                        if (fullscreenChart) fullscreenChart.dispose();
+                    }
+                });
             } catch (e) {
-                console.error('Error initializing messagingQuestionOriginChart:', e);
+                console.error('Error initializing Messaging Question Origin ECharts chart:', e);
             }
 
             try {
-                if (typeof messagingQuestionDestinationChart === 'function' && destinationData) {
-                    messagingQuestionDestinationChart(destinationData);
+                var messagingQuestionDestinationChartType = 'doughnut';
+                if (typeof initMessagingQuestionsResponsesByDestinationChart === 'function' && destinationData) {
+                    initMessagingQuestionsResponsesByDestinationChart(destinationData, undefined, messagingQuestionDestinationChartType);
                 }
+                function renderMessagingQuestionDestinationCharts(type) {
+                    messagingQuestionDestinationChartType = type;
+                    if (typeof initMessagingQuestionsResponsesByDestinationChart === 'function' && destinationData) {
+                        initMessagingQuestionsResponsesByDestinationChart(destinationData, 'messaging-question-destination-echarts-chart', type);
+                        if ($('#messaging-question-destination-fullscreen-modal').hasClass('show')) {
+                            initMessagingQuestionsResponsesByDestinationChart(destinationData, 'messaging-question-destination-fullscreen-chart', type);
+                        }
+                    }
+                }
+                $(document).on('click', '#messaging-question-destination-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionDestinationCharts($(this).data('chart-type'));
+                });
+                $(document).on('click', '#messaging-question-destination-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionDestinationCharts($(this).data('chart-type'));
+                });
+                $('#messaging-question-destination-fullscreen-modal').on('shown.bs.modal', function () {
+                    var fullscreenContainer = document.getElementById('messaging-question-destination-fullscreen-chart');
+                    if (fullscreenContainer) {
+                        var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+                        if (existingChart) existingChart.dispose();
+                    }
+                    setTimeout(function() {
+                        if (typeof initMessagingQuestionsResponsesByDestinationChart === 'function' && destinationData) {
+                            initMessagingQuestionsResponsesByDestinationChart(destinationData, 'messaging-question-destination-fullscreen-chart', messagingQuestionDestinationChartType);
+                        }
+                    }, 50);
+                });
+                $('#messaging-question-destination-fullscreen-modal').on('hidden.bs.modal', function () {
+                    if (typeof echarts !== 'undefined') {
+                        var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-destination-fullscreen-chart'));
+                        if (fullscreenChart) fullscreenChart.dispose();
+                    }
+                });
             } catch (e) {
-                console.error('Error initializing messagingQuestionDestinationChart:', e);
+                console.error('Error initializing Messaging Question Destination ECharts chart:', e);
             }
 
             try {
-                if (typeof messagingQustionOrganisationPieChart === 'function' && organisationData) {
-                    messagingQustionOrganisationPieChart(organisationData);
+                var messagingQuestionOrganisationChartType = 'doughnut';
+                if (typeof initMessagingQuestionsResponsesByOrganisationChart === 'function' && organisationData) {
+                    initMessagingQuestionsResponsesByOrganisationChart(organisationData, undefined, messagingQuestionOrganisationChartType);
                 }
+                function renderMessagingQuestionOrganisationCharts(type) {
+                    messagingQuestionOrganisationChartType = type;
+                    if (typeof initMessagingQuestionsResponsesByOrganisationChart === 'function' && organisationData) {
+                        initMessagingQuestionsResponsesByOrganisationChart(organisationData, 'messaging-question-organisation-echarts-chart', type);
+                        if ($('#messaging-question-organisation-fullscreen-modal').hasClass('show')) {
+                            initMessagingQuestionsResponsesByOrganisationChart(organisationData, 'messaging-question-organisation-fullscreen-chart', type);
+                        }
+                    }
+                }
+                $(document).on('click', '#messaging-question-organisation-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionOrganisationCharts($(this).data('chart-type'));
+                });
+                $(document).on('click', '#messaging-question-organisation-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionOrganisationCharts($(this).data('chart-type'));
+                });
+                $('#messaging-question-organisation-fullscreen-modal').on('shown.bs.modal', function () {
+                    var fullscreenContainer = document.getElementById('messaging-question-organisation-fullscreen-chart');
+                    if (fullscreenContainer) {
+                        var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+                        if (existingChart) existingChart.dispose();
+                    }
+                    setTimeout(function() {
+                        if (typeof initMessagingQuestionsResponsesByOrganisationChart === 'function' && organisationData) {
+                            initMessagingQuestionsResponsesByOrganisationChart(organisationData, 'messaging-question-organisation-fullscreen-chart', messagingQuestionOrganisationChartType);
+                        }
+                    }, 50);
+                });
+                $('#messaging-question-organisation-fullscreen-modal').on('hidden.bs.modal', function () {
+                    if (typeof echarts !== 'undefined') {
+                        var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-organisation-fullscreen-chart'));
+                        if (fullscreenChart) fullscreenChart.dispose();
+                    }
+                });
             } catch (e) {
-                console.error('Error initializing messagingQustionOrganisationPieChart:', e);
+                console.error('Error initializing Messaging Question Organisation ECharts chart:', e);
             }
 
             try {
-                if (typeof reusablePieChart === 'function' && messaging_question_by_age) {
-                    reusablePieChart(messaging_question_by_age, 'messaging-question-by-age-chart-id');
+                var messagingQuestionAgeChartType = 'doughnut';
+                if (typeof initMessagingQuestionsResponsesByAgeChart === 'function' && messaging_question_by_age) {
+                    initMessagingQuestionsResponsesByAgeChart(messaging_question_by_age, undefined, messagingQuestionAgeChartType);
                 }
+                function renderMessagingQuestionAgeCharts(type) {
+                    messagingQuestionAgeChartType = type;
+                    if (typeof initMessagingQuestionsResponsesByAgeChart === 'function' && messaging_question_by_age) {
+                        initMessagingQuestionsResponsesByAgeChart(messaging_question_by_age, 'messaging-question-age-echarts-chart', type);
+                        if ($('#messaging-question-age-fullscreen-modal').hasClass('show')) {
+                            initMessagingQuestionsResponsesByAgeChart(messaging_question_by_age, 'messaging-question-age-fullscreen-chart', type);
+                        }
+                    }
+                }
+                $(document).on('click', '#messaging-question-age-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionAgeCharts($(this).data('chart-type'));
+                });
+                $(document).on('click', '#messaging-question-age-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionAgeCharts($(this).data('chart-type'));
+                });
+                $('#messaging-question-age-fullscreen-modal').on('shown.bs.modal', function () {
+                    var fullscreenContainer = document.getElementById('messaging-question-age-fullscreen-chart');
+                    if (fullscreenContainer) {
+                        var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+                        if (existingChart) existingChart.dispose();
+                    }
+                    setTimeout(function() {
+                        if (typeof initMessagingQuestionsResponsesByAgeChart === 'function' && messaging_question_by_age) {
+                            initMessagingQuestionsResponsesByAgeChart(messaging_question_by_age, 'messaging-question-age-fullscreen-chart', messagingQuestionAgeChartType);
+                        }
+                    }, 50);
+                });
+                $('#messaging-question-age-fullscreen-modal').on('hidden.bs.modal', function () {
+                    if (typeof echarts !== 'undefined') {
+                        var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-age-fullscreen-chart'));
+                        if (fullscreenChart) fullscreenChart.dispose();
+                    }
+                });
             } catch (e) {
-                console.error('Error initializing reusablePieChart (age):', e);
+                console.error('Error initializing Messaging Question Age ECharts chart:', e);
             }
 
             try {
-                if (typeof reusablePieChart === 'function' && messaging_question_by_gender) {
-                    reusablePieChart(messaging_question_by_gender, 'messaging-question-by-gender-chart-id');
+                var messagingQuestionGenderChartType = 'doughnut';
+                if (typeof initMessagingQuestionsResponsesByGenderChart === 'function' && messaging_question_by_gender) {
+                    initMessagingQuestionsResponsesByGenderChart(messaging_question_by_gender, undefined, messagingQuestionGenderChartType);
                 }
+                function renderMessagingQuestionGenderCharts(type) {
+                    messagingQuestionGenderChartType = type;
+                    if (typeof initMessagingQuestionsResponsesByGenderChart === 'function' && messaging_question_by_gender) {
+                        initMessagingQuestionsResponsesByGenderChart(messaging_question_by_gender, 'messaging-question-gender-echarts-chart', type);
+                        if ($('#messaging-question-gender-fullscreen-modal').hasClass('show')) {
+                            initMessagingQuestionsResponsesByGenderChart(messaging_question_by_gender, 'messaging-question-gender-fullscreen-chart', type);
+                        }
+                    }
+                }
+                $(document).on('click', '#messaging-question-gender-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionGenderCharts($(this).data('chart-type'));
+                });
+                $(document).on('click', '#messaging-question-gender-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionGenderCharts($(this).data('chart-type'));
+                });
+                $('#messaging-question-gender-fullscreen-modal').on('shown.bs.modal', function () {
+                    var fullscreenContainer = document.getElementById('messaging-question-gender-fullscreen-chart');
+                    if (fullscreenContainer) {
+                        var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+                        if (existingChart) existingChart.dispose();
+                    }
+                    setTimeout(function() {
+                        if (typeof initMessagingQuestionsResponsesByGenderChart === 'function' && messaging_question_by_gender) {
+                            initMessagingQuestionsResponsesByGenderChart(messaging_question_by_gender, 'messaging-question-gender-fullscreen-chart', messagingQuestionGenderChartType);
+                        }
+                    }, 50);
+                });
+                $('#messaging-question-gender-fullscreen-modal').on('hidden.bs.modal', function () {
+                    if (typeof echarts !== 'undefined') {
+                        var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-gender-fullscreen-chart'));
+                        if (fullscreenChart) fullscreenChart.dispose();
+                    }
+                });
+                $(window).on('resize', function() {
+                    if ($('#messaging-question-age-fullscreen-modal').hasClass('show')) {
+                        if (typeof echarts !== 'undefined') {
+                            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-age-fullscreen-chart'));
+                            if (fullscreenChart) fullscreenChart.resize();
+                        }
+                    }
+                    if ($('#messaging-question-gender-fullscreen-modal').hasClass('show')) {
+                        if (typeof echarts !== 'undefined') {
+                            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-gender-fullscreen-chart'));
+                            if (fullscreenChart) fullscreenChart.resize();
+                        }
+                    }
+                    if ($('#messaging-question-organisation-fullscreen-modal').hasClass('show')) {
+                        if (typeof echarts !== 'undefined') {
+                            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-organisation-fullscreen-chart'));
+                            if (fullscreenChart) fullscreenChart.resize();
+                        }
+                    }
+                    if ($('#messaging-question-destination-fullscreen-modal').hasClass('show')) {
+                        if (typeof echarts !== 'undefined') {
+                            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-destination-fullscreen-chart'));
+                            if (fullscreenChart) fullscreenChart.resize();
+                        }
+                    }
+                    if ($('#messaging-question-origin-fullscreen-modal').hasClass('show')) {
+                        if (typeof echarts !== 'undefined') {
+                            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-origin-fullscreen-chart'));
+                            if (fullscreenChart) fullscreenChart.resize();
+                        }
+                    }
+                    if ($('#messaging-question-sector-fullscreen-modal').hasClass('show')) {
+                        if (typeof echarts !== 'undefined') {
+                            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-sector-fullscreen-chart'));
+                            if (fullscreenChart) fullscreenChart.resize();
+                        }
+                    }
+                });
             } catch (e) {
-                console.error('Error initializing reusablePieChart (gender):', e);
+                console.error('Error initializing Messaging Question Gender ECharts chart:', e);
             }
 
             try {
@@ -317,11 +822,47 @@
             }
 
             try {
-                if (typeof usersBySectorsChart === 'function' && messaging_question_by_sectors) {
-                    usersBySectorsChart(messaging_question_by_sectors, 'messaging-question-sectors-chart-id');
+                var messagingQuestionSectorChartType = 'doughnut';
+                if (typeof initMessagingQuestionsResponsesBySectorChart === 'function' && messaging_question_by_sectors) {
+                    initMessagingQuestionsResponsesBySectorChart(messaging_question_by_sectors, undefined, messagingQuestionSectorChartType);
                 }
+                function renderMessagingQuestionSectorCharts(type) {
+                    messagingQuestionSectorChartType = type;
+                    if (typeof initMessagingQuestionsResponsesBySectorChart === 'function' && messaging_question_by_sectors) {
+                        initMessagingQuestionsResponsesBySectorChart(messaging_question_by_sectors, 'messaging-question-sector-echarts-chart', type);
+                        if ($('#messaging-question-sector-fullscreen-modal').hasClass('show')) {
+                            initMessagingQuestionsResponsesBySectorChart(messaging_question_by_sectors, 'messaging-question-sector-fullscreen-chart', type);
+                        }
+                    }
+                }
+                $(document).on('click', '#messaging-question-sector-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionSectorCharts($(this).data('chart-type'));
+                });
+                $(document).on('click', '#messaging-question-sector-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+                    e.preventDefault();
+                    renderMessagingQuestionSectorCharts($(this).data('chart-type'));
+                });
+                $('#messaging-question-sector-fullscreen-modal').on('shown.bs.modal', function () {
+                    var fullscreenContainer = document.getElementById('messaging-question-sector-fullscreen-chart');
+                    if (fullscreenContainer) {
+                        var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+                        if (existingChart) existingChart.dispose();
+                    }
+                    setTimeout(function() {
+                        if (typeof initMessagingQuestionsResponsesBySectorChart === 'function' && messaging_question_by_sectors) {
+                            initMessagingQuestionsResponsesBySectorChart(messaging_question_by_sectors, 'messaging-question-sector-fullscreen-chart', messagingQuestionSectorChartType);
+                        }
+                    }, 50);
+                });
+                $('#messaging-question-sector-fullscreen-modal').on('hidden.bs.modal', function () {
+                    if (typeof echarts !== 'undefined') {
+                        var fullscreenChart = echarts.getInstanceByDom(document.getElementById('messaging-question-sector-fullscreen-chart'));
+                        if (fullscreenChart) fullscreenChart.dispose();
+                    }
+                });
             } catch (e) {
-                console.error('Error initializing usersBySectorsChart:', e);
+                console.error('Error initializing Messaging Question Sector ECharts chart:', e);
             }
 
     })();
