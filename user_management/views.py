@@ -115,7 +115,7 @@ class EditOrganisationView(View):
         organisation = OrganisationData.objects.filter(pk=organisation_id).first()
         if not organisation:
             return JsonResponse(
-                {"ok": False, "errors": {"organisation": ["Organisation not found."]}},
+                {"ok": False, "error": "Organisation not found."},
                 status=404,
             )
         form = CreateOrganisationForm(request.POST, instance=organisation)
