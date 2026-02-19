@@ -70,8 +70,7 @@ def fetch_chapters_opened_data_from_api_to_db():
             break
 
         for chapter_opened in chapters_opened:
-            try:
-                update_chapter_titles()
+            try:             
                 add_chapters_opened_to_db(chapter_opened)
             except Exception as e:
                 kunfu_panda_logger.error(f"An error occurred during chapter creation: {str(e)}")
@@ -87,6 +86,7 @@ def fetch_chapters_opened_data_from_api_to_db():
     kunfu_panda_logger.info(f"Finished adding a total of {total_fetched} chapters opened to the database")
     
     translate_and_clean_preferences_fields()
+    update_chapter_titles()
     update_myvoice_chapters_opened_events()
     update_chapters_opened_org_info_from_organisation()
 
