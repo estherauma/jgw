@@ -84,7 +84,7 @@ def fetch_chapters_opened_data_from_api_to_db():
         )
 
     kunfu_panda_logger.info(f"Finished adding a total of {total_fetched} chapters opened to the database")
-
+    
     translate_and_clean_preferences_fields()
     update_chapter_titles()
     update_myvoice_chapters_opened_events()
