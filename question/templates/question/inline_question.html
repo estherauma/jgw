@@ -28,100 +28,263 @@
     </div>
 </div>
 
+<!-- Fullscreen Modal for Inline Questions Responses by Origin -->
+<div class="modal fade" id="inline-question-origin-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="inline-question-origin-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="inline-question-origin-fullscreen-modal-label">{% translate "inlineQuestionsOriginCountry" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="inline-question-origin-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="inline-question-origin-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Inline Questions Responses by Organisation -->
+<div class="modal fade" id="inline-question-organisation-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="inline-question-organisation-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="inline-question-organisation-fullscreen-modal-label">{% translate "inlineQuestionsOrganisation" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="inline-question-organisation-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="inline-question-organisation-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Inline Questions Responses by Language -->
+<div class="modal fade" id="inline-question-language-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="inline-question-language-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="inline-question-language-fullscreen-modal-label">{% translate "inlineQuestionsLanguage" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="inline-question-language-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="inline-question-language-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal for Inline Questions Responses by Destination Country -->
+<div class="modal fade" id="inline-question-destination-fullscreen-modal" tabindex="-1" role="dialog" aria-labelledby="inline-question-destination-fullscreen-modal-label">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content fullscreen-chart-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="inline-question-destination-fullscreen-modal-label">{% translate "inlineQuestionsDestinationCountry" %}</h4>
+                <div class="chart-header-actions ms-auto">
+                    <div class="dropdown">
+                        <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="inline-question-destination-fullscreen-chart-type-menu">
+                            <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                            <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="inline-question-destination-fullscreen-chart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
-    <div class="col-md-12">
-        <div class="widget-rounded-circle card">
-            <div class="card-body">
-                <div class="row">
-                    {% flag 'can_view_total_inline_questions_response_count_on_inline_question_page' %}
-                        <div class="col-9">
-                            <div class="text-start">
-                                <h3 class="text-dark"><span data-plugin="counterup">{{total_inline_question_responses}}</span></h3>
-                                <h5 class="text-muted global-text-style">{% translate "inlineQuestionsTotalResponses" %} </h5>
-                            </div>
+
+    <div class="col-md-9">
+        <header class="user-overview-header">Inline Questions Responses</header>
+    </div>
+    <div class="col-3 user-overview-actions">
+        {% if user.is_authenticated %}
+            <div class="row">
+                <div class="col-md-6 button-margin">
+                    <div class="dropdown w-100">
+                        {% flag 'can_download_inline_questions_excel_reports' %}
+                            <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                                id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                               {% translate "inlineQuestionsExportButton" %} 
+                                <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                            </a>
+                        {% endflag %}
+                        <div class="dropdown-menu" aria-labelledby="export-menu">
+                            <a class="dropdown-item" href="{% url 'question:export_inline_question_data' %}?export=true">{% translate "inlineQuestionsExportDataReport" %} </a>
+                            <button  class="dropdown-item" id="export-inline-question-to-excel">{% translate "inlineQuestionsExportStatistics" %} </button>
+                            <a class="dropdown-item" href="{% url 'question:export_payment_inline_questions' %}">{% translate "inlineQuestionsExportPayment" %} </a>
+                            <a class="dropdown-item" href="{% url 'question:export_lead_questions_with_followups' %}">Export Lead Questions with Follow-ups to Excel</a>
                         </div>
-                    {% endflag %}
-                    <div class="col-3">
-                        {% if user.is_authenticated %}
-                            <div class="row">
-                                <div class="col-md-6 button-margin">
-                                    <div class="dropdown w-100">
-                                        {% flag 'can_download_inline_questions_excel_reports' %}
-                                            <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
-                                                id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                               {% translate "inlineQuestionsExportButton" %} 
-                                                <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                                            </a>
-                                        {% endflag %}
-                                        <div class="dropdown-menu" aria-labelledby="export-menu">
-                                            <a class="dropdown-item" href="{% url 'question:export_inline_question_data' %}?export=true">{% translate "inlineQuestionsExportDataReport" %} </a>
-                                            <button  class="dropdown-item" id="export-inline-question-to-excel">{% translate "inlineQuestionsExportStatistics" %} </button>
-                                            <a class="dropdown-item" href="{% url 'question:export_payment_inline_questions' %}">{% translate "inlineQuestionsExportPayment" %} </a>
-                                            <a class="dropdown-item" href="{% url 'question:export_lead_questions_with_followups' %}">Export Lead Questions with Follow-ups to Excel</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 button-margin">
-                                    <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "inlineQuestionsFilterButton" %}</button>
-                                </div>
+                    </div>
+                </div>
+                <div class="col-md-6 button-margin">
+                    <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
+                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "inlineQuestionsFilterButton" %}</button>
+                </div>
+            </div>
+        {% else %}
+            {% include 'includes/non_auth_banner_btns.html' %}
+        {% endif %}
+    </div>
+
+</div>
+<div class="row">
+    {% if user.is_authenticated %}
+    {% flag 'can_view_organisation_chart_on_inline_question_page'%}
+    <div class="col-md-6 mx-auto mt-3">
+        <div class="card h-100 inline-question-echarts-card">
+            <div class="card-body dashboard-chart">
+                <div data-chart-id="inline_question_responses_by_organisation" id="chart-inline_question_responses_by_organisation">
+                    <div class="chart-header">
+                        <div class="chart-header-left">
+                            <h4 class="chart-main-title">{% translate "inlineQuestionsOrganisation" %}</h4>
+                        </div>
+                        <div class="chart-header-actions">
+                            <div class="dropdown">
+                                <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="inline-question-organisation-chart-type-menu">
+                                    <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                    <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                    <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                </ul>
                             </div>
-                        {% else %}
-                            {% include 'includes/non_auth_banner_btns.html' %}
-                        {% endif %}
+                            <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#inline-question-organisation-fullscreen-modal">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="inline-question-organisation-echarts-chart" style="height: 500px; width: 100%;"></div>
+                    <div class="info-tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        {% translate "inlineQuestionsOrganisationTooltip" %}
+                        <div class="tooltip-arrow"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<div class="row">
-  
-            {% if user.is_authenticated %}
-                {% flag 'can_view_organisation_chart_on_inline_question_page'%}
-                <div class="chart-column-width mt-3">
-                    <div class="card h-100">
-                        <div class="card-body chart">
-                            <p class="chart-title">{% translate "inlineQuestionsOrganisation" %} </p>
-                            <canvas id="inline-question-organisation-pie-chart-id" class="canvas-chart"></canvas>
-                            <div class="info-tooltip">
-                                <i class="fas fa-info-circle"></i>
-                                {% translate "inlineQuestionsOrganisationTooltip" %}
-                                <div class="tooltip-arrow"></div>
+    {% endflag %}
+    {% endif %}
+    {% flag 'can_view_selected_user_language_chart_on_inline_question_page' %}
+        <div class="col-md-6 mx-auto mt-3">
+            <div class="card h-100 inline-question-echarts-card">
+                <div class="card-body dashboard-chart">
+                    <div data-chart-id="inline_question_responses_by_language" id="chart-inline_question_responses_by_language">
+                        <div class="chart-header">
+                            <div class="chart-header-left">
+                                <h4 class="chart-main-title">{% translate "inlineQuestionsLanguage" %}</h4>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                {% endflag %}
-            {% endif %}
-            {% flag 'can_view_selected_user_language_chart_on_inline_question_page' %}
-                <div class="chart-column-width mt-3">
-                    <div class="card h-100">
-                        <div class="card-body chart">
-                            <p class="chart-title">{% translate "inlineQuestionsLanguage" %} </p>
-                            <div class="inline-question-language-graph-id-chart-box">
-                                <div id="inline-question-language-graph-id"></div>
-                                <div class="info-tooltip">
-                                    <i class="fas fa-info-circle"></i>
-                                    {% translate "inlineQuestionsLanguageTooltip" %}
-                                    <div class="tooltip-arrow"></div>
+                            <div class="chart-header-actions">
+                                <div class="dropdown">
+                                    <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="inline-question-language-chart-type-menu">
+                                        <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                    </ul>
                                 </div>
+                                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#inline-question-language-fullscreen-modal">
+                                    <i class="fas fa-expand"></i>
+                                </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-            {% endflag %}
-
-    {% flag 'can_view_responses_per_origin_country_chart_on_inline_question_page' %}
-        <div class="chart-column-width mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">{% translate "inlineQuestionsOriginCountry" %} </p>
-                    <div class="inline-question-destination-graph-id-chart-box">
-                        <div id="inline-question-destination-graph-id"></div>
+                        <div id="inline-question-language-echarts-chart" style="height: 500px; width: 100%;"></div>
                         <div class="info-tooltip">
                             <i class="fas fa-info-circle"></i>
-                            {% translate "inlineQuestionsOriginCountryTooltip" %} 
+                            {% translate "inlineQuestionsLanguageTooltip" %}
+                            <div class="tooltip-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endflag %}
+
+    {% flag 'can_view_responses_per_origin_country_chart_on_inline_question_page' %}
+        <div class="col-md-6 mx-auto mt-3">
+            <div class="card h-100 inline-question-echarts-card">
+                <div class="card-body dashboard-chart">
+                    <div data-chart-id="inline_question_responses_by_origin" id="chart-inline_question_responses_by_origin">
+                        <div class="chart-header">
+                            <div class="chart-header-left">
+                                <h4 class="chart-main-title">{% translate "inlineQuestionsOriginCountry" %}</h4>
+                            </div>
+                            <div class="chart-header-actions">
+                                <div class="dropdown">
+                                    <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="inline-question-origin-chart-type-menu">
+                                        <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                    </ul>
+                                </div>
+                                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#inline-question-origin-fullscreen-modal">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="inline-question-origin-echarts-chart" style="height: 500px; width: 100%;"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            {% translate "inlineQuestionsOriginCountryTooltip" %}
                             <div class="tooltip-arrow"></div>
                         </div>
                     </div>
@@ -130,22 +293,36 @@
         </div>
     {% endflag %}
     {% flag 'can_view_responses_per_destination_country_chart_on_inline_question_page' %}
-        <div class="chart-column-width mt-3">
-            <div class="card h-100">
-                <div class="card-body chart">
-                    <p class="chart-title">{% translate "inlineQuestionsDestinationCountry" %} </p>
-                    <div class="scrollable-table-container" onscroll="stopScrollPropagation(event)">
-                        <table class="table" id="inline-question-origin-table-id">
-                            <thead>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="info-tooltip">
-                        <i class="fas fa-info-circle"></i>
-                        {% translate "inlineQuestionsDestinationCountryTooltip" %} 
-                        <div class="tooltip-arrow"></div>
+        <div class="col-md-6 mx-auto mt-3">
+            <div class="card h-100 inline-question-echarts-card">
+                <div class="card-body dashboard-chart">
+                    <div data-chart-id="inline_question_responses_by_destination" id="chart-inline_question_responses_by_destination">
+                        <div class="chart-header">
+                            <div class="chart-header-left">
+                                <h4 class="chart-main-title">{% translate "inlineQuestionsDestinationCountry" %}</h4>
+                            </div>
+                            <div class="chart-header-actions">
+                                <div class="dropdown">
+                                    <button class="fullscreen-btn chart-type-dropdown-btn" type="button" title="Chart type" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end chart-type-dropdown-menu" id="inline-question-destination-chart-type-menu">
+                                        <li><a class="dropdown-item" href="#" data-chart-type="doughnut">Doughnut</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="pie">Pie</a></li>
+                                        <li><a class="dropdown-item" href="#" data-chart-type="bar">Bar</a></li>
+                                    </ul>
+                                </div>
+                                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#inline-question-destination-fullscreen-modal">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="inline-question-destination-echarts-chart" style="height: 500px; width: 100%;"></div>
+                        <div class="info-tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            {% translate "inlineQuestionsDestinationCountryTooltip" %}
+                            <div class="tooltip-arrow"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -211,11 +388,11 @@
 {% endblock content %}
 
 {% block scripts %}
-<script src="{% static 'js/charts/table/inline_question_destination_table.js' %}"></script>
-<script src="{% static 'js/charts/bar/inline_question_origin_graph.js' %}"></script>
-<script src="{% static 'js/charts/bar/inline_question_language_graph.js' %}"></script>
+<script src="{% static 'js/charts/echarts/inline_questions/responses_by_origin.js' %}"></script>
+<script src="{% static 'js/charts/echarts/inline_questions/responses_by_destination.js' %}"></script>
+<script src="{% static 'js/charts/echarts/inline_questions/responses_by_organisation.js' %}"></script>
+<script src="{% static 'js/charts/echarts/inline_questions/responses_by_language.js' %}"></script>
 <script src="{% static 'js/charts/bar/inline_question_responses_graph.js' %}"></script>
-<script src="{% static 'js/charts/pie/inline_question_organisation_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/bar/inline_question_graph.js' %}"></script>
 <script src="{% static 'js/app/inline_question.js' %}"></script>
 <script type="text/javascript">
@@ -227,15 +404,254 @@
     var responseData  = {{ inline_question_response_data | safe }}
     var allInlineQuestionResponse = {{ each_inline_question_response | safe }}
 
-    // plots the origin graph
-    inlineQuestionOriginGraph(originData)
+    // ECharts: Inline Questions Responses by Origin – current chart type (doughnut, pie, bar)
+    var inlineQuestionOriginChartType = 'doughnut';
+    if (typeof initInlineQuestionsResponsesByOriginChart === 'function') {
+        initInlineQuestionsResponsesByOriginChart(originData, undefined, inlineQuestionOriginChartType);
+    }
 
-    // plots the destination table
-    inlineQuestionDestinationTable(destinationData)
+    function renderInlineQuestionOriginCharts(type) {
+        inlineQuestionOriginChartType = type;
+        if (typeof initInlineQuestionsResponsesByOriginChart === 'function' && originData) {
+            initInlineQuestionsResponsesByOriginChart(originData, 'inline-question-origin-echarts-chart', type);
+            if ($('#inline-question-origin-fullscreen-modal').hasClass('show')) {
+                initInlineQuestionsResponsesByOriginChart(originData, 'inline-question-origin-fullscreen-chart', type);
+            }
+        }
+    }
 
-    inlineQustionOrganisationPieChart(organisationData)
+    $(document).on('click', '#inline-question-origin-chart-type-menu [data-chart-type]', function(e) {
+        e.preventDefault();
+        var type = $(this).data('chart-type');
+        renderInlineQuestionOriginCharts(type);
+    });
+    $(document).on('click', '#inline-question-origin-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+        e.preventDefault();
+        var type = $(this).data('chart-type');
+        renderInlineQuestionOriginCharts(type);
+    });
 
-    inlineQuestionLanguageGraph(languageData)
+    // Fullscreen modal for Inline Questions Responses by Origin chart
+    var inlineQuestionOriginFullscreenChartInstance = null;
+    $('#inline-question-origin-fullscreen-modal').on('shown.bs.modal', function () {
+        var fullscreenContainer = document.getElementById('inline-question-origin-fullscreen-chart');
+        if (fullscreenContainer) {
+            var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+        }
+        setTimeout(function() {
+            if (typeof initInlineQuestionsResponsesByOriginChart === 'function' && originData) {
+                inlineQuestionOriginFullscreenChartInstance = initInlineQuestionsResponsesByOriginChart(
+                    originData, 'inline-question-origin-fullscreen-chart', inlineQuestionOriginChartType
+                );
+            }
+        }, 50);
+    });
+    $('#inline-question-origin-fullscreen-modal').on('hidden.bs.modal', function () {
+        if (typeof echarts !== 'undefined') {
+            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('inline-question-origin-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.dispose();
+            }
+        }
+        inlineQuestionOriginFullscreenChartInstance = null;
+    });
+
+    // ECharts: Inline Questions Responses by Destination Country – chart type (doughnut, pie, bar)
+    var inlineQuestionDestinationChartType = 'doughnut';
+    if (typeof initInlineQuestionsResponsesByDestinationChart === 'function' && destinationData) {
+        initInlineQuestionsResponsesByDestinationChart(destinationData, undefined, inlineQuestionDestinationChartType);
+    }
+
+    function renderInlineQuestionDestinationCharts(type) {
+        inlineQuestionDestinationChartType = type;
+        if (typeof initInlineQuestionsResponsesByDestinationChart === 'function' && destinationData) {
+            initInlineQuestionsResponsesByDestinationChart(destinationData, 'inline-question-destination-echarts-chart', type);
+            if ($('#inline-question-destination-fullscreen-modal').hasClass('show')) {
+                initInlineQuestionsResponsesByDestinationChart(destinationData, 'inline-question-destination-fullscreen-chart', type);
+            }
+        }
+    }
+
+    $(document).on('click', '#inline-question-destination-chart-type-menu [data-chart-type]', function(e) {
+        e.preventDefault();
+        var type = $(this).data('chart-type');
+        renderInlineQuestionDestinationCharts(type);
+    });
+    $(document).on('click', '#inline-question-destination-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+        e.preventDefault();
+        var type = $(this).data('chart-type');
+        renderInlineQuestionDestinationCharts(type);
+    });
+
+    // Fullscreen modal for Inline Questions Responses by Destination chart
+    $('#inline-question-destination-fullscreen-modal').on('shown.bs.modal', function () {
+        var fullscreenContainer = document.getElementById('inline-question-destination-fullscreen-chart');
+        if (fullscreenContainer) {
+            var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+        }
+        setTimeout(function() {
+            if (typeof initInlineQuestionsResponsesByDestinationChart === 'function' && destinationData) {
+                initInlineQuestionsResponsesByDestinationChart(
+                    destinationData, 'inline-question-destination-fullscreen-chart', inlineQuestionDestinationChartType
+                );
+            }
+        }, 50);
+    });
+    $('#inline-question-destination-fullscreen-modal').on('hidden.bs.modal', function () {
+        if (typeof echarts !== 'undefined') {
+            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('inline-question-destination-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.dispose();
+            }
+        }
+    });
+
+    // ECharts: Inline Questions Responses by Organisation – chart type (doughnut, pie, bar)
+    var inlineQuestionOrganisationChartType = 'doughnut';
+    if (typeof initInlineQuestionsResponsesByOrganisationChart === 'function' && organisationData) {
+        initInlineQuestionsResponsesByOrganisationChart(organisationData, undefined, inlineQuestionOrganisationChartType);
+    }
+
+    function renderInlineQuestionOrganisationCharts(type) {
+        inlineQuestionOrganisationChartType = type;
+        if (typeof initInlineQuestionsResponsesByOrganisationChart === 'function' && organisationData) {
+            initInlineQuestionsResponsesByOrganisationChart(organisationData, 'inline-question-organisation-echarts-chart', type);
+            if ($('#inline-question-organisation-fullscreen-modal').hasClass('show')) {
+                initInlineQuestionsResponsesByOrganisationChart(organisationData, 'inline-question-organisation-fullscreen-chart', type);
+            }
+        }
+    }
+
+    $(document).on('click', '#inline-question-organisation-chart-type-menu [data-chart-type]', function(e) {
+        e.preventDefault();
+        var type = $(this).data('chart-type');
+        renderInlineQuestionOrganisationCharts(type);
+    });
+    $(document).on('click', '#inline-question-organisation-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+        e.preventDefault();
+        var type = $(this).data('chart-type');
+        renderInlineQuestionOrganisationCharts(type);
+    });
+
+    // Fullscreen modal for Inline Questions Responses by Organisation chart
+    $('#inline-question-organisation-fullscreen-modal').on('shown.bs.modal', function () {
+        var fullscreenContainer = document.getElementById('inline-question-organisation-fullscreen-chart');
+        if (fullscreenContainer) {
+            var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+        }
+        setTimeout(function() {
+            if (typeof initInlineQuestionsResponsesByOrganisationChart === 'function' && organisationData) {
+                initInlineQuestionsResponsesByOrganisationChart(
+                    organisationData, 'inline-question-organisation-fullscreen-chart', inlineQuestionOrganisationChartType
+                );
+            }
+        }, 50);
+    });
+    $('#inline-question-organisation-fullscreen-modal').on('hidden.bs.modal', function () {
+        if (typeof echarts !== 'undefined') {
+            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('inline-question-organisation-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.dispose();
+            }
+        }
+    });
+
+    // ECharts: Inline Questions Responses by Language – chart type (doughnut, pie, bar)
+    var inlineQuestionLanguageChartType = 'doughnut';
+    if (typeof initInlineQuestionsResponsesByLanguageChart === 'function' && languageData) {
+        initInlineQuestionsResponsesByLanguageChart(languageData, undefined, inlineQuestionLanguageChartType);
+    }
+
+    function renderInlineQuestionLanguageCharts(type) {
+        inlineQuestionLanguageChartType = type;
+        if (typeof initInlineQuestionsResponsesByLanguageChart === 'function' && languageData) {
+            initInlineQuestionsResponsesByLanguageChart(languageData, 'inline-question-language-echarts-chart', type);
+            if ($('#inline-question-language-fullscreen-modal').hasClass('show')) {
+                initInlineQuestionsResponsesByLanguageChart(languageData, 'inline-question-language-fullscreen-chart', type);
+            }
+        }
+    }
+
+    $(document).on('click', '#inline-question-language-chart-type-menu [data-chart-type]', function(e) {
+        e.preventDefault();
+        var type = $(this).data('chart-type');
+        renderInlineQuestionLanguageCharts(type);
+    });
+    $(document).on('click', '#inline-question-language-fullscreen-chart-type-menu [data-chart-type]', function(e) {
+        e.preventDefault();
+        var type = $(this).data('chart-type');
+        renderInlineQuestionLanguageCharts(type);
+    });
+
+    // Fullscreen modal for Inline Questions Responses by Language chart
+    $('#inline-question-language-fullscreen-modal').on('shown.bs.modal', function () {
+        var fullscreenContainer = document.getElementById('inline-question-language-fullscreen-chart');
+        if (fullscreenContainer) {
+            var existingChart = typeof echarts !== 'undefined' && echarts.getInstanceByDom(fullscreenContainer);
+            if (existingChart) {
+                existingChart.dispose();
+            }
+        }
+        setTimeout(function() {
+            if (typeof initInlineQuestionsResponsesByLanguageChart === 'function' && languageData) {
+                initInlineQuestionsResponsesByLanguageChart(
+                    languageData, 'inline-question-language-fullscreen-chart', inlineQuestionLanguageChartType
+                );
+            }
+        }, 50);
+    });
+    $('#inline-question-language-fullscreen-modal').on('hidden.bs.modal', function () {
+        if (typeof echarts !== 'undefined') {
+            var fullscreenChart = echarts.getInstanceByDom(document.getElementById('inline-question-language-fullscreen-chart'));
+            if (fullscreenChart) {
+                fullscreenChart.dispose();
+            }
+        }
+    });
+
+    $(window).on('resize', function() {
+        if ($('#inline-question-origin-fullscreen-modal').hasClass('show')) {
+            if (typeof echarts !== 'undefined') {
+                var fullscreenChart = echarts.getInstanceByDom(document.getElementById('inline-question-origin-fullscreen-chart'));
+                if (fullscreenChart) {
+                    fullscreenChart.resize();
+                }
+            }
+        }
+        if ($('#inline-question-organisation-fullscreen-modal').hasClass('show')) {
+            if (typeof echarts !== 'undefined') {
+                var fullscreenChart = echarts.getInstanceByDom(document.getElementById('inline-question-organisation-fullscreen-chart'));
+                if (fullscreenChart) {
+                    fullscreenChart.resize();
+                }
+            }
+        }
+        if ($('#inline-question-language-fullscreen-modal').hasClass('show')) {
+            if (typeof echarts !== 'undefined') {
+                var fullscreenChart = echarts.getInstanceByDom(document.getElementById('inline-question-language-fullscreen-chart'));
+                if (fullscreenChart) {
+                    fullscreenChart.resize();
+                }
+            }
+        }
+        if ($('#inline-question-destination-fullscreen-modal').hasClass('show')) {
+            if (typeof echarts !== 'undefined') {
+                var fullscreenChart = echarts.getInstanceByDom(document.getElementById('inline-question-destination-fullscreen-chart'));
+                if (fullscreenChart) {
+                    fullscreenChart.resize();
+                }
+            }
+        }
+    });
 
 
     function truncateText(text, maxLength) { 

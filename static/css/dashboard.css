@@ -827,7 +827,8 @@ body.modal-open {
 .users-route-map-card,
 .users-geolocation-map-card,
 .users-interaction-map-card,
-.users-by-sector-card {
+.users-by-sector-card
+.inline-question-language-echarts-card {
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -843,7 +844,8 @@ body.modal-open {
 .users-by-immigration-status-card .card-body,
 .users-by-age-card .card-body,
 .work-code-usage-card .card-body,
-.users-by-sector-card .card-body {
+.users-by-sector-card .card-body,
+.inline-question-language-echarts-card .card-body {
     padding: 24px;
 }
 
@@ -944,6 +946,14 @@ body.modal-open {
 }
 
 .fullscreen-btn i {
+    font-size: 16px;
+}
+
+.chart-type-dropdown-btn {
+    padding: 8px 12px;
+}
+
+.chart-type-dropdown-btn i {
     font-size: 16px;
 }
 
@@ -1114,11 +1124,11 @@ body.modal-open {
 
 /* User Overview Header Styles */
 .user-overview-header-row {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 .user-overview-header {
-    font-size: 32px;
+    font-size: 25px;
     font-weight: 700;
     color: white;
     margin: 0;
@@ -1394,7 +1404,7 @@ body.modal-open {
 .dashboard-customize-mode .dashboard-chart {
     position: relative;
     border: 2px dashed var(--jgw-success);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 15px;
     background: linear-gradient(to bottom, rgba(157, 190, 59, 0.03), rgba(157, 190, 59, 0.08));
     transition: all 0.3s ease;
@@ -1988,6 +1998,12 @@ body.modal-open {
     font-weight: 500;
 }
 
+.inline-question-echarts-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;  
+}
 /* What matters to workers - chapters opened tree chart */
 .chapters-opened-tree-chart-box {
     min-height: 400px;

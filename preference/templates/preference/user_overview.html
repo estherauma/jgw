@@ -418,46 +418,46 @@
 <div class="row user-overview-header-row">
     <div class="col-md-6">
         <header class="user-overview-header">Home Overview</header>
-                            </div>
+    </div>
     <div class="col-md-6 text-end">
-                        {% if user.is_authenticated %}
+        {% if user.is_authenticated %}
         <div class="user-overview-actions">
             <div class="dropdown d-inline-block me-2">
-                                    {% flag 'can_download_preferences_excel_reports' %}
+                {% flag 'can_download_preferences_excel_reports' %}
                 <a class="btn btn-primary dropdown-toggle waves-effect text-center bg-jgw-deep-blue"
-                                        href="#" role="button" id="export-menu" data-bs-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                        {% translate "userOverviewExport" %}
-                                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>                                    
-                                    </a>
-                                    {% endflag %}
-                                    <div class="dropdown-menu" aria-labelledby="export-menu">
-                                        <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">{% translate "userOverviewExportPreferencesDataReport" %}</a>
-                                        <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">{% translate "userOverviewExportHelpContactsDataReport" %}</a>
-                                        <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">{% translate "userOverviewExportPreferencesStatistics" %}</a>
-                                        <a class="dropdown-item" href="{% url 'preference:export_pay_calculator_statistics' %}?export=true">Export Pay Calculator Statistics</a>
-                                    </div>
-                                </div>
-                                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
+                    href="#" role="button" id="export-menu" data-bs-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    {% translate "userOverviewExport" %}
+                    <i class="mdi mdi:arrow-down-drop-circle-outline"></i>                                    
+                </a>
+                {% endflag %}
+                <div class="dropdown-menu" aria-labelledby="export-menu">
+                    <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">{% translate "userOverviewExportPreferencesDataReport" %}</a>
+                    <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">{% translate "userOverviewExportHelpContactsDataReport" %}</a>
+                    <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">{% translate "userOverviewExportPreferencesStatistics" %}</a>
+                    <a class="dropdown-item" href="{% url 'preference:export_pay_calculator_statistics' %}?export=true">Export Pay Calculator Statistics</a>
+                </div>
+                </div>
+                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
                 role="button" class="btn btn-primary waves-effect text-center bg-jgw-deep-blue">
                 {% translate "userOverviewFilterButton" %}
             </button>
             <button id="customize-dashboard-btn" class="btn btn-primary waves-effect text-center bg-jgw-deep-blue">
                 <i class="fe-settings"></i> Customize Dashboard
             </button>
-                        </div>
-                        {% else %}
-                        {% include 'includes/non_auth_banner_btns.html' %}
-                        {% endif %}
-                    </div>
-                </div>
+        </div>
+        {% else %}
+        {% include 'includes/non_auth_banner_btns.html' %}
+        {% endif %}
+    </div>
+</div>
 
 
 <div id="dashboard-toolbar" style="display: none;">
     <div class="toolbar-brand">
         <i class="fe-layers"></i>
         <span>Dashboard Builder</span>
-            </div>
+    </div>
    
     <div class="toolbar-right">
         <button class="toolbar-btn" id="add-row-btn" title="Add Row">
@@ -993,25 +993,25 @@
 
 {% endblock content %}
 {% block scripts %}
-<script src="{% static 'js/charts/echarts/monthly_active_users.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/monthly_active_users.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/users_by_origin.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/users_by_origin.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/users_by_gender.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/users_by_gender.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/users_by_destination.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/users_by_destination.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/users_by_language.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/users_by_language.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/users_by_state.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/users_by_state.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/users_by_immigration_status.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/users_by_immigration_status.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/users_by_age.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/users_by_age.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/users_by_sector.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/users_by_sector.js' %}"></script>
 
-<script src="{% static 'js/charts/echarts/work_code_usage.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/work_code_usage.js' %}"></script>
 
 <script src="{% static 'js/charts/pie/preference_age_pie_chart.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_gender_pie_chart.js' %}"></script>
@@ -1019,7 +1019,7 @@
 <script src="{% static 'js/charts/bar/preference_origin_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/preference_work-code-usage_graph.js' %}"></script>
 <script src="{% static 'js/charts/pie/preference_destination_pie_chart.js' %}"></script>
-<script src="{% static 'js/charts/echarts/preferences_monthly_users.js' %}"></script>
+<script src="{% static 'js/charts/echarts/preferences/preferences_monthly_users.js' %}"></script>
 <!-- Removed legacy bar chart scripts no longer used on this page -->
 <script src="{% static 'js/app/user_overview.js' %}"></script>
 <script src="{% static 'js/charts/line/active_users_monthly_stat.js' %}"></script>
