@@ -9,6 +9,7 @@ from .forms import (
     AddWorkCodeForm,
     AppUserForm,
     CreateOrganisationForm,
+    WorkCodeAssignForm,
     WorkGroupForm,
 )
 from .models import AppUser, WorkGroup
@@ -69,6 +70,7 @@ def user_management(request):
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups),
+        "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
     }
     return render(request, "index.html", context=context)
 
@@ -163,5 +165,46 @@ class CreateAppUserView(View):
             user.save()
             form.save_m2m()
             return JsonResponse({"ok": True, "org_id": organisation.id})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class AssignWorkCodeView(View):
+    def post(self, request):
+        org_id = request.POST.get("selected_org_id")
+        work_code_id = request.POST.get("work_code_id")
+        organisation = None
+        if org_id:
+            organisation = OrganisationData.objects.filter(id=org_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
+                status=400,
+            )
+        if not work_code_id:
+            return JsonResponse(
+                {"ok": False, "errors": {"work_code_id": ["Select a work code first."]}},
+                status=400,
+            )
+        work_code = OrganisationAccessCode.objects.filter(
+            id=work_code_id, organisation=organisation
+        ).first()
+        if not work_code:
+            return JsonResponse(
+                {"ok": False, "errors": {"work_code_id": ["Work code not found."]}},
+                status=400,
+            )
+        work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
+        form = WorkCodeAssignForm(request.POST, work_groups_qs=work_groups_qs)
+        if form.is_valid():
+            work_groups = form.cleaned_data["work_groups"]
+            work_code.work_groups.set(work_groups)
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "org_id": organisation.id,
+                    "work_code_id": work_code.id,
+                }
+            )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
