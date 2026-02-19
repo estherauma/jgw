@@ -147,11 +147,11 @@
         } else {
           window.location.reload();
         }
-      } catch (err) {
-        if (err && err.errors) {
-          Object.keys(err.errors).forEach(field => {
+      } catch (data) {
+        if (data && data.errors) {
+          Object.keys(data.errors).forEach(field => {
             var el = form.querySelector("[data-error-for='" + field + "']");
-            if (el) el.textContent = Array.isArray(err.errors[field]) ? err.errors[field].join(' ') : err.errors[field];
+            if (el) el.textContent = Array.isArray(data.errors[field]) ? data.errors[field].join(' ') : data.errors[field];
           });
         }
         if (errorBox) {
