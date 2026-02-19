@@ -17,4 +17,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         ChaptersOpened.objects.all().delete()
         Chapter.objects.all().delete()
+
       

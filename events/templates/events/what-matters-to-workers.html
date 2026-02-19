@@ -122,6 +122,24 @@
   <div class="col-md-12 mt-3">
     <div class="card h-100">
       <div class="card-body chart">
+        <p class="chart-title">{% translate "whatMattersChartTitle" %} — Tree view</p>
+        <div class="chapters-opened-tree-chart-box">
+          <div id="chapters-opened-tree-chart-id"></div>
+          <div class="info-tooltip">
+            <i class="fas fa-info-circle"></i>
+            {% translate "whatMattersChartTooltip" %}
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12 mt-3">
+    <div class="card h-100">
+      <div class="card-body chart">
         <p class="chart-title"> {% translate "whatMattersUserFeedbackTitle" %}</p>
         <div class="was-this-helpful-graph-id-chart-box">
           <div id="was-this-helpful-graph-id"></div>
@@ -139,6 +157,7 @@
 {% block scripts %}
 <script src="{% static 'js/charts/bar/chapters_feedback_graph.js' %}"></script>
 <script src="{% static 'js/charts/bar/chapters_opened_graph.js' %}"></script>
+<script src="{% static 'js/charts/echarts/what_matters_to_workers/chapters_opened_tree.js' %}"></script>
 <script src="{% static 'js/app/what_matter_to_workers.js' %}"></script>
 
 <script type="text/javascript">
@@ -148,6 +167,10 @@
 
   const chaptersOpenedData = {{ chapters_opened_data | safe }};
   chaptersOpenedGraph(chaptersOpenedData);
+
+  if (chaptersOpenedData && chaptersOpenedData.tree) {
+    initChaptersOpenedTreeChart(chaptersOpenedData, 'chapters-opened-tree-chart-id');
+  }
 
 </script>
 {% endblock %}

@@ -151,6 +151,7 @@ class Age(models.Model):
 
 class OrganisationAccessCode(models.Model):
     code = models.CharField(max_length=255, unique=True)
+    requires_login = models.BooleanField(default=False)
     organisation = models.ForeignKey(
         "OrganisationData",
         on_delete=models.SET_NULL,
@@ -503,4 +504,3 @@ class PayCalculator(models.Model):
     
     def __str__(self):
         return f"PayCalculator - {self.device_id} - {self.api_created_at}"
-

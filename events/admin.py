@@ -29,7 +29,7 @@ class SwsPasiEventTabularAdminDisplay(admin.ModelAdmin):
 
 
 class ChapterAdminDisplay(admin.ModelAdmin):
-    list_display = ["number_key", "chapter_text", "destination"]
+    list_display = ["number_key", "chapter_text", "destination", "origin"]
     search_fields = ["number_key", "chapter_text"]
 
 
@@ -111,12 +111,14 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
         "created_at",
         "event_created_at",
         "event_name",
+        "chapter",
         "get_chapter_text",
         "get_chapter_key",
         "immigration_status_chapter_title",
         "immigration_status",
         "device_id",
         "destination",
+        "origin",
         "organisation",
         "org_info",
         "is_myvoice_organisation",

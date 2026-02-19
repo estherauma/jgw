@@ -23,7 +23,8 @@ from events.logic.update_events_data_with_org_info import update_chapters_opened
 from events.models import Chapter, ChaptersOpened, ImmigrationStatusChapterTitle
 from preference.models import Country, Organisation, Preference
 from preference.tasks import translate_and_clean_preferences_fields
-
+from django.db.models import Q, Case, When, Value, IntegerField
+import datetime
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/chapters_opened.log")
 
@@ -49,7 +50,6 @@ def get_chapter_number_from_name(chapter_name):
     matches = re.search(r"ChapterOpened_(\d+_\d+)", chapter_name)
     return matches[1] if matches else chapter_name
 
-
 def fetch_chapters_opened_data_from_api_to_db():
     try:
         last_event_timestamp = get_latest_chapter_opened_event_timestamp()
@@ -71,6 +71,7 @@ def fetch_chapters_opened_data_from_api_to_db():
 
         for chapter_opened in chapters_opened:
             try:
+                update_chapter_titles()
                 add_chapters_opened_to_db(chapter_opened)
             except Exception as e:
                 kunfu_panda_logger.error(f"An error occurred during chapter creation: {str(e)}")
@@ -86,7 +87,6 @@ def fetch_chapters_opened_data_from_api_to_db():
     kunfu_panda_logger.info(f"Finished adding a total of {total_fetched} chapters opened to the database")
     
     translate_and_clean_preferences_fields()
-    update_chapter_titles()
     update_myvoice_chapters_opened_events()
     update_chapters_opened_org_info_from_organisation()
 
@@ -129,57 +129,44 @@ def add_chapters_opened_to_db(chapters_feedback):
     destination_data = get_or_add_country_to_db(destination, source="destination")
     factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
 
+    number_key = get_chapter_number_from_name(event_name)
+
+    chapter = get_chapter_instance(number_key, destination_data, origin_data)
+
+    immigration_status_chapter_title = None
+    if immigration_status_data:
+        number_key_with_dots = number_key.replace("_", ".")
+        immigration_status_chapter_title = ImmigrationStatusChapterTitle.objects.filter(
+            chapter_uid=number_key_with_dots,
+            destination=destination_data,
+            immigration_status=immigration_status_data,
+        ).first()
+
     if event_date is not None and timezone.is_naive(event_date):
         event_date = timezone.make_aware(event_date)
 
     preference = Preference.objects.filter(device_id=device_id).first()
 
-    chapter_opened = ChaptersOpened.objects.create(
-        event_name=event_name or NOT_SPECIFIED,
-        organisation=organisation_data,
-        event_created_at=event_date,
-        age=age_data,
-        language=language_data,
-        gender=gender_data,
-        organisation_sector=organisation_sector_data,
-        device_id=device_id,
-        app_id=app_id,
-        destination_state=destination_state_data,
-        destination=destination_data,
-        origin=origin_data,
-        preference=preference,
-        immigration_status=immigration_status_data,
-        factory_farm=factory_farm_data,
-    )
-
-    number_key = get_chapter_number_from_name(chapter_opened.event_name)
-    
-    if immigration_status_data:
-        number_key_with_dots = number_key.replace('_', '.')
-        
-        immigration_status_title = ImmigrationStatusChapterTitle.objects.filter(
-            chapter_uid__in=[number_key_with_dots],
-            destination=destination_data,
-            immigration_status=immigration_status_data
-        ).first()
-
-        if immigration_status_title:
-            chapter_opened.immigration_status_chapter_title = immigration_status_title
-        else:
-            chapter, _ = Chapter.objects.get_or_create(
-                number_key=number_key,
-                destination=destination_data
-            )
-            chapter_opened.chapter = chapter
-    else:
-        chapter, _ = Chapter.objects.get_or_create(
-            number_key=number_key,
-            destination=destination_data
-        )
-        chapter_opened.chapter = chapter
-
     try:
-        chapter_opened.save()
+        ChaptersOpened.objects.create(
+            event_name=event_name or NOT_SPECIFIED,
+            organisation=organisation_data,
+            event_created_at=event_date,
+            age=age_data,
+            language=language_data,
+            gender=gender_data,
+            organisation_sector=organisation_sector_data,
+            device_id=device_id,
+            app_id=app_id,
+            destination_state=destination_state_data,
+            destination=destination_data,
+            origin=origin_data,
+            preference=preference,
+            immigration_status=immigration_status_data,
+            factory_farm=factory_farm_data,
+            chapter=chapter,
+            immigration_status_chapter_title=immigration_status_chapter_title,
+        )
     except Exception as e:
         kunfu_panda_logger.error(f"Error saving chapter opened: {str(e)}")
         raise
@@ -214,3 +201,27 @@ def reverse_myvoice_chapters_opened_events():
         )
 
     return updated_count
+
+def get_chapter_instance(number_key, destination, origin):
+    if not number_key or not destination:
+        return None
+
+    return (
+        Chapter.objects
+        .filter(
+            number_key=number_key,
+            destination=destination,
+        )
+        .filter(
+            Q(origin=origin) | Q(origin=destination)
+        )
+        .annotate(
+            priority=Case(
+                When(origin=origin, then=Value(1)),          
+                default=Value(3),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("priority")
+        .first()
+    )
