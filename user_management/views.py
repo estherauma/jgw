@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.http import JsonResponse
-from django.shortcuts import redirect, render,get_object_or_404
+from django.shortcuts import render
 from django.views import View
 
 from preference.models import OrganisationAccessCode, OrganisationData
@@ -112,7 +112,12 @@ class CreateWorkCodeView(View):
 
 class EditOrganisationView(View):
     def post(self, request, organisation_id):
-        organisation = get_object_or_404(OrganisationData, pk=organisation_id)
+        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "errors": {"organisation": ["Organisation not found."]}},
+                status=404,
+            )
         form = CreateOrganisationForm(request.POST, instance=organisation)
         if form.is_valid():
             form.save()

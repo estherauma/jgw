@@ -78,17 +78,29 @@
         }
         window.location.reload();
       } catch (data) {
+        var otherErrors = [];
+        var hasFieldErrors = false;
+
         if (data && data.errors) {
           Object.keys(data.errors).forEach(function (field) {
             var el = form.querySelector("[data-error-for='" + field + "']");
             if (el) {
               el.textContent = data.errors[field].join(' ');
+              hasFieldErrors = true;
+            } else {
+              otherErrors.push(data.errors[field].join(' '));
             }
           });
         }
+
         if (errorBox) {
-          errorBox.textContent = 'Please fix the errors and try again.';
-          errorBox.classList.remove('d-none');
+          if (otherErrors.length > 0) {
+            errorBox.textContent = otherErrors.join(' ');
+            errorBox.classList.remove('d-none');
+          } else if (hasFieldErrors) {
+            errorBox.textContent = 'Please fix the errors and try again.';
+            errorBox.classList.remove('d-none');
+          }
         }
       } finally {
         if (submitButton) {
