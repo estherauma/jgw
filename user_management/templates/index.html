@@ -253,8 +253,6 @@
 {% include 'add-appuser-modal.html' with action_type='add' modal_title='Add user' submit_label='Save' form_action=create_app_user_url form=app_user_form %}
 
 {% include 'create-org-modal.html' with action_type='edit' modal_title='Edit organisation' submit_label='Save changes' form=create_org_form form_action="" %}
-
-{% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% endblock content %} 
 {% block scripts %}
 <script src="{% static 'js/user_management/common.js' %}"></script>
