@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.views import View
 
 from preference.models import OrganisationAccessCode, OrganisationData
@@ -13,6 +13,7 @@ from .forms import (
     WorkGroupForm,
 )
 from .models import AppUser, WorkGroup
+
 
 
 def user_management(request):
@@ -111,6 +112,20 @@ class CreateWorkCodeView(View):
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
+class EditOrganisationView(View):
+    def post(self, request, organisation_id):
+        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Organisation not found."},
+                status=404,
+            )
+        form = CreateOrganisationForm(request.POST, instance=organisation)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"ok": True})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 class CreateWorkGroupView(View):
     def post(self, request):

@@ -67,33 +67,33 @@
   </div>
 </div>
 <script>
-  (function () {
-    function initOrgDropdown() {
-      var wrapper = document.querySelector('[data-org-select]');
-      if (!wrapper) {
-        return;
-      }
-      var toggle = wrapper.querySelector('[data-org-toggle]');
-      var menu = wrapper.querySelector('[data-org-menu]');
-      var filterInput = wrapper.querySelector('[data-org-filter]');
-      var hiddenInput = wrapper.querySelector('[data-org-hidden]');
-      var selectedLabel = wrapper.querySelector('[data-org-selected-label]');
-      var options = Array.prototype.slice.call(
-        wrapper.querySelectorAll('[data-org-option]'),
-      );
+(function () {
+  function initOrgDropdown() {
+    var wrapper = document.querySelector('[data-org-select]');
+    if (!wrapper) {
+      return;
+    }
+    var toggle = wrapper.querySelector('[data-org-toggle]');
+    var menu = wrapper.querySelector('[data-org-menu]');
+    var filterInput = wrapper.querySelector('[data-org-filter]');
+    var hiddenInput = wrapper.querySelector('[data-org-hidden]');
+    var selectedLabel = wrapper.querySelector('[data-org-selected-label]');
+    var options = Array.prototype.slice.call(
+      wrapper.querySelectorAll('[data-org-option]'),
+    );
 
-      if (!toggle || !menu || !selectedLabel || options.length === 0) {
-        return;
-      }
+    if (!toggle || !menu || !selectedLabel || options.length === 0) {
+      return;
+    }
 
-      function closeMenu() {
-        wrapper.classList.remove('is-open');
-        menu.classList.remove('is-open');
-        if (filterInput) {
-          filterInput.value = '';
-          filterOptions('');
-        }
+    function closeMenu() {
+      wrapper.classList.remove('is-open');
+      menu.classList.remove('is-open');
+      if (filterInput) {
+        filterInput.value = '';
+        filterOptions('');
       }
+    }
 
       function setSelected(option) {
         var label = option.getAttribute('data-org-label') || '';
@@ -267,6 +267,6 @@
       }
     }
 
-    window.addEventListener('load', initOrgDropdown);
-  })();
+  window.addEventListener('load', initOrgDropdown);
+})();
 </script>
