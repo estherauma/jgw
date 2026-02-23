@@ -190,7 +190,14 @@
                                     {% endif %}
                                     <td>
                                         <div class="um-action">
-                                            <button class="um-btn um-btn-outline">Edit</button>
+                                            <button class="um-btn um-btn-outline" data-toggle="modal" 
+                                            data-target="#edit-appuser-modal" 
+                                            data-user-id="{{ u.id }}" data-user-email="{{ u.email }}" 
+                                            data-user-first-name="{{ u.first_name }}" data-user-last-name="{{ u.last_name }}" 
+                                            data-user-work-groups="{% for group in u.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}" {% if selected_org_id %}
+                                            data-user-org-id="{{ selected_org_id }}"{% endif %}>
+                                                Edit
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
