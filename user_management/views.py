@@ -165,3 +165,19 @@ class CreateAppUserView(View):
             return JsonResponse({"ok": True, "org_id": organisation.id})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+    
+class EditAppUserView(View):
+    def post(self, request, user_id):
+        user = AppUser.objects.filter(id=user_id).first()
+        if not user:
+            return JsonResponse({"ok": False, "errors": {"user": ["User not found."]}}, status=404)
+        
+        organisation = user.organisation_data
+        work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
+        form = AppUserForm(request.POST, instance=user, work_groups_qs=work_groups_qs)
+        
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"ok": True, "org_id": organisation.id})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
