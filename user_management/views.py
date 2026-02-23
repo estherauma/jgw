@@ -185,7 +185,7 @@ class EditAppUserView(View):
     def post(self, request, user_id):
         user = AppUser.objects.filter(id=user_id).first()
         if not user:
-            return JsonResponse({"ok": False, "errors": {"user": ["User not found."]}}, status=404)
+            return JsonResponse({"ok": False, "error": "User not found."}, status=404)
         
         organisation = user.organisation_data
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
