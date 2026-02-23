@@ -110,13 +110,9 @@
         }
         window.location.reload();
       } catch (data) {
-        console.log('Edit user error response:', data);
         if (data && data.errors) {
-          console.log('Errors object:', data.errors);
           Object.keys(data.errors).forEach(function (field) {
-            console.log('Processing field:', field, 'error:', data.errors[field]);
             var el = form.querySelector("[data-error-for='" + field + "']");
-            console.log('Found element for field:', field, el);
             if (el) {
               el.textContent = data.errors[field].join(' ');
             }
