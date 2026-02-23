@@ -76,8 +76,8 @@
                             <thead>
                                 <tr>
                                     <th>Work code</th>
-                                    <th>Requires authentication</th>
-                                    <th>Assigned work groups</th>
+                                    <th class="text-center">Requires authentication</th>
+                                    <th class="text-center">Assigned work groups</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -88,12 +88,23 @@
                                 {% for code in work_codes %}
                                 <tr data-org-workcode data-org-id="{{ code.organisation_id }}">
                                     <td data-workcode-value>{{ code.code }}</td>
-                                    <td>{% if code.requires_login %}Yes{% else %}No{% endif %}</td>
-                                    <td>0</td>
+                                    <td class="text-center">{% if code.requires_login %}Yes{% else %}No{% endif %}</td>
+                                    <td class="text-center">{{ code.work_groups.count }}</td>
                                     <td>
                                         <div class="um-action">
                                             <button class="um-btn um-btn-outline">Edit</button>
-                                            <button class="um-btn um-btn-outline">Assign</button>
+                                            <button
+                                                class="um-btn um-btn-outline"
+                                                type="button"
+                                                data-toggle="modal"
+                                                data-target="#assign-workcode-modal"
+                                                data-workcode-assign
+                                                data-workcode-id="{{ code.id }}"
+                                                data-workcode-code="{{ code.code }}"
+                                                data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                            >
+                                                Assign
+                                            </button>
                                             <button class="um-btn um-btn-outline-black um-navy">Delete</button>
                                         </div>
                                     </td>
@@ -236,9 +247,11 @@
 {% url 'user_management:create_organisation' as create_org_url %}
 {% url 'user_management:create_work_group' as create_work_group_url %}
 {% url 'user_management:create_app_user' as create_app_user_url %}
+{% url 'user_management:assign_work_code' as assign_work_code_url %}
 <!-- include create organisation modal -->
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
+{% include 'assign-workcode-modal.html' with action_type='assign' modal_title='Assign work code' submit_label='Assign' form_action=assign_work_code_url form=assign_work_code_form %}
 {% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add work group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
 {% include 'add-appuser-modal.html' with action_type='add' modal_title='Add user' submit_label='Save' form_action=create_app_user_url form=app_user_form %}
 
