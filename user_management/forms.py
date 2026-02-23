@@ -20,13 +20,19 @@ class CreateOrganisationForm(forms.ModelForm):
 
     def clean_name(self):
         name = self.cleaned_data.get("name", "").strip().title()
-        if OrganisationData.objects.filter(name__iexact=name).exists():
+        qs = OrganisationData.objects.filter(name__iexact=name)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
             raise forms.ValidationError("Organisation name already exists.")
         return name
 
     def clean_org_code(self):
         org_code = self.cleaned_data.get("org_code", "").strip().upper()
-        if OrganisationData.objects.filter(org_code__iexact=org_code).exists():
+        qs = OrganisationData.objects.filter(org_code__iexact=org_code)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
             raise forms.ValidationError("Organisation code already exists.")
         return org_code
 
