@@ -53,17 +53,8 @@
           window.location.reload();
         }
       } catch (data) {
-        if (data && data.errors) {
-          Object.keys(data.errors).forEach(function (field) {
-            var el = form.querySelector("[data-error-for='" + field + "']");
-            if (el) {
-              el.textContent = data.errors[field].join(' ');
-            }
-          });
-        }
-        if (errorBox) {
-          errorBox.textContent = 'Please fix the errors and try again.';
-          errorBox.classList.remove('d-none');
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
         if (submitButton) {

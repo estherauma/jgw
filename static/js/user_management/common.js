@@ -105,6 +105,26 @@
 
   window.postFormJson = postFormJson;
 
+  function handleErrors({ form, errorBox, data, errorMessage }) {
+    if (data && data.errors) {
+      Object.keys(data.errors).forEach(function (field) {
+        if (!form) {
+          return;
+        }
+        var el = form.querySelector("[data-error-for='" + field + "']");
+        if (el) {
+          el.textContent = data.errors[field].join(' ');
+        }
+      });
+    }
+    if (errorBox) {
+      errorBox.textContent = errorMessage || data?.error || 'Please fix the errors and try again.';
+      errorBox.classList.remove('d-none');
+    }
+  }
+
+  window.handleErrors = handleErrors;
+
   function syncThumb(container, track, thumb) {
     if (!thumb || !track || !container) {
       return;
