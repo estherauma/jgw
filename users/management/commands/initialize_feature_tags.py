@@ -86,7 +86,7 @@ class Command(BaseCommand):
             {"condition": "58_admin", "tag": "can_view_organizations_table"},
             {"condition": "58_admin", "tag": "can_create_work_code"},
             {"condition": "58_admin", "tag": "can_delete_work_code"},
-            {"condition": "58_admin", "tag": "can_assign_work_code"},
+            {"condition": "org_admin", "tag": "can_assign_work_code"},
             {"condition": "58_admin", "tag": "can_edit_organizations"},
             {"condition": "58_admin", "tag": "can_delete_organization"},
             {"condition": "org_admin", "tag": "can_create_appuser"},
@@ -102,7 +102,7 @@ class Command(BaseCommand):
         WaffleFlag = get_waffle_flag_model()
         ROLE_INHERITANCE = {
             "org_admin": ["org_admin", "58_admin"],  # 58_admin has all org_admin permissions
-            "58_admin": ["58_admin", "org_admin"],
+            "58_admin": ["58_admin"],  # 58_admin permissions only
             "user_management": ["user_management"],
         }
         for flag in flags_list:
