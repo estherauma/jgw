@@ -240,7 +240,12 @@
                             </td>
                             <td>
                                 <div class="um-action">
-                                    <button class="um-btn um-btn-outline">Edit</button>
+                                    <button class="um-btn um-btn-outline" data-toggle="modal" 
+                                    data-target="#edit-workgroup-modal" data-group-id="{{ group.id }}" 
+                                    data-group-name="{{ group.name }}" 
+                                    data-group-codes="{% for code in group.access_codes.all %}{{ code.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                                        Edit
+                                    </button>
                                     <button class="um-btn um-btn-outline-black um-navy">Delete</button>
                                 </div>
                             </td>
@@ -263,6 +268,7 @@
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% include 'assign-workcode-modal.html' with action_type='assign' modal_title='Assign work code' submit_label='Assign' form_action=assign_work_code_url form=assign_work_code_form %}
 {% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add work group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
+{% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit work group' submit_label='Save changes' form='work_group_form'%}
 {% include 'add-appuser-modal.html' with action_type='add' modal_title='Add user' submit_label='Save' form_action=create_app_user_url form=app_user_form %}
 
 {% include 'create-org-modal.html' with action_type='edit' modal_title='Edit organisation' submit_label='Save changes' form=create_org_form form_action="" %}
