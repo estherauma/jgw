@@ -159,6 +159,29 @@ class CreateWorkGroupView(View):
             )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+    
+class EditWorkGroupView(View):
+    def post(self, request, work_group_id):
+        work_group = WorkGroup.objects.filter(pk=work_group_id).first()
+        if not work_group:
+            return JsonResponse(
+                {"ok": False, "error": "Work group not found."},
+                status=404,
+            )
+        form = WorkGroupForm(request.POST, instance=work_group)
+        if form.is_valid():
+            if WorkGroup.objects.filter(
+                organisation=work_group.organisation,
+                name__iexact=form.cleaned_data["name"]
+            ).exclude(pk=work_group_id).exists():
+                return JsonResponse(
+                    {"ok": False, "errors": {"name": ["Work group already exists."]}},
+                    status=400,
+                )
+            form.save()
+            return JsonResponse({"ok": True})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
 class CreateAppUserView(View):
