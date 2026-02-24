@@ -13,13 +13,42 @@ from .forms import (
     WorkGroupForm,
 )
 from .models import AppUser, WorkGroup
+from .utils import is_org_admin, is_super_or_58_admin
 
+
+def get_allowed_orgs(user):
+    if user.is_anonymous:
+        return OrganisationData.objects.none()
+    if is_super_or_58_admin(user):
+        return OrganisationData.objects.all()
+    if is_org_admin(user):
+        org = user.organisation_data.order_by("name").first()
+        if not org:
+            return OrganisationData.objects.none()
+        return OrganisationData.objects.filter(id=org.id)
+    return OrganisationData.objects.none()
+
+
+def has_org_access(user, organisation):
+    if not organisation:
+        return False
+    return get_allowed_orgs(user).filter(id=organisation.id).exists()
+
+
+def org_access_denied():
+    return JsonResponse(
+        {"ok": False, "error": "You do not have access to this organisation."},
+        status=403,
+    )
 
 
 def user_management(request):
-    organizations = OrganisationData.objects.order_by("name")
+    user = request.user
+    organizations = get_allowed_orgs(user).order_by("name")
 
     users = AppUser.objects.select_related("organisation_data").prefetch_related("work_groups").order_by("email")
+    if is_org_admin(user):
+        users = users.filter(organisation_data__in=organizations)
 
     work_codes = []
     work_groups = WorkGroup.objects.none()
@@ -32,6 +61,12 @@ def user_management(request):
     requested_org_id = request.GET.get("selected_org_id")
     if requested_org_id:
         selected_org = organizations.filter(id=requested_org_id).first()
+        if selected_org:
+            selected_org_id = str(selected_org.id)
+            selected_org_name = selected_org.name
+
+    if is_org_admin(user):
+        selected_org = organizations.first()
         if selected_org:
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
@@ -78,6 +113,8 @@ def user_management(request):
 
 class CreateOrganisationView(View):
     def post(self, request):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
         form = CreateOrganisationForm(request.POST)
         if form.is_valid():
             organisation = form.save()
@@ -88,6 +125,8 @@ class CreateOrganisationView(View):
 
 class CreateWorkCodeView(View):
     def post(self, request):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
         form = AddWorkCodeForm(request.POST)
         org_id = request.POST.get("selected_org_id")
         organisation = None
@@ -114,6 +153,8 @@ class CreateWorkCodeView(View):
 
 class EditOrganisationView(View):
     def post(self, request, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
         organisation = OrganisationData.objects.filter(pk=organisation_id).first()
         if not organisation:
             return JsonResponse(
@@ -139,6 +180,8 @@ class CreateWorkGroupView(View):
                 {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
                 status=400,
             )
+        if not has_org_access(request.user, organisation):
+            return org_access_denied()
         if form.is_valid():
             if WorkGroup.objects.filter(
                 organisation=organisation, name__iexact=form.cleaned_data["name"]
@@ -172,6 +215,8 @@ class CreateAppUserView(View):
                 {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
                 status=400,
             )
+        if not has_org_access(request.user, organisation):
+            return org_access_denied()
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
         form = AppUserForm(request.POST, work_groups_qs=work_groups_qs)
         if form.is_valid():
@@ -196,6 +241,8 @@ class AssignWorkCodeView(View):
                 {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
                 status=400,
             )
+        if not has_org_access(request.user, organisation):
+            return org_access_denied()
         if not work_code_id:
             return JsonResponse(
                 {"ok": False, "errors": {"work_code_id": ["Select a work code first."]}},
