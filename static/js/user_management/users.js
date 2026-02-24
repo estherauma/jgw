@@ -93,6 +93,10 @@
       var userID = $btn.data('user-id');
       form.action = '/user-management/app-users/' + userID + '/edit/';
 
+      if (window.syncSelectedOrganization) {
+        window.syncSelectedOrganization('edit-appuser-form', '#edit-appuser-modal [data-appuser-org-label]');
+      }
+
       if (errorBox) errorBox.classList.add('d-none');
       $(form).find("[data-error-for]").text("");
     });
