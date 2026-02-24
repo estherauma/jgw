@@ -230,12 +230,66 @@
     });
   }
 
+  function initEditWorkGroupForm() {
+    var modal = document.getElementById('edit-workgroup-modal');
+    if (!modal) return;
+  
+    var form = modal.querySelector('form');
+    var errorBox = document.getElementById('edit-workgroup-form-error');
+  
+    $('[data-edit-workgroup-btn]').on('click', function() {
+      var $btn = $(this);
+      form.querySelector('[name="name"]').value = $btn.data('workgroup-name') || '';
+      form.action = '/user-management/work-groups/' + $btn.data('workgroup-id') + '/edit/';
+  
+      if (window.syncSelectedOrganization) {
+        window.syncSelectedOrganization('edit-workgroup-form', '[data-workgroup-org-label]');
+      }
+
+      if (errorBox) errorBox.classList.add('d-none');
+      $(form).find("[data-error-for]").text("");
+    });
+  
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      safeClearFormErrors(form, errorBox);
+  
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) submitButton.disabled = true;
+  
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        window.location.reload();
+      } catch (data) {
+        if (data && data.errors) {
+          Object.keys(data.errors).forEach(function (field) {
+            var el = form.querySelector("[data-error-for='" + field + "']");
+            if (el) {
+              el.textContent = data.errors[field].join(' ');
+            }
+          });
+        }
+        if (errorBox) {
+          errorBox.textContent = (data && data.error) || 'Please fix the errors and try again.';
+          errorBox.classList.remove('d-none');
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+  }
+
   window.addEventListener('load', ()=>{
     initCreateOrgForm();
     initWorkCodeForm();
     initWorkGroupForm();
     initAssignWorkCodeForm();
     initEditOrgForm();
+    initEditWorkGroupForm();
   })
 
   function safeClearFormErrors(form, errorBox) {
