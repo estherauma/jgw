@@ -45,17 +45,22 @@
                             <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
-                    {% if form.work_groups and form.work_groups.field.queryset %}
-                    <div class="um-field form-group">
-                        <span>Work groups</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll">
-                            {{ form.work_groups }}
+                    {% if action_type == 'add' %}
+                        {% if form.work_groups and form.work_groups.field.queryset.exists %}
+                        <div class="um-field form-group">
+                            <span>Work groups</span>
+                            <div class="um-checkbox-list um-checkbox-list-scroll">
+                                {{ form.work_groups }}
+                            </div>
+                            <div class="text-danger small" data-error-for="work_groups"></div>
                         </div>
-                        <div class="text-danger small" data-error-for="work_groups"></div>
-                        {% if form.work_groups.errors %}
-                            <div class="text-danger small">{{ form.work_groups.errors }}</div>
                         {% endif %}
-                    </div>
+                    {% else %}
+                        <div class="um-field form-group" data-workgroups-section hidden>
+                            <span>Work groups</span>
+                            <div class="um-checkbox-list um-checkbox-list-scroll"></div>
+                            <div class="text-danger small" data-error-for="work_groups"></div>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="um-modal-footer modal-footer">

@@ -203,10 +203,10 @@
                                         <div class="um-action">
                                             <button class="um-btn um-btn-outline" data-toggle="modal" 
                                             data-target="#edit-appuser-modal" 
-                                            data-user-id="{{ u.id }}" data-user-email="{{ u.email }}" 
-                                            data-user-first-name="{{ u.first_name }}" data-user-last-name="{{ u.last_name }}" 
-                                            data-user-work-groups="{% for group in u.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}" {% if selected_org_id %}
-                                            data-user-org-id="{{ selected_org_id }}"{% endif %}>
+                                            data-user-id="{{ u.id }}" data-email="{{ u.email }}" 
+                                            data-first-name="{{ u.first_name }}" data-last-name="{{ u.last_name }}" 
+                                            data-org-name="{% if u.organisation_data %}{{ u.organisation_data.name }}{% endif %}"
+                                            data-work-groups="{% for group in u.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
                                                 Edit
                                             </button>
                                         </div>
