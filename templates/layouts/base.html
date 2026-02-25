@@ -117,6 +117,15 @@
         <!-- Custom generic charts -->
         <script src="{% static 'dashboard/js/charts/bar.js' %}"></script>
 
+        <script>
+            window.isOrgAdmin = {{ is_org_admin|yesno:"true,false" }};
+            window.is58Admin = {{ is_58_admin|yesno:"true,false" }};
+            window.isSuperUser = {{ is_super_user|yesno:"true,false" }};
+            if (window.is58Admin || window.isSuperUser) {
+                window.isOrgAdmin = false;
+            }
+        </script>
+
         {% block scripts %}{% endblock scripts %}
         {% include 'includes/posthog_snippet.html' %}
         <script>

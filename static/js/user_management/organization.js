@@ -206,7 +206,7 @@
         if (window.postFormJson) {
           data = await window.postFormJson(form);
         }
-        if (data && data.org_id) {
+        if (data && data.org_id && !window.isOrgAdmin) {
           var homeUrl = window.location.pathname;
           var target =
             homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
@@ -308,7 +308,7 @@
         if (window.postFormJson) {
           data = await window.postFormJson(form);
         }
-        if (data && data.org_id) {
+        if (data && data.org_id && !window.isOrgAdmin) {
           var homeUrl = window.location.pathname;
           var target =
             homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);

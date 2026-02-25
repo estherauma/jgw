@@ -81,12 +81,38 @@ class Command(BaseCommand):
             {"condition": "everyone", "tag": "can_view_messaging_question_per_origin_on_messaging_page"},
             {"condition": "everyone", "tag": "can_view_messaging_question_per_destination_on_messaging_page"},
             {"condition": "everyone", "tag": "can_view_organisation_chart_on_messaging_question_page"},
+            # User management page feature flags
+            {"condition": "user_management", "tag": "can_view_user_management_page"},
+            {"condition": "58_admin", "tag": "can_view_organizations_table"},
+            {"condition": "58_admin", "tag": "can_create_work_code"},
+            {"condition": "58_admin", "tag": "can_delete_work_code"},
+            {"condition": "org_admin", "tag": "can_assign_work_code"},
+            {"condition": "58_admin", "tag": "can_edit_organizations"},
+            {"condition": "58_admin", "tag": "can_delete_organization"},
+            {"condition": "org_admin", "tag": "can_create_appuser"},
+            {"condition": "org_admin", "tag": "can_edit_appuser"},
+            {"condition": "org_admin", "tag": "can_delete_appuser"},
+            {"condition": "org_admin", "tag": "can_create_workgroup"},
+            {"condition": "org_admin", "tag": "can_delete_workgroup"},
+            {"condition": "org_admin", "tag": "can_edit_workgroup"},
+            {"condition": "org_admin", "tag": "can_edit_organization_details"},
+            {"condition": "58_admin", "tag": "can_select_organization"},
+
         ]
         WaffleFlag = get_waffle_flag_model()
+        ROLE_INHERITANCE = {
+            "org_admin": ["org_admin", "58_admin"],  # 58_admin has all org_admin permissions
+            "58_admin": ["58_admin"],  # 58_admin permissions only
+            "user_management": ["user_management"],
+        }
         for flag in flags_list:
             created_flag, created = WaffleFlag.objects.get_or_create(name=flag["tag"], superusers=True)
             if flag["condition"] == "testers":
                 created_flag.groups.add(testers_group)
+            if flag["condition"] in ROLE_INHERITANCE:
+                for group_name in ROLE_INHERITANCE[flag["condition"]]:
+                    group, _ = Group.objects.get_or_create(name=group_name)
+                    created_flag.groups.add(group)
             if flag["condition"] == "everyone":
                 created_flag.everyone = True
                 created_flag.save()

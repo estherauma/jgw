@@ -1,3 +1,4 @@
+{% load waffle_tags %}
 <div class="modal fade" id="{{ action_type }}-workcode-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-workcode-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -19,9 +20,11 @@
                     {% endif %}
                     <input type="hidden" name="selected_org_id" data-selected-org-id />
                     <input type="hidden" name="work_code_id" data-workcode-id />
+                    {% flag 'can_view_organizations_table' %}
                     <div class="um-navy mb-2">
                         Organisation: <span class="fw-bold" data-assign-org-label>None selected</span>
                     </div>
+                    {% endflag %}
                     <div class="um-navy mb-2">
                         Work code: <span class="fw-bold" data-assign-code-label>—</span>
                     </div>
