@@ -1,0 +1,42 @@
+<div class="um-card" data-org-dependent>
+    <div class="um-row">
+        <div class="um-card-title um-navy">Work Groups</div>
+        <button
+            class="um-btn um-navy"
+            type="button"
+            data-toggle="modal"
+            data-target="#add-workgroup-modal"
+        >
+            Create work group
+        </button>
+    </div>
+    <table class="um-table um-navy">
+        <thead>
+            <tr>
+                <th>Work group</th>
+                <th>Work codes</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in work_groups %}
+            <tr>
+                <td>{{ group.name }}</td>
+                <td>
+                    {% for code in group.access_codes.all %}
+                        {{ code.code }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        —
+                    {% endfor %}
+                </td>
+                <td>
+                    <div class="um-action">
+                        <button class="um-btn um-btn-outline">Edit</button>
+                        <button class="um-btn um-btn-outline-black um-navy">Delete</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
