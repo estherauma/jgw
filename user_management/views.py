@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.db.models import Q
+from django.template.loader import render_to_string
 from django.views import View
 
 from preference.models import OrganisationAccessCode, OrganisationData
@@ -109,6 +111,22 @@ def user_management(request):
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
     }
     return render(request, "index.html", context=context)
+
+
+def search_organisations(request):
+    user = request.user
+    query = request.GET.get("q", "").strip()
+    organisations = get_allowed_orgs(user).order_by("name")
+    if query:
+        organisations = organisations.filter(
+            Q(name__icontains=query) | Q(org_code__icontains=query)
+        )
+    html = render_to_string(
+        "organization-rows.html",
+        {"organizations": organisations},
+        request=request,
+    )
+    return JsonResponse({"ok": True, "html": html})
 
 
 class CreateOrganisationView(View):
