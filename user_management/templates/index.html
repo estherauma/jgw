@@ -1,7 +1,7 @@
 {% extends 'core/layouts/base.html' %} 
 {% load crispy_forms_tags %} 
 {% load static %}
-{% load waffle_tags %} 
+{% load waffle_tags %}
 {% load i18n %}
 
 {% block title %} {% translate "userManagement" %} {% endblock title %}
@@ -18,6 +18,7 @@
 
     <div class="um-grid">
         <div>
+            {% flag 'can_view_organizations_table' %}
             <div class="um-card">
                 <div class="um-row">
                     <div class="um-card-title um-navy">
@@ -29,7 +30,7 @@
                 <div class="um-row">
                     <div class="um-search">
                         <span class="search-icon">🔍</span> 
-                        <input type="text" placeholder="Search..." />
+                        <input type="text" placeholder="Search..." data-org-search data-org-search-url="{% url 'user_management:search_organisations' %}" />
                     </div>
                 </div>
                 <div class="um-table-scroll-wrapper">
@@ -46,28 +47,15 @@
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for org in organizations %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ org.name }}</td>
-                                <td>{{ org.org_code }}</td>
-                                <td>
-                                    <div class="um-action">
-                                        <button class="um-btn um-btn-outline" data-edit-btn data-toggle="modal" data-target="#edit-org-modal" data-org-id="{{ org.id }}" data-org-name="{{ org.name }}" data-org-code="{{ org.org_code }}">
-                                            Edit
-                                        </button>
-                                    </div>                                    
-                                </td>
-                            </tr>
-                            {% endfor %}
+                        <tbody data-org-table-body>
+                            {% include "organization-rows.html" %}
                         </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-
             {% include "select-org.html" with options=organizations selected=selected_org_name selected_id=selected_org_id %}
+            {% endflag %}
 
             <div class="um-card" data-org-dependent>
                 <div class="um-card-title um-navy">Work Codes</div>
@@ -96,7 +84,7 @@
                                     <td class="text-center">{{ code.work_groups.count }}</td>
                                     <td>
                                         <div class="um-action">
-                                            <button class="um-btn um-btn-outline">Edit</button>
+                                            <!-- <button class="um-btn um-btn-outline">Edit</button> -->
                                             <button
                                                 class="um-btn um-btn-outline"
                                                 type="button"
@@ -109,7 +97,9 @@
                                             >
                                                 Assign
                                             </button>
+                                            {% flag 'can_delete_work_code' %}
                                             <button class="um-btn um-btn-outline-black um-navy">Delete</button>
+                                            {% endflag %}
                                         </div>
                                     </td>
                                 </tr>
@@ -119,16 +109,20 @@
                     </div>
                 </div>
             </div>
+            {% if is_org_admin %}
+            {% include "work-groups-card.html" %}
+            {% endif %}
 
             <div class="um-card um-navy" data-org-dependent>
                 <div class="um-row">
                     <div class="um-card-title">Organisation details</div>
+                    {% flag 'can_edit_organizations' %}
                     <div class="um-action">
                         <button class="um-btn um-btn-outline" data-toggle="modal" 
                         data-target="#edit-org-modal" data-org-id="{{ selected_org_id }}" 
                         data-org-name="{{ org_details.name }}" data-org-code="{{ org_details.code }}" data-edit-btn>Edit details</button>
                     </div>
-                    
+                    {% endflag %}
                 </div>
                 <div class="um-details um-navy">
                     <div>Name: <span class="um-navy" data-org-detail="name" data-org-default="{{ org_details.name }}">{{ org_details.name }}</span></div>
@@ -217,48 +211,9 @@
                 </div>
             </div>
 
-            <div class="um-card" data-org-dependent>
-                <div class="um-row">
-                    <div class="um-card-title um-navy">Work Groups</div>
-                    <button
-                        class="um-btn um-navy"
-                        type="button"
-                        data-toggle="modal"
-                        data-target="#add-workgroup-modal"
-                    >
-                        Create work group
-                    </button>
-                </div>
-                <table class="um-table um-navy">
-                    <thead>
-                        <tr>
-                            <th>Work group</th>
-                            <th>Work codes</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for group in work_groups %}
-                        <tr>
-                            <td>{{ group.name }}</td>
-                            <td>
-                                {% for code in group.access_codes.all %}
-                                    {{ code.code }}{% if not forloop.last %}, {% endif %}
-                                {% empty %}
-                                    —
-                                {% endfor %}
-                            </td>
-                            <td>
-                                <div class="um-action">
-                                    <button class="um-btn um-btn-outline">Edit</button>
-                                    <button class="um-btn um-btn-outline-black um-navy">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            {% if not is_org_admin %}
+            {% include "work-groups-card.html" %}
+            {% endif %}
         </div>
     </div>
 </div>
@@ -282,4 +237,16 @@
 <script src="{% static 'js/user_management/common.js' %}"></script>
 <script src="{% static 'js/user_management/organization.js' %}"></script>
 <script src="{% static 'js/user_management/users.js' %}"></script>
+<script>
+// Set selected org id in hidden inputs in modals on page load
+  (function () {
+    var selectedOrgId = "{{ selected_org_id|default_if_none:'' }}";
+    if (!selectedOrgId) {
+      return;
+    }
+    document.querySelectorAll('[data-selected-org-id]').forEach(function (input) {
+      input.value = selectedOrgId;
+    });
+  })();
+</script>
 {% endblock %}

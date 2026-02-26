@@ -34,7 +34,6 @@
     }
     try {
       var stored = window.localStorage.getItem('selectedOrg');
-      console.log('Retrieved stored organization data:', stored);
       return stored ? JSON.parse(stored) : null;
     } catch (err) {
       console.error('Error parsing stored organization data:', err);
@@ -46,6 +45,9 @@
   window.getSelectedOrgData = getSelectedOrgData;
 
   function syncSelectedOrganization(formId, labelSelector) {
+    if (window.isOrgAdmin) {
+      return;
+    }
     var form = document.getElementById(formId);
     var selectedId = '';
     var selectedName = '';

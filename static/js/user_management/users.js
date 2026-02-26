@@ -27,8 +27,7 @@
         window.syncSelectedOrganization('add-appuser-form', '[data-appuser-org-label]');
       }
       var selectedInput = form.querySelector('[data-selected-org-id]');
-      var selectedId = selectedInput ? selectedInput.value || '' : '';
-      
+      var selectedId =  selectedInput?.value || '';
       if (!selectedId) {
         if (errorBox) {
           errorBox.textContent = 'Select an organisation first.';
@@ -45,7 +44,7 @@
         if (window.postFormJson) {
           data = await window.postFormJson(form);
         }
-        if (data && data.org_id) {
+        if (data && data.org_id && !window.isOrgAdmin) {
           var homeUrl = window.location.pathname;
           var target =
             homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
