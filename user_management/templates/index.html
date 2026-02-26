@@ -179,6 +179,7 @@
                                     {% if selected_org_id %}
                                     <th>Work group</th>
                                     {% endif %}
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -206,7 +207,8 @@
                                             data-user-id="{{ u.id }}" data-email="{{ u.email }}" 
                                             data-first-name="{{ u.first_name }}" data-last-name="{{ u.last_name }}" 
                                             data-org-name="{% if u.organisation_data %}{{ u.organisation_data.name }}{% endif %}"
-                                            data-work-groups="{% for group in u.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                                            data-user-work-groups="{% for group in u.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                            data-org-work-groups='{% if u.organisation_data %}[{% for wg in u.organisation_data.work_groups.all %}{"id":{{ wg.id }},"name":"{{ wg.name }}"}{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}[]{% endif %}'>
                                                 Edit
                                             </button>
                                         </div>

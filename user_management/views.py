@@ -184,29 +184,6 @@ class CreateAppUserView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
     
 class EditAppUserView(View):
-    def get(self, request, user_id):
-        user = AppUser.objects.filter(id=user_id).select_related("organisation_data").prefetch_related("work_groups").first()
-        if not user:
-            return JsonResponse({"ok": False, "error": "User not found."}, status=404)
-        
-        organisation = user.organisation_data
-        work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
-        
-        return JsonResponse({
-            "ok": True,
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "organisation_name": organisation.name,
-                "work_group_ids": list(user.work_groups.values_list("id", flat=True)),
-            },
-            "work_groups": [
-                {"id": work_group.id, "name": work_group.name} for work_group in work_groups_qs
-            ],
-        })
-
     def post(self, request, user_id):
         user = AppUser.objects.filter(id=user_id).first()
         if not user:

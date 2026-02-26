@@ -84,34 +84,40 @@
     }
 
     function renderWorkGroups(workGroups, selectedIds) {
+
       var section = modal.querySelector('[data-workgroups-section]');
-      var container = modal.querySelector('.um-checkbox-list-scroll');
-      if (!section || !container) return;
-
+  
       if (!workGroups || workGroups.length === 0) {
-        section.hidden = true;
-        container.innerHTML = '';
-        return;
+          if (section) section.classList.add('d-none'); 
+          return;
       }
-
+  
+      if (!section) {
+          section = document.createElement('div');
+          section.className = 'um-field form-group';
+          section.setAttribute('data-workgroups-section', '');
+          section.innerHTML = '<span>Work groups</span><div class="um-checkbox-list-scroll"></div>';
+          form.querySelector('.modal-body').appendChild(section);
+      }
+  
+      section.classList.remove('d-none');
+      var container = section.querySelector('.um-checkbox-list-scroll');
+      
       var html = '<ul class="um-checkbox-list">';
-      for (var group of workGroups) {
-
-          var isChecked = selectedIds && selectedIds.indexOf(group.id) !== -1 ? 'checked' : '';
-
-          html += `<li><label><input type="checkbox" name="work_groups" value="${group.id}" class="form-check-input" ${isChecked}> ${group.name}</label></li>`;
-        }
+      for (var i = 0; i < workGroups.length; i++) {
+          var wg = workGroups[i];
+          var isChecked = selectedIds && selectedIds.indexOf(wg.id) !== -1 ? 'checked' : '';
+          html += '<li><label><input type="checkbox" name="work_groups" value="' + wg.id + '" ' + isChecked + '> ' + wg.name + '</label></li>';
+      }
       html += '</ul>';
+      
       container.innerHTML = html;
-      section.hidden = false;
-    }
-
-    $('[data-target="#edit-appuser-modal"]').on('click', async function () {
+  }
+    $('[data-target="#edit-appuser-modal"]').on('click', function () {
       var $btn = $(this);
       var userId = $btn.data('user-id');
-      var editUrl = '/user-management/app-users/' + userId + '/edit/';
       
-      form.action = editUrl;
+      form.action = '/user-management/app-users/' + userId + '/edit/';
       form.querySelector('[name="first_name"]').value = $btn.data('first-name') || '';
       form.querySelector('[name="last_name"]').value = $btn.data('last-name') || '';
       form.querySelector('[name="email"]').value = $btn.data('email') || '';
@@ -121,16 +127,13 @@
         orgLabel.textContent = $btn.data('org-name') || 'None';
       }
 
-      try {
-        var response = await fetch(editUrl);
-        var data = await response.json();
-        if (data.ok) {
-          renderWorkGroups(data.work_groups, data.user.work_group_ids);
-        }
-      } catch (err) {
-        console.error('Failed to fetch work groups:', err);
-      }
+      var orgWorkGroups = $btn.data('org-work-groups') || [];
+      var userWorkGroupsStr = String($btn.data('user-work-groups') || '');
+      var userWorkGroupIds = userWorkGroupsStr ? userWorkGroupsStr.split(',').map(function(id) {
+        return parseInt(id, 10);
+      }) : [];
 
+      renderWorkGroups(orgWorkGroups, userWorkGroupIds);
       clearErrors();
     });
 
