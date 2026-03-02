@@ -7,6 +7,7 @@ from .views import (
     CreateWorkCodeView,
     CreateWorkGroupView,
     user_management,
+    EditAppUserView,
     search_organisations,
 )
 
@@ -21,4 +22,5 @@ urlpatterns = [
     path('work-codes/assign/', AssignWorkCodeView.as_view(), name="assign_work_code"),
     path('work-groups/create/', CreateWorkGroupView.as_view(), name="create_work_group"),
     path('app-users/create/', CreateAppUserView.as_view(), name="create_app_user"),
+    path('app-users/<int:user_id>/edit/', EditAppUserView.as_view(), name="edit_app_user"),
 ]

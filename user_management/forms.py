@@ -102,7 +102,10 @@ class AppUserForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get("email", "").strip().lower()
-        if AppUser.objects.filter(email__iexact=email).exists():
+        qs = AppUser.objects.filter(email__iexact=email)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
             raise forms.ValidationError("Email already exists.")
         return email
 
