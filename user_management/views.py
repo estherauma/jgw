@@ -229,6 +229,9 @@ class EditWorkGroupView(View):
                 {"ok": False, "error": "Work group not found."},
                 status=404,
             )
+        if not has_org_access(request.user, work_group.organisation):
+            return org_access_denied()
+        
         form = WorkGroupForm(request.POST, instance=work_group)
         if form.is_valid():
             if WorkGroup.objects.filter(
@@ -275,6 +278,10 @@ class EditAppUserView(View):
         user = AppUser.objects.filter(id=user_id).select_related("organisation_data").prefetch_related("work_groups").first()
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+        
+        if not has_org_access(request.user, user.organisation_data):
+            return org_access_denied()
+        
         organisation = user.organisation_data
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
         return JsonResponse({
@@ -296,6 +303,9 @@ class EditAppUserView(View):
         user = AppUser.objects.filter(id=user_id).first()
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+        
+        if not has_org_access(request.user, user.organisation_data):
+            return org_access_denied()
         
         organisation = user.organisation_data
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
