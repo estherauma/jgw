@@ -32,10 +32,10 @@
                 <td>
                     <div class="um-action">
                         <button class="um-btn um-btn-outline" data-toggle="modal" 
-                        data-target="#edit-workgroup-modal-{{ group.id }}" 
+                        data-target="#edit-workgroup-modal"
+                        data-edit-workgroup-btn
                         data-workgroup-id="{{ group.id }}" 
-                        data-workgroup-name="{{ group.name }}" 
-                        data-workgroup-codes="{% for code in group.access_codes.all %}{{ code.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                        data-workgroup-name="{{ group.name }}">
                             Edit
                         </button>
                         <button class="um-btn um-btn-outline-black um-navy">Delete</button>
