@@ -89,6 +89,54 @@
     });
   }
 
+  function initOrgSearch() {
+    const input = document.querySelector('[data-org-search]');
+    const url = input.getAttribute('data-org-search-url');
+    const tbody = document.querySelector('[data-org-table-body]');
+    let debounceTimer = null;
+    let controller = null;
+
+    function runSearch(value) {
+      if (controller) {
+        controller.abort();
+      }
+      controller = new AbortController();
+      const params = new URLSearchParams();
+      if (value) {
+        params.set('q', value);
+      }
+      fetch(url + (params.toString() ? '?' + params.toString() : ''), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        signal: controller.signal,
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error('Search failed');
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          if (data && data.html !== undefined) {
+            tbody.innerHTML = data.html;
+          }
+        })
+        .catch(function (error) {
+          if (error.name === 'AbortError') {
+            return;
+          }
+          console.error(error);
+        });
+    }
+
+    input.addEventListener('input', function (event) {
+      const value = (event.target.value || '').trim();
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        runSearch(value);
+      }, 250);
+    });
+  }
+
   function initWorkCodeForm() {
     var form = document.getElementById('add-workcode-form');
     if (!form) {
@@ -206,7 +254,7 @@
         if (window.postFormJson) {
           data = await window.postFormJson(form);
         }
-        if (data && data.org_id) {
+        if (data && data.org_id && !window.isOrgAdmin) {
           var homeUrl = window.location.pathname;
           var target =
             homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
@@ -285,6 +333,7 @@
 
   window.addEventListener('load', ()=>{
     initCreateOrgForm();
+    initOrgSearch();
     initWorkCodeForm();
     initWorkGroupForm();
     initAssignWorkCodeForm();
@@ -362,7 +411,7 @@
         if (window.postFormJson) {
           data = await window.postFormJson(form);
         }
-        if (data && data.org_id) {
+        if (data && data.org_id && !window.isOrgAdmin) {
           var homeUrl = window.location.pathname;
           var target =
             homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);

@@ -118,6 +118,7 @@ TEMPLATES = [
                 "common.custom_utils_context_preprocessors.google_analytics_id",
                 "common.custom_utils_context_preprocessors.posthog_web_config",
                 "common.custom_context_processor.export_buttons_config_list",
+                "user_management.context_processors.user_role",
             ],
         },
     },

@@ -1,3 +1,4 @@
+{% load waffle_tags %}
 <div class="modal fade" id="{{ action_type }}-appuser-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-appuser-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -18,9 +19,11 @@
                         </div>
                     {% endif %}
                     <input type="hidden" name="selected_org_id" data-selected-org-id />
+                    {% flag 'can_view_organizations_table' %}
                     <div class="um-navy mb-2">
                         Organisation: <span class="fw-bold" data-appuser-org-label>None selected</span>
                     </div>
+                    {% endflag %}
                     <label class="um-field form-group mt-1">
                         <span>Email</span>
                         {{ form.email }}

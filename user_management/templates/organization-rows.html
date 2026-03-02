@@ -1,0 +1,20 @@
+{% if organizations %}
+    {% for org in organizations %}
+    <tr data-org-row>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ org.name }}</td>
+        <td>{{ org.org_code }}</td>
+        <td>
+            <div class="um-action">
+                <button class="um-btn um-btn-outline" data-edit-btn data-toggle="modal" data-target="#edit-org-modal" data-org-id="{{ org.id }}" data-org-name="{{ org.name }}" data-org-code="{{ org.org_code }}">
+                    Edit
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr data-org-row>
+        <td colspan="4">No organisations found.</td>
+    </tr>
+{% endif %}
