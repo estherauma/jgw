@@ -7,10 +7,14 @@ def is_in_group(user, group_name):
 
 
 def is_org_admin(user):
+    if is_58_admin(user) or is_super_user(user):
+        return False
     return is_in_group(user, "org_admin")
 
 
 def is_58_admin(user):
+    if is_super_user(user):
+        return False
     return is_in_group(user, "58_admin")
 
 

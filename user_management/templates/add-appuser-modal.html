@@ -18,7 +18,12 @@
                             {{ form.non_field_errors }}
                         </div>
                     {% endif %}
-                    <input type="hidden" name="selected_org_id" data-selected-org-id />
+                    <input
+                        type="hidden"
+                        name="selected_org_id"
+                        data-selected-org-id
+                        value=""
+                    />
                     {% flag 'can_view_organizations_table' %}
                     <div class="um-navy mb-2">
                         Organisation: <span class="fw-bold" data-appuser-org-label>None selected</span>
