@@ -291,7 +291,7 @@
       form.action = '/user-management/work-groups/' + $btn.data('workgroup-id') + '/edit/';
   
       if (window.syncSelectedOrganization) {
-        window.syncSelectedOrganization('edit-workgroup-form', '[data-workgroup-org-label]');
+        window.syncSelectedOrganization('edit-workgroup-form', '#edit-workgroup-modal [data-workgroup-org-label]');
       }
 
       if (errorBox) errorBox.classList.add('d-none');
