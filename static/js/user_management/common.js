@@ -127,6 +127,100 @@
 
   window.handleErrors = handleErrors;
 
+  var deleteState = {
+    url: '',
+    itemName: '',
+    onSuccess: null,
+  };
+
+  function showDeleteConfirm(options) {
+    var modal = document.getElementById('delete-confirm-modal');
+    const errorDiv = document.getElementById('delete-confirm-error'); 
+    
+    if (!modal) {
+      console.error('Delete confirm modal not found');
+      return;
+    }
+
+    if (errorDiv) {
+      errorDiv.classList.add('d-none');
+      errorDiv.textContent = '';
+    }
+
+    deleteState.url = options.url || '';
+    deleteState.itemName = options.itemName || 'this item';
+    deleteState.onSuccess = options.onSuccess || function() { window.location.reload(); };
+
+    var messageEl = modal.querySelector('[data-delete-message]');
+    if (messageEl) {
+      messageEl.textContent = 'Are you sure you want to delete "' + deleteState.itemName + '"?';
+    }
+
+    var warningEl = modal.querySelector('[data-delete-warning]');
+    if (warningEl) {
+      warningEl.textContent = 'This action is not reversible';
+    }
+
+    $(modal).modal('show');
+  }
+
+  function initDeleteConfirmModal() {
+    var modal = document.getElementById('delete-confirm-modal');
+    if (!modal) return;
+
+    var confirmBtn = modal.querySelector('[data-delete-confirm-btn]');
+    var errorDiv = document.getElementById('delete-confirm-error'); 
+    
+    if (!confirmBtn) return;
+
+    confirmBtn.addEventListener('click', async function() {
+      if (!deleteState.url) return;
+
+      confirmBtn.disabled = true;
+      if (errorDiv) {
+        errorDiv.classList.add('d-none');
+        errorDiv.textContent = '';
+      }
+
+      try {
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        var response = await fetch(deleteState.url, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken,
+          },
+        });
+        
+        var data = await response.json();
+
+        if (data.ok) {
+          $(modal).one('hidden.bs.modal', function() {
+            if (deleteState.onSuccess) {
+              deleteState.onSuccess(data);
+            }
+          });
+          $(modal).modal('hide');
+        } else {
+          if (errorDiv) {
+            errorDiv.textContent = data.error || 'Failed to delete.';
+            errorDiv.classList.remove('d-none');
+          }
+        }
+      } catch (err) {
+        if (errorDiv) {
+          errorDiv.textContent = 'An error occurred while communicating with the server.';
+          errorDiv.classList.remove('d-none');
+        }
+      } finally {
+        confirmBtn.disabled = false;
+      }
+    });
+}
+
+  window.showDeleteConfirm = showDeleteConfirm;
+  window.addEventListener('load', initDeleteConfirmModal);
+
   function syncThumb(container, track, thumb) {
     if (!thumb || !track || !container) {
       return;

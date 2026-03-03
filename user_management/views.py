@@ -337,7 +337,12 @@ class DeleteWorkGroupView(View):
         if not has_org_access(request.user, organisation):
             return org_access_denied()
         if work_group.users.exists():
-            return JsonResponse({"ok": False, "error": "Cannot delete work group with assigned users."}, status=400)
+            return JsonResponse(
+                {"ok": False, "error": "Cannot delete work group with assigned users."},
+                status=400,
+            )
+        name = work_group.name
         work_group.delete()
+        messages.success(request, f'Work group "{name}" deleted successfully.')
         return JsonResponse({"ok": True, "org_id": organisation.id})
     

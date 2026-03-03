@@ -232,7 +232,8 @@
 {% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form%}
 
 {% include 'create-org-modal.html' with action_type='edit' modal_title='Edit organisation' submit_label='Save changes' form=create_org_form form_action="" %}
-{% endblock content %} 
+{% include 'delete-confirm-modal.html' %}
+{% endblock content %}
 {% block scripts %}
 <script src="{% static 'js/user_management/common.js' %}"></script>
 <script src="{% static 'js/user_management/organization.js' %}"></script>
