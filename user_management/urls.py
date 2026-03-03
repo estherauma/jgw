@@ -9,6 +9,7 @@ from .views import (
     user_management,
     EditAppUserView,
     search_organisations,
+    DeleteWorkGroupView,
 )
 
 app_name = "user_management"
@@ -23,4 +24,5 @@ urlpatterns = [
     path('work-groups/create/', CreateWorkGroupView.as_view(), name="create_work_group"),
     path('app-users/create/', CreateAppUserView.as_view(), name="create_app_user"),
     path('app-users/<int:user_id>/edit/', EditAppUserView.as_view(), name="edit_app_user"),
+    path('work-groups/<int:work_group_id>/delete/', DeleteWorkGroupView.as_view(), name="delete_work_group"),
 ]
