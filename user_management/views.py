@@ -13,6 +13,7 @@ from .forms import (
     WorkCodeAssignForm,
     WorkGroupForm,
 )
+from .decorators import group_required
 from .models import AppUser, WorkGroup
 from .utils import is_org_admin, is_super_or_58_admin
 
@@ -43,6 +44,7 @@ def org_access_denied():
     )
 
 
+@group_required("user_management")
 def user_management(request):
     user = request.user
     organizations = get_allowed_orgs(user).order_by("name")
