@@ -1,0 +1,34 @@
+{% if users %}
+    {% for u in users %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
+        <td>{{ u.email }}</td>
+        {% if not selected_org_id %}
+        <td>{% if u.organisation_data %}{{ u.organisation_data.name }}{% else %}—{% endif %}</td>
+        {% endif %}
+        {% if selected_org_id %}
+        <td>
+            {% for group in u.work_groups.all %}
+                {{ group.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                —
+            {% endfor %}
+        </td>
+        {% endif %}
+        <td>
+            <div class="um-action">
+                <button class="um-btn um-btn-outline" data-toggle="modal"
+                data-target="#edit-appuser-modal"
+                data-user-id="{{ u.id }}">
+                    Edit
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr>
+        <td colspan="{% if selected_org_id %}5{% else %}5{% endif %}">No users found.</td>
+    </tr>
+{% endif %}
