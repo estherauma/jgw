@@ -1,6 +1,9 @@
 {% if users %}
     {% for u in users %}
     <tr>
+        <td class="text-center col-1">
+            <input type="checkbox" class="form-check-input" data-user-select value="{{ u.id }}">
+        </td>
         <td>{{ forloop.counter }}</td>
         <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
         <td>{{ u.email }}</td>
@@ -29,6 +32,6 @@
     {% endfor %}
 {% else %}
     <tr>
-        <td colspan="{% if selected_org_id %}5{% else %}5{% endif %}">No users found.</td>
+        <td colspan="{% if selected_org_id %}6{% else %}6{% endif %}">No users found.</td>
     </tr>
 {% endif %}
