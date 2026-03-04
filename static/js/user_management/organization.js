@@ -91,6 +91,9 @@
 
   function initOrgSearch() {
     const input = document.querySelector('[data-org-search]');
+    if (!input) {
+      return;
+    }
     const url = input.getAttribute('data-org-search-url');
     const tbody = document.querySelector('[data-org-table-body]');
     let debounceTimer = null;
