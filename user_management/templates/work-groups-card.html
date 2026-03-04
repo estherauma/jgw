@@ -38,7 +38,12 @@
                         data-workgroup-name="{{ group.name }}">
                             Edit
                         </button>
-                        <button class="um-btn um-btn-outline-black um-navy">Delete</button>
+                        <button class="um-btn um-btn-outline-black um-navy"
+                        data-workgroup-id="{{ group.id }}" 
+                        data-workgroup-name="{{ group.name }}"
+                        data-delete-workgroup-btn>
+                            Delete
+                        </button>
                     </div>
                 </td>
             </tr>
