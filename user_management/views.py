@@ -377,7 +377,7 @@ class DeleteWorkGroupView(View):
             return org_access_denied()
         if work_group.users.exists():
             return JsonResponse(
-                {"ok": False, "error": "Cannot delete work group with assigned users."},
+                {"ok": False, "error": "This work group cannot be deleted because it has assigned users. Remove users first."},
                 status=400,
             )
         name = work_group.name

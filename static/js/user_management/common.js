@@ -158,7 +158,7 @@
 
     var warningEl = modal.querySelector('[data-delete-warning]');
     if (warningEl) {
-      warningEl.textContent = 'This action is not reversible';
+      warningEl.textContent = 'This action can not be reversed.';
     }
 
     $(modal).modal('show');
