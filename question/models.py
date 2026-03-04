@@ -152,6 +152,7 @@ class MessagingQuestionStandard(models.Model):
     app_id = models.CharField(max_length=255, blank=True, null=True)
     question_id = models.CharField(max_length=255, blank=True, null=True)
     message_id = models.CharField(max_length=255, blank=True, null=True)
+    is_test_data = models.BooleanField(default=False)
     locale = models.CharField(max_length=255, blank=True, null=True)
 
     route = models.ForeignKey(

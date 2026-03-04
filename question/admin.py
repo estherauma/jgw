@@ -116,6 +116,7 @@ class MessagingQuestionStandardAdmin(ExportActionModelAdmin, admin.ModelAdmin):
         "data_source_id",
         "device_id",
         "question_id",
+        "is_test_data",
         "question_version",
         "route",
         "preference",
