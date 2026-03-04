@@ -254,6 +254,9 @@
 
   function initUserSelection() {
     const selectAll = document.querySelector('[data-users-select-all]');
+    if (!selectAll) {
+      return;
+    }
 
     function updateSelectionState() {
       const selectedIds = getSelectedUserIds();

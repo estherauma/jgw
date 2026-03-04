@@ -194,9 +194,11 @@
                         <table class="um-table um-navy">
                             <thead>
                                 <tr>
+                                    {% if selected_org_id %}
                                     <th class="text-center col-1">
                                         <input type="checkbox" class="form-check-input" data-users-select-all>
                                     </th>
+                                    {% endif %}
                                     <th>#</th>
                                     <th class="w-25">Name</th>
                                     <th>Email</th>
