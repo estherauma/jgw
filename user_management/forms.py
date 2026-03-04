@@ -122,3 +122,17 @@ class WorkCodeAssignForm(forms.Form):
         super().__init__(*args, **kwargs)
         if work_groups_qs is not None:
             self.fields["work_groups"].queryset = work_groups_qs
+
+
+class UsersWorkGroupAssignForm(forms.Form):
+    work_groups = forms.ModelMultipleChoiceField(
+        queryset=WorkGroup.objects.none(),
+        required=True,
+        widget=forms.CheckboxSelectMultiple(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        work_groups_qs = kwargs.pop("work_groups_qs", None)
+        super().__init__(*args, **kwargs)
+        if work_groups_qs is not None:
+            self.fields["work_groups"].queryset = work_groups_qs
