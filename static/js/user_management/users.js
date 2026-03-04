@@ -1,4 +1,22 @@
 (function () {
+  function getSelectedUserIds() {
+    return Array.from(
+      document.querySelectorAll('[data-user-select]:checked'),
+    ).map(function (input) {
+      return input.value;
+    });
+  }
+
+  function updateAssignButtonState() {
+      const assignWorkGroupButton = document.querySelector('[data-users-workgroup-action]');
+      const selectedIds = getSelectedUserIds();
+      assignWorkGroupButton.disabled = selectedIds.length === 0;
+      const countLabel = modal.querySelector('[data-selected-users-count]');
+      if (countLabel) {
+        countLabel.textContent = String(selectedIds.length);
+      }
+  }
+
   function initAppUserForm() {
     var form = document.getElementById('add-appuser-form');
     if (!form) {
@@ -215,6 +233,7 @@
         const data = await response.json();
         if (data?.html) {
           tbody.innerHTML = data.html;
+          updateAssignButtonState();
         }
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -233,9 +252,100 @@
     });
   }
 
+  function initUserSelection() {
+    const selectAll = document.querySelector('[data-users-select-all]');
+    if (!selectAll) {
+      return;
+    }
+
+    function updateSelectionState() {
+      const selectedIds = getSelectedUserIds();
+      const checkboxes = document.querySelectorAll('[data-user-select]');
+      if (!checkboxes.length) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+      } else {
+        selectAll.checked = selectedIds.length === checkboxes.length;
+        selectAll.indeterminate = selectedIds.length > 0 && selectedIds.length < checkboxes.length;
+      }
+      updateAssignButtonState();
+    }
+
+    selectAll.addEventListener('change', function (event) {
+      const checked = event.target.checked;
+      const checkboxes = document.querySelectorAll('[data-user-select]');
+      checkboxes.forEach(function (input) {
+        input.checked = checked;
+      });
+      updateSelectionState();
+    });
+
+    document.addEventListener('change', function (event) {
+      if (event.target && event.target.matches('[data-user-select]')) {
+        updateSelectionState();
+      }
+    });
+  }
+
+  function initAssignUsersToWorkGroups() {
+    const modal = document.getElementById('assign-users-workgroup-modal');
+    const form = document.getElementById('assign-users-workgroup-form');
+    const errorBox = document.getElementById('assign-users-workgroup-form-error');
+
+    $('[data-target="#assign-users-workgroup-modal"]').on('click', function () {
+      if (window.clearFormErrors) {
+        window.clearFormErrors(form, errorBox);
+      }
+      const selectedIds = getSelectedUserIds();
+      const input = form.querySelector('[data-selected-user-ids]');
+      if (input) {
+        input.value = selectedIds.join(',');
+      }
+      const countLabel = modal.querySelector('[data-selected-users-count]');
+      if (countLabel) {
+        countLabel.textContent = String(selectedIds.length);
+      }
+    });
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      if (window.clearFormErrors) {
+        window.clearFormErrors(form, errorBox);
+      }
+      const selectedGroups = form.querySelectorAll('input[name="work_groups"]:checked');
+      if (!selectedGroups.length) {
+        if (errorBox) {
+          errorBox.textContent = 'Select at least one work group.';
+          errorBox.classList.remove('d-none');
+        }
+        return;
+      }
+      const submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+  }
+
   window.addEventListener('load', function () {
     initAppUserForm();
     initEditUserForm();
     initUserSearch();
+    initUserSelection();
+    initAssignUsersToWorkGroups();
   });
 })();

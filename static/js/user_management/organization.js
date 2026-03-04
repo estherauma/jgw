@@ -92,7 +92,7 @@
   function initOrgSearch() {
     const input = document.querySelector('[data-org-search]');
     if (!input) {
-      return; 
+      return;
     }
     const url = input.getAttribute('data-org-search-url');
     const tbody = document.querySelector('[data-org-table-body]');
@@ -328,15 +328,7 @@
     });
   }
 
-  window.addEventListener('load', ()=>{
-    initCreateOrgForm();
-    initOrgSearch();
-    initWorkCodeForm();
-    initWorkGroupForm();
-    initAssignWorkCodeForm();
-    initEditOrgForm();
-    initEditWorkGroupForm();
-  })
+
 
   function safeClearFormErrors(form, errorBox) {
     if (window.clearFormErrors) {
@@ -443,4 +435,26 @@
       workCodeInput.value = codeId || '';
     });
   }
+  
+  window.addEventListener('load', function () {
+    initCreateOrgForm();
+  });
+  window.addEventListener('load', function () {
+    initOrgSearch();
+  });
+  window.addEventListener('load', function () {
+    initWorkCodeForm();
+  });
+  window.addEventListener('load', function () {
+    initWorkGroupForm();
+  });
+  window.addEventListener('load', function () {
+    initAssignWorkCodeForm();
+  });
+  window.addEventListener('load', function () {
+    initEditOrgForm();
+  });
+  window.addEventListener('load', ()=>{
+    initEditWorkGroupForm();
+  })
 })();
