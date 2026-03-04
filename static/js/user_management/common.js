@@ -153,12 +153,12 @@
 
     var messageEl = modal.querySelector('[data-delete-message]');
     if (messageEl) {
-      messageEl.textContent = 'Are you sure you want to delete "' + deleteState.itemName + '"?';
+      messageEl.textContent = options.message || 'Are you sure you want to delete "' + deleteState.itemName + '"?';
     }
 
     var warningEl = modal.querySelector('[data-delete-warning]');
     if (warningEl) {
-      warningEl.textContent = 'This action can not be reversed.';
+      warningEl.textContent = options.warning || 'This action can not be reversed.';
     }
 
     $(modal).modal('show');
