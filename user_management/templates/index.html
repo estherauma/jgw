@@ -142,6 +142,7 @@
                     </div>
                     <div class="um-action gap-3">
                         <div class="dropdown um-actions-dropdown">
+                            {% if  selected_org_id %}
                             <button
                                 class="um-btn um-btn-outline dropdown-toggle"
                                 type="button"
@@ -153,6 +154,7 @@
                                 Actions
                                 <span class="dropdown-icon">▼</span>
                             </button>
+                             {% endif %}
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="user-actions-dropdown">
                                 {% if selected_org_id %}
                                 <button
