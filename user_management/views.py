@@ -369,12 +369,11 @@ class AssignWorkCodeView(View):
 
 class DeleteWorkGroupView(View):
     def post(self, request, work_group_id):
-        work_group = WorkGroup.objects.filter(id=work_group_id).first()
+        allowed_orgs = get_allowed_orgs(request.user)
+        work_group = WorkGroup.objects.filter(id=work_group_id, organisation__in=allowed_orgs).first()
         if not work_group:
             return JsonResponse({"ok": False, "error": "Work group not found."}, status=404)
         organisation = work_group.organisation
-        if not has_org_access(request.user, organisation):
-            return org_access_denied()
         if work_group.users.exists():
             return JsonResponse(
                 {"ok": False, "error": "This work group cannot be deleted because it has assigned users. Remove users first."},
