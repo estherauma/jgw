@@ -73,17 +73,65 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
         }
     });
 
+    treeData.children.forEach(function (child) {
+        if (child.children && child.children.length > 0) {
+            child.children.unshift({
+                name: 'User Destination',
+                isLayerTitle: true
+            });
+        }
+    });
+
+    treeData.children.forEach(function (middleChild) {
+        if (middleChild.children) {
+            middleChild.children.forEach(function (grandchild) {
+                if (grandchild.children && grandchild.children.length > 0 && !grandchild.isLayerTitle) {
+                    grandchild.children.unshift({
+                        name: 'User Origin Country',
+                        isLayerTitle: true
+                    });
+                }
+            });
+        }
+    });
+
+    treeData.children.forEach(function (middleChild) {
+        if (middleChild.children) {
+            middleChild.children.forEach(function (grandchild) {
+                if (grandchild.children) {
+                    grandchild.children.forEach(function (greatGrandchild) {
+                        if (greatGrandchild.children && greatGrandchild.children.length > 0 && !greatGrandchild.isLayerTitle) {
+                            greatGrandchild.children.unshift({
+                                name: 'Chapter titles viewed',
+                                isLayerTitle: true
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+    treeData.children.forEach(function (child) {
+        assignDepth(child, 1);
+    });
+    computeNodeTotals(treeData);
+
     function setDisplayTitles(node) {
-        const total = node.total != null ? node.total : (node.value != null ? node.value : 0);
-        node.displayTitle = node.name + (total > 0 ? '  ·  ' + formatCount(total) : '');
+        if (node.isLayerTitle) {
+            node.displayTitle = node.name;
+        } else {
+            const total = node.total != null ? node.total : (node.value != null ? node.value : 0);
+            node.displayTitle = node.name + (total > 0 ? '  ·  ' + formatCount(total) : '');
+        }
         if (node.children && node.children.length) {
             node.children.forEach(setDisplayTitles);
         }
     }
-    treeData.displayTitle = (treeData.name || 'Views') + (treeData.total > 0 ? '  ·  ' + formatCount(treeData.total) : '');
+    treeData.displayTitle = treeData.name || 'Chapter Views';
     treeData.children.forEach(setDisplayTitles);
 
     function getNodeColor(node) {
+        if (node.isLayerTitle) return 'transparent';
         if (node.value != null && node.value !== undefined) return leafColor;
         const d = node.depth != null ? node.depth : 0;
         return levelColors[Math.min(d, levelColors.length - 1)];
@@ -104,6 +152,7 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
             },
             formatter: function (params) {
                 const node = params.data;
+                if (node.isLayerTitle) return node.name;
                 const title = node.displayTitle || node.name;
                 const total = node.total != null ? node.total : node.value;
                 if (total != null && total !== undefined) {
@@ -118,10 +167,12 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
                 data: [treeData],
                 name: 'Chapter views',
                 top: 48,
-                left: '15%',
+                left: '5%',
                 bottom: '2%',
-                right: '15%',
-                symbolSize: 10,
+                right: '25%',
+                symbolSize: function (value, params) {
+                    return (params.data && params.data.isLayerTitle) ? 0 : 10;
+                },
                 edgeForkPosition: '50%',
                 initialTreeDepth: 2,
                 lineStyle: {
@@ -147,15 +198,23 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
                         align: 'left',
                         fontSize: 12,
                         color: labelColorLight,
+                        rich: {
+                            layerTitle: {
+                                fontWeight: 'bold',
+                                color: labelColor
+                            }
+                        },
                         formatter: function (params) {
                             const d = params.data;
-                            return (d.displayTitle != null ? d.displayTitle : d.name);
+                            const text = d.displayTitle != null ? d.displayTitle : d.name;
+                            return d.isLayerTitle ? '{layerTitle|' + text + '}' : text;
                         }
                     },
-                    itemStyle: {
-                        color: leafColor,
-                        borderColor: 'rgba(99, 179, 237, 0.6)',
-                        borderWidth: 1
+                    itemStyle: function (params) {
+                        if (params.data && params.data.isLayerTitle) {
+                            return { color: 'transparent', borderColor: 'transparent', borderWidth: 0 };
+                        }
+                        return { color: leafColor, borderColor: 'rgba(99, 179, 237, 0.6)', borderWidth: 1 };
                     }
                 },
                 itemStyle: {
