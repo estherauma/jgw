@@ -196,6 +196,16 @@ body .modal-backdrop.show {
     color: #193560;
 }
 
+.um-dropdown-item {
+    color: #37C1E3 !important;
+    font-weight: 400;
+}
+
+.um-dropdown-item:disabled {
+    color: #cbd3df !important;
+}
+
+
 .um-btn-icon {
     background: #ffffff;
     border: 1px solid #d9e4f2;

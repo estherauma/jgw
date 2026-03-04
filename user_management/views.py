@@ -12,6 +12,7 @@ from .forms import (
     CreateOrganisationForm,
     WorkCodeAssignForm,
     WorkGroupForm,
+    UsersWorkGroupAssignForm,
 )
 from .decorators import group_required
 from .models import AppUser, WorkGroup
@@ -417,3 +418,48 @@ class DeleteWorkGroupView(View):
         messages.success(request, f'Work group "{name}" deleted successfully.')
         return JsonResponse({"ok": True, "org_id": organisation.id})
     
+class AssignUsersToWorkGroupsView(View):
+    def post(self, request):
+        org_id = request.POST.get("selected_org_id")
+        user_ids_raw = request.POST.get("user_ids", "")
+        organisation = None
+        if org_id:
+            organisation = OrganisationData.objects.filter(id=org_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Select an organisation first."},
+                status=400,
+            )
+        if not has_org_access(request.user, organisation):
+            return org_access_denied()
+
+        user_ids = [
+            value
+            for value in user_ids_raw.split(",")
+            if value.strip()
+        ]
+        if not user_ids:
+            return JsonResponse(
+                {"ok": False, "error": "Select at least one user."},
+                status=400,
+            )
+
+        work_groups_qs = WorkGroup.objects.filter(organisation=organisation)
+        form = UsersWorkGroupAssignForm(request.POST, work_groups_qs=work_groups_qs)
+        if form.is_valid():
+            work_groups = list(form.cleaned_data["work_groups"])
+            users = AppUser.objects.filter(
+                id__in=user_ids, organisation_data=organisation
+            )
+            if not users.exists():
+                return JsonResponse(
+                    {"ok": False, "error": "No matching users found."},
+                    status=400,
+                )
+            for user in users:
+                user.work_groups.add(*work_groups)
+            return JsonResponse(
+                {"ok": True, "org_id": organisation.id, "user_count": users.count()}
+            )
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
