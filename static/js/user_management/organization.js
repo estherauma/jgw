@@ -96,6 +96,9 @@
     }
     const url = input.getAttribute('data-org-search-url');
     const tbody = document.querySelector('[data-org-table-body]');
+    if (!tbody) {
+      return;
+    }
     let debounceTimer = null;
     let controller = null;
 
