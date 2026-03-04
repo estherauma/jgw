@@ -14,6 +14,11 @@
                     <div class="alert alert-danger d-none" id="assign-users-workgroup-form-error" role="alert"></div>
                     <input type="hidden" name="selected_org_id" data-selected-org-id />
                     <input type="hidden" name="user_ids" data-selected-user-ids />
+                    {% if not is_org_admin %}
+                    <div class="um-navy mb-2">
+                        Organisation: <span class="fw-bold">{{ selected_org_name|default:"None" }}</span>
+                    </div>
+                    {% endif %}
                     <div class="um-navy mb-2">
                         Selected users: <span class="fw-bold" data-selected-users-count>0</span>
                     </div>
