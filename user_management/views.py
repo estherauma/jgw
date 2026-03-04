@@ -259,6 +259,32 @@ class CreateWorkGroupView(View):
             )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+    
+class EditWorkGroupView(View):
+    def post(self, request, work_group_id):
+        work_group = WorkGroup.objects.filter(pk=work_group_id).first()
+        if not work_group:
+            return JsonResponse(
+                {"ok": False, "error": "Work group not found."},
+                status=404,
+            )
+        if not has_org_access(request.user, work_group.organisation):
+            return org_access_denied()
+        
+        form = WorkGroupForm(request.POST, instance=work_group)
+        if form.is_valid():
+            if WorkGroup.objects.filter(
+                organisation=work_group.organisation,
+                name__iexact=form.cleaned_data["name"]
+            ).exclude(pk=work_group_id).exists():
+                return JsonResponse(
+                    {"ok": False, "errors": {"name": ["Work group already exists."]}},
+                    status=400,
+                )
+            form.save()
+            return JsonResponse({"ok": True})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
 class CreateAppUserView(View):
@@ -291,6 +317,10 @@ class EditAppUserView(View):
         user = AppUser.objects.filter(id=user_id).select_related("organisation_data").prefetch_related("work_groups").first()
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+        
+        if not has_org_access(request.user, user.organisation_data):
+            return org_access_denied()
+        
         organisation = user.organisation_data
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
         return JsonResponse({
@@ -312,6 +342,9 @@ class EditAppUserView(View):
         user = AppUser.objects.filter(id=user_id).first()
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+        
+        if not has_org_access(request.user, user.organisation_data):
+            return org_access_denied()
         
         organisation = user.organisation_data
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
