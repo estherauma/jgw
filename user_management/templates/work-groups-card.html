@@ -31,7 +31,13 @@
                 </td>
                 <td>
                     <div class="um-action">
-                        <button class="um-btn um-btn-outline">Edit</button>
+                        <button class="um-btn um-btn-outline" data-toggle="modal" 
+                        data-target="#edit-workgroup-modal"
+                        data-edit-workgroup-btn
+                        data-workgroup-id="{{ group.id }}" 
+                        data-workgroup-name="{{ group.name }}">
+                            Edit
+                        </button>
                         <button class="um-btn um-btn-outline-black um-navy">Delete</button>
                     </div>
                 </td>

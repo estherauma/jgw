@@ -96,6 +96,9 @@
     }
     const url = input.getAttribute('data-org-search-url');
     const tbody = document.querySelector('[data-org-table-body]');
+    if (!tbody) {
+      return;
+    }
     let debounceTimer = null;
     let controller = null;
 
@@ -281,6 +284,50 @@
     });
   }
 
+  function initEditWorkGroupForm() {
+    var modal = document.getElementById('edit-workgroup-modal');
+    if (!modal) return;
+  
+    var form = modal.querySelector('form');
+    var errorBox = document.getElementById('edit-workgroup-form-error');
+  
+    $('[data-edit-workgroup-btn]').on('click', function() {
+      var $btn = $(this);
+      form.querySelector('[name="name"]').value = $btn.data('workgroup-name') || '';
+      form.action = '/user-management/work-groups/' + $btn.data('workgroup-id') + '/edit/';
+  
+      if (window.syncSelectedOrganization) {
+        window.syncSelectedOrganization('edit-workgroup-form', '#edit-workgroup-modal [data-workgroup-org-label]');
+      }
+
+      if (errorBox) errorBox.classList.add('d-none');
+      $(form).find("[data-error-for]").text("");
+    });
+  
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      safeClearFormErrors(form, errorBox);
+  
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) submitButton.disabled = true;
+  
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+  }
+
 
 
   function safeClearFormErrors(form, errorBox) {
@@ -407,4 +454,7 @@
   window.addEventListener('load', function () {
     initEditOrgForm();
   });
+  window.addEventListener('load', ()=>{
+    initEditWorkGroupForm();
+  })
 })();
