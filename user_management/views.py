@@ -4,7 +4,6 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
-
 from preference.models import OrganisationAccessCode, OrganisationData
 
 from .forms import (
@@ -14,6 +13,7 @@ from .forms import (
     WorkCodeAssignForm,
     WorkGroupForm,
 )
+from .decorators import group_required
 from .models import AppUser, WorkGroup
 from .utils import is_org_admin, is_super_or_58_admin
 
@@ -44,6 +44,7 @@ def org_access_denied():
     )
 
 
+@group_required("user_management")
 def user_management(request):
     user = request.user
     organizations = get_allowed_orgs(user).order_by("name")
@@ -124,6 +125,44 @@ def search_organisations(request):
     html = render_to_string(
         "organization-rows.html",
         {"organizations": organisations},
+        request=request,
+    )
+    return JsonResponse({"ok": True, "html": html})
+
+
+def search_users(request):
+    user = request.user
+    query = request.GET.get("q", "").strip()
+    selected_org_id = request.GET.get("selected_org_id")
+    users = (
+        AppUser.objects.select_related("organisation_data")
+        .prefetch_related("work_groups")
+        .order_by("email")
+    )
+
+    if is_org_admin(user):
+        allowed_orgs = get_allowed_orgs(user)
+        users = users.filter(organisation_data__in=allowed_orgs)
+
+    if selected_org_id:
+        organisation = (
+            get_allowed_orgs(user).filter(id=selected_org_id).first()
+        )
+        if organisation:
+            users = users.filter(organisation_data=organisation)
+        else:
+            users = users.none()
+
+    if query:
+        users = users.filter(
+            Q(first_name__icontains=query)
+            | Q(last_name__icontains=query)
+            | Q(email__icontains=query)
+        )
+
+    html = render_to_string(
+        "user-rows.html",
+        {"users": users, "selected_org_id": selected_org_id},
         request=request,
     )
     return JsonResponse({"ok": True, "html": html})

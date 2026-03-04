@@ -153,7 +153,12 @@
                 <div class="um-row">
                     <div class="um-search">
                         <span class="search-icon">🔍</span> 
-                        <input type="text" placeholder="Search..." />
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            data-user-search
+                            data-user-search-url="{% url 'user_management:search_users' %}"
+                        />
                     </div>
                 </div>
                 <div class="um-table-scroll-wrapper um-table-scroll-wrapper-lg">
@@ -176,35 +181,8 @@
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for u in users %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
-                                    <td>{{ u.email }}</td>
-                                    {% if not selected_org_id %}
-                                    <td>{% if u.organisation_data %}{{ u.organisation_data.name }}{% else %}—{% endif %}</td>
-                                    {% endif %}
-                                    {% if selected_org_id %}
-                                    <td>
-                                        {% for group in u.work_groups.all %}
-                                            {{ group.name }}{% if not forloop.last %}, {% endif %}
-                                        {% empty %}
-                                            —
-                                        {% endfor %}
-                                    </td>
-                                    {% endif %}
-                                    <td>
-                                        <div class="um-action">
-                                            <button class="um-btn um-btn-outline" data-toggle="modal" 
-                                            data-target="#edit-appuser-modal" 
-                                            data-user-id="{{ u.id }}">
-                                                Edit
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
+                            <tbody data-users-table-body>
+                                {% include "user-rows.html" %}
                             </tbody>
                         </table>
                     </div>
