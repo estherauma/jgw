@@ -127,6 +127,82 @@
 
   window.handleErrors = handleErrors;
 
+
+  function showDeleteConfirm(options) {
+    var modal = document.getElementById('delete-confirm-modal');
+    const errorDiv = document.getElementById('delete-confirm-error'); 
+    
+    if (!modal) {
+      console.error('Delete confirm modal not found');
+      return;
+    }
+
+    if (errorDiv) {
+      errorDiv.classList.add('d-none');
+      errorDiv.textContent = '';
+    }
+
+    var messageEl = modal.querySelector('[data-delete-message]');
+    if (messageEl) {
+      messageEl.textContent = options.message || 'Are you sure you want to delete this item?';
+    }
+
+    var warningEl = modal.querySelector('[data-delete-warning]');
+    if (warningEl) {
+      warningEl.textContent = options.warning || 'This action can not be reversed.';
+    }
+
+    var titleEl = modal.querySelector('[data-delete-title]');
+    if (titleEl) {
+      titleEl.textContent = options.title || 'Confirm Deletion';
+    }
+
+    $(modal).modal('show');
+    const confirmBtn = modal.querySelector('[data-delete-confirm-btn]');
+
+    confirmBtn.onclick = async function () {
+      const confirmBtn = modal.querySelector('[data-delete-confirm-btn]');
+      confirmBtn.disabled = true;
+      if (errorDiv) {
+              errorDiv.classList.add('d-none');
+              errorDiv.textContent = '';
+            }
+
+      try {
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        var response = await fetch(options.url, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken,
+          },
+        });
+        
+        var data = await response.json();
+
+        if (!data.ok) {
+          window.handleErrors({ errorBox: errorDiv, data: data }); 
+          return;
+        } 
+
+        $(modal).one('hidden.bs.modal', function() {
+            options?.onSuccess(data);
+        });
+        $(modal).modal('hide');
+      } catch (err) {
+        window.handleErrors({ 
+          errorBox: errorDiv, 
+          data: err, 
+          errorMessage: 'An error occurred while communicating with the server.' 
+        });
+      } finally {
+        confirmBtn.disabled = false;
+      }
+    };
+  }
+
+  window.showDeleteConfirm = showDeleteConfirm;
+
   function syncThumb(container, track, thumb) {
     if (!thumb || !track || !container) {
       return;

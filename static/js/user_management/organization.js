@@ -284,6 +284,24 @@
     });
   }
 
+  function initDeleteWorkGroup() {
+    $(document).on('click', '[data-delete-workgroup-btn]', function() {
+      var $btn = $(this);
+      var workGroupId = $btn.data('workgroup-id');
+      var workGroupName = $btn.data('workgroup-name');
+
+      if (window.showDeleteConfirm) {
+        window.showDeleteConfirm({
+          url: '/user-management/work-groups/' + workGroupId + '/delete/',
+          title: 'Delete Work Group',
+          message: 'Are you sure you want to delete the work group "' + workGroupName + '"?',
+          onSuccess: function() {
+            window.location.reload();
+          }
+        });
+      }
+    });
+  }
   function initEditWorkGroupForm() {
     var modal = document.getElementById('edit-workgroup-modal');
     if (!modal) return;
@@ -327,7 +345,6 @@
       }
     });
   }
-
 
 
   function safeClearFormErrors(form, errorBox) {
@@ -456,5 +473,8 @@
   });
   window.addEventListener('load', ()=>{
     initEditWorkGroupForm();
+  });
+  window.addEventListener('load', ()=>{
+    initDeleteWorkGroup();
   })
 })();

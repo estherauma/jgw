@@ -401,6 +401,23 @@ class AssignWorkCodeView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
+class DeleteWorkGroupView(View):
+    def post(self, request, work_group_id):
+        allowed_orgs = get_allowed_orgs(request.user)
+        work_group = WorkGroup.objects.filter(id=work_group_id, organisation__in=allowed_orgs).first()
+        if not work_group:
+            return JsonResponse({"ok": False, "error": "Work group not found."}, status=404)
+        organisation = work_group.organisation
+        if work_group.users.exists():
+            return JsonResponse(
+                {"ok": False, "error": "This work group cannot be deleted because it has assigned users. Remove users first."},
+                status=400,
+            )
+        name = work_group.name
+        work_group.delete()
+        messages.success(request, f'Work group "{name}" deleted successfully.')
+        return JsonResponse({"ok": True, "org_id": organisation.id})
+    
 class AssignUsersToWorkGroupsView(View):
     def post(self, request):
         org_id = request.POST.get("selected_org_id")
