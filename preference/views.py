@@ -431,14 +431,22 @@ def export_preferences_data(request):
 
 def export_pay_calculator_statistics(request):
     """Export PayCalculator statistics grouped by origin, Organisation, and Organisation Access Code"""
-    statistics_data = get_pay_calculator_statistics()
-    
+    form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
+    filters = form_filter_params["filters"]
+    start_date = filters.get("start_date")
+    end_date = filters.get("end_date")
+
+    statistics_data = get_pay_calculator_statistics(start_date=start_date, end_date=end_date)
+
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Pay Calculator Statistics"
-    
+
+    heading_text = "Pay Calculator Statistics"
+    if start_date and end_date:
+        heading_text = f"Pay Calculator Statistics from {start_date} to {end_date}"
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=5)
-    heading_cell = ws.cell(row=2, column=1, value="Pay Calculator Statistics")
+    heading_cell = ws.cell(row=2, column=1, value=heading_text)
     heading_cell.alignment = Alignment(horizontal="center", vertical="center")
     heading_cell.font = Font(bold=True, size=14)
     
@@ -480,9 +488,12 @@ def export_pay_calculator_statistics(request):
     ws.cell(row=total_row, column=5, value=sum(d.get("total_records", 0) for d in statistics_data)).font = Font(bold=True)
     
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response["Content-Disposition"] = 'attachment; filename="pay_calculator_statistics.xlsx"'
+    filename = "pay_calculator_statistics.xlsx"
+    if start_date and end_date:
+        filename = f"pay_calculator_statistics_from_{start_date}_to_{end_date}.xlsx"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     wb.save(response)
-    
+
     return response
 
 

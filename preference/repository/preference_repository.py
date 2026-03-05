@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, date
 from django.db.models import Case, When, Value, CharField, F, Count
 from django.db.models.functions import Cast, Substr, Length
 from django.db.models import Q
@@ -806,16 +806,31 @@ def get_preferences_by_device_id(device_id):
     ).order_by('-api_created_at')
     return preferences
 
-def get_pay_calculator_statistics():
+def get_pay_calculator_statistics(start_date=None, end_date=None):
     """
     Extract PayCalculator data with unique device_id grouped by origin, Organisation, and Organisation Access Code.
-    
+
+    Optionally filter by date range using api_created_at.
+
+    Args:
+        start_date: Start of date range (date, datetime, or YYYY-MM-DD string). Optional.
+        end_date: End of date range (date, datetime, or YYYY-MM-DD string). Optional.
+
     Returns:
         list: List of dictionaries containing grouped statistics
     """
-    statistics = (
+
+    queryset = (
         PayCalculator.objects
         .select_related('origin', 'organisation', 'organisation_access_code', 'destination')
+    )
+    if start_date is not None:
+        queryset = queryset.filter(api_created_at__date__gte=start_date)
+    if end_date is not None:
+        queryset = queryset.filter(api_created_at__date__lte=end_date)
+
+    statistics = (
+        queryset
         .values(
             'origin__name',
             'organisation__name',
@@ -828,7 +843,7 @@ def get_pay_calculator_statistics():
         )
         .order_by('origin__name', 'organisation__name', 'organisation_access_code__code')
     )
-    
+
     return list(statistics)
 
 
