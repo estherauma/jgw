@@ -207,16 +207,14 @@
           });
           $(modal).modal('hide');
         } else {
-          if (errorDiv) {
-            errorDiv.textContent = data.error || 'Failed to delete.';
-            errorDiv.classList.remove('d-none');
-          }
+          window.handleErrors({ errorBox: errorDiv, data: data }); 
         }
       } catch (err) {
-        if (errorDiv) {
-          errorDiv.textContent = 'An error occurred while communicating with the server.';
-          errorDiv.classList.remove('d-none');
-        }
+        window.handleErrors({ 
+          errorBox: errorDiv, 
+          data: err, 
+          errorMessage: 'An error occurred while communicating with the server.' 
+        });
       } finally {
         confirmBtn.disabled = false;
       }
