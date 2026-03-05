@@ -473,5 +473,8 @@
   });
   window.addEventListener('load', ()=>{
     initEditWorkGroupForm();
+  });
+  window.addEventListener('load', ()=>{
+    initDeleteWorkGroup();
   })
 })();
