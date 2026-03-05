@@ -90,20 +90,14 @@
 
   window.syncSelectedOrganization = syncSelectedOrganization;
 
-  async function postFormJson(target) {
-    var isForm = target instanceof HTMLFormElement;
-    var url = isForm ? target.action : target;
-    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-    var body = isForm ? new FormData(target) : new FormData();
-    var response = await fetch(url, {
+  async function postFormJson(form) {
+    var response = await fetch(form.action, {
       method: 'POST',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': csrfToken,
       },
-      body: body,
+      body: new FormData(form),
     });
-
     var data = await response.json();
     if (!response.ok) {
       throw data;
@@ -194,7 +188,16 @@
       }
 
       try {
-        var data = await window.postFormJson(deleteState.url); 
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        var response = await fetch(deleteState.url, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken,
+          },
+        });
+        
+        var data = await response.json();
 
         if (data.ok) {
           $(modal).one('hidden.bs.modal', function() {
@@ -204,13 +207,16 @@
           });
           $(modal).modal('hide');
         } else {
-          window.handleErrors({ errorBox: errorDiv, data: data }); 
+          if (errorDiv) {
+            errorDiv.textContent = data.error || 'Failed to delete.';
+            errorDiv.classList.remove('d-none');
+          }
         }
       } catch (err) {
-        window.handleErrors({ 
-          errorBox: errorDiv, 
-          data: err
-        });
+        if (errorDiv) {
+          errorDiv.textContent = 'An error occurred while communicating with the server.';
+          errorDiv.classList.remove('d-none');
+        }
       } finally {
         confirmBtn.disabled = false;
       }
