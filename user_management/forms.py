@@ -40,13 +40,19 @@ class CreateOrganisationForm(forms.ModelForm):
 class AddWorkCodeForm(forms.ModelForm):
     class Meta:
         model = OrganisationAccessCode
-        fields = ["code", "requires_login"]
+        fields = ["code","expiry_date", "requires_login"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["code"].widget.attrs.update(
             {"class": "form-control  um-input", "placeholder": "Work code"}
         )
+        self.fields["expiry_date"].widget = forms.DateInput(
+            attrs={"class": "form-control  um-input", 
+                   "type": "date",
+                   }
+            )
+        self.fields["expiry_date"].input_formats = ["%d-%m-%y"]
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
         )
