@@ -127,11 +127,6 @@
 
   window.handleErrors = handleErrors;
 
-  var deleteState = {
-    url: '',
-    itemName: '',
-    onSuccess: null,
-  };
 
   function showDeleteConfirm(options) {
     var modal = document.getElementById('delete-confirm-modal');
@@ -147,13 +142,9 @@
       errorDiv.textContent = '';
     }
 
-    deleteState.url = options.url || '';
-    deleteState.itemName = options.itemName || 'this item';
-    deleteState.onSuccess = options.onSuccess || function() { window.location.reload(); };
-
     var messageEl = modal.querySelector('[data-delete-message]');
     if (messageEl) {
-      messageEl.textContent = options.message || 'Are you sure you want to delete "' + deleteState.itemName + '"?';
+      messageEl.textContent = options.message || 'Are you sure you want to delete this item?';
     }
 
     var warningEl = modal.querySelector('[data-delete-warning]');
@@ -167,29 +158,19 @@
     }
 
     $(modal).modal('show');
-  }
+    const confirmBtn = modal.querySelector('[data-delete-confirm-btn]');
 
-  function initDeleteConfirmModal() {
-    var modal = document.getElementById('delete-confirm-modal');
-    if (!modal) return;
-
-    var confirmBtn = modal.querySelector('[data-delete-confirm-btn]');
-    var errorDiv = document.getElementById('delete-confirm-error'); 
-    
-    if (!confirmBtn) return;
-
-    confirmBtn.addEventListener('click', async function() {
-      if (!deleteState.url) return;
-
+    confirmBtn.onclick = async function () {
+      const confirmBtn = modal.querySelector('[data-delete-confirm-btn]');
       confirmBtn.disabled = true;
       if (errorDiv) {
-        errorDiv.classList.add('d-none');
-        errorDiv.textContent = '';
-      }
+              errorDiv.classList.add('d-none');
+              errorDiv.textContent = '';
+            }
 
       try {
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-        var response = await fetch(deleteState.url, {
+        var response = await fetch(options.url, {
           method: 'POST',
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -199,16 +180,15 @@
         
         var data = await response.json();
 
-        if (data.ok) {
-          $(modal).one('hidden.bs.modal', function() {
-            if (deleteState.onSuccess) {
-              deleteState.onSuccess(data);
-            }
-          });
-          $(modal).modal('hide');
-        } else {
+        if (!data.ok) {
           window.handleErrors({ errorBox: errorDiv, data: data }); 
-        }
+          return;
+        } 
+
+        $(modal).one('hidden.bs.modal', function() {
+            options?.onSuccess(data);
+        });
+        $(modal).modal('hide');
       } catch (err) {
         window.handleErrors({ 
           errorBox: errorDiv, 
@@ -218,11 +198,10 @@
       } finally {
         confirmBtn.disabled = false;
       }
-    });
-}
+    };
+  }
 
   window.showDeleteConfirm = showDeleteConfirm;
-  window.addEventListener('load', initDeleteConfirmModal);
 
   function syncThumb(container, track, thumb) {
     if (!thumb || !track || !container) {
