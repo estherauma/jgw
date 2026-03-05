@@ -167,6 +167,11 @@
       warningEl.textContent = options.warning || 'This action can not be reversed.';
     }
 
+    var titleEl = modal.querySelector('[data-delete-title]');
+    if (titleEl) {
+      titleEl.textContent = options.title || 'Confirm Deletion';
+    }
+
     $(modal).modal('show');
   }
 
