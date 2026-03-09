@@ -69,18 +69,26 @@
                                 <tr>
                                     <th>Work code</th>
                                     <th class="text-center">Requires authentication</th>
+                                    <th class="text-center">Expiry Date</th>
                                     <th class="text-center">Assigned work groups</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="d-none" data-org-workcode-empty>
-                                    <td colspan="4">No work codes yet.</td>
+                                    <td colspan="5">No work codes yet.</td>
                                 </tr>
                                 {% for code in work_codes %}
                                 <tr data-org-workcode data-org-id="{{ code.organisation_id }}">
                                     <td data-workcode-value>{{ code.code }}</td>
                                     <td class="text-center">{% if code.requires_login %}Yes{% else %}No{% endif %}</td>
+                                    <td class="text-center">
+                                        {% if code.expiry_date %}
+                                            {{ code.expiry_date | date:"Y-m-d" }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
                                     <td class="text-center">{{ code.work_groups.count }}</td>
                                     <td>
                                         <div class="um-action">

@@ -1,5 +1,5 @@
 from django import forms
-
+from django.utils import timezone
 from preference.models import OrganisationAccessCode, OrganisationData
 from .models import AppUser, WorkGroup
 
@@ -40,12 +40,15 @@ class CreateOrganisationForm(forms.ModelForm):
 class AddWorkCodeForm(forms.ModelForm):
     class Meta:
         model = OrganisationAccessCode
-        fields = ["code", "requires_login"]
+        fields = ["code", "expiry_date", "requires_login"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["code"].widget.attrs.update(
             {"class": "form-control  um-input", "placeholder": "Work code"}
+        )
+        self.fields["expiry_date"].widget = forms.DateInput(
+            attrs={"type": "date", "class": "form-control um-input"},
         )
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
@@ -56,6 +59,12 @@ class AddWorkCodeForm(forms.ModelForm):
         if OrganisationAccessCode.objects.filter(code__iexact=code).exists():
             raise forms.ValidationError("Work code already exists.")
         return code
+    
+    def clean_expiry_date(self):
+        expiry_date = self.cleaned_data.get("expiry_date")
+        if expiry_date and expiry_date < timezone.now().date():
+            raise forms.ValidationError("Expiry date cannot be in the past.")
+        return expiry_date
 
 
 class WorkGroupForm(forms.ModelForm):

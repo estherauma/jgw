@@ -29,6 +29,14 @@
                             <div class="text-danger small">{{ form.code.errors }}</div>
                         {% endif %}
                     </label>
+                    <label class="um-field form-group mt-2">
+                        <span>Expiry date (Optional)</span>
+                        {{ form.expiry_date }}
+                        <div class="text-danger small" data-error-for="expiry_date"></div>
+                        {% if form.expiry_date.errors %}
+                            <div class="text-danger small">{{ form.expiry_date.errors }}</div>
+                        {% endif %}
+                    </label>
                     <div class="form-check form-switch mt-2">
                         {{ form.requires_login }}
                         <label class="form-check-label" for="{{ form.requires_login.id_for_label }}">
