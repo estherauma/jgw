@@ -70,6 +70,7 @@
                                     <th>Work code</th>
                                     <th class="text-center">Requires authentication</th>
                                     <th class="text-center">Assigned work groups</th>
+                                    <th class="text-center">Expiry Date</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -82,6 +83,13 @@
                                     <td data-workcode-value>{{ code.code }}</td>
                                     <td class="text-center">{% if code.requires_login %}Yes{% else %}No{% endif %}</td>
                                     <td class="text-center">{{ code.work_groups.count }}</td>
+                                    <td class="text-center">
+                                        {% if code.expiry_date %}
+                                        {{ code.expiry_date|date:"d/m/Y" }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <div class="um-action">
                                             <!-- <button class="um-btn um-btn-outline">Edit</button> -->
@@ -261,6 +269,36 @@
     document.querySelectorAll('[data-selected-org-id]').forEach(function (input) {
       input.value = selectedOrgId;
     });
+    
+    function initExpiryDatePicker() {
+        var $input = $('input[name="expiry_date"]');
+        if ($input.length > 0) {
+          $input.daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoUpdateInput: false,
+            locale: {
+              format: 'DD-MM-YYYY'
+            }
+          });
+  
+          $input.on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD-MM-YYYY'));
+          });
+  
+          $input.on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+          });
+        }
+      }
+  
+      $(document).ready(function() {
+        initExpiryDatePicker();
+      });
+  
+      $('#add-workcode-modal').on('shown.bs.modal', function () {
+        initExpiryDatePicker();
+      });
   })();
 </script>
 {% endblock %}
