@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
+import phonenumbers
 from preference.models import OrganisationAccessCode, OrganisationData
 
 from .forms import (
@@ -324,6 +325,13 @@ class EditAppUserView(View):
         
         organisation = user.organisation_data
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
+        phone_local = ""
+        if user.phone_number:
+            try:
+                parsed = phonenumbers.parse(user.phone_number, None)
+                phone_local = str(parsed.national_number)
+            except phonenumbers.NumberParseException:
+                phone_local = user.phone_number
         return JsonResponse({
             "ok": True,
             "user": {
@@ -331,6 +339,9 @@ class EditAppUserView(View):
                 "email": user.email,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
+                "phone_number": user.phone_number,
+                "phone_country_iso": user.phone_country_iso,
+                "phone_local": phone_local,
                 "organisation_name": organisation.name,
                 "work_group_ids": list(user.work_groups.values_list("id", flat=True)),
             },

@@ -1,7 +1,10 @@
 from django import forms
 
+import phonenumbers
+
 from preference.models import OrganisationAccessCode, OrganisationData
 from .models import AppUser, WorkGroup
+from .utils import get_country_code_choices, validate_phone_number
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -75,12 +78,16 @@ class WorkGroupForm(forms.ModelForm):
 
 
 class AppUserForm(forms.ModelForm):
+    phone_country_iso = forms.ChoiceField(required=False)
+
     class Meta:
         model = AppUser
         fields = [
             "email",
             "first_name",
             "last_name",
+            "phone_number",
+            "phone_country_iso",
             "work_groups",
         ]
 
@@ -96,6 +103,13 @@ class AppUserForm(forms.ModelForm):
         self.fields["last_name"].widget.attrs.update(
             {"class": "form-control  um-input", "placeholder": "Last name"}
         )
+        self.fields["phone_number"].widget.attrs.update(
+            {"class": "form-control  um-input", "placeholder": "Phone number (optional)"}
+        )
+        self.fields["phone_country_iso"].choices = get_country_code_choices()
+        self.fields["phone_country_iso"].widget.attrs.update(
+            {"class": "form-control  um-input"}
+        )
         self.fields["work_groups"].widget = forms.CheckboxSelectMultiple()
         if work_groups_qs is not None:
             self.fields["work_groups"].queryset = work_groups_qs
@@ -108,6 +122,39 @@ class AppUserForm(forms.ModelForm):
         if qs.exists():
             raise forms.ValidationError("Email already exists.")
         return email
+
+    def clean(self):
+        cleaned = super().clean()
+        phone_number = cleaned.get("phone_number", "") or ""
+        phone_country_iso = cleaned.get("phone_country_iso", "") or ""
+        if phone_number and not phone_country_iso:
+            self.add_error("phone_country_iso", "Select a country code.")
+            return cleaned
+        if phone_number and phone_country_iso:
+            parsed, error_message = validate_phone_number(phone_number, phone_country_iso)
+            if error_message:
+                if "country code" in error_message:
+                    self.add_error("phone_country_iso", error_message)
+                else:
+                    self.add_error("phone_number", error_message)
+                return cleaned
+            cleaned["phone_number"] = phonenumbers.format_number(
+                parsed, phonenumbers.PhoneNumberFormat.E164
+            )
+            phone_qs = AppUser.objects.filter(
+                phone_number=cleaned["phone_number"],
+                phone_country_iso=phone_country_iso,
+            )
+            
+            if self.instance and self.instance.pk:
+                phone_qs = phone_qs.exclude(pk=self.instance.pk)
+            if phone_qs.exists():
+                self.add_error(
+                    "phone_number",
+                    "Phone number already exists for the selected country.",
+                )
+
+        return cleaned
 
 
 class WorkCodeAssignForm(forms.Form):

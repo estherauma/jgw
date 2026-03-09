@@ -20,3 +20,42 @@ def is_58_admin(user):
 
 def is_super_or_58_admin(user):
     return is_super_user(user) or is_58_admin(user)
+import phonenumbers
+import pycountry
+
+COUNTRY_CODE_CHOICES = None
+
+
+def get_country_code_choices():
+    global COUNTRY_CODE_CHOICES
+    if COUNTRY_CODE_CHOICES is not None:
+        return COUNTRY_CODE_CHOICES
+    choices = []
+    for region in sorted(phonenumbers.SUPPORTED_REGIONS):
+        country = pycountry.countries.get(alpha_2=region)
+        name = country.name if country else region
+        code = phonenumbers.country_code_for_region(region)
+        if not code:
+            continue
+        dial = f"+{code}"
+        choices.append((region, f"({dial}) {name}"))
+    COUNTRY_CODE_CHOICES = choices
+    return choices
+
+
+def validate_phone_number(phone_number, country_iso):
+    if not phone_number:
+        return None, "Enter a valid phone number."
+    if not country_iso:
+        return None, "Select a country code."
+    iso_code = phonenumbers.country_code_for_region(country_iso)
+    if not iso_code:
+        return None, "Select a valid country code."
+    raw_number = phone_number.strip()
+    try:
+        parsed = phonenumbers.parse(raw_number, country_iso)
+    except phonenumbers.NumberParseException:
+        return None, "Enter a valid phone number."
+    if not phonenumbers.is_possible_number(parsed) or not phonenumbers.is_valid_number(parsed):
+        return None, "Enter a valid phone number."
+    return parsed, None

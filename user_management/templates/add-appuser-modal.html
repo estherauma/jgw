@@ -53,6 +53,25 @@
                             <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
+                    <div class="um-field form-group">
+                        <span>Phone number</span>
+                        <div class="phone-field align-items-center">
+                            <div class="w-25 phone-code">
+                                {{ form.phone_country_iso }}
+                                <div class="text-danger small" data-error-for="phone_country_iso"></div>
+                                {% if form.phone_country_iso.errors %}
+                                    <div class="text-danger small">{{ form.phone_country_iso.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1 phone-number">
+                                {{ form.phone_number }}
+                                <div class="text-danger small" data-error-for="phone_number"></div>
+                                {% if form.phone_number.errors %}
+                                    <div class="text-danger small">{{ form.phone_number.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
     
                     <div class="um-field form-group">
                         <span>Work groups</span>
