@@ -48,13 +48,10 @@ class AddWorkCodeForm(forms.ModelForm):
         self.fields["code"].widget.attrs.update(
             {"class": "form-control  um-input", "placeholder": "Work code"}
         )
-        self.fields["expiry_date"].widget = forms.DateInput(
-            format='%d-%m-%Y', 
-            attrs={
-                "class": "form-control um-input", 
-                "type": "text",
-                "placeholder": "DD-MM-YYYY",
-            }
+        self.fields["expiry_date"] = forms.DateField(
+            input_formats=["%Y-%m-%d"],
+            widget=forms.DateInput(attrs={"type": "date","class": "form-control um-input", 
+                "placeholder": "DD-MM-YYYY",}),
         )
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
