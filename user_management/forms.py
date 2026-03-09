@@ -1,8 +1,7 @@
 from django import forms
-
+from django.utils import timezone
 from preference.models import OrganisationAccessCode, OrganisationData
 from .models import AppUser, WorkGroup
-from django.utils import timezone
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -41,7 +40,7 @@ class CreateOrganisationForm(forms.ModelForm):
 class AddWorkCodeForm(forms.ModelForm):
     class Meta:
         model = OrganisationAccessCode
-        fields = ["code","expiry_date", "requires_login"]
+        fields = ["code", "expiry_date", "requires_login"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -49,7 +48,7 @@ class AddWorkCodeForm(forms.ModelForm):
             {"class": "form-control  um-input", "placeholder": "Work code"}
         )
         self.fields["expiry_date"].widget = forms.DateInput(
-            attrs={"type": "date","class": "form-control um-input"},
+            attrs={"type": "date", "class": "form-control um-input"},
         )
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
