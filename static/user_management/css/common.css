@@ -465,7 +465,3 @@ body .modal-backdrop.show {
 p[data-delete-message] {
     font-weight: 500;
 }
-
-.daterangepicker {
-    z-index: 1100 !important; 
-}
