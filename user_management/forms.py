@@ -2,6 +2,7 @@ from django import forms
 
 from preference.models import OrganisationAccessCode, OrganisationData
 from .models import AppUser, WorkGroup
+from django.utils import timezone
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -52,7 +53,6 @@ class AddWorkCodeForm(forms.ModelForm):
                    "type": "date",
                    }
             )
-        self.fields["expiry_date"].input_formats = ["%d-%m-%y"]
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
         )
@@ -62,6 +62,12 @@ class AddWorkCodeForm(forms.ModelForm):
         if OrganisationAccessCode.objects.filter(code__iexact=code).exists():
             raise forms.ValidationError("Work code already exists.")
         return code
+    
+    def clean_expiry_date(self):
+        expiry_date = self.cleaned_data.get("expiry_date")
+        if expiry_date and expiry_date < timezone.now().date():
+            raise forms.ValidationError("Expiry date cannot be in the past.")
+        return expiry_date
 
 
 class WorkGroupForm(forms.ModelForm):
