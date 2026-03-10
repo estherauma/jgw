@@ -13,6 +13,7 @@ from .views import (
     search_organisations,
     DeleteWorkGroupView,
     search_users,
+    DeleteWorkCodeView,
 )
 
 app_name = "user_management"
@@ -31,4 +32,5 @@ urlpatterns = [
     path('app-users/search/', search_users, name="search_users"),
     path('app-users/<int:user_id>/edit/', EditAppUserView.as_view(), name="edit_app_user"),
     path('work-groups/<int:work_group_id>/delete/', DeleteWorkGroupView.as_view(), name="delete_work_group"),
+    path('work-codes/<int:work_code_id>/delete/', DeleteWorkCodeView.as_view(), name="delete_work_code"),
 ]
