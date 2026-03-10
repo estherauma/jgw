@@ -302,6 +302,25 @@
       }
     });
   }
+
+  function initDeleteWorkCode() {
+    $(document).on('click', '[data-delete-workcode-btn]', function() {
+      var $btn = $(this);
+      var codeId = $btn.data('workcode-id');
+      var codeValue = $btn.data('workcode-code');
+
+      if (window.showDeleteConfirm) {
+        window.showDeleteConfirm({
+          url: '/user-management/work-codes/' + codeId + '/delete/',
+          title: 'Delete Work Code',
+          message: 'Are you sure you want to delete the work code "' + codeValue + '"?',
+          onSuccess: function() {
+            window.location.reload();
+          }
+        });
+      }
+    });
+  }
   function initEditWorkGroupForm() {
     var modal = document.getElementById('edit-workgroup-modal');
     if (!modal) return;
@@ -476,5 +495,8 @@
   });
   window.addEventListener('load', ()=>{
     initDeleteWorkGroup();
-  })
+  });
+  window.addEventListener('load', ()=>{
+    initDeleteWorkCode();
+  });
 })();

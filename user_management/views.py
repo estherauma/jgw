@@ -82,7 +82,7 @@ def user_management(request):
         users = users.filter(organisation_data=selected_org)
         work_codes = (
             OrganisationAccessCode.objects.select_related("organisation")
-            .filter(organisation=selected_org)
+            .filter(organisation=selected_org, is_deleted=False)
             .order_by("-created_at")
         )
         work_groups = (
@@ -478,25 +478,19 @@ class AssignUsersToWorkGroupsView(View):
 
 class DeleteWorkCodeView(View):
     def post(self, request, work_code_id):
-        org_id = request.POST.get("selected_org_id")
-        organisation = None
-        if org_id:
-            organisation = OrganisationData.objects.filter(id=org_id).first()
-        if not organisation:
-            return JsonResponse(
-                {"ok": False, "error": "Select an organisation first."},
-                status=400,
-            )
-        if not has_org_access(request.user, organisation):
-            return org_access_denied()
+        allowed_orgs = get_allowed_orgs(request.user)
         work_code = OrganisationAccessCode.objects.filter(
-            id=work_code_id, organisation=organisation
+            id=work_code_id,
+            organisation__in=allowed_orgs,
+            is_deleted=False
         ).first()
+
         if not work_code:
             return JsonResponse(
                 {"ok": False, "error": "Work code not found."},
                 status=404,
             )
+
         if work_code.work_groups.exists():
             return JsonResponse(
                 {
@@ -505,7 +499,10 @@ class DeleteWorkCodeView(View):
                 },
                 status=400,
             )
+
         code_name = work_code.code
+        
         work_code.soft_delete(request.user)
+        
         messages.success(request, f'Work code "{code_name}" deleted successfully.')
-        return JsonResponse({"ok": True, "org_id": organisation.id})
+        return JsonResponse({"ok": True})
