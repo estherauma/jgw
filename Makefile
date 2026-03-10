@@ -37,7 +37,7 @@ docker_makemigrations:
 	docker-compose -f docker-compose.dev.yml exec web python manage.py makemigrations
 
 docker_up:
-	docker compose -f docker-compose.dev.yml up
+	docker compose -f docker-compose.dev.yml up --build
 
 docker_down:
 	docker compose -f docker-compose.dev.yml down

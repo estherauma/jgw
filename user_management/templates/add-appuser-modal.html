@@ -38,7 +38,7 @@
                         {% endif %}
                     </label>
                     <label class="um-field form-group">
-                        <span>First name</span>
+                        <span>First name (optional)</span>
                         {{ form.first_name }}
                         <div class="text-danger small" data-error-for="first_name"></div>
                         {% if form.first_name.errors %}
@@ -46,16 +46,35 @@
                         {% endif %}
                     </label>
                     <label class="um-field form-group">
-                        <span>Last name</span>
+                        <span>Last name (optional)</span>
                         {{ form.last_name }}
                         <div class="text-danger small" data-error-for="last_name"></div>
                         {% if form.last_name.errors %}
                             <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
+                    <div class="um-field form-group">
+                        <span>Phone number (optional)</span>
+                        <div class="phone-field align-items-center">
+                            <div class="w-25 phone-code">
+                                {{ form.phone_country_iso }}
+                                <div class="text-danger small" data-error-for="phone_country_iso"></div>
+                                {% if form.phone_country_iso.errors %}
+                                    <div class="text-danger small">{{ form.phone_country_iso.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1 phone-number">
+                                {{ form.phone_number }}
+                                <div class="text-danger small" data-error-for="phone_number"></div>
+                                {% if form.phone_number.errors %}
+                                    <div class="text-danger small">{{ form.phone_number.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
     
                     <div class="um-field form-group">
-                        <span>Work groups</span>
+                        <span>Work groups (optional)</span>
                         <div class="um-checkbox-list um-checkbox-list-scroll" data-work-groups-container>
                             {% if form.work_groups and form.work_groups.field.queryset %}
                                 {{ form.work_groups }}

@@ -34,6 +34,8 @@ class AppUser(models.Model):
     first_name = models.CharField(blank=True, null=False, max_length=128)
     last_name = models.CharField(blank=True, null=False, max_length=128)
     email = models.EmailField(null=False, blank=False, max_length=128, unique=True)
+    phone_number = models.CharField(blank=True, null=True, max_length=32)
+    phone_country_iso = models.CharField(blank=True, null=True, max_length=2)
     organisation_data = models.ForeignKey(
         OrganisationData, on_delete=models.PROTECT, null=True, blank=True
     )

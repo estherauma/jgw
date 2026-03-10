@@ -112,10 +112,35 @@
     min-width: 160px;
     height: 40px;
 }
-  .um-input::placeholder {
-      color: #CBD3DF;
-      font-size: 13px;
-  }
+.um-input::placeholder {
+    color: #CBD3DF;
+    font-size: 13px;
+}
+.phone-field {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.phone-field .phone-code {
+    flex: 0 0 25%;
+}
+.phone-field .phone-number {
+    flex: 1 1 auto;
+}
+.phone-field .um-input {
+    min-width: 0;
+    width: 100%;
+}
+.phone-field .phone-code select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234f647f' d='M1.41 0.59L6 5.17 10.59 0.59 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px 8px;
+    padding-right: 28px;
+}
 .um-btn {
     background: #37C1E3;
     border: none;
