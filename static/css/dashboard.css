@@ -288,6 +288,7 @@
 }
 
 .enhanced-sidebar .menu-arrow {
+    color: white !important;
     margin-left: auto;
     transition: transform 0.3s ease;
 }
