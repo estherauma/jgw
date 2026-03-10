@@ -495,7 +495,7 @@ class DeleteWorkCodeView(View):
             return JsonResponse(
                 {
                     "ok": False, 
-                    "error": f"Cannot delete '{work_code.code}' because it is assigned to work groups."
+                    "error": f"Cannot delete '{work_code.code}' because it is assigned to work groups. Remove it from work groups first."
                 },
                 status=400,
             )
