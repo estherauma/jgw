@@ -500,9 +500,9 @@ class DeleteWorkCodeView(View):
                 status=400,
             )
 
-        code_name = work_code.code
+        code = work_code.code
         
         work_code.soft_delete(request.user)
         
-        messages.success(request, f'Work code "{code_name}" deleted successfully.')
+        messages.success(request, f'Work code "{code}" deleted successfully.')
         return JsonResponse({"ok": True})
