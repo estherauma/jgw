@@ -199,11 +199,25 @@ class CreateWorkCodeView(View):
         if form.is_valid():
             code_value = form.cleaned_data["code"].strip()
             existing_code = OrganisationAccessCode.objects.filter(
-                code__iexact=code_value, organisation=organisation
+                code__iexact=code_value
                 ).first()
             if existing_code:
+                if existing_code.organisation != organisation:
+                    return JsonResponse(
+                        {
+                            "ok": False, 
+                            "errors": {"code": ["Work code already exists for a different organisation."]}
+                        }, 
+                        status=400
+                        )
                 if not existing_code.is_deleted:
-                    return JsonResponse({"ok": False, "errors": {"code": ["Work code already exists."]}}, status=400)
+                    return JsonResponse(
+                        {
+                            "ok": False, "errors": 
+                            {"code": ["Work code already exists."]}
+                        }, 
+                        status=400
+                        )
                 
                 existing_code.is_deleted = False
                 existing_code.deleted_at = None
