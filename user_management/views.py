@@ -389,7 +389,7 @@ class AssignWorkCodeView(View):
                 status=400,
             )
         work_code = OrganisationAccessCode.objects.filter(
-            id=work_code_id, organisation=organisation
+            id=work_code_id, organisation=organisation, is_deleted=False
         ).first()
         if not work_code:
             return JsonResponse(
