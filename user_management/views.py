@@ -212,11 +212,13 @@ class CreateWorkCodeView(View):
                 existing_code.requires_login = form.cleaned_data["requires_login"]
                 existing_code.save()
                 work_code = existing_code
+                msg = f'Work code "{work_code.code}" already exists but was deleted. It has been reactivated with the new details you provided.'
             else:
-                
                 work_code = form.save(commit=False)
                 work_code.organisation = organisation
                 work_code.save()
+                msg = f'Work code "{work_code.code}" created successfully.'   
+            messages.success(request, msg)
             return JsonResponse(
                 {
                     "ok": True,
