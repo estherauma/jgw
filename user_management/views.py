@@ -509,6 +509,8 @@ class AssignUsersToWorkGroupsView(View):
 
 class DeleteWorkCodeView(View):
     def post(self, request, work_code_id):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
         allowed_orgs = get_allowed_orgs(request.user)
         work_code = OrganisationAccessCode.objects.filter(
             id=work_code_id,
