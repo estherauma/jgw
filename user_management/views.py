@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
+from django.db import transaction, IntegrityError
 import phonenumbers
 from preference.models import OrganisationAccessCode, OrganisationData
 
@@ -198,49 +199,46 @@ class CreateWorkCodeView(View):
             )
         if form.is_valid():
             code_value = form.cleaned_data["code"].strip()
-            existing_code = OrganisationAccessCode.objects.filter(
-                code__iexact=code_value
-                ).first()
-            if existing_code:
-                if existing_code.organisation != organisation:
-                    return JsonResponse(
-                        {
-                            "ok": False, 
-                            "errors": {"code": ["Work code already exists for a different organisation."]}
-                        }, 
-                        status=400
-                        )
-                if not existing_code.is_deleted:
-                    return JsonResponse(
-                        {
-                            "ok": False, "errors": 
-                            {"code": ["Work code already exists."]}
-                        }, 
-                        status=400
-                        )
+            try:
+                with transaction.atomic():
+                    existing_code = OrganisationAccessCode.objects.filter(
+                        code__iexact=code_value
+                        ).first()
+                    if existing_code:
+                        if existing_code.organisation != organisation:
+                            return JsonResponse(
+                                {"ok": False, "errors": {"code": ["Work code already exists for a different organisation."]}}, 
+                                status=400)
+                        if not existing_code.is_deleted:
+                            return JsonResponse(
+                                {"ok": False, "errors": {"code": ["Work code already exists."]}}, 
+                                status=400)
+         
+                        existing_code.is_deleted = False
+                        existing_code.deleted_at = None
+                        existing_code.deleted_by = None
+                        existing_code.expiry_date = form.cleaned_data["expiry_date"]
+                        existing_code.requires_login = form.cleaned_data["requires_login"]
+                        existing_code.save()
+                        work_code = existing_code
+                        msg = f'Work code "{work_code.code}" already exists but was deleted. It has been reactivated with the new details you provided.'
+                    else:
+                        work_code = form.save(commit=False)
+                        work_code.organisation = organisation
+                        work_code.save()
+                        msg = f'Work code "{work_code.code}" created successfully.'   
+                    messages.success(request, msg)
+                return JsonResponse(
+                    {
+                        "ok": True,
+                        "code": work_code.code,
+                        "org_id": work_code.organisation_id,
+                    }
+                )
+            except IntegrityError:
+                return JsonResponse({"ok": False,"errors": {"code": ["This code was just taken by another user or already exists. Please try a different one."]}}, 
+                                        status=400)
                 
-                existing_code.is_deleted = False
-                existing_code.deleted_at = None
-                existing_code.deleted_by = None
-                existing_code.expiry_date = form.cleaned_data["expiry_date"]
-                existing_code.requires_login = form.cleaned_data["requires_login"]
-                existing_code.save()
-                work_code = existing_code
-                msg = f'Work code "{work_code.code}" already exists but was deleted. It has been reactivated with the new details you provided.'
-            else:
-                work_code = form.save(commit=False)
-                work_code.organisation = organisation
-                work_code.save()
-                msg = f'Work code "{work_code.code}" created successfully.'   
-            messages.success(request, msg)
-            return JsonResponse(
-                {
-                    "ok": True,
-                    "code": work_code.code,
-                    "org_id": work_code.organisation_id,
-                }
-            )
-
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 class EditOrganisationView(View):
