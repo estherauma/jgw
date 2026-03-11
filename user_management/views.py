@@ -197,9 +197,26 @@ class CreateWorkCodeView(View):
                 status=400,
             )
         if form.is_valid():
-            work_code = form.save(commit=False)
-            work_code.organisation = organisation
-            work_code.save()
+            code_value = form.cleaned_data["code"].strip()
+            existing_code = OrganisationAccessCode.objects.filter(
+                code__iexact=code_value, organisation=organisation
+                ).first()
+            if existing_code:
+                if not existing_code.is_deleted:
+                    return JsonResponse({"ok": False, "errors": {"code": ["Work code already exists."]}}, status=400)
+                
+                existing_code.is_deleted = False
+                existing_code.deleted_at = None
+                existing_code.deleted_by = None
+                existing_code.expiry_date = form.cleaned_data["expiry_date"]
+                existing_code.requires_login = form.cleaned_data["requires_login"]
+                existing_code.save()
+                work_code = existing_code
+            else:
+                
+                work_code = form.save(commit=False)
+                work_code.organisation = organisation
+                work_code.save()
             return JsonResponse(
                 {
                     "ok": True,
@@ -495,7 +512,7 @@ class DeleteWorkCodeView(View):
             return JsonResponse(
                 {
                     "ok": False, 
-                    "error": f"Cannot delete '{work_code.code}' because it is assigned to work groups. Remove it from work groups first."
+                    "error": f"Cannot delete '{work_code.code}' because it is assigned to work groups. Remove it from the work groups first."
                 },
                 status=400,
             )

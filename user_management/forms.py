@@ -56,11 +56,12 @@ class AddWorkCodeForm(forms.ModelForm):
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
         )
+        
+    def validate_unique(self):
+        pass
 
     def clean_code(self):
         code = self.cleaned_data.get("code", "").strip().upper()
-        if OrganisationAccessCode.objects.filter(code__iexact=code).exists():
-            raise forms.ValidationError("Work code already exists.")
         return code
     
     def clean_expiry_date(self):
