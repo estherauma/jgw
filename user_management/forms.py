@@ -2,6 +2,7 @@ from django import forms
 
 import phonenumbers
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from preference.models import OrganisationAccessCode, OrganisationData
 from .models import AppUser, WorkGroup
 from .utils import get_country_code_choices, validate_phone_number
@@ -58,7 +59,14 @@ class AddWorkCodeForm(forms.ModelForm):
         )
         
     def validate_unique(self):
-        pass
+        exclude = self._get_validation_exclusions()
+    
+        if 'code' not in exclude:
+            exclude.append('code')
+        try:
+            self.instance.validate_unique(exclude=exclude)
+        except ValidationError as e:
+            self._update_errors(e)
 
     def clean_code(self):
         code = self.cleaned_data.get("code", "").strip().upper()
