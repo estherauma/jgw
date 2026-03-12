@@ -463,7 +463,8 @@
     $('[data-edit-code-btn]').on('click', function() {
       var $btn = $(this);
       form.querySelector('[name="code"]').value = $btn.data('workcode-code') || '';
-      form.querySelector('[name="requires_login"]').checked = $btn.data('workcode-requires-login') || false;
+      const requiresLogin = $btn.data('workcode-requires-login');
+      form.querySelector('[name="requires_login"]').checked = (String(requiresLogin).toLowerCase() === 'true');
       form.querySelector('[name="expiry_date"]').value = $btn.data('workcode-expiry-date') || '';
       form.action = '/user-management/work-codes/' + $btn.data('workcode-id') + '/edit/';
   
