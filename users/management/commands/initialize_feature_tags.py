@@ -2,15 +2,17 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.db.models import Q
 from waffle import get_waffle_flag_model
+from users.utils import ALL_GROUPS
 
 
 class Command(BaseCommand):
     help = "Create initial feature toggle tags for user groups using the waffle library"
 
     def handle(self, *args, **options):
+        for group_name in ALL_GROUPS:
+            Group.objects.get_or_create(name=group_name)
 
-        group_name = "testers"
-        testers_group, _ = Group.objects.get_or_create(name=group_name)
+        testers_group, _ = Group.objects.get_or_create(name='testers')
         permissions = Permission.objects.filter(
             ~Q(content_type__app_label="users")
             & ~Q(content_type__app_label="admin")
@@ -103,8 +105,9 @@ class Command(BaseCommand):
         ROLE_INHERITANCE = {
             "org_admin": ["org_admin", "58_admin"],  # 58_admin has all org_admin permissions
             "58_admin": ["58_admin"],  # 58_admin permissions only
-            "user_management": ["user_management"],
+            "user_management": ["user_management", "58_admin"],
         }
+  
         for flag in flags_list:
             created_flag, created = WaffleFlag.objects.get_or_create(name=flag["tag"], superusers=True)
             if flag["condition"] == "testers":
