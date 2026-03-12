@@ -39,7 +39,7 @@ class AppUser(models.Model):
     organisation_data = models.ForeignKey(
         OrganisationData, on_delete=models.PROTECT, null=True, blank=True
     )
-    work_groups = models.ManyToManyField(WorkGroup, blank=True, related_name="users")
+    work_groups = models.ManyToManyField(WorkGroup, blank=True, related_name="app_users")
     user_languages = models.ManyToManyField(Language, blank=True)
 
     is_staff = models.BooleanField(
