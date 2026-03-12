@@ -44,3 +44,6 @@ docker_down:
 	
 docker_restart_web:
 	docker compose -f docker-compose.dev.yml restart web
+
+docker_initialize_feature_tags:
+	docker compose -f docker-compose.dev.yml exec web python manage.py initialize_feature_tags
