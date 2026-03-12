@@ -241,6 +241,7 @@
 .enhanced-sidebar .menu-link {
     display: flex;
     align-items: center;
+    flex-wrap: nowrap;
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -280,17 +281,22 @@
     opacity: 0;
     transform: translateX(-10px);
     transition: all 0.3s ease;
+    max-width: 0;
+    overflow: hidden;
 }
 
 .enhanced-sidebar:hover .menu-text {
     opacity: 1;
     transform: translateX(0);
+    max-width: 180px;
 }
 
 .enhanced-sidebar .menu-arrow {
     color: white !important;
     margin-left: auto;
     transition: transform 0.3s ease;
+    position: static;
+    flex-shrink: 0;
 }
 
 .enhanced-sidebar .has-submenu .menu-link[aria-expanded="true"] .menu-arrow {
