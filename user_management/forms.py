@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 import phonenumbers
 from django.utils import timezone
@@ -63,7 +64,7 @@ class AddWorkCodeForm(forms.ModelForm):
             exclude.append('code')
         try:
             self.instance.validate_unique(exclude=exclude)
-        except forms.ValidationError as e: 
+        except ValidationError as e: 
             self._update_errors(e)
 
     def clean_code(self):
