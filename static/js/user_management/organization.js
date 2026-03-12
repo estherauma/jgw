@@ -452,6 +452,52 @@
       workCodeInput.value = codeId || '';
     });
   }
+
+  function initEditWorkCodeForm() {
+    var modal = document.getElementById('edit-workcode-modal');
+    if (!modal) return;
+  
+    var form = modal.querySelector('form');
+    var errorBox = document.getElementById('edit-workcode-form-error');
+  
+    $('[data-edit-code-btn]').on('click', function() {
+      var $btn = $(this);
+      form.querySelector('[name="code"]').value = $btn.data('workcode-code') || '';
+      form.querySelector('[name="requires_login"]').checked = $btn.data('workcode-requires-login') || false;
+      form.querySelector('[name="expiry_date"]').value = $btn.data('workcode-expiry-date') || '';
+      form.action = '/user-management/work-codes/' + $btn.data('workcode-id') + '/edit/';
+  
+      if (window.syncSelectedOrganization) {
+        window.syncSelectedOrganization('edit-workcode-form', '#edit-workcode-modal [data-workcode-org-label]');
+      }
+
+      if (errorBox) errorBox.classList.add('d-none');
+      $(form).find("[data-error-for]").text("");
+    });
+  
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      safeClearFormErrors(form, errorBox);
+  
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) submitButton.disabled = true;
+  
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+  }
   
   window.addEventListener('load', function () {
     initCreateOrgForm();
@@ -476,5 +522,8 @@
   });
   window.addEventListener('load', ()=>{
     initDeleteWorkGroup();
-  })
+  });
+  window.addEventListener('load', ()=>{
+    initEditWorkCodeForm();
+  });
 })();
