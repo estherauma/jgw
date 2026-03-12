@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
+from django.db import transaction, IntegrityError
 import phonenumbers
 from preference.models import OrganisationAccessCode, OrganisationData
 
@@ -82,7 +83,7 @@ def user_management(request):
         users = users.filter(organisation_data=selected_org)
         work_codes = (
             OrganisationAccessCode.objects.select_related("organisation")
-            .filter(organisation=selected_org)
+            .filter(organisation=selected_org, is_deleted=False)
             .order_by("-created_at")
         )
         work_groups = (
@@ -197,17 +198,47 @@ class CreateWorkCodeView(View):
                 status=400,
             )
         if form.is_valid():
-            work_code = form.save(commit=False)
-            work_code.organisation = organisation
-            work_code.save()
-            return JsonResponse(
-                {
-                    "ok": True,
-                    "code": work_code.code,
-                    "org_id": work_code.organisation_id,
-                }
-            )
-
+            code_value = form.cleaned_data["code"].strip()
+            try:
+                with transaction.atomic():
+                    existing_code = OrganisationAccessCode.objects.filter(
+                        code__iexact=code_value
+                        ).first()
+                    if existing_code:
+                        if existing_code.organisation != organisation:
+                            return JsonResponse(
+                                {"ok": False, "errors": {"code": ["Work code already exists for a different organisation."]}}, 
+                                status=400)
+                        if not existing_code.is_deleted:
+                            return JsonResponse(
+                                {"ok": False, "errors": {"code": ["Work code already exists."]}}, 
+                                status=400)
+         
+                        existing_code.is_deleted = False
+                        existing_code.deleted_at = None
+                        existing_code.deleted_by = None
+                        existing_code.expiry_date = form.cleaned_data["expiry_date"]
+                        existing_code.requires_login = form.cleaned_data["requires_login"]
+                        existing_code.save()
+                        work_code = existing_code
+                        msg = f'Work code "{work_code.code}" already exists but was deleted. It has been reactivated with the new details you provided.'
+                    else:
+                        work_code = form.save(commit=False)
+                        work_code.organisation = organisation
+                        work_code.save()
+                        msg = f'Work code "{work_code.code}" created successfully.'   
+                    messages.success(request, msg)
+                return JsonResponse(
+                    {
+                        "ok": True,
+                        "code": work_code.code,
+                        "org_id": work_code.organisation_id,
+                    }
+                )
+            except IntegrityError:
+                return JsonResponse({"ok": False,"errors": {"code": ["This code was just taken by another user or already exists. Please try a different one."]}}, 
+                                        status=400)
+                
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 class EditOrganisationView(View):
@@ -389,7 +420,7 @@ class AssignWorkCodeView(View):
                 status=400,
             )
         work_code = OrganisationAccessCode.objects.filter(
-            id=work_code_id, organisation=organisation
+            id=work_code_id, organisation=organisation, is_deleted=False
         ).first()
         if not work_code:
             return JsonResponse(
@@ -474,3 +505,37 @@ class AssignUsersToWorkGroupsView(View):
             )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class DeleteWorkCodeView(View):
+    def post(self, request, work_code_id):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
+        allowed_orgs = get_allowed_orgs(request.user)
+        work_code = OrganisationAccessCode.objects.filter(
+            id=work_code_id,
+            organisation__in=allowed_orgs,
+            is_deleted=False
+        ).first()
+
+        if not work_code:
+            return JsonResponse(
+                {"ok": False, "error": "Work code not found."},
+                status=404,
+            )
+
+        if work_code.work_groups.exists():
+            return JsonResponse(
+                {
+                    "ok": False, 
+                    "error": f"Cannot delete '{work_code.code}' because it is assigned to work groups. Remove it from the work groups first."
+                },
+                status=400,
+            )
+
+        code = work_code.code
+        
+        work_code.soft_delete(request.user)
+        
+        messages.success(request, f'Work code "{code}" deleted successfully.')
+        return JsonResponse({"ok": True})

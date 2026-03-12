@@ -106,7 +106,12 @@
                                                 Assign
                                             </button>
                                             {% flag 'can_delete_work_code' %}
-                                            <button class="um-btn um-btn-outline-black um-navy">Delete</button>
+                                            <button class="um-btn um-btn-outline-black um-navy"
+                                            data-workcode-id="{{ code.id }}"
+                                            data-workcode-code="{{ code.code }}"
+                                            data-delete-workcode-btn>
+                                                Delete
+                                            </button>
                                             {% endflag %}
                                         </div>
                                     </td>

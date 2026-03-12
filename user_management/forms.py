@@ -2,6 +2,7 @@ from django import forms
 
 import phonenumbers
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from preference.models import OrganisationAccessCode, OrganisationData
 from .models import AppUser, WorkGroup
 from .utils import get_country_code_choices, validate_phone_number
@@ -56,11 +57,19 @@ class AddWorkCodeForm(forms.ModelForm):
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
         )
+        
+    def validate_unique(self):
+        exclude = self._get_validation_exclusions()
+    
+        if 'code' not in exclude:
+            exclude.append('code')
+        try:
+            self.instance.validate_unique(exclude=exclude)
+        except ValidationError as e:
+            self._update_errors(e)
 
     def clean_code(self):
         code = self.cleaned_data.get("code", "").strip().upper()
-        if OrganisationAccessCode.objects.filter(code__iexact=code).exists():
-            raise forms.ValidationError("Work code already exists.")
         return code
     
     def clean_expiry_date(self):
