@@ -58,6 +58,8 @@ class AddWorkCodeForm(forms.ModelForm):
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
         )
+        if self.instance and self.instance.pk:
+            self.fields['code'].disabled = True
         
     def validate_unique(self):
         exclude = self._get_validation_exclusions()

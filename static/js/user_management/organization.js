@@ -481,8 +481,11 @@
   
     $('[data-edit-code-btn]').on('click', function() {
       var $btn = $(this);
-      form.querySelector('[name="code"]').value = $btn.data('workcode-code') || '';
       const requiresLogin = $btn.data('workcode-requires-login');
+      var codeField = form.querySelector('[name="code"]');
+      codeField.value = $btn.data('workcode-code') || '';
+      codeField.readOnly = true;
+      codeField.classList.add('bg-light', 'text-muted');
       form.querySelector('[name="requires_login"]').checked = (String(requiresLogin).toLowerCase() === 'true');
       form.querySelector('[name="expiry_date"]').value = $btn.data('workcode-expiry-date') || '';
       form.action = '/user-management/work-codes/' + $btn.data('workcode-id') + '/edit/';
