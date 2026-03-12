@@ -59,6 +59,8 @@ def generic_question_filtered_queryset(
 
     generic_question_filters_q_object = Q()
 
+    generic_question_filters_q_object &= Q(is_test_data=False)
+
     if user_orgs:
         user_org_names = [org.name for org in user_orgs]
         user_org_q = Q(org_info__name__in=user_org_names)

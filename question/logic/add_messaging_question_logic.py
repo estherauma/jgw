@@ -22,6 +22,7 @@ from common.helpers.model_helpers.preference import (
     add_original_sector_of_work_to_db,
 )
 from common.helpers.preference_helpers.country import get_data_destination, get_data_origin
+from common.helpers.messaging_question_helpers.messging_question_test_data import is_messaging_question_test_data
 from common.logger import KunfuPandaLogger
 
 from common.services.api_client import JustGoodWorkAPIClient, MessagingAPIClient
@@ -162,6 +163,7 @@ def add_messaging_question_to_db(messaging_question):
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
     organisation_data = get_or_add_organisation_to_db(organisation)
     factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
+    is_test_data = is_messaging_question_test_data(messaging_question.get("questionKey"))
 
     # save the standard fields,
     device_id = messaging_question.get("deviceId")
@@ -177,6 +179,7 @@ def add_messaging_question_to_db(messaging_question):
         api_updated_at=messaging_question.get("updatedAt"),
         message_id=messaging_question.get("messageId"),
         question_id=messaging_question.get("questionId"),
+        is_test_data=is_test_data,
         route=route_data,
         language=language_data,
         origin=origin_data,
@@ -283,11 +286,16 @@ def add_messaging_question_v3_to_db(data):
         preference = Preference.objects.filter(device_id=data.get('deviceId')).first()
         standard_data['preference'] = preference
 
+        is_test_data = is_messaging_question_test_data(data.get('questionKey'))
+        standard_data['is_test_data'] = is_test_data
+
         if data.get('language'):
-            language, _ = Language.objects.get_or_create(
-                code=data.get('language'),
-                defaults={'name': data.get('language')}
-            )
+            language = Language.objects.filter(code=data.get('language')).first()
+            if not language:
+                language = Language.objects.create(
+                    code=data.get('language'),
+                    name=data.get('language')
+                )
             standard_data['language'] = language
 
         if data.get('destination'):
@@ -352,6 +360,16 @@ def add_messaging_question_v3_to_db(data):
         response_type = data.get('questionResponseType')
         question_value = data.get('questionValue')
 
+        def _get_or_create_response(option_text, value):
+            response = MessagingResponse.objects.filter(
+                option=option_text, value=value
+            ).first()
+            if not response:
+                response = MessagingResponse.objects.create(
+                    option=option_text, value=value
+                )
+            return response
+
         if response_type == 'select' and isinstance(question_value, list):
             for value in question_value:
                 option_text, _ = MessagingResponseOptionText.objects.get_or_create(
@@ -360,9 +378,8 @@ def add_messaging_question_v3_to_db(data):
                         'translated_option': None
                     }
                 )
-                response, _ = MessagingResponse.objects.get_or_create(
-                    option=option_text,
-                    value=value.get('key', '')
+                response = _get_or_create_response(
+                    option_text, value.get('key', '')
                 )
                 question_response, _ = MessagingQuestionResponse.objects.get_or_create(
                     messaging_question=question
@@ -376,9 +393,8 @@ def add_messaging_question_v3_to_db(data):
                     'translated_option': None
                 }
             )
-            response, _ = MessagingResponse.objects.get_or_create(
-                option=option_text,
-                value=question_value.get('key', '')
+            response = _get_or_create_response(
+                option_text, question_value.get('key', '')
             )
             question_response, _ = MessagingQuestionResponse.objects.get_or_create(
                 messaging_question=question
@@ -392,9 +408,8 @@ def add_messaging_question_v3_to_db(data):
                     'translated_option': None
                 }
             )
-            response, _ = MessagingResponse.objects.get_or_create(
-                option=option_text,
-                value=str(question_value)
+            response = _get_or_create_response(
+                option_text, str(question_value)
             )
             question_response, _ = MessagingQuestionResponse.objects.get_or_create(
                 messaging_question=question

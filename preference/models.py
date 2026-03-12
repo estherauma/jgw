@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from django.conf import settings
 
 from common.const.value_const import NOT_SPECIFIED
 
@@ -162,9 +164,23 @@ class OrganisationAccessCode(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     expiry_date = models.DateField(null=True, blank=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.code
+    
+    def soft_delete(self, user):
+        self.is_deleted = True
+        self.deleted_by = user
+        self.deleted_at = timezone.now()
+        self.save()
 
 
 class ImmigrationStatus(models.Model):

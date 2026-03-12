@@ -7,6 +7,11 @@ from question.models import (
     MessagingQuestionStandard,
     MessagingQuestionText,
     MessagingResponseOptionText,
+    MessagingQuestionV1,
+    MessagingQuestionResponseV1,
+    LeadMessagingQuestionResponse,
+    FollowupMessagingQuestionResponse,
+    FollowupFollowupMessagingQuestionResponse,
 )
 
 

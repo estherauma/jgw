@@ -678,12 +678,20 @@ class DashboardCustomizer {
         const chartDef = this.chartDefinitions[colData.chart_id] || window.chartDefinitions?.[colData.chart_id];
         const chartName = chartDef ? chartDef.name : colData.chart_id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         
+        const fullscreenModalId = this.getFullscreenModalId(colData.chart_id);
         const chartHeader = document.createElement('div');
         chartHeader.className = 'chart-header';
         chartHeader.innerHTML = `
             <div class="chart-header-left">
                 <h4 class="chart-main-title">${chartName}</h4>
             </div>
+            ${fullscreenModalId ? `
+            <div class="chart-header-actions">
+                <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#${fullscreenModalId}">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+            ` : ''}
         `;
         chartWrapper.appendChild(chartHeader);
         
@@ -2144,6 +2152,23 @@ class DashboardCustomizer {
             'user_geolocation_map_user_engagement': 'user_geolocation_map_user_engagement'
         };
         return chartContainerMap[chartId] || null;
+    }
+    
+    getFullscreenModalId(chartId) {
+        const modalMap = {
+            'monthly_active_users': 'monthly-active-users-fullscreen-modal',
+            'users_by_origin_country': 'users-by-origin-fullscreen-modal',
+            'users_by_gender': 'users-by-gender-fullscreen-modal',
+            'users_by_destination_country': 'users-by-destination-fullscreen-modal',
+            'users_by_language': 'users-by-language-fullscreen-modal',
+            'users_by_country_state': 'users-by-state-fullscreen-modal',
+            'users_by_immigration_status': 'users-by-immigration-status-fullscreen-modal',
+            'users_by_age': 'users-by-age-fullscreen-modal',
+            'users_by_sector': 'users-by-sector-fullscreen-modal',
+            'new_monthly_users': 'monthly-users-overview-fullscreen-modal',
+            'work_code_usage': 'work-code-usage-fullscreen-modal'
+        };
+        return modalMap[chartId] || null;
     }
     
     updateChartSpacing(colElement, size) {
