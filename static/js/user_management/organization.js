@@ -481,18 +481,24 @@
   
     $('[data-edit-code-btn]').on('click', function() {
       var $btn = $(this);
+      var orgIdInput = form.querySelector('[name="selected_org_id"]');
+      const orgId = $btn.data('workcode-org-id');
+      var orgLabel = modal.querySelector('[data-workcode-org-label]')
       const requiresLogin = $btn.data('workcode-requires-login');
       var codeField = form.querySelector('[name="code"]');
+      
+      if (orgIdInput) {
+        orgIdInput.value = orgId || '';
+      }
+      if (orgLabel) {
+        orgLabel.textContent = $btn.data('workcode-org-name') || 'None selected';
+      }
       codeField.value = $btn.data('workcode-code') || '';
       codeField.readOnly = true;
       codeField.classList.add('bg-light', 'text-muted');
-      form.querySelector('[name="requires_login"]').checked = (String(requiresLogin).toLowerCase() === 'true');
       form.querySelector('[name="expiry_date"]').value = $btn.data('workcode-expiry-date') || '';
+      form.querySelector('[name="requires_login"]').checked = (String(requiresLogin).toLowerCase() === 'true');
       form.action = '/user-management/work-codes/' + $btn.data('workcode-id') + '/edit/';
-  
-      if (window.syncSelectedOrganization) {
-        window.syncSelectedOrganization('edit-workcode-form', '#edit-workcode-modal [data-workcode-org-label]');
-      }
 
       if (errorBox) errorBox.classList.add('d-none');
       $(form).find("[data-error-for]").text("");

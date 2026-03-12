@@ -124,7 +124,9 @@
                                                 data-workcode-id="{{ code.id }}"
                                                 data-workcode-code="{{ code.code }}"
                                                 data-workcode-requires-login="{{ code.requires_login }}"
-                                                data-workcode-expiry-date="{% if code.expiry_date %}{{ code.expiry_date|date:'Y-m-d' }}{% endif %}">
+                                                data-workcode-expiry-date="{% if code.expiry_date %}{{ code.expiry_date|date:'Y-m-d' }}{% endif %}"
+                                                data-workcode-org-name="{{ selected_org_name }}"
+                                                data-workcode-org-id="{{ selected_org_id }}">
                                                 Edit
                                             </button>
                                                 
