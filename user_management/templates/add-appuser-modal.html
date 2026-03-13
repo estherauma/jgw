@@ -1,5 +1,5 @@
 {% load waffle_tags %}
-<div class="modal fade" id="{{ action_type }}-appuser-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-appuser-title" aria-hidden="true">
+<div class="modal fade um-modal um-modal-lg" id="{{ action_type }}-appuser-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-appuser-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -8,16 +8,16 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            <div class="alert alert-danger d-none" id="{{ action_type }}-appuser-form-error" role="alert"></div>
             <div class="um-modal-divider"></div>
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+             {% endif %}
             <form id="{{ action_type }}-appuser-form" method="post" action="{{ form_action }}">
                 {% csrf_token %}
-                <div class="modal-body">
-                    <div class="alert alert-danger d-none" id="{{ action_type }}-appuser-form-error" role="alert"></div>
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger" role="alert">
-                            {{ form.non_field_errors }}
-                        </div>
-                    {% endif %}
+                <div class="modal-body um-modal-grid">
                     <input
                         type="hidden"
                         name="selected_org_id"
@@ -25,32 +25,26 @@
                         value=""
                     />
                     {% flag 'can_view_organizations_table' %}
-                    <div class="um-navy mb-2">
+                    <div class="um-navy mb-2" data-selected-org-label>
                         Organisation: <span class="fw-bold" data-appuser-org-label>None selected</span>
                     </div>
                     {% endflag %}
-                    <label class="um-field form-group mt-1">
-                        <span>Email</span>
+                    <label class="um-field form-group um-field-full">
+                        <span>Role</span>
+                        {{ form.role_group }}
+                        <small class="um-helper">Administrators are users you want to access the dashboard.</small>
+                        <div class="text-danger small" data-error-for="role_group"></div>
+                        {% if form.role_group.errors %}
+                            <div class="text-danger small">{{ form.role_group.errors }}</div>
+                        {% endif %}
+                    </label>
+                    <label class="um-field form-group">
+                        <span>Email (optional)</span>
                         {{ form.email }}
+                        <small class="um-helper">Required when role is Administrator.</small>
                         <div class="text-danger small" data-error-for="email"></div>
                         {% if form.email.errors %}
                             <div class="text-danger small">{{ form.email.errors }}</div>
-                        {% endif %}
-                    </label>
-                    <label class="um-field form-group">
-                        <span>First name (optional)</span>
-                        {{ form.first_name }}
-                        <div class="text-danger small" data-error-for="first_name"></div>
-                        {% if form.first_name.errors %}
-                            <div class="text-danger small">{{ form.first_name.errors }}</div>
-                        {% endif %}
-                    </label>
-                    <label class="um-field form-group">
-                        <span>Last name (optional)</span>
-                        {{ form.last_name }}
-                        <div class="text-danger small" data-error-for="last_name"></div>
-                        {% if form.last_name.errors %}
-                            <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
                     <div class="um-field form-group">
@@ -72,7 +66,38 @@
                             </div>
                         </div>
                     </div>
-    
+                    <label class="um-field form-group">
+                        <span>Password (optional)</span>
+                        {{ form.password }}
+                        <div class="text-danger small" data-error-for="password"></div>
+                        {% if form.password.errors %}
+                            <div class="text-danger small">{{ form.password.errors }}</div>
+                        {% endif %}
+                    </label>
+                    <label class="um-field form-group">
+                        <span>Confirm password (optional)</span>
+                        {{ form.password_confirm }}
+                        <div class="text-danger small" data-error-for="password_confirm"></div>
+                        {% if form.password_confirm.errors %}
+                            <div class="text-danger small">{{ form.password_confirm.errors }}</div>
+                        {% endif %}
+                    </label>
+                    <label class="um-field form-group">
+                        <span>First name (optional)</span>
+                        {{ form.first_name }}
+                        <div class="text-danger small" data-error-for="first_name"></div>
+                        {% if form.first_name.errors %}
+                            <div class="text-danger small">{{ form.first_name.errors }}</div>
+                        {% endif %}
+                    </label>
+                    <label class="um-field form-group">
+                        <span>Last name (optional)</span>
+                        {{ form.last_name }}
+                        <div class="text-danger small" data-error-for="last_name"></div>
+                        {% if form.last_name.errors %}
+                            <div class="text-danger small">{{ form.last_name.errors }}</div>
+                        {% endif %}
+                    </label>
                     <div class="um-field form-group">
                         <span>Work groups (optional)</span>
                         <div class="um-checkbox-list um-checkbox-list-scroll" data-work-groups-container>
@@ -81,14 +106,12 @@
                             {% else %}
                                 <p>No work groups available.</p>
                             {% endif %}
-
                         </div>
                         <div class="text-danger small" data-error-for="work_groups"></div>
                         {% if form.work_groups.errors %}
                             <div class="text-danger small">{{ form.work_groups.errors }}</div>
                         {% endif %}
                     </div>
-            
                 </div>
                 <div class="um-modal-footer modal-footer">
                     <button type="button" class="um-btn um-btn-gray" data-dismiss="modal">

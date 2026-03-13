@@ -151,7 +151,11 @@
                 <div class="um-row">
                     <div class="um-card-title">
                         <span class="wave-emoji">👋</span>
-                        <span class="title-text um-navy">USERS:</span>
+                        {% if selected_org_name %}
+                        <span class="title-text um-navy">{{ selected_org_name }} Users</span>
+                        {% else %}
+                        <span class="title-text um-navy">Users</span>
+                        {% endif %}
                     </div>
                     <div class="um-action gap-3">
                         <div class="dropdown um-actions-dropdown">
@@ -183,9 +187,16 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% if not selected_org_id %}
+                        <button class="um-btn" type="button" data-toggle="modal" data-target="#add-dashboard-user-modal">
+                            Add Admin
+                        </button>
+                        {% endif %}
+                        {% if selected_org_id %}
                         <button class="um-btn um-navy" type="button" data-toggle="modal" data-target="#add-appuser-modal" data-org-dependent>
                             Add user
                         </button>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="um-row">
@@ -215,6 +226,7 @@
                                     <th>#</th>
                                     <th class="w-25">Name</th>
                                     <th>Email</th>
+                                    <th>Access type</th>
                                     {% if not selected_org_id %}
                                     <th>Organisation</th>
                                     {% endif %}
@@ -251,6 +263,8 @@
 {% include 'assign-workcode-modal.html' with action_type='assign' modal_title='Assign work code' submit_label='Assign' form_action=assign_work_code_url form=assign_work_code_form %}
 {% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add work group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
 {% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit work group' submit_label='Save changes' form_action='' form=work_group_form %}
+{% url 'user_management:create_dashboard_user' as create_dashboard_user_url %}
+{% include 'add-dashboard-user-modal.html' with action_type='add' modal_title='Add admin user' submit_label='Save' form_action=create_dashboard_user_url form=dashboard_user_form %}
 {% include 'add-appuser-modal.html' with action_type='add' modal_title='Add user' submit_label='Save' form_action=create_app_user_url form=app_user_form %}
 {% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form%}
 {% if selected_org_id %}

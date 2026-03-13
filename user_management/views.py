@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.db.models import Q
 from django.template.loader import render_to_string
+from django.contrib.auth.models import Group
 from django.views import View
 from django.db import transaction, IntegrityError
 import phonenumbers
@@ -12,13 +13,15 @@ from .forms import (
     AddWorkCodeForm,
     AppUserForm,
     CreateOrganisationForm,
+    DashboardUserForm,
     WorkCodeAssignForm,
     WorkGroupForm,
     UsersWorkGroupAssignForm,
 )
 from .decorators import group_required
-from .models import AppUser, WorkGroup
+from .models import WorkGroup
 from .utils import is_org_admin, is_super_or_58_admin
+from users.models import User
 
 
 def get_allowed_orgs(user):
@@ -52,7 +55,11 @@ def user_management(request):
     user = request.user
     organizations = get_allowed_orgs(user).order_by("name")
 
-    users = AppUser.objects.select_related("organisation_data").prefetch_related("work_groups").order_by("email")
+    users = (
+        User.objects.prefetch_related("organisation_data", "work_groups")
+        .order_by("email")
+        .distinct()
+    )
     if is_org_admin(user):
         users = users.filter(organisation_data__in=organizations)
 
@@ -112,6 +119,7 @@ def user_management(request):
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups),
+        "dashboard_user_form": DashboardUserForm(orgs_qs=organizations),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
     }
     return render(request, "index.html", context=context)
@@ -138,21 +146,21 @@ def search_users(request):
     query = request.GET.get("q", "").strip()
     selected_org_id = request.GET.get("selected_org_id")
     users = (
-        AppUser.objects.select_related("organisation_data")
-        .prefetch_related("work_groups")
+        User.objects.prefetch_related("organisation_data", "work_groups")
         .order_by("email")
+        .distinct()
     )
 
     if is_org_admin(user):
         allowed_orgs = get_allowed_orgs(user)
-        users = users.filter(organisation_data__in=allowed_orgs)
+        users = users.filter(organisation_data__in=allowed_orgs).distinct()
 
     if selected_org_id:
         organisation = (
             get_allowed_orgs(user).filter(id=selected_org_id).first()
         )
         if organisation:
-            users = users.filter(organisation_data=organisation)
+            users = users.filter(organisation_data=organisation).distinct()
         else:
             users = users.none()
 
@@ -326,21 +334,67 @@ class CreateAppUserView(View):
         organisation = None
         if org_id:
             organisation = OrganisationData.objects.filter(id=org_id).first()
+
         if not organisation:
             return JsonResponse(
-                {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
+                {"ok": False, "error": "Select an organisation first."},
                 status=400,
             )
+
         if not has_org_access(request.user, organisation):
             return org_access_denied()
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
         form = AppUserForm(request.POST, work_groups_qs=work_groups_qs)
         if form.is_valid():
+            try:
+                with transaction.atomic():
+                    user = form.save(commit=False)
+                    password = form.cleaned_data.get("password")
+                    role_group = form.cleaned_data.get("role_group")
+
+                    if password:
+                        user.set_password(password)
+                    else:
+                        user.set_unusable_password()
+
+                    user.access_type = "dashboard" if role_group.name == "org_admin" else "app"
+                    if role_group.name == "org_admin":
+                        user.is_active = True
+                    user.save()
+                    form.save_m2m()
+                    user.groups.add(role_group)
+                    user.organisation_data.add(organisation)
+            except Exception as e:
+                return JsonResponse(
+                    {"ok": False, "error": "Could not save user. Please try again."},
+                    status=500,
+                )
+            return JsonResponse({"ok": True, "org_id": organisation.id if organisation else None})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class CreateDashboardUserView(View):
+    def post(self, request):
+        form = DashboardUserForm(
+            request.POST,
+            orgs_qs=get_allowed_orgs(request.user),
+        )
+        if form.is_valid():
             user = form.save(commit=False)
-            user.organisation_data = organisation
+            password = form.cleaned_data.get("password")
+            if password:
+                user.set_password(password)
+            else:
+                user.set_unusable_password()
+            user.is_active = form.cleaned_data.get("is_active", True)
+            user.access_type = "dashboard"
             user.save()
             form.save_m2m()
-            return JsonResponse({"ok": True, "org_id": organisation.id})
+            selected_groups = form.cleaned_data.get("groups")
+            if selected_groups:
+                user.groups.add(*selected_groups)
+            return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
     
@@ -382,7 +436,7 @@ class EditAppUserView(View):
         })
 
     def post(self, request, user_id):
-        user = AppUser.objects.filter(id=user_id).first()
+        user = User.objects.filter(id=user_id).first()
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
         
@@ -450,7 +504,7 @@ class DeleteWorkGroupView(View):
         if not work_group:
             return JsonResponse({"ok": False, "error": "Work group not found."}, status=404)
         organisation = work_group.organisation
-        if work_group.users.exists():
+        if work_group.app_users.exists():
             return JsonResponse(
                 {"ok": False, "error": "This work group cannot be deleted because it has assigned users. Remove users first."},
                 status=400,
@@ -490,9 +544,9 @@ class AssignUsersToWorkGroupsView(View):
         form = UsersWorkGroupAssignForm(request.POST, work_groups_qs=work_groups_qs)
         if form.is_valid():
             work_groups = list(form.cleaned_data["work_groups"])
-            users = AppUser.objects.filter(
-                id__in=user_ids, organisation_data=organisation
-            )
+            users = User.objects.filter(
+                id__in=user_ids, organisation_data=organisation, access_type="app"
+            ).distinct()
             if not users.exists():
                 return JsonResponse(
                     {"ok": False, "error": "No matching users found."},

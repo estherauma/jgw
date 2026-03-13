@@ -85,7 +85,53 @@
     $('[data-target="#add-appuser-modal"]').on('click', function () {
       resetAppUserForm();
     });
+  }
 
+  function initDashboardUserForm() {
+    var form = document.getElementById('add-dashboard-user-form');
+    if (!form) {
+      return;
+    }
+    var errorBox = document.getElementById('add-dashboard-user-form-error');
+
+    function clearErrors() {
+      if (window.clearFormErrors) {
+        window.clearFormErrors(form, errorBox);
+      }
+    }
+
+    function resetDashboardForm() {
+      clearErrors();
+      form.reset();
+    }
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      clearErrors();
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        $('#add-dashboard-user-modal').modal('hide');
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+
+    $('[data-target="#add-dashboard-user-modal"]').on('click', function () {
+      resetDashboardForm();
+    });
   }
 
   function initEditUserForm() {
@@ -345,6 +391,7 @@
 
   window.addEventListener('load', function () {
     initAppUserForm();
+    initDashboardUserForm();
     initEditUserForm();
     initUserSearch();
     initUserSelection();
