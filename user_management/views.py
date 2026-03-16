@@ -543,7 +543,19 @@ class EditAppUserView(View):
         form = AppUserForm(request.POST, instance=user, work_groups_qs=work_groups_qs)
         
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
+            role_group = form.cleaned_data.get("role_group")
+            if not role_group:
+                return JsonResponse(
+                    {"ok": False, "errors": {"role_group": ["Role is required."]}},
+                    status=400,
+                )
+            user.access_type = "dashboard" if role_group.name == "org_admin" else "app"
+            if role_group.name == "org_admin":
+                user.is_active = True
+            user.save()
+            form.save_m2m()
+            user.groups.set([role_group])
             return JsonResponse({"ok": True, "org_id": organisation.id})
         errors = {field: [e for e in errs] for field, errs in form.errors.items()}
         return JsonResponse({"ok": False, "errors": errors}, status=400)
