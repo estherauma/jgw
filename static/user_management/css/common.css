@@ -556,3 +556,7 @@ body .modal-backdrop.show {
 p[data-delete-message] {
     font-weight: 500;
 }
+
+.um-btn-reset {
+   height: 38px;
+}

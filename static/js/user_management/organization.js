@@ -471,6 +471,62 @@
       workCodeInput.value = codeId || '';
     });
   }
+
+  function initEditWorkCodeForm() {
+    var modal = document.getElementById('edit-workcode-modal');
+    if (!modal) return;
+  
+    var form = modal.querySelector('form');
+    var errorBox = document.getElementById('edit-workcode-form-error');
+  
+    $('[data-edit-code-btn]').on('click', function() {
+      var $btn = $(this);
+      var orgIdInput = form.querySelector('[name="selected_org_id"]');
+      const orgId = $btn.data('workcode-org-id');
+      var orgLabel = modal.querySelector('[data-workcode-org-label]')
+      const requiresLogin = $btn.data('workcode-requires-login');
+      var codeField = form.querySelector('[name="code"]');
+      
+      if (orgIdInput) {
+        orgIdInput.value = orgId || '';
+      }
+      if (orgLabel) {
+        orgLabel.textContent = $btn.data('workcode-org-name') || 'None selected';
+      }
+      codeField.value = $btn.data('workcode-code') || '';
+      codeField.readOnly = true;
+      codeField.classList.add('bg-light', 'text-muted');
+      form.querySelector('[name="expiry_date"]').value = $btn.data('workcode-expiry-date') || '';
+      form.querySelector('[name="requires_login"]').checked = (String(requiresLogin).toLowerCase() === 'true');
+      form.action = '/user-management/work-codes/' + $btn.data('workcode-id') + '/edit/';
+
+      if (errorBox) errorBox.classList.add('d-none');
+      $(form).find("[data-error-for]").text("");
+    });
+  
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      safeClearFormErrors(form, errorBox);
+  
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) submitButton.disabled = true;
+  
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+  }
   
   window.addEventListener('load', function () {
     initCreateOrgForm();
@@ -497,6 +553,7 @@
     initDeleteWorkGroup();
   });
   window.addEventListener('load', ()=>{
+    initEditWorkCodeForm();
     initDeleteWorkCode();
   });
 })();

@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
 
 import phonenumbers
 from django.utils import timezone
@@ -67,6 +68,8 @@ class AddWorkCodeForm(forms.ModelForm):
         self.fields["requires_login"].widget.attrs.update(
             {"class": "form-check-input", "role": "switch"}
         )
+        if self.instance and self.instance.pk:
+            self.fields['code'].disabled = True
         
     def validate_unique(self):
         exclude = self._get_validation_exclusions()
@@ -84,8 +87,10 @@ class AddWorkCodeForm(forms.ModelForm):
     
     def clean_expiry_date(self):
         expiry_date = self.cleaned_data.get("expiry_date")
-        if expiry_date and expiry_date < timezone.now().date():
-            raise forms.ValidationError("Expiry date cannot be in the past.")
+        today = timezone.now().date()
+        if expiry_date:
+            if expiry_date <= today:
+                raise forms.ValidationError("Expiry date must be a future date.")
         return expiry_date
 
 
