@@ -20,7 +20,7 @@ from .forms import (
 )
 from .decorators import group_required
 from .models import WorkGroup
-from .utils import is_org_admin, is_super_or_58_admin
+from .utils import is_58_admin, is_org_admin, is_super_or_58_admin
 from users.models import User
 
 
@@ -363,6 +363,11 @@ class CreateAppUserView(View):
                     user.save()
                     form.save_m2m()
                     user.groups.add(role_group)
+                    if role_group.name == "org_admin":
+                        user_management_group, _ = Group.objects.get_or_create(
+                            name="user_management"
+                        )
+                        user.groups.add(user_management_group)
                     user.organisation_data.add(organisation)
             except Exception as e:
                 return JsonResponse(
@@ -383,6 +388,18 @@ class CreateDashboardUserView(View):
         if form.is_valid():
             user = form.save(commit=False)
             password = form.cleaned_data.get("password")
+            if password and is_58_admin(request.user) and user.id != request.user.id:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "errors": {
+                            "password": [
+                                "You can only change your own password."
+                            ]
+                        },
+                    },
+                    status=400,
+                )
             if password:
                 user.set_password(password)
             else:
@@ -550,12 +567,37 @@ class EditAppUserView(View):
                     {"ok": False, "errors": {"role_group": ["Role is required."]}},
                     status=400,
                 )
+            password = form.cleaned_data.get("password")
+            if password:
+                is_worker = role_group.name == "worker"
+                is_self = user.id == request.user.id
+                if not (is_worker or is_self):
+                    return JsonResponse(
+                        {
+                            "ok": False,
+                            "errors": {
+                                "password": [
+                                    "You can only change passwords for workers or your own account."
+                                ]
+                            },
+                        },
+                        status=400,
+                    )
+            if password:
+                user.set_password(password)
             user.access_type = "dashboard" if role_group.name == "org_admin" else "app"
             if role_group.name == "org_admin":
                 user.is_active = True
+                user_management_group, _ = Group.objects.get_or_create(
+                    name="user_management"
+                )
+            else:
+                user.is_active = False
             user.save()
             form.save_m2m()
             user.groups.set([role_group])
+            if role_group.name == "org_admin":
+                user.groups.add(user_management_group)
             return JsonResponse({"ok": True, "org_id": organisation.id})
         errors = {field: [e for e in errs] for field, errs in form.errors.items()}
         return JsonResponse({"ok": False, "errors": errors}, status=400)
