@@ -1,10 +1,10 @@
 from django.contrib import messages
+from django.db import transaction, IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
-from django.db import transaction, IntegrityError
 import phonenumbers
 from preference.models import OrganisationAccessCode, OrganisationData
 
@@ -539,3 +539,39 @@ class DeleteWorkCodeView(View):
         
         messages.success(request, f'Work code "{code}" deleted successfully.')
         return JsonResponse({"ok": True})
+    
+class EditWorkCodeView(View):
+    def post(self, request, work_code_id):
+        org_id = request.POST.get("selected_org_id")
+        organisation = None
+        if org_id:
+            organisation = OrganisationData.objects.filter(id=org_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Select an organisation first."},
+                status=400,
+            )
+        if not has_org_access(request.user, organisation):
+            return org_access_denied()
+        work_code = OrganisationAccessCode.objects.filter(
+            id=work_code_id,
+            organisation=organisation,
+            is_deleted=False
+        ).first()
+        if not work_code:
+            return JsonResponse(
+                {"ok": False, "error": "Work code not found."},
+                status=404,
+            )
+        form = AddWorkCodeForm(request.POST, instance=work_code)
+        if form.is_valid():
+            form.save()
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "org_id": organisation.id,
+                    "work_code_id": work_code.id,
+                }
+            )
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)

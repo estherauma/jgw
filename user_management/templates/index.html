@@ -113,6 +113,23 @@
                                                 Delete
                                             </button>
                                             {% endflag %}
+                                            <!-- Edit button -->
+                                            <button
+                                                data-edit-code-btn
+                                                class="um-btn um-btn-outline"
+                                                type="button"
+                                                data-toggle="modal"
+                                                data-target="#edit-workcode-modal"
+                                                data-workcode-edit
+                                                data-workcode-id="{{ code.id }}"
+                                                data-workcode-code="{{ code.code }}"
+                                                data-workcode-requires-login="{{ code.requires_login }}"
+                                                data-workcode-expiry-date="{% if code.expiry_date %}{{ code.expiry_date|date:'Y-m-d' }}{% endif %}"
+                                                data-workcode-org-name="{{ selected_org_name }}"
+                                                data-workcode-org-id="{{ selected_org_id }}">
+                                                Edit
+                                            </button>
+                                                
                                         </div>
                                     </td>
                                 </tr>
@@ -248,6 +265,7 @@
 <!-- include create organisation modal -->
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
+{% include 'add-workcode-modal.html' with action_type='edit' modal_title='Edit work code' submit_label='Save Changes' form=add_work_code_form %}
 {% include 'assign-workcode-modal.html' with action_type='assign' modal_title='Assign work code' submit_label='Assign' form_action=assign_work_code_url form=assign_work_code_form %}
 {% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add work group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
 {% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit work group' submit_label='Save changes' form_action='' form=work_group_form %}
