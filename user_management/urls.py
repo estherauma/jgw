@@ -3,6 +3,8 @@ from .views import (
     AssignWorkCodeView,
     AssignUsersToWorkGroupsView,
     CreateAppUserView,
+    CreateDashboardUserView,
+    EditDashboardUserView,
     CreateOrganisationView,
     EditOrganisationView,
     CreateWorkCodeView,
@@ -13,6 +15,7 @@ from .views import (
     search_organisations,
     DeleteWorkGroupView,
     search_users,
+    EditWorkCodeView,
     DeleteWorkCodeView,
 )
 
@@ -28,9 +31,12 @@ urlpatterns = [
     path('work-groups/assign-users/', AssignUsersToWorkGroupsView.as_view(), name="assign_users_work_groups"),
     path('work-groups/create/', CreateWorkGroupView.as_view(), name="create_work_group"),
     path('app-users/create/', CreateAppUserView.as_view(), name="create_app_user"),
+    path('dashboard-users/create/', CreateDashboardUserView.as_view(), name="create_dashboard_user"),
+    path('dashboard-users/<int:user_id>/edit/', EditDashboardUserView.as_view(), name="edit_dashboard_user"),
     path('work-groups/<int:work_group_id>/edit/', EditWorkGroupView.as_view(), name="edit_work_group"),
     path('app-users/search/', search_users, name="search_users"),
     path('app-users/<int:user_id>/edit/', EditAppUserView.as_view(), name="edit_app_user"),
     path('work-groups/<int:work_group_id>/delete/', DeleteWorkGroupView.as_view(), name="delete_work_group"),
+    path('work-codes/<int:work_code_id>/edit/', EditWorkCodeView.as_view(), name="edit_work_code"),
     path('work-codes/<int:work_code_id>/delete/', DeleteWorkCodeView.as_view(), name="delete_work_code"),
 ]

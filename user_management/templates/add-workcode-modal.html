@@ -31,7 +31,14 @@
                     </label>
                     <label class="um-field form-group mt-2">
                         <span>Expiry date (Optional)</span>
-                        {{ form.expiry_date }}
+                        <div class="d-flex align-items-center gap-2">
+                            {{ form.expiry_date }}
+                            <button type="button" 
+                                    class="btn btn-sm um-btn-danger um-btn-reset" 
+                                    onclick="this.previousElementSibling.value = ''">
+                                Remove
+                            </button>
+                        </div>
                         <div class="text-danger small" data-error-for="expiry_date"></div>
                         {% if form.expiry_date.errors %}
                             <div class="text-danger small">{{ form.expiry_date.errors }}</div>

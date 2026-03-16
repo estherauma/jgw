@@ -6,6 +6,10 @@ from preference.models import Country, FactoryFarm, ImmigrationStatus, Language,
 from decimal import Decimal
 
 ROLES = ["SCHEME", "FACTORY", "STAFF", "ADMIN"]
+USER_TYPE_CHOICES = [
+    ("dashboard", "Dashboard"),
+    ("app", "Mobile App"),
+]
 STATUS = ["PENDING", "ACCEPTED", "SENT"]
 
 
@@ -38,21 +42,30 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
     USERNAME_FIELD = "email"
     ROLE = models.TextChoices("Role", " ".join(ROLES))
-
     password = models.CharField(blank=True, max_length=128)
     first_name = models.CharField(blank=True, null=False, max_length=128)
     last_name = models.CharField(blank=True, null=False, max_length=128)
     role = models.CharField(blank=True, null=True, choices=ROLE.choices, max_length=16)
+    access_type = models.CharField(
+        blank=False,
+        null=False,
+        choices=USER_TYPE_CHOICES,
+        max_length=16,
+        default="dashboard",
+    )
     scheme = models.ForeignKey(
         to="dashboard.Scheme", on_delete=models.DO_NOTHING, null=True, max_length=16, blank=True
     )
-    email = models.EmailField(null=False, blank=False, max_length=128, unique=True)
+    email = models.EmailField(null=True, blank=True, max_length=128, unique=True)
+    phone_number = models.CharField(blank=True, null=True, max_length=32)
+    phone_country_iso = models.CharField(blank=True, null=True, max_length=2)
 
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     factories = models.ManyToManyField(FactoryFarm, blank=True)
     organisations = models.ManyToManyField(Organisation, blank=True)
     organisation_data = models.ManyToManyField(OrganisationData, blank=True)
+    work_groups = models.ManyToManyField("user_management.WorkGroup", blank=True, related_name="users")
     destinations = models.ManyToManyField(Country, blank=True)
     user_languages = models.ManyToManyField(Language, blank=True)
     excluded_origin_countries = models.ManyToManyField(Country, blank=True, related_name="excluded_origins")
