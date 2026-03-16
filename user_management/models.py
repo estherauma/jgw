@@ -6,7 +6,11 @@ from preference.models import (
     OrganisationData,
 )
 
-
+class AuditFieldsMixin(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        abstract = True
 class WorkGroup(models.Model):
     name = models.CharField(max_length=255)
     organisation = models.ForeignKey(
