@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from user_management.models import AuditFieldsMixin
 
 from common.const.value_const import NOT_SPECIFIED
 
@@ -198,16 +199,14 @@ class ImmigrationStatus(models.Model):
         ]
 
 
-class OrganisationData(models.Model):
+class OrganisationData(AuditFieldsMixin):
     name = models.CharField(max_length=255)
     org_code = models.CharField(max_length=50, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
-
-    class Meta:
+    class Meta(AuditFieldsMixin.Meta):
+        abstract = False
         indexes = [
             models.Index(fields=['name']),
         ]
