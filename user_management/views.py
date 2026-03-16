@@ -554,7 +554,9 @@ class EditWorkCodeView(View):
         if not has_org_access(request.user, organisation):
             return org_access_denied()
         work_code = OrganisationAccessCode.objects.filter(
-            id=work_code_id, organisation=organisation
+            id=work_code_id,
+            organisation=organisation,
+            is_deleted=False
         ).first()
         if not work_code:
             return JsonResponse(
