@@ -5,7 +5,6 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
-from django.db import transaction, IntegrityError
 import phonenumbers
 from preference.models import OrganisationAccessCode, OrganisationData
 
