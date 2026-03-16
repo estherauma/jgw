@@ -479,15 +479,22 @@ class EditDashboardUserView(View):
 class EditAppUserView(View):
     
     def get(self, request, user_id):
-        user = AppUser.objects.filter(id=user_id).select_related("organisation_data").prefetch_related("work_groups").first()
+        user = (
+            User.objects.filter(id=user_id)
+            .prefetch_related("organisation_data", "work_groups", "groups")
+            .first()
+        )
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
-        
-        if not has_org_access(request.user, user.organisation_data):
+
+        allowed_orgs = get_allowed_orgs(request.user)
+        organisation = user.organisation_data.filter(id__in=allowed_orgs).first()
+        if not organisation:
             return org_access_denied()
-        
-        organisation = user.organisation_data
-        work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
+
+        work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by(
+            "name"
+        )
         phone_local = ""
         if user.phone_number:
             try:
@@ -495,34 +502,44 @@ class EditAppUserView(View):
                 phone_local = str(parsed.national_number)
             except phonenumbers.NumberParseException:
                 phone_local = user.phone_number
-        return JsonResponse({
-            "ok": True,
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "phone_number": user.phone_number,
-                "phone_country_iso": user.phone_country_iso,
-                "phone_local": phone_local,
-                "organisation_name": organisation.name,
-                "work_group_ids": list(user.work_groups.values_list("id", flat=True)),
-            },
-            "work_groups": [
-                {"id": work_group.id, "name": work_group.name} for work_group in work_groups_qs
-            ],
-        })
+        role_group = user.groups.filter(name__in=["org_admin", "worker"]).first()
+        return JsonResponse(
+            {
+                "ok": True,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "phone_number": user.phone_number,
+                    "phone_country_iso": user.phone_country_iso,
+                    "phone_local": phone_local,
+                    "organisation_name": organisation.name,
+                    "work_group_ids": list(
+                        user.work_groups.values_list("id", flat=True)
+                    ),
+                    "role_group_id": role_group.id if role_group else "",
+                },
+                "work_groups": [
+                    {"id": work_group.id, "name": work_group.name}
+                    for work_group in work_groups_qs
+                ],
+            }
+        )
 
     def post(self, request, user_id):
         user = User.objects.filter(id=user_id).first()
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
-        
-        if not has_org_access(request.user, user.organisation_data):
+
+        allowed_orgs = get_allowed_orgs(request.user)
+        organisation = user.organisation_data.filter(id__in=allowed_orgs).first()
+        if not organisation:
             return org_access_denied()
-        
-        organisation = user.organisation_data
-        work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
+
+        work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by(
+            "name"
+        )
         form = AppUserForm(request.POST, instance=user, work_groups_qs=work_groups_qs)
         
         if form.is_valid():

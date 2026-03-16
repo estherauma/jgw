@@ -297,8 +297,13 @@
           form.querySelector('[name="first_name"]').value = user.first_name || '';
           form.querySelector('[name="last_name"]').value = user.last_name || '';
           form.querySelector('[name="email"]').value = user.email || '';
+          form.querySelector('[name="role_group"]').value = user.role_group_id || '';
           form.querySelector('[name="phone_number"]').value = user.phone_local || '';
-          form.querySelector('[name="phone_country_iso"]').value = user.phone_country_iso || countryField.options?.[0]?.value || '';
+          var countryField = form.querySelector('[name="phone_country_iso"]');
+          if (countryField) {
+            countryField.value =
+              user.phone_country_iso || countryField.options?.[0]?.value || '';
+          }
 
           var orgLabel = modal.querySelector('[data-appuser-org-label]');
           if (orgLabel) {
