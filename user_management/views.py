@@ -548,7 +548,7 @@ class EditWorkCodeView(View):
             organisation = OrganisationData.objects.filter(id=org_id).first()
         if not organisation:
             return JsonResponse(
-                {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
+                {"ok": False, "error": "Select an organisation first."},
                 status=400,
             )
         if not has_org_access(request.user, organisation):
@@ -560,7 +560,7 @@ class EditWorkCodeView(View):
         ).first()
         if not work_code:
             return JsonResponse(
-                {"ok": False, "errors": {"work_code_id": ["Work code not found."]}},
+                {"ok": False, "error": "Work code not found."},
                 status=404,
             )
         form = AddWorkCodeForm(request.POST, instance=work_code)
