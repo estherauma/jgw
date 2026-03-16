@@ -9,8 +9,15 @@
         <td>{{ forloop.counter }}</td>
         <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
         <td>{{ u.email }}</td>
+        <td>{% if u.access_type %}{{ u.get_access_type_display }}{% else %}—{% endif %}</td>
         {% if not selected_org_id %}
-        <td>{% if u.organisation_data %}{{ u.organisation_data.name }}{% else %}—{% endif %}</td>
+        <td>
+            {% for org in u.organisation_data.all %}
+                {{ org.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                —
+            {% endfor %}
+        </td>
         {% endif %}
         {% if selected_org_id %}
         <td>
@@ -23,9 +30,12 @@
         {% endif %}
         <td>
             <div class="um-action">
-                <button class="um-btn um-btn-outline" data-toggle="modal"
-                data-target="#edit-appuser-modal"
-                data-user-id="{{ u.id }}">
+                <button
+                    class="um-btn um-btn-outline"
+                    data-toggle="modal"
+                    data-target="{% if u.access_type == 'dashboard' and not is_org_admin %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
+                    data-user-id="{{ u.id }}"
+                >
                     Edit
                 </button>
             </div>
@@ -34,6 +44,6 @@
     {% endfor %}
 {% else %}
     <tr>
-        <td colspan="{% if selected_org_id %}6{% else %}5{% endif %}">No users found.</td>
+        <td colspan="{% if selected_org_id %}7{% else %}6{% endif %}">No users found.</td>
     </tr>
 {% endif %}

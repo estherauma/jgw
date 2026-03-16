@@ -2,6 +2,17 @@ from django.db.models import Q
 
 from preference.models import Country, FactoryFarm, Language, OrganisationData
 
+ALL_GROUPS = [
+    "58_admin",
+    "org_admin",
+    "user_management",
+    "worker",
+    "testers",
+    "my_voice",
+    "summer_berry",
+    "Summerberry"
+]
+
 
 def get_user_factories(user):
     if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:

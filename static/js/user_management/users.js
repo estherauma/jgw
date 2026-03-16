@@ -85,7 +85,152 @@
     $('[data-target="#add-appuser-modal"]').on('click', function () {
       resetAppUserForm();
     });
+  }
 
+  function initDashboardUserForm() {
+    var form = document.getElementById('add-dashboard-user-form');
+    if (!form) {
+      return;
+    }
+    var errorBox = document.getElementById('add-dashboard-user-form-error');
+
+    function clearErrors() {
+      if (window.clearFormErrors) {
+        window.clearFormErrors(form, errorBox);
+      }
+    }
+
+    function resetDashboardForm() {
+      clearErrors();
+      form.reset();
+    }
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      clearErrors();
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        $('#add-dashboard-user-modal').modal('hide');
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+
+    $('[data-target="#add-dashboard-user-modal"]').on('click', function () {
+      resetDashboardForm();
+    });
+  }
+
+  function initEditDashboardUserForm() {
+    var modal = document.getElementById('edit-dashboard-user-modal');
+    if (!modal) {
+      return;
+    }
+    var form = modal.querySelector('form');
+    var errorBox = document.getElementById('edit-dashboard-user-form-error');
+
+    function clearErrors() {
+      if (window.clearFormErrors) {
+        window.clearFormErrors(form, errorBox);
+      }
+    }
+
+    function setSingleValue(name, value) {
+      var input = form.querySelector('[name="' + name + '"]');
+      if (input) {
+        input.value = value || '';
+      }
+    }
+
+    function setCheckboxValue(name, checked) {
+      var input = form.querySelector('[name="' + name + '"]');
+      if (input) {
+        input.checked = Boolean(checked);
+      }
+    }
+
+    function setMultiValues(name, values) {
+      var valueSet = new Set((values || []).map(String));
+      var inputs = form.querySelectorAll('input[name="' + name + '"]');
+      inputs.forEach(function (input) {
+        input.checked = valueSet.has(String(input.value));
+      });
+    }
+
+    function resetForm() {
+      clearErrors();
+      form.reset();
+    }
+
+    $('[data-target="#edit-dashboard-user-modal"]').on('click', async function () {
+      var $btn = $(this);
+      var userId = $btn.data('user-id');
+      var editUrl = '/user-management/dashboard-users/' + userId + '/edit/';
+      form.action = editUrl;
+      resetForm();
+      try {
+        var response = await fetch(editUrl);
+        var data = await response.json();
+        if (!data.ok) {
+          throw new Error(data.error || 'Failed to fetch user data.');
+        }
+        var user = data.user || {};
+        setSingleValue('email', user.email);
+        setSingleValue('first_name', user.first_name);
+        setSingleValue('last_name', user.last_name);
+        setSingleValue('scheme', user.scheme_id ? String(user.scheme_id) : '');
+        setSingleValue('start_date', user.start_date);
+        setSingleValue('end_date', user.end_date);
+        setSingleValue('password', '');
+        setSingleValue('password_confirm', '');
+        setCheckboxValue('is_active', user.is_active);
+        setMultiValues('groups', user.groups);
+        setMultiValues('organisation_data', user.organisation_data);
+        setMultiValues('factories', user.factories);
+        setMultiValues('destinations', user.destinations);
+        setMultiValues('user_languages', user.user_languages);
+        setMultiValues('excluded_origin_countries', user.excluded_origin_countries);
+        setMultiValues('immigration_status', user.immigration_status);
+      } catch (err) {
+        console.error('Failed to fetch dashboard user data:', err);
+      }
+    });
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      clearErrors();
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
   }
 
   function initEditUserForm() {
@@ -152,8 +297,13 @@
           form.querySelector('[name="first_name"]').value = user.first_name || '';
           form.querySelector('[name="last_name"]').value = user.last_name || '';
           form.querySelector('[name="email"]').value = user.email || '';
+          form.querySelector('[name="role_group"]').value = user.role_group_id || '';
           form.querySelector('[name="phone_number"]').value = user.phone_local || '';
-          form.querySelector('[name="phone_country_iso"]').value = user.phone_country_iso || countryField.options?.[0]?.value || '';
+          var countryField = form.querySelector('[name="phone_country_iso"]');
+          if (countryField) {
+            countryField.value =
+              user.phone_country_iso || countryField.options?.[0]?.value || '';
+          }
 
           var orgLabel = modal.querySelector('[data-appuser-org-label]');
           if (orgLabel) {
@@ -345,6 +495,8 @@
 
   window.addEventListener('load', function () {
     initAppUserForm();
+    initDashboardUserForm();
+    initEditDashboardUserForm();
     initEditUserForm();
     initUserSearch();
     initUserSelection();

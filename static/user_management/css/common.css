@@ -1,6 +1,46 @@
 .modal-content{
     border-radius: 22px;
 }
+.um-modal-lg .modal-dialog {
+    max-width: 980px;
+}
+.um-modal-lg .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+.um-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
+    align-items: start;
+}
+.um-modal-grid .um-field {
+    margin-top: 0;
+}
+.um-modal-grid .alert,
+.um-modal-grid [data-selected-org-id],
+.um-modal-grid .um-navy.mb-2 {
+    grid-column: 1 / -1;
+}
+.um-field-full {
+    grid-column: 1 / -1;
+}
+.um-modal-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
+}
+@media (max-width: 992px) {
+    .um-modal-lg .modal-dialog {
+        max-width: 95%;
+    }
+    .um-modal-grid {
+        grid-template-columns: 1fr;
+    }
+    .um-modal-section {
+        grid-template-columns: 1fr;
+    }
+}
 .modal-body{
     padding: 20px 50px;
 }
@@ -175,10 +215,28 @@
 }
 .um-field {
     display: grid;
-    gap: 10px;
+    row-gap: 8px;
     font-size: 14px;
     color: #193560;
     margin-top: 20px;
+    align-self: start;
+    align-content: start;
+}
+.um-field > span {
+    margin: 0;
+    line-height: 1.2;
+}
+.um-helper {
+    font-size: 11px;
+    color: #6a7c96;
+}
+.um-field-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.um-field-inline .text-danger {
+    margin-left: auto;
 }
 .um-modal-footer {
     display: flex;
@@ -266,6 +324,14 @@ body .modal-backdrop.show {
     gap: 8px;
     font-size: 12px;
     color: #193560;
+}
+.um-checkbox-list input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+}
+.um-modal .alert {
+    padding: 10px 16px;
+    margin: 10px 20px 0;
 }
 
 .um-checkbox-list ul {
