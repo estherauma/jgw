@@ -30,9 +30,12 @@
         {% endif %}
         <td>
             <div class="um-action">
-                <button class="um-btn um-btn-outline" data-toggle="modal"
-                data-target="#edit-appuser-modal"
-                data-user-id="{{ u.id }}">
+                <button
+                    class="um-btn um-btn-outline"
+                    data-toggle="modal"
+                    data-target="{% if u.access_type == 'dashboard' %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
+                    data-user-id="{{ u.id }}"
+                >
                     Edit
                 </button>
             </div>

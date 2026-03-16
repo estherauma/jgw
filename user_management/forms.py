@@ -212,7 +212,10 @@ class DashboardUserForm(forms.ModelForm):
         email = email.strip().lower()
         if not email:
             raise forms.ValidationError("Email is required")
-        if User.objects.filter(email__iexact=email).exists():
+        qs = User.objects.filter(email__iexact=email)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
             raise forms.ValidationError("Email already exists.")
         return email
 

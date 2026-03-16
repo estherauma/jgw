@@ -265,6 +265,7 @@
 {% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit work group' submit_label='Save changes' form_action='' form=work_group_form %}
 {% url 'user_management:create_dashboard_user' as create_dashboard_user_url %}
 {% include 'add-dashboard-user-modal.html' with action_type='add' modal_title='Add admin user' submit_label='Save' form_action=create_dashboard_user_url form=dashboard_user_form %}
+{% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
 {% include 'add-appuser-modal.html' with action_type='add' modal_title='Add user' submit_label='Save' form_action=create_app_user_url form=app_user_form %}
 {% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form%}
 {% if selected_org_id %}

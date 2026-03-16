@@ -397,7 +397,85 @@ class CreateDashboardUserView(View):
             return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
-    
+
+
+class EditDashboardUserView(View):
+    def get(self, request, user_id):
+        user = User.objects.prefetch_related(
+            "organisation_data",
+            "groups",
+            "factories",
+            "destinations",
+            "user_languages",
+            "excluded_origin_countries",
+            "immigration_status",
+        ).filter(id=user_id, access_type="dashboard").first()
+        if not user:
+            return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "is_active": user.is_active,
+                    "scheme_id": user.scheme_id,
+                    "start_date": user.start_date.isoformat()
+                    if user.start_date
+                    else "",
+                    "end_date": user.end_date.isoformat() if user.end_date else "",
+                    "groups": list(user.groups.values_list("id", flat=True)),
+                    "organisation_data": list(
+                        user.organisation_data.values_list("id", flat=True)
+                    ),
+                    "factories": list(user.factories.values_list("id", flat=True)),
+                    "destinations": list(user.destinations.values_list("id", flat=True)),
+                    "user_languages": list(
+                        user.user_languages.values_list("id", flat=True)
+                    ),
+                    "excluded_origin_countries": list(
+                        user.excluded_origin_countries.values_list("id", flat=True)
+                    ),
+                    "immigration_status": list(
+                        user.immigration_status.values_list("id", flat=True)
+                    ),
+                },
+            }
+        )
+
+    def post(self, request, user_id):
+        user = User.objects.filter(id=user_id, access_type="dashboard").first()
+        if not user:
+            return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
+
+        form = DashboardUserForm(
+            request.POST,
+            instance=user,
+            orgs_qs=get_allowed_orgs(request.user),
+        )
+        if form.is_valid():
+            user = form.save(commit=False)
+            password = form.cleaned_data.get("password")
+            if password:
+                user.set_password(password)
+            user.is_active = form.cleaned_data.get("is_active", True)
+            user.save()
+            form.save_m2m()
+            selected_groups = form.cleaned_data.get("groups")
+            if selected_groups is not None:
+                user.groups.set(selected_groups)
+            return JsonResponse({"ok": True})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
 class EditAppUserView(View):
     
     def get(self, request, user_id):
