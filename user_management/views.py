@@ -653,7 +653,7 @@ class DeleteWorkGroupView(View):
         if not work_group:
             return JsonResponse({"ok": False, "error": "Work group not found."}, status=404)
         organisation = work_group.organisation
-        if work_group.app_users.exists():
+        if work_group.users.exists():
             return JsonResponse(
                 {"ok": False, "error": "This work group cannot be deleted because it has assigned users. Remove users first."},
                 status=400,
