@@ -20,7 +20,7 @@ class AuditFieldsMixin(models.Model):
     
     class Meta:
         abstract = True
-class WorkGroup(models.Model):
+class WorkGroup(AuditFieldsMixin):
     name = models.CharField(max_length=255)
     organisation = models.ForeignKey(
         OrganisationData, on_delete=models.CASCADE, related_name="work_groups"
@@ -28,13 +28,11 @@ class WorkGroup(models.Model):
     access_codes = models.ManyToManyField(
         OrganisationAccessCode, blank=True, related_name="work_groups"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
-
-    class Meta:
+    class Meta(AuditFieldsMixin.Meta):
+        abstract = False
         constraints = [
             models.UniqueConstraint(
                 fields=["organisation", "name"], name="unique_workgroup_name_per_org"

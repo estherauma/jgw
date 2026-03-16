@@ -152,7 +152,7 @@ class Age(models.Model):
         return self.range
 
 
-class OrganisationAccessCode(models.Model):
+class OrganisationAccessCode(AuditFieldsMixin):
     code = models.CharField(max_length=255, unique=True)
     requires_login = models.BooleanField(default=False)
     organisation = models.ForeignKey(
@@ -162,8 +162,6 @@ class OrganisationAccessCode(models.Model):
         blank=True,
         related_name="organisation_access_codes",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     expiry_date = models.DateField(null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     deleted_by = models.ForeignKey(
@@ -182,6 +180,10 @@ class OrganisationAccessCode(models.Model):
         self.deleted_by = user
         self.deleted_at = timezone.now()
         self.save()
+        
+    class Meta(AuditFieldsMixin.Meta):
+        abstract = False
+        
 
 
 class ImmigrationStatus(models.Model):
