@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="um-modal-title um-navy" id="assign-users-workgroup-title">Add users to work group</h5>
+                <h5 class="um-modal-title um-navy" id="assign-users-workgroup-title">Add users to department</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -23,7 +23,7 @@
                         Selected users: <span class="fw-bold" data-selected-users-count>0</span>
                     </div>
                     <div class="um-navy mb-2">
-                        Work groups
+                        Departments
                     </div>
                     <div class="um-checkbox-list um-checkbox-list-scroll" data-workgroup-options>
                         {% if work_groups %}
@@ -38,7 +38,7 @@
                             {% endfor %}
                         </ul>
                         {% else %}
-                        <p class="mb-0">No work groups available.</p>
+                        <p class="mb-0">No departments available.</p>
                         {% endif %}
                     </div>
                 </div>

@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group, Permission
 from django.db.models import Q
 from waffle import get_waffle_flag_model
 from users.utils import ALL_GROUPS
+from user_management.flags import UM_FLAG_DEFS
 
 
 class Command(BaseCommand):
@@ -83,24 +84,16 @@ class Command(BaseCommand):
             {"condition": "everyone", "tag": "can_view_messaging_question_per_origin_on_messaging_page"},
             {"condition": "everyone", "tag": "can_view_messaging_question_per_destination_on_messaging_page"},
             {"condition": "everyone", "tag": "can_view_organisation_chart_on_messaging_question_page"},
-            # User management page feature flags
-            {"condition": "user_management", "tag": "can_view_user_management_page"},
-            {"condition": "58_admin", "tag": "can_view_organizations_table"},
-            {"condition": "58_admin", "tag": "can_create_work_code"},
-            {"condition": "58_admin", "tag": "can_delete_work_code"},
-            {"condition": "org_admin", "tag": "can_assign_work_code"},
-            {"condition": "58_admin", "tag": "can_edit_organizations"},
-            {"condition": "58_admin", "tag": "can_delete_organization"},
-            {"condition": "org_admin", "tag": "can_create_appuser"},
-            {"condition": "org_admin", "tag": "can_edit_appuser"},
-            {"condition": "org_admin", "tag": "can_delete_appuser"},
-            {"condition": "org_admin", "tag": "can_create_workgroup"},
-            {"condition": "org_admin", "tag": "can_delete_workgroup"},
-            {"condition": "org_admin", "tag": "can_edit_workgroup"},
-            {"condition": "org_admin", "tag": "can_edit_organization_details"},
-            {"condition": "58_admin", "tag": "can_select_organization"},
-
         ]
+        um_flags = {flag["name"] for flag in UM_FLAG_DEFS}
+        flags_list = [entry for entry in flags_list if entry["tag"] not in um_flags]
+        for flag in UM_FLAG_DEFS:
+            flags_list.append(
+                {
+                    "condition": flag.get("condition", "org_admin"),
+                    "tag": flag["name"],
+                }
+            )
         WaffleFlag = get_waffle_flag_model()
         ROLE_INHERITANCE = {
             "org_admin": ["org_admin", "58_admin"],  # 58_admin has all org_admin permissions

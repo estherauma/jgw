@@ -1,3 +1,4 @@
+{% load um_waffle_flags %}
 {% if users %}
     {% for u in users %}
     <tr>
@@ -30,6 +31,7 @@
         {% endif %}
         <td>
             <div class="um-action">
+                {% flag 'can_edit_appuser' %}
                 <button
                     class="um-btn um-btn-outline"
                     data-toggle="modal"
@@ -38,6 +40,7 @@
                 >
                     Edit
                 </button>
+                {% endflag %}
             </div>
         </td>
     </tr>

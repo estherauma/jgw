@@ -1,4 +1,4 @@
-{% load waffle_tags %}
+{% load um_waffle_flags %}
 <div class="modal fade" id="{{ action_type }}-workgroup-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-workgroup-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -25,7 +25,7 @@
                     </div>
                     {% endflag %}
                     <label class="um-field form-group mt-1">
-                        <span>Work group name</span>
+                        <span>Department name</span>
                         {{ form.name }}
                         <div class="text-danger small" data-error-for="name"></div>
                         {% if form.name.errors %}

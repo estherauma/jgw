@@ -294,7 +294,7 @@
         window.showDeleteConfirm({
           url: '/user-management/work-groups/' + workGroupId + '/delete/',
           title: 'Delete Work Group',
-          message: 'Are you sure you want to delete the work group "' + workGroupName + '"?',
+          message: 'Are you sure you want to delete the department "' + workGroupName + '"?',
           onSuccess: function() {
             window.location.reload();
           }

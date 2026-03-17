@@ -1,4 +1,4 @@
-{% load waffle_tags %}
+{% load um_waffle_flags %}
 <div class="modal fade um-modal um-modal-lg" id="{{ action_type }}-appuser-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-appuser-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -31,11 +31,11 @@
                     {% endflag %}
                     <label class="um-field form-group um-field-full">
                         <span>Role</span>
-                        {{ form.role_group }}
+                        {{ form.role }}
                         <small class="um-helper">Administrators are users you want to access the dashboard.</small>
-                        <div class="text-danger small" data-error-for="role_group"></div>
-                        {% if form.role_group.errors %}
-                            <div class="text-danger small">{{ form.role_group.errors }}</div>
+                        <div class="text-danger small" data-error-for="role"></div>
+                        {% if form.role.errors %}
+                            <div class="text-danger small">{{ form.role.errors }}</div>
                         {% endif %}
                     </label>
                     <label class="um-field form-group">
@@ -98,13 +98,14 @@
                             <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
+                    {% flag 'can_assign_user_workgroups' %}
                     <div class="um-field form-group">
-                        <span>Work groups (optional)</span>
+                        <span>Departments (optional)</span>
                         <div class="um-checkbox-list um-checkbox-list-scroll" data-work-groups-container>
                             {% if form.work_groups and form.work_groups.field.queryset %}
                                 {{ form.work_groups }}
                             {% else %}
-                                <p>No work groups available.</p>
+                                <p>No departments available.</p>
                             {% endif %}
                         </div>
                         <div class="text-danger small" data-error-for="work_groups"></div>
@@ -112,6 +113,7 @@
                             <div class="text-danger small">{{ form.work_groups.errors }}</div>
                         {% endif %}
                     </div>
+                    {% endflag %}
                 </div>
                 <div class="um-modal-footer modal-footer">
                     <button type="button" class="um-btn um-btn-gray" data-dismiss="modal">

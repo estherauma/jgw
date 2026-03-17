@@ -251,7 +251,7 @@
       
 
       if (!workGroups?.length) {
-        workGroupsContainer.innerHTML = '<p>No work groups available.</p>';
+        workGroupsContainer.innerHTML = '<p>No departments available.</p>';
         return;
       }
       const workGroupOptions = workGroups.map(function (group, index) {
@@ -279,6 +279,23 @@
 
     }
 
+    function renderRoles(roles, selectedRoleId, roleSelect) {
+      if (!roleSelect || !Array.isArray(roles)) {
+        return;
+      }
+      var options = ['<option value=\"\">Select role</option>'];
+      roles.forEach(function (role) {
+        var selected =
+          selectedRoleId && String(role.id) === String(selectedRoleId)
+            ? ' selected'
+            : '';
+        options.push(
+          '<option value=\"' + role.id + '\"' + selected + '>' + role.name + '</option>',
+        );
+      });
+      roleSelect.innerHTML = options.join('');
+    }
+
     $('[data-target="#edit-appuser-modal"]').on('click', async function () {
       var $btn = $(this);
       var userId = $btn.data('user-id');
@@ -297,7 +314,8 @@
           form.querySelector('[name="first_name"]').value = user.first_name || '';
           form.querySelector('[name="last_name"]').value = user.last_name || '';
           form.querySelector('[name="email"]').value = user.email || '';
-          form.querySelector('[name="role_group"]').value = user.role_group_id || '';
+          var roleSelect = form.querySelector('[name="role"]');
+          renderRoles(data.roles, user.role_id, roleSelect);
           form.querySelector('[name="phone_number"]').value = user.phone_local || '';
           var countryField = form.querySelector('[name="phone_country_iso"]');
           if (countryField) {
@@ -467,7 +485,7 @@
       const selectedGroups = form.querySelectorAll('input[name="work_groups"]:checked');
       if (!selectedGroups.length) {
         if (errorBox) {
-          errorBox.textContent = 'Select at least one work group.';
+          errorBox.textContent = 'Select at least one department.';
           errorBox.classList.remove('d-none');
         }
         return;
