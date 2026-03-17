@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-from user_management.models import AuditFieldsMixin
+from common.models import AuditFieldsMixin
 
 from common.const.value_const import NOT_SPECIFIED
 
@@ -179,12 +179,7 @@ class OrganisationAccessCode(AuditFieldsMixin):
         self.is_deleted = True
         self.deleted_by = user
         self.deleted_at = timezone.now()
-        self.save()
-        
-    class Meta(AuditFieldsMixin.Meta):
-        abstract = False
-        
-
+        self.save()     
 
 class ImmigrationStatus(models.Model):
     name = models.CharField(max_length=255)
@@ -208,7 +203,6 @@ class OrganisationData(AuditFieldsMixin):
     def __str__(self):
         return self.name
     class Meta(AuditFieldsMixin.Meta):
-        abstract = False
         indexes = [
             models.Index(fields=['name']),
         ]

@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from user_management.models import AuditFieldsMixin
+from common.models import AuditFieldsMixin
 from django.db import models
 from dashboard.forms import OPERATORS
 from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation, OrganisationData
@@ -89,7 +89,6 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
     dashboard_preferences_version = models.IntegerField(default=1, help_text="Version of dashboard preferences schema")
 
     class Meta(AuditFieldsMixin.Meta):
-        abstract = False
         verbose_name_plural = "Users"
         indexes = [
             models.Index(fields=['email']),
