@@ -179,7 +179,8 @@ class OrganisationAccessCode(AuditFieldsMixin):
         self.is_deleted = True
         self.deleted_by = user
         self.deleted_at = timezone.now()
-        self.save()     
+        self.updated_by = user
+        self.save()
 
 class ImmigrationStatus(models.Model):
     name = models.CharField(max_length=255)

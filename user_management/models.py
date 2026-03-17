@@ -1,11 +1,10 @@
 from django.db import models
-from django.conf import settings
-
 from preference.models import (
     OrganisationAccessCode,
     OrganisationData,
 )
 from common.models import AuditFieldsMixin
+
 class WorkGroup(AuditFieldsMixin):
     name = models.CharField(max_length=255)
     organisation = models.ForeignKey(
