@@ -336,8 +336,15 @@
         resetBtn.classList.toggle('d-none', !targetInput.value);
     };
 
+    if (targetInput.dataset.listenerAttached) {
+      toggleBtn();
+      return; 
+    }
+
     targetInput.addEventListener('input', toggleBtn);
     targetInput.addEventListener('change', toggleBtn);
+
+    targetInput.dataset.listenerAttached = "true";
     
     toggleBtn();
 
