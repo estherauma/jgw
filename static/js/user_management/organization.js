@@ -210,6 +210,7 @@
 
     $('[data-target="#add-workcode-modal"]').on('click', function () {
       resetWorkCodeForm();
+      window.setupFieldReset('add-workcode-form', 'expiry_date');
     });
   }
 

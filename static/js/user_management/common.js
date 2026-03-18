@@ -321,6 +321,34 @@
       syncThumb(container, track, thumb);
     });
   }
+  
+  function setupFieldReset(formId, inputName) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    const targetInput = form.querySelector(`input[name="${inputName}"]`);
+    
+    const resetBtn = form.querySelector(`[data-reset-for="${inputName}"]`);
+    
+    if (!targetInput || !resetBtn) return;
+
+    const toggleBtn = () => {
+        resetBtn.classList.toggle('d-none', !targetInput.value);
+    };
+
+    targetInput.addEventListener('input', toggleBtn);
+    targetInput.addEventListener('change', toggleBtn);
+    
+    toggleBtn();
+
+    resetBtn.onclick = function() {
+      targetInput.value = '';
+      toggleBtn();
+      targetInput.dispatchEvent(new Event('change'));
+    };
+  }
+
+  window.setupFieldReset = setupFieldReset;
 
   window.addEventListener('load', initScrollbars);
   window.addEventListener('resize', syncAllThumbs);
