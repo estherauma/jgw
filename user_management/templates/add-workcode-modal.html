@@ -33,10 +33,10 @@
                         <span>Expiry date (Optional)</span>
                         <div class="d-flex align-items-center gap-2">
                             {{ form.expiry_date }}
-                            <button type="button" 
-                                    class="btn btn-sm um-btn-danger um-btn-reset" 
-                                    onclick="this.previousElementSibling.value = ''">
-                                Remove
+                            <button type="button" data-reset-for="expiry_date"
+                                class="btn btn-link p-0 text-dark text-decoration-none d-none"
+                                aria-label="Clear expiry date" title="Clear expiry date">
+                                &times;
                             </button>
                         </div>
                         <div class="text-danger small" data-error-for="expiry_date"></div>
