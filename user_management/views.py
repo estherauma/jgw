@@ -778,3 +778,43 @@ class EditWorkCodeView(View):
             )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class SoftDeleteUserView(View):
+    def post(self, request, user_id):
+        current_user = request.user
+        
+        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+            return org_access_denied()
+
+        target_user = User.objects.filter(id=user_id, access_type="dashboard").first()
+        if not target_user:
+            return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+        
+        if target_user == current_user:
+            return JsonResponse({"ok": False, "error": "You cannot delete your own account."}, status=400)
+
+        can_delete = False
+
+        if current_user.is_superuser:
+            can_delete = True
+
+        elif is_58_admin(current_user):
+            if hasattr(target_user, 'created_by') and target_user.created_by == current_user:
+                can_delete = True
+            else:
+                return JsonResponse({"ok": False, "error": "58 Admins can only delete users they created."}, status=403)
+
+        elif is_org_admin(current_user):
+            target_org = target_user.organisation_data.first()
+            if target_org and has_org_access(current_user, target_org):
+                can_delete = True
+            else:
+                return JsonResponse({"ok": False, "error": "Org Admins can only delete users within their organization."}, status=403)
+
+        if can_delete:
+            target_user.soft_delete(deleted_by=current_user)
+            messages.success(request, f'User "{target_user.email}" deleted successfully.')
+            return JsonResponse({"ok": True})
+        
+        return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)

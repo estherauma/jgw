@@ -1,5 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils import timezone
 from django.db import models
 from dashboard.forms import OPERATORS
 from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation, OrganisationData
@@ -89,6 +90,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text="User's dashboard customization preferences"
     )
     dashboard_preferences_version = models.IntegerField(default=1, help_text="Version of dashboard preferences schema")
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="deleted_users"
+    )
 
     class Meta:
         indexes = [
@@ -97,6 +103,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str___(self):
         return f"{self.email}"
+    
+    def soft_delete(self, deleted_by=None):
+        self.deleted_at = timezone.now()
+        self.deleted_by = deleted_by
+        self.is_active = False
+        self.save()
 
 
 class UserInvitations(models.Model):
