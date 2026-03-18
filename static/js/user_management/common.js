@@ -326,7 +326,7 @@
     const form = document.getElementById(formId);
     if (!form) return;
 
-    const targetInput = form.querySelector(`input[name="${inputName}"]`);
+    const targetInput = form.querySelector(`[name="${inputName}"]`);
     
     const resetBtn = form.querySelector(`[data-reset-for="${inputName}"]`);
     
