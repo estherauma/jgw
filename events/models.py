@@ -107,6 +107,7 @@ class ChaptersOpened(models.Model):
         ImmigrationStatusChapterTitle, null=True, blank=True, on_delete=models.SET_NULL, related_name="chapter_opened_immigration_status_chapter_titles"
     )
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
+    org_code = models.CharField(max_length=255, null=True, blank=True)
     org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
     age = models.ForeignKey(Age, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
@@ -202,6 +203,7 @@ class ChaptersFeedbackStandard(models.Model):
         OrganisationSector, on_delete=models.SET_NULL, null=True, blank=True
     )
     factory_farm = models.ForeignKey(FactoryFarm, on_delete=models.SET_NULL, null=True, blank=True)
+    org_code = models.CharField(max_length=255, null=True, blank=True)
     organisation = models.ForeignKey(Organisation, on_delete=models.SET_NULL, null=True, blank=True)
     org_info = models.ForeignKey(OrganisationData, on_delete=models.SET_NULL, null=True, blank=True)
     sectors_of_work = models.ManyToManyField(SectorOfWork)
