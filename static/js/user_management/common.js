@@ -336,7 +336,7 @@
         resetBtn.classList.toggle('d-none', !targetInput.value);
     };
 
-    if (targetInput.dataset.listenerAttached) {
+    if (targetInput.dataset.fieldResetListenerAttached) {
       toggleBtn();
       return; 
     }
@@ -344,7 +344,7 @@
     targetInput.addEventListener('input', toggleBtn);
     targetInput.addEventListener('change', toggleBtn);
 
-    targetInput.dataset.listenerAttached = "true";
+    targetInput.dataset.fieldResetListenerAttached = "true";
     
     toggleBtn();
 
