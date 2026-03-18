@@ -351,7 +351,8 @@
     resetBtn.onclick = function() {
       targetInput.value = '';
       toggleBtn();
-      targetInput.dispatchEvent(new Event('change'));
+      targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+      targetInput.dispatchEvent(new Event('change', { bubbles: true }));
     };
   }
 
