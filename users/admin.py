@@ -29,6 +29,9 @@ class UserAdmin(ExportActionModelAdmin, admin.ModelAdmin):
         ('Statistics', {
             'fields': ('total_logged_hours',)
         }),
+        ('Audit', {
+            'fields': ('created_by', 'updated_by')
+        }),
     )
 
 admin.site.register(User, UserAdmin)

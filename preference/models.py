@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from common.models import AuditFieldsMixin
 
 from common.const.value_const import NOT_SPECIFIED
 
@@ -151,7 +152,7 @@ class Age(models.Model):
         return self.range
 
 
-class OrganisationAccessCode(models.Model):
+class OrganisationAccessCode(AuditFieldsMixin):
     code = models.CharField(max_length=255, unique=True)
     requires_login = models.BooleanField(default=False)
     organisation = models.ForeignKey(
@@ -161,8 +162,6 @@ class OrganisationAccessCode(models.Model):
         blank=True,
         related_name="organisation_access_codes",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     expiry_date = models.DateField(null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     deleted_by = models.ForeignKey(
@@ -180,8 +179,8 @@ class OrganisationAccessCode(models.Model):
         self.is_deleted = True
         self.deleted_by = user
         self.deleted_at = timezone.now()
+        self.updated_by = user
         self.save()
-
 
 class ImmigrationStatus(models.Model):
     name = models.CharField(max_length=255)
@@ -198,16 +197,13 @@ class ImmigrationStatus(models.Model):
         ]
 
 
-class OrganisationData(models.Model):
+class OrganisationData(AuditFieldsMixin):
     name = models.CharField(max_length=255)
     org_code = models.CharField(max_length=50, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
-
-    class Meta:
+    class Meta(AuditFieldsMixin.Meta):
         indexes = [
             models.Index(fields=['name']),
         ]

@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
+from common.models import AuditFieldsMixin
 from django.db import models
 from dashboard.forms import OPERATORS
 from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation, OrganisationData
@@ -36,10 +37,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    class Meta:
-        verbose_name_plural = "Users"
-
+class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
     objects = UserManager()
     USERNAME_FIELD = "email"
     ROLE = models.TextChoices("Role", " ".join(ROLES))
@@ -96,7 +94,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         related_name="deleted_users"
     )
 
-    class Meta:
+    class Meta(AuditFieldsMixin.Meta):
+        verbose_name_plural = "Users"
         indexes = [
             models.Index(fields=['email']),
         ]
