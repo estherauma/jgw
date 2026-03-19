@@ -165,6 +165,10 @@ function initUsersByGenderChart(genderData, customContainerId, chartType) {
                     width: 15,
                     show: showScrollbar,
                     realtime: true,
+                    showDetail: false,
+                    labelFormatter: function () {
+                        return '';
+                    },
                     textStyle: {
                         color: '#6c757d'
                     },

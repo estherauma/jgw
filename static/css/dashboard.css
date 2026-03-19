@@ -834,7 +834,7 @@ body.modal-open {
 .users-route-map-card,
 .users-geolocation-map-card,
 .users-interaction-map-card,
-.users-by-sector-card
+.users-by-sector-card,
 .inline-question-language-echarts-card {
     background: white;
     border-radius: 12px;
