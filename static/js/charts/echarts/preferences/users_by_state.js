@@ -179,8 +179,12 @@ function initUsersByStateChart(stateData, customContainerId, chartType) {
                     end: 50,
                     right: 2,
                     width: 15,
-                    show: showScrollbar,
+                    show: showScrollbar,        
                     realtime: true,
+                    showDetail: false,
+                    labelFormatter: function () {
+                        return '';
+                    },
                     textStyle: {
                         color: '#6c757d'
                     },
