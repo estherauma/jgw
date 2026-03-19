@@ -70,7 +70,7 @@ def fetch_preferences_from_api_to_db():
     translate_and_clean_preferences_fields()
     update_original_sector_of_work_references()
     update_myvoice_preferences()
-    update_preferences_org_info_from_organisation()
+    # update_preferences_org_info_from_organisation()
 
 
 def create_preference_object(preference):
@@ -91,6 +91,7 @@ def create_preference_object(preference):
     language = preference.get("language")
     route = preference.get("route") or NOT_SPECIFIED
     immigration_status = preference.get("immigrationStatus")
+    org_code = preference.get("organisationCode")
 
     origin = get_data_origin(route=route, api_origin=preference.get("locale") or preference.get("origin"))
     destination = get_data_destination(
@@ -119,13 +120,7 @@ def create_preference_object(preference):
     organisation_access_code_data = get_or_add_organisation_access_code(organisation_access_code)
 
     immigration_status_instance = get_or_add_immigration_status_to_db(immigration_status)
-
-    org_info_data = None
-    if org_info:
-        try:
-            org_info_data = OrganisationData.objects.get(org_code=org_info)
-        except OrganisationData.DoesNotExist:
-            kunfu_panda_logger.warning(f"No OrganisationData found for org_code: {org_info}")
+    org_info_data = get_organisation_data(org_code=org_code, organisation=organisation)
 
     new_preference = Preference(
         data_source_id=preference.get("_id"),
@@ -148,6 +143,7 @@ def create_preference_object(preference):
         organisation=organisation_data,
         api_destination=api_destination_data,
         organisation_access_code=organisation_access_code_data,
+        org_code=org_code,
         org_info=org_info_data,
     )
 
