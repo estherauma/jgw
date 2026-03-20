@@ -22,8 +22,6 @@ function initUsersByAgeChart(ageData, customContainerId, chartType) {
     let ages = [];
     let counts = [];
     
-    console.log('Users by Age Chart Data:', ageData);
-    
     if (typeof ageData === 'object' && ageData.labels && ageData.counts) {
         ages = [...ageData.labels];
         counts = [...ageData.counts];
@@ -179,6 +177,10 @@ function initUsersByAgeChart(ageData, customContainerId, chartType) {
                     width: 15,
                     show: showScrollbar,
                     realtime: true,
+                    showDetail: false,
+                    labelFormatter: function () {
+                        return '';
+                    },
                     textStyle: {
                         color: '#6c757d'
                     },

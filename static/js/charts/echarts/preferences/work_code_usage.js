@@ -41,12 +41,24 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
             }
             return acc;
         }, {});
+
+        const organizationTotals = organizations.reduce((acc, org) => {
+            acc[org] = workCodeUsageParams
+                .filter(item => item.organisation_name === org)
+                .reduce((sum, item) => sum + (item.access_code_count || 0), 0);
+            return acc;
+        }, {});
+
+        const sortedOrganizations = [...organizations].sort((a, b) => {
+            return (organizationTotals[b] || 0) - (organizationTotals[a] || 0);
+        });
+        const chartOrganizations = [...sortedOrganizations].reverse();
         
         const series = accessCodes.map(accessCode => ({
             name: accessCode,
             type: 'bar',
             stack: 'workCode',
-            data: organizations.map(org => {
+            data: chartOrganizations.map(org => {
                 const foundItem = workCodeUsageParams.find(
                     item => item.organisation_name === org && item.mapped_access_code === accessCode
                 );
@@ -57,7 +69,7 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
                 borderRadius: [0, 4, 4, 0]
             },
             label: {
-                show: true,
+                show: false,
                 position: 'right',
                 formatter: function(params) {
                     return params.value > 0 ? params.value : '';
@@ -68,7 +80,7 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
             }
         }));
         
-        const numItems = organizations.length;
+        const numItems = chartOrganizations.length;
         const showScrollbar = numItems > 8;
         
         const option = {
@@ -119,8 +131,12 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
                     start: 100,
                     end: showScrollbar ? 50 : 100,
                     right: 2,
-                    width: 15,
+                    width: 15,  
                     show: showScrollbar,
+                    showDetail: false,
+                    labelFormatter: function () {
+                        return '';
+                    },
                     realtime: true,
                     textStyle: {
                         color: '#6c757d'
@@ -131,7 +147,7 @@ function initWorkCodeUsageChart(workCodeUsageParams, customContainerId) {
             ],
             yAxis: {
                 type: 'category',
-                data: organizations,
+                data: chartOrganizations,
                 axisLine: {
                     show: true,
                     lineStyle: {

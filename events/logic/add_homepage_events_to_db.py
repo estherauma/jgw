@@ -3,7 +3,8 @@ from common.app_events import AppEvents
 from datetime import datetime
 from common.const.value_const import BIGQUERY_HOMEPAGE_EVENTS_START_DATE
 from common.helpers.model_helpers.common import bulk_create_in_chunks
-from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_immigration_status_to_db
+from common.helpers.model_helpers.preference import get_or_add_country_to_db, get_or_add_immigration_status_to_db, get_or_add_organisation_to_db
+from common.helpers.preference_helpers.organisation import get_organisation_data
 from common.logger import KunfuPandaLogger
 from events.models import BigqueryHomepageEventData
 from preference.logic.update_perference_organisation_info import update_bigquery_homepage_event_org_info_from_organisation
@@ -93,7 +94,7 @@ def fetch_and_save_homepage_events_to_db():
     kunfu_panda_logger.info(f"Finished adding {total_fetched} homepage events to the database")
 
     update_myvoice_bigquery_homepage_events()
-    update_bigquery_homepage_event_org_info_from_organisation()
+    # update_bigquery_homepage_event_org_info_from_organisation()
 
 def create_homepage_event_instance(event, languages, ages, genders, organisations, countries, organisation_not_specified):
     event_date = event.get("event_date")
@@ -115,7 +116,8 @@ def create_homepage_event_instance(event, languages, ages, genders, organisation
         preference = None
     
     organisation_name = event.get("organisation")
-    organisation = organisations.get(organisation_name.lower()) if organisation_name else organisation_not_specified
+    organisation = get_or_add_organisation_to_db(organisation_name)
+    org_data = get_organisation_data(org_code=organisation_code, organisation=organisation)
 
     destination_name = event.get("destination")
     destination = countries.get(destination_name.lower()) if destination_name else None
@@ -134,6 +136,7 @@ def create_homepage_event_instance(event, languages, ages, genders, organisation
         gender=gender,
         organisation=organisation,
         organisation_code=organisation_code,
+        org_info=org_data,
         immigration_status=immigration_status,
         geo_city=geo_city,
         geo_country=geo_country,

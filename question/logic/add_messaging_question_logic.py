@@ -22,6 +22,7 @@ from common.helpers.model_helpers.preference import (
     add_original_sector_of_work_to_db,
 )
 from common.helpers.preference_helpers.country import get_data_destination, get_data_origin
+from common.helpers.preference_helpers.organisation import get_organisation_data
 from common.helpers.messaging_question_helpers.messging_question_test_data import is_messaging_question_test_data
 from common.logger import KunfuPandaLogger
 
@@ -131,7 +132,7 @@ def fetch_messaging_questions_from_api_to_db():
     translate_and_clean_messaging_question_fields()
     update_translations_from_localization(meassaging_question_response_localization)
     update_myvoice_messaging_questions()
-    update_messaging_question_org_info_from_organisation()
+    # update_messaging_question_org_info_from_organisation()
 
 
 def add_messaging_question_to_db(messaging_question):
@@ -164,6 +165,7 @@ def add_messaging_question_to_db(messaging_question):
     organisation_data = get_or_add_organisation_to_db(organisation)
     factory_farm_data = get_or_add_factory_farm_to_db(factory_farm)
     is_test_data = is_messaging_question_test_data(messaging_question.get("questionKey"))
+    org_data = get_organisation_data(org_code=org_code, organisation=organisation)
 
     # save the standard fields,
     device_id = messaging_question.get("deviceId")
@@ -188,6 +190,7 @@ def add_messaging_question_to_db(messaging_question):
         organisation=organisation_data,
         factory_farm=factory_farm_data,
         org_code=org_code,
+        org_info=org_data,
         question_version="V1_and_v2"
     )
     if sectors:
@@ -304,21 +307,14 @@ def add_messaging_question_v3_to_db(data):
 
         if data.get('locale'):
             origin = get_or_add_country_to_db(data.get('locale'), source="origin")
-            standard_data['origin'] = origin
+            standard_data['origin'] = originpy
 
-        if data.get('organisation'):
-            org, _ = Organisation.objects.get_or_create(
-                name=data.get('organisation')
-            )
-            standard_data['organisation'] = org
-
-            
-            if data.get('organisationCode'):
-                org_data = OrganisationData.objects.filter(
-                    org_code=data.get('organisationCode')
-                ).first()
-                if org_data:  
-                    standard_data['org_info'] = org_data
+        organisation = data.get('organisation')
+        organisation = get_or_add_organisation_to_db(organisation)
+        standard_data['organisation'] = organisation
+        org_code = data.get('organisationCode')
+        org_data = get_organisation_data(org_code=org_code, organisation=organisation)
+        standard_data['org_info'] = org_data
 
         if data.get('organisationSector'):
             sector, _ = OrganisationSector.objects.get_or_create(

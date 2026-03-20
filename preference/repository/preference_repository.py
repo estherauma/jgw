@@ -774,6 +774,11 @@ def preferences_by_immigration_status(**filters):
         .annotate(
             name=Case(
                 When(immigration_status__name__isnull=True, then=Value("Not Specified")),
+                When(immigration_status__name__iexact="skilledWorkerVisa", then=Value("Skilled Worker Visa")),
+                When(immigration_status__name__iexact="healthcareAndWorkerVisa", then=Value("Healthcare and Worker Visa")),
+                When(immigration_status__name__iexact="asylumSeekerRefugee", then=Value("Asylum Seeker/Refugee")),
+                When(immigration_status__name__iexact="fishingVisa", then=Value("Fishing Visa")),
+                When(immigration_status__name__iexact="others", then=Value("Others")),
                 default=F('immigration_status__name'),
                 output_field=CharField(),
             )

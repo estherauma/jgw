@@ -557,6 +557,7 @@ p[data-delete-message] {
     font-weight: 500;
 }
 
-.um-btn-reset {
-   height: 38px;
+[data-reset-for] {
+    font-size: 1.2rem;
+    font-weight: bold;
 }

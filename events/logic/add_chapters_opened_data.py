@@ -16,6 +16,7 @@ from common.helpers.model_helpers.preference import (
     get_or_add_organisation_sector_to_db,
     get_or_add_organisation_to_db,
 )
+from common.helpers.preference_helpers.organisation import get_organisation_data
 from common.helpers.preference_helpers.country import get_data_destination, get_data_origin
 from common.logger import KunfuPandaLogger
 from events.logic.chapter_title_api_data import update_chapter_titles
@@ -88,7 +89,7 @@ def fetch_chapters_opened_data_from_api_to_db():
     translate_and_clean_preferences_fields()
     update_chapter_titles()
     update_myvoice_chapters_opened_events()
-    update_chapters_opened_org_info_from_organisation()
+    # update_chapters_opened_org_info_from_organisation()
 
 
 def add_chapters_opened_to_db(chapters_feedback):
@@ -100,6 +101,7 @@ def add_chapters_opened_to_db(chapters_feedback):
     gender = chapters_feedback.get("gender")
     organisation_sector = chapters_feedback.get("organisationSector")
     organisation = chapters_feedback.get("organisation")
+    org_code = chapters_feedback.get("organisationCode")
     destination_state = chapters_feedback.get("destinationState")
     immigration_status = chapters_feedback.get("immigrationStatus")
     device_id = chapters_feedback.get("deviceId")
@@ -121,6 +123,7 @@ def add_chapters_opened_to_db(chapters_feedback):
     age_data = get_or_add_age_to_db(age)
     destination_state_data = get_or_add_country_state_to_db(destination_state)
     organisation_data = get_or_add_organisation_to_db(organisation)
+    org_info_data = get_organisation_data(org_code=org_code, organisation=organisation)
     gender_data = get_or_add_gender_to_db(gender)
     organisation_sector_data = get_or_add_organisation_sector_to_db(organisation_sector)
     immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
@@ -151,6 +154,8 @@ def add_chapters_opened_to_db(chapters_feedback):
         ChaptersOpened.objects.create(
             event_name=event_name or NOT_SPECIFIED,
             organisation=organisation_data,
+            org_code=org_code,
+            org_info=org_info_data,
             event_created_at=event_date,
             age=age_data,
             language=language_data,
