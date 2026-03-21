@@ -48,7 +48,7 @@ def fetch_preferences_from_api(client):
 
     latest_preference = Preference.objects.last()
     if latest_preference:
-        start_date = latest_preference.created_at.strftime("%Y-%m-%d")
+        start_date = latest_preference.api_created_at.strftime("%Y-%m-%d")
 
     return client.get_data(f"/preferences?startDate={start_date}&endDate={end_date}")
 
