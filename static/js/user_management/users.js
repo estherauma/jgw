@@ -11,10 +11,13 @@
       const assignWorkGroupButton = document.querySelector('[data-users-workgroup-action]');
       const selectedIds = getSelectedUserIds();
       assignWorkGroupButton.disabled = selectedIds.length === 0;
-      const countLabel = modal.querySelector('[data-selected-users-count]');
-      if (countLabel) {
-        countLabel.textContent = String(selectedIds.length);
-      }
+      const modal = document.getElementById('assign-users-workgroup-modal');
+      if (modal) {
+        const countLabel = modal.querySelector('[data-selected-users-count]');
+        if (countLabel) {
+            countLabel.textContent = String(selectedIds.length);
+        }
+    }
   }
 
   function initAppUserForm() {
@@ -404,6 +407,15 @@
     });
   }
 
+  function toggleDeleteButton() {
+    const deleteButton = document.querySelector('[data-users-delete]');
+    if (!deleteButton) {
+      return;
+    }
+    const selectedIds = getSelectedUserIds();
+    deleteButton.disabled = selectedIds.length === 0;
+  }
+
   function initUserSelection() {
     const selectAll = document.querySelector('[data-users-select-all]');
     if (!selectAll) {
@@ -430,12 +442,40 @@
         input.checked = checked;
       });
       updateSelectionState();
+      toggleDeleteButton();
+      
     });
 
     document.addEventListener('change', function (event) {
       if (event.target && event.target.matches('[data-user-select]')) {
         updateSelectionState();
+        toggleDeleteButton();
       }
+    });
+  }
+
+  function initDeleteUsers() {
+    const deleteBtn = document.querySelector('[data-users-delete]');
+    if (!deleteBtn) {
+      return;
+    }
+
+    deleteBtn.addEventListener('click', function () {
+      const selectedIds = getSelectedUserIds();
+      
+      if (!selectedIds.length) {
+        alert('Select at least one user to delete.');
+        return;
+      }
+
+      window.showDeleteConfirm({
+        title: 'Delete selected users?',
+        message: `Are you sure you want to delete ${selectedIds.length} users?`,
+        url: '/user-management/users/delete/?ids=' + selectedIds.join(','), 
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
     });
   }
 
@@ -501,5 +541,6 @@
     initUserSearch();
     initUserSelection();
     initAssignUsersToWorkGroups();
+    initDeleteUsers();
   });
 })();

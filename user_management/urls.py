@@ -40,5 +40,5 @@ urlpatterns = [
     path('work-groups/<int:work_group_id>/delete/', DeleteWorkGroupView.as_view(), name="delete_work_group"),
     path('work-codes/<int:work_code_id>/edit/', EditWorkCodeView.as_view(), name="edit_work_code"),
     path('work-codes/<int:work_code_id>/delete/', DeleteWorkCodeView.as_view(), name="delete_work_code"),
-    path('users/<int:user_id>/delete/', SoftDeleteUserView.as_view(), name="soft_delete_user"),
+    path('users/delete/', SoftDeleteUserView.as_view(), name="soft_delete_user"),
 ]
