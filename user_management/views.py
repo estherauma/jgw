@@ -840,9 +840,9 @@ class DeleteUserView(View):
                 "error": "You cannot delete your own account. Please deselect yourself and try again."
             }, status=400) 
         
-        allowed_org_ids =[]
+        allowed_org_ids = set()
         if is_org_admin(current_user):
-            allowed_org_ids = list(get_allowed_orgs(current_user).values_list("id", flat=True))
+            allowed_org_ids = set(get_allowed_orgs(current_user).values_list("id", flat=True))
             
         for target_user in target_users:
             can_delete = False
@@ -858,7 +858,7 @@ class DeleteUserView(View):
                     
             elif is_org_admin(current_user):
                 user_org_ids = {org.id for org in target_user.organisation_data.all()}
-                if any(org_id in allowed_org_ids for org_id in user_org_ids):
+                if allowed_org_ids.intersection(user_org_ids):
                     can_delete = True
                 else:
                     failed_emails.append(target_user.email)
