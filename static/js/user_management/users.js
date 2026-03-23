@@ -475,7 +475,13 @@
       window.showDeleteConfirm({
         title: `Delete ${count === 1 ? 'User' : 'Users'}`,
         message: `Are you sure you want to delete ${count === 1? 'the selected user': `the ${count} selected users`}?`,
-        url: '/user-management/users/delete/?ids=' + selectedIds.join(','), 
+        url: '/user-management/users/delete/',
+        method: 'POST',
+        body: JSON.stringify({ ids: selectedIds.join(',') }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+          },
         onSuccess: function () {
           window.location.reload();
         },

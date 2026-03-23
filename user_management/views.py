@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth.models import Group
 from django.views import View
 import phonenumbers
+import json
 from preference.models import OrganisationAccessCode, OrganisationData
 
 from .forms import (
@@ -805,7 +806,12 @@ class EditWorkCodeView(View):
 class DeleteUserView(View):
     def post(self, request):
         current_user = request.user
-        ids_param = request.POST.get('ids', '')
+        try:
+            data = json.loads(request.body)
+            ids_param = data.get('ids', '')
+            
+        except (json.JSONDecodeError, AttributeError):
+            ids_param = ''
         raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
         
         if not raw_ids:
@@ -813,6 +819,7 @@ class DeleteUserView(View):
         
         try:
             user_ids = [int(uid) for uid in raw_ids]
+            
         except ValueError:
             return JsonResponse({"ok": False, "error": "Invalid User ID(s) provided."}, status=400)
         
@@ -823,8 +830,8 @@ class DeleteUserView(View):
         requested_ids = set(user_ids)
         found_ids = {u.id for u in target_users}
         missing_ids = requested_ids - found_ids
+        
         if missing_ids:
-            
             missing_str = ", ".join(map(str, sorted(missing_ids)))
             return JsonResponse({
                 "ok": False, 
