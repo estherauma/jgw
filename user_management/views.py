@@ -819,9 +819,9 @@ class DeleteUserView(View):
         if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
             return org_access_denied()
 
-        target_users = User.objects.filter(id__in=user_ids).prefetch_related('organisation_data')
+        target_users = list(User.objects.filter(id__in=user_ids).prefetch_related('organisation_data'))
         requested_ids = set(user_ids)
-        found_ids = set(target_users.values_list('id', flat=True))
+        found_ids = {u.id for u in target_users}
         missing_ids = requested_ids - found_ids
         if missing_ids:
             
@@ -833,7 +833,11 @@ class DeleteUserView(View):
         
         users_to_delete = []
         failed_emails = [] 
-
+        
+        allowed_org_ids =[]
+        if is_org_admin(current_user):
+            allowed_org_ids = list(get_allowed_orgs(current_user).values_list("id", flat=True))
+            
         for target_user in target_users:
             can_delete = False
 
@@ -851,10 +855,7 @@ class DeleteUserView(View):
                     failed_emails.append(target_user.email)
                     
             elif is_org_admin(current_user):
-                allowed_org_ids = get_allowed_orgs(current_user).values_list("id", flat=True)
-                has_overlap = target_user.organisation_data.filter(id__in=allowed_org_ids).exists()
-                
-                if has_overlap:
+                if target_user.organisation_data.filter(id__in=allowed_org_ids).exists():
                     can_delete = True
                 else:
                     failed_emails.append(target_user.email)
