@@ -178,7 +178,7 @@ class DashboardUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         orgs_qs = kwargs.pop("orgs_qs", None)
         super().__init__(*args, **kwargs)
-        groups_qs = Group.objects.exclude(name="worker").order_by("name")
+        groups_qs = Group.objects.exclude(name__in=["worker", "org_staff"]).order_by("name")
         self.fields["groups"].queryset = groups_qs
         self.fields["email"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Email"}
