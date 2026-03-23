@@ -99,6 +99,7 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         verbose_name_plural = "Users"
         indexes = [
             models.Index(fields=['email']),
+            models.Index(fields=['is_deleted']),
         ]
 
     def __str__(self):
