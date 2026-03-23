@@ -56,7 +56,8 @@ def user_management(request):
     organizations = get_allowed_orgs(user).order_by("name")
 
     users = (
-        User.objects.prefetch_related("organisation_data", "work_groups")
+        User.objects.filter(is_deleted = False)
+        .prefetch_related("organisation_data", "work_groups")
         .order_by("email")
         .distinct()
     )
@@ -146,7 +147,8 @@ def search_users(request):
     query = request.GET.get("q", "").strip()
     selected_org_id = request.GET.get("selected_org_id")
     users = (
-        User.objects.prefetch_related("organisation_data", "work_groups")
+        User.objects.filter(is_deleted = False)
+        .prefetch_related("organisation_data", "work_groups")
         .order_by("email")
         .distinct()
     )
