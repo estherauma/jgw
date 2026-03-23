@@ -806,10 +806,15 @@ class DeleteUserView(View):
     def post(self, request):
         current_user = request.user
         ids_param = request.GET.get('ids', '')
-        user_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
+        raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
         
-        if not user_ids:
+        if not raw_ids:
             return JsonResponse({"ok": False, "error": "No user selected."}, status=400)
+        
+        try:
+            user_ids = [int(uid) for uid in raw_ids]
+        except ValueError:
+            return JsonResponse({"ok": False, "error": "Invalid User ID(s) provided."}, status=400)
         
         if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
             return org_access_denied()
