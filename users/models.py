@@ -109,6 +109,7 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         self.deleted_at = timezone.now()
         self.deleted_by = deleted_by
         self.is_active = False
+        self.updated_by = deleted_by
         self.save()
 
 
