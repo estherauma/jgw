@@ -819,7 +819,7 @@ class DeleteUserView(View):
         if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
             return org_access_denied()
 
-        target_users = User.objects.filter(id__in=user_ids)
+        target_users = User.objects.filter(id__in=user_ids).prefetch_related('organisation_data')
         requested_ids = set(user_ids)
         found_ids = set(target_users.values_list('id', flat=True))
         missing_ids = requested_ids - found_ids
