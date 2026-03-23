@@ -33,6 +33,7 @@
                             <td class="text-center">{% if role.grants_dashboard_access %}Yes{% else %}No{% endif %}</td>
                             <td>
                                 <div class="um-action">
+                                    {% if not role.is_system %}
                                     {% flag 'can_edit_role' %}
                                     <button
                                         class="um-btn um-btn-outline"
@@ -45,6 +46,7 @@
                                         Edit
                                     </button>
                                     {% endflag %}
+                                    {% endif %}
                                     {% if not role.is_system %}
                                     {% flag 'can_delete_role' %}
                                     <button

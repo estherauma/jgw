@@ -65,6 +65,11 @@ UM_FLAG_DEFS = [
         "condition": "org_admin",
     },
     {
+        "name": "can_view_organization_details",
+        "label": "View organisation details",
+        "condition": "org_admin",
+    },
+    {
         "name": "can_edit_organization_details",
         "label": "Edit organisation details",
         "condition": "org_admin",
@@ -149,4 +154,5 @@ UM_FLAG_DEFS = [
         "label": "Assign role permissions",
         "condition": "org_admin",
     },
+
 ]

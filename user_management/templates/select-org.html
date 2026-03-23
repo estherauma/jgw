@@ -1,4 +1,5 @@
 {% load um_waffle_flags %}
+{% flag 'can_select_organization' %}
 <div class="um-card um-navy mb-2">
   <div class="um-card-title">Selected organisation</div>
   <div class="um-row">
@@ -273,3 +274,4 @@
   window.addEventListener('load', initOrgDropdown);
 })();
 </script>
+{% endflag %}

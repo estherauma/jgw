@@ -147,16 +147,14 @@
                 </div>
             </div>
             {% endflag %}
-            {% if is_org_admin %}
             {% flag 'can_view_work_groups' %}
             {% include "work-groups-card.html" %}
             {% endflag %}
-            {% endif %}
-
+            {% flag 'can_view_organization_details' %}
             <div class="um-card um-navy" data-org-dependent>
                 <div class="um-row">
                     <div class="um-card-title">Organisation details</div>
-                    {% flag 'can_edit_organizations' %}
+                    {% flag 'can_edit_organization_details' %}
                     <div class="um-action">
                         <button class="um-btn um-btn-outline" data-toggle="modal" 
                         data-target="#edit-org-modal" data-org-id="{{ selected_org_id }}" 
@@ -171,6 +169,7 @@
                     <div>Organisation was created on: <span class="um-navy" data-org-detail="created_at" data-org-default="{{ org_details.created_at }}">{{ org_details.created_at }}</span></div>
                 </div>
             </div>
+            {% endflag %}
         </div>
 
         <div>
@@ -275,12 +274,6 @@
             {% if selected_org_id %}
             {% flag 'can_view_roles' %}
             {% include "roles-card.html" %}
-            {% endflag %}
-            {% endif %}
-
-            {% if not is_org_admin %}
-            {% flag 'can_view_work_groups' %}
-            {% include "work-groups-card.html" %}
             {% endflag %}
             {% endif %}
         </div>
