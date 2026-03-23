@@ -470,8 +470,8 @@
       }
 
       window.showDeleteConfirm({
-        title: `Delete ${count === 1 ? 'a User' : 'Users'}`,
-        message: `Are you sure you want to delete the selected ${count} ${count === 1 ? 'user' : 'users'}?`,
+        title: `Delete ${count === 1 ? 'User' : 'Users'}`,
+        message: `Are you sure you want to delete ${count === 1? 'the selected user': `the ${count} selected users`}?`,
         url: '/user-management/users/delete/?ids=' + selectedIds.join(','), 
         onSuccess: function () {
           window.location.reload();
