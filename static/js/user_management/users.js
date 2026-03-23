@@ -407,7 +407,7 @@
     });
   }
 
-  function toggleDeleteButton() {
+  function updateDeleteButton() {
     const deleteButton = document.querySelector('[data-users-delete]');
     if (!deleteButton) {
       return;
@@ -442,14 +442,14 @@
         input.checked = checked;
       });
       updateSelectionState();
-      toggleDeleteButton();
+      updateDeleteButton();
       
     });
 
     document.addEventListener('change', function (event) {
       if (event.target && event.target.matches('[data-user-select]')) {
         updateSelectionState();
-        toggleDeleteButton();
+        updateDeleteButton();
       }
     });
   }

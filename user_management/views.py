@@ -802,47 +802,71 @@ class EditWorkCodeView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
-class SoftDeleteUserView(View):
+class DeleteUserView(View):
     def post(self, request):
         current_user = request.user
-        
         ids_param = request.GET.get('ids', '')
-        user_id = ids_param.split(',')[0] if ids_param else None
-
-        if not user_id:
+        user_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
+        
+        if not user_ids:
             return JsonResponse({"ok": False, "error": "No user selected."}, status=400)
         
         if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
             return org_access_denied()
 
-        target_user = User.objects.filter(id=user_id).first()
-        if not target_user:
-            return JsonResponse({"ok": False, "error": "User not found."}, status=404)
-        
-        if target_user == current_user:
-            return JsonResponse({"ok": False, "error": "You cannot delete your own account."}, status=400)
+        target_users = User.objects.filter(id__in=user_ids)
+        if not target_users.exists():
+            return JsonResponse({"ok": False, "error": "User(s) not found."}, status=404)
 
-        can_delete = False
+        users_to_delete = []
+        failed_emails = [] 
 
-        if current_user.is_superuser:
-            can_delete = True
+        for target_user in target_users:
+            can_delete = False
 
-        elif is_58_admin(current_user):
-            if hasattr(target_user, 'created_by') and target_user.created_by == current_user:
+            if target_user == current_user:
+                failed_emails.append(f"{target_user.email} (Self)")
+                continue
+
+            if current_user.is_superuser:
                 can_delete = True
-            else:
-                return JsonResponse({"ok": False, "error": "58 Admins can only delete users they created."}, status=403)
+            elif is_58_admin(current_user):
+                if hasattr(target_user, 'created_by') and target_user.created_by == current_user:
+                    can_delete = True
+                else:
+                    failed_emails.append(target_user.email)
+            elif is_org_admin(current_user):
+                target_org = target_user.organisation_data.first()
+                if target_org and has_org_access(current_user, target_org):
+                    can_delete = True
+                else:
+                    failed_emails.append(target_user.email)
 
-        elif is_org_admin(current_user):
-            target_org = target_user.organisation_data.first()
-            if target_org and has_org_access(current_user, target_org):
-                can_delete = True
-            else:
-                return JsonResponse({"ok": False, "error": "Org Admins can only delete users within their organization."}, status=403)
+            if can_delete:
+                users_to_delete.append(target_user)
 
-        if can_delete:
-            target_user.soft_delete(deleted_by=current_user)
-            messages.success(request, f'User "{target_user.email}" deleted successfully.')
+        if failed_emails:
+            emails_list = ", ".join(failed_emails)
+            
+            if is_58_admin(current_user):
+                error_prefix = "58 Admins can only delete users they created. Failed at: "
+            elif is_org_admin(current_user):
+                error_prefix = "Org Admins can only delete users within their organization. Failed at: "
+            else:
+                error_prefix = "Permission denied for: "
+                
+            return JsonResponse({
+                "ok": False, 
+                "error": f"{error_prefix}{emails_list}."
+            }, status=403)
+
+        if users_to_delete:
+            deleted_emails = []
+            for user in users_to_delete:
+                user.soft_delete(deleted_by=current_user)
+                deleted_emails.append(user.email)
+            
+            messages.success(request, f"Successfully deleted: {', '.join(deleted_emails)}")
             return JsonResponse({"ok": True})
-        
+                
         return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
