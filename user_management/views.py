@@ -883,9 +883,10 @@ class DeleteUserView(View):
 
         if users_to_delete:
             deleted_emails = []
-            for user in users_to_delete:
-                user.soft_delete(deleted_by=current_user)
-                deleted_emails.append(user.email)
+            with transaction.atomic():
+                for user in users_to_delete:
+                    user.soft_delete(deleted_by=current_user)
+                    deleted_emails.append(user.email)
             
             messages.success(request, f"Successfully deleted: {', '.join(deleted_emails)}")
             return JsonResponse({"ok": True})
