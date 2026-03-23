@@ -391,6 +391,7 @@
         if (data?.html) {
           tbody.innerHTML = data.html;
           updateAssignButtonState();
+          updateDeleteButton();
         }
       } catch (error) {
         if (error.name === 'AbortError') {
