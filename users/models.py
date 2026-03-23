@@ -101,7 +101,7 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
             models.Index(fields=['email']),
         ]
 
-    def __str___(self):
+    def __str__(self):
         return f"{self.email}"
     
     def soft_delete(self, deleted_by=None):
