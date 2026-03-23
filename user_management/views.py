@@ -820,9 +820,17 @@ class DeleteUserView(View):
             return org_access_denied()
 
         target_users = User.objects.filter(id__in=user_ids)
-        if not target_users.exists():
-            return JsonResponse({"ok": False, "error": "User(s) not found."}, status=404)
-
+        requested_ids = set(user_ids)
+        found_ids = set(target_users.values_list('id', flat=True))
+        missing_ids = requested_ids - found_ids
+        if missing_ids:
+            
+            missing_str = ", ".join(map(str, sorted(missing_ids)))
+            return JsonResponse({
+                "ok": False, 
+                "error": f"User(s) not found for ID(s): {missing_str}. Please refresh your list."
+            }, status=404)
+        
         users_to_delete = []
         failed_emails = [] 
 
