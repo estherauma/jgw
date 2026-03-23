@@ -462,6 +462,7 @@
 
     deleteBtn.addEventListener('click', function () {
       const selectedIds = getSelectedUserIds();
+      const count = selectedIds.length;
       
       if (!selectedIds.length) {
         alert('Select at least one user to delete.');
@@ -469,8 +470,8 @@
       }
 
       window.showDeleteConfirm({
-        title: 'Delete selected users?',
-        message: `Are you sure you want to delete ${selectedIds.length} users?`,
+        title: `Delete ${count === 1 ? 'a User' : 'Users'}`,
+        message: `Are you sure you want to delete the selected ${count} ${count === 1 ? 'user' : 'users'}?`,
         url: '/user-management/users/delete/?ids=' + selectedIds.join(','), 
         onSuccess: function () {
           window.location.reload();
