@@ -10,7 +10,9 @@
   function updateAssignButtonState() {
       const assignWorkGroupButton = document.querySelector('[data-users-workgroup-action]');
       const selectedIds = getSelectedUserIds();
-      assignWorkGroupButton.disabled = selectedIds.length === 0;
+      if (assignWorkGroupButton) {
+        assignWorkGroupButton.disabled = selectedIds.length === 0;
+      }
       const modal = document.getElementById('assign-users-workgroup-modal');
       if (modal) {
         const countLabel = modal.querySelector('[data-selected-users-count]');
