@@ -843,14 +843,18 @@ class DeleteUserView(View):
 
             if current_user.is_superuser:
                 can_delete = True
+                
             elif is_58_admin(current_user):
                 if hasattr(target_user, 'created_by') and target_user.created_by == current_user:
                     can_delete = True
                 else:
                     failed_emails.append(target_user.email)
+                    
             elif is_org_admin(current_user):
-                target_org = target_user.organisation_data.first()
-                if target_org and has_org_access(current_user, target_org):
+                allowed_org_ids = get_allowed_orgs(current_user).values_list("id", flat=True)
+                has_overlap = target_user.organisation_data.filter(id__in=allowed_org_ids).exists()
+                
+                if has_overlap:
                     can_delete = True
                 else:
                     failed_emails.append(target_user.email)
