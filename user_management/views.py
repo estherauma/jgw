@@ -832,7 +832,13 @@ class DeleteUserView(View):
             }, status=404)
         
         users_to_delete = []
-        failed_emails = [] 
+        failed_emails = []
+        
+        if current_user.id in user_ids:
+            return JsonResponse({
+                "ok": False, 
+                "error": "You cannot delete your own account. Please deselect yourself and try again."
+            }, status=400) 
         
         allowed_org_ids =[]
         if is_org_admin(current_user):
@@ -840,10 +846,6 @@ class DeleteUserView(View):
             
         for target_user in target_users:
             can_delete = False
-
-            if target_user == current_user:
-                failed_emails.append(f"{target_user.email} (Self)")
-                continue
 
             if current_user.is_superuser:
                 can_delete = True
