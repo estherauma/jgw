@@ -801,13 +801,19 @@ class EditWorkCodeView(View):
 
 
 class SoftDeleteUserView(View):
-    def post(self, request, user_id):
+    def post(self, request):
         current_user = request.user
+        
+        ids_param = request.GET.get('ids', '')
+        user_id = ids_param.split(',')[0] if ids_param else None
+
+        if not user_id:
+            return JsonResponse({"ok": False, "error": "No user selected."}, status=400)
         
         if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
             return org_access_denied()
 
-        target_user = User.objects.filter(id=user_id, access_type="dashboard").first()
+        target_user = User.objects.filter(id=user_id).first()
         if not target_user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
         

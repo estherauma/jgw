@@ -88,6 +88,7 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         help_text="User's dashboard customization preferences"
     )
     dashboard_preferences_version = models.IntegerField(default=1, help_text="Version of dashboard preferences schema")
+    is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL,
@@ -104,6 +105,7 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         return f"{self.email}"
     
     def soft_delete(self, deleted_by=None):
+        self.is_deleted = True
         self.deleted_at = timezone.now()
         self.deleted_by = deleted_by
         self.is_active = False
