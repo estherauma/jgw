@@ -855,7 +855,8 @@ class DeleteUserView(View):
                     failed_emails.append(target_user.email)
                     
             elif is_org_admin(current_user):
-                if target_user.organisation_data.filter(id__in=allowed_org_ids).exists():
+                user_org_ids = {org.id for org in target_user.organisation_data.all()}
+                if any(org_id in allowed_org_ids for org_id in user_org_ids):
                     can_delete = True
                 else:
                     failed_emails.append(target_user.email)
