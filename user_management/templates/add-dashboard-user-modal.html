@@ -83,7 +83,6 @@
                             <div class="text-danger small">{{ form.end_date.errors }}</div>
                         {% endif %}
                     </label>
-                    {% flag 'can_assign_user_role' %}
                     <label class="um-field form-group">
                         <span>Roles & Permissions (optional)</span>
                         <div class="um-checkbox-list um-checkbox-list-scroll">
@@ -94,7 +93,6 @@
                             <div class="text-danger small">{{ form.groups.errors }}</div>
                         {% endif %}
                     </label>
-                    {% endflag %}
                     <label class="um-field form-group">
                         <span>Organization (optional)</span>
                         <div class="um-checkbox-list um-checkbox-list-scroll">

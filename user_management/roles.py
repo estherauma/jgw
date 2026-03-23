@@ -18,7 +18,7 @@ DEFAULT_ROLES = [
 ]
 
 
-def ensure_default_roles(organisation):
+def add_default_org_roles(organisation):
     roles = []
     for role_def in DEFAULT_ROLES:
         role, _ = OrganisationRole.objects.get_or_create(

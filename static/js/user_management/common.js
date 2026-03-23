@@ -45,7 +45,7 @@
   window.getSelectedOrgData = getSelectedOrgData;
 
   function syncSelectedOrganization(formId, labelSelector) {
-    if (window.isOrgAdmin) {
+    if (window.isOrgAdminOrStaff) {
       return;
     }
     var form = document.getElementById(formId);

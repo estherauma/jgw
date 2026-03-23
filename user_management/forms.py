@@ -20,9 +20,8 @@ from .models import (
     OrganisationRolePermission,
     WorkGroup,
 )
-from .roles import ensure_default_roles
 from .flags import UM_FLAG_DEFS
-from .utils import get_country_code_choices, is_org_admin, validate_phone_number
+from .utils import get_country_code_choices, is_org_admin_or_staff, validate_phone_number
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -273,8 +272,7 @@ class AppUserForm(forms.ModelForm):
         work_groups_qs = kwargs.pop("work_groups_qs", None)
         organisation = kwargs.pop("organisation", None)
         super().__init__(*args, **kwargs)
-        if organisation:
-            ensure_default_roles(organisation)
+
         self.fields["email"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Email"}
         )
@@ -392,7 +390,7 @@ class OrganisationRoleForm(forms.ModelForm):
         )
         self.fields.pop("grants_dashboard_access", None)
         um_flags = UM_FLAG_DEFS
-        if self.current_user and is_org_admin(self.current_user):
+        if self.current_user and is_org_admin_or_staff(self.current_user):
             um_flags = [flag for flag in UM_FLAG_DEFS if flag.get("condition") == "org_admin"]
         um_flag_names = [flag["name"] for flag in um_flags]
         self.fields["permissions"].queryset = Flag.objects.filter(

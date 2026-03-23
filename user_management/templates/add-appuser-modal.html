@@ -29,7 +29,6 @@
                         Organisation: <span class="fw-bold" data-appuser-org-label>None selected</span>
                     </div>
                     {% endflag %}
-                    {% flag 'can_assign_user_role' %}
                     <label class="um-field form-group um-field-full">
                         <span>Role</span>
                         {{ form.role }}
@@ -39,7 +38,6 @@
                             <div class="text-danger small">{{ form.role.errors }}</div>
                         {% endif %}
                     </label>
-                    {% endflag %}
                     <label class="um-field form-group">
                         <span>Email (optional)</span>
                         {{ form.email }}
@@ -102,7 +100,6 @@
                             <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
-                    {% flag 'can_assign_user_workgroups' %}
                     <div class="um-field form-group">
                         <span>Departments (optional)</span>
                         <div class="um-checkbox-list um-checkbox-list-scroll" data-work-groups-container>
@@ -117,7 +114,6 @@
                             <div class="text-danger small">{{ form.work_groups.errors }}</div>
                         {% endif %}
                     </div>
-                    {% endflag %}
                 </div>
                 <div class="um-modal-footer modal-footer">
                     <button type="button" class="um-btn um-btn-gray" data-dismiss="modal">

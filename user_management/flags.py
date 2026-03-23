@@ -36,17 +36,17 @@ UM_FLAG_DEFS = [
     },
     {
         "name": "can_create_appuser",
-        "label": "Create app users",
+        "label": "Create users",
         "condition": "org_admin",
     },
     {
         "name": "can_edit_appuser",
-        "label": "Edit app users",
+        "label": "Edit users",
         "condition": "org_admin",
     },
     {
         "name": "can_delete_appuser",
-        "label": "Delete app users",
+        "label": "Delete users",
         "condition": "org_admin",
     },
     {
@@ -117,16 +117,6 @@ UM_FLAG_DEFS = [
     {
         "name": "can_invite_user",
         "label": "Invite users",
-        "condition": "org_admin",
-    },
-    {
-        "name": "can_assign_user_role",
-        "label": "Assign user roles",
-        "condition": "org_admin",
-    },
-    {
-        "name": "can_assign_user_workgroups",
-        "label": "Assign user work groups",
         "condition": "org_admin",
     },
     {

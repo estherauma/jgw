@@ -116,8 +116,12 @@
             window.isOrgAdmin = {{ is_org_admin|yesno:"true,false" }};
             window.is58Admin = {{ is_58_admin|yesno:"true,false" }};
             window.isSuperUser = {{ is_super_user|yesno:"true,false" }};
+            window.isOrgStaff = {{ is_org_staff|yesno:"true,false" }};
+            window.isOrgAdminOrStaff = {{ is_org_admin_or_staff|yesno:"true,false" }};
             if (window.is58Admin || window.isSuperUser) {
                 window.isOrgAdmin = false;
+                window.isOrgStaff = false;
+                window.isOrgAdminOrStaff = false;
             }
         </script>
         {% block scripts %}{% endblock scripts %}

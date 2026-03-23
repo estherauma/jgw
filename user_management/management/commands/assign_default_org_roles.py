@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from user_management.models import OrganisationRole, OrganisationRoleAssignment
-from user_management.roles import ensure_default_roles
+from user_management.roles import add_default_org_roles
 from users.models import User
 
 
@@ -16,7 +16,7 @@ class Command(BaseCommand):
             if len(orgs) != 1:
                 continue
             organisation = orgs[0]
-            ensure_default_roles(organisation)
+            add_default_org_roles(organisation)
             if OrganisationRoleAssignment.objects.filter(
                 user=user, organisation=organisation
             ).exists():
