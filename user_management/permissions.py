@@ -32,6 +32,7 @@ def user_has_role_flag(user, organisation, flag):
 
 def is_flag_active(request, flag_name, organisation=None, selected_org_id=None):
     flag = Flag.objects.filter(name=flag_name).first()
+
     if not flag:
         return False
     if flag.everyone:
@@ -40,16 +41,11 @@ def is_flag_active(request, flag_name, organisation=None, selected_org_id=None):
         return True
     if not request or request.user.is_anonymous:
         return False
+    if request.user.groups.filter(name="org_admin").exists():
+        return flag.is_active(request)
     if not organisation:
         organisation = resolve_current_org(request, selected_org_id=selected_org_id)
+
     if not organisation:
         return False
-    has_role = OrganisationRoleAssignment.objects.filter(
-        user=request.user,
-        organisation=organisation,
-    ).exists()
-    if has_role:
-        return user_has_role_flag(request.user, organisation, flag)
-    if flag.is_active(request):
-        return True
-    return False
+    return user_has_role_flag(request.user, organisation, flag)
