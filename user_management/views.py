@@ -56,7 +56,7 @@ def user_management(request):
     organizations = get_allowed_orgs(user).order_by("name")
 
     users = (
-        User.objects.filter(is_deleted = False)
+        User.objects.filter(is_deleted=False)
         .prefetch_related("organisation_data", "work_groups")
         .order_by("email")
         .distinct()
@@ -805,7 +805,7 @@ class EditWorkCodeView(View):
 class DeleteUserView(View):
     def post(self, request):
         current_user = request.user
-        ids_param = request.GET.get('ids', '')
+        ids_param = request.POST.get('ids', '')
         raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
         
         if not raw_ids:
@@ -817,7 +817,7 @@ class DeleteUserView(View):
             return JsonResponse({"ok": False, "error": "Invalid User ID(s) provided."}, status=400)
         
         if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
-            return org_access_denied()
+            return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
         target_users = list(User.objects.filter(id__in=user_ids).prefetch_related('organisation_data'))
         requested_ids = set(user_ids)
