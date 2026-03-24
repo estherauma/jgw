@@ -148,7 +148,7 @@ def search_users(request):
     query = request.GET.get("q", "").strip()
     selected_org_id = request.GET.get("selected_org_id")
     users = (
-        User.objects.filter(is_deleted = False)
+        User.objects.filter(is_deleted=False)
         .prefetch_related("organisation_data", "work_groups")
         .order_by("email")
         .distinct()
@@ -879,7 +879,7 @@ class DeleteUserView(View):
             if is_58_admin(current_user):
                 error_prefix = "58 Admins can only delete users they created. Failed at: "
             elif is_org_admin(current_user):
-                error_prefix = "Org Admins can only delete users within their organization. Failed at: "
+                error_prefix = "Org Admins can only delete users within their organisation. Failed at: "
             else:
                 error_prefix = "Permission denied for: "
                 

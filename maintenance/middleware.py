@@ -1,6 +1,9 @@
 import logging
 from django.shortcuts import render
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 import redis
 
 logger = logging.getLogger(__name__)
@@ -12,6 +15,12 @@ class MaintenanceModeMiddleware:
         logger.info("MaintenanceModeMiddleware initialized")
 
     def __call__(self, request):
+        if request.user.is_authenticated and not request.user.is_active:
+            user_email = request.user.email
+            logger.info(f"Logging out deactivated user: {user_email}")
+            logout(request) 
+            messages.error(request, f"The account '{user_email}' has been deactivated. Please contact an administrator.")
+            return redirect(settings.LOGIN_URL) 
         try:
 
             maintenance_mode = self.redis_client.get('MAINTENANCE_MODE')
