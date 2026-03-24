@@ -861,14 +861,16 @@ class DeleteUserView(View):
                 if hasattr(target_user, 'created_by') and target_user.created_by == current_user:
                     can_delete = True
                 else:
-                    failed_emails.append(target_user.email)
+                    identifier = target_user.email or f"ID {target_user.id}"
+                    failed_emails.append(str(identifier))
                     
             elif is_org_admin(current_user):
                 user_org_ids = {org.id for org in target_user.organisation_data.all()}
                 if allowed_org_ids.intersection(user_org_ids):
                     can_delete = True
                 else:
-                    failed_emails.append(target_user.email)
+                    identifier = target_user.email or f"ID {target_user.id}"
+                    failed_emails.append(str(identifier))
 
             if can_delete:
                 users_to_delete.append(target_user)
