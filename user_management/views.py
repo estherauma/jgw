@@ -893,9 +893,17 @@ class DeleteUserView(View):
             with transaction.atomic():
                 for user in users_to_delete:
                     user.soft_delete(deleted_by=current_user)
-                    deleted_emails.append(user.email)
-            
-            messages.success(request, f"Successfully deleted: {', '.join(deleted_emails)}")
+                    if user.email:
+                        deleted_emails.append(str(user.email))
+                        
+            email_string = ', '.join(filter(None, deleted_emails))
+                    
+            if email_string:
+                messages.success(request, f"Successfully deleted: {email_string}")
+            else:
+                count = len(users_to_delete)
+                messages.success(request, f"Successfully deleted {count} user(s).")
+                
             return JsonResponse({"ok": True})
                 
         return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
