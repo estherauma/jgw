@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 
+from preference.models import OrganisationData
 from user_management.models import OrganisationRole, OrganisationRoleAssignment
 from user_management.roles import add_default_org_roles
 from users.models import User
@@ -9,6 +10,8 @@ class Command(BaseCommand):
     help = "Assign default organisation roles for existing users."
 
     def handle(self, *args, **options):
+        for organisation in OrganisationData.objects.all().iterator():
+            add_default_org_roles(organisation)
         users = User.objects.prefetch_related("organisation_data", "groups")
         created = 0
         for user in users.iterator():
