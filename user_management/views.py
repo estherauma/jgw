@@ -869,7 +869,7 @@ class DeleteUserView(View):
                 can_delete = True
                 
             elif is_58_admin(current_user):
-                if hasattr(target_user, 'created_by') and target_user.created_by == current_user:
+                if getattr(target_user, 'created_by_id', None) == current_user.id:
                     can_delete = True
                 else:
                     identifier = target_user.email or f"ID {target_user.id}"
