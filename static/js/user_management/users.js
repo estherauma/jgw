@@ -480,7 +480,6 @@
         body: JSON.stringify({ ids: selectedIds.join(',') }),
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken')
           },
         onSuccess: function () {
           window.location.reload();
