@@ -7,8 +7,12 @@ from common.const.value_const import org_info_list
 
 def update_preferences_org_info_from_organisation():
     """
-    Update preference org_info based on organisation name matching with org_info_list.
+    Update preference org_info with the matching OrganisationData instance.
     Only processes preferences where is_missing_organisation_info_cleaned is False.
+
+    Resolution order:
+    1. If preference.org_code is set, look up OrganisationData by org_code and set org_info.
+    2. Otherwise, match by organisation name against org_info_list and set org_info from that.
     """
     kunfu_panda_logger = KunfuPandaLogger()
     update_count = 0
@@ -16,7 +20,6 @@ def update_preferences_org_info_from_organisation():
     with transaction.atomic():
         preferences_to_update = Preference.objects.filter(
             is_missing_organisation_info_cleaned=False,
-            organisation__isnull=False
         ).select_related('organisation')
 
         kunfu_panda_logger.info(
@@ -24,39 +27,55 @@ def update_preferences_org_info_from_organisation():
         )
 
         for preference in preferences_to_update:
-            org_name = preference.organisation.name.lower().strip()
-            
-            matching_org = next(
-                (org for org in org_info_list 
-                 if org["name"].lower().strip() == org_name),
-                None
-            )
+            org_data = None
+            source = None
 
-            if matching_org:
+            # 1. Prefer org_code if set: look up OrganisationData by code
+            if preference.org_code and preference.org_code.strip():
                 try:
                     org_data = OrganisationData.objects.get(
-                        org_code=matching_org["org_code"]
+                        org_code=preference.org_code.strip()
                     )
-                    
-                    preference.org_info = org_data
-                    preference.is_missing_organisation_info_cleaned = True
-                    preference.save()
-                    
-                    update_count += 1
-                    kunfu_panda_logger.info(
-                        f"Updated org_info for preference {preference.data_source_id} "
-                        f"with org_code {matching_org['org_code']}"
-                    )
+                    source = "org_code"
                 except OrganisationData.DoesNotExist:
                     kunfu_panda_logger.warning(
-                        f"No OrganisationData found for org_code: {matching_org['org_code']}"
+                        f"No OrganisationData found for org_code: {preference.org_code!r}"
                     )
-            else:
-                kunfu_panda_logger.warning(
-                    f"No matching organization found for name: {org_name}"
+
+            # 2. Fallback: match by organisation name via org_info_list
+            if org_data is None and preference.organisation:
+                org_name = preference.organisation.name.lower().strip()
+                matching_org = next(
+                    (org for org in org_info_list
+                     if org["name"].lower().strip() == org_name),
+                    None
                 )
-                preference.is_missing_organisation_info_cleaned = True
-                preference.save()
+                if matching_org:
+                    try:
+                        org_data = OrganisationData.objects.get(
+                            org_code=matching_org["org_code"]
+                        )
+                        source = "organisation_name"
+                    except OrganisationData.DoesNotExist:
+                        kunfu_panda_logger.warning(
+                            f"No OrganisationData found for org_code: {matching_org['org_code']}"
+                        )
+                else:
+                    org_data = OrganisationData.objects.get(org_code='ONS')
+                    kunfu_panda_logger.warning(
+                        f"No matching organization found for name: {org_name}"
+                    )
+
+            preference.org_info = org_data
+            preference.is_missing_organisation_info_cleaned = True
+            preference.save()
+
+            if org_data and source:
+                update_count += 1
+                kunfu_panda_logger.info(
+                    f"Updated org_info for preference {preference.data_source_id} "
+                    f"with org_code {org_data.org_code} (source: {source})"
+                )
 
     kunfu_panda_logger.info(f"Updated org_info for {update_count} preferences")
     return update_count
@@ -64,8 +83,13 @@ def update_preferences_org_info_from_organisation():
 
 def update_bigquery_homepage_event_org_info_from_organisation():
     """
-    Update bigquery homepage event org_info based on organisation name matching with org_info_list.
-    Only processes preferences where is_missing_organisation_info_cleaned is False.
+    Update bigquery homepage event org_info with the matching OrganisationData instance.
+    Only processes records where is_org_info_cleaned is False.
+
+    Resolution order:
+    1. If organisation_code is set, look up OrganisationData by org_code and set org_info.
+    2. Otherwise, match by organisation name against org_info_list and set org_info from that.
+    3. Otherwise, use OrganisationData with code ONS.
     """
     kunfu_panda_logger = KunfuPandaLogger()
     update_count = 0
@@ -81,39 +105,56 @@ def update_bigquery_homepage_event_org_info_from_organisation():
         )
 
         for bigquery_homepage_event in bigquery_homepage_event_to_update:
-            org_name = bigquery_homepage_event.organisation.name.lower().strip()
-            
-            matching_org = next(
-                (org for org in org_info_list 
-                 if org["name"].lower().strip() == org_name),
-                None
-            )
+            org_data = None
+            source = None
 
-            if matching_org:
+            # 1. Prefer organisation_code if set: look up OrganisationData by code
+            if bigquery_homepage_event.organisation_code and bigquery_homepage_event.organisation_code.strip():
                 try:
                     org_data = OrganisationData.objects.get(
-                        org_code=matching_org["org_code"]
+                        org_code=bigquery_homepage_event.organisation_code.strip()
                     )
-                    
-                    bigquery_homepage_event.org_info = org_data
-                    bigquery_homepage_event.is_org_info_cleaned = True
-                    bigquery_homepage_event.save()
-                    
-                    update_count += 1
-                    kunfu_panda_logger.info(
-                        f"Updated org_info for bigquery homepage event {bigquery_homepage_event.id} "
-                        f"with org_code {matching_org['org_code']}"
-                    )
+                    source = "organisation_code"
                 except OrganisationData.DoesNotExist:
                     kunfu_panda_logger.warning(
-                        f"No OrganisationData found for org_code: {matching_org['org_code']}"
+                        f"No OrganisationData found for org_code: {bigquery_homepage_event.organisation_code!r}"
                     )
-            else:
-                kunfu_panda_logger.warning(
-                    f"No matching organization found for name: {org_name}"
+
+            # 2. Fallback: match by organisation name via org_info_list
+            if org_data is None and bigquery_homepage_event.organisation:
+                org_name = bigquery_homepage_event.organisation.name.lower().strip()
+                matching_org = next(
+                    (org for org in org_info_list
+                     if org["name"].lower().strip() == org_name),
+                    None
                 )
-                bigquery_homepage_event.is_org_info_cleaned = True
-                bigquery_homepage_event.save()
+
+                if matching_org:
+                    try:
+                        org_data = OrganisationData.objects.get(
+                            org_code=matching_org["org_code"]
+                        )
+                        source = "organisation_name"
+                    except OrganisationData.DoesNotExist:
+                        kunfu_panda_logger.warning(
+                            f"No OrganisationData found for org_code: {matching_org['org_code']}"
+                        )
+                else:
+                    org_data = OrganisationData.objects.get(org_code='ONS')
+                    kunfu_panda_logger.warning(
+                        f"No matching organization found for name: {org_name}"
+                    )
+
+            bigquery_homepage_event.org_info = org_data
+            bigquery_homepage_event.is_org_info_cleaned = True
+            bigquery_homepage_event.save()
+
+            if org_data and source:
+                update_count += 1
+                kunfu_panda_logger.info(
+                    f"Updated org_info for bigquery homepage event {bigquery_homepage_event.id} "
+                    f"with org_code {org_data.org_code} (source: {source})"
+                )
 
     kunfu_panda_logger.info(f"Updated org_info for {update_count} bigquery homepage events")
     return update_count

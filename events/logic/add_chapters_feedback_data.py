@@ -20,6 +20,7 @@ from common.helpers.preference_helpers.country import (
     get_data_destination,
     get_data_origin,
 )
+from common.helpers.preference_helpers.organisation import get_organisation_data
 from events.logic.process_chapters import is_chapter_feedback_key
 from events.logic.update_events_data_with_org_info import update_chapters_feedback_org_info_from_organisation
 from events.models import (
@@ -68,7 +69,7 @@ def fetch_chapters_feedback_from_api_to_db():
     translate_and_clean_chapter_feedback_fields()
 
     update_myvoice_chapters_feedback()
-    update_chapters_feedback_org_info_from_organisation()
+    # update_chapters_feedback_org_info_from_organisation()
 
 
 feedback_non_required_fields = [
@@ -149,6 +150,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
     language = standard_fields_dict.get("language")
     organisation_sector = standard_fields_dict.get("organisationSector")
     organisation = standard_fields_dict.get("organisation")
+    org_code = standard_fields_dict.get("organisationCode")
     immigration_status = standard_fields_dict.get("immigrationStatus")
     factory_farm = standard_fields_dict.get("factoryFarm")
     api_created_at = standard_fields_dict.get("createdAt")
@@ -173,6 +175,7 @@ def add_chapter_feedback_to_db(chapter_feedback):
     destination_data = get_or_add_country_to_db(destination, source="destination")
     route_data = get_or_add_route_to_db(route)
     immigration_status_data = get_or_add_immigration_status_to_db(immigration_status)
+    org_info_data = get_organisation_data(org_code=org_code, organisation=organisation)
     for feedback_data in feedback_list:
         feedback_data_key = feedback_data.get("key")
 
@@ -201,6 +204,8 @@ def add_chapter_feedback_to_db(chapter_feedback):
             "organisation_sector": organisation_sector_data,
             "factory_farm": factory_farm_data,
             "organisation": organisation_data,
+            "org_code": org_code,
+            "org_info": org_info_data,
             "immigration_status": immigration_status_data,
             "documentId": documentId,
             "soft_deleted": standard_fields_dict.get("softDeleted", False),

@@ -201,6 +201,9 @@ class CreateOrganisationView(View):
             return org_access_denied()
         form = CreateOrganisationForm(request.POST)
         if form.is_valid():
+            organisation = form.save(commit=False)
+            organisation.created_by = request.user
+            organisation.updated_by = request.user
             organisation = form.save()
             add_default_org_roles(organisation)
             return JsonResponse({"ok": True, "org_id": organisation.id})
@@ -242,6 +245,7 @@ class CreateWorkCodeView(View):
                         existing_code.is_deleted = False
                         existing_code.deleted_at = None
                         existing_code.deleted_by = None
+                        existing_code.updated_by = request.user
                         existing_code.expiry_date = form.cleaned_data["expiry_date"]
                         existing_code.requires_login = form.cleaned_data["requires_login"]
                         existing_code.save()
@@ -250,6 +254,8 @@ class CreateWorkCodeView(View):
                     else:
                         work_code = form.save(commit=False)
                         work_code.organisation = organisation
+                        work_code.created_by = request.user
+                        work_code.updated_by = request.user
                         work_code.save()
                         msg = f'Work code "{work_code.code}" created successfully.'   
                     messages.success(request, msg)
@@ -278,6 +284,8 @@ class EditOrganisationView(View):
             )
         form = CreateOrganisationForm(request.POST, instance=organisation)
         if form.is_valid():
+            organisation = form.save(commit=False)
+            organisation.updated_by = request.user
             form.save()
             return JsonResponse({"ok": True})
 
@@ -314,6 +322,8 @@ class CreateWorkGroupView(View):
                 )
             work_group = form.save(commit=False)
             work_group.organisation = organisation
+            work_group.created_by = request.user
+            work_group.updated_by = request.user
             work_group.save()
             return JsonResponse(
                 {
@@ -351,6 +361,8 @@ class EditWorkGroupView(View):
                     {"ok": False, "errors": {"name": ["Work group already exists."]}},
                     status=400,
                 )
+            work_group = form.save(commit=False)
+            work_group.updated_by = request.user
             form.save()
             return JsonResponse({"ok": True})
 
@@ -386,6 +398,8 @@ class CreateAppUserView(View):
             try:
                 with transaction.atomic():
                     user = form.save(commit=False)
+                    user.created_by = request.user
+                    user.updated_by = request.user
                     password = form.cleaned_data.get("password")
                     role = form.cleaned_data.get("role")
 
@@ -418,6 +432,8 @@ class CreateDashboardUserView(View):
         )
         if form.is_valid():
             user = form.save(commit=False)
+            user.created_by = request.user
+            user.updated_by = request.user
             password = form.cleaned_data.get("password")
             if password and is_58_admin(request.user) and user.id != request.user.id:
                 return JsonResponse(
@@ -510,6 +526,7 @@ class EditDashboardUserView(View):
         )
         if form.is_valid():
             user = form.save(commit=False)
+            user.updated_by = request.user
             password = form.cleaned_data.get("password")
             if password:
                 user.set_password(password)
@@ -650,6 +667,7 @@ class EditAppUserView(View):
                     )
             if password:
                 user.set_password(password)
+            user.updated_by = request.user
             user.save()
             form.save_m2m()
             apply_role_to_user(user, organisation, role)
@@ -959,6 +977,8 @@ class EditWorkCodeView(View):
             )
         form = AddWorkCodeForm(request.POST, instance=work_code)
         if form.is_valid():
+            work_code = form.save(commit=False)
+            work_code.updated_by = request.user
             form.save()
             return JsonResponse(
                 {

@@ -76,6 +76,9 @@ function initUsersBySectorChart(sectorData, customContainerId, chartType) {
     ];
     const colors = sortedSectors.map((_, index) => colorPalette[index % colorPalette.length]);
     const reversedColors = [...colors].reverse();
+
+    const scrollbarWidth = showScrollbar ? 20 : 0;
+    const legendWidth = 80;
     
     let option = {};
     
@@ -155,7 +158,7 @@ function initUsersBySectorChart(sectorData, customContainerId, chartType) {
             },
             grid: {
                 left: '5%',
-                right: '5%',
+                right: scrollbarWidth + legendWidth,
                 bottom: '0%',
                 top: '5%',
                 containLabel: true
@@ -171,6 +174,10 @@ function initUsersBySectorChart(sectorData, customContainerId, chartType) {
                     width: 15,
                     show: showScrollbar,
                     realtime: true,
+                    showDetail: false,
+                    labelFormatter: function () {
+                        return '';
+                    },
                     textStyle: {
                         color: '#6c757d'
                     },
