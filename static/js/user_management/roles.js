@@ -16,7 +16,7 @@
     }
     var inputs = form.querySelectorAll('input[name="permissions"]');
     inputs.forEach(function (input) {
-      var value = parseInt(input.value, 10);
+      var value = Number(input.value);
       input.checked = permissionIds.indexOf(value) !== -1;
     });
   }
@@ -120,7 +120,7 @@
     window.showDeleteConfirm({
       title: 'Delete role',
       message: 'Delete "' + roleName + '"?',
-      warning: 'Users assigned to this role will lose its permissions.',
+      warning: 'This action is not reversible.',
       url: deleteUrl,
       onSuccess: function () {
         window.location.reload();

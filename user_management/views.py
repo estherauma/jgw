@@ -826,6 +826,14 @@ class DeleteOrganisationRoleView(View):
                 {"ok": False, "error": "System roles cannot be deleted."},
                 status=400,
             )
+        if role.assignments.exists():
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "Remove users from this role before deleting it.",
+                },
+                status=400,
+            )
         role.delete()
         return JsonResponse({"ok": True})
     

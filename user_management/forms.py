@@ -423,8 +423,7 @@ class OrganisationRoleForm(forms.ModelForm):
         role = super().save(commit=False)
         if self.organisation:
             role.organisation = self.organisation
-        if not role.is_system:
-            role.grants_dashboard_access = True
+        role.grants_dashboard_access = role.name != "Worker"
         if commit:
             role.save()
         permissions = self.cleaned_data.get("permissions", [])

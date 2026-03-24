@@ -279,7 +279,9 @@
 
     }
 
-    function renderRoles(roles, selectedRoleId, roleSelect) {
+    function renderRoles(roles, selectedRoleId) {
+      var roleSelect = form.querySelector('[name="role"]');
+
       if (!roleSelect || !Array.isArray(roles)) {
         return;
       }
@@ -314,8 +316,7 @@
           form.querySelector('[name="first_name"]').value = user.first_name || '';
           form.querySelector('[name="last_name"]').value = user.last_name || '';
           form.querySelector('[name="email"]').value = user.email || '';
-          var roleSelect = form.querySelector('[name="role"]');
-          renderRoles(data.roles, user.role_id, roleSelect);
+          renderRoles(data.roles, user.role_id);
           form.querySelector('[name="phone_number"]').value = user.phone_local || '';
           var countryField = form.querySelector('[name="phone_country_iso"]');
           if (countryField) {
