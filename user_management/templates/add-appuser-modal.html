@@ -32,7 +32,7 @@
                     <label class="um-field form-group um-field-full">
                         <span>Role</span>
                         {{ form.role }}
-                        <small class="um-helper">Administrators are users you want to access the dashboard.</small>
+                        <small class="um-helper">Workers will not have access to the dashboard.</small>
                         <div class="text-danger small" data-error-for="role"></div>
                         {% if form.role.errors %}
                             <div class="text-danger small">{{ form.role.errors }}</div>
