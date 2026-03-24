@@ -94,6 +94,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "core.middlewares.custom_csrf.CustomCSRFMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "users.middleware.UserStatusMiddleware",
     "maintenance.middleware.MaintenanceModeMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",

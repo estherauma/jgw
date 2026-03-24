@@ -812,7 +812,18 @@ class DeleteUserView(View):
             
         except (json.JSONDecodeError, AttributeError):
             ids_param = ''
-        raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
+            
+        if isinstance(ids_param, list):
+            raw_ids = [str(uid).strip() for uid in ids_param if str(uid).strip()]
+            
+        elif isinstance(ids_param, str):
+            raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
+            
+        else:
+            return JsonResponse(
+                {"ok": False, "error": "Invalid format for 'ids'. Expected string or list."},
+                status=400,
+            )
         
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "No user selected."}, status=400)
