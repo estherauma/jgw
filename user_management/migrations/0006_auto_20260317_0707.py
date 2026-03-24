@@ -17,10 +17,5 @@ class Migration(migrations.Migration):
             model_name='workgroup',
             name='created_by',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='user_management_workgroup_created', to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddField(
-            model_name='workgroup',
-            name='updated_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='user_management_workgroup_updated', to=settings.AUTH_USER_MODEL),
-        ),
+        )
     ]
