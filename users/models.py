@@ -107,13 +107,12 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
     def __str__(self):
         return f"{self.email}"
     
-    def soft_delete(self, deleted_by=None):
+    def soft_delete(self, deleted_by):
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.is_active = False
-        if deleted_by is not None:
-            self.deleted_by = deleted_by
-            self.updated_by = deleted_by
+        self.deleted_by = deleted_by
+        self.updated_by = deleted_by
         self.save()
 
 
