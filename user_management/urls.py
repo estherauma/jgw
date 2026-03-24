@@ -18,7 +18,7 @@ from .views import (
     EditWorkCodeView,
     DeleteWorkCodeView,
     DeleteUserView,
-    )
+)
 
 app_name = "user_management"
 

@@ -860,7 +860,7 @@ class DeleteUserView(View):
         
         allowed_org_ids = set()
         if is_org_admin(current_user):
-            allowed_org_ids = set(get_allowed_orgs(current_user).values_list("id", flat=True))
+            allowed_org_ids = set(current_user.organisation_data.values_list("id", flat=True))
             
         for target_user in target_users:
             can_delete = False

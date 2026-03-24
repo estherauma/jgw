@@ -173,9 +173,9 @@
         var response = await fetch(options.url, {
           method: options.method || 'POST',
           headers: {
+            ...(options.headers || {}),
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRFToken': csrfToken,
-            ...(options.headers || {}),
           },
           body: options.body || null,
         });
