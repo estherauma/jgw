@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
+from django.conf import settings
 from common.models import AuditFieldsMixin
 from django.db import models
 from dashboard.forms import OPERATORS
@@ -91,7 +92,8 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL, 
+        null=True, blank=True, on_delete=models.SET_NULL,
         related_name="deleted_users"
     )
 
