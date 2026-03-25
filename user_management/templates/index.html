@@ -1,7 +1,7 @@
 {% extends 'core/layouts/base.html' %} 
 {% load crispy_forms_tags %} 
 {% load static %}
-{% load waffle_tags %}
+{% load um_waffle_flags %}
 {% load i18n %}
 
 {% block title %} {% translate "userManagement" %} {% endblock title %}
@@ -59,6 +59,7 @@
             {% include "select-org.html" with options=organizations selected=selected_org_name selected_id=selected_org_id %}
             {% endflag %}
 
+            {% flag 'can_view_work_codes' %}
             <div class="um-card" data-org-dependent>
                 <div class="um-card-title um-navy">Work Codes</div>
                 <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm" data-org-workcode-list>
@@ -72,7 +73,7 @@
                                     <th>Work code</th>
                                     <th class="text-center">Requires authentication</th>
                                     <th class="text-center">Expiry Date</th>
-                                    <th class="text-center">Assigned work groups</th>
+                                    <th class="text-center">Assigned departments</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -95,6 +96,7 @@
                                     <td>
                                         <div class="um-action">
                                             <!-- <button class="um-btn um-btn-outline">Edit</button> -->
+                                            {% flag 'can_assign_work_code' %}
                                             <button
                                                 class="um-btn um-btn-outline"
                                                 type="button"
@@ -107,6 +109,7 @@
                                             >
                                                 Assign
                                             </button>
+                                            {% endflag %}
                                             {% flag 'can_delete_work_code' %}
                                             <button class="um-btn um-btn-outline-black um-navy"
                                             data-workcode-id="{{ code.id }}"
@@ -116,6 +119,7 @@
                                             </button>
                                             {% endflag %}
                                             <!-- Edit button -->
+                                            {% flag 'can_edit_work_code' %}
                                             <button
                                                 data-edit-code-btn
                                                 class="um-btn um-btn-outline"
@@ -131,6 +135,7 @@
                                                 data-workcode-org-id="{{ selected_org_id }}">
                                                 Edit
                                             </button>
+                                            {% endflag %}
                                                 
                                         </div>
                                     </td>
@@ -141,14 +146,15 @@
                     </div>
                 </div>
             </div>
-            {% if is_org_admin %}
+            {% endflag %}
+            {% flag 'can_view_work_groups' %}
             {% include "work-groups-card.html" %}
-            {% endif %}
-
+            {% endflag %}
+            {% flag 'can_view_organization_details' %}
             <div class="um-card um-navy" data-org-dependent>
                 <div class="um-row">
                     <div class="um-card-title">Organisation details</div>
-                    {% flag 'can_edit_organizations' %}
+                    {% flag 'can_edit_organization_details' %}
                     <div class="um-action">
                         <button class="um-btn um-btn-outline" data-toggle="modal" 
                         data-target="#edit-org-modal" data-org-id="{{ selected_org_id }}" 
@@ -163,9 +169,11 @@
                     <div>Organisation was created on: <span class="um-navy" data-org-detail="created_at" data-org-default="{{ org_details.created_at }}">{{ org_details.created_at }}</span></div>
                 </div>
             </div>
+            {% endflag %}
         </div>
 
         <div>
+            {% flag 'can_view_users' %}
             <div class="um-card um-navy">
                 <div class="um-row">
                     <div class="um-card-title">
@@ -189,6 +197,7 @@
                              {% endif %}
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="user-actions-dropdown">
                                 {% if selected_org_id %}
+                                {% flag 'can_assign_users_to_workgroups' %}
                                 <button
                                    class="dropdown-item um-dropdown-item"
                                     type="button"
@@ -197,8 +206,9 @@
                                     data-users-workgroup-action
                                     disabled
                                 >
-                                    Add to work group
+                                    Add to department
                                 </button>
+                                {% endflag %}
                                 {% endif %}
                             </div>
                         </div>
@@ -208,9 +218,11 @@
                         </button>
                         {% endif %}
                         {% if selected_org_id %}
+                        {% flag 'can_create_appuser' %}
                         <button class="um-btn um-navy" type="button" data-toggle="modal" data-target="#add-appuser-modal" data-org-dependent>
                             Add user
                         </button>
+                        {% endflag %}
                         {% endif %}
                     </div>
                 </div>
@@ -246,7 +258,7 @@
                                     <th>Organisation</th>
                                     {% endif %}
                                     {% if selected_org_id %}
-                                    <th>Work group</th>
+                                    <th>Department</th>
                                     {% endif %}
                                     <th></th>
                                 </tr>
@@ -258,9 +270,11 @@
                     </div>
                 </div>
             </div>
-
-            {% if not is_org_admin %}
-            {% include "work-groups-card.html" %}
+            {% endflag %}
+            {% if selected_org_id %}
+            {% flag 'can_view_roles' %}
+            {% include "roles-card.html" %}
+            {% endflag %}
             {% endif %}
         </div>
     </div>
@@ -272,13 +286,16 @@
 {% url 'user_management:create_app_user' as create_app_user_url %}
 {% url 'user_management:assign_work_code' as assign_work_code_url %}
 {% url 'user_management:assign_users_work_groups' as assign_users_work_groups_url %}
+{% url 'user_management:create_role' as create_role_url %}
 <!-- include create organisation modal -->
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% include 'add-workcode-modal.html' with action_type='edit' modal_title='Edit work code' submit_label='Save Changes' form=add_work_code_form %}
 {% include 'assign-workcode-modal.html' with action_type='assign' modal_title='Assign work code' submit_label='Assign' form_action=assign_work_code_url form=assign_work_code_form %}
-{% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add work group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
-{% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit work group' submit_label='Save changes' form_action='' form=work_group_form %}
+{% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add department' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
+{% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit department' submit_label='Save changes' form_action='' form=work_group_form %}
+{% include 'add-role-modal.html' with action_type='add' modal_title='Add role' submit_label='Save' form_action=create_role_url form=role_form %}
+{% include 'add-role-modal.html' with action_type='edit' modal_title='Edit role' submit_label='Save changes' form_action='' form=role_form %}
 {% url 'user_management:create_dashboard_user' as create_dashboard_user_url %}
 {% include 'add-dashboard-user-modal.html' with action_type='add' modal_title='Add admin user' submit_label='Save' form_action=create_dashboard_user_url form=dashboard_user_form %}
 {% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
@@ -295,6 +312,7 @@
 <script src="{% static 'js/user_management/common.js' %}"></script>
 <script src="{% static 'js/user_management/organization.js' %}"></script>
 <script src="{% static 'js/user_management/users.js' %}"></script>
+<script src="{% static 'js/user_management/roles.js' %}"></script>
 <script>
 // Set selected org id in hidden inputs in modals on page load
   (function () {

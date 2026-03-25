@@ -4,7 +4,6 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.db.models import Q
 from django.template.loader import render_to_string
-from django.contrib.auth.models import Group
 from django.views import View
 import phonenumbers
 from preference.models import OrganisationAccessCode, OrganisationData
@@ -14,13 +13,20 @@ from .forms import (
     AppUserForm,
     CreateOrganisationForm,
     DashboardUserForm,
+    OrganisationRoleForm,
     WorkCodeAssignForm,
     WorkGroupForm,
     UsersWorkGroupAssignForm,
 )
 from .decorators import group_required
-from .models import WorkGroup
-from .utils import is_58_admin, is_org_admin, is_super_or_58_admin
+from .models import (
+    OrganisationRole,
+    OrganisationRoleAssignment,
+    WorkGroup,
+)
+from .permissions import is_flag_active
+from .roles import add_default_org_roles, apply_role_to_user
+from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin
 from users.models import User
 
 
@@ -29,7 +35,7 @@ def get_allowed_orgs(user):
         return OrganisationData.objects.none()
     if is_super_or_58_admin(user):
         return OrganisationData.objects.all()
-    if is_org_admin(user):
+    if is_org_admin_or_staff(user):
         org = user.organisation_data.order_by("name").first()
         if not org:
             return OrganisationData.objects.none()
@@ -37,10 +43,14 @@ def get_allowed_orgs(user):
     return OrganisationData.objects.none()
 
 
-def has_org_access(user, organisation):
+def has_org_access(user, organisation, request=None, flag_name=None):
     if not organisation:
         return False
-    return get_allowed_orgs(user).filter(id=organisation.id).exists()
+    if not get_allowed_orgs(user).filter(id=organisation.id).exists():
+        return False
+    if flag_name and request and is_org_admin_or_staff(user):
+        return is_flag_active(request, flag_name, organisation=organisation)
+    return True
 
 
 def org_access_denied():
@@ -60,12 +70,13 @@ def user_management(request):
         .order_by("email")
         .distinct()
     )
-    if is_org_admin(user):
+    if is_org_admin_or_staff(user):
         users = users.filter(organisation_data__in=organizations)
 
     work_codes = []
     work_groups = WorkGroup.objects.none()
     assigned_work_codes = []
+    roles = OrganisationRole.objects.none()
 
     selected_org = None
     selected_org_id = None
@@ -78,7 +89,7 @@ def user_management(request):
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
 
-    if is_org_admin(user):
+    if is_org_admin_or_staff(user):
         selected_org = organizations.first()
         if selected_org:
             selected_org_id = str(selected_org.id)
@@ -99,6 +110,9 @@ def user_management(request):
             .filter(organisation=selected_org)
             .order_by("name")
         )
+        roles = OrganisationRole.objects.filter(organisation=selected_org).prefetch_related(
+            "role_permissions"
+        ).order_by("name")
         org_details = {
             "name": selected_org.name,
             "code": selected_org.org_code,
@@ -118,9 +132,11 @@ def user_management(request):
         "create_org_form": CreateOrganisationForm(),
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
-        "app_user_form": AppUserForm(work_groups_qs=work_groups),
+        "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
         "dashboard_user_form": DashboardUserForm(orgs_qs=organizations),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
+        "roles": roles,
+        "role_form": OrganisationRoleForm(organisation=selected_org, current_user=user),
     }
     return render(request, "index.html", context=context)
 
@@ -151,7 +167,7 @@ def search_users(request):
         .distinct()
     )
 
-    if is_org_admin(user):
+    if is_org_admin_or_staff(user):
         allowed_orgs = get_allowed_orgs(user)
         users = users.filter(organisation_data__in=allowed_orgs).distinct()
 
@@ -189,6 +205,7 @@ class CreateOrganisationView(View):
             organisation.created_by = request.user
             organisation.updated_by = request.user
             organisation = form.save()
+            add_default_org_roles(organisation)
             return JsonResponse({"ok": True, "org_id": organisation.id})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
@@ -286,7 +303,14 @@ class CreateWorkGroupView(View):
                 {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
                 status=400,
             )
-        if not has_org_access(request.user, organisation):
+        print("Organisation for new work group:", organisation)
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_workgroup",
+        ):
+            print("User does not have access to create work group in this organisation.")
             return org_access_denied()
         if form.is_valid():
             if WorkGroup.objects.filter(
@@ -319,7 +343,12 @@ class EditWorkGroupView(View):
                 {"ok": False, "error": "Work group not found."},
                 status=404,
             )
-        if not has_org_access(request.user, work_group.organisation):
+        if not has_org_access(
+            request.user,
+            work_group.organisation,
+            request=request,
+            flag_name="can_edit_workgroup",
+        ):
             return org_access_denied()
         
         form = WorkGroupForm(request.POST, instance=work_group)
@@ -352,11 +381,19 @@ class CreateAppUserView(View):
                 {"ok": False, "error": "Select an organisation first."},
                 status=400,
             )
-
-        if not has_org_access(request.user, organisation):
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_appuser",
+        ):
             return org_access_denied()
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
-        form = AppUserForm(request.POST, work_groups_qs=work_groups_qs)
+        form = AppUserForm(
+            request.POST,
+            work_groups_qs=work_groups_qs,
+            organisation=organisation,
+        )
         if form.is_valid():
             try:
                 with transaction.atomic():
@@ -364,24 +401,16 @@ class CreateAppUserView(View):
                     user.created_by = request.user
                     user.updated_by = request.user
                     password = form.cleaned_data.get("password")
-                    role_group = form.cleaned_data.get("role_group")
+                    role = form.cleaned_data.get("role")
 
                     if password:
                         user.set_password(password)
                     else:
                         user.set_unusable_password()
 
-                    user.access_type = "dashboard" if role_group.name == "org_admin" else "app"
-                    if role_group.name == "org_admin":
-                        user.is_active = True
                     user.save()
                     form.save_m2m()
-                    user.groups.add(role_group)
-                    if role_group.name == "org_admin":
-                        user_management_group, _ = Group.objects.get_or_create(
-                            name="user_management"
-                        )
-                        user.groups.add(user_management_group)
+                    apply_role_to_user(user, organisation, role)
                     user.organisation_data.add(organisation)
             except Exception as e:
                 return JsonResponse(
@@ -395,6 +424,8 @@ class CreateAppUserView(View):
 
 class CreateDashboardUserView(View):
     def post(self, request):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
         form = DashboardUserForm(
             request.POST,
             orgs_qs=get_allowed_orgs(request.user),
@@ -525,10 +556,18 @@ class EditAppUserView(View):
         organisation = user.organisation_data.filter(id__in=allowed_orgs).first()
         if not organisation:
             return org_access_denied()
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_edit_appuser",
+        ):
+            return org_access_denied()
 
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by(
             "name"
         )
+        roles_qs = OrganisationRole.objects.filter(organisation=organisation).order_by("name")
         phone_local = ""
         if user.phone_number:
             try:
@@ -536,7 +575,17 @@ class EditAppUserView(View):
                 phone_local = str(parsed.national_number)
             except phonenumbers.NumberParseException:
                 phone_local = user.phone_number
-        role_group = user.groups.filter(name__in=["org_admin", "worker"]).first()
+        role_assignment = OrganisationRoleAssignment.objects.filter(
+            user=user,
+            organisation=organisation,
+        ).select_related("role").first()
+        role_id = role_assignment.role_id if role_assignment else ""
+        if not role_id:
+            fallback_role = OrganisationRole.objects.filter(
+                organisation=organisation,
+                grants_dashboard_access=user.access_type == "dashboard",
+            ).order_by("name").first()
+            role_id = fallback_role.id if fallback_role else ""
         return JsonResponse(
             {
                 "ok": True,
@@ -552,11 +601,15 @@ class EditAppUserView(View):
                     "work_group_ids": list(
                         user.work_groups.values_list("id", flat=True)
                     ),
-                    "role_group_id": role_group.id if role_group else "",
+                    "role_id": role_id,
                 },
                 "work_groups": [
                     {"id": work_group.id, "name": work_group.name}
                     for work_group in work_groups_qs
+                ],
+                "roles": [
+                    {"id": role.id, "name": role.name}
+                    for role in roles_qs
                 ],
             }
         )
@@ -570,24 +623,35 @@ class EditAppUserView(View):
         organisation = user.organisation_data.filter(id__in=allowed_orgs).first()
         if not organisation:
             return org_access_denied()
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_edit_appuser",
+        ):
+            return org_access_denied()
 
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by(
             "name"
         )
-        form = AppUserForm(request.POST, instance=user, work_groups_qs=work_groups_qs)
+        form = AppUserForm(
+            request.POST,
+            instance=user,
+            work_groups_qs=work_groups_qs,
+            organisation=organisation,
+        )
         
         if form.is_valid():
             user = form.save(commit=False)
-            user.updated_by = request.user
-            role_group = form.cleaned_data.get("role_group")
-            if not role_group:
+            role = form.cleaned_data.get("role")
+            if not role:
                 return JsonResponse(
-                    {"ok": False, "errors": {"role_group": ["Role is required."]}},
+                    {"ok": False, "errors": {"role": ["Role is required."]}},
                     status=400,
                 )
             password = form.cleaned_data.get("password")
             if password:
-                is_worker = role_group.name == "worker"
+                is_worker = not role.grants_dashboard_access
                 is_self = user.id == request.user.id
                 if not (is_worker or is_self):
                     return JsonResponse(
@@ -595,7 +659,7 @@ class EditAppUserView(View):
                             "ok": False,
                             "errors": {
                                 "password": [
-                                    "You can only change passwords for workers or your own account."
+                                    "You can only change passwords for app users or your own account."
                                 ]
                             },
                         },
@@ -603,19 +667,10 @@ class EditAppUserView(View):
                     )
             if password:
                 user.set_password(password)
-            user.access_type = "dashboard" if role_group.name == "org_admin" else "app"
-            if role_group.name == "org_admin":
-                user.is_active = True
-                user_management_group, _ = Group.objects.get_or_create(
-                    name="user_management"
-                )
-            else:
-                user.is_active = False
+            user.updated_by = request.user
             user.save()
             form.save_m2m()
-            user.groups.set([role_group])
-            if role_group.name == "org_admin":
-                user.groups.add(user_management_group)
+            apply_role_to_user(user, organisation, role)
             return JsonResponse({"ok": True, "org_id": organisation.id})
         errors = {field: [e for e in errs] for field, errs in form.errors.items()}
         return JsonResponse({"ok": False, "errors": errors}, status=400)
@@ -633,7 +688,12 @@ class AssignWorkCodeView(View):
                 {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
                 status=400,
             )
-        if not has_org_access(request.user, organisation):
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_assign_work_code",
+        ):
             return org_access_denied()
         if not work_code_id:
             return JsonResponse(
@@ -671,6 +731,13 @@ class DeleteWorkGroupView(View):
         if not work_group:
             return JsonResponse({"ok": False, "error": "Work group not found."}, status=404)
         organisation = work_group.organisation
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_delete_workgroup",
+        ):
+            return org_access_denied()
         if work_group.users.exists():
             return JsonResponse(
                 {"ok": False, "error": "This work group cannot be deleted because it has assigned users. Remove users first."},
@@ -680,6 +747,113 @@ class DeleteWorkGroupView(View):
         work_group.delete()
         messages.success(request, f'Work group "{name}" deleted successfully.')
         return JsonResponse({"ok": True, "org_id": organisation.id})
+
+
+class CreateOrganisationRoleView(View):
+    def post(self, request):
+        org_id = request.POST.get("selected_org_id")
+        organisation = None
+        if org_id:
+            organisation = OrganisationData.objects.filter(id=org_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
+                status=400,
+            )
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_role",
+        ):
+            return org_access_denied()
+        form = OrganisationRoleForm(request.POST, organisation=organisation)
+        if form.is_valid():
+            role = form.save()
+            return JsonResponse({"ok": True, "role_id": role.id})
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class EditOrganisationRoleView(View):
+    def get(self, request, role_id):
+        role = OrganisationRole.objects.filter(
+            id=role_id, organisation__in=get_allowed_orgs(request.user)
+        ).first()
+        if not role:
+            return JsonResponse({"ok": False, "error": "Role not found."}, status=404)
+        if not has_org_access(
+            request.user,
+            role.organisation,
+            request=request,
+            flag_name="can_edit_role",
+        ):
+            return org_access_denied()
+        permission_ids = list(role.role_permissions.values_list("flag_id", flat=True))
+        return JsonResponse(
+            {
+                "ok": True,
+                "role": {
+                    "id": role.id,
+                    "name": role.name,
+                    "description": role.description,
+                    "grants_dashboard_access": role.grants_dashboard_access,
+                    "permission_ids": permission_ids,
+                    "is_system": role.is_system,
+                },
+            }
+        )
+
+    def post(self, request, role_id):
+        role = OrganisationRole.objects.filter(
+            id=role_id, organisation__in=get_allowed_orgs(request.user)
+        ).first()
+        if not role:
+            return JsonResponse({"ok": False, "error": "Role not found."}, status=404)
+        if not has_org_access(
+            request.user,
+            role.organisation,
+            request=request,
+            flag_name="can_edit_role",
+        ):
+            return org_access_denied()
+        form = OrganisationRoleForm(
+            request.POST, instance=role, organisation=role.organisation
+        )
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"ok": True, "role_id": role.id})
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class DeleteOrganisationRoleView(View):
+    def post(self, request, role_id):
+        role = OrganisationRole.objects.filter(
+            id=role_id, organisation__in=get_allowed_orgs(request.user)
+        ).first()
+        if not role:
+            return JsonResponse({"ok": False, "error": "Role not found."}, status=404)
+        if not has_org_access(
+            request.user,
+            role.organisation,
+            request=request,
+            flag_name="can_delete_role",
+        ):
+            return org_access_denied()
+        if role.is_system:
+            return JsonResponse(
+                {"ok": False, "error": "System roles cannot be deleted."},
+                status=400,
+            )
+        if role.assignments.exists():
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "Remove users from this role before deleting it.",
+                },
+                status=400,
+            )
+        role.delete()
+        return JsonResponse({"ok": True})
     
 class AssignUsersToWorkGroupsView(View):
     def post(self, request):
@@ -693,7 +867,12 @@ class AssignUsersToWorkGroupsView(View):
                 {"ok": False, "error": "Select an organisation first."},
                 status=400,
             )
-        if not has_org_access(request.user, organisation):
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_assign_users_to_workgroups",
+        ):
             return org_access_denied()
 
         user_ids = [
@@ -744,6 +923,13 @@ class DeleteWorkCodeView(View):
                 {"ok": False, "error": "Work code not found."},
                 status=404,
             )
+        if not has_org_access(
+            request.user,
+            work_code.organisation,
+            request=request,
+            flag_name="can_delete_work_code",
+        ):
+            return org_access_denied()
 
         if work_code.work_groups.exists():
             return JsonResponse(
@@ -772,7 +958,12 @@ class EditWorkCodeView(View):
                 {"ok": False, "error": "Select an organisation first."},
                 status=400,
             )
-        if not has_org_access(request.user, organisation):
+        if not has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_edit_work_code",
+        ):
             return org_access_denied()
         work_code = OrganisationAccessCode.objects.filter(
             id=work_code_id,

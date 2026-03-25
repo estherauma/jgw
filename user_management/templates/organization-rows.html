@@ -1,3 +1,4 @@
+{% load um_waffle_flags %}
 {% if organizations %}
     {% for org in organizations %}
     <tr data-org-row>
@@ -6,9 +7,11 @@
         <td>{{ org.org_code }}</td>
         <td>
             <div class="um-action">
+                {% flag 'can_edit_organizations' %}
                 <button class="um-btn um-btn-outline" data-edit-btn data-toggle="modal" data-target="#edit-org-modal" data-org-id="{{ org.id }}" data-org-name="{{ org.name }}" data-org-code="{{ org.org_code }}">
                     Edit
                 </button>
+                {% endflag %}
             </div>
         </td>
     </tr>

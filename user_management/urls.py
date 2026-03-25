@@ -9,7 +9,10 @@ from .views import (
     EditOrganisationView,
     CreateWorkCodeView,
     CreateWorkGroupView,
+    CreateOrganisationRoleView,
+    DeleteOrganisationRoleView,
     user_management,
+    EditOrganisationRoleView,
     EditWorkGroupView,
     EditAppUserView,
     search_organisations,
@@ -39,4 +42,7 @@ urlpatterns = [
     path('work-groups/<int:work_group_id>/delete/', DeleteWorkGroupView.as_view(), name="delete_work_group"),
     path('work-codes/<int:work_code_id>/edit/', EditWorkCodeView.as_view(), name="edit_work_code"),
     path('work-codes/<int:work_code_id>/delete/', DeleteWorkCodeView.as_view(), name="delete_work_code"),
+    path('roles/create/', CreateOrganisationRoleView.as_view(), name="create_role"),
+    path('roles/<int:role_id>/edit/', EditOrganisationRoleView.as_view(), name="edit_role"),
+    path('roles/<int:role_id>/delete/', DeleteOrganisationRoleView.as_view(), name="delete_role"),
 ]

@@ -1,3 +1,4 @@
+{% load um_waffle_flags %}
 <div class="modal fade um-modal um-modal-lg" id="{{ action_type }}-dashboard-user-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-dashboard-user-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -48,6 +49,7 @@
                             <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
+                    {% flag 'can_edit_user_password' %}
                     <label class="um-field form-group">
                         <span>Password (optional)</span>
                         {{ form.password }}
@@ -64,6 +66,7 @@
                             <div class="text-danger small">{{ form.password_confirm.errors }}</div>
                         {% endif %}
                     </label>
+                    {% endflag %}
                     <label class="um-field form-group">
                         <span>Start date (optional)</span>
                         {{ form.start_date }}

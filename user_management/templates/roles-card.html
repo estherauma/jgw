@@ -1,0 +1,76 @@
+{% load um_waffle_flags %}
+<div class="um-card um-navy" data-org-dependent>
+    <div class="um-row">
+        <div class="um-card-title um-navy">Roles</div>
+        <div class="um-action">
+            {% flag 'can_create_role' %}
+            <button class="um-btn" type="button" data-toggle="modal" data-target="#add-role-modal">
+                Add role
+            </button>
+            {% endflag %}
+        </div>
+    </div>
+    <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm">
+        <div class="um-scrollbar">
+            <div class="um-scrollbar-thumb"></div>
+        </div>
+        <div class="um-table-scroll">
+            <table class="um-table um-navy">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th class="text-center">Permissions</th>
+                        <th class="text-center">Dashboard access</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if roles %}
+                        {% for role in roles %}
+                        <tr data-role-row data-role-id="{{ role.id }}">
+                            <td>{{ role.name }}</td>
+                            <td class="text-center">{{ role.role_permissions.count }}</td>
+                            <td class="text-center">{% if role.grants_dashboard_access %}Yes{% else %}No{% endif %}</td>
+                            <td>
+                                <div class="um-action">
+                                    {% if not role.is_system %}
+                                    {% flag 'can_edit_role' %}
+                                    <button
+                                        class="um-btn um-btn-outline"
+                                        type="button"
+                                        data-toggle="modal"
+                                        data-target="#edit-role-modal"
+                                        data-role-edit
+                                        data-role-id="{{ role.id }}"
+                                    >
+                                        Edit
+                                    </button>
+                                    {% endflag %}
+                                    {% endif %}
+                                    {% if not role.is_system %}
+                                    {% flag 'can_delete_role' %}
+                                    <button
+                                        class="um-btn um-btn-outline-black um-navy"
+                                        type="button"
+                                        data-role-delete
+                                        data-role-id="{{ role.id }}"
+                                        data-role-name="{{ role.name }}"
+                                    >
+                                        Delete
+                                    </button>
+                                    {% endflag %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4">No roles yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

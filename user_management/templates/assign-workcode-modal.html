@@ -1,4 +1,4 @@
-{% load waffle_tags %}
+{% load um_waffle_flags %}
 <div class="modal fade" id="{{ action_type }}-workcode-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-workcode-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -30,7 +30,7 @@
                     </div>
                     {% if form.work_groups and form.work_groups.field.queryset %}
                     <div class="um-field form-group">
-                        <span>Work groups</span>
+                        <span>Departments</span>
                         <div class="um-checkbox-list um-checkbox-list-scroll">
                             {{ form.work_groups }}
                         </div>
@@ -40,7 +40,7 @@
                         {% endif %}
                     </div>
                     {% else %}
-                    <div class="text-muted">No work groups available for this organisation.</div>
+                    <div class="text-muted">No departments available for this organisation.</div>
                     {% endif %}
                 </div>
                 <div class="um-modal-footer modal-footer">
