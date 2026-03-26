@@ -1,3 +1,5 @@
+{% load um_waffle_flags %}
+{% flag 'can_select_organization' %}
 <div class="um-card um-navy mb-2">
   <div class="um-card-title">Selected organisation</div>
   <div class="um-row">
@@ -50,6 +52,7 @@
       >
         <i class="bi bi-x-circle"></i>
       </button>
+      {% flag 'can_create_work_code' %}
       <button
         class="um-btn"
         type="button"
@@ -59,6 +62,7 @@
       >
         Create work code
       </button>
+      {% endflag %}
     </div>
   </div>
   <div class="um-navy mt-2 mb-3">
@@ -270,3 +274,4 @@
   window.addEventListener('load', initOrgDropdown);
 })();
 </script>
+{% endflag %}

@@ -47,8 +47,6 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from preference.dashboard_config import CHART_DEFINITIONS, get_default_chart_settings
 from preference.models import DashboardPreferences, ChartSettings
-from waffle import flag_is_active
-from waffle.models import Flag
 import logging
 
 @login_required
@@ -1410,5 +1408,4 @@ def filter_new_users_by_month(request):
             {'status': 'error', 'message': 'Unable to fetch data for the selected range'},
             status=500
         )
-
 

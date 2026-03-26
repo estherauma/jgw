@@ -91,7 +91,7 @@ class PreferenceTabularAdminDisplay(ExportActionModelAdmin, admin.ModelAdmin):
         "is_missing_accesscode_cleaned",
         "immigration_status",
     ]
-
+    ordering = ["-api_created_at"]
     def get_translated_name(self, obj):
         return obj.gender.translated_name if obj.gender else None
 

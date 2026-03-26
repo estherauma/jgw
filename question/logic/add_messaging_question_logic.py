@@ -307,7 +307,7 @@ def add_messaging_question_v3_to_db(data):
 
         if data.get('locale'):
             origin = get_or_add_country_to_db(data.get('locale'), source="origin")
-            standard_data['origin'] = originpy
+            standard_data['origin'] = origin
 
         organisation = data.get('organisation')
         organisation = get_or_add_organisation_to_db(organisation)

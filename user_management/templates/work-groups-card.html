@@ -1,19 +1,22 @@
+{% load um_waffle_flags %}
 <div class="um-card" data-org-dependent>
     <div class="um-row">
-        <div class="um-card-title um-navy">Work Groups</div>
+        <div class="um-card-title um-navy">Departments</div>
+        {% flag 'can_create_workgroup' %}
         <button
             class="um-btn um-navy"
             type="button"
             data-toggle="modal"
             data-target="#add-workgroup-modal"
         >
-            Create work group
+            Create department
         </button>
+        {% endflag %}
     </div>
     <table class="um-table um-navy">
         <thead>
             <tr>
-                <th>Work group</th>
+                <th>Name</th>
                 <th>Work codes</th>
                 <th></th>
             </tr>
@@ -31,6 +34,7 @@
                 </td>
                 <td>
                     <div class="um-action">
+                        {% flag 'can_edit_workgroup' %}
                         <button class="um-btn um-btn-outline" data-toggle="modal" 
                         data-target="#edit-workgroup-modal"
                         data-edit-workgroup-btn
@@ -38,12 +42,15 @@
                         data-workgroup-name="{{ group.name }}">
                             Edit
                         </button>
+                        {% endflag %}
+                        {% flag 'can_delete_workgroup' %}
                         <button class="um-btn um-btn-outline-black um-navy"
                         data-workgroup-id="{{ group.id }}" 
                         data-workgroup-name="{{ group.name }}"
                         data-delete-workgroup-btn>
                             Delete
                         </button>
+                        {% endflag %}
                     </div>
                 </td>
             </tr>

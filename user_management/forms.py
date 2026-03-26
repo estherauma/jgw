@@ -1,7 +1,5 @@
 from django import forms
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
-
 import phonenumbers
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -15,8 +13,15 @@ from preference.models import (
 )
 from dashboard.models import Scheme
 from users.models import User
-from .models import WorkGroup
-from .utils import get_country_code_choices, validate_phone_number
+from waffle.models import Flag
+
+from .models import (
+    OrganisationRole,
+    OrganisationRolePermission,
+    WorkGroup,
+)
+from .flags import UM_FLAG_DEFS
+from .utils import get_country_code_choices, is_org_admin_or_staff, validate_phone_number
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -172,7 +177,7 @@ class DashboardUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         orgs_qs = kwargs.pop("orgs_qs", None)
         super().__init__(*args, **kwargs)
-        groups_qs = Group.objects.exclude(name="worker").order_by("name")
+        groups_qs = Group.objects.exclude(name__in=["worker", "org_staff"]).order_by("name")
         self.fields["groups"].queryset = groups_qs
         self.fields["email"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Email"}
@@ -247,10 +252,7 @@ class DashboardUserForm(forms.ModelForm):
 
 
 class AppUserForm(forms.ModelForm):
-    role_group = forms.ModelChoiceField(
-        queryset=Group.objects.none(),
-        required=True,
-    )
+    role = forms.ModelChoiceField(queryset=OrganisationRole.objects.none(), required=True)
     password = forms.CharField(widget=forms.PasswordInput, required=False)
     password_confirm = forms.CharField(widget=forms.PasswordInput, required=False)
     phone_country_iso = forms.ChoiceField(required=False)
@@ -268,13 +270,9 @@ class AppUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         work_groups_qs = kwargs.pop("work_groups_qs", None)
+        organisation = kwargs.pop("organisation", None)
         super().__init__(*args, **kwargs)
-        role_names = ["org_admin", "worker"]
-        for role_name in role_names:
-            Group.objects.get_or_create(name=role_name)
-        self.fields["role_group"].label_from_instance = (
-            lambda group: "Administrator" if group.name == "org_admin" else "Worker"
-        )
+
         self.fields["email"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Email"}
         )
@@ -299,14 +297,15 @@ class AppUserForm(forms.ModelForm):
         self.fields["password_confirm"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Confirm password"}
         )
-        self.fields["role_group"].widget = forms.Select(
+        self.fields["role"].widget = forms.Select(
             attrs={
                 "class": "form-control um-input",
             }
         )
-        self.fields["role_group"].queryset = Group.objects.filter(
-            name__in=role_names
-        ).order_by("name")
+        if organisation:
+            self.fields["role"].queryset = OrganisationRole.objects.filter(
+                organisation=organisation
+            ).order_by("name")
 
         if work_groups_qs is not None:
             self.fields["work_groups"].queryset = work_groups_qs
@@ -323,7 +322,7 @@ class AppUserForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        role = cleaned.get("role_group")
+        role = cleaned.get("role")
         phone_number = cleaned.get("phone_number", "") or ""
         phone_country_iso = cleaned.get("phone_country_iso", "") or ""
         email = (cleaned.get("email") or "").strip()
@@ -332,13 +331,13 @@ class AppUserForm(forms.ModelForm):
         if password or password_confirm:
             if password != password_confirm:
                 self.add_error("password_confirm", "Passwords do not match.")
-        if role and role.name == "worker" and not email and not phone_number:
+        if role and not role.grants_dashboard_access and not email and not phone_number:
             self.add_error(
                 "email",
-                "Provide an email or phone number for workers.",
+                "Provide an email or phone number for app users.",
             )
-        if role and role.name == "org_admin" and not email:
-            self.add_error("email", "Email is required for org admins.")
+        if role and role.grants_dashboard_access and not email:
+            self.add_error("email", "Email is required for dashboard users.")
         if phone_number and not phone_country_iso:
             self.add_error("phone_country_iso", "Select a country code.")
             return cleaned
@@ -365,6 +364,85 @@ class AppUserForm(forms.ModelForm):
                     "Phone number already exists for the selected country.",
                 )
         return cleaned
+
+
+class OrganisationRoleForm(forms.ModelForm):
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Flag.objects.none(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple(),
+    )
+
+    class Meta:
+        model = OrganisationRole
+        fields = ["name", "description", "grants_dashboard_access"]
+
+    def __init__(self, *args, **kwargs):
+        self.organisation = kwargs.pop("organisation", None)
+        self.current_user = kwargs.pop("current_user", None)
+        super().__init__(*args, **kwargs)
+        flag_labels = {flag["name"]: flag.get("label", flag["name"]) for flag in UM_FLAG_DEFS}
+        self.fields["name"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Role name"}
+        )
+        self.fields["description"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Role description"}
+        )
+        self.fields.pop("grants_dashboard_access", None)
+        um_flags = UM_FLAG_DEFS
+        if self.current_user and is_org_admin_or_staff(self.current_user):
+            um_flags = [flag for flag in UM_FLAG_DEFS if flag.get("condition") == "org_admin"]
+        um_flag_names = [flag["name"] for flag in um_flags]
+        self.fields["permissions"].queryset = Flag.objects.filter(
+            name__in=um_flag_names
+        ).order_by("name")
+        self.fields["permissions"].label_from_instance = lambda flag: flag_labels.get(
+            flag.name, flag.name
+        )
+        if self.instance and self.instance.pk:
+            selected = OrganisationRolePermission.objects.filter(
+                role=self.instance
+            ).values_list("flag_id", flat=True)
+            self.fields["permissions"].initial = list(selected)
+
+    def clean_name(self):
+        name = (self.cleaned_data.get("name") or "").strip()
+        if not name:
+            raise forms.ValidationError("Role name is required.")
+        if self.organisation:
+            qs = OrganisationRole.objects.filter(
+                organisation=self.organisation, name__iexact=name
+            )
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError("Role name already exists.")
+        return name
+
+    def save(self, commit=True):
+        role = super().save(commit=False)
+        if self.organisation:
+            role.organisation = self.organisation
+        role.grants_dashboard_access = role.name != "Worker"
+        if commit:
+            role.save()
+        permissions = self.cleaned_data.get("permissions", [])
+        OrganisationRolePermission.objects.filter(role=role).exclude(
+            flag__in=permissions
+        ).delete()
+        existing_flags = set(
+            OrganisationRolePermission.objects.filter(role=role).values_list(
+                "flag_id", flat=True
+            )
+        )
+        new_permissions = [
+            OrganisationRolePermission(role=role, flag=flag)
+            for flag in permissions
+            if flag.id not in existing_flags
+        ]
+        if new_permissions:
+            OrganisationRolePermission.objects.bulk_create(new_permissions)
+        return role
 
 
 class WorkCodeAssignForm(forms.Form):

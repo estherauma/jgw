@@ -1,3 +1,6 @@
+import phonenumbers
+import pycountry
+
 def is_super_user(user):
     return not user.is_anonymous and user.is_superuser
 
@@ -11,6 +14,11 @@ def is_org_admin(user):
         return False
     return is_in_group(user, "org_admin")
 
+def is_org_staff(user):
+    if is_58_admin(user) or is_super_user(user) or is_org_admin(user):
+        return False
+    return is_in_group(user, "org_staff")
+
 
 def is_58_admin(user):
     if is_super_user(user):
@@ -20,8 +28,9 @@ def is_58_admin(user):
 
 def is_super_or_58_admin(user):
     return is_super_user(user) or is_58_admin(user)
-import phonenumbers
-import pycountry
+
+def is_org_admin_or_staff(user):
+    return is_org_admin(user) or is_org_staff(user)
 
 COUNTRY_CODE_CHOICES = None
 
