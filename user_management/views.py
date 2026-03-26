@@ -811,20 +811,13 @@ class DeleteUserView(View):
             ids_param = data.get('ids', '')
             
         except (json.JSONDecodeError, AttributeError):
-            ids_param = ''
-            
-        if isinstance(ids_param, list):
-            raw_ids = [str(uid).strip() for uid in ids_param if str(uid).strip()]
-            
-        elif isinstance(ids_param, str):
-            raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
-            
-        else:
             return JsonResponse(
-                {"ok": False, "error": "Invalid format for 'ids'. Expected string or list."},
+                {"ok": False, "error": "Invalid JSON data."},
                 status=400,
             )
-        
+              
+        raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
+            
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "No user selected."}, status=400)
         
@@ -855,12 +848,8 @@ class DeleteUserView(View):
         if current_user.id in user_ids:
             return JsonResponse({
                 "ok": False, 
-                "error": "You cannot delete your own account. Please deselect yourself and try again."
+                "error": "You cannot delete your own account. Please deselect your account and try again."
             }, status=400) 
-        
-        allowed_org_ids = set()
-        if is_org_admin(current_user):
-            allowed_org_ids = set(current_user.organisation_data.values_list("id", flat=True))
             
         for target_user in target_users:
             can_delete = False
@@ -876,8 +865,8 @@ class DeleteUserView(View):
                     failed_emails.append(str(identifier))
                     
             elif is_org_admin(current_user):
-                user_org_ids = {org.id for org in target_user.organisation_data.all()}
-                if allowed_org_ids.intersection(user_org_ids):
+                target_org = target_user.organisation_data.first()
+                if target_org and has_org_access(current_user, target_org):
                     can_delete = True
                 else:
                     identifier = target_user.email or f"ID {target_user.id}"
