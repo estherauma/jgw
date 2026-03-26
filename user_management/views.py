@@ -1008,41 +1008,25 @@ class DeleteUserView(View):
             )
               
         raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
-            
-        if not raw_ids:
-            return JsonResponse({"ok": False, "error": "No user selected."}, status=400)
         
-        try:
-            user_ids = [int(uid) for uid in raw_ids]
-            
-        except ValueError:
-            return JsonResponse({"ok": False, "error": "Invalid User ID(s) provided."}, status=400)
+        if not raw_ids:
+            return JsonResponse({"ok": False, "error": "No User selected."}, status=400)
         
         if not (is_super_or_58_admin(current_user) or is_org_admin_or_staff(current_user)):
             return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
-        target_users = list(User.objects.filter(id__in=user_ids).prefetch_related('organisation_data'))
-        requested_ids = set(user_ids)
-        found_ids = {u.id for u in target_users}
-        missing_ids = requested_ids - found_ids
-        
-        if missing_ids:
-            missing_str = ", ".join(map(str, sorted(missing_ids)))
-            return JsonResponse({
-                "ok": False, 
-                "error": f"User(s) not found for ID(s): {missing_str}. Please refresh your list."
-            }, status=404)
+        target_users = list(User.objects.filter(id__in=raw_ids).prefetch_related('organisation_data'))
         
         users_to_delete = []
         failed_emails = []
-        
-        if current_user.id in user_ids:
-            return JsonResponse({
-                "ok": False, 
-                "error": "You cannot delete your own account. Please deselect your account and try again."
-            }, status=400) 
             
         for target_user in target_users:
+            if target_user.id == current_user.id:
+                continue
+            
+            if not current_user.has_perm('user_management.can_delete_appuser'):
+                continue
+            
             can_delete = False
 
             if current_user.is_superuser:
