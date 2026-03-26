@@ -1,4 +1,4 @@
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from events.filters import generic_chapters_opened_filtered_queryset
 
 from events.models import ChaptersOpened
@@ -58,27 +58,23 @@ def get_chapters_opened_data(**filters):
         queryset=ChaptersOpened.objects.exclude(device_id__isnull=True), **filters
     )
 
+    chapters_opened_with_labels_queryset = chapters_opened_queryset.annotate(
+        chapter_text=F("chapter__chapter_text"),
+        origin_text=F("chapter__origin__name"),
+        destination_text=F("chapter__destination__name"),
+        number_key=F("chapter__number_key"),
+        immigration_status_chapter_text=F("immigration_status_chapter_title__chapter_title"),
+    ).filter(Q(immigration_status_chapter_text__isnull=False) | Q(chapter_text__isnull=False))
+
     chapters_opened_all = (
-        chapters_opened_queryset.annotate(
-            chapter_text=F("chapter__chapter_text"),
-            origin_text=F("chapter__origin__name"),
-            destination_text=F("chapter__destination__name"),
-            number_key=F("chapter__number_key"),
-            immigration_status_chapter_text=F("immigration_status_chapter_title__chapter_title"),
-        )
+        chapters_opened_with_labels_queryset
         .values("chapter_text", "number_key", "immigration_status_chapter_text", "origin_text", "destination_text")
         .annotate(count=Count("event_name"))
         .order_by("-count")
     )
 
     chapters_opened_unique = (
-        chapters_opened_queryset.annotate(
-            chapter_text=F("chapter__chapter_text"),
-            origin_text=F("chapter__origin__name"),
-            destination_text=F("chapter__destination__name"),
-            number_key=F("chapter__number_key"),
-            immigration_status_chapter_text=F("immigration_status_chapter_title__chapter_title"),
-        )
+        chapters_opened_with_labels_queryset
         .values("chapter_text", "number_key", "immigration_status_chapter_text", "origin_text", "destination_text")
         .annotate(count=Count("device_id", distinct=True))
         .order_by("-count")
