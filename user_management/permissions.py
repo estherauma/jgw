@@ -41,8 +41,8 @@ def is_flag_active(request, flag_name, organisation=None, selected_org_id=None):
         return True
     if not request or request.user.is_anonymous:
         return False
-    if request.user.groups.filter(name="org_admin").exists():
-        return flag.is_active(request)
+    if flag.is_active(request):
+        return True
     if not organisation:
         organisation = resolve_current_org(request, selected_org_id=selected_org_id)
 

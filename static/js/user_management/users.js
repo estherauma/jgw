@@ -512,6 +512,10 @@
     const form = document.getElementById('assign-users-workgroup-form');
     const errorBox = document.getElementById('assign-users-workgroup-form-error');
 
+    if (!modal || !form) {
+      return;
+    }
+
     $('[data-target="#assign-users-workgroup-modal"]').on('click', function () {
       if (window.clearFormErrors) {
         window.clearFormErrors(form, errorBox);

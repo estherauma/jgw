@@ -1024,9 +1024,6 @@ class DeleteUserView(View):
             if target_user.id == current_user.id:
                 continue
             
-            if not current_user.has_perm('user_management.can_delete_appuser'):
-                continue
-            
             can_delete = False
 
             if current_user.is_superuser:
