@@ -516,19 +516,20 @@ def set_password(request, token):
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         user_id, invite_id = payload.get("user_id"), payload.get("invite_id")
 
-        if invite_id is None:
+        if invite_id is None and user_id is None:
             messages.error(request, _("setPasswordViewInvalidTokenError"))
             return render(request, "users/set_password.html", {"form": form})
-        invite = UserInvitations.objects.filter(id=invite_id).first()
-        if not invite:
-            messages.error(request, _("setPasswordViewInvalidTokenError"))
-            return render(request, "users/set_password.html", {"form": form})
-        if invite.status == "ACCEPTED":
-            messages.error(request, _("setPasswordViewInvalidTokenError"))
-            return render(request, "users/set_password.html", {"form": form})
-        if user_id and not User.objects.filter(id=user_id, email__iexact=invite.email).exists():
-            messages.error(request, _("setPasswordViewInvalidTokenError"))
-            return render(request, "users/set_password.html", {"form": form})
+        if invite_id is not None:
+            invite = UserInvitations.objects.filter(id=invite_id).first()
+            if not invite:
+                messages.error(request, _("setPasswordViewInvalidTokenError"))
+                return render(request, "users/set_password.html", {"form": form})
+            if invite.status == "ACCEPTED":
+                messages.error(request, _("setPasswordViewInvalidTokenError"))
+                return render(request, "users/set_password.html", {"form": form})
+            if user_id and not User.objects.filter(id=user_id, email__iexact=invite.email).exists():
+                messages.error(request, _("setPasswordViewInvalidTokenError"))
+                return render(request, "users/set_password.html", {"form": form})
 
         if request.method == "POST":
             form = SetPasswordForm(request.POST)
