@@ -27,7 +27,7 @@ from .models import (
 )
 from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
-from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin
+from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
 from users.models import User
 
 
@@ -1018,7 +1018,7 @@ class DeleteUserView(View):
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "No User selected."}, status=400)
         
-        if not (is_super_or_58_admin(current_user) or is_org_admin_or_staff(current_user)):
+        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
             return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
         target_users = list(User.objects.filter(id__in=raw_ids).prefetch_related('organisation_data'))
@@ -1029,36 +1029,36 @@ class DeleteUserView(View):
         for target_user in target_users:
             if target_user.id == current_user.id:
                 continue
-            
-            can_delete = False
 
             if current_user.is_superuser:
-                can_delete = True
+                users_to_delete.append(target_user)
+                continue
                 
             elif is_58_admin(current_user):
                 if getattr(target_user, 'created_by_id', None) == current_user.id:
-                    can_delete = True
+                    users_to_delete.append(target_user)
+                    continue
                 else:
                     identifier = target_user.email or f"ID {target_user.id}"
                     failed_emails.append(str(identifier))
+                    continue
                     
-            elif is_org_admin_or_staff(current_user):
+            elif is_org_admin(current_user):
                 target_org = target_user.organisation_data.first()
                 if target_org and has_org_access(current_user, target_org):
-                    can_delete = True
+                    users_to_delete.append(target_user)
+                    continue
                 else:
                     identifier = target_user.email or f"ID {target_user.id}"
                     failed_emails.append(str(identifier))
-
-            if can_delete:
-                users_to_delete.append(target_user)
+                    continue
 
         if failed_emails:
             emails_list = ", ".join(failed_emails)
             
             if is_58_admin(current_user):
                 error_prefix = "58 Admins can only delete users they created. Failed at: "
-            elif is_org_admin_or_staff(current_user):
+            elif is_org_admin(current_user):
                 error_prefix = "Org Admins can only delete users within their organisation. Failed at: "
             else:
                 error_prefix = "Permission denied for: "
