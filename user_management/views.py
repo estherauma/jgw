@@ -1006,8 +1006,14 @@ class DeleteUserView(View):
                 {"ok": False, "error": "Invalid JSON data."},
                 status=400,
             )
-              
-        raw_ids = [uid.strip() for uid in ids_param.split(',') if uid.strip()]
+        
+        try:     
+            raw_ids = [int(uid.strip()) for uid in ids_param.split(',') if uid.strip()]
+        except Exception:
+            return JsonResponse(
+                {"ok": False, "error": "Invalid ID format."},
+                status=400,
+            )
         
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "No User selected."}, status=400)
