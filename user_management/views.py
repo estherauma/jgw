@@ -1003,17 +1003,13 @@ class DeleteUserView(View):
             
         except (json.JSONDecodeError, AttributeError):
             return JsonResponse(
-                {"ok": False, "error": "Invalid JSON data."},
-                status=400,
-            )
+                {"ok": False, "error": "Invalid JSON data."},status=400,)
         
         try:     
             raw_ids = [int(uid.strip()) for uid in ids_param.split(',') if uid.strip()]
         except Exception:
             return JsonResponse(
-                {"ok": False, "error": "Invalid ID format."},
-                status=400,
-            )
+                {"ok": False, "error": "Invalid ID format."},status=400,)
         
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "No User selected."}, status=400)
@@ -1023,39 +1019,47 @@ class DeleteUserView(View):
 
         target_users = list(User.objects.filter(id__in=raw_ids).prefetch_related('organisation_data'))
         
-        users_to_delete = []
+        deleted_emails = []
         failed_emails = []
-            
-        for target_user in target_users:
-            if target_user.id == current_user.id:
-                continue
-
-            if current_user.is_superuser:
-                users_to_delete.append(target_user)
-                continue
-                
-            elif is_58_admin(current_user):
-                if getattr(target_user, 'created_by_id', None) == current_user.id:
-                    users_to_delete.append(target_user)
+        deletion_count = 0
+        
+        with transaction.atomic():
+            for target_user in target_users:
+                if target_user.id == current_user.id:
                     continue
-                else:
-                    identifier = target_user.email or f"ID {target_user.id}"
-                    failed_emails.append(str(identifier))
+
+                if current_user.is_superuser:
+                    target_user.soft_delete(deleted_by=current_user)
+                    deletion_count += 1
+                    if target_user.email:
+                        deleted_emails.append(str(target_user.email))
                     continue
                     
-            elif is_org_admin(current_user):
-                target_org = target_user.organisation_data.first()
-                if target_org and has_org_access(current_user, target_org):
-                    users_to_delete.append(target_user)
-                    continue
-                else:
-                    identifier = target_user.email or f"ID {target_user.id}"
-                    failed_emails.append(str(identifier))
-                    continue
+                elif is_58_admin(current_user):
+                    if getattr(target_user, 'created_by_id', None) == current_user.id:
+                        target_user.soft_delete(deleted_by=current_user)
+                        deletion_count += 1
+                        if target_user.email:
+                            deleted_emails.append(str(target_user.email))
+                        continue
+                    else:
+                        failed_emails.append(str(target_user.email or f"ID {target_user.id}"))  
+                        continue
+                        
+                elif is_org_admin(current_user):
+                    target_org = target_user.organisation_data.first()
+                    if target_org and has_org_access(current_user, target_org):
+                        target_user.soft_delete(deleted_by=current_user)
+                        deletion_count += 1
+                        if target_user.email:
+                            deleted_emails.append(str(target_user.email))
+                        continue
+                    else:
+                        failed_emails.append(str(target_user.email or f"ID {target_user.id}"))
+                        continue
 
         if failed_emails:
             emails_list = ", ".join(failed_emails)
-            
             if is_58_admin(current_user):
                 error_prefix = "58 Admins can only delete users they created. Failed at: "
             elif is_org_admin(current_user):
@@ -1063,27 +1067,15 @@ class DeleteUserView(View):
             else:
                 error_prefix = "Permission denied for: "
                 
-            return JsonResponse({
-                "ok": False, 
-                "error": f"{error_prefix}{emails_list}."
-            }, status=403)
+            return JsonResponse({"ok": False, "error": f"{error_prefix}{emails_list}."}, status=403)
 
-        if users_to_delete:
-            deleted_emails = []
-            with transaction.atomic():
-                for user in users_to_delete:
-                    user.soft_delete(deleted_by=current_user)
-                    if user.email:
-                        deleted_emails.append(str(user.email))
-                        
-            email_string = ', '.join(filter(None, deleted_emails))
-                    
-            if email_string:
+        if deletion_count>0:
+            if deleted_emails:
+                email_string = ', '.join(deleted_emails)
                 messages.success(request, f"Successfully deleted: {email_string}")
+                return JsonResponse({"ok": True})
             else:
-                count = len(users_to_delete)
-                messages.success(request, f"Successfully deleted {count} user(s).")
-                
-            return JsonResponse({"ok": True})
-                
-        return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
+                messages.success(request, f"Successfully deleted {deletion_count} users.")
+                return JsonResponse({"ok": True})
+    
+        return JsonResponse({"ok": False, "error": "You can not delete your own account."}, status=400)
