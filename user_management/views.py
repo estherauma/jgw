@@ -1039,7 +1039,7 @@ class DeleteUserView(View):
                 return JsonResponse({"ok": False, "error": f"You do not have permission to delete selected users."}, status=403)
 
             if deletion_count and failed_count:
-                    messages.warning(request, f"Successfully deleted {deletion_count} users. {failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
+                messages.warning(request, f"{failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
             messages.success(request, f"Successfully deleted {deletion_count} users.")
             return JsonResponse({"ok": True})
             
