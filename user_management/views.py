@@ -1007,7 +1007,7 @@ class BulkDeleteUsersView(View):
             data = json.loads(request.body)
             ids_param = data.get('ids', '')
             raw_ids = [int(uid.strip()) for uid in ids_param.split(',') if uid.strip()]
-
+            
         except (json.JSONDecodeError, AttributeError):
             return JsonResponse(
                 {"ok": False, "error": "Invalid JSON data."},status=400,)
