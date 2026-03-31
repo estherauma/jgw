@@ -547,13 +547,14 @@ def set_password(request, token):
                     if invite.phone_number:
                         new_user.phone_number = invite.phone_number
                         new_user.save(update_fields=["phone_number"])
-                        access_type = new_user.access_type
+                    access_type = new_user.access_type
                     if invite.organisation:
                         new_user.organisation_data.add(invite.organisation)
                     # Initialize dashboard preferences for the new user
                     initialize_user_dashboard_preferences(new_user, request)
-                invite.status = "ACCEPTED"
-                invite.save(update_fields=["status"])
+                    if invite:
+                        invite.status = "ACCEPTED"
+                        invite.save(update_fields=["status"])
                 success_text = _("setPasswordViewSuccessText")
                 
                 return render(

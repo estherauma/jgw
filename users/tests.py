@@ -124,6 +124,7 @@ class AuthTests(TestCase):
                 "email": "test@test.local",
                 "role": "SCHEME",
                 "scheme": Scheme.objects.first().id,
+                "factory": Factory.objects.first().id,
             },
         )
         self.assertEqual(len(response.context["form"].errors.values()), 1)
