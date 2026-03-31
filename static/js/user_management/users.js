@@ -511,6 +511,9 @@
     const modal = document.getElementById('assign-users-workgroup-modal');
     const form = document.getElementById('assign-users-workgroup-form');
     const errorBox = document.getElementById('assign-users-workgroup-form-error');
+    if (!modal || !form) {
+      return;
+    }
 
     if (!modal || !form) {
       return;

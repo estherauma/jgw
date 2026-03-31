@@ -35,7 +35,7 @@
                 <button
                     class="um-btn um-btn-outline"
                     data-toggle="modal"
-                    data-target="{% if u.access_type == 'dashboard' and not is_org_admin_or_staff %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
+                    data-target="{% if selected_org_id %}#edit-appuser-modal{% elif u.access_type == 'dashboard' and not is_org_admin_or_staff %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
                     data-user-id="{{ u.id }}"
                 >
                     Edit

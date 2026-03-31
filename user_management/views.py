@@ -19,6 +19,7 @@ from .forms import (
     WorkGroupForm,
     UsersWorkGroupAssignForm,
 )
+from .emails import send_invitation
 from .decorators import group_required
 from .models import (
     OrganisationRole,
@@ -415,6 +416,7 @@ class CreateAppUserView(View):
                     form.save_m2m()
                     apply_role_to_user(user, organisation, role)
                     user.organisation_data.add(organisation)
+                    send_invitation(request, user)
             except Exception as e:
                 return JsonResponse(
                     {"ok": False, "error": "Could not save user. Please try again."},
@@ -461,6 +463,7 @@ class CreateDashboardUserView(View):
             selected_groups = form.cleaned_data.get("groups")
             if selected_groups:
                 user.groups.add(*selected_groups)
+            send_invitation(request, user)
             return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
