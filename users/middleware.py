@@ -13,14 +13,14 @@ class UserStatusMiddleware:
 
     def __call__(self, request):
         if request.user.is_authenticated and not request.user.is_active:
-            user_email = request.user.email
-            logger.info(f"Logging out deactivated user: {user_email}")
+            user_id = request.user.id
+            logger.info(f"Logging out deactivated user: {user_id}")
             logout(request)
             
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
                 return JsonResponse({"error": "Account deactivated", "ok": False}, status=401)
 
-            messages.error(request, f"The account '{user_email}' has been deactivated. Please contact an administrator.")
+            messages.error(request, f"The account '{user_id}' has been deactivated. Please contact an administrator.")
             return redirect(settings.LOGIN_URL)
 
         return self.get_response(request)
