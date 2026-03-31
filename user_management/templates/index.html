@@ -209,6 +209,15 @@
                                     Add to department
                                 </button>
                                 {% endflag %}
+                                {% flag 'can_deactivate_user' %}
+                                <button
+                                    class="dropdown-item um-dropdown-item"
+                                    type="button"
+                                    data-deactivate-users-btn                                                         
+                                    disabled>
+                                    Deactivate
+                                </button>
+                                {% endflag %}
                                 {% endif %}
                             </div>
                         </div>
