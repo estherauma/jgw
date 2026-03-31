@@ -2,7 +2,6 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from common.models import AuditFieldsMixin
 from django.db import models
-from dashboard.forms import OPERATORS
 from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation, OrganisationData
 from decimal import Decimal
 
@@ -100,11 +99,25 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
 
 class UserInvitations(models.Model):
     STATUS = models.TextChoices("Status", " ".join(STATUS))
+    user = models.ForeignKey(
+        User,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
+        related_name="invitations",
+    )
     email = models.EmailField(null=False, blank=False, max_length=128)
     role = models.CharField(blank=False, null=True, choices=User.ROLE.choices, max_length=16)
     scheme = models.ForeignKey(to="dashboard.Scheme", on_delete=models.DO_NOTHING, null=True, max_length=16)
     factory = models.ForeignKey(to="dashboard.Factory", on_delete=models.DO_NOTHING, null=True, max_length=16)
-    organisation = models.CharField(max_length=64, null=True, blank=False, choices=OPERATORS.items())
+    organisation = models.ForeignKey(
+        OrganisationData,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
+        related_name="user_invitations",
+    )
+    phone_number = models.CharField(blank=True, null=True, max_length=32)
     status = models.CharField(
         blank=False, null=False, max_length=16, choices=STATUS.choices, default="PENDING"
     )
