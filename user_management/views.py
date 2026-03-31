@@ -997,7 +997,7 @@ class EditWorkCodeView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
-class DeleteUserView(View):
+class BulkDeleteUsersView(View):
     def post(self, request):
         current_user = request.user
         if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
