@@ -12,6 +12,7 @@ class MaintenanceModeMiddleware:
         logger.info("MaintenanceModeMiddleware initialized")
 
     def __call__(self, request):
+        
         try:
 
             maintenance_mode = self.redis_client.get('MAINTENANCE_MODE')

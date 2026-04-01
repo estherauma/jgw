@@ -171,11 +171,13 @@
       try {
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
         var response = await fetch(options.url, {
-          method: 'POST',
+          method: options.method || 'POST',
           headers: {
+            ...(options.headers || {}),
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRFToken': csrfToken,
           },
+          body: options.body || null,
         });
         
         var data = await response.json();
