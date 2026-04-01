@@ -411,6 +411,7 @@
           tbody.innerHTML = data.html;
           updateAssignButtonState();
           updateDeleteButton();
+          updateDeactivateButtonState();
         }
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -436,6 +437,15 @@
     }
     const selectedIds = getSelectedUserIds();
     deleteButton.disabled = selectedIds.length === 0;
+  }
+
+  function updateDeactivateButtonState(){
+    const deactivateButton = document.querySelector('[data-deactivate-users]')
+    if (!deactivateButton) {
+      return;
+    }
+    const selectedIds = getSelectedUserIds();
+    deactivateButton.disabled = selectedIds.length === 0;
   }
 
   function initUserSelection() {
@@ -465,6 +475,7 @@
       });
       updateSelectionState();
       updateDeleteButton();
+      updateDeactivateButtonState();
       
     });
 
@@ -472,6 +483,7 @@
       if (event.target && event.target.matches('[data-user-select]')) {
         updateSelectionState();
         updateDeleteButton();
+        updateDeactivateButtonState();
       }
     });
   }
@@ -505,6 +517,37 @@
         },
       });
     });
+  }
+
+  function initDeactivateUsers(){
+    const deactivateBtn = document.querySelector('[data-deactivate-users]');
+    if (!deactivateBtn) {
+      return;
+    }
+    deactivateBtn.addEventListener('click', function () {
+      const selectedIds = getSelectedUserIds();
+      const count = selectedIds.length;
+      
+      if (!selectedIds.length) {
+        alert('Select at least one user to deactivate.');
+        return;
+      }
+
+      window.showDeleteConfirm({
+        title: `Deactivate ${count === 1 ? 'User' : 'Users'}`,
+        message: `Are you sure you want to deactivate ${count === 1? 'the selected user': `the ${count} selected users`}?`,
+        url: '/user-management/users/deactivate/',
+        method: 'POST',
+        body: JSON.stringify({ ids: selectedIds.join(',') }),
+        headers: {
+          'Content-Type': 'application/json',
+          },
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    }
+    );
   }
 
   function initAssignUsersToWorkGroups() {
@@ -577,5 +620,6 @@
     initUserSelection();
     initAssignUsersToWorkGroups();
     initDeleteUsers();
+    initDeactivateUsers();
   });
 })();
