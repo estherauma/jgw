@@ -1090,7 +1090,7 @@ class BulkDeactivateUsersView(View):
                             failed_count += 1
                             continue
                     
-                    user.deactivate(updated_by=current_user)
+                    user.deactivate(deactivated_by=current_user)
                     deactivation_count += 1
 
             if failed_count and not deactivation_count:

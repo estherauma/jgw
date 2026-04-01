@@ -542,6 +542,7 @@
         headers: {
           'Content-Type': 'application/json',
           },
+        confirmButtonText: 'Deactivate',
         onSuccess: function () {
           window.location.reload();
         },

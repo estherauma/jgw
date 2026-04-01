@@ -553,7 +553,7 @@ body .modal-backdrop.show {
     font-weight: bolder;
 }
 
-p[data-delete-message] {
+p[data-message] {
     font-weight: 500;
 }
 
