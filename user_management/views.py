@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
+import json
 from preference.models import OrganisationAccessCode, OrganisationData
 
 from .forms import (
@@ -18,6 +19,7 @@ from .forms import (
     WorkGroupForm,
     UsersWorkGroupAssignForm,
 )
+from .emails import send_invitation
 from .decorators import group_required
 from .models import (
     OrganisationRole,
@@ -26,7 +28,7 @@ from .models import (
 )
 from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
-from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin
+from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
 from users.models import User
 
 
@@ -66,7 +68,8 @@ def user_management(request):
     organizations = get_allowed_orgs(user).order_by("name")
 
     users = (
-        User.objects.prefetch_related("organisation_data", "work_groups")
+        User.objects.filter(is_deleted=False)
+        .prefetch_related("organisation_data", "work_groups")
         .order_by("email")
         .distinct()
     )
@@ -162,7 +165,8 @@ def search_users(request):
     query = request.GET.get("q", "").strip()
     selected_org_id = request.GET.get("selected_org_id")
     users = (
-        User.objects.prefetch_related("organisation_data", "work_groups")
+        User.objects.filter(is_deleted=False)
+        .prefetch_related("organisation_data", "work_groups")
         .order_by("email")
         .distinct()
     )
@@ -412,6 +416,7 @@ class CreateAppUserView(View):
                     form.save_m2m()
                     apply_role_to_user(user, organisation, role)
                     user.organisation_data.add(organisation)
+                    send_invitation(request, user)
             except Exception as e:
                 return JsonResponse(
                     {"ok": False, "error": "Could not save user. Please try again."},
@@ -458,6 +463,7 @@ class CreateDashboardUserView(View):
             selected_groups = form.cleaned_data.get("groups")
             if selected_groups:
                 user.groups.add(*selected_groups)
+            send_invitation(request, user)
             return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
@@ -989,3 +995,58 @@ class EditWorkCodeView(View):
             )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class BulkDeleteUsersView(View):
+    def post(self, request):
+        current_user = request.user
+        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+            return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
+
+        try:
+            data = json.loads(request.body)
+            ids_param = data.get('ids', '')
+            raw_ids = [int(uid.strip()) for uid in ids_param.split(',') if uid.strip()]
+            
+        except (json.JSONDecodeError, AttributeError):
+            return JsonResponse(
+                {"ok": False, "error": "Invalid JSON data."},status=400,)
+        
+        if not raw_ids:
+            return JsonResponse({"ok": False, "error": "Select at least one user."}, status=400)
+        
+        deletion_count = 0
+        failed_count = 0
+        try:
+            with transaction.atomic():
+                for user_id in raw_ids:
+                    user = User.objects.filter(id=user_id).first()
+                    if not user or user.id == current_user.id:
+                        failed_count += 1
+                        continue
+                    if user.is_superuser and not current_user.is_superuser:
+                        failed_count += 1
+                        continue
+                    if is_org_admin(current_user):
+                        user_org = user.organisation_data.first()
+                        if not has_org_access(current_user, user_org):
+                            raise PermissionError("'You have no permission to delete one or more of the selected users.'") 
+                    if is_58_admin(current_user):
+                        if getattr(user, 'created_by_id', None) != current_user.id and is_58_admin(user):
+                            failed_count += 1
+                            continue
+                    user.soft_delete(deleted_by=current_user)
+                    deletion_count += 1
+
+            if failed_count and not deletion_count:
+                return JsonResponse({"ok": False, "error": f"You do not have permission to delete selected users."}, status=403)
+
+            if deletion_count and failed_count:
+                messages.warning(request, f"{failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
+            messages.success(request, f"Successfully deleted {deletion_count} users.")
+            return JsonResponse({"ok": True})
+            
+        except PermissionError as e:
+              return JsonResponse({"ok": False, "error": str(e)}, status=403)
+        except Exception:
+            return JsonResponse({"ok": False, "error": "An error occurred while deleting users. Please try again."}, status=500)

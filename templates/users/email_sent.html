@@ -43,7 +43,15 @@
 
     <h3>{% translate "emailSentSuccess" %}</h3>
     <p class="text-muted font-14 mt-2">{{success_text}}</p>
+    {% if access_type == "app" %}
+    <p class="text-muted font-14 mt-2">
+        Please download the JGW app and log in there.
+    </p>
+    {% endif %}
+   {% if access_type != "app" %}
     <a href="{% url 'users:login_user' %}" class="btn w-100 btn-primary waves-effect waves-light mt-3">{% translate "emailSentBackToSignIn" %}</a>
+   {% endif %}
+
 </div>
 
 {% endblock form %}

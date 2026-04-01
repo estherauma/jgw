@@ -47,3 +47,6 @@ docker_restart_web:
 
 docker_initialize_feature_tags:
 	docker compose -f docker-compose.dev.yml exec web python manage.py initialize_feature_tags
+
+docker_assign_default_org_roles:
+	docker compose -f docker-compose.dev.yml exec web python manage.py assign_default_org_roles

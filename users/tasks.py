@@ -40,30 +40,37 @@ def send_email_notification(subject, message, recipients, attachment_path=None, 
     :param attachment_path: File path of an attachment (if any)
     :param inline_images: Dict {CID: file_path} for inline images
     """
-    mail = EmailMultiAlternatives(
-        subject,
-        message,
-        "JGW Pandas <alerts@jgwpandas.com>",
-        recipients
-    )
+    try:
+        mail = EmailMultiAlternatives(
+            subject,
+            message,
+            "JGW Pandas <alerts@jgwpandas.com>",
+            recipients,
+        )
 
-    if attachment_path:
-        mail.attach_file(attachment_path)
-    
-    if html_message:
-        mail.attach_alternative(html_message, "text/html")
+        if attachment_path:
+            mail.attach_file(attachment_path)
 
-    if inline_images:
-        for cid, img_path in inline_images.items():
-            if os.path.exists(img_path):
-                mime_type, _ = mimetypes.guess_type(img_path)
-                if not mime_type:
-                    mime_type = "../static/logo.jpeg"
+        if html_message:
+            mail.attach_alternative(html_message, "text/html")
 
-                with open(img_path, "rb") as img_file:
-                    image = MIMEImage(img_file.read(), _subtype=mime_type.split("/")[-1])
-                    image.add_header("Content-ID", f"<{cid}>")
-                    image.add_header("Content-Disposition", "inline", filename=os.path.basename(img_path))
-                    mail.attach(image)
+        if inline_images:
+            for cid, img_path in inline_images.items():
+                if os.path.exists(img_path):
+                    mime_type, _ = mimetypes.guess_type(img_path)
+                    if not mime_type:
+                        mime_type = "../static/logo.jpeg"
 
-    mail.send()
+                    with open(img_path, "rb") as img_file:
+                        image = MIMEImage(img_file.read(), _subtype=mime_type.split("/")[-1])
+                        image.add_header("Content-ID", f"<{cid}>")
+                        image.add_header(
+                            "Content-Disposition",
+                            "inline",
+                            filename=os.path.basename(img_path),
+                        )
+                        mail.attach(image)
+
+        mail.send()
+    except Exception as exc:
+        debug_logger.exception("send_email_notification failed: %s", exc)

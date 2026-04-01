@@ -95,7 +95,7 @@ def list_users(request):
     page_number = request.GET.get('page', 1)
     items_per_page = request.GET.get('items_per_page', 25)
 
-    users = User.objects.all()
+    users = User.objects.filter(is_deleted=False)
 
     if search_query:
         users = users.filter(
@@ -511,31 +511,60 @@ def request_password_reset(request):
 def set_password(request, token):
     logout(request)
     form = SetPasswordForm()
+    invite = None
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         user_id, invite_id = payload.get("user_id"), payload.get("invite_id")
-        if user_id is None and invite_id is None:
+
+        if invite_id is None and user_id is None:
             messages.error(request, _("setPasswordViewInvalidTokenError"))
-            return redirect("users:login_user")
+            return render(request, "users/set_password.html", {"form": form})
+        if invite_id is not None:
+            invite = UserInvitations.objects.filter(id=invite_id).first()
+            if not invite:
+                messages.error(request, _("setPasswordViewInvalidTokenError"))
+                return render(request, "users/set_password.html", {"form": form})
+            if invite.status == "ACCEPTED":
+                messages.error(request, _("setPasswordViewInvalidTokenError"))
+                return render(request, "users/set_password.html", {"form": form})
+            if user_id and not User.objects.filter(id=user_id, email__iexact=invite.email).exists():
+                messages.error(request, _("setPasswordViewInvalidTokenError"))
+                return render(request, "users/set_password.html", {"form": form})
+
         if request.method == "POST":
             form = SetPasswordForm(request.POST)
             if form.is_valid():
                 password = form.cleaned_data.get("confirm_password")
+                access_type = 'dashboard'
                 if user_id:
                     user = User.objects.get(id=user_id)
                     user.set_password(password)
                     user.save()
-                elif invite_id:
-                    invite = UserInvitations.objects.values(
-                        "email", "role", "scheme", "factory", "organisation"
-                    ).get(id=invite_id)
-                    user_obj = {"email": invite["email"], "role": invite["scheme"]}
+                    access_type = user.access_type
+                else:
+                    user_obj = {"email": invite.email, "role": invite.scheme_id}
                     new_user = User.objects.create_user(**user_obj, password=password, is_active=True)
+                    if invite.phone_number:
+                        new_user.phone_number = invite.phone_number
+                        new_user.save(update_fields=["phone_number"])
+                    access_type = new_user.access_type
+                    if invite.organisation:
+                        new_user.organisation_data.add(invite.organisation)
                     # Initialize dashboard preferences for the new user
                     initialize_user_dashboard_preferences(new_user, request)
+                    if invite:
+                        invite.status = "ACCEPTED"
+                        invite.save(update_fields=["status"])
                 success_text = _("setPasswordViewSuccessText")
                 
-                return render(request, "users/email_sent.html", {"success_text": success_text})
+                return render(
+                    request,
+                    "users/email_sent.html",
+                    {
+                        "success_text": success_text,
+                        "access_type": access_type,
+                    },
+                )
             else:
                 messages.error(request, _("setPasswordViewInvalidFormError"))
     except jwt.ExpiredSignatureError:

@@ -63,13 +63,14 @@ class UserMgtForm(forms.ModelForm):
 class InviteUserForm(forms.ModelForm):
     class Meta:
         model = UserInvitations
-        fields = ("email", "role", "scheme")
+        fields = ("email", "role", "scheme", "factory", "organisation", "phone_number")
 
     def __init__(self, *args, **kwargs):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control"
         self.fields["email"].label = "Email Address"
+        self.fields["phone_number"].label = "Phone Number (optional)"
 
     def clean(self):
         cleaned_data = super().clean()

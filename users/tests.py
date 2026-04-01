@@ -124,6 +124,7 @@ class AuthTests(TestCase):
                 "email": "test@test.local",
                 "role": "SCHEME",
                 "scheme": Scheme.objects.first().id,
+                "factory": Factory.objects.first().id,
             },
         )
         self.assertEqual(len(response.context["form"].errors.values()), 1)
@@ -306,7 +307,8 @@ class AuthTests(TestCase):
         }
         token = jwt.encode(payload=payload, key=settings.SECRET_KEY)
         response = self.client.get(reverse("users:set_password", args=(token,)))
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/set_password.html")
 
     def test_set_password_account_not_found(self):
         payload = {

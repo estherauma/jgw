@@ -1,8 +1,9 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils import timezone
+from django.conf import settings
 from common.models import AuditFieldsMixin
 from django.db import models
-from dashboard.forms import OPERATORS
 from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation, OrganisationData
 from decimal import Decimal
 
@@ -87,24 +88,54 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         help_text="User's dashboard customization preferences"
     )
     dashboard_preferences_version = models.IntegerField(default=1, help_text="Version of dashboard preferences schema")
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="deleted_users"
+    )
 
     class Meta(AuditFieldsMixin.Meta):
         verbose_name_plural = "Users"
         indexes = [
             models.Index(fields=['email']),
+            models.Index(fields=['is_deleted']),
         ]
 
-    def __str___(self):
+    def __str__(self):
         return f"{self.email}"
+    
+    def soft_delete(self, deleted_by):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.is_active = False
+        self.deleted_by = deleted_by
+        self.updated_by = deleted_by
+        self.save()
 
 
 class UserInvitations(models.Model):
     STATUS = models.TextChoices("Status", " ".join(STATUS))
+    user = models.ForeignKey(
+        User,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
+        related_name="invitations",
+    )
     email = models.EmailField(null=False, blank=False, max_length=128)
     role = models.CharField(blank=False, null=True, choices=User.ROLE.choices, max_length=16)
     scheme = models.ForeignKey(to="dashboard.Scheme", on_delete=models.DO_NOTHING, null=True, max_length=16)
     factory = models.ForeignKey(to="dashboard.Factory", on_delete=models.DO_NOTHING, null=True, max_length=16)
-    organisation = models.CharField(max_length=64, null=True, blank=False, choices=OPERATORS.items())
+    organisation = models.ForeignKey(
+        OrganisationData,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
+        related_name="user_invitations",
+    )
+    phone_number = models.CharField(blank=True, null=True, max_length=32)
     status = models.CharField(
         blank=False, null=False, max_length=16, choices=STATUS.choices, default="PENDING"
     )

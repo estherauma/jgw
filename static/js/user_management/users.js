@@ -10,11 +10,16 @@
   function updateAssignButtonState() {
       const assignWorkGroupButton = document.querySelector('[data-users-workgroup-action]');
       const selectedIds = getSelectedUserIds();
-      assignWorkGroupButton.disabled = selectedIds.length === 0;
-      const countLabel = modal.querySelector('[data-selected-users-count]');
-      if (countLabel) {
-        countLabel.textContent = String(selectedIds.length);
+      if (assignWorkGroupButton) {
+        assignWorkGroupButton.disabled = selectedIds.length === 0;
       }
+      const modal = document.getElementById('assign-users-workgroup-modal');
+      if (modal) {
+        const countLabel = modal.querySelector('[data-selected-users-count]');
+        if (countLabel) {
+            countLabel.textContent = String(selectedIds.length);
+        }
+    }
   }
 
   function initAppUserForm() {
@@ -405,6 +410,7 @@
         if (data?.html) {
           tbody.innerHTML = data.html;
           updateAssignButtonState();
+          updateDeleteButton();
         }
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -421,6 +427,15 @@
         runSearch(value);
       }, 250);
     });
+  }
+
+  function updateDeleteButton() {
+    const deleteButton = document.querySelector('[data-users-delete]');
+    if (!deleteButton) {
+      return;
+    }
+    const selectedIds = getSelectedUserIds();
+    deleteButton.disabled = selectedIds.length === 0;
   }
 
   function initUserSelection() {
@@ -449,12 +464,46 @@
         input.checked = checked;
       });
       updateSelectionState();
+      updateDeleteButton();
+      
     });
 
     document.addEventListener('change', function (event) {
       if (event.target && event.target.matches('[data-user-select]')) {
         updateSelectionState();
+        updateDeleteButton();
       }
+    });
+  }
+
+  function initDeleteUsers() {
+    const deleteBtn = document.querySelector('[data-users-delete]');
+    if (!deleteBtn) {
+      return;
+    }
+
+    deleteBtn.addEventListener('click', function () {
+      const selectedIds = getSelectedUserIds();
+      const count = selectedIds.length;
+      
+      if (!selectedIds.length) {
+        alert('Select at least one user to delete.');
+        return;
+      }
+
+      window.showDeleteConfirm({
+        title: `Delete ${count === 1 ? 'User' : 'Users'}`,
+        message: `Are you sure you want to delete ${count === 1? 'the selected user': `the ${count} selected users`}?`,
+        url: '/user-management/users/delete/',
+        method: 'POST',
+        body: JSON.stringify({ ids: selectedIds.join(',') }),
+        headers: {
+          'Content-Type': 'application/json',
+          },
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
     });
   }
 
@@ -462,6 +511,13 @@
     const modal = document.getElementById('assign-users-workgroup-modal');
     const form = document.getElementById('assign-users-workgroup-form');
     const errorBox = document.getElementById('assign-users-workgroup-form-error');
+    if (!modal || !form) {
+      return;
+    }
+
+    if (!modal || !form) {
+      return;
+    }
 
     $('[data-target="#assign-users-workgroup-modal"]').on('click', function () {
       if (window.clearFormErrors) {
@@ -520,5 +576,6 @@
     initUserSearch();
     initUserSelection();
     initAssignUsersToWorkGroups();
+    initDeleteUsers();
   });
 })();
