@@ -311,7 +311,9 @@ class AppUserForm(forms.ModelForm):
             self.fields["work_groups"].queryset = work_groups_qs
 
     def clean_email(self):
-        email = self.cleaned_data.get("email", "").strip().lower()
+        email = (self.cleaned_data.get("email") or "").strip().lower()
+        if not email:
+            return None
         qs = User.objects.filter(email__iexact=email)
 
         if self.instance and self.instance.pk:
