@@ -2,12 +2,14 @@
 {% if users %}
     {% for u in users %}
     <tr>
-        {% if selected_org_id %}
         <td class="text-center col-1">
-            <input type="checkbox" class="form-check-input" data-user-select value="{{ u.id }}">
+            <input type="checkbox" class="form-check-input" 
+            data-user-select value="{{ u.id }}"
+            data-first-name = "{{ u.first_name | default:'' }}"
+            data-last-name = "{{ u.last_name | default:'' }}"
+            data-email = "{{ u.email | default:'' }}"
+            >
         </td>
-        {% endif %}
-        <td>{{ forloop.counter }}</td>
         <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
         <td>{{ u.email }}</td>
         <td>{% if u.access_type %}{{ u.get_access_type_display }}{% else %}—{% endif %}</td>
@@ -47,6 +49,6 @@
     {% endfor %}
 {% else %}
     <tr>
-        <td colspan="{% if selected_org_id %}7{% else %}6{% endif %}">No users found.</td>
+        <td colspan="{% if selected_org_id %}6{% else %}5{% endif %}">No users found.</td>
     </tr>
 {% endif %}

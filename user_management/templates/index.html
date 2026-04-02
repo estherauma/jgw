@@ -182,7 +182,6 @@
                     </div>
                     <div class="um-action gap-3">
                         <div class="dropdown um-actions-dropdown">
-                            {% if  selected_org_id %}
                             <button
                                 class="um-btn um-btn-outline dropdown-toggle"
                                 type="button"
@@ -194,7 +193,6 @@
                                 Actions
                                 <span class="dropdown-icon">▼</span>
                             </button>
-                             {% endif %}
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="user-actions-dropdown">
                                 {% if selected_org_id %}
                                 {% flag 'can_assign_users_to_workgroups' %}
@@ -209,20 +207,21 @@
                                     Add to department
                                 </button>
                                 {% endflag %}
-                                {% flag 'can_deactivate_user' %}
-                                <button
-                                    class="dropdown-item um-dropdown-item"
-                                    type="button"
-                                    data-deactivate-users                                                         
-                                    disabled>
-                                    Deactivate User(s)
-                                </button>
-                                {% endflag %}
+                                
                                 <button class="dropdown-item um-dropdown-item" 
                                     type="button" data-users-delete disabled>
                                     Delete User(s)
                                 </button>
                                 {% endif %}
+                                {% flag 'can_deactivate_user' %}
+                                <button
+                                    class="dropdown-item um-dropdown-item"
+                                    type="button"
+                                    data-deactivate-users                                                       
+                                    disabled>
+                                    Deactivate User(s)
+                                </button>
+                                {% endflag %}
                             </div>
                         </div>
                         {% if not selected_org_id %}
@@ -258,12 +257,9 @@
                         <table class="um-table um-navy">
                             <thead>
                                 <tr>
-                                    {% if selected_org_id %}
                                     <th class="text-center col-1">
                                         <input type="checkbox" class="form-check-input" data-users-select-all>
                                     </th>
-                                    {% endif %}
-                                    <th>#</th>
                                     <th class="w-25">Name</th>
                                     <th>Email</th>
                                     <th>Access type</th>

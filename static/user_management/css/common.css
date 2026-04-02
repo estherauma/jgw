@@ -553,10 +553,6 @@ body .modal-backdrop.show {
     font-weight: bolder;
 }
 
-p[data-message] {
-    font-weight: 500;
-}
-
 [data-reset-for] {
     font-size: 1.2rem;
     font-weight: bold;

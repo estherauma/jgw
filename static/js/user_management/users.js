@@ -465,6 +465,7 @@
         selectAll.indeterminate = selectedIds.length > 0 && selectedIds.length < checkboxes.length;
       }
       updateAssignButtonState();
+      updateDeactivateButtonState();
     }
 
     selectAll.addEventListener('change', function (event) {
@@ -519,36 +520,67 @@
     });
   }
 
-  function initDeactivateUsers(){
-    const deactivateBtn = document.querySelector('[data-deactivate-users]');
-    if (!deactivateBtn) {
-      return;
+  function getUserDisplayname(user){
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    if (fullName) {
+      return fullName;
     }
+    if (user.email) {
+      return user.email;
+    }
+    return `ID: ${user.id}`;
+  }
+
+  function initDeactivateUsers() {
+    const deactivateBtn = document.querySelector('[data-deactivate-users]');
+    if (!deactivateBtn) return;
+  
     deactivateBtn.addEventListener('click', function () {
-      const selectedIds = getSelectedUserIds();
-      const count = selectedIds.length;
+      const checkedBoxes = document.querySelectorAll('[data-user-select]:checked');
       
-      if (!selectedIds.length) {
+      if (checkedBoxes.length === 0) {
         alert('Select at least one user to deactivate.');
         return;
       }
+  
+      const selectedUsers = Array.from(checkedBoxes).map(cb => {
+        return {
+          id: cb.value,
+          first_name: cb.getAttribute('data-first-name') || '',
+          last_name: cb.getAttribute('data-last-name') || '',
+          email: cb.getAttribute('data-email') || ''
+        };
+      });
+  
+      const count = selectedUsers.length;
+      let deactivateMessage = '';
+      let deactivateTitle = '';
+  
+      if (count === 1) {
+        const userDisplayName = getUserDisplayname(selectedUsers[0]);
+        deactivateTitle = `Deactivate User`;
+        deactivateMessage = `Are you sure you want to deactivate <strong>${userDisplayName}</strong>?`;
+      } else {
+        const displayNamesList = selectedUsers.map(user => getUserDisplayname(user)).join(", ");
+        deactivateTitle = `Deactivate Users`;
+        deactivateMessage = `Are you sure you want to deactivate the following users: <strong>${displayNamesList}</strong>?`;
+      }
 
       window.showDeleteConfirm({
-        title: `Deactivate ${count === 1 ? 'User' : 'Users'}`,
-        message: `Are you sure you want to deactivate ${count === 1? 'the selected user': `the ${count} selected users`}?`,
+        title: deactivateTitle,
+        message: deactivateMessage,
         url: '/user-management/users/deactivate/',
         method: 'POST',
-        body: JSON.stringify({ ids: selectedIds.join(',') }),
+        body: JSON.stringify({ ids: selectedUsers.map(u => u.id).join(',') }),
         headers: {
           'Content-Type': 'application/json',
-          },
+        },
         confirmButtonText: 'Deactivate',
         onSuccess: function () {
           window.location.reload();
         },
       });
-    }
-    );
+    });
   }
 
   function initAssignUsersToWorkGroups() {

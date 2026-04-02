@@ -144,22 +144,22 @@
     }
 
     if(confirmBtn){
-      confirmBtn.textContent = options.confirmButtonText || 'Delete';
+      confirmBtn.innerHTML = options.confirmButtonText || 'Delete';
     }
 
     var messageEl = modal.querySelector('[data-message]');
     if (messageEl) {
-      messageEl.textContent = options.message || 'Are you sure you want to delete this item?';
+      messageEl.innerHTML = options.message || 'Are you sure you want to delete this item?';
     }
 
     var warningEl = modal.querySelector('[data-warning]');
     if (warningEl) {
-      warningEl.textContent = options.warning || 'This action can not be reversed.';
+      warningEl.innerHTML = options.warning || 'This action can not be reversed.';
     }
 
     var titleEl = modal.querySelector('[data-title]');
     if (titleEl) {
-      titleEl.textContent = options.title || 'Confirm Deletion';
+      titleEl.innerHTML = options.title || 'Confirm Deletion';
     }
 
     $(modal).modal('show');
