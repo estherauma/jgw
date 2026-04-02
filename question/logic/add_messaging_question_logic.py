@@ -43,7 +43,7 @@ from question.models import (
     MessagingQuestionResponseV1,
     QuestionCategory,
 )
-from preference.models import Country, FactoryFarm, Gender, ImmigrationStatus, Language, Organisation, OrganisationData, OrganisationSector, Preference
+from preference.models import Country, FactoryFarm, Gender, ImmigrationStatus, Language, Organisation, OrganisationData, Preference
 from question.tasks import translate_and_clean_messaging_question_fields
 
 
@@ -155,8 +155,8 @@ def add_messaging_question_to_db(messaging_question):
     org_code = messaging_question.get("orgCode")
     organisation = messaging_question.get("organisation")
     factory_farm = messaging_question.get("factoryFarm")
-    sectors = messaging_question.get("sectors", [])
-    
+    final_sectors_of_work = _final_sectors_of_work_from_payload(messaging_question)
+
     route_data = get_or_add_route_to_db(route)
     language_data = get_or_add_language_to_db(language)
     origin_data = get_or_add_country_to_db(origin, source="origin")
@@ -193,8 +193,8 @@ def add_messaging_question_to_db(messaging_question):
         org_info=org_data,
         question_version="V1_and_v2"
     )
-    if sectors:
-        sectors_of_work_list = add_original_sector_of_work_to_db(sectors)
+    if final_sectors_of_work:
+        sectors_of_work_list = add_original_sector_of_work_to_db(final_sectors_of_work)
         messaging_question_standard.sectors_of_work.set(sectors_of_work_list)
 
     #  create messaging question text
@@ -316,11 +316,9 @@ def add_messaging_question_v3_to_db(data):
         org_data = get_organisation_data(org_code=org_code, organisation=organisation)
         standard_data['org_info'] = org_data
 
-        if data.get('organisationSector'):
-            sector, _ = OrganisationSector.objects.get_or_create(
-                name=data.get('organisationSector')
-            )
-            standard_data['organisation_sector'] = sector
+        standard_data['organisation_sector'] = get_or_add_organisation_sector_to_db(
+            data.get('organisationSector')
+        )
 
         if data.get('factoryFarm'):
             farm, _ = FactoryFarm.objects.get_or_create(
@@ -338,6 +336,11 @@ def add_messaging_question_v3_to_db(data):
             data_source_id=standard_data['data_source_id'],
             defaults=standard_data
         )
+
+        final_sectors_of_work = _final_sectors_of_work_from_payload(data)
+        if final_sectors_of_work:
+            sec_of_work_list = add_original_sector_of_work_to_db(final_sectors_of_work)
+            standard.sectors_of_work.set(sec_of_work_list)
 
         question_text, _ = MessagingQuestionText.objects.get_or_create(
             text=data.get('questionText', ''),
@@ -417,6 +420,20 @@ def add_messaging_question_v3_to_db(data):
     except Exception as e:
         print(f"Error processing messaging question v3: {str(e)}")
         return False
+
+def _final_sectors_of_work_from_payload(payload):
+    sectors_of_work = payload.get("sectorsOfWork")
+    sector_of_work_list = payload.get("sectorOfWork")
+    sectors = payload.get("sectors")
+    final_sectors_of_work = None
+    if sector_of_work_list:
+        final_sectors_of_work = sector_of_work_list
+    if sectors_of_work:
+        final_sectors_of_work = sectors_of_work
+    if sectors:
+        final_sectors_of_work = sectors
+    return final_sectors_of_work
+
 
 
 def update_myvoice_messaging_questions():
