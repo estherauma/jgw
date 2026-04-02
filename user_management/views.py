@@ -1085,6 +1085,10 @@ class BulkDeactivateUsersView(View):
                         user_org = user.organisation_data.first()
                         if not has_org_access(current_user, user_org):
                             raise PermissionError("'You have no permission to deactivate one or more of the selected users.'") 
+                        if is_org_admin(user):
+                            if getattr(user,'created_by_id',None) != current_user.id:
+                                failed_count += 1
+                                continue
                     if is_58_admin(current_user):
                         if is_super_or_58_admin(user):
                             failed_count += 1
