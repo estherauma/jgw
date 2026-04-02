@@ -927,13 +927,7 @@ class DashboardCustomizer {
             
             if (data.status === 'success') {
                 this.showNotification('Dashboard reset to default', 'success');
-                this.loadLayout().then(() => {
-                    this.renderLayout();
-                    if (this.isCustomizing) {
-                        this.addCustomizationControls();
-                        this.initializeDragAndDrop();
-                    }
-                });
+                setTimeout(() => window.location.reload(), 400);
             } else {
                 this.showNotification('Error resetting dashboard', 'error');
             }
