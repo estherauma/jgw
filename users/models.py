@@ -113,6 +113,12 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         self.deleted_by = deleted_by
         self.updated_by = deleted_by
         self.save()
+        
+    def deactivate(self, deactivated_by):
+        self.is_active = False
+        self.updated_at = timezone.now()
+        self.updated_by = deactivated_by
+        self.save()
 
 
 class UserInvitations(models.Model):

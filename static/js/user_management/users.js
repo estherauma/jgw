@@ -411,6 +411,7 @@
           tbody.innerHTML = data.html;
           updateAssignButtonState();
           updateDeleteButton();
+          updateDeactivateButtonState();
         }
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -438,6 +439,15 @@
     deleteButton.disabled = selectedIds.length === 0;
   }
 
+  function updateDeactivateButtonState(){
+    const deactivateButton = document.querySelector('[data-deactivate-users]')
+    if (!deactivateButton) {
+      return;
+    }
+    const selectedIds = getSelectedUserIds();
+    deactivateButton.disabled = selectedIds.length === 0;
+  }
+
   function initUserSelection() {
     const selectAll = document.querySelector('[data-users-select-all]');
     if (!selectAll) {
@@ -455,6 +465,7 @@
         selectAll.indeterminate = selectedIds.length > 0 && selectedIds.length < checkboxes.length;
       }
       updateAssignButtonState();
+      updateDeactivateButtonState();
     }
 
     selectAll.addEventListener('change', function (event) {
@@ -465,6 +476,7 @@
       });
       updateSelectionState();
       updateDeleteButton();
+      updateDeactivateButtonState();
       
     });
 
@@ -472,6 +484,7 @@
       if (event.target && event.target.matches('[data-user-select]')) {
         updateSelectionState();
         updateDeleteButton();
+        updateDeactivateButtonState();
       }
     });
   }
@@ -500,6 +513,69 @@
         headers: {
           'Content-Type': 'application/json',
           },
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    });
+  }
+
+  function getUserDisplayname(user){
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    if (fullName) {
+      return fullName;
+    }
+    if (user.email) {
+      return user.email;
+    }
+    return `ID: ${user.id}`;
+  }
+
+  function initDeactivateUsers() {
+    const deactivateBtn = document.querySelector('[data-deactivate-users]');
+    if (!deactivateBtn) return;
+  
+    deactivateBtn.addEventListener('click', function () {
+      const checkedBoxes = document.querySelectorAll('[data-user-select]:checked');
+      
+      if (checkedBoxes.length === 0) {
+        alert('Select at least one user to deactivate.');
+        return;
+      }
+  
+      const selectedUsers = Array.from(checkedBoxes).map(cb => {
+        return {
+          id: cb.value,
+          first_name: cb.getAttribute('data-first-name') || '',
+          last_name: cb.getAttribute('data-last-name') || '',
+          email: cb.getAttribute('data-email') || ''
+        };
+      });
+  
+      const count = selectedUsers.length;
+      let deactivateMessage = '';
+      let deactivateTitle = '';
+  
+      if (count === 1) {
+        const userDisplayName = getUserDisplayname(selectedUsers[0]);
+        deactivateTitle = `Deactivate User`;
+        deactivateMessage = `Are you sure you want to deactivate <strong>${userDisplayName}</strong>?`;
+      } else {
+        const displayNamesList = selectedUsers.map(user => getUserDisplayname(user)).join(", ");
+        deactivateTitle = `Deactivate Users`;
+        deactivateMessage = `Are you sure you want to deactivate the following users: <strong>${displayNamesList}</strong>?`;
+      }
+
+      window.showDeleteConfirm({
+        title: deactivateTitle,
+        message: deactivateMessage,
+        url: '/user-management/users/deactivate/',
+        method: 'POST',
+        body: JSON.stringify({ ids: selectedUsers.map(u => u.id).join(',') }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: 'Deactivate',
         onSuccess: function () {
           window.location.reload();
         },
@@ -577,5 +653,6 @@
     initUserSelection();
     initAssignUsersToWorkGroups();
     initDeleteUsers();
+    initDeactivateUsers();
   });
 })();
