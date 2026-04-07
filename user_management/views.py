@@ -1043,7 +1043,7 @@ class BulkDeleteUsersView(View):
 
             if deletion_count and failed_count:
                 messages.warning(request, f"{failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
-            messages.success(request, f"Successfully deleted {deletion_count} users.")
+            messages.success(request, f"Successfully deleted {deletion_count} user(s).")
             return JsonResponse({"ok": True})
             
         except PermissionError as e:
@@ -1101,7 +1101,7 @@ class BulkDeactivateUsersView(View):
 
             if deactivation_count and failed_count:
                 messages.warning(request, f"{failed_count} user(s) could not be deactivated. You may not have permission to deactivate those users.")
-            messages.success(request, f"Successfully deactivated {deactivation_count} users.")
+            messages.success(request, f"Successfully deactivated {deactivation_count} user(s).")
             return JsonResponse({"ok": True})
             
         except PermissionError as e:
