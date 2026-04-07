@@ -29,6 +29,13 @@
                         Organisation: <span class="fw-bold" data-appuser-org-label>None selected</span>
                     </div>
                     {% endflag %}
+                    <label class="um-field form-group um-field-inline">
+                        {{ form.send_invite }}<span>Send invitation email/sms</span>
+                        <div class="text-danger small" data-error-for="send_invite"></div>
+                        {% if form.send_invite.errors %}
+                            <div class="text-danger small">{{ form.send_invite.errors }}</div>
+                        {% endif %}
+                    </label>
                     <label class="um-field form-group um-field-full">
                         <span>Role</span>
                         {{ form.role }}

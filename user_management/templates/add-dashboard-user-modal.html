@@ -18,11 +18,18 @@
                             {{ form.non_field_errors }}
                         </div>
                     {% endif %}
-                    <label class="um-field form-group um-field-inline">
+                    <label class="um-field form-group um-field-inline mb-3">
                         {{ form.is_active }}<span>Is active</span>
                         <div class="text-danger small" data-error-for="is_active"></div>
                         {% if form.is_active.errors %}
                             <div class="text-danger small">{{ form.is_active.errors }}</div>
+                        {% endif %}
+                    </label>
+                    <label class="um-field form-group um-field-inline mb-3">
+                        {{ form.send_invite }}<span>Send invitation email/sms</span>
+                        <div class="text-danger small" data-error-for="send_invite"></div>
+                        {% if form.send_invite.errors %}
+                            <div class="text-danger small">{{ form.send_invite.errors }}</div>
                         {% endif %}
                     </label>
                     <label class="um-field form-group">
