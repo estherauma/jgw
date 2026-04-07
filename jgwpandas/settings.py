@@ -96,6 +96,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "maintenance.middleware.MaintenanceModeMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "users.middleware.UserStatusMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "waffle.middleware.WaffleMiddleware"

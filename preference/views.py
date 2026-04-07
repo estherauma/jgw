@@ -43,10 +43,16 @@ from preference.repository.preference_repository import (
 from users.utils import get_user_organisations
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from preference.dashboard_config import CHART_DEFINITIONS, get_default_chart_settings
+from preference.dashboard_config import (
+    CHART_DEFINITIONS,
+    get_default_chart_settings,
+    get_default_dashboard_preferences,
+)
 from preference.models import DashboardPreferences, ChartSettings
+from user_management.permissions import is_flag_active
 import logging
 
 @login_required
@@ -817,10 +823,62 @@ def chart_settings_api(request, chart_id=None):
 @login_required
 @require_http_methods(["POST"])
 def reset_dashboard(request):
-    """Reset dashboard to default layout"""
+    """Restore dashboard layout and chart settings to defaults from dashboard_config."""
     try:
-        request.user.dashboard_preferences = {}
-        request.user.save()
+        permitted = [
+            chart_id
+            for chart_id, config in CHART_DEFINITIONS.items()
+            if is_flag_active(request, config['waffle_flag'])
+        ]
+        if not permitted:
+            permitted = list(CHART_DEFINITIONS.keys())
+
+        default_prefs = get_default_dashboard_preferences(permitted)
+
+        with transaction.atomic():
+            dashboard_prefs, _ = DashboardPreferences.objects.get_or_create(
+                user=request.user
+            )
+            dashboard_prefs.layout = default_prefs['layout']
+            dashboard_prefs.chart_definitions = default_prefs['chart_definitions']
+            dashboard_prefs.save()
+
+            ChartSettings.objects.filter(dashboard_preferences=dashboard_prefs).delete()
+
+            to_create = [
+                ChartSettings(
+                    dashboard_preferences=dashboard_prefs,
+                    chart_id=chart_id,
+                    chart_type=CHART_DEFINITIONS[chart_id]['default_type'],
+                    size=CHART_DEFINITIONS[chart_id]['default_size'],
+                    enabled=True,
+                    start_date=None,
+                    end_date=None,
+                )
+                for chart_id in permitted
+                if chart_id in CHART_DEFINITIONS
+            ]
+            if to_create:
+                ChartSettings.objects.bulk_create(to_create)
+
+            chart_settings_json = {
+                chart_id: {
+                    'chart_type': CHART_DEFINITIONS[chart_id]['default_type'],
+                    'size': CHART_DEFINITIONS[chart_id]['default_size'],
+                    'enabled': True,
+                    'start_date': None,
+                    'end_date': None,
+                }
+                for chart_id in permitted
+                if chart_id in CHART_DEFINITIONS
+            }
+            request.user.dashboard_preferences = {
+                'layout': default_prefs['layout'],
+                'chart_settings': chart_settings_json,
+                'chart_definitions': default_prefs['chart_definitions'],
+            }
+            request.user.save(update_fields=['dashboard_preferences'])
+
         return JsonResponse({'status': 'success', 'message': 'Dashboard reset to default'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

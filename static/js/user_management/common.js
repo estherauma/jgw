@@ -129,11 +129,12 @@
 
 
   function showDeleteConfirm(options) {
-    var modal = document.getElementById('delete-confirm-modal');
-    const errorDiv = document.getElementById('delete-confirm-error'); 
+    var modal = document.getElementById('confirm-modal');
+    const confirmBtn = modal.querySelector('[data-confirm-btn]');
+    const errorDiv = document.getElementById('confirm-error'); 
     
-    if (!modal) {
-      console.error('Delete confirm modal not found');
+    if (!modal || !confirmBtn) {
+      console.error('Confirm modal not found');
       return;
     }
 
@@ -142,26 +143,29 @@
       errorDiv.textContent = '';
     }
 
-    var messageEl = modal.querySelector('[data-delete-message]');
+    if(confirmBtn){
+      confirmBtn.innerHTML = options.confirmButtonText || 'Delete';
+    }
+
+    var messageEl = modal.querySelector('[data-message]');
     if (messageEl) {
-      messageEl.textContent = options.message || 'Are you sure you want to delete this item?';
+      messageEl.innerHTML = options.message || 'Are you sure you want to delete this item?';
     }
 
-    var warningEl = modal.querySelector('[data-delete-warning]');
+    var warningEl = modal.querySelector('[data-warning]');
     if (warningEl) {
-      warningEl.textContent = options.warning || 'This action can not be reversed.';
+      warningEl.innerHTML = options.warning || 'This action can not be reversed.';
     }
 
-    var titleEl = modal.querySelector('[data-delete-title]');
+    var titleEl = modal.querySelector('[data-title]');
     if (titleEl) {
-      titleEl.textContent = options.title || 'Confirm Deletion';
+      titleEl.innerHTML = options.title || 'Confirm Deletion';
     }
 
     $(modal).modal('show');
-    const confirmBtn = modal.querySelector('[data-delete-confirm-btn]');
 
     confirmBtn.onclick = async function () {
-      const confirmBtn = modal.querySelector('[data-delete-confirm-btn]');
+      const confirmBtn = modal.querySelector('[data-confirm-btn]');
       confirmBtn.disabled = true;
       if (errorDiv) {
               errorDiv.classList.add('d-none');
@@ -171,11 +175,13 @@
       try {
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
         var response = await fetch(options.url, {
-          method: 'POST',
+          method: options.method || 'POST',
           headers: {
+            ...(options.headers || {}),
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRFToken': csrfToken,
           },
+          body: options.body || null,
         });
         
         var data = await response.json();

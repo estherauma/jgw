@@ -95,7 +95,7 @@ def list_users(request):
     page_number = request.GET.get('page', 1)
     items_per_page = request.GET.get('items_per_page', 25)
 
-    users = User.objects.all()
+    users = User.objects.filter(is_deleted=False)
 
     if search_query:
         users = users.filter(
