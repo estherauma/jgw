@@ -1089,10 +1089,9 @@ class BulkDeactivateUsersView(View):
                             if getattr(user,'created_by_id',None) != current_user.id:
                                 failed_count += 1
                                 continue
-                    if is_58_admin(current_user):
-                        if is_super_or_58_admin(user):
-                            failed_count += 1
-                            continue
+                    if is_58_admin(current_user) and is_super_or_58_admin(user):
+                        failed_count += 1
+                        continue
                     
                     user.deactivate(deactivated_by=current_user)
                     deactivation_count += 1
