@@ -144,5 +144,11 @@ UM_FLAG_DEFS = [
         "label": "Assign role permissions",
         "condition": "org_admin",
     },
+    {
+        "name":"can_delete_user",
+        "label": "Delete users",
+        "condition": "org_admin",
+
+    },
 
 ]
