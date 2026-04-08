@@ -14,6 +14,85 @@ class DashboardCustomizer {
         this.availableCharts = [];
         this.sidebarResizeTimeout = null;
     }
+
+    async confirmWithModal({ title = 'Confirm', message = 'Are you sure?', confirmText = 'Confirm', cancelText = 'Cancel' } = {}) {
+        if (!window.bootstrap || !window.bootstrap.Modal) {
+            return confirm(message);
+        }
+
+        const modalId = 'dashboard-confirm-modal';
+        let modalEl = document.getElementById(modalId);
+        if (!modalEl) {
+            modalEl = document.createElement('div');
+            modalEl.className = 'modal fade';
+            modalEl.id = modalId;
+            modalEl.tabIndex = -1;
+            modalEl.setAttribute('aria-hidden', 'true');
+            modalEl.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body"></div>
+                        <div class="modal-footer justify-content-center gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"></button>
+                            <button type="button" class="btn btn-primary"></button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalEl);
+        }
+
+        modalEl.querySelector('.modal-title').textContent = title;
+        modalEl.querySelector('.modal-body').textContent = message;
+        const cancelBtn = modalEl.querySelector('.modal-footer .btn.btn-secondary');
+        const confirmBtn = modalEl.querySelector('.modal-footer .btn.btn-primary');
+        cancelBtn.textContent = cancelText;
+        confirmBtn.textContent = confirmText;
+
+        const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+
+        return await new Promise((resolve) => {
+            let resolved = false;
+
+            const cleanup = () => {
+                confirmBtn.removeEventListener('click', onConfirm);
+                modalEl.removeEventListener('hidden.bs.modal', onHidden);
+            };
+
+            const onConfirm = () => {
+                if (resolved) return;
+                resolved = true;
+                cleanup();
+                modal.hide();
+                resolve(true);
+            };
+
+            const onHidden = () => {
+                if (resolved) return;
+                resolved = true;
+                cleanup();
+                resolve(false);
+            };
+
+            confirmBtn.addEventListener('click', onConfirm, { once: true });
+            modalEl.addEventListener('hidden.bs.modal', onHidden, { once: true });
+            modal.show();
+        });
+    }
+
+    getDuplicateCountForChart(chartId) {
+        const baseGraphContainerId = this.getGraphContainerId(chartId);
+        if (baseGraphContainerId) {
+            return document.querySelectorAll(`[id^="${baseGraphContainerId}-duplicate_"]`).length;
+        }
+
+        // Fallback if a chart has no known graph container mapping.
+        return document.querySelectorAll(`[id^="chart-${chartId}-duplicate_"]`).length;
+    }
     
     async init() {
         this.setupEventListeners();
@@ -1830,11 +1909,28 @@ class DashboardCustomizer {
         }
     }
     
-    duplicateChart(chartId) {
+    async duplicateChart(chartId) {
         
         const chartElement = document.querySelector(`[data-chart-id="${chartId}"]`);
         if (!chartElement) {
             console.error(`Chart element not found for: ${chartId}`);
+            return;
+        }
+
+        const chartDef = this.chartDefinitions[chartId] || window.chartDefinitions?.[chartId];
+        const chartName = chartDef ? chartDef.name : chartId;
+
+        const ok = await this.confirmWithModal({
+            title: 'Duplicate chart?',
+            message: `This will create another copy of "${chartName}" on your dashboard.`,
+            confirmText: 'Duplicate',
+            cancelText: 'Cancel'
+        });
+        if (!ok) return;
+
+        const existingDuplicates = this.getDuplicateCountForChart(chartId);
+        if (existingDuplicates >= 5) {
+            this.showNotification(`You can only create a maximum of 5 duplicates for "${chartName}".`, 'error');
             return;
         }
         
@@ -1993,8 +2089,6 @@ class DashboardCustomizer {
         
         this.saveLayout();
         
-        const chartDef = this.chartDefinitions[chartId] || window.chartDefinitions?.[chartId];
-        const chartName = chartDef ? chartDef.name : chartId;
         this.showNotification(`Chart "${chartName}" duplicated successfully`, 'success');
     }
     
