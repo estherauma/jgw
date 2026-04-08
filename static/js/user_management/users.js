@@ -412,6 +412,7 @@
           updateAssignButtonState();
           updateDeleteButton();
           updateDeactivateButtonState();
+          updateInviteButtonState();
         }
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -437,6 +438,15 @@
     }
     const selectedIds = getSelectedUserIds();
     deleteButton.disabled = selectedIds.length === 0;
+  }
+
+  function updateInviteButtonState() {
+    const inviteButton = document.querySelector('[data-invite-users]');
+    if (!inviteButton) {
+      return;
+    }
+    const selectedIds = getSelectedUserIds();
+    inviteButton.disabled = selectedIds.length === 0;
   }
 
   function updateDeactivateButtonState(){
@@ -466,6 +476,7 @@
       }
       updateAssignButtonState();
       updateDeactivateButtonState();
+      updateInviteButtonState();
     }
 
     selectAll.addEventListener('change', function (event) {
@@ -477,6 +488,7 @@
       updateSelectionState();
       updateDeleteButton();
       updateDeactivateButtonState();
+      updateInviteButtonState();
       
     });
 
@@ -485,6 +497,7 @@
         updateSelectionState();
         updateDeleteButton();
         updateDeactivateButtonState();
+        updateInviteButtonState();
       }
     });
   }
@@ -550,7 +563,78 @@
     if (user.email) {
       return user.email;
     }
+    if (user.phone_number) {
+      return user.phone_number;
+    }
     return `ID: ${user.id}`;
+  }
+
+  function initInviteUsers() {
+    const inviteBtn = document.querySelector('[data-invite-users]');
+    if (!inviteBtn) {
+      return;
+    }
+
+    inviteBtn.addEventListener('click', function () {
+      const checkedBoxes = document.querySelectorAll('[data-user-select]:checked');
+      if (checkedBoxes.length === 0) {
+        alert('Select at least one user to invite.');
+        return;
+      }
+
+      const selectedUsers = Array.from(checkedBoxes).map(cb => {
+        return {
+          id: cb.value,
+          first_name: cb.getAttribute('data-first-name') || '',
+          last_name: cb.getAttribute('data-last-name') || '',
+          email: cb.getAttribute('data-email') || '',
+          phone_number: cb.getAttribute('data-phone-number') || '',
+        };
+      });
+
+      const count = selectedUsers.length;
+      const displayNamesList = selectedUsers
+        .map(user => getUserDisplayname(user))
+        .join(', ');
+
+      const emailTargets = selectedUsers
+        .filter(user => user.email)
+        .map(user => user.email);
+      const smsTargets = selectedUsers
+        .filter(user => !user.email && user.phone_number)
+        .map(user => user.phone_number);
+
+      const emailList = emailTargets.length
+        ? `<div><strong>Email invitations</strong>: ${emailTargets.join(', ')}</div>`
+        : '<div><strong>Email invitations</strong>: None</div>';
+      const smsList = smsTargets.length
+        ? `<div><strong>SMS invitations</strong>: ${smsTargets.join(', ')}</div>`
+        : '<div><strong>SMS invitations</strong>: None</div>';
+
+      const title = count === 1 ? 'Invite User' : 'Invite Users';
+      const message =
+        count === 1
+          ? `Send an invitation to <strong>${displayNamesList}</strong>?${emailList}${smsList}`
+          : `The following invitations will be sent: <strong>${displayNamesList}</strong>?${emailList}${smsList}`;
+
+      window.showDeleteConfirm({
+        title: title,
+        message: message,
+        warning: 'SMS invitations will only be sent when no email is available.',
+        url: '/user-management/users/invite/',
+        method: 'POST',
+        body: JSON.stringify({ ids: selectedUsers.map(u => u.id).join(',') }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: 'Send invite',
+        confirmButtonClass: 'um-btn-lime',
+        showFullScreenLoader: true,
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    });
   }
 
   function initDeactivateUsers() {
@@ -676,5 +760,6 @@
     initAssignUsersToWorkGroups();
     initDeleteUsers();
     initDeactivateUsers();
+    initInviteUsers();
   });
 })();

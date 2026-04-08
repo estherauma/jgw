@@ -1108,3 +1108,85 @@ class BulkDeactivateUsersView(View):
               return JsonResponse({"ok": False, "error": str(e)}, status=403)
         except Exception:
                 return JsonResponse({"ok": False, "error": "An error occurred while deactivating users. Please try again."}, status=500)
+
+
+class BulkInviteUsersView(View):
+    def post(self, request):
+        current_user = request.user
+        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+            return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
+
+        try:
+            data = json.loads(request.body)
+            ids_param = data.get('ids', '')
+            raw_ids = [int(uid.strip()) for uid in ids_param.split(',') if uid.strip()]
+        except (json.JSONDecodeError, AttributeError):
+            return JsonResponse({"ok": False, "error": "Invalid JSON data."}, status=400)
+
+        if not raw_ids:
+            return JsonResponse({"ok": False, "error": "Select at least one user."}, status=400)
+
+        invite_sms = []
+        invited_emails = []
+        failed_contacts = []
+
+        try:
+            with transaction.atomic():
+                for user_id in raw_ids:
+                    user = User.objects.filter(id=user_id, is_deleted=False).first()
+                    if not user or (not user.email and not user.phone_number):
+                        continue
+                    if is_org_admin(current_user):
+                        user_org = user.organisation_data.first()
+                        if not has_org_access(
+                            current_user,
+                            user_org,
+                            request=request,
+                            flag_name="can_invite_user",
+                        ):
+                            raise PermissionError(
+                                "You do not have permission to invite one or more of the selected users."
+                            )
+                        
+                    invited = send_invitation(request, user)
+
+                    if invited:          
+                        if user.email:
+                            invited_emails.append(user.email)
+                        else:
+                            invite_sms.append(user.phone_number)
+
+                    else:
+                        if user.email:
+                            failed_contacts.append(user.email)
+                        elif user.phone_number:
+                            failed_contacts.append(user.phone_number)
+
+            if len(invited_emails):
+                messages.success(
+                    request,
+                    f"Sent email invitations to {', '.join(invited_emails)}.",
+                )
+            if len(invite_sms):
+                messages.success(
+                    request,
+                    f"Sent SMS invitations to {', '.join(invite_sms)} user(s)."
+                )
+            if len(failed_contacts):
+                if not len(invited_emails) and not len(invite_sms):
+                    return JsonResponse(
+                        {"ok": False, "error": "No invitations were sent."},
+                        status=400,
+                    )
+                messages.warning(
+                    request,
+                    f"Failed to invite the following users: {', '.join(failed_contacts)}. You may not have permission to invite those users or they may not have valid contact information.",
+                ) 
+            return JsonResponse({"ok": True})
+        except PermissionError as e:
+            return JsonResponse({"ok": False, "error": str(e)}, status=403)
+        except Exception:
+            return JsonResponse(
+                {"ok": False, "error": "An error occurred while sending invitations. Please try again."},
+                status=500,
+            )

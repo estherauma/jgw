@@ -279,6 +279,16 @@ body .modal-backdrop.show {
     color: #193560;
 }
 
+.um-fullscreen-loader {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.75);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .um-dropdown-item {
     color: #37C1E3 !important;
     font-weight: 400;
