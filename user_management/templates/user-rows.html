@@ -12,7 +12,6 @@
         </td>
         <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
         <td>{{ u.email }}</td>
-        <td>{% if u.access_type %}{{ u.get_access_type_display }}{% else %}—{% endif %}</td>
         {% if not selected_org_id %}
         <td>
             {% for org in u.organisation_data.all %}
