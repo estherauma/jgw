@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.db import transaction, IntegrityError
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
+from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
@@ -25,6 +25,7 @@ from .models import (
     OrganisationRole,
     OrganisationRoleAssignment,
     WorkGroup,
+    ShortLink,
 )
 from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
@@ -197,6 +198,15 @@ def search_users(request):
         request=request,
     )
     return JsonResponse({"ok": True, "html": html})
+
+
+def short_link_redirect(request, code):
+    link = ShortLink.objects.filter(code=code).first()
+    if not link:
+        return HttpResponseNotFound("Link not found.")
+    if link.is_expired():
+        return HttpResponseGone("This link has expired.")
+    return redirect(link.target_url)
 
 
 class CreateOrganisationView(View):
@@ -406,6 +416,7 @@ class CreateAppUserView(View):
                     user.updated_by = request.user
                     password = form.cleaned_data.get("password")
                     role = form.cleaned_data.get("role")
+                    invite_sent = False
 
                     if password:
                         user.set_password(password)
@@ -417,7 +428,10 @@ class CreateAppUserView(View):
                     apply_role_to_user(user, organisation, role)
                     user.organisation_data.add(organisation)
                     if form.cleaned_data.get("send_invite"):
-                        send_invitation(request, user)
+                        invite_sent = send_invitation(request, user)
+                        if invite_sent:
+                            messages.success(request, f"An invitation was sent to {user.email or user.phone_number} successfully.")
+
             except Exception as e:
                 return JsonResponse(
                     {"ok": False, "error": "Could not save user. Please try again."},
@@ -441,6 +455,7 @@ class CreateDashboardUserView(View):
             user.created_by = request.user
             user.updated_by = request.user
             password = form.cleaned_data.get("password")
+            invite_sent = False
             if password and is_58_admin(request.user) and user.id != request.user.id:
                 return JsonResponse(
                     {
@@ -465,8 +480,10 @@ class CreateDashboardUserView(View):
             if selected_groups:
                 user.groups.add(*selected_groups)
             if form.cleaned_data.get("send_invite"):
-                send_invitation(request, user)
-            return JsonResponse({"ok": True})
+                invite_sent = send_invitation(request, user)
+            if invite_sent:
+                messages.success(request, "Invitation sent successfully.")
+            return JsonResponse({"ok": True, "invite_sent": invite_sent})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
