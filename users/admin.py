@@ -8,7 +8,7 @@ class UserAdmin(ExportActionModelAdmin, admin.ModelAdmin):
     form = UserAdminForm
     list_display = ['email', 'first_name', 'last_name', 'role', 'is_active', 'is_staff']
     list_filter = ['role', 'is_active', 'is_staff']
-    search_fields = ['email', 'first_name', 'last_name']
+    search_fields = ['email', 'first_name', 'last_name', 'phone_number']
     readonly_fields = ('created_at_display', 'updated_at_display', 'total_logged_hours', 'deleted_at', 'deleted_by')
     fieldsets = (
         ('Personal Information', {
