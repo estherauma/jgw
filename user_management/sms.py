@@ -14,15 +14,15 @@ logger = getLogger("djangoDebug")
 
 
 def send_sms_invitation(request, user, days_to_expiry=3):
+    if not getattr(settings, "VERIFY_PHONE_NUMBER", False):
+        return False
     if not user or not user.phone_number:
         return False
-    
 
     account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", None)
     auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
     from_number = getattr(settings, "TWILIO_FROM_NUMBER", None)
     if not account_sid or not auth_token or not from_number:
-        print("printing: Twilio credentials are not configured.")
         logger.error("Twilio credentials are not configured.")
         return False
 
@@ -50,7 +50,7 @@ def send_sms_invitation(request, user, days_to_expiry=3):
                 reverse("short_link", args=(short_link.code,))
             )
         except Exception as exc:
-            print(f"short link creation failed: {exc}")
+            logger.error("short link creation failed: %s", exc)
             shortened_reset_link = reset_link
         org_text = f"You have been added to {organisation.name}. " if organisation else ""
         message = (
@@ -62,6 +62,5 @@ def send_sms_invitation(request, user, days_to_expiry=3):
         client.messages.create(**params)
         return True
     except Exception as exc:
-        print(f"send_sms_invitation failed for {user.phone_number}: {exc}")
-        logger.exception("send_invitation sms failed for %s: %s", user.phone_number, exc)
+        logger.exception("send_sms_invitation failed for %s: %s", user.phone_number, exc)
         return False
