@@ -15,33 +15,53 @@ def _chapter_label(entry):
     return "Others"
 
 
-def _build_destination_origin_chapter_tree(entries):
+def _build_merged_destination_origin_chapter_tree(all_entries, unique_entries):
     """
-    Build a tree: destination -> origin -> chapter leaves with value (count).
-    Returns list of destination nodes, each with children = list of origin nodes,
-    each origin with children = list of { name, value } for chapters.
+    Merge total (all events) and unique (distinct device) counts per (destination, origin, chapter).
+    Each chapter leaf: { name, total_views, unique_views }.
     """
-    tree = {}
-
-    for entry in entries:
+    totals = {}
+    for entry in all_entries:
         dest_name = entry.get("destination_text") or "Others"
         origin_name = entry.get("origin_text") or "Others"
         chapter_name = _chapter_label(entry)
-        count = entry["count"]
+        key = (dest_name, origin_name, chapter_name)
+        totals[key] = totals.get(key, 0) + entry["count"]
 
+    uniques = {}
+    for entry in unique_entries:
+        dest_name = entry.get("destination_text") or "Others"
+        origin_name = entry.get("origin_text") or "Others"
+        chapter_name = _chapter_label(entry)
+        key = (dest_name, origin_name, chapter_name)
+        uniques[key] = uniques.get(key, 0) + entry["count"]
+
+    tree = {}
+    for key in set(totals.keys()) | set(uniques.keys()):
+        dest_name, origin_name, chapter_name = key
         if dest_name not in tree:
             tree[dest_name] = {}
         if origin_name not in tree[dest_name]:
             tree[dest_name][origin_name] = {}
-        tree[dest_name][origin_name][chapter_name] = tree[dest_name][origin_name].get(chapter_name, 0) + count
+        tree[dest_name][origin_name][chapter_name] = {
+            "total_views": totals.get(key, 0),
+            "unique_views": uniques.get(key, 0),
+        }
 
     destination_nodes = []
     for dest_name in sorted(tree.keys()):
         origin_children = []
         for origin_name in sorted(tree[dest_name].keys()):
+            chapters = tree[dest_name][origin_name]
             chapter_children = [
-                {"name": ch_name, "value": ch_count}
-                for ch_name, ch_count in sorted(tree[dest_name][origin_name].items(), key=lambda x: -x[1])
+                {
+                    "name": ch_name,
+                    "total_views": data["total_views"],
+                    "unique_views": data["unique_views"],
+                }
+                for ch_name, data in sorted(
+                    chapters.items(), key=lambda x: -x[1]["total_views"]
+                )
             ]
             origin_children.append({"name": origin_name, "children": chapter_children})
         destination_nodes.append({"name": dest_name, "children": origin_children})
@@ -52,7 +72,7 @@ def _build_destination_origin_chapter_tree(entries):
 def get_chapters_opened_data(**filters):
     """
     Return chapter opened data as a tree for ECharts tree chart.
-    Root -> [Total views, Unique views] -> destination -> origin -> chapter titles with value (count).
+    Root (Chapter Views) -> destination -> origin -> chapter leaves with total_views and unique_views.
     """
     chapters_opened_queryset = generic_chapters_opened_filtered_queryset(
         queryset=ChaptersOpened.objects.exclude(device_id__isnull=True), **filters
@@ -83,15 +103,11 @@ def get_chapters_opened_data(**filters):
     all_entries = list(chapters_opened_all)
     unique_entries = list(chapters_opened_unique)
 
-    total_views_tree = _build_destination_origin_chapter_tree(all_entries)
-    unique_views_tree = _build_destination_origin_chapter_tree(unique_entries)
+    merged_nodes = _build_merged_destination_origin_chapter_tree(all_entries, unique_entries)
 
     tree = {
-        "name": "views",
-        "children": [
-            {"name": "Total views", "children": total_views_tree},
-            {"name": "Unique views", "children": unique_views_tree},
-        ],
+        "name": "Chapter Views",
+        "children": merged_nodes,
     }
 
     sums_all = {}

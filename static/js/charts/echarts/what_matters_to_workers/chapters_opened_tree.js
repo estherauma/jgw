@@ -1,7 +1,7 @@
 /**
  * ECharts tree chart for chapters opened data.
- * Accepts tree data: { name, children } with optional leaf nodes { name, value }.
- * Data can be the full API response { tree, labels, ... } or the tree object directly.
+ * Hierarchy: Chapter Views (root) -> User Destination -> User Origin Country -> Chapter titles view counts
+ * (headings) over destination / origin / chapter data; leaves carry total_views and unique_views.
  */
 function initChaptersOpenedTreeChart(data, customContainerId) {
     if (typeof echarts === 'undefined') {
@@ -9,6 +9,9 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
     }
 
     const treeData = data && data.tree ? data.tree : data;
+    if (treeData.name === 'Chapter views') {
+        treeData.name = 'Chapter Views';
+    }
     const containerId = customContainerId || 'chapters-opened-tree-chart-id';
     const chartDom = document.getElementById(containerId);
 
@@ -53,7 +56,15 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
         return String(n);
     }
 
+    function isChapterMetricLeaf(node) {
+        return node.total_views != null && node.total_views !== undefined;
+    }
+
     function computeNodeTotals(node) {
+        if (isChapterMetricLeaf(node)) {
+            node.total = node.total_views;
+            return node.total;
+        }
         if (node.value != null && node.value !== undefined) {
             node.total = node.value;
             return node.total;
@@ -67,58 +78,120 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
         return node.total;
     }
     computeNodeTotals(treeData);
-    treeData.children.forEach(function (child, index) {
-        if (index % 2 === 0) {
-            child.collapsed = true;
-        }
-    });
 
-    treeData.children.forEach(function (child) {
-        if (child.children && child.children.length > 0) {
-            child.children.unshift({
-                name: 'User Destination',
-                isLayerTitle: true
-            });
-        }
+    var isLegacyTotalUniqueBranch = treeData.children.some(function (c) {
+        return c.name === 'Total views' || c.name === 'Unique views';
     });
+    if (isLegacyTotalUniqueBranch) {
+        treeData.children.forEach(function (child) {
+            if (child.children && child.children.length > 0) {
+                child.children.unshift({
+                    name: 'User Destination',
+                    isLayerTitle: true
+                });
+            }
+        });
+    } else if (treeData.children && treeData.children.length > 0) {
+        treeData.children.unshift({
+            name: 'User Destination',
+            isLayerTitle: true
+        });
+    }
 
-    treeData.children.forEach(function (middleChild) {
-        if (middleChild.children) {
-            middleChild.children.forEach(function (grandchild) {
-                if (grandchild.children && grandchild.children.length > 0 && !grandchild.isLayerTitle) {
-                    grandchild.children.unshift({
-                        name: 'User Origin Country',
-                        isLayerTitle: true
-                    });
+    function forEachRealDestination(fn) {
+        function walkDestinations(children) {
+            if (!children || !children.length) {
+                return;
+            }
+            children.forEach(function (node) {
+                if (node.isLayerTitle) {
+                    return;
+                }
+                if (node.children && node.children.length) {
+                    fn(node);
                 }
             });
         }
+        if (isLegacyTotalUniqueBranch) {
+            treeData.children.forEach(function (branch) {
+                walkDestinations(branch.children);
+            });
+        } else {
+            walkDestinations(treeData.children);
+        }
+    }
+
+    // User Origin Country labels the column of origin nodes under each destination (not the chapter list).
+    forEachRealDestination(function (destinationNode) {
+        destinationNode.children.unshift({
+            name: 'User Origin Country',
+            isLayerTitle: true
+        });
     });
 
-    treeData.children.forEach(function (middleChild) {
-        if (middleChild.children) {
-            middleChild.children.forEach(function (grandchild) {
-                if (grandchild.children) {
-                    grandchild.children.forEach(function (greatGrandchild) {
-                        if (greatGrandchild.children && greatGrandchild.children.length > 0 && !greatGrandchild.isLayerTitle) {
-                            greatGrandchild.children.unshift({
-                                name: 'Chapter titles viewed',
-                                isLayerTitle: true
-                            });
-                        }
-                    });
-                }
-            });
-        }
+    // Chapter titles view counts labels the leaf chapter rows under each origin.
+    forEachRealDestination(function (destinationNode) {
+        destinationNode.children.forEach(function (originNode) {
+            if (originNode.isLayerTitle) {
+                return;
+            }
+            if (originNode.children && originNode.children.length > 0) {
+                originNode.children.unshift({
+                    name: 'Chapter titles view counts',
+                    isLayerTitle: true
+                });
+            }
+        });
     });
     treeData.children.forEach(function (child) {
         assignDepth(child, 1);
     });
     computeNodeTotals(treeData);
 
+    function collapseAllButFirstDestinationInList(children) {
+        if (!children || !children.length) {
+            return;
+        }
+        var firstBranchExpanded = false;
+        children.forEach(function (node) {
+            if (node.isLayerTitle) {
+                return;
+            }
+            if (!node.children || !node.children.length) {
+                return;
+            }
+            if (!firstBranchExpanded) {
+                firstBranchExpanded = true;
+                delete node.collapsed;
+            } else {
+                node.collapsed = true;
+            }
+        });
+    }
+
+    if (isLegacyTotalUniqueBranch) {
+        treeData.children.forEach(function (branch) {
+            if (branch.children && branch.children.length) {
+                collapseAllButFirstDestinationInList(branch.children);
+            }
+        });
+    } else {
+        collapseAllButFirstDestinationInList(treeData.children);
+    }
+
     function setDisplayTitles(node) {
         if (node.isLayerTitle) {
             node.displayTitle = node.name;
+        } else if (isChapterMetricLeaf(node)) {
+            const tv = node.total_views;
+            const uv = node.unique_views != null ? node.unique_views : 0;
+            node.displayTitle =
+                node.name +
+                '  ·  ' +
+                formatCount(tv) +
+                ' total / ' +
+                formatCount(uv) +
+                ' unique';
         } else {
             const total = node.total != null ? node.total : (node.value != null ? node.value : 0);
             node.displayTitle = node.name + (total > 0 ? '  ·  ' + formatCount(total) : '');
@@ -132,7 +205,7 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
 
     function getNodeColor(node) {
         if (node.isLayerTitle) return 'transparent';
-        if (node.value != null && node.value !== undefined) return leafColor;
+        if (isChapterMetricLeaf(node) || (node.value != null && node.value !== undefined)) return leafColor;
         const d = node.depth != null ? node.depth : 0;
         return levelColors[Math.min(d, levelColors.length - 1)];
     }
@@ -153,6 +226,18 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
             formatter: function (params) {
                 const node = params.data;
                 if (node.isLayerTitle) return node.name;
+                if (isChapterMetricLeaf(node)) {
+                    return (
+                        '<strong>' +
+                        node.name +
+                        '</strong><br/>' +
+                        'Total views: ' +
+                        Number(node.total_views).toLocaleString() +
+                        '<br/>' +
+                        'Unique views: ' +
+                        Number(node.unique_views).toLocaleString()
+                    );
+                }
                 const title = node.displayTitle || node.name;
                 const total = node.total != null ? node.total : node.value;
                 if (total != null && total !== undefined) {
@@ -165,11 +250,11 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
             {
                 type: 'tree',
                 data: [treeData],
-                name: 'Chapter views',
+                name: 'Chapter Views',
                 top: 48,
-                left: '5%',
+                left: '12%',
                 bottom: '2%',
-                right: '25%',
+                right: '35%',
                 symbolSize: function (value, params) {
                     return (params.data && params.data.isLayerTitle) ? 0 : 10;
                 },
@@ -187,8 +272,22 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
                     fontSize: 12,
                     color: labelColor,
                     fontWeight: 500,
+                    rich: {
+                        layerTitle: {
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: '#1a365d',
+                            padding: [3, 8],
+                            backgroundColor: 'rgba(49, 130, 206, 0.12)',
+                            borderRadius: 4
+                        }
+                    },
                     formatter: function (params) {
-                        return params.data.displayTitle || params.data.name;
+                        const d = params.data;
+                        if (d.isLayerTitle) {
+                            return '{layerTitle|' + (d.displayTitle != null ? d.displayTitle : d.name) + '}';
+                        }
+                        return d.displayTitle || d.name;
                     }
                 },
                 leaves: {
@@ -200,8 +299,12 @@ function initChaptersOpenedTreeChart(data, customContainerId) {
                         color: labelColorLight,
                         rich: {
                             layerTitle: {
-                                fontWeight: 'bold',
-                                color: labelColor
+                                fontSize: 13,
+                                fontWeight: 700,
+                                color: '#1a365d',
+                                padding: [3, 8],
+                                backgroundColor: 'rgba(49, 130, 206, 0.12)',
+                                borderRadius: 4
                             }
                         },
                         formatter: function (params) {
