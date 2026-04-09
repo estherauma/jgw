@@ -431,7 +431,8 @@ class CreateAppUserView(View):
                         invite_sent = send_invitation(request, user)
                         if invite_sent:
                             messages.success(request, f"An invitation was sent to {user.email or user.phone_number} successfully.")
-
+                        else:
+                            messages.warning(request, "User was created but the invitation could not be sent. Please check the contact details and try sending the invitation again.")
             except Exception as e:
                 return JsonResponse(
                     {"ok": False, "error": "Could not save user. Please try again."},
@@ -482,7 +483,9 @@ class CreateDashboardUserView(View):
             if form.cleaned_data.get("send_invite"):
                 invite_sent = send_invitation(request, user)
             if invite_sent:
-                messages.success(request, "Invitation sent successfully.")
+                messages.success(request, f"Invitation sent successfully to {user.email}.")
+            else:
+                messages.warning(request, "User was created but the invitation could not be sent. Please check the contact details and try sending the invitation again.")
             return JsonResponse({"ok": True, "invite_sent": invite_sent})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
