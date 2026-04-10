@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.db.models import Q, Prefetch
+from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
@@ -61,58 +61,25 @@ def org_access_denied():
         status=403,
     )
 
-def get_users_queryset():
-    role_assignments_prefetch = Prefetch(
-        "org_roles",
-        queryset=OrganisationRoleAssignment.objects.select_related("role", "organisation"),
-    )
-    return (
-        User.objects.filter(is_deleted=False)
-        .prefetch_related(
-            "organisation_data",
-            "work_groups",
-            "groups",
-            role_assignments_prefetch,
-        )
-        .order_by("email")
-        .distinct()
-    )
-
 def get_user_role_display(user, selected_org=None):
     if user.is_superuser:
         return "Super Admin"
 
-    if selected_org:
-        assignment = next(
-            (
-                item
-                for item in user.org_roles.all()
-                if item.organisation_id == selected_org.id
-            ),
-            None,
-        )
-        if assignment and assignment.role:
-            return assignment.role.name
-
     group_names = {group.name for group in user.groups.all()}
-
     if "58_admin" in group_names:
         return "Fiftyeight Admin"
+    if "worker" in group_names:
+         return "Worker"
+    for assignment in user.org_roles.all():
+        if assignment.role and assignment.role.name.lower() == "worker":
+            return "Worker"
     if "org_admin" in group_names:
         return "Administrator" if selected_org else "Org Admin"
-    if "worker" in group_names:
-        return "Worker"
     if "org_staff" in group_names:
-        if not selected_org:
-            role_names = []
-            for assignment in user.org_roles.all():
-                role = assignment.role
-                if role and not role.is_system and role.name not in role_names:
-                    role_names.append(role.name)
-            if role_names:
-                return ", ".join(role_names)
+        for assignment in user.org_roles.all():
+            if assignment.role and not assignment.role.is_system:
+                return assignment.role.name
         return "Org Staff"
-
     return "—"
 
 def attach_user_role_display(users, selected_org=None):
@@ -127,7 +94,18 @@ def attach_user_role_display(users, selected_org=None):
 def user_management(request):
     user = request.user
     organizations = get_allowed_orgs(user).order_by("name")
-    users = get_users_queryset()
+    users = (
+        User.objects.filter(is_deleted=False)
+        .prefetch_related(
+            "groups",
+            "organisation_data",
+            "work_groups",
+            "org_roles__role",
+            "org_roles__organisation",
+        )
+        .order_by("email")
+        .distinct()
+    )
     if is_org_admin_or_staff(user):
         users = users.filter(organisation_data__in=organizations)
 
@@ -220,17 +198,27 @@ def search_users(request):
     user = request.user
     query = request.GET.get("q", "").strip()
     selected_org_id = request.GET.get("selected_org_id")
-    users = get_users_queryset()
-    selected_org = None
+    users = (
+        User.objects.filter(is_deleted=False)
+        .prefetch_related(
+            "groups",
+            "organisation_data",
+            "work_groups",
+            "org_roles__role",
+            "org_roles__organisation",
+        )
+        .order_by("email")
+        .distinct()
+    )
 
     if is_org_admin_or_staff(user):
         allowed_orgs = get_allowed_orgs(user)
         users = users.filter(organisation_data__in=allowed_orgs).distinct()
 
     if selected_org_id:
-        selected_org = get_allowed_orgs(user).filter(id=selected_org_id).first()
-        if selected_org:
-            users = users.filter(organisation_data=selected_org).distinct()
+        organisation = get_allowed_orgs(user).filter(id=selected_org_id).first()
+        if organisation:
+            users = users.filter(organisation_data=organisation).distinct()
         else:
             users = users.none()
 
@@ -240,7 +228,7 @@ def search_users(request):
             | Q(last_name__icontains=query)
             | Q(email__icontains=query)
         )
-    users = attach_user_role_display(users, selected_org=selected_org)
+    users = attach_user_role_display(users, selected_org=organisation)
 
     html = render_to_string(
         "user-rows.html",
