@@ -207,11 +207,6 @@
                                     Add to department
                                 </button>
                                 {% endflag %}
-                                
-                                <button class="dropdown-item um-dropdown-item" 
-                                    type="button" data-users-delete disabled>
-                                    Delete User(s)
-                                </button>
                                 {% endif %}
                                 {% flag 'can_deactivate_user' %}
                                 <button
@@ -220,6 +215,12 @@
                                     data-deactivate-users                                                       
                                     disabled>
                                     Deactivate User(s)
+                                </button>
+                                {% endflag %}
+                                {% flag 'can_delete_user' %}
+                                <button class="dropdown-item um-dropdown-item" 
+                                    type="button" data-users-delete disabled>
+                                    Delete User(s)
                                 </button>
                                 {% endflag %}
                             </div>
@@ -287,6 +288,11 @@
             {% endflag %}
             {% endif %}
         </div>
+    </div>
+    <!-- full screen loader -->
+    <div class="um-fullscreen-loader d-none" data-um-loader>
+        <div class="um-loader-spinner" role="status" aria-live="polite" aria-label="Loading"></div>
+        <span class="um-loader-text">Please wait...</span>
     </div>
 </div>
 

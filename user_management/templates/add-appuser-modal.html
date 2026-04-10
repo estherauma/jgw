@@ -29,6 +29,13 @@
                         Organisation: <span class="fw-bold" data-appuser-org-label>None selected</span>
                     </div>
                     {% endflag %}
+                    <label class="um-field form-group um-field-inline">
+                        {{ form.send_invite }}<span>Send invitation email/sms</span>
+                        <div class="text-danger small" data-error-for="send_invite"></div>
+                        {% if form.send_invite.errors %}
+                            <div class="text-danger small">{{ form.send_invite.errors }}</div>
+                        {% endif %}
+                    </label>
                     <label class="um-field form-group um-field-full">
                         <span>Role</span>
                         {{ form.role }}
@@ -66,24 +73,6 @@
                             </div>
                         </div>
                     </div>
-                    {% flag 'can_edit_user_password' %}
-                    <label class="um-field form-group">
-                        <span>Password (optional)</span>
-                        {{ form.password }}
-                        <div class="text-danger small" data-error-for="password"></div>
-                        {% if form.password.errors %}
-                            <div class="text-danger small">{{ form.password.errors }}</div>
-                        {% endif %}
-                    </label>
-                    <label class="um-field form-group">
-                        <span>Confirm password (optional)</span>
-                        {{ form.password_confirm }}
-                        <div class="text-danger small" data-error-for="password_confirm"></div>
-                        {% if form.password_confirm.errors %}
-                            <div class="text-danger small">{{ form.password_confirm.errors }}</div>
-                        {% endif %}
-                    </label>
-                    {% endflag %}
                     <label class="um-field form-group">
                         <span>First name (optional)</span>
                         {{ form.first_name }}

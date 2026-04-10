@@ -154,6 +154,7 @@ class DashboardUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=False)
     password_confirm = forms.CharField(widget=forms.PasswordInput, required=False)
     is_active = forms.BooleanField(required=False, initial=True)
+    send_invite = forms.BooleanField(required=False, initial=True)
 
     class Meta:
         model = User
@@ -202,6 +203,9 @@ class DashboardUserForm(forms.ModelForm):
             {"class": "form-control um-input", "placeholder": "Confirm password"}
         )
         self.fields["is_active"].widget = forms.CheckboxInput(
+            attrs={"class": "form-check-input"}
+        )
+        self.fields["send_invite"].widget = forms.CheckboxInput(
             attrs={"class": "form-check-input"}
         )
         if orgs_qs is not None:
@@ -256,6 +260,7 @@ class AppUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=False)
     password_confirm = forms.CharField(widget=forms.PasswordInput, required=False)
     phone_country_iso = forms.ChoiceField(required=False)
+    send_invite = forms.BooleanField(required=False, initial=True)
 
     class Meta:
         model = User
@@ -302,6 +307,9 @@ class AppUserForm(forms.ModelForm):
                 "class": "form-control um-input",
             }
         )
+        self.fields["send_invite"].widget = forms.CheckboxInput(
+            attrs={"class": "form-check-input"}
+        )
         if organisation:
             self.fields["role"].queryset = OrganisationRole.objects.filter(
                 organisation=organisation
@@ -311,7 +319,9 @@ class AppUserForm(forms.ModelForm):
             self.fields["work_groups"].queryset = work_groups_qs
 
     def clean_email(self):
-        email = self.cleaned_data.get("email", "").strip().lower()
+        email = (self.cleaned_data.get("email") or "").strip().lower()
+        if not email:
+            return None
         qs = User.objects.filter(email__iexact=email)
 
         if self.instance and self.instance.pk:

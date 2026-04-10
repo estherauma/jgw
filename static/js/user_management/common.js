@@ -127,6 +127,16 @@
 
   window.handleErrors = handleErrors;
 
+  function toggleFullScreenLoader(show) {
+    var loader = document.querySelector('[data-um-loader]');
+    if (!loader) {
+      return;
+    }
+    loader.classList.toggle('d-none', !show);
+  }
+
+  window.toggleFullScreenLoader = toggleFullScreenLoader;
+
 
   function showDeleteConfirm(options) {
     var modal = document.getElementById('confirm-modal');

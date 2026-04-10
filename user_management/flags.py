@@ -100,11 +100,6 @@ UM_FLAG_DEFS = [
         "condition": "org_admin",
     },
     {
-        "name": "can_edit_user_password",
-        "label": "Edit user passwords",
-        "condition": "org_admin",
-    },
-    {
         "name": "can_activate_user",
         "label": "Activate users",
         "condition": "org_admin",
@@ -142,6 +137,11 @@ UM_FLAG_DEFS = [
     {
         "name": "can_assign_role_permissions",
         "label": "Assign role permissions",
+        "condition": "org_admin",
+    },
+    {
+        "name": "can_delete_user",
+        "label": "Delete users",
         "condition": "org_admin",
     },
 

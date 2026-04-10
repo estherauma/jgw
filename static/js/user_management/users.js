@@ -62,6 +62,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         var data = null;
         if (window.postFormJson) {
@@ -80,6 +83,9 @@
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (submitButton) {
           submitButton.disabled = false;
         }
@@ -117,6 +123,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         if (window.postFormJson) {
           await window.postFormJson(form);
@@ -128,6 +137,9 @@
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (submitButton) {
           submitButton.disabled = false;
         }
@@ -496,20 +508,42 @@
     }
 
     deleteBtn.addEventListener('click', function () {
-      const selectedIds = getSelectedUserIds();
-      const count = selectedIds.length;
+      const checkedBoxes = document.querySelectorAll('[data-user-select]:checked');
       
-      if (!selectedIds.length) {
+      if (checkedBoxes.length === 0) {
         alert('Select at least one user to delete.');
         return;
       }
 
+      const selectedUsers = Array.from(checkedBoxes).map(cb => {
+        return {
+          id: cb.value,
+          first_name: cb.getAttribute('data-first-name') || '',
+          last_name: cb.getAttribute('data-last-name') || '',
+          email: cb.getAttribute('data-email') || ''
+        };
+      });
+
+      const count = selectedUsers.length;
+      let deleteMessage = '';
+      let deleteTitle = '';
+
+      if (count === 1) {
+        const userDisplayName = getUserDisplayname(selectedUsers[0]);
+        deleteTitle = `Delete User`;
+        deleteMessage = `Are you sure you want to delete <strong>${userDisplayName}</strong>?`;
+      } else {
+        const displayNamesList = selectedUsers.map(user => getUserDisplayname(user)).join(", ");
+        deleteTitle = `Delete Users`;
+        deleteMessage = `Are you sure you want to delete the following users: <strong>${displayNamesList}</strong>?`;
+      }
+
       window.showDeleteConfirm({
-        title: `Delete ${count === 1 ? 'User' : 'Users'}`,
-        message: `Are you sure you want to delete ${count === 1? 'the selected user': `the ${count} selected users`}?`,
+        title: deleteTitle,
+        message: deleteMessage,
         url: '/user-management/users/delete/',
         method: 'POST',
-        body: JSON.stringify({ ids: selectedIds.join(',') }),
+        body: JSON.stringify({ ids: selectedUsers.map(u => u.id).join(',') }),
         headers: {
           'Content-Type': 'application/json',
           },

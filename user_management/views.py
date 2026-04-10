@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.db import transaction, IntegrityError
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
+from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
@@ -25,6 +25,7 @@ from .models import (
     OrganisationRole,
     OrganisationRoleAssignment,
     WorkGroup,
+    ShortLink,
 )
 from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
@@ -238,6 +239,15 @@ def search_users(request):
     return JsonResponse({"ok": True, "html": html})
 
 
+def short_link_redirect(request, code):
+    link = ShortLink.objects.filter(code=code).first()
+    if not link:
+        return HttpResponseNotFound("Link not found.")
+    if link.is_expired():
+        return HttpResponseGone("This link has expired.")
+    return redirect(link.target_url)
+
+
 class CreateOrganisationView(View):
     def post(self, request):
         if not is_super_or_58_admin(request.user):
@@ -445,6 +455,7 @@ class CreateAppUserView(View):
                     user.updated_by = request.user
                     password = form.cleaned_data.get("password")
                     role = form.cleaned_data.get("role")
+                    invite_sent = False
 
                     if password:
                         user.set_password(password)
@@ -455,7 +466,12 @@ class CreateAppUserView(View):
                     form.save_m2m()
                     apply_role_to_user(user, organisation, role)
                     user.organisation_data.add(organisation)
-                    send_invitation(request, user)
+                    if form.cleaned_data.get("send_invite"):
+                        invite_sent = send_invitation(request, user)
+                        if invite_sent:
+                            messages.success(request, f"An invitation was sent to {user.email or user.phone_number} successfully.")
+                        else:
+                            messages.warning(request, "User was created but the invitation could not be sent. Please check the contact details and try sending the invitation again.")
             except Exception as e:
                 return JsonResponse(
                     {"ok": False, "error": "Could not save user. Please try again."},
@@ -479,6 +495,7 @@ class CreateDashboardUserView(View):
             user.created_by = request.user
             user.updated_by = request.user
             password = form.cleaned_data.get("password")
+            invite_sent = False
             if password and is_58_admin(request.user) and user.id != request.user.id:
                 return JsonResponse(
                     {
@@ -502,8 +519,13 @@ class CreateDashboardUserView(View):
             selected_groups = form.cleaned_data.get("groups")
             if selected_groups:
                 user.groups.add(*selected_groups)
-            send_invitation(request, user)
-            return JsonResponse({"ok": True})
+            if form.cleaned_data.get("send_invite"):
+                invite_sent = send_invitation(request, user)
+            if invite_sent:
+                messages.success(request, f"Invitation sent successfully to {user.email}.")
+            else:
+                messages.warning(request, "User was created but the invitation could not be sent. Please check the contact details and try sending the invitation again.")
+            return JsonResponse({"ok": True, "invite_sent": invite_sent})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
@@ -1082,7 +1104,7 @@ class BulkDeleteUsersView(View):
 
             if deletion_count and failed_count:
                 messages.warning(request, f"{failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
-            messages.success(request, f"Successfully deleted {deletion_count} users.")
+            messages.success(request, f"Successfully deleted {deletion_count} user(s).")
             return JsonResponse({"ok": True})
             
         except PermissionError as e:
@@ -1140,7 +1162,7 @@ class BulkDeactivateUsersView(View):
 
             if deactivation_count and failed_count:
                 messages.warning(request, f"{failed_count} user(s) could not be deactivated. You may not have permission to deactivate those users.")
-            messages.success(request, f"Successfully deactivated {deactivation_count} users.")
+            messages.success(request, f"Successfully deactivated {deactivation_count} user(s).")
             return JsonResponse({"ok": True})
             
         except PermissionError as e:

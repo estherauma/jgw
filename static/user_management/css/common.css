@@ -333,6 +333,36 @@ body .modal-backdrop.show {
     padding: 10px 16px;
     margin: 10px 20px 0;
 }
+ .um-fullscreen-loader {
+    position: fixed;
+    inset: 0;
+    background: rgba(25, 53, 96, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+.um-loader-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #ffffff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: um-spin 0.8s linear infinite;
+}
+.um-loader-text {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+@keyframes um-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 .um-checkbox-list ul {
     list-style: none;

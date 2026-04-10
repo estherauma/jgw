@@ -166,16 +166,16 @@ function initPreferencesMonthlyUsersChart(preferenceMonthlyUsersChartData, month
                 symbolSize: 6,
                 lineStyle: { width: 3, color: cumulativeLineColor },
                 itemStyle: { color: cumulativeLineColor },
-                label: {
-                    show: true,
-                    position: 'top',
-                    color: '#193560',
-                    fontWeight: 'bold',
-                    fontSize: 12,
-                    formatter: function(params) {
-                        return params.value;
-                    }
-                },
+                // label: {
+                //     show: true,
+                //     position: 'top',
+                //     color: '#193560',
+                //     fontWeight: 'bold',
+                //     fontSize: 12,
+                //     formatter: function(params) {
+                //         return params.value;
+                //     }
+                // },
                 emphasis: { focus: 'series' }
             }
         ]

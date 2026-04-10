@@ -4,6 +4,7 @@ from .models import (
     OrganisationRole,
     OrganisationRoleAssignment,
     OrganisationRolePermission,
+    ShortLink,
     WorkGroup,
 )
 
@@ -33,3 +34,10 @@ class OrganisationRoleAssignmentAdmin(admin.ModelAdmin):
     list_display = ("user", "organisation", "role")
     list_select_related = ("user", "organisation", "role")
     search_fields = ("user__email", "organisation__name", "role__name")
+
+
+@admin.register(ShortLink)
+class ShortLinkAdmin(admin.ModelAdmin):
+    list_display = ("code", "target_url", "expires_at", "created_at")
+    list_filter = ("expires_at", "created_at")
+    search_fields = ("code", "target_url")
