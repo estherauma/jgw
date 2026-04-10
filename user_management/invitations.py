@@ -61,8 +61,6 @@ def build_invitation_context(request, user, days_to_expiry=3, include_short_link
 
 
 def send_invitation(request, user, days_to_expiry=3):
-    print("starting sendinggg>>>>>>>>>>>>>>>", user.email, user.phone_number)
-
     if not user or (not user.email and not user.phone_number):
         return False
  
@@ -102,6 +100,5 @@ def send_invitation(request, user, days_to_expiry=3):
         
         return True
     except Exception as exc:
-        print(f"send_invitation failed for {getattr(user, 'email', 'unknown')}: {exc}")
         logger.error("send_invitation failed for %s: %s", getattr(user, "email", "unknown"), exc)
         return False

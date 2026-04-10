@@ -23,7 +23,6 @@ def send_sms(to_number, message):
     
 
 def send_sms_invitation(user, context, days_to_expiry=3):
-    print(f"Preparing to send SMS ",getattr(settings, "VERIFY_PHONE_NUMBER", False))  # Debug print
     if not getattr(settings, "VERIFY_PHONE_NUMBER", False):
         return False
     if not user or not user.phone_number:
@@ -39,9 +38,8 @@ def send_sms_invitation(user, context, days_to_expiry=3):
             f"{org_text} Click the link to set your password and finish setup: {context['short_link']} "
             f"This link expires in {days_to_expiry} days."
         )
-        print(f"Sending SMS to {user.phone_number}: {message}")  # Debug print
+        logger.info("Sending SMS to %s: %s", user.phone_number, message)
         return send_sms(user.phone_number, message)
     except Exception as exc:
-        print(f"send_sms_invitation failed for {user.phone_number}: {exc}")
         logger.exception("send_sms_invitation failed for %s: %s", user.phone_number, exc)
         return False
