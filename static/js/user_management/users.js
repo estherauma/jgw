@@ -62,6 +62,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         var data = null;
         if (window.postFormJson) {
@@ -80,6 +83,9 @@
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (submitButton) {
           submitButton.disabled = false;
         }
@@ -117,6 +123,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         if (window.postFormJson) {
           await window.postFormJson(form);
@@ -128,6 +137,9 @@
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (submitButton) {
           submitButton.disabled = false;
         }

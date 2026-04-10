@@ -11,12 +11,16 @@ import mimetypes
 import os
 
 from users.models import UserInvitations
+from .sms import send_sms_invitation
 from users.tasks import send_email_notification
 
 def send_invitation(request, user, days_to_expiry=3):
 
-    if not user or not user.email:
+    if not user  or  (not user.email and not user.phone_number):
         return False
+    
+    if not user.email:
+        return send_sms_invitation(request, user, days_to_expiry=days_to_expiry)
     try:
         organisation = user.organisation_data.order_by("created_at").first()
 

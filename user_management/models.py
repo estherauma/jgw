@@ -1,5 +1,8 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
+import secrets
+import string
 from waffle.models import Flag
 
 from preference.models import (
@@ -94,3 +97,26 @@ class OrganisationRoleAssignment(models.Model):
                 name="unique_role_assignment_per_org",
             )
         ]
+
+
+class ShortLink(models.Model):
+    code = models.CharField(max_length=16, unique=True)
+    target_url = models.URLField(max_length=2048)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return self.expires_at is not None and self.expires_at <= timezone.now()
+
+    @classmethod
+    def create_url_short_link(cls, target_url, expires_at=None, length=8, max_attempts=5):
+        alphabet = string.ascii_letters + string.digits
+        for _ in range(max_attempts):
+            code = ''.join(secrets.choice(alphabet) for _ in range(length))
+            if not cls.objects.filter(code=code).exists():
+                return cls.objects.create(
+                    code=code,
+                    target_url=target_url,
+                    expires_at=expires_at,
+                )
+        raise ValueError("Unable to generate unique short link code.")
