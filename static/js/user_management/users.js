@@ -640,7 +640,7 @@
           'Content-Type': 'application/json',
         },
         confirmButtonText: 'Send invite',
-        confirmButtonClass: 'um-btn-lime',
+        confirmButtonClass: 'um-btn um-btn-lime',
         showFullScreenLoader: true,
         onSuccess: function () {
           window.location.reload();
