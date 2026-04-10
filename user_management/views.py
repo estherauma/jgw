@@ -19,7 +19,7 @@ from .forms import (
     WorkGroupForm,
     UsersWorkGroupAssignForm,
 )
-from .emails import send_invitation
+from .invitations import send_invitation
 from .decorators import group_required
 from .models import (
     OrganisationRole,
@@ -71,7 +71,7 @@ def user_management(request):
     users = (
         User.objects.filter(is_deleted=False)
         .prefetch_related("organisation_data", "work_groups")
-        .order_by("email")
+        .order_by("-created_at")
         .distinct()
     )
     if is_org_admin_or_staff(user):
@@ -168,7 +168,7 @@ def search_users(request):
     users = (
         User.objects.filter(is_deleted=False)
         .prefetch_related("organisation_data", "work_groups")
-        .order_by("email")
+        .order_by("-created_at")
         .distinct()
     )
 
