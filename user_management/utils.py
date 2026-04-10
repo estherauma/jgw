@@ -48,6 +48,7 @@ def get_country_code_choices():
             continue
         dial = f"+{code}"
         choices.append((region, f"({dial}) {name}"))
+    choices.sort(key=lambda item: item[1].split(") ", 1)[-1].lower())
     COUNTRY_CODE_CHOICES = choices
     return choices
 
