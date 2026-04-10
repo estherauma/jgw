@@ -31,6 +31,7 @@
             {% endfor %}
         </td>
         {% endif %}
+        <td>{{ u.role_display|default:"—" }}</td>
         <td>
             <div class="um-action">
                 {% flag 'can_edit_appuser' %}
@@ -49,6 +50,6 @@
     {% endfor %}
 {% else %}
     <tr>
-        <td colspan="{% if selected_org_id %}6{% else %}5{% endif %}">No users found.</td>
+        <td colspan="7">No users found.</td>
     </tr>
 {% endif %}
