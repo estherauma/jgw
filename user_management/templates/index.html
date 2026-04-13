@@ -261,27 +261,29 @@
                     </div>
                 </div>
                 <div class="um-table-scroll-wrapper um-table-scroll-wrapper-lg">
-                    <div class="um-scrollbar">
-                        <div class="um-scrollbar-thumb"></div>
+                    <div class="um-scrollbar um-scrollbar-y">
+                        <div class="um-scrollbar-thumb um-scrollbar-thumb-y"></div>
                     </div>
                     <div class="um-table-scroll">
                         <table class="um-table um-navy">
                             <thead>
                                 <tr>
-                                    <th class="text-center col-1">
+                                    <th class="text-center w-xs">
                                         <input type="checkbox" class="form-check-input" data-users-select-all>
                                     </th>
-                                    <th class="w-25">Name</th>
-                                    <th>Email</th>
-                                    <th>Is Active</th>
+                                    <th class="w-xs">#</th>
+                                    <th class="w-lg">Name</th>
+                                    <th class="w-lg">Email</th>
+                                    <th class="w-sm">Is Active</th>
                                     {% if not selected_org_id %}
-                                    <th>Organisation</th>
+                                    <th class="w-lg">Organisation</th>
                                     {% endif %}
                                     {% if selected_org_id %}
-                                    <th>Department</th>
+                                    <th class="w-lg">Department</th>
                                     {% endif %}
-                                    <th>Role</th>
-                                    <th></th>
+                                    <th class="w-md">Role</th>
+
+                                    <th class="w-md"></th>
                                 </tr>
                             </thead>
                             <tbody data-users-table-body>
@@ -289,12 +291,15 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="um-scrollbar um-scrollbar-x">
+                        <div class="um-scrollbar-thumb um-scrollbar-thumb-x"></div>
+                    </div>
                 </div>
             </div>
             {% endflag %}
             {% if selected_org_id %}
             {% flag 'can_view_roles' %}
-            {% include "roles-card.html" %}
+                {% include "roles-card.html" %}
             {% endflag %}
             {% endif %}
         </div>

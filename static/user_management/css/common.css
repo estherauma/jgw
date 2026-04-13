@@ -92,8 +92,11 @@
 }
 .um-grid {
     display: grid;
-    grid-template-columns: 1.1fr 1fr;
+    grid-template-columns: 1fr 1fr;  
     gap: 18px;
+}
+.um-grid > div {
+    min-width: 0;
 }
 .um-card {
     background: #ffffff;
@@ -400,7 +403,8 @@ body .modal-backdrop.show {
 }
 
 .um-table {
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     border-collapse: collapse;
     font-size: 12px;
     color: #47566e;
@@ -416,6 +420,26 @@ body .modal-backdrop.show {
     font-weight: 600;
     font-size: 11px;
     text-transform: uppercase;
+}
+.w-xs {
+    width: 40px;
+    min-width: 40px;
+}
+.w-sm {
+    width: 80px;
+    min-width: 80px;
+}
+.w-md {
+    width: 120px;
+    min-width: 120px;
+}
+.w-lg {
+    width: 160px;
+    min-width: 160px;
+}
+.w-xl {
+    width: 300px;
+    min-width: 300px;
 }
 .um-table-scroll-wrapper {
     position: relative;
@@ -435,8 +459,10 @@ body .modal-backdrop.show {
 .um-table-scroll {
     height: 100%;
     overflow-y: scroll;
+    overflow-x: scroll;
     border-radius: 8px;
     padding-right: 16px;
+    padding-bottom: 16px;
     scrollbar-gutter: stable;
 }
 .um-table-scroll-wrapper.um-table-scroll-wrapper-lg .um-table-scroll {
@@ -466,6 +492,14 @@ body .modal-backdrop.show {
     cursor: pointer;
     z-index: 1;
 }
+.um-scrollbar-x {
+    top: auto;
+    right: auto;
+    left: 8px;
+    bottom: 4px;
+    width: calc(100% - 24px);
+    height: 8px;
+}
 .um-scrollbar-thumb {
     position: absolute;
     top: 0;
@@ -477,6 +511,10 @@ body .modal-backdrop.show {
     border: 2px solid #e9f7fb;
     box-sizing: border-box;
     cursor: grab;
+}
+.um-scrollbar-thumb-x {
+    width: 32px;
+    height: 100%;
 }
 .um-scrollbar-thumb:active {
     cursor: grabbing;
