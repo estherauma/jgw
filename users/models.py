@@ -88,13 +88,6 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         help_text="User's dashboard customization preferences"
     )
     dashboard_preferences_version = models.IntegerField(default=1, help_text="Version of dashboard preferences schema")
-    is_deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        null=True, blank=True, on_delete=models.SET_NULL,
-        related_name="deleted_users"
-    )
 
     class Meta(AuditFieldsMixin.Meta):
         verbose_name_plural = "Users"
@@ -105,14 +98,6 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
 
     def __str__(self):
         return f"{self.email}"
-    
-    def soft_delete(self, deleted_by):
-        self.is_deleted = True
-        self.deleted_at = timezone.now()
-        self.is_active = False
-        self.deleted_by = deleted_by
-        self.updated_by = deleted_by
-        self.save()
         
     def deactivate(self, deactivated_by):
         self.is_active = False
