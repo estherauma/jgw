@@ -71,20 +71,16 @@ def get_user_role_display(user, selected_org=None):
         return "Fiftyeight Admin"
     if "worker" in group_names:
          return "Worker"
-    for assignment in user.org_roles.all():
-        if assignment.role and assignment.role.name.lower() == "worker":
-            return "Worker"
     if "org_admin" in group_names:
         return "Administrator" if selected_org else "Org Admin"
     if "org_staff" in group_names:
-        for assignment in user.org_roles.all():
-            if assignment.role and not assignment.role.is_system:
-                return assignment.role.name
-        return "Org Staff"
+        assignment = user.org_roles.all().first()
+        if assignment and assignment.role:
+            return assignment.role.name
     return "—"
 
 def attach_user_role_display(users, selected_org=None):
-    users = list(users)
+    users = users
     for listed_user in users:
         listed_user.role_display = get_user_role_display(
             listed_user, selected_org=selected_org
