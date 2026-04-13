@@ -153,8 +153,9 @@
       errorDiv.textContent = '';
     }
 
-    if(confirmBtn){
+    if (confirmBtn) {
       confirmBtn.innerHTML = options.confirmButtonText || 'Delete';
+      confirmBtn.className = options.confirmButtonClass || 'um-btn um-btn-danger';
     }
 
     var messageEl = modal.querySelector('[data-message]');
@@ -176,7 +177,11 @@
 
     confirmBtn.onclick = async function () {
       const confirmBtn = modal.querySelector('[data-confirm-btn]');
+      const loader = document.getElementById('um-fullscreen-loader');
       confirmBtn.disabled = true;
+      if (options.showFullScreenLoader && loader) {
+        loader.classList.remove('d-none');
+      }
       if (errorDiv) {
               errorDiv.classList.add('d-none');
               errorDiv.textContent = '';
@@ -213,6 +218,9 @@
         });
       } finally {
         confirmBtn.disabled = false;
+        if (options.showFullScreenLoader && loader) {
+          loader.classList.add('d-none');
+        }
       }
     };
   }
