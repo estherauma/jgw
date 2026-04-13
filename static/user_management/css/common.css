@@ -1,6 +1,10 @@
 .modal-content{
     border-radius: 22px;
 }
+thead {
+    background: #CBD3DF !important;
+    color:  #193560 !important;
+}
 .um-modal-lg .modal-dialog {
     max-width: 980px;
 }
