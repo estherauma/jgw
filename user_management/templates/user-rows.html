@@ -11,9 +11,11 @@
             data-phone-number = "{{ u.phone_number | default:'' }}"
             >
         </td>
+        <td>{{ forloop.counter }}</td>
         <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
         <td>{{ u.email|default:"-" }}</td>
-        <td>{% if u.access_type %}{{ u.get_access_type_display }}{% else %}—{% endif %}</td>
+        <td>{{ u.is_active|yesno:"Yes,No" }}</td>
+
         {% if not selected_org_id %}
         <td>
             {% for org in u.organisation_data.all %}
@@ -32,6 +34,7 @@
             {% endfor %}
         </td>
         {% endif %}
+        <td>{{ u.role_display|default:"—" }}</td>
         <td>
             <div class="um-action">
                 {% flag 'can_edit_appuser' %}
@@ -50,6 +53,6 @@
     {% endfor %}
 {% else %}
     <tr>
-        <td colspan="{% if selected_org_id %}6{% else %}5{% endif %}">No users found.</td>
+        <td colspan="8">No users found.</td>
     </tr>
 {% endif %}

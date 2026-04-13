@@ -227,60 +227,80 @@
 
   window.showDeleteConfirm = showDeleteConfirm;
 
-  function syncThumb(container, track, thumb) {
+  function syncScrollbar(container, track, thumb, axis) {
     if (!thumb || !track || !container) {
       return;
     }
-    var scrollHeight = container.scrollHeight;
-    var clientHeight = container.clientHeight;
-    if (scrollHeight <= clientHeight) {
+    var isX = axis === 'x';
+    var scrollSize = isX ? container.scrollWidth : container.scrollHeight;
+    var clientSize = isX ? container.clientWidth : container.clientHeight;
+    if (scrollSize <= clientSize) {
       track.style.display = 'none';
-      thumb.style.height = track.clientHeight + 'px';
-      thumb.style.top = '0px';
+      if (isX) {
+        thumb.style.width = track.clientWidth + 'px';
+        thumb.style.left = '0px';
+      } else {
+        thumb.style.height = track.clientHeight + 'px';
+        thumb.style.top = '0px';
+      }
       return;
     }
     track.style.display = '';
-    var thumbHeight = Math.max(
+    var trackSize = isX ? track.clientWidth : track.clientHeight;
+    var thumbSize = Math.max(
       24,
-      Math.floor((clientHeight / scrollHeight) * track.clientHeight),
+      Math.floor((clientSize / scrollSize) * trackSize),
     );
-    thumb.style.height = thumbHeight + 'px';
-    var maxThumbTop = track.clientHeight - thumbHeight;
-    var scrollTop = container.scrollTop;
-    var maxScrollTop = scrollHeight - clientHeight;
-    var thumbTop = Math.floor((scrollTop / maxScrollTop) * maxThumbTop);
-    thumb.style.top = thumbTop + 'px';
+    if (isX) {
+      thumb.style.width = thumbSize + 'px';
+    } else {
+      thumb.style.height = thumbSize + 'px';
+    }
+    var maxThumbPos = trackSize - thumbSize;
+    var scrollPos = isX ? container.scrollLeft : container.scrollTop;
+    var maxScrollPos = scrollSize - clientSize;
+    var thumbPos = Math.floor((scrollPos / maxScrollPos) * maxThumbPos);
+    if (isX) {
+      thumb.style.left = thumbPos + 'px';
+    } else {
+      thumb.style.top = thumbPos + 'px';
+    }
   }
 
-  function attachScrollbar(container, track, thumb) {
+  function attachScrollbar(container, track, thumb, axis) {
     if (!thumb || !track || !container) {
       return;
     }
+    var isX = axis === 'x';
     var dragState = {
       dragging: false,
-      startY: 0,
-      startScrollTop: 0,
+      startPos: 0,
+      startScroll: 0,
     };
 
-    function updateFromThumb(deltaY) {
-      var scrollHeight = container.scrollHeight;
-      var clientHeight = container.clientHeight;
-      var maxScrollTop = scrollHeight - clientHeight;
-      if (maxScrollTop <= 0) {
+    function updateFromThumb(delta) {
+      var scrollSize = isX ? container.scrollWidth : container.scrollHeight;
+      var clientSize = isX ? container.clientWidth : container.clientHeight;
+      var maxScroll = scrollSize - clientSize;
+      if (maxScroll <= 0) {
         return;
       }
-      var trackHeight = track.clientHeight;
-      var thumbHeight = thumb.offsetHeight;
-      var maxThumbTop = trackHeight - thumbHeight;
-      var ratio = maxScrollTop / maxThumbTop;
-      container.scrollTop = dragState.startScrollTop + deltaY * ratio;
+      var trackSize = isX ? track.clientWidth : track.clientHeight;
+      var thumbSize = isX ? thumb.offsetWidth : thumb.offsetHeight;
+      var maxThumbPos = trackSize - thumbSize;
+      var ratio = maxScroll / maxThumbPos;
+      if (isX) {
+        container.scrollLeft = dragState.startScroll + delta * ratio;
+      } else {
+        container.scrollTop = dragState.startScroll + delta * ratio;
+      }
     }
 
     thumb.addEventListener('mousedown', function (event) {
       event.preventDefault();
       dragState.dragging = true;
-      dragState.startY = event.clientY;
-      dragState.startScrollTop = container.scrollTop;
+      dragState.startPos = isX ? event.clientX : event.clientY;
+      dragState.startScroll = isX ? container.scrollLeft : container.scrollTop;
       document.body.style.userSelect = 'none';
     });
 
@@ -288,7 +308,8 @@
       if (!dragState.dragging) {
         return;
       }
-      updateFromThumb(event.clientY - dragState.startY);
+      var delta = isX ? event.clientX - dragState.startPos : event.clientY - dragState.startPos;
+      updateFromThumb(delta);
     });
 
     document.addEventListener('mouseup', function () {
@@ -304,21 +325,26 @@
         return;
       }
       var rect = track.getBoundingClientRect();
-      var clickY = event.clientY - rect.top;
-      var scrollHeight = container.scrollHeight;
-      var clientHeight = container.clientHeight;
-      var maxScrollTop = scrollHeight - clientHeight;
-      if (maxScrollTop <= 0) {
+      var clickPos = isX ? event.clientX - rect.left : event.clientY - rect.top;
+      var scrollSize = isX ? container.scrollWidth : container.scrollHeight;
+      var clientSize = isX ? container.clientWidth : container.clientHeight;
+      var maxScroll = scrollSize - clientSize;
+      if (maxScroll <= 0) {
         return;
       }
-      var trackHeight = track.clientHeight;
-      var thumbHeight = thumb.offsetHeight;
-      var maxThumbTop = trackHeight - thumbHeight;
-      var thumbTop = Math.min(
-        Math.max(clickY - thumbHeight / 2, 0),
-        maxThumbTop,
+      var trackSize = isX ? track.clientWidth : track.clientHeight;
+      var thumbSize = isX ? thumb.offsetWidth : thumb.offsetHeight;
+      var maxThumbPos = trackSize - thumbSize;
+      var thumbPos = Math.min(
+        Math.max(clickPos - thumbSize / 2, 0),
+        maxThumbPos,
       );
-      container.scrollTop = (thumbTop / maxThumbTop) * maxScrollTop;
+      var targetScroll = (thumbPos / maxThumbPos) * maxScroll;
+      if (isX) {
+        container.scrollLeft = targetScroll;
+      } else {
+        container.scrollTop = targetScroll;
+      }
     });
   }
 
@@ -326,12 +352,26 @@
     var wrappers = document.querySelectorAll('.um-table-scroll-wrapper');
     wrappers.forEach(function (wrapper) {
       var container = wrapper.querySelector('.um-table-scroll');
-      var track = wrapper.querySelector('.um-scrollbar');
-      var thumb = wrapper.querySelector('.um-scrollbar-thumb');
-      attachScrollbar(container, track, thumb);
-      syncThumb(container, track, thumb);
+      var trackY =
+        wrapper.querySelector('.um-scrollbar-y') ||
+        wrapper.querySelector('.um-scrollbar:not(.um-scrollbar-x)') ||
+        wrapper.querySelector('.um-scrollbar');
+      var thumbY = trackY
+        ? trackY.querySelector('.um-scrollbar-thumb-y') ||
+          trackY.querySelector('.um-scrollbar-thumb')
+        : null;
+      var trackX = wrapper.querySelector('.um-scrollbar-x');
+      var thumbX = trackX
+        ? trackX.querySelector('.um-scrollbar-thumb-x') ||
+          trackX.querySelector('.um-scrollbar-thumb')
+        : null;
+      attachScrollbar(container, trackY, thumbY, 'y');
+      attachScrollbar(container, trackX, thumbX, 'x');
+      syncScrollbar(container, trackY, thumbY, 'y');
+      syncScrollbar(container, trackX, thumbX, 'x');
       container.addEventListener('scroll', function () {
-        syncThumb(container, track, thumb);
+        syncScrollbar(container, trackY, thumbY, 'y');
+        syncScrollbar(container, trackX, thumbX, 'x');
       });
     });
   }
@@ -340,9 +380,21 @@
     var wrappers = document.querySelectorAll('.um-table-scroll-wrapper');
     wrappers.forEach(function (wrapper) {
       var container = wrapper.querySelector('.um-table-scroll');
-      var track = wrapper.querySelector('.um-scrollbar');
-      var thumb = wrapper.querySelector('.um-scrollbar-thumb');
-      syncThumb(container, track, thumb);
+      var trackY =
+        wrapper.querySelector('.um-scrollbar-y') ||
+        wrapper.querySelector('.um-scrollbar:not(.um-scrollbar-x)') ||
+        wrapper.querySelector('.um-scrollbar');
+      var thumbY = trackY
+        ? trackY.querySelector('.um-scrollbar-thumb-y') ||
+          trackY.querySelector('.um-scrollbar-thumb')
+        : null;
+      var trackX = wrapper.querySelector('.um-scrollbar-x');
+      var thumbX = trackX
+        ? trackX.querySelector('.um-scrollbar-thumb-x') ||
+          trackX.querySelector('.um-scrollbar-thumb')
+        : null;
+      syncScrollbar(container, trackY, thumbY, 'y');
+      syncScrollbar(container, trackX, thumbX, 'x');
     });
   }
   
