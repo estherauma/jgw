@@ -69,8 +69,7 @@ def user_management(request):
     organizations = get_allowed_orgs(user).order_by("name")
 
     users = (
-        User.objects.filter(is_deleted=False)
-        .prefetch_related("organisation_data", "work_groups")
+        User.objects.prefetch_related("organisation_data", "work_groups")
         .order_by("-created_at")
         .distinct()
     )
@@ -105,7 +104,7 @@ def user_management(request):
         users = users.filter(organisation_data=selected_org)
         work_codes = (
             OrganisationAccessCode.objects.select_related("organisation")
-            .filter(organisation=selected_org, is_deleted=False)
+            .filter(organisation=selected_org)
             .order_by("-created_at")
         )
         work_groups = (
@@ -166,8 +165,7 @@ def search_users(request):
     query = request.GET.get("q", "").strip()
     selected_org_id = request.GET.get("selected_org_id")
     users = (
-        User.objects.filter(is_deleted=False)
-        .prefetch_related("organisation_data", "work_groups")
+        User.objects.prefetch_related("organisation_data", "work_groups")
         .order_by("-created_at")
         .distinct()
     )
@@ -729,7 +727,7 @@ class AssignWorkCodeView(View):
                 status=400,
             )
         work_code = OrganisationAccessCode.objects.filter(
-            id=work_code_id, organisation=organisation, is_deleted=False
+            id=work_code_id, organisation=organisation
         ).first()
         if not work_code:
             return JsonResponse(
@@ -943,7 +941,6 @@ class DeleteWorkCodeView(View):
         work_code = OrganisationAccessCode.objects.filter(
             id=work_code_id,
             organisation__in=allowed_orgs,
-            is_deleted=False
         ).first()
 
         if not work_code:
@@ -996,7 +993,6 @@ class EditWorkCodeView(View):
         work_code = OrganisationAccessCode.objects.filter(
             id=work_code_id,
             organisation=organisation,
-            is_deleted=False
         ).first()
         if not work_code:
             return JsonResponse(
@@ -1155,7 +1151,7 @@ class BulkInviteUsersView(View):
         try:
             with transaction.atomic():
                 for user_id in raw_ids:
-                    user = User.objects.filter(id=user_id, is_deleted=False).first()
+                    user = User.objects.filter(id=user_id).first()
                     if not user or (not user.email and not user.phone_number):
                         continue
                     if is_org_admin(current_user):
