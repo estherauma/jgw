@@ -62,20 +62,56 @@ def org_access_denied():
         status=403,
     )
 
+def get_user_role_display(user, selected_org=None):
+    if user.is_superuser:
+        return "Super Admin"
+
+    group_names = {group.name for group in user.groups.all()}
+    if "58_admin" in group_names:
+        return "Fiftyeight Admin"
+    if "worker" in group_names:
+         return "Worker"
+    if "org_admin" in group_names:
+        return "Administrator" if selected_org else "Org Admin"
+    if "org_staff" in group_names:
+        assignment = user.org_roles.all().first()
+        if assignment and assignment.role:
+            return assignment.role.name
+    return "—"
+
+
+def get_users_query(current_user, selected_org=None):
+    users = (
+        User.objects.filter(is_deleted=False)
+        .prefetch_related(
+            "groups",
+            "organisation_data",
+            "work_groups",
+            "org_roles__role",
+            "org_roles__organisation",
+        )
+        .order_by("-created_at")
+        .distinct()
+    )
+    if selected_org:
+        users = users.filter(organisation_data=selected_org)
+
+    if is_org_admin_or_staff(current_user):
+        allowed_orgs = get_allowed_orgs(current_user)
+        users = users.filter(organisation_data__in=allowed_orgs).distinct()
+    for user in users:
+        user.role_display = get_user_role_display(user, selected_org=selected_org)
+
+    return users
+
 
 @group_required("user_management")
 def user_management(request):
     user = request.user
+    selected_org = None
+    selected_org_id = None
+    selected_org_name = None
     organizations = get_allowed_orgs(user).order_by("name")
-
-    users = (
-        User.objects.filter(is_deleted=False)
-        .prefetch_related("organisation_data", "work_groups")
-        .order_by("-created_at")
-        .distinct()
-    )
-    if is_org_admin_or_staff(user):
-        users = users.filter(organisation_data__in=organizations)
 
     work_codes = []
     work_groups = WorkGroup.objects.none()
@@ -99,10 +135,10 @@ def user_management(request):
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
 
-    org_details = {
-    }
+    org_details = {}
+    users = get_users_query(user, selected_org)
+
     if selected_org:
-        users = users.filter(organisation_data=selected_org)
         work_codes = (
             OrganisationAccessCode.objects.select_related("organisation")
             .filter(organisation=selected_org, is_deleted=False)
@@ -165,25 +201,12 @@ def search_users(request):
     user = request.user
     query = request.GET.get("q", "").strip()
     selected_org_id = request.GET.get("selected_org_id")
-    users = (
-        User.objects.filter(is_deleted=False)
-        .prefetch_related("organisation_data", "work_groups")
-        .order_by("-created_at")
-        .distinct()
-    )
-
-    if is_org_admin_or_staff(user):
-        allowed_orgs = get_allowed_orgs(user)
-        users = users.filter(organisation_data__in=allowed_orgs).distinct()
+    organisation = None
 
     if selected_org_id:
-        organisation = (
-            get_allowed_orgs(user).filter(id=selected_org_id).first()
-        )
-        if organisation:
-            users = users.filter(organisation_data=organisation).distinct()
-        else:
-            users = users.none()
+        organisation = get_allowed_orgs(user).filter(id=selected_org_id).first()
+
+    users = get_users_query(user, organisation)
 
     if query:
         users = users.filter(
@@ -191,7 +214,6 @@ def search_users(request):
             | Q(last_name__icontains=query)
             | Q(email__icontains=query)
         )
-
     html = render_to_string(
         "user-rows.html",
         {"users": users, "selected_org_id": selected_org_id},

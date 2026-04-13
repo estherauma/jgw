@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group, Permission
 from django.db.models import Q
 from waffle import get_waffle_flag_model
 from users.utils import ALL_GROUPS
+from users.models import User
 from user_management.flags import UM_FLAG_DEFS
 
 
@@ -12,6 +13,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for group_name in ALL_GROUPS:
             Group.objects.get_or_create(name=group_name)
+        # Todo:  remove this in next pr
+        # Ensure all users with app access are in the worker group
+        worker_group, _ = Group.objects.get_or_create(name="worker")
+        app_users = User.objects.filter(access_type="app").exclude(groups=worker_group)
+        if app_users.exists():
+            for user in app_users:
+                user.groups.add(worker_group)
 
         testers_group, _ = Group.objects.get_or_create(name='testers')
         permissions = Permission.objects.filter(
@@ -117,3 +125,4 @@ class Command(BaseCommand):
                     f'Feature flag "{flag["tag"]}" for user group "{flag["condition"]}" initialized successfully.'
                 )
             )
+        
