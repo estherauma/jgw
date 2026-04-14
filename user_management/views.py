@@ -1234,3 +1234,17 @@ class BulkInviteUsersView(View):
                 {"ok": False, "error": "An error occurred while sending invitations. Please try again."},
                 status=500,
             )
+@group_required("user_management")           
+def user_details(request, user_id):
+    user = User.objects.prefetch_related(
+        "organisation_data",
+        "groups",
+        "work_groups",
+        "destinations",
+        "user_languages",
+        "excluded_origin_countries").filter(id=user_id).first()
+    if not user:
+        return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+    
+    
+    return render(request, "user_management/user_details.html", {"user": user})
