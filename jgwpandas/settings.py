@@ -296,6 +296,9 @@ ADMIN_SITE_HEADER = "FiftyEight"
 MESSAGING_API_BASE_URL = os.getenv("MESSAGING_API_BASE_URL")
 MESSAGING_API_SECRET = os.getenv("MESSAGING_API_SECRET")
 
+STRAPI_API_BASE_URL = os.getenv("STRAPI_API_BASE_URL")
+STRAPI_API_TOKEN = os.getenv("STRAPI_API_TOKEN")
+
 # Maintenance Mode Settings
 MAINTENANCE_MODE = True
 MAINTENANCE_MODE_MESSAGE = "We are currently performing scheduled maintenance. Please check back later."
