@@ -1242,9 +1242,13 @@ def user_details(request, user_id):
         "work_groups",
         "destinations",
         "user_languages",
-        "excluded_origin_countries").filter(id=user_id).first()
+        "excluded_origin_countries",
+        'org_roles__role'
+        ).filter(id=user_id).first()
     if not user:
         return JsonResponse({"ok": False, "error": "User not found."}, status=404)
     
+    selected_org = user.organisation_data.first()
+    user.role_display = get_user_role_display(user, selected_org=selected_org)
     
-    return render(request, "user_management/user_details.html", {"user": user})
+    return render(request, "user-details.html", {"user": user})

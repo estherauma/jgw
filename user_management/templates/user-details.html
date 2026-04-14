@@ -1,0 +1,186 @@
+{% extends 'core/layouts/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}User Details{% endblock %}
+
+{% block styles %}
+@import url("{% static 'user_management/css/common.css' %}");
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-white">User Profile: {{ user.first_name }} {{ user.last_name }}</h2>
+        <a href="{% url 'user_management:home' %}" class="btn btn-light border btn-sm px-3">
+            <i class="bi bi-chevron-left"></i> Back
+        </a>
+    </div>
+
+    <div class="um-detail-card p-5 bg-white text-dark shadow" style="background-color: #ffffff !important; color: #212529 !important; border-radius: 12px;">
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">First Name</span>
+                <span class="info-value" style="color: #002b5c !important;">{{ user.first_name }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Last Name</span>
+                <span class="info-value" style="color: #002b5c !important;">{{ user.last_name }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Email Address</span>
+                <span class="info-value text-primary">{{ user.email }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Phone</span>
+                <span class="info-value" style="color: #002b5c !important;">+({{ user.phone_country_iso|default:"N/A" }}) {{ user.phone_number|default:"—" }}</span>
+            </div>
+        </div>
+
+        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Active</span>
+                <span>
+                    {{ user.is_active|yesno:"Yes,No" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Role</span>
+                <span class="info-value" style="color: #002b5c !important;">{{ user.role_display|default:"Worker" }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Access Type</span>
+                <span class="info-value" style="color: #002b5c !important;">{{ user.access_type|title }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Scheme</span>
+                <span class="info-value" style="color: #002b5c !important;">{{ user.scheme.name|default:"General" }}</span>
+            </div>
+        </div>
+
+        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Organizations</span>
+                <div class="mt-2">
+                    {% for org in user.organisation_data.all %}
+                        <span>{{ org.name }}</span>
+                    {% empty %} — {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Work Groups</span>
+                <div class="mt-2">
+                    {% for group in user.work_groups.all %}
+                        <span>{{ group.name }}</span>
+                    {% empty %} — {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Start Date</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.start_date|date:"M d, Y"|default:"—" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">End Date</span>
+                <span class="info-value" style="color: #002b5c !important;">{{ user.end_date|date:"M d, Y"|default:"—" }}</span>
+            </div>
+            
+        </div>
+        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Languages</span>
+                <div class="mt-2">
+                    {% for lang in user.languages.all %}
+                        <span>{{ lang.name }}</span>
+                    {% empty %} — {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Factories</span>
+                <div class="mt-2">
+                    {% for factory in user.factories.all %}
+                        <span>{{ factory.name }}</span>
+                    {% empty %} — {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Destinations</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {% for destination in user.destinations.all %}
+                        <span>{{ destination.name }}</span>
+                    {% empty %} — {% endfor %}
+                </span>
+            </div>
+
+        </div>
+        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Created At</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.created_at|date:"M d, Y H:i"|default:"—" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Updated At</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.updated_at|date:"M d, Y H:i"|default:"—" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Dashboard Preferences</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.dashboard_preferences|default:"—" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Dashboard Preferences Version</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.dashboard_preferences_version|default:"—" }}
+                </span>
+            </div>
+        </div>
+        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Total Logged Hours</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.total_logged_hours|default:"—" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Immigration Status</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.immigration_status|default:"—" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">Receive Marketing Emails</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.receive_marketing_emails|yesno:"Yes,No" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">is_staff</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.is_staff|yesno:"Yes,No" }}
+                </span>
+            </div>
+        </div>
+        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <span class="info-label" style="color: #6c757d !important;">excluded_origin_countries</span>
+                <span class="info-value" style="color: #002b5c !important;">
+                    {{ user.excluded_origin_countries|default:None }}
+                </span>
+            </div>
+        </div>
+{% endblock %}
