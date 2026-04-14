@@ -264,7 +264,7 @@ class CreateWorkCodeView(View):
             code_value = form.cleaned_data["code"].strip()
             try:
                 with transaction.atomic():
-                    existing_code = OrganisationAccessCode.objects.filter(
+                    existing_code = OrganisationAccessCode.all_objects.filter(
                         code__iexact=code_value
                         ).first()
                     if existing_code:

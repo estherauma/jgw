@@ -29,6 +29,7 @@ class AuditFieldsMixin(models.Model):
     
     class Meta:
         abstract = True
+        base_manager_name = "all_objects"
         
     def soft_delete(self, deleted_by):
         self.is_deleted = True
