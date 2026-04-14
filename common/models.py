@@ -33,7 +33,8 @@ class AuditFieldsMixin(models.Model):
     def soft_delete(self, deleted_by):
         self.is_deleted = True
         self.deleted_at = timezone.now()
-        self.is_active = False
+        if any(field.name == "is_active" for field in self._meta.fields):
+            self.is_active = False
         self.deleted_by = deleted_by
         self.updated_by = deleted_by
         self.save()

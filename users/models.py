@@ -16,6 +16,9 @@ STATUS = ["PENDING", "ACCEPTED", "SENT"]
 
 
 class UserManager(BaseUserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+    
     def create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError("Email must be set!")
