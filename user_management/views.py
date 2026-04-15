@@ -1238,12 +1238,15 @@ class BulkInviteUsersView(View):
 def user_details(request, user_id):
     user = User.objects.prefetch_related(
         "organisation_data",
+        "organisations",
         "groups",
         "work_groups",
         "destinations",
         "user_languages",
         "excluded_origin_countries",
-        'org_roles__role'
+        'org_roles__role',
+        "immigration_status",
+        "factories",
         ).filter(id=user_id).first()
     if not user:
         return JsonResponse({"ok": False, "error": "User not found."}, status=404)

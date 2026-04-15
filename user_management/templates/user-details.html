@@ -1,5 +1,7 @@
 {% extends 'core/layouts/base.html' %}
+{% load crispy_forms_tags %} 
 {% load static %}
+{% load um_waffle_flags %}
 {% load i18n %}
 
 {% block title %}User Details{% endblock %}
@@ -9,178 +11,206 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-white">User Profile: {{ user.first_name }} {{ user.last_name }}</h2>
-        <a href="{% url 'user_management:home' %}" class="btn btn-light border btn-sm px-3">
-            <i class="bi bi-chevron-left"></i> Back
-        </a>
+<div class="um-page">
+    <div class="um-header">
+        <h2 class="um-title">User Profile: 
+            {% if user.first_name or user.last_name %}
+                {{ user.first_name }} {{ user.last_name }}
+            {% elif user.email %}
+                {{ user.email }}
+            {% else %}
+                User #{{ user.id }}
+            {% endif %}
+        </h2>
     </div>
 
-    <div class="um-detail-card p-5 bg-white text-dark shadow" style="background-color: #ffffff !important; color: #212529 !important; border-radius: 12px;">
-        
+    <div class="um-card um-navy"> 
         <div class="row g-4">
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">First Name</span>
-                <span class="info-value" style="color: #002b5c !important;">{{ user.first_name }}</span>
+                <span><strong>First Name: </strong></span>
+                <span>{{ user.first_name|default:"—" }}</span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Last Name</span>
-                <span class="info-value" style="color: #002b5c !important;">{{ user.last_name }}</span>
+                <span><strong>Last Name: </strong></span>
+                <span>{{ user.last_name|default:"—" }}</span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Email Address</span>
-                <span class="info-value text-primary">{{ user.email }}</span>
+                <span><strong>Email: </strong></span>
+                <span>{{ user.email|default:"—" }}</span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Phone</span>
-                <span class="info-value" style="color: #002b5c !important;">+({{ user.phone_country_iso|default:"N/A" }}) {{ user.phone_number|default:"—" }}</span>
+                <span><strong>Phone Number: </strong></span>
+                <span>
+                    {% if user.phone_number %}
+                    +({{ user.phone_country_iso|default:"—" }}) {{ user.phone_number }}
+                    {% else %}
+                    —
+                    {% endif %}
+                </span>
             </div>
         </div>
 
-        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
-
+        <br>
         <div class="row g-4">
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Active</span>
+                <span><strong>Access Type: </strong></span>
+                <span>{{ user.access_type|title }}</span>
+            </div>
+            <div class="col-md-3">
+                <span><strong>Is Active: </strong></span>
                 <span>
                     {{ user.is_active|yesno:"Yes,No" }}
                 </span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Role</span>
-                <span class="info-value" style="color: #002b5c !important;">{{ user.role_display|default:"Worker" }}</span>
+                <span><strong>Is Staff: </strong></span>
+                <span>
+                    {{ user.is_staff|yesno:"Yes,No" }}
+                </span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Access Type</span>
-                <span class="info-value" style="color: #002b5c !important;">{{ user.access_type|title }}</span>
-            </div>
-            <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Scheme</span>
-                <span class="info-value" style="color: #002b5c !important;">{{ user.scheme.name|default:"General" }}</span>
+                <span><strong>Organizations: </strong></span>
+                <span>
+                     {% for org in user.organisation_data.all %}
+                        {{ org.name|default:"—" }}{% if not forloop.last %}, {% endif %}
+                    {% empty %} — {% endfor %}
+                </span>
             </div>
         </div>
-
-        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+        <br>
 
         <div class="row g-4">
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Organizations</span>
-                <div class="mt-2">
-                    {% for org in user.organisation_data.all %}
-                        <span>{{ org.name }}</span>
-                    {% empty %} — {% endfor %}
-                </div>
-            </div>
-            <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Work Groups</span>
-                <div class="mt-2">
+                <span><strong>Departments: </strong></span>
+                <span>
                     {% for group in user.work_groups.all %}
-                        <span>{{ group.name }}</span>
+                        {{ group.name }}{% if not forloop.last %}, {% endif %}
                     {% empty %} — {% endfor %}
-                </div>
+                </span> 
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Start Date</span>
-                <span class="info-value" style="color: #002b5c !important;">
+                <span><strong>Role: </strong></span>
+                <span>{{ user.role_display|default:"—" }}</span>
+            </div>
+            <div class="col-md-3">
+                <span><strong>Start Date: </strong></span>
+                <span>
                     {{ user.start_date|date:"M d, Y"|default:"—" }}
                 </span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">End Date</span>
-                <span class="info-value" style="color: #002b5c !important;">{{ user.end_date|date:"M d, Y"|default:"—" }}</span>
-            </div>
-            
+                <span><strong>End Date: </strong></span>
+                <span>{{ user.end_date|date:"M d, Y"|default:"—" }}</span>
+            </div>  
         </div>
-        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+        <br>
+
         <div class="row g-4">
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Languages</span>
-                <div class="mt-2">
-                    {% for lang in user.languages.all %}
-                        <span>{{ lang.name }}</span>
-                    {% empty %} — {% endfor %}
-                </div>
+                <span><strong>Scheme: </strong></span>
+                <span>{{ user.scheme.name|default:"—" }}</span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Factories</span>
-                <div class="mt-2">
-                    {% for factory in user.factories.all %}
-                        <span>{{ factory.name }}</span>
-                    {% empty %} — {% endfor %}
-                </div>
-            </div>
-            <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Destinations</span>
-                <span class="info-value" style="color: #002b5c !important;">
-                    {% for destination in user.destinations.all %}
-                        <span>{{ destination.name }}</span>
+                <span><strong>User Languages: </strong></span>
+                <span>
+                    {% for language in user.languages.all %}
+                        {{ language.name }}{% if not forloop.last %}, {% endif %}
                     {% empty %} — {% endfor %}
                 </span>
             </div>
-
+            <div class="col-md-3">
+                <span><strong>Factories: </strong></span>
+                <span>
+                    {% for factory in user.factories.all %}
+                        {{ factory.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %} — {% endfor %}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span><strong>Destinations: </strong></span>
+                <span>
+                    {% for destination in user.destinations.all %}
+                        {{ destination.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %} — {% endfor %}
+                </span>
+            </div>
         </div>
-        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+        <br>
+        
         <div class="row g-4">
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Created At</span>
-                <span class="info-value" style="color: #002b5c !important;">
+                <span><strong>Created By: </strong></span>
+                <span>
+                    {{ user.created_by|default:"—" }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <span><strong>Created At: </strong></span>
+                <span>
                     {{ user.created_at|date:"M d, Y H:i"|default:"—" }}
                 </span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Updated At</span>
-                <span class="info-value" style="color: #002b5c !important;">
+                <span><strong>Updated At: </strong></span>
+                <span>
                     {{ user.updated_at|date:"M d, Y H:i"|default:"—" }}
                 </span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Dashboard Preferences</span>
-                <span class="info-value" style="color: #002b5c !important;">
+                <span><strong>Dashboard Preferences: </strong></span>
+                <span>
                     {{ user.dashboard_preferences|default:"—" }}
                 </span>
             </div>
+        </div>
+        <br>
+        
+        <div class="row g-4">
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Dashboard Preferences Version</span>
-                <span class="info-value" style="color: #002b5c !important;">
+                <span><strong>Dashboard Preferences Version: </strong></span>
+                <span>
                     {{ user.dashboard_preferences_version|default:"—" }}
                 </span>
             </div>
-        </div>
-        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
-        <div class="row g-4">
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Total Logged Hours</span>
-                <span class="info-value" style="color: #002b5c !important;">
+                <span><strong>Total Logged Hours: </strong></span>
+                <span>
                     {{ user.total_logged_hours|default:"—" }}
                 </span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Immigration Status</span>
-                <span class="info-value" style="color: #002b5c !important;">
-                    {{ user.immigration_status|default:"—" }}
+                <span><strong>Immigration Status: </strong></span>
+                <span>
+                   {% for status in user.immigration_status.all %}
+                        {{ status.name|default:"—" }}{% if not forloop.last %}, {% endif %}
+                    {% empty %} — {% endfor %}
                 </span>
             </div>
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">Receive Marketing Emails</span>
-                <span class="info-value" style="color: #002b5c !important;">
+                <span><strong>Receive Marketing Emails: </strong></span>
+                <span>
                     {{ user.receive_marketing_emails|yesno:"Yes,No" }}
                 </span>
             </div>
-            <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">is_staff</span>
-                <span class="info-value" style="color: #002b5c !important;">
-                    {{ user.is_staff|yesno:"Yes,No" }}
-                </span>
-            </div>
         </div>
-        <div class="section-divider" style="border-top: 1px solid #dee2e6 !important; margin: 1.5rem 0;"></div>
+        
+        <br>
         <div class="row g-4">
             <div class="col-md-3">
-                <span class="info-label" style="color: #6c757d !important;">excluded_origin_countries</span>
-                <span class="info-value" style="color: #002b5c !important;">
-                    {{ user.excluded_origin_countries|default:None }}
+                <span><strong>Excluded Origin Countries: </strong></span>
+                <span>
+                    {% for country in user.excluded_origin_countries.all %}
+                        {{ country.name|default:"—" }}{% if not forloop.last %}, {% endif %}
+                    {% empty %} — {% endfor %}
                 </span>
             </div>
         </div>
+        <br>
+        <button class="um-btn um-btn-gray">
+            <a href="{% url 'user_management:home' %}">
+                <i class="bi bi-chevron-left"></i> Back
+            </a>
+        </button>
+    </div>
+</div>
 {% endblock %}
