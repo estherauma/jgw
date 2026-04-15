@@ -165,8 +165,42 @@
                 <div class="um-details um-navy">
                     <div>Name: <span class="um-navy" data-org-detail="name" data-org-default="{{ org_details.name }}">{{ org_details.name }}</span></div>
                     <div>Organisation code: <span class="um-navy" data-org-detail="code" data-org-default="{{ org_details.code }}">{{ org_details.code }}</span></div>
+                    <div>Custom type: <span class="um-navy" data-org-detail="custom_type" data-org-default="{{ org_details.custom_type|default:'-' }}">{{ org_details.custom_type|default:"-" }}</span></div>
+                    <div>Work sector: <span class="um-navy" data-org-detail="work_sector" data-org-default="{{ org_details.work_sector|default:'-' }}">{{ org_details.work_sector|default:"-" }}</span></div>
+                    <div>Content collection: <span class="um-navy" data-org-detail="content_collection" data-org-default="{{ org_details.content_collection|default:'-' }}">{{ org_details.content_collection|default:"-" }}</span></div>
+                    <div>Default collection language: <span class="um-navy" data-org-detail="default_collection_language" data-org-default="{{ org_details.default_collection_language|default:'-' }}">{{ org_details.default_collection_language|default:"-" }}</span></div>
                     <div>Organisation was created by: <span class="um-navy" data-org-detail="created_by" data-org-default="{{ org_details.created_by }}">{{ org_details.created_by }}</span></div>
                     <div>Organisation was created on: <span class="um-navy" data-org-detail="created_at" data-org-default="{{ org_details.created_at }}">{{ org_details.created_at }}</span></div>
+                </div>
+            </div>
+            <div class="um-card um-navy" data-org-dependent>
+                <div class="um-card-title">Site languages</div>
+                <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm mt-3">
+                    <div class="um-scrollbar">
+                        <div class="um-scrollbar-thumb"></div>
+                    </div>
+                    <div class="um-table-scroll">
+                        <table class="um-table um-navy">
+                            <thead>
+                                <tr>
+                                    <th>Language code</th>
+                                    <th>Language name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for language in org_languages %}
+                                <tr>
+                                    <td>{{ language.code }}</td>
+                                    <td>{{ language.name|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2">No collection languages found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             {% endflag %}

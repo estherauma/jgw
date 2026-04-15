@@ -2,19 +2,22 @@ import logging
 
 from celery import shared_task
 
-from user_management.cms.partner_configurations import get_partner_configurations
+from user_management.cms.partner_configurations import (
+    sync_partner_configurations,
+)
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task(name="fetch_partner_configurations")
-def fetch_partner_configurations():
-    logger.info("Fetching organisation partner configurations from Strapi...")
-    data = get_partner_configurations()
-    if data is None:
-        logger.error("Failed to fetch organisation partner configurations from Strapi.")
+@shared_task(name="sync_partner_configurations")
+def sync_partner_configurations_task():
+    logger.info("Syncing partner configurations from Strapi...")
+    summary = sync_partner_configurations()
+    if summary is None:
+        logger.error("Failed to fetch partner configurations from Strapi.")
     else:
         logger.info(
-            "Successfully fetched organisation partner configurations from Strapi."
+            "Successfully synced partner configurations from Strapi. Sync summary: %s",
+            summary,
         )
-    return data
+    return summary
