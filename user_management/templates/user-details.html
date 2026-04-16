@@ -8,209 +8,215 @@
 
 {% block styles %}
 @import url("{% static 'user_management/css/common.css' %}");
+@import url("{% static 'user_management/css/user-details.css' %}");
 {% endblock %}
 
 {% block content %}
-<div class="um-page">
-    <div class="um-header">
-        <h2 class="um-title">User Profile: 
-            {% if user.first_name or user.last_name %}
-                {{ user.first_name }} {{ user.last_name }}
-            {% elif user.email %}
-                {{ user.email }}
-            {% else %}
-                User #{{ user.id }}
-            {% endif %}
-        </h2>
+<div class="um-page um-user-details-page um-navy">
+    <div class="um-card um-user-profile-summary">
+        <div class="um-user-profile-primary">
+            <div class="um-user-profile-copy">
+                <h3 class="um-user-name">
+                    {% if user.first_name or user.last_name %}
+                        {{ user.first_name }} {{ user.last_name }}
+                    {% elif user.email %}
+                        {{ user.email }}
+                    {% else %}
+                        User #{{ user.id }}
+                    {% endif %}
+                </h3>
+                <p class="um-user-role-line">
+                    <span class="um-user-highlight">{{ user.role_display }}</span>
+                    <span class="um-user-role-divider">|</span>
+                    <span class="badge-custom {% if user.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                        {{ user.is_active|yesno:"ACTIVE,INACTIVE" }}
+                    </span>
+                </p>
+            </div>
+        </div>
+        <div class="um-user-contact-grid">
+            <div class="um-user-contact-item">
+                <span class="um-user-contact-label">User ID: </span>
+                <span class="um-user-contact-value">{{ user.id }}</span>
+            </div>
+            <div class="um-user-contact-item">
+                <span class="um-user-contact-label">Last Login: </span>
+                <span class="um-user-contact-value">{{ user.last_login|date:"M d, Y H:i" }}</span>
+            </div>
+            <div class="um-user-contact-item">
+                <span class="um-user-contact-label">Access type: </span>
+                <span class="um-user-contact-value">{{ user.access_type|title }}</span>
+            </div>
+            <div class="um-user-contact-item">
+                <span class="um-user-contact-label">Total logged hours: </span>
+                <span class="um-user-contact-value">{{ user.total_logged_hours}}</span>
+            </div>
+        </div>
     </div>
 
-    <div class="um-card um-navy"> 
-        <div class="row g-4">
-            <div class="col-md-3">
-                <span><strong>First Name: </strong></span>
-                <span>{{ user.first_name|default:"—" }}</span>
+    <div class="um-user-details-layout">
+        <section class="um-card um-user-details-card um-user-details-card-lg">
+            <div class="um-user-card-header">
+                <h4 class="um-user-card-title">Account Information</h4>
             </div>
-            <div class="col-md-3">
-                <span><strong>Last Name: </strong></span>
-                <span>{{ user.last_name|default:"—" }}</span>
+            <div class="um-user-card-divider"></div>
+            <div class="um-user-info-grid">
+                <div class="um-user-field">
+                    <span class="um-user-field-label">First Name</span>
+                    <span class="um-user-field-value">{{ user.first_name }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Last Name</span>
+                    <span class="um-user-field-value">{{ user.last_name }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Created By</span>
+                    <span class="um-user-field-value">{{ user.created_by }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Created At</span>
+                    <span class="um-user-field-value">{{ user.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Updated At</span>
+                    <span class="um-user-field-value">{{ user.updated_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Updated By</span>
+                    <span class="um-user-field-value">{{ user.updated_by }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Role</span>
+                    <span class="um-user-field-value">{{ user.role_display }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Receive marketing emails</span>
+                    <span class="um-user-field-value">{{ user.receive_marketing_emails|yesno:"Yes,No" }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Dashboard preferences version</span>
+                    <span class="um-user-field-value">{{ user.dashboard_preferences_version }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Dashboard preferences</span>
+                    <span class="um-user-field-value">{{ user.dashboard_preferences }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">User languages</span>
+                    <span class="um-user-field-value um-user-field-value-wrap">
+                        {% for language in user.user_languages.all %}
+                            {{ language.name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                               
+                        {% endfor %}
+                    </span>
+                </div>
+                <div class="um-user-field">
+                <span class="um-user-field-label">Email</span>
+                <span class="um-user-field-value">{{ user.email }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Is staff</span>
+                    <span class="um-user-field-value">{{ user.is_staff|yesno:"Yes,No" }}</span>
+                </div>
+                <div class="um-user-field">
+                    <span class="um-user-field-label">Phone number</span>
+                    <span class="um-user-field-value">
+                        {% if user.phone_number %}
+                            +({{ user.phone_country_iso}}) {{ user.phone_number }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
+                </div>
             </div>
-            <div class="col-md-3">
-                <span><strong>Email: </strong></span>
-                <span>{{ user.email|default:"—" }}</span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Phone Number: </strong></span>
-                <span>
-                    {% if user.phone_number %}
-                    +({{ user.phone_country_iso|default:"—" }}) {{ user.phone_number }}
-                    {% else %}
-                    —
-                    {% endif %}
-                </span>
-            </div>
-        </div>
+        </section>
 
-        <br>
-        <div class="row g-4">
-            <div class="col-md-3">
-                <span><strong>Access Type: </strong></span>
-                <span>{{ user.access_type|title }}</span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Is Active: </strong></span>
-                <span>
-                    {{ user.is_active|yesno:"Yes,No" }}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Is Staff: </strong></span>
-                <span>
-                    {{ user.is_staff|yesno:"Yes,No" }}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Organizations: </strong></span>
-                <span>
-                     {% for org in user.organisation_data.all %}
-                        {{ org.name|default:"—" }}{% if not forloop.last %}, {% endif %}
-                    {% empty %} — {% endfor %}
-                </span>
-            </div>
+        <div class="um-user-side-stack">
+            <section class="um-card um-user-details-card">
+                <div class="um-user-card-header">
+                    <h4 class="um-user-card-title">Organisation Information</h4>
+                </div>
+                <div class="um-user-card-divider"></div>
+                <div class="um-user-info-grid">
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">Organizations</span>
+                        <span class="um-user-field-value um-user-field-value-wrap">
+                            {% for org in user.organisation_data.all %}
+                                {{ org.name|default:"—" }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">Departments</span>
+                        <span class="um-user-field-value um-user-field-value-wrap">
+                            {% for group in user.work_groups.all %}
+                                {{ group.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">Start date</span>
+                        <span class="um-user-field-value">{{ user.start_date|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">End date</span>
+                        <span class="um-user-field-value">{{ user.end_date|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">Scheme</span>
+                        <span class="um-user-field-value">{{ user.scheme.name }}</span>
+                    </div>
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">Factories</span>
+                        <span class="um-user-field-value um-user-field-value-wrap">
+                            {% for factory in user.factories.all %}
+                                {{ factory.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                            
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">Destinations</span>
+                        <span class="um-user-field-value um-user-field-value-wrap">
+                            {% for destination in user.destinations.all %}
+                                {{ destination.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">Immigration status</span>
+                        <span class="um-user-field-value um-user-field-value-wrap">
+                            {% for status in user.immigration_status.all %}
+                                {{ status.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div class="um-user-field">
+                        <span class="um-user-field-label">Excluded origin countries</span>
+                        <span class="um-user-field-value um-user-field-value-wrap">
+                            {% for country in user.excluded_origin_countries.all %}
+                                {{ country.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                            {% endfor %}
+                        </span>
+                    </div>
+                </div>
+            </section>
         </div>
-        <br>
+    </div>
 
-        <div class="row g-4">
-            <div class="col-md-3">
-                <span><strong>Departments: </strong></span>
-                <span>
-                    {% for group in user.work_groups.all %}
-                        {{ group.name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %} — {% endfor %}
-                </span> 
-            </div>
-            <div class="col-md-3">
-                <span><strong>Role: </strong></span>
-                <span>{{ user.role_display|default:"—" }}</span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Start Date: </strong></span>
-                <span>
-                    {{ user.start_date|date:"M d, Y"|default:"—" }}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>End Date: </strong></span>
-                <span>{{ user.end_date|date:"M d, Y"|default:"—" }}</span>
-            </div>  
-        </div>
-        <br>
-
-        <div class="row g-4">
-            <div class="col-md-3">
-                <span><strong>Scheme: </strong></span>
-                <span>{{ user.scheme.name|default:"—" }}</span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>User Languages: </strong></span>
-                <span>
-                    {% for language in user.languages.all %}
-                        {{ language.name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %} — {% endfor %}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Factories: </strong></span>
-                <span>
-                    {% for factory in user.factories.all %}
-                        {{ factory.name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %} — {% endfor %}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Destinations: </strong></span>
-                <span>
-                    {% for destination in user.destinations.all %}
-                        {{ destination.name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %} — {% endfor %}
-                </span>
-            </div>
-        </div>
-        <br>
-        
-        <div class="row g-4">
-            <div class="col-md-3">
-                <span><strong>Created By: </strong></span>
-                <span>
-                    {{ user.created_by|default:"—" }}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Created At: </strong></span>
-                <span>
-                    {{ user.created_at|date:"M d, Y H:i"|default:"—" }}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Updated At: </strong></span>
-                <span>
-                    {{ user.updated_at|date:"M d, Y H:i"|default:"—" }}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Dashboard Preferences: </strong></span>
-                <span>
-                    {{ user.dashboard_preferences|default:"—" }}
-                </span>
-            </div>
-        </div>
-        <br>
-        
-        <div class="row g-4">
-            <div class="col-md-3">
-                <span><strong>Dashboard Preferences Version: </strong></span>
-                <span>
-                    {{ user.dashboard_preferences_version|default:"—" }}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Total Logged Hours: </strong></span>
-                <span>
-                    {{ user.total_logged_hours|default:"—" }}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Immigration Status: </strong></span>
-                <span>
-                   {% for status in user.immigration_status.all %}
-                        {{ status.name|default:"—" }}{% if not forloop.last %}, {% endif %}
-                    {% empty %} — {% endfor %}
-                </span>
-            </div>
-            <div class="col-md-3">
-                <span><strong>Receive Marketing Emails: </strong></span>
-                <span>
-                    {{ user.receive_marketing_emails|yesno:"Yes,No" }}
-                </span>
-            </div>
-        </div>
-        
-        <br>
-        <div class="row g-4">
-            <div class="col-md-3">
-                <span><strong>Excluded Origin Countries: </strong></span>
-                <span>
-                    {% for country in user.excluded_origin_countries.all %}
-                        {{ country.name|default:"—" }}{% if not forloop.last %}, {% endif %}
-                    {% empty %} — {% endfor %}
-                </span>
-            </div>
-        </div>
-        <br>
-        <button class="um-btn um-btn-gray">
-            <a href="{% url 'user_management:home' %}">
-                <i class="bi bi-chevron-left"></i> Back
-            </a>
-        </button>
+    <div class="um-user-footer">
+        <a class="um-btn um-btn-gray um-user-back-link" href="{% url 'user_management:home' %}">
+            <i class="bi bi-chevron-left"></i>
+            <span>Back</span>
+        </a>
     </div>
 </div>
 {% endblock %}
