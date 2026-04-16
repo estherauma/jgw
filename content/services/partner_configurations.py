@@ -154,10 +154,6 @@ def get_partner_configurations():
         response = session.get(url, headers=headers, timeout=30)
         response.raise_for_status()
         data = response.json()
-        print(
-            "Successfully fetched partner configurations from CMS: %s",
-            json.dumps(data, default=str),
-        )
         return data
     except requests.exceptions.HTTPError as exc:
         logger.error(
