@@ -49,6 +49,7 @@ POSTHOG_HOST = os.getenv("POSTHOG_HOST", "https://us.i.posthog.com")
 POSTHOG_DEFAULTS_DATE = os.getenv("POSTHOG_DEFAULTS_DATE", "")
 POSTHOG_WEB_ENABLED = os.getenv("POSTHOG_WEB_ENABLED", "True").lower() == "true"
 POSTHOG_SKIP_LOCALHOST = os.getenv("POSTHOG_SKIP_LOCALHOST", "False").lower() == "true"
+STRAPI_WEBHOOK_SECRET = os.getenv("STRAPI_WEBHOOK_SECRET")
 
 
 # Application definition
