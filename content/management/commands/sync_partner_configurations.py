@@ -1,8 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from user_management.cms.partner_configurations import (
-    sync_partner_configurations,
-)
+from content.services.partner_configurations import sync_partner_configurations
 
 
 class Command(BaseCommand):
@@ -20,3 +18,4 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Successfully synced organisation partner configurations."))
         self.stdout.write(self.style.SUCCESS(f"Sync summary: {summary}"))
+

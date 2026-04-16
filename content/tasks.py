@@ -2,9 +2,7 @@ import logging
 
 from celery import shared_task
 
-from user_management.cms.partner_configurations import (
-    sync_partner_configurations,
-)
+from content.services.partner_configurations import sync_partner_configurations
 
 logger = logging.getLogger(__name__)
 
@@ -21,3 +19,4 @@ def sync_partner_configurations_task():
             summary,
         )
     return summary
+

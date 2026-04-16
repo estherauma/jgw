@@ -6,13 +6,16 @@ from django.conf import settings
 from django.db import transaction
 
 from preference.models import OrganisationData, SiteLanguages
-from user_management.cms.utils import get_cms_headers, get_cms_session
+from content.services.utils import get_cms_headers, get_cms_session
+from user_management.roles import add_default_org_roles
 
 logger = logging.getLogger(__name__)
 
 
 def _extract_language_values(collection_languages):
     values = []
+    if not isinstance(collection_languages, list):
+        return values
 
     for item in collection_languages:
         if not isinstance(item, dict):
@@ -60,6 +63,7 @@ def sync_organisation_languages(organisation, collection_languages):
 def sync_partner_configuration_item(item):
     org_code = (item.get("org_code") or "").strip()
     name = (item.get("display_name") or (item.get("name") or "")).strip()
+    print(f"Syncing partner configuration for org_code: {org_code}, name: {name}")
 
     if not org_code or not name:
         logger.warning(
@@ -81,6 +85,9 @@ def sync_partner_configuration_item(item):
             org_code=org_code,
             defaults=defaults,
         )
+
+        if created:
+            add_default_org_roles(organisation)
 
         languages_created = sync_organisation_languages(
             organisation=organisation,
