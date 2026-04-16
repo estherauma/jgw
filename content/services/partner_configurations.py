@@ -5,7 +5,7 @@ import requests
 from django.conf import settings
 from django.db import transaction
 
-from preference.models import OrganisationData, SiteLanguages
+from preference.models import OrganisationAccessCode, OrganisationData, SiteLanguages
 from content.services.utils import get_cms_headers, get_cms_session
 from user_management.roles import add_default_org_roles
 
@@ -92,6 +92,16 @@ def sync_partner_configuration_item(item):
             organisation=organisation,
             collection_languages=item.get("collection_languages"),
         )
+
+        access_codes_raw = (item.get("access_code") or "").strip()
+        access_codes = [
+            code.strip() for code in access_codes_raw.split(",") if code and code.strip()
+        ]
+        for code in access_codes:
+            OrganisationAccessCode.objects.update_or_create(
+                code=code,
+                defaults={"organisation": organisation},
+            )
 
     return {
         "created": 1 if created else 0,
