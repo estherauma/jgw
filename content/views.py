@@ -136,7 +136,6 @@ class AggregatedContentView(APIView):
             return Response({}, status.HTTP_200_OK)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class ContentWebhookView(APIView):
     webhook_handlers = {
         "partner-configuration": {

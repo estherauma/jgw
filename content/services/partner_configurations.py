@@ -63,7 +63,6 @@ def sync_organisation_languages(organisation, collection_languages):
 def sync_partner_configuration_item(item):
     org_code = (item.get("org_code") or "").strip()
     name = (item.get("display_name") or (item.get("name") or "")).strip()
-    print(f"Syncing partner configuration for org_code: {org_code}, name: {name}")
 
     if not org_code or not name:
         logger.warning(
