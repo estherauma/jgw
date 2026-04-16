@@ -36,6 +36,4 @@ class AuditFieldsMixin(models.Model):
         self.deleted_at = timezone.now()
         self.deleted_by = deleted_by
         self.updated_by = deleted_by
-        if any(field.name == "is_active" for field in self._meta.fields):
-            self.is_active = False
         self.save()

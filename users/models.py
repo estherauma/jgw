@@ -107,6 +107,10 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         self.updated_at = timezone.now()
         self.updated_by = deactivated_by
         self.save()
+        
+    def soft_delete(self, deleted_by):
+        self.is_active = False
+        super().soft_delete(deleted_by)
 
 
 class UserInvitations(models.Model):
