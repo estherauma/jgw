@@ -14,6 +14,7 @@ from preference.models import (
     PayCalculator,
     Preference,
     SectorOfWork,
+    SiteLanguages,
     Route,
     Language,
     Gender,
@@ -188,8 +189,30 @@ class ImmigrationStatusAdmin(admin.ModelAdmin):
 
 @admin.register(OrganisationData)
 class OrganisationDataAdmin(admin.ModelAdmin):
-    search_fields = ["name", "org_code"]
-    list_display = ["name", "org_code", "created_at", "updated_at"]
+    search_fields = [
+        "name",
+        "org_code",
+        "custom_type",
+        "work_sector",
+        "content_collection",
+        "default_collection_language",
+    ]
+    list_display = [
+        "name",
+        "org_code",
+        "custom_type",
+        "work_sector",
+        "content_collection",
+        "default_collection_language",
+        "created_at",
+        "updated_at",
+    ]
+
+
+@admin.register(SiteLanguages)
+class SiteLanguagesAdmin(admin.ModelAdmin):
+    search_fields = ["organisation__name", "code", "name"]
+    list_display = ["organisation", "code", "name", "created_at", "updated_at"]
 
 
 @admin.register(PreferenceHistory)
