@@ -2,12 +2,11 @@ from django.core.management.base import BaseCommand
 
 from events.models import (
     ChaptersOpened,
-    Chapter,
 )
 
 
 class Command(BaseCommand):
-    """Deletes everything in the imported events tables
+    """Deletes everything in the chapters opened tables
 
     Args:
         BaseCommand (BaseCommand): Django commands base class
@@ -16,6 +15,5 @@ class Command(BaseCommand):
     """
     def handle(self, *args, **options):
         ChaptersOpened.objects.all().delete()
-        # Chapter.objects.all().delete()
 
       

@@ -40,6 +40,7 @@ class ChaptersFeedbackStandardAdminDisplay(ExportActionModelAdmin, admin.ModelAd
         "api_created_at",
         "data_source_id",
         "documentId",
+        "origin",
         "destination",
         "feedback_title",
         "organisation",
