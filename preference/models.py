@@ -163,25 +163,10 @@ class OrganisationAccessCode(AuditFieldsMixin):
         related_name="organisation_access_codes",
     )
     expiry_date = models.DateField(null=True, blank=True)
-    is_deleted = models.BooleanField(default=False)
-    deleted_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True
-    )
-    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.code
     
-    def soft_delete(self, user):
-        self.is_deleted = True
-        self.deleted_by = user
-        self.deleted_at = timezone.now()
-        self.updated_by = user
-        self.save()
-
 class ImmigrationStatus(models.Model):
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)

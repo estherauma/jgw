@@ -226,7 +226,7 @@ class DashboardUserForm(forms.ModelForm):
         email = email.strip().lower()
         if not email:
             raise forms.ValidationError("Email is required")
-        qs = User.objects.filter(email__iexact=email)
+        qs = User.all_objects.filter(email__iexact=email)
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
@@ -322,7 +322,7 @@ class AppUserForm(forms.ModelForm):
         email = (self.cleaned_data.get("email") or "").strip().lower()
         if not email:
             return None
-        qs = User.objects.filter(email__iexact=email)
+        qs = User.all_objects.filter(email__iexact=email)
 
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
@@ -362,7 +362,7 @@ class AppUserForm(forms.ModelForm):
             cleaned["phone_number"] = phonenumbers.format_number(
                 parsed, phonenumbers.PhoneNumberFormat.E164
             )
-            phone_qs = User.objects.filter(
+            phone_qs = User.all_objects.filter(
                 phone_number=cleaned["phone_number"],
                 phone_country_iso=phone_country_iso,
             )
