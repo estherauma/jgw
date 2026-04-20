@@ -49,6 +49,7 @@ POSTHOG_HOST = os.getenv("POSTHOG_HOST", "https://us.i.posthog.com")
 POSTHOG_DEFAULTS_DATE = os.getenv("POSTHOG_DEFAULTS_DATE", "")
 POSTHOG_WEB_ENABLED = os.getenv("POSTHOG_WEB_ENABLED", "True").lower() == "true"
 POSTHOG_SKIP_LOCALHOST = os.getenv("POSTHOG_SKIP_LOCALHOST", "False").lower() == "true"
+STRAPI_WEBHOOK_SECRET = os.getenv("STRAPI_WEBHOOK_SECRET")
 
 
 # Application definition
@@ -295,6 +296,9 @@ ADMIN_SITE_HEADER = "FiftyEight"
 
 MESSAGING_API_BASE_URL = os.getenv("MESSAGING_API_BASE_URL")
 MESSAGING_API_SECRET = os.getenv("MESSAGING_API_SECRET")
+
+STRAPI_API_BASE_URL = os.getenv("STRAPI_API_BASE_URL")
+STRAPI_API_TOKEN = os.getenv("STRAPI_API_TOKEN")
 
 # Maintenance Mode Settings
 MAINTENANCE_MODE = True

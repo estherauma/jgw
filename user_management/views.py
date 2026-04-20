@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
 import json
-from preference.models import OrganisationAccessCode, OrganisationData
+from preference.models import OrganisationAccessCode, OrganisationData, SiteLanguages
 
 from .forms import (
     AddWorkCodeForm,
@@ -155,9 +155,16 @@ def user_management(request):
         org_details = {
             "name": selected_org.name,
             "code": selected_org.org_code,
+            "custom_type": selected_org.custom_type,
+            "work_sector": selected_org.work_sector,
+            "content_collection": selected_org.content_collection,
+            "default_collection_language": selected_org.default_collection_language,
             "created_by": "N/A",
             "created_at": selected_org.created_at,
         }
+        org_languages = SiteLanguages.objects.filter(organisation=selected_org).order_by("code")
+    else:
+        org_languages = SiteLanguages.objects.none()
 
     context = {
         "organizations": organizations,
@@ -168,6 +175,7 @@ def user_management(request):
         "selected_org_id": selected_org_id,
         "selected_org_name": selected_org_name,
         "org_details": org_details,
+        "org_languages": org_languages,
         "create_org_form": CreateOrganisationForm(),
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),

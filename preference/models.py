@@ -185,12 +185,43 @@ class ImmigrationStatus(models.Model):
 class OrganisationData(AuditFieldsMixin):
     name = models.CharField(max_length=255)
     org_code = models.CharField(max_length=50, unique=True)
+    custom_type = models.CharField(max_length=100, null=True, blank=True)
+    work_sector = models.CharField(max_length=255, null=True, blank=True)
+    content_collection = models.CharField(max_length=255, null=True, blank=True)
+    default_collection_language = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.name
     class Meta(AuditFieldsMixin.Meta):
         indexes = [
             models.Index(fields=['name']),
+        ]
+
+
+class SiteLanguages(AuditFieldsMixin):
+    organisation = models.ForeignKey(
+        "OrganisationData",
+        on_delete=models.CASCADE,
+        related_name="collection_languages",
+    )
+    code = models.CharField(max_length=20)
+    name = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        if self.name:
+            return f"{self.code} ({self.name})"
+        return self.code
+
+    class Meta(AuditFieldsMixin.Meta):
+        indexes = [
+            models.Index(fields=['code']),
+            models.Index(fields=['organisation']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['organisation', 'code'],
+                name='unique_site_language_per_organisation',
+            )
         ]
 
 
