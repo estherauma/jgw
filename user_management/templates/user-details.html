@@ -12,6 +12,13 @@
 {% endblock %}
 
 {% block content %}
+<div class="um-user-back">
+        <a class="um-user-back-link" href="{% url 'user_management:home' %}">
+            <i class="bi bi-chevron-left"></i>
+            <span>Back to User Management</span>
+        </a>
+</div>
+
 <div class="um-page um-user-details-page um-navy">
     <div class="um-card um-user-profile-summary">
         <div class="um-user-profile-primary">
@@ -223,13 +230,6 @@
             </section>
         </div>
         {% endif %}
-    </div>
-
-    <div class="um-user-footer">
-        <a class="um-btn um-btn-gray um-user-back-link" href="{% url 'user_management:home' %}">
-            <i class="bi bi-chevron-left"></i>
-            <span>Back</span>
-        </a>
     </div>
 </div>
 {% endblock %}
