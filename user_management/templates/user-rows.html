@@ -26,15 +26,11 @@
 
         {% if not selected_org_id %}
         <td>
-            {% if u.hide_organisation_information %}
+            {% for org in u.organisation_data.all %}
+                {{ org.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
                 —
-            {% else %}
-                {% for org in u.organisation_data.all %}
-                    {{ org.name }}{% if not forloop.last %}, {% endif %}
-                {% empty %}
-                    —
-                {% endfor %}
-            {% endif %}
+            {% endfor %}
         </td>
         {% endif %}
         {% if selected_org_id %}
