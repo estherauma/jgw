@@ -362,7 +362,7 @@ class AppUserForm(forms.ModelForm):
             cleaned["phone_number"] = phonenumbers.format_number(
                 parsed, phonenumbers.PhoneNumberFormat.E164
             )
-            phone_qs = User.objects.filter(
+            phone_qs = User.all_objects.filter(
                 phone_number=cleaned["phone_number"],
                 phone_country_iso=phone_country_iso,
             )
