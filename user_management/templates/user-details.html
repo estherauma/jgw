@@ -55,7 +55,7 @@
     </div>
 
     <div class="um-user-details-layout">
-        <section class="um-card um-user-details-card um-user-details-card-lg">
+        <section class="um-card um-user-details-card um-user-details-card-lg{% if user.hide_organisation_information %} um-user-details-card-expand{% endif %}">
             <div class="um-user-card-header">
                 <h4 class="um-user-card-title">Account Information</h4>
             </div>
@@ -99,7 +99,18 @@
                 </div>
                 <div class="um-user-field">
                     <span class="um-user-field-label">Dashboard preferences</span>
-                    <span class="um-user-field-value">{{ user.dashboard_preferences }}</span>
+                    {% if dashboard_preferences_display %}
+                    <ul class="um-user-pref-list">
+                        {% for preference in dashboard_preferences_display %}
+                        <li class="um-user-pref-item">
+                            <span class="um-user-pref-key">{{ preference.label }}:</span>
+                            <span class="um-user-pref-value">{{ preference.value }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <span class="um-user-field-value">No dashboard preferences configured yet.</span>
+                    {% endif %}
                 </div>
                 <div class="um-user-field">
                     <span class="um-user-field-label">User languages</span>
@@ -132,6 +143,7 @@
             </div>
         </section>
 
+        {% if not user.hide_organisation_information %}
         <div class="um-user-side-stack">
             <section class="um-card um-user-details-card">
                 <div class="um-user-card-header">
@@ -210,6 +222,7 @@
                 </div>
             </section>
         </div>
+        {% endif %}
     </div>
 
     <div class="um-user-footer">

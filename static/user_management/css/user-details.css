@@ -101,6 +101,10 @@
     padding: 24px 22px;
 }
 
+.um-user-details-card-expand {
+    grid-column: 1 / -1;
+}
+
 .um-user-card-header {
     display: flex;
     align-items: center;
@@ -139,6 +143,31 @@
 
 .um-user-field-value-wrap {
     overflow-wrap: anywhere;
+}
+
+.um-user-pref-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.um-user-pref-item {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.um-user-pref-key {
+    font-weight: 600;
+    color: #222734;
+}
+
+.um-user-pref-value {
+    color: #2f3748;
+    font-weight: 500;
 }
 
 .um-user-footer {

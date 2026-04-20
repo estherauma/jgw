@@ -80,6 +80,45 @@ def get_user_role_display(user, selected_org=None):
     return "—"
 
 
+def has_global_admin_scope(user):
+    if user.is_superuser:
+        return True
+    group_names = {group.name for group in user.groups.all()}
+    return "58_admin" in group_names
+
+
+def _humanize_dashboard_preference_value(value):
+    if isinstance(value, bool):
+        return "Enabled" if value else "Disabled"
+    if value in (None, ""):
+        return "Not set"
+    if isinstance(value, list):
+        return ", ".join(str(item) for item in value) if value else "None"
+    if isinstance(value, dict):
+        nested_items = []
+        for nested_key, nested_value in value.items():
+            nested_label = str(nested_key).replace("_", " ").strip().title()
+            nested_items.append(
+                f"{nested_label}: {_humanize_dashboard_preference_value(nested_value)}"
+            )
+        return ", ".join(nested_items) if nested_items else "None"
+    return str(value)
+
+
+def get_dashboard_preferences_display(preferences):
+    if not isinstance(preferences, dict) or not preferences:
+        return []
+    display_items = []
+    for key, value in preferences.items():
+        display_items.append(
+            {
+                "label": str(key).replace("_", " ").strip().title(),
+                "value": _humanize_dashboard_preference_value(value),
+            }
+        )
+    return display_items
+
+
 def get_users_query(current_user, selected_org=None):
     users = (
         User.objects.filter(is_deleted=False)
@@ -101,6 +140,7 @@ def get_users_query(current_user, selected_org=None):
         users = users.filter(organisation_data__in=allowed_orgs).distinct()
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
+        user.hide_organisation_information = has_global_admin_scope(user)
 
     return users
 
@@ -1261,5 +1301,12 @@ def user_details(request, user_id):
     
     selected_org = user.organisation_data.first()
     user.role_display = get_user_role_display(user, selected_org=selected_org)
-    
-    return render(request, "user-details.html", {"user": user})
+    user.hide_organisation_information = has_global_admin_scope(user)
+
+    context = {
+        "user": user,
+        "dashboard_preferences_display": get_dashboard_preferences_display(
+            user.dashboard_preferences
+        ),
+    }
+    return render(request, "user-details.html", context)
