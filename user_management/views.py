@@ -79,38 +79,6 @@ def get_user_role_display(user, selected_org=None):
             return assignment.role.name
     return "—"
 
-def format_preference_value(value):
-    if isinstance(value, bool):
-        return "Enabled" if value else "Disabled"
-    if value in (None, ""):
-        return "Not set"
-    if isinstance(value, list):
-        return ", ".join(str(item) for item in value) if value else "None"
-    if isinstance(value, dict):
-        nested_items = []
-        for nested_key, nested_value in value.items():
-            nested_label = str(nested_key).replace("_", " ").strip().title()
-            nested_items.append(
-                f"{nested_label}: {format_preference_value(nested_value)}"
-            )
-        return ", ".join(nested_items) if nested_items else "None"
-    return str(value)
-
-
-def prepare_preferences_display(preferences):
-    if not isinstance(preferences, dict) or not preferences:
-        return []
-    display_items = []
-    for key, value in preferences.items():
-        display_items.append(
-            {
-                "label": str(key).replace("_", " ").strip().title(),
-                "value": format_preference_value(value),
-            }
-        )
-    return display_items
-
-
 def get_users_query(current_user, selected_org=None):
     users = (
         User.objects.prefetch_related(
@@ -1299,8 +1267,5 @@ def user_details(request, user_id):
 
     context = {
         "user": user,
-        "dashboard_preferences_display": prepare_preferences_display(
-            user.dashboard_preferences
-        ),
     }
     return render(request, "user-details.html", context)

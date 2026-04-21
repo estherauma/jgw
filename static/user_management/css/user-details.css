@@ -15,176 +15,20 @@
     display: grid;
     grid-template-columns: minmax(340px, 1fr) minmax(340px, 1fr);
     gap: 28px;
-    margin-bottom: 16px;
 }
 
 .um-user-profile-primary {
     display: flex;
     align-items: center;
-    gap: 20px;
     border-right: 1px solid #d9dce3;
     padding-right: 22px;
     min-width: 0;
 }
 
-.um-user-profile-copy {
-    min-width: 0;
-}
-
-.um-user-name {
-    margin: 0;
-    color: #2c2f3a;
-    
-    line-height: 1.2;
-}
-
-.um-user-role-line {
-    margin: 8px 0 0;
-    color: #7b808c;
-    font-size: clamp(0.95rem, 1.05vw, 1.15rem);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-}
-
-.um-user-highlight {
-    color: #2ba7b6;
-    font-weight: 600;
-}
-
-.um-user-role-divider {
-    color: #b2b6bf;
-}
-
-.um-user-contact-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; 
-    gap: 12px 50px;
-    justify-content: start;
-}
-
-.um-user-contact-item {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    white-space: nowrap;
-}
-
-.um-user-contact-label {
-    color: #7e838f;
-}
-
-.um-user-contact-value {
-    color: #262a35;
-    font-weight: 500;
-    overflow-wrap: anywhere;
-}
-
-.um-user-details-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 18px;
-}
-
-.um-user-side-stack {
-    display: grid;
-    gap: 18px;
-    align-content: start;
-}
-
-.um-user-details-card {
-    padding: 22px;
-}
-
-.um-user-details-card-lg {
-    padding: 24px 22px;
-}
-
-.um-user-details-card-expand {
-    grid-column: 1 / -1;
-}
-
-.um-user-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.um-user-card-divider {
+.um-section-divider {
     height: 1px;
-    background: #e8ebf1;
-    margin: 14px 0 18px;
-}
-
-.um-user-info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px 24px;
-}
-
-.um-user-field {
-    display: grid;
-    gap: 4px;
-    min-width: 0;
-}
-
-.um-user-field-label {
-    color: #8a8f9a;
-    line-height: 1.2;
-}
-
-.um-user-field-value {
-    color: #222734;
-    font-weight: 500;
-    line-height: 1.35;
-}
-
-.um-user-field-value-wrap {
-    overflow-wrap: anywhere;
-}
-
-.um-user-pref-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 6px;
-}
-
-.um-user-pref-item {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.um-user-pref-key {
-    font-weight: 600;
-    color: #222734;
-}
-
-.um-user-pref-value {
-    color: #2f3748;
-    font-weight: 500;
-}
-
-.um-user-back {
-    margin-top: 18px;
-    margin-bottom: 18px;
-}
-
-.um-user-back-link {
-    display: inline-flex;
-    gap: 8px;
-    font-weight: 600;
-    color: #2ba7b6;
-}
-
-.um-user-back-link:hover,
-.um-user-back-link:focus {
-    color: #ffffff !important;
+    width: 100%;
+    background-color: #d9dce3;
 }
 
 @media (max-width: 1400px) {
@@ -201,12 +45,6 @@
     }
 }
 
-@media (max-width: 1100px) {
-    .um-user-details-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
 @media (max-width: 768px) {
     .um-user-details-page {
         padding: 12px;
@@ -215,34 +53,4 @@
     .um-user-profile-summary {
         padding: 18px;
     }
-
-    .um-user-contact-grid,
-    .um-user-info-grid {
-        grid-template-columns: 1fr;
-    }
-
 }
-
-.badge-custom {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 50px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .badge-active {
-        background-color: #e6f4ea !important;
-        color: #1e7e34 !important;
-    }
-
-    .badge-inactive {
-        background-color: #fce8e8 !important;
-        color: #c53030 !important;
-    }
-
-    .um-user-card-title{
-       color: #7e838f; 
-    }
