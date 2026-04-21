@@ -23,6 +23,7 @@ from .views import (
     BulkDeleteUsersView,
     BulkDeactivateUsersView,
     BulkInviteUsersView,
+    user_details
 )
 
 app_name = "user_management"
@@ -51,4 +52,5 @@ urlpatterns = [
     path('roles/<int:role_id>/delete/', DeleteOrganisationRoleView.as_view(), name="delete_role"),
     path('users/deactivate/', BulkDeactivateUsersView.as_view(), name="deactivate_users"),
     path('users/invite/', BulkInviteUsersView.as_view(), name="invite_users"),
+    path('users/<int:user_id>/', user_details, name="user_details"),
 ]

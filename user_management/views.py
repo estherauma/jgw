@@ -79,7 +79,6 @@ def get_user_role_display(user, selected_org=None):
             return assignment.role.name
     return "—"
 
-
 def get_users_query(current_user, selected_org=None):
     users = (
         User.objects.prefetch_related(
@@ -100,6 +99,7 @@ def get_users_query(current_user, selected_org=None):
         users = users.filter(organisation_data__in=allowed_orgs).distinct()
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
+        user.hide_organisation_information = is_super_or_58_admin(user)
 
     return users
 
@@ -1239,3 +1239,33 @@ class BulkInviteUsersView(View):
                 {"ok": False, "error": "An error occurred while sending invitations. Please try again."},
                 status=500,
             )
+@group_required("user_management")           
+def user_details(request, user_id):
+    user = User.objects.prefetch_related(
+        "organisation_data",
+        "groups",
+        "work_groups",
+        "destinations",
+        "user_languages",
+        "excluded_origin_countries",
+        'org_roles__role',
+        "immigration_status",
+        "factories",
+        ).filter(id=user_id).first()
+    if not user:
+        return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+    
+    current_user = request.user
+    if is_org_admin(current_user):
+        target_user_org = user.organisation_data.first()
+        if not has_org_access(current_user, target_user_org):
+            return org_access_denied()
+        
+    selected_org = user.organisation_data.first()
+    user.role_display = get_user_role_display(user, selected_org=selected_org)
+    user.hide_organisation_information = is_super_or_58_admin(user)
+
+    context = {
+        "user": user,
+    }
+    return render(request, "user-details.html", context)
