@@ -10,6 +10,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 
 
+NO_DATA_AVAILABLE_MESSAGE = "No data available"
+
+
 def get_messaging_question_per_origin_counts(**filters):
     show_new_user_data = filters.get('show_new_user_data', False)
     start_date = filters.get('start_date')
@@ -41,6 +44,14 @@ def get_messaging_question_per_origin_counts(**filters):
     origin_labels = [
         count["origin_name"].title() for count in origin_counts_data if count["origin_name"] is not None
     ]
+    print("origin_data", origin_data)
+    print("origin_labels", origin_labels)
+    if not origin_data:
+        return {
+            "counts": [],
+            "labels": [],
+            "message": NO_DATA_AVAILABLE_MESSAGE,
+        }
 
     return {
         "counts": origin_data,
@@ -82,6 +93,14 @@ def get_messaging_question_per_destination_counts(**filters):
         for count in destination_counts_data
         if count["destination_name"] is not None
     ]
+    print("destination_data", destination_data)
+    print("destination_labels", destination_labels)
+    if not destination_data:
+        return {
+            "counts": [],
+            "labels": [],
+            "message": NO_DATA_AVAILABLE_MESSAGE,
+        }
 
     return {
         "counts": destination_data,
@@ -107,7 +126,11 @@ def messaging_questions_count(**filters):
         queryset=base_queryset, **filters
     )
 
-    return format_thousands_with_commas(messaging_questions_count_queryset.count())
+    total_count = messaging_questions_count_queryset.count()
+    if total_count == 0:
+        return NO_DATA_AVAILABLE_MESSAGE
+
+    return format_thousands_with_commas(total_count)
 
 
 def messaging_question_stats_for_export(filters):
@@ -313,6 +336,13 @@ def get_messaging_question_per_organisation_counts(**filters):
             if count["org_info__name"] is not None
         ]
 
+        if not organisation_data:
+            return {
+                "counts": [],
+                "labels": [],
+                "message": NO_DATA_AVAILABLE_MESSAGE,
+            }
+
         return {
             "counts": organisation_data,
             "labels": organisation_labels,
@@ -322,12 +352,14 @@ def get_messaging_question_per_organisation_counts(**filters):
         return {
             "counts": [],
             "labels": [],
+            "message": NO_DATA_AVAILABLE_MESSAGE,
         }
     except Exception as e:
         print(f"An error occurred: {e}")
         return {
             "counts": [],
             "labels": [],
+            "message": NO_DATA_AVAILABLE_MESSAGE,
         }
 
 

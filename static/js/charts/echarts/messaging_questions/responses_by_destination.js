@@ -25,10 +25,14 @@ function initMessagingQuestionsResponsesByDestinationChart(destinationData, cust
 
     let destinations = [];
     let counts = [];
+    let noDataMessage = 'No data available';
 
     if (typeof destinationData === 'object' && destinationData.labels && destinationData.counts) {
         destinations = [...destinationData.labels];
         counts = [...destinationData.counts];
+        if (destinationData.message) {
+            noDataMessage = destinationData.message;
+        }
     } else if (Array.isArray(destinationData)) {
         destinationData.forEach(item => {
             const dest = item.name || item.destination || item.label || '';
@@ -50,6 +54,21 @@ function initMessagingQuestionsResponsesByDestinationChart(destinationData, cust
 
     if (destinations.length === 0 || counts.length === 0) {
         console.warn('No valid data for Messaging Questions Responses by Destination chart');
+        myChart.setOption({
+            title: {
+                text: noDataMessage,
+                left: 'center',
+                top: 'middle',
+                textStyle: {
+                    color: '#6c757d',
+                    fontSize: 14,
+                    fontWeight: 'normal'
+                }
+            },
+            xAxis: { show: false },
+            yAxis: { show: false },
+            series: []
+        });
         return myChart;
     }
 
