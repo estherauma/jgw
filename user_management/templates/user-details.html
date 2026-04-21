@@ -171,13 +171,9 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Organizations</span>
+                            <span class="text-muted small">Organization</span>
                             <span class="fw-semibold text-dark text-break">
-                                {% for org in user.organisation_data.all %}
-                                    {{ org.name }}{% if not forloop.last %}, {% endif %}
-                                {% empty %}
-                                    Not set
-                                {% endfor %}
+                                {{ user.organisation_data.all.0.name|default:"Not set" }}
                             </span>
                         </div>
                     </div>
