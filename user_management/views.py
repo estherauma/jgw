@@ -79,14 +79,6 @@ def get_user_role_display(user, selected_org=None):
             return assignment.role.name
     return "—"
 
-
-def is_global_admin(user):
-    if user.is_superuser:
-        return True
-    group_names = {group.name for group in user.groups.all()}
-    return "58_admin" in group_names
-
-
 def format_preference_value(value):
     if isinstance(value, bool):
         return "Enabled" if value else "Disabled"
@@ -139,7 +131,7 @@ def get_users_query(current_user, selected_org=None):
         users = users.filter(organisation_data__in=allowed_orgs).distinct()
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
-        user.hide_organisation_information = is_global_admin(user)
+        user.hide_organisation_information = is_super_or_58_admin(user)
 
     return users
 
@@ -1298,7 +1290,7 @@ def user_details(request, user_id):
     
     selected_org = user.organisation_data.first()
     user.role_display = get_user_role_display(user, selected_org=selected_org)
-    user.hide_organisation_information = is_global_admin(user)
+    user.hide_organisation_information = is_super_or_58_admin(user)
 
     context = {
         "user": user,
