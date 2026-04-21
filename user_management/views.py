@@ -1275,7 +1275,6 @@ class BulkInviteUsersView(View):
 def user_details(request, user_id):
     user = User.objects.prefetch_related(
         "organisation_data",
-        "organisations",
         "groups",
         "work_groups",
         "destinations",
@@ -1288,6 +1287,12 @@ def user_details(request, user_id):
     if not user:
         return JsonResponse({"ok": False, "error": "User not found."}, status=404)
     
+    current_user = request.user
+    if is_org_admin(current_user):
+        target_user_org = user.organisation_data.first()
+        if not has_org_access(current_user, target_user_org):
+            return org_access_denied()
+        
     selected_org = user.organisation_data.first()
     user.role_display = get_user_role_display(user, selected_org=selected_org)
     user.hide_organisation_information = is_super_or_58_admin(user)
