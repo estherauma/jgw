@@ -347,15 +347,7 @@ class EditUserForm(forms.ModelForm):
         self.fields["user_languages"].widget.attrs["class"] = "form-select selectpicker"
         self.fields["user_languages"].widget.attrs["id"] = "edit-user-languages-id"
         self.fields["user_languages"].widget.attrs["data-live-search"] = "true"
-
-        # # organisations
-        # self.fields["organisations"].choices = [
-        #     (org.id, org.name) for org in Organisation.objects.all().order_by("name")
-        # ]
-        # self.fields["organisations"].widget.attrs["class"] = "form-select selectpicker"
-        # self.fields["organisations"].widget.attrs["id"] = "edit-user-organisations-id"
-        # self.fields["organisations"].widget.attrs["data-live-search"] = "true"
-
+        
         # organisation_data
         self.fields["organisation_data"].choices = [
             (org.id, org.name) for org in OrganisationData.objects.all().order_by("name")
