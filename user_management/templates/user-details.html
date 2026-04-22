@@ -32,6 +32,7 @@
         </button>
         {% endflag %}
     </div>
+
     <div class="um-card um-user-profile-summary mb-3">
         <div class="um-user-profile-primary">
             <div class="w-100">
@@ -81,9 +82,9 @@
         </div>
     </div>
 
-    <div class="row g-3">
-        <div class="{% if user.hide_organisation_information %}col-12{% else %}col-lg-6{% endif %}">
-            <section class="um-card p-4 h-100">
+    <div class="row g-3 align-items-start">
+        <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+            <section class="um-card p-4">
                 <h4 class="h5 mb-0 text-muted">Account Information</h4>
                 <div class="um-section-divider my-3"></div>
                 <div class="row g-3">
@@ -173,11 +174,9 @@
                     </div>
                 </div>
             </section>
-        </div>
 
-        {% if not user.hide_organisation_information %}
-        <div class="col-lg-6">
-            <section class="um-card p-4 h-100">
+            {% if not user.hide_organisation_information %}
+            <section class="um-card p-4">
                 <h4 class="h5 mb-0 text-muted">Organisation Information</h4>
                 <div class="um-section-divider my-3"></div>
                 <div class="row g-3">
@@ -269,16 +268,63 @@
                     </div>
                 </div>
             </section>
+            {% endif %}
         </div>
-        {% endif %}
+
+        <div class="col-12 col-lg-6">
+            <section class="um-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-0">
+                    <h4 class="h5 mb-0 text-muted">Dashboard Preferences</h4>
+                    {% if prefs %}
+                        <span class="badge bg-light text-dark border small">v{{ prefs.version }}</span>
+                    {% endif %}
+                </div>
+                <div class="um-section-divider my-3"></div>
+
+                {% if prefs %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-grid gap-1">
+                                <span class="text-muted small">Default Start Date</span>
+                                <span class="fw-semibold text-dark">{{ prefs.filter_start_date|date:"M d, Y"|default:"Not set" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid gap-1">
+                                <span class="text-muted small">Default End Date</span>
+                                <span class="fw-semibold text-dark">{{ prefs.filter_end_date|date:"M d, Y"|default:"Not set" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid gap-1">
+                                <span class="text-muted small">Last Updated</span>
+                                <span class="fw-semibold text-dark">{{ prefs.updated_at|date:"M d, Y H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid gap-1">
+                                <span class="text-muted small">Created On</span>
+                                <span class="fw-semibold text-dark">{{ prefs.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <div class="d-grid gap-1">
+                                <span class="text-muted small">Layout Configuration</span>
+                                <pre class="p-3 bg-light rounded border mb-0 small text-dark fw-medium" style="max-height: 150px; overflow-y: auto; font-family: inherit;">{{ prefs.layout }}</pre>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-gear-wide-connected text-muted fs-2 mb-2 d-block"></i>
+                        <p class="text-muted italic mb-0">No dashboard preferences found for this user.</p>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
     </div>
 </div>
 
 {% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
 {% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form %}
-{% endblock %}
-
-{% block scripts %}
-<script src="{% static 'js/user_management/common.js' %}"></script>
-<script src="{% static 'js/user_management/users.js' %}"></script>
 {% endblock %}

@@ -1251,7 +1251,7 @@ def user_details(request, user_id):
         'org_roles__role',
         "immigration_status",
         "factories",
-        ).filter(id=user_id).first()
+        ).select_related("dashboard_prefs").filter(id=user_id).first()
     if not user:
         return JsonResponse({"ok": False, "error": "User not found."}, status=404)
     
@@ -1265,20 +1265,23 @@ def user_details(request, user_id):
     user.role_display = get_user_role_display(user, selected_org=selected_org)
     user.hide_organisation_information = is_super_or_58_admin(user)
     allowed_orgs = get_allowed_orgs(request.user).order_by("name")
-    editable_org = user.organisation_data.filter(id__in=allowed_orgs).first()
-    if not editable_org:
-        editable_org = selected_org
+    target_user_org = user.organisation_data.filter(id__in=allowed_orgs).first()
+    if not target_user_org:
+        target_user_org = selected_org
     work_groups_qs = (
-        WorkGroup.objects.filter(organisation=editable_org).order_by("name")
-        if editable_org
+        WorkGroup.objects.filter(organisation=target_user_org).order_by("name")
+        if target_user_org
         else WorkGroup.objects.none()
     )
+    
+    prefs = getattr(user, "dashboard_prefs", None)
 
     context = {
         "user": user,
+        "prefs": prefs,
         "app_user_form": AppUserForm(
             work_groups_qs=work_groups_qs,
-            organisation=editable_org,
+            organisation=target_user_org,
         ),
         "dashboard_user_form": DashboardUserForm(orgs_qs=allowed_orgs),
     }
