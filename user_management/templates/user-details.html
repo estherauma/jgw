@@ -20,17 +20,18 @@
 </div>
 
 <div class="um-page um-user-details-page um-navy">
-    {% flag 'can_edit_appuser' %}
-    <button
-        type="button"
-        class="um-btn um-btn-outline mb-3"
-        data-toggle="modal" 
-        data-target="{% if user.access_type == 'dashboard' and not is_org_admin_or_staff %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
-        data-user-id="{{ user.id }}"
-    >
-        Edit User
-    </button>
-    {% endflag %}
+    <div class="d-flex justify-content-end">
+        {% flag 'can_edit_appuser' %}
+        <button
+            class="um-btn um-btn-outline-black mb-2"
+            data-toggle="modal" 
+            data-target="{% if user.access_type == 'dashboard' and not is_org_admin_or_staff %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
+            data-user-id="{{ user.id }}"
+        >
+            Edit User
+        </button>
+        {% endflag %}
+    </div>
     <div class="um-card um-user-profile-summary mb-3">
         <div class="um-user-profile-primary">
             <div class="w-100">
