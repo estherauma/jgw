@@ -25,10 +25,14 @@ function initMessagingQuestionsResponsesByOriginChart(originData, customContaine
 
     let origins = [];
     let counts = [];
+    let noDataMessage = 'No data available';
 
     if (typeof originData === 'object' && originData.labels && originData.counts) {
         origins = [...originData.labels];
         counts = [...originData.counts];
+        if (originData.message) {
+            noDataMessage = originData.message;
+        }
     } else if (Array.isArray(originData)) {
         originData.forEach(item => {
             const origin = item.name || item.origin || item.label || '';
@@ -50,6 +54,21 @@ function initMessagingQuestionsResponsesByOriginChart(originData, customContaine
 
     if (origins.length === 0 || counts.length === 0) {
         console.warn('No valid data for Messaging Questions Responses by Origin chart');
+        myChart.setOption({
+            title: {
+                text: noDataMessage,
+                left: 'center',
+                top: 'middle',
+                textStyle: {
+                    color: '#6c757d',
+                    fontSize: 14,
+                    fontWeight: 'normal'
+                }
+            },
+            xAxis: { show: false },
+            yAxis: { show: false },
+            series: []
+        });
         return myChart;
     }
 
