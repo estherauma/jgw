@@ -1264,8 +1264,22 @@ def user_details(request, user_id):
     selected_org = user.organisation_data.first()
     user.role_display = get_user_role_display(user, selected_org=selected_org)
     user.hide_organisation_information = is_super_or_58_admin(user)
+    allowed_orgs = get_allowed_orgs(request.user).order_by("name")
+    editable_org = user.organisation_data.filter(id__in=allowed_orgs).first()
+    if not editable_org:
+        editable_org = selected_org
+    work_groups_qs = (
+        WorkGroup.objects.filter(organisation=editable_org).order_by("name")
+        if editable_org
+        else WorkGroup.objects.none()
+    )
 
     context = {
         "user": user,
+        "app_user_form": AppUserForm(
+            work_groups_qs=work_groups_qs,
+            organisation=editable_org,
+        ),
+        "dashboard_user_form": DashboardUserForm(orgs_qs=allowed_orgs),
     }
     return render(request, "user-details.html", context)

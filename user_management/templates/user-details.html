@@ -20,6 +20,17 @@
 </div>
 
 <div class="um-page um-user-details-page um-navy">
+    {% flag 'can_edit_appuser' %}
+    <button
+        type="button"
+        class="um-btn um-btn-outline mb-3"
+        data-toggle="modal" 
+        data-target="{% if user.access_type == 'dashboard' and not is_org_admin_or_staff %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
+        data-user-id="{{ user.id }}"
+    >
+        Edit User
+    </button>
+    {% endflag %}
     <div class="um-card um-user-profile-summary mb-3">
         <div class="um-user-profile-primary">
             <div class="w-100">
@@ -261,4 +272,12 @@
         {% endif %}
     </div>
 </div>
+
+{% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
+{% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/user_management/common.js' %}"></script>
+<script src="{% static 'js/user_management/users.js' %}"></script>
 {% endblock %}
