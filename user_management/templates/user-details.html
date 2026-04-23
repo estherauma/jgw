@@ -275,42 +275,42 @@
             <section class="um-card p-4">
                 <div class="d-flex align-items-center justify-content-between mb-0">
                     <h4 class="h5 mb-0 text-muted">Dashboard Preferences</h4>
-                    {% if prefs %}
-                        <span class="badge bg-light text-dark border small">v{{ prefs.version }}</span>
+                    {% if dashboard_preferences %}
+                        <span class="badge bg-light text-dark border small">v{{ dashboard_preferences.version }}</span>
                     {% endif %}
                 </div>
                 <div class="um-section-divider my-3"></div>
 
-                {% if prefs %}
+                {% if dashboard_preferences %}
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="d-grid gap-1">
                                 <span class="text-muted small">Default Start Date</span>
-                                <span class="fw-semibold text-dark">{{ prefs.filter_start_date|date:"M d, Y"|default:"Not set" }}</span>
+                                <span class="fw-semibold text-dark">{{ dashboard_preferences.filter_start_date|date:"M d, Y"|default:"Not set" }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="d-grid gap-1">
                                 <span class="text-muted small">Default End Date</span>
-                                <span class="fw-semibold text-dark">{{ prefs.filter_end_date|date:"M d, Y"|default:"Not set" }}</span>
+                                <span class="fw-semibold text-dark">{{ dashboard_preferences.filter_end_date|date:"M d, Y"|default:"Not set" }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="d-grid gap-1">
                                 <span class="text-muted small">Last Updated</span>
-                                <span class="fw-semibold text-dark">{{ prefs.updated_at|date:"M d, Y H:i" }}</span>
+                                <span class="fw-semibold text-dark">{{ dashboard_preferences.updated_at|date:"M d, Y H:i" }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="d-grid gap-1">
                                 <span class="text-muted small">Created On</span>
-                                <span class="fw-semibold text-dark">{{ prefs.created_at|date:"M d, Y" }}</span>
+                                <span class="fw-semibold text-dark">{{ dashboard_preferences.created_at|date:"M d, Y" }}</span>
                             </div>
                         </div>
                         <div class="col-12 mt-2">
                             <div class="d-grid gap-1">
                                 <span class="text-muted small">Layout Configuration</span>
-                                <pre class="p-3 bg-light rounded border mb-0 small text-dark fw-medium" style="max-height: 150px; overflow-y: auto; font-family: inherit;">{{ prefs.layout }}</pre>
+                                <pre class="p-3 bg-light rounded border mb-0 small text-dark fw-medium" style="max-height: 150px; overflow-y: auto; font-family: inherit;">{{ dashboard_preferences.layout }}</pre>
                             </div>
                         </div>
                     </div>
