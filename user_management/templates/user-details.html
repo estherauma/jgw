@@ -102,38 +102,26 @@
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Created By</span>
-                            <span class="fw-semibold text-dark text-break">{{ user.created_by|default:"Not set" }}</span>
+                            <span class="text-muted small">Email</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.email|default:"Not provided" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Created At</span>
-                            <span class="fw-semibold text-dark">{{ user.created_at|date:"M d, Y H:i"|default:"Not set" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-grid gap-1">
-                            <span class="text-muted small">Updated At</span>
-                            <span class="fw-semibold text-dark">{{ user.updated_at|date:"M d, Y H:i"|default:"Not set" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-grid gap-1">
-                            <span class="text-muted small">Updated By</span>
-                            <span class="fw-semibold text-dark text-break">{{ user.updated_by|default:"Not set" }}</span>
+                            <span class="text-muted small">Phone number</span>
+                            <span class="fw-semibold text-dark">
+                                {% if user.phone_number %}
+                                    +({{ user.phone_country_iso }}) {{ user.phone_number }}
+                                {% else %}
+                                    Not provided
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
                             <span class="text-muted small">Role</span>
                             <span class="fw-semibold text-dark">{{ user.role_display|default:"Not set" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-grid gap-1">
-                            <span class="text-muted small">Receive marketing emails</span>
-                            <span class="fw-semibold text-dark">{{ user.receive_marketing_emails|yesno:"Yes,No" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -150,26 +138,38 @@
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Email</span>
-                            <span class="fw-semibold text-dark text-break">{{ user.email|default:"Not provided" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-grid gap-1">
                             <span class="text-muted small">Is staff</span>
                             <span class="fw-semibold text-dark">{{ user.is_staff|yesno:"Yes,No" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Phone number</span>
-                            <span class="fw-semibold text-dark">
-                                {% if user.phone_number %}
-                                    +({{ user.phone_country_iso }}) {{ user.phone_number }}
-                                {% else %}
-                                    Not provided
-                                {% endif %}
-                            </span>
+                            <span class="text-muted small">Receive marketing emails</span>
+                            <span class="fw-semibold text-dark">{{ user.receive_marketing_emails|yesno:"Yes,No" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Created By</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.created_by|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Created At</span>
+                            <span class="fw-semibold text-dark">{{ user.created_at|date:"M d, Y H:i"|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Updated By</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.updated_by|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Updated At</span>
+                            <span class="fw-semibold text-dark">{{ user.updated_at|date:"M d, Y H:i"|default:"Not set" }}</span>
                         </div>
                     </div>
                 </div>
