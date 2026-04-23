@@ -23,7 +23,7 @@
     <div class="d-flex justify-content-end">
         {% flag 'can_edit_appuser' %}
         <button
-            class="um-btn um-btn-outline-black mb-2"
+            class="um-btn um-btn-outline mb-2"
             data-toggle="modal" 
             data-target="{% if user.access_type == 'dashboard' and not is_org_admin_or_staff %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
             data-user-id="{{ user.id }}"
@@ -38,7 +38,7 @@
             <div class="w-100">
                 <h3 class="mb-0 text-dark">
                     {% if user.first_name or user.last_name %}
-                        {{ user.first_name }} {{ user.last_name }}
+                        {{ user.first_name|title }} {{ user.last_name|title }}
                     {% elif user.email %}
                         {{ user.email }}
                     {% else %}
@@ -91,13 +91,13 @@
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
                             <span class="text-muted small">First Name</span>
-                            <span class="fw-semibold text-dark">{{ user.first_name|default:"Not provided" }}</span>
+                            <span class="fw-semibold text-dark">{{ user.first_name|title|default:"Not provided" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
                             <span class="text-muted small">Last Name</span>
-                            <span class="fw-semibold text-dark">{{ user.last_name|default:"Not provided" }}</span>
+                            <span class="fw-semibold text-dark">{{ user.last_name|title|default:"Not provided" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -175,6 +175,12 @@
                 </div>
             </section>
 
+            {% if not user.hide_organisation_information %}
+                {% include 'dashboard-prefs-card.html' %}
+            {% endif %}
+        </div>
+
+        <div class="col-12 col-lg-6 d-flex flex-column gap-3">
             {% if not user.hide_organisation_information %}
             <section class="um-card p-4">
                 <h4 class="h5 mb-0 text-muted">Organisation Information</h4>
@@ -268,59 +274,9 @@
                     </div>
                 </div>
             </section>
+            {% else %}
+                {% include 'partials/dashboard_prefs_card.html' %}
             {% endif %}
-        </div>
-
-        <div class="col-12 col-lg-6">
-            <section class="um-card p-4">
-                <div class="d-flex align-items-center justify-content-between mb-0">
-                    <h4 class="h5 mb-0 text-muted">Dashboard Preferences</h4>
-                    {% if dashboard_preferences %}
-                        <span class="badge bg-light text-dark border small">v{{ dashboard_preferences.version }}</span>
-                    {% endif %}
-                </div>
-                <div class="um-section-divider my-3"></div>
-
-                {% if dashboard_preferences %}
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="d-grid gap-1">
-                                <span class="text-muted small">Default Start Date</span>
-                                <span class="fw-semibold text-dark">{{ dashboard_preferences.filter_start_date|date:"M d, Y"|default:"Not set" }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-grid gap-1">
-                                <span class="text-muted small">Default End Date</span>
-                                <span class="fw-semibold text-dark">{{ dashboard_preferences.filter_end_date|date:"M d, Y"|default:"Not set" }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-grid gap-1">
-                                <span class="text-muted small">Last Updated</span>
-                                <span class="fw-semibold text-dark">{{ dashboard_preferences.updated_at|date:"M d, Y H:i" }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-grid gap-1">
-                                <span class="text-muted small">Created On</span>
-                                <span class="fw-semibold text-dark">{{ dashboard_preferences.created_at|date:"M d, Y" }}</span>
-                            </div>
-                        </div>
-                        <div class="col-12 mt-2">
-                            <div class="d-grid gap-1">
-                                <span class="text-muted small">Layout Configuration</span>
-                                <pre class="p-3 bg-light rounded border mb-0 small text-dark fw-medium" style="max-height: 150px; overflow-y: auto; font-family: inherit;">{{ dashboard_preferences.layout }}</pre>
-                            </div>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="text-center py-4">
-                        <i class="bi bi-gear-wide-connected text-muted fs-2 mb-2 d-block"></i>
-                        <p class="text-muted italic mb-0">No dashboard preferences found for this user.</p>
-                    </div>
-                {% endif %}
-            </section>
         </div>
     </div>
 </div>
@@ -328,6 +284,7 @@
 {% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
 {% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form %}
 {% endblock %}
+
 {% block scripts %}
 <script src="{% static 'js/user_management/common.js' %}"></script>
 <script src="{% static 'js/user_management/organization.js' %}"></script>
