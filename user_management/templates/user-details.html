@@ -20,12 +20,25 @@
 </div>
 
 <div class="um-page um-user-details-page um-navy">
+    <div class="d-flex justify-content-end">
+        {% flag 'can_edit_appuser' %}
+        <button
+            class="um-btn um-btn-outline mb-2"
+            data-toggle="modal" 
+            data-target="{% if user.access_type == 'dashboard' and not is_org_admin_or_staff %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
+            data-user-id="{{ user.id }}"
+        >
+            Edit User
+        </button>
+        {% endflag %}
+    </div>
+
     <div class="um-card um-user-profile-summary mb-3">
         <div class="um-user-profile-primary">
             <div class="w-100">
                 <h3 class="mb-0 text-dark">
                     {% if user.first_name or user.last_name %}
-                        {{ user.first_name }} {{ user.last_name }}
+                        {{ user.first_name|title }} {{ user.last_name|title }}
                     {% elif user.email %}
                         {{ user.email }}
                     {% else %}
@@ -69,58 +82,46 @@
         </div>
     </div>
 
-    <div class="row g-3">
-        <div class="{% if user.hide_organisation_information %}col-12{% else %}col-lg-6{% endif %}">
-            <section class="um-card p-4 h-100">
+    <div class="row g-3 align-items-start">
+        <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+            <section class="um-card p-4">
                 <h4 class="h5 mb-0 text-muted">Account Information</h4>
                 <div class="um-section-divider my-3"></div>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
                             <span class="text-muted small">First Name</span>
-                            <span class="fw-semibold text-dark">{{ user.first_name|default:"Not provided" }}</span>
+                            <span class="fw-semibold text-dark">{{ user.first_name|title|default:"Not provided" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
                             <span class="text-muted small">Last Name</span>
-                            <span class="fw-semibold text-dark">{{ user.last_name|default:"Not provided" }}</span>
+                            <span class="fw-semibold text-dark">{{ user.last_name|title|default:"Not provided" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Created By</span>
-                            <span class="fw-semibold text-dark text-break">{{ user.created_by|default:"Not set" }}</span>
+                            <span class="text-muted small">Email</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.email|default:"Not provided" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Created At</span>
-                            <span class="fw-semibold text-dark">{{ user.created_at|date:"M d, Y H:i"|default:"Not set" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-grid gap-1">
-                            <span class="text-muted small">Updated At</span>
-                            <span class="fw-semibold text-dark">{{ user.updated_at|date:"M d, Y H:i"|default:"Not set" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-grid gap-1">
-                            <span class="text-muted small">Updated By</span>
-                            <span class="fw-semibold text-dark text-break">{{ user.updated_by|default:"Not set" }}</span>
+                            <span class="text-muted small">Phone number</span>
+                            <span class="fw-semibold text-dark">
+                                {% if user.phone_number %}
+                                    +({{ user.phone_country_iso }}) {{ user.phone_number }}
+                                {% else %}
+                                    Not provided
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
                             <span class="text-muted small">Role</span>
                             <span class="fw-semibold text-dark">{{ user.role_display|default:"Not set" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-grid gap-1">
-                            <span class="text-muted small">Receive marketing emails</span>
-                            <span class="fw-semibold text-dark">{{ user.receive_marketing_emails|yesno:"Yes,No" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -137,35 +138,51 @@
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Email</span>
-                            <span class="fw-semibold text-dark text-break">{{ user.email|default:"Not provided" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-grid gap-1">
                             <span class="text-muted small">Is staff</span>
                             <span class="fw-semibold text-dark">{{ user.is_staff|yesno:"Yes,No" }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Phone number</span>
-                            <span class="fw-semibold text-dark">
-                                {% if user.phone_number %}
-                                    +({{ user.phone_country_iso }}) {{ user.phone_number }}
-                                {% else %}
-                                    Not provided
-                                {% endif %}
-                            </span>
+                            <span class="text-muted small">Receive marketing emails</span>
+                            <span class="fw-semibold text-dark">{{ user.receive_marketing_emails|yesno:"Yes,No" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Created By</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.created_by|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Created At</span>
+                            <span class="fw-semibold text-dark">{{ user.created_at|date:"M d, Y H:i"|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Updated By</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.updated_by|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Updated At</span>
+                            <span class="fw-semibold text-dark">{{ user.updated_at|date:"M d, Y H:i"|default:"Not set" }}</span>
                         </div>
                     </div>
                 </div>
             </section>
+
+            {% if not user.hide_organisation_information %}
+                {% include 'dashboard-prefs-card.html' %}
+            {% endif %}
         </div>
 
-        {% if not user.hide_organisation_information %}
-        <div class="col-lg-6">
-            <section class="um-card p-4 h-100">
+        <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+            {% if not user.hide_organisation_information %}
+            <section class="um-card p-4">
                 <h4 class="h5 mb-0 text-muted">Organisation Information</h4>
                 <div class="um-section-divider my-3"></div>
                 <div class="row g-3">
@@ -257,8 +274,20 @@
                     </div>
                 </div>
             </section>
+            {% else %}
+                {% include 'dashboard-prefs-card.html' %}
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
+
+{% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
+{% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/user_management/common.js' %}"></script>
+<script src="{% static 'js/user_management/organization.js' %}"></script>
+<script src="{% static 'js/user_management/users.js' %}"></script>
+<script src="{% static 'js/user_management/roles.js' %}"></script>
 {% endblock %}

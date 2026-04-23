@@ -1251,21 +1251,35 @@ def user_details(request, user_id):
         'org_roles__role',
         "immigration_status",
         "factories",
+        "dashboard_prefs"
         ).filter(id=user_id).first()
     if not user:
         return JsonResponse({"ok": False, "error": "User not found."}, status=404)
     
     current_user = request.user
-    if is_org_admin(current_user):
-        target_user_org = user.organisation_data.first()
-        if not has_org_access(current_user, target_user_org):
-            return org_access_denied()
+    target_user_org = user.organisation_data.first()
+    
+    if is_org_admin(current_user) and not has_org_access(current_user, target_user_org):
+        return org_access_denied()
         
-    selected_org = user.organisation_data.first()
-    user.role_display = get_user_role_display(user, selected_org=selected_org)
+    user.role_display = get_user_role_display(user, selected_org=target_user_org)
     user.hide_organisation_information = is_super_or_58_admin(user)
+    
+    work_groups_qs = (
+        WorkGroup.objects.filter(organisation=target_user_org).order_by("name")
+        if target_user_org
+        else WorkGroup.objects.none()
+    )
+    
+    dashboard_preferences = getattr(user, "dashboard_prefs", None)
 
     context = {
         "user": user,
+        "dashboard_preferences": dashboard_preferences,
+        "app_user_form": AppUserForm(
+            work_groups_qs=work_groups_qs,
+            organisation=target_user_org,
+        ),
+        "dashboard_user_form": DashboardUserForm(orgs_qs=get_allowed_orgs(current_user).order_by("name")),
     }
     return render(request, "user-details.html", context)
