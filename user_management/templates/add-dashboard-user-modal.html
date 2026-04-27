@@ -25,6 +25,7 @@
                             <div class="text-danger small">{{ form.is_active.errors }}</div>
                         {% endif %}
                     </label>
+                    {% if action_type == 'add' %}
                     <label class="um-field form-group um-field-inline mb-3">
                         {{ form.send_invite }}<span>Send invitation email/sms</span>
                         <div class="text-danger small" data-error-for="send_invite"></div>
@@ -32,6 +33,7 @@
                             <div class="text-danger small">{{ form.send_invite.errors }}</div>
                         {% endif %}
                     </label>
+                    {% endif %}
                     <label class="um-field form-group">
                         <span>Email</span>
                         {{ form.email }}
