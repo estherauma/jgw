@@ -46,9 +46,10 @@ def apply_role_to_user(user, organisation, role):
         user.groups.add(user_management_group)
         if role.is_system:
             user.groups.add(org_admin_group)
+            user.groups.remove(org_staff_group, worker_group)
         else:
             user.groups.add(org_staff_group)
-        user.groups.remove(org_admin_group, worker_group)
+            user.groups.remove(org_admin_group, worker_group)
     else:
         user.access_type = "app"
         user.is_active = False
