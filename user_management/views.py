@@ -1285,15 +1285,32 @@ def user_details(request, user_id):
     return render(request, "user-details.html", context)
 
 def invite_user(request, user_id):
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "Method not allowed."}, status=405)
     user = User.objects.filter(id=user_id).first()
     if not user:
         return JsonResponse({"ok": False, "error": "User not found."}, status=404)
     if not (is_super_or_58_admin(request.user) or (is_org_admin(request.user) and has_org_access(request.user, user.organisation_data.first(), request=request, flag_name="can_invite_user"))):
         return org_access_denied()
+    contact = user.email or user.phone_number
+    if not contact:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "User has no email or phone number for invitation.",
+            },
+            status=400,
+        )
     invite_sent = send_invitation(request, user)
     if invite_sent:
-        messages.success(request, f"Invitation sent successfully to {user.email}.")
+        messages.success(request, f"Invitation sent successfully to {contact}.")
         return JsonResponse({"ok": True})
     else:
         messages.warning(request, "The invitation could not be sent. Please check the contact details and try sending the invitation again.")
-        return JsonResponse({"ok": False}, status=500)
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "The invitation could not be sent. Please check the contact details and try sending the invitation again.",
+            },
+            status=500,
+        )
