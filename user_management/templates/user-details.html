@@ -27,7 +27,6 @@
             class="um-btn um-btn-outline mb-2"
             data-invite-user
             data-user-id="{{ user.id }}"
-            data-invite-url="{% url 'user_management:invite_user' user.id %}"
             data-first-name="{{ user.first_name|default:'' }}"
             data-last-name="{{ user.last_name|default:'' }}"
             data-email="{{ user.email|default:'' }}"

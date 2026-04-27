@@ -790,12 +790,15 @@
         title: 'Invite User',
         message: message,
         warning: 'SMS invitations will only be sent when no email is available.',
-        url:
-          inviteBtn.getAttribute('data-invite-url') ||
-          '/user-management/users/' + encodeURIComponent(user.id) + '/invite/',
+        url: '/user-management/users/invite/',
         method: 'POST',
+        body: JSON.stringify({ ids: String(user.id) }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         confirmButtonText: 'Send invite',
         confirmButtonClass: 'um-btn um-btn-lime',
+        showFullScreenLoader: true,
         onSuccess: function () {
           window.location.reload();
         },
