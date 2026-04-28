@@ -181,10 +181,9 @@ class ImmigrationStatus(models.Model):
             models.Index(fields=['name']),
         ]
 
-
-class Brand(AuditFieldsMixin):
+class OrganizationGroup(AuditFieldsMixin):
     name = models.CharField(max_length=255, unique=True)
-    brand_code = models.CharField(max_length=50, unique=True)
+    group_code = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
@@ -193,12 +192,12 @@ class Brand(AuditFieldsMixin):
 class OrganisationData(AuditFieldsMixin):
     name = models.CharField(max_length=255)
     org_code = models.CharField(max_length=50, unique=True)
-    brand = models.ForeignKey(
-        Brand,
+    organization_group = models.ForeignKey(
+        OrganizationGroup,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="organisation_data",
+        related_name="organizations",
     )
     display_name = models.CharField(max_length=255, null=True, blank=True)
     has_custom_content = models.BooleanField(default=True)

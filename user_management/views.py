@@ -7,12 +7,12 @@ from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
 import json
-from preference.models import Brand, OrganisationAccessCode, OrganisationData, SiteLanguages
+from preference.models import OrganizationGroup, OrganisationAccessCode, OrganisationData, SiteLanguages
 
 from .forms import (
     AddWorkCodeForm,
     AppUserForm,
-    CreateBrandForm,
+    CreateOrganizationGroupForm,
     CreateOrganisationForm,
     DashboardUserForm,
     OrganisationRoleForm,
@@ -113,7 +113,7 @@ def user_management(request):
     selected_org_id = None
     selected_org_name = None
     organizations = get_allowed_orgs(user).order_by("name")
-    brands = Brand.objects.order_by("name")
+    organization_groups = OrganizationGroup.objects.order_by("name")
 
     work_codes = []
     work_groups = WorkGroup.objects.none()
@@ -171,7 +171,7 @@ def user_management(request):
 
     context = {
         "organizations": organizations,
-        "brands": brands,
+        "organization_groups": organization_groups,
         "users": users,
         "work_codes": work_codes,
         "work_groups": work_groups,
@@ -181,7 +181,7 @@ def user_management(request):
         "org_details": org_details,
         "org_languages": org_languages,
         "create_org_form": CreateOrganisationForm(),
-        "create_brand_form": CreateBrandForm(),
+        "create_organization_group_form": CreateOrganizationGroupForm(),
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
@@ -258,17 +258,19 @@ class CreateOrganisationView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
-class CreateBrandView(View):
+class CreateOrganizationGroupView(View):
     def post(self, request):
         if not is_super_or_58_admin(request.user):
             return org_access_denied()
-        form = CreateBrandForm(request.POST)
+        form = CreateOrganizationGroupForm(request.POST)
         if form.is_valid():
-            brand = OrganizationService.create_brand(form=form, user=request.user)
-            return JsonResponse({"ok": True, "brand_id": brand.id})
+            organization_group = OrganizationService.create_organization_group(
+                form=form,
+                user=request.user,
+            )
+            return JsonResponse({"ok": True, "organization_group_id": organization_group.id})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
-
 
 class CreateWorkCodeView(View):
     def post(self, request):

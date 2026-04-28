@@ -23,11 +23,11 @@
             <div class="um-card">
                 <div class="um-row">
                     <div class="um-card-title um-navy">
-                        <span class="title-icon">🏷️</span>
-                        <span class="title-text">Brands:</span>
+                        <span class="title-icon">🗂️</span>
+                        <span class="title-text">Organization Groups:</span>
                     </div>
-                    {% flag 'can_manage_brand' %}
-                    <button class="um-btn" type="button" data-toggle="modal" data-target="#create-brand-modal">Add brand</button>
+                    {% flag 'can_manage_organization_groups' %}
+                    <button class="um-btn" type="button" data-toggle="modal" data-target="#create-organization-group-modal">Add organization group</button>
                     {% endflag %}
                 </div>
                 <div class="um-table-scroll-wrapper">
@@ -43,8 +43,8 @@
                                 <th>Code</th>
                             </tr>
                         </thead>
-                        <tbody data-brand-table-body>
-                            {% include "brand-rows.html" %}
+                        <tbody data-organization-group-table-body>
+                            {% include "organization-group-rows.html" %}
                         </tbody>
                         </table>
                     </div>
@@ -376,7 +376,7 @@
 </div>
 
 {% url 'user_management:create_work_code' as create_work_code_url %}
-{% url 'user_management:create_brand' as create_brand_url %}
+{% url 'user_management:create_organization_group' as create_organization_group_url %}
 {% url 'user_management:create_organisation' as create_org_url %}
 {% url 'user_management:create_work_group' as create_work_group_url %}
 {% url 'user_management:create_app_user' as create_app_user_url %}
@@ -384,7 +384,7 @@
 {% url 'user_management:assign_users_work_groups' as assign_users_work_groups_url %}
 {% url 'user_management:create_role' as create_role_url %}
 <!-- include create organisation modal -->
-{% include 'create-brand-modal.html' with modal_title='Create new brand' submit_label='Save' form_action=create_brand_url form=create_brand_form %}
+{% include 'create-organization-group-modal.html' with modal_title='Create new organization group' submit_label='Save' form_action=create_organization_group_url form=create_organization_group_form %}
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form %}
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% include 'add-workcode-modal.html' with action_type='edit' modal_title='Edit work code' submit_label='Save Changes' form=add_work_code_form %}

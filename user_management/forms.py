@@ -4,7 +4,7 @@ import phonenumbers
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from preference.models import (
-    Brand,
+    OrganizationGroup,
     OrganisationAccessCode,
     OrganisationData,
     Country,
@@ -57,38 +57,37 @@ class CreateOrganisationForm(forms.ModelForm):
             raise forms.ValidationError("Organisation code already exists.")
         return org_code
 
-
-class CreateBrandForm(forms.ModelForm):
+class CreateOrganizationGroupForm(forms.ModelForm):
     class Meta:
-        model = Brand
-        fields = ["name", "brand_code"]
+        model = OrganizationGroup
+        fields = ["name", "group_code"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].widget.attrs.update(
-            {"class": "form-control um-input", "placeholder": "Brand name"}
+            {"class": "form-control um-input", "placeholder": "Organization group name"}
         )
-        self.fields["brand_code"].widget.attrs.update(
-            {"class": "form-control um-input", "placeholder": "Brand code"}
+        self.fields["group_code"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Group code"}
         )
 
     def clean_name(self):
         name = self.cleaned_data.get("name", "").strip().title()
-        qs = Brand.objects.filter(name__iexact=name)
+        qs = OrganizationGroup.objects.filter(name__iexact=name)
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
-            raise forms.ValidationError("Brand name already exists.")
+            raise forms.ValidationError("Organization group name already exists.")
         return name
 
-    def clean_brand_code(self):
-        brand_code = self.cleaned_data.get("brand_code", "").strip().upper()
-        qs = Brand.objects.filter(brand_code__iexact=brand_code)
+    def clean_group_code(self):
+        group_code = self.cleaned_data.get("group_code", "").strip().upper()
+        qs = OrganizationGroup.objects.filter(group_code__iexact=group_code)
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
-            raise forms.ValidationError("Brand code already exists.")
-        return brand_code
+            raise forms.ValidationError("Group code already exists.")
+        return group_code
 
 
 class AddWorkCodeForm(forms.ModelForm):

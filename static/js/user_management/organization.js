@@ -1,10 +1,10 @@
 (function () {
-  function initCreateBrandForm() {
-    const form = document.getElementById('create-brand-form');
+  function initCreateOrganizationGroupForm() {
+    const form = document.getElementById('create-organization-group-form');
     if (!form) {
       return;
     }
-    const errorBox = document.getElementById('create-brand-form-error');
+    const errorBox = document.getElementById('create-organization-group-form-error');
 
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
@@ -562,7 +562,7 @@
   }
   
   window.addEventListener('load', function () {
-    initCreateBrandForm();
+    initCreateOrganizationGroupForm();
   });
   window.addEventListener('load', function () {
     initCreateOrgForm();

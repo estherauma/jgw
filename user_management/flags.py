@@ -10,8 +10,8 @@ UM_FLAG_DEFS = [
         "condition": "58_admin",
     },
     {
-        "name": "can_manage_brand",
-        "label": "Manage brands",
+        "name": "can_manage_organization_groups",
+        "label": "Manage organization groups",
         "condition": "58_admin",
     },
     {

@@ -1,0 +1,13 @@
+{% if organization_groups %}
+    {% for organization_group in organization_groups %}
+    <tr data-organization-group-row>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ organization_group.name }}</td>
+        <td>{{ organization_group.group_code }}</td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr data-organization-group-row>
+        <td colspan="3">No organization groups found.</td>
+    </tr>
+{% endif %}
