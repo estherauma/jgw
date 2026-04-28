@@ -87,6 +87,7 @@ def get_users_query(current_user, selected_org=None):
             "work_groups",
             "org_roles__role",
             "org_roles__organisation",
+            "invitations",
         )
         .order_by("-created_at")
         .distinct()
@@ -100,6 +101,10 @@ def get_users_query(current_user, selected_org=None):
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
         user.hide_organisation_information = is_super_or_58_admin(user)
+        user.has_pending_invitation = any(
+            invitation.status in {"SENT", "PENDING"}
+            for invitation in user.invitations.all()
+        )
 
     return users
 
