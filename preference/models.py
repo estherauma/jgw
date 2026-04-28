@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.conf import settings
 from common.models import AuditFieldsMixin
 
-from common.const.value_const import NOT_SPECIFIED
+from common.const.value_const import NOT_SPECIFIED, ORGANISATION_THEME_CHOICES
 
 
 class OriginalSectorOfWork(models.Model):
@@ -182,10 +182,32 @@ class ImmigrationStatus(models.Model):
         ]
 
 
+class Brand(AuditFieldsMixin):
+    name = models.CharField(max_length=255, unique=True)
+    brand_code = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class OrganisationData(AuditFieldsMixin):
     name = models.CharField(max_length=255)
     org_code = models.CharField(max_length=50, unique=True)
-    custom_type = models.CharField(max_length=100, null=True, blank=True)
+    brand = models.ForeignKey(
+        Brand,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="organisation_data",
+    )
+    display_name = models.CharField(max_length=255, null=True, blank=True)
+    has_custom_content = models.BooleanField(default=True)
+    theme = models.CharField(max_length=100, choices=ORGANISATION_THEME_CHOICES, null=True, blank=True)
+    default_report_issue_emails = models.TextField(null=True, blank=True)
+    default_feedback_emails = models.TextField(null=True, blank=True)
+    big_icon = models.TextField(null=True, blank=True)
+    small_icon = models.TextField(null=True, blank=True)
+    custom_type = models.CharField(max_length=100, default="version_1")
     work_sector = models.CharField(max_length=255, null=True, blank=True)
     content_collection = models.CharField(max_length=255, null=True, blank=True)
     default_collection_language = models.CharField(max_length=100, null=True, blank=True)

@@ -8,6 +8,7 @@ from preference.models import (
     ImmigrationStatus,
     Organisation,
     OrganisationAccessCode,
+    Brand,
     OrganisationData,
     OrganisationSector,
     OriginalSectorOfWork,
@@ -192,7 +193,13 @@ class OrganisationDataAdmin(admin.ModelAdmin):
     search_fields = [
         "name",
         "org_code",
+        "display_name",
+        "brand__name",
+        "brand__brand_code",
         "custom_type",
+        "theme",
+        "default_report_issue_emails",
+        "default_feedback_emails",
         "work_sector",
         "content_collection",
         "default_collection_language",
@@ -200,13 +207,23 @@ class OrganisationDataAdmin(admin.ModelAdmin):
     list_display = [
         "name",
         "org_code",
+        "display_name",
+        "brand",
+        "has_custom_content",
         "custom_type",
+        "theme",
         "work_sector",
         "content_collection",
         "default_collection_language",
         "created_at",
         "updated_at",
     ]
+
+
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    search_fields = ["name", "brand_code"]
+    list_display = ["name", "brand_code", "created_at", "updated_at"]
 
 
 @admin.register(SiteLanguages)

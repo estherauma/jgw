@@ -4,6 +4,14 @@ BIGQUERY_HOMEPAGE_EVENTS_START_DATE = "2023-06-01"
 PUBLIC_USER_DATA_START_DATE = "2024-01-01"
 SESSION_FILTERS_KEY = "session_filters"
 
+ORGANISATION_THEME_CHOICES = [
+    ("purple_and_hot_pink", "Purple And Hot Pink"),
+    ("orange_and_dark_red", "Orange And Dark Red"),
+    ("mint_and_green", "Mint And Green"),
+    ("blue_and_dark_blue", "Blue And Dark Blue"),
+    ("red_and_dark_red", "Red And Dark Red"),
+]
+
 ACCESS_CODE_MAPPING = {
     "csws61": "Concordia23",
     "csws62": "Concordia24",

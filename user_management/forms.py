@@ -4,6 +4,7 @@ import phonenumbers
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from preference.models import (
+    Brand,
     OrganisationAccessCode,
     OrganisationData,
     Country,
@@ -55,6 +56,39 @@ class CreateOrganisationForm(forms.ModelForm):
         if qs.exists():
             raise forms.ValidationError("Organisation code already exists.")
         return org_code
+
+
+class CreateBrandForm(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = ["name", "brand_code"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Brand name"}
+        )
+        self.fields["brand_code"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Brand code"}
+        )
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name", "").strip().title()
+        qs = Brand.objects.filter(name__iexact=name)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Brand name already exists.")
+        return name
+
+    def clean_brand_code(self):
+        brand_code = self.cleaned_data.get("brand_code", "").strip().upper()
+        qs = Brand.objects.filter(brand_code__iexact=brand_code)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Brand code already exists.")
+        return brand_code
 
 
 class AddWorkCodeForm(forms.ModelForm):

@@ -23,6 +23,7 @@ from .views import (
     BulkDeleteUsersView,
     BulkDeactivateUsersView,
     BulkInviteUsersView,
+    CreateBrandView,
     user_details
 )
 
@@ -30,6 +31,7 @@ app_name = "user_management"
 
 urlpatterns = [
     path('', user_management, name="home"),
+    path('brands/create/', CreateBrandView.as_view(), name="create_brand"),
     path('organisations/create/', CreateOrganisationView.as_view(), name="create_organisation"),
     path('organisations/search/', search_organisations, name="search_organisations"),
     path('organisations/<int:organisation_id>/edit/', EditOrganisationView.as_view(), name="edit_organisation"),

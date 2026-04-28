@@ -7,11 +7,12 @@ from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
 import json
-from preference.models import OrganisationAccessCode, OrganisationData, SiteLanguages
+from preference.models import Brand, OrganisationAccessCode, OrganisationData, SiteLanguages
 
 from .forms import (
     AddWorkCodeForm,
     AppUserForm,
+    CreateBrandForm,
     CreateOrganisationForm,
     DashboardUserForm,
     OrganisationRoleForm,
@@ -29,6 +30,7 @@ from .models import (
 )
 from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
+from .services.organization import OrganizationService
 from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
 from users.models import User
 
@@ -111,6 +113,7 @@ def user_management(request):
     selected_org_id = None
     selected_org_name = None
     organizations = get_allowed_orgs(user).order_by("name")
+    brands = Brand.objects.order_by("name")
 
     work_codes = []
     work_groups = WorkGroup.objects.none()
@@ -168,6 +171,7 @@ def user_management(request):
 
     context = {
         "organizations": organizations,
+        "brands": brands,
         "users": users,
         "work_codes": work_codes,
         "work_groups": work_groups,
@@ -177,6 +181,7 @@ def user_management(request):
         "org_details": org_details,
         "org_languages": org_languages,
         "create_org_form": CreateOrganisationForm(),
+        "create_brand_form": CreateBrandForm(),
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
@@ -202,7 +207,6 @@ def search_organisations(request):
         request=request,
     )
     return JsonResponse({"ok": True, "html": html})
-
 
 def search_users(request):
     user = request.user
@@ -250,6 +254,18 @@ class CreateOrganisationView(View):
             organisation = form.save()
             add_default_org_roles(organisation)
             return JsonResponse({"ok": True, "org_id": organisation.id})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class CreateBrandView(View):
+    def post(self, request):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
+        form = CreateBrandForm(request.POST)
+        if form.is_valid():
+            brand = OrganizationService.create_brand(form=form, user=request.user)
+            return JsonResponse({"ok": True, "brand_id": brand.id})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 

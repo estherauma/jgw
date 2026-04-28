@@ -1,4 +1,35 @@
 (function () {
+  function initCreateBrandForm() {
+    const form = document.getElementById('create-brand-form');
+    if (!form) {
+      return;
+    }
+    const errorBox = document.getElementById('create-brand-form-error');
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      safeClearFormErrors(form, errorBox);
+      const submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+  }
+
   function initCreateOrgForm() {
     var form = document.getElementById('create-org-form');
     if (!form) {
@@ -530,6 +561,9 @@
     });
   }
   
+  window.addEventListener('load', function () {
+    initCreateBrandForm();
+  });
   window.addEventListener('load', function () {
     initCreateOrgForm();
   });
