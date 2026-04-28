@@ -30,7 +30,7 @@ from .models import (
 from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
 from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
-from users.models import User
+from users.models import User, UserInvitations
 
 
 def get_allowed_orgs(user):
@@ -87,7 +87,6 @@ def get_users_query(current_user, selected_org=None):
             "work_groups",
             "org_roles__role",
             "org_roles__organisation",
-            "invitations",
         )
         .order_by("-created_at")
         .distinct()
@@ -101,7 +100,10 @@ def get_users_query(current_user, selected_org=None):
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
         user.hide_organisation_information = is_super_or_58_admin(user)
-        user.has_pending_invitation = user.invitations.filter(status__in=["SENT", "PENDING"]).exists()
+        user.has_pending_invitation = UserInvitations.objects.filter(
+            user=user,
+            status__in=["SENT", "PENDING"],
+        ).exists()
 
     return users
 
