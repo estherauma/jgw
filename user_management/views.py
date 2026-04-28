@@ -101,10 +101,7 @@ def get_users_query(current_user, selected_org=None):
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
         user.hide_organisation_information = is_super_or_58_admin(user)
-        user.has_pending_invitation = any(
-            invitation.status in {"SENT", "PENDING"}
-            for invitation in user.invitations.all()
-        )
+        user.has_pending_invitation = user.invitations.filter(status__in=["SENT", "PENDING"]).exists()
 
     return users
 
@@ -1238,29 +1235,23 @@ class BulkInviteUsersView(View):
                     request,
                     f"Sent SMS invitations to {', '.join(invite_sms)}."
                 )
-            if len(failed_contacts):
-                if not len(invited_emails) and not len(invite_sms):
-                    if len(failed_contacts) == 1:
-                        return JsonResponse(
-                            {
-                                "ok": False,
-                                "error": f"The invitation to {failed_contacts[0]} could not be sent.",
-                            },
-                            status=400,
-                        )
-                    return JsonResponse(
-                        {"ok": False, "error": "No invitations were sent."},
-                        status=400,
-                    )
-                if len(failed_contacts) == 1:
+            if failed_contacts:
+                is_single_user = len(raw_ids) == 1
+                nothing_sent = not invited_emails and not invite_sms
+
+                if nothing_sent:
+                    if is_single_user:
+                        return JsonResponse({
+                            "ok": False, 
+                            "error": f"The invitation to {failed_contacts[0]} could not be sent. Please check their contact details."
+                        }, status=400)
+                    else:
+                        return JsonResponse({"ok": False, "error": "No invitations could be sent."}, status=400)
+
+                if not is_single_user:
                     messages.warning(
-                        request,
-                        f"Failed to invite {failed_contacts[0]}. You may not have permission to invite this user or the contact information may be invalid.",
-                    )
-                else:
-                    messages.warning(
-                        request,
-                        f"Failed to invite the following users: {', '.join(failed_contacts)}. You may not have permission to invite these users or their contact information may be invalid.",
+                        request, 
+                        f"Failed to invite: {', '.join(failed_contacts)}. Others were invited successfully."
                     )
             return JsonResponse({"ok": True})
         except PermissionError as e:

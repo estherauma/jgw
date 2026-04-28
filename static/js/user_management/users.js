@@ -763,7 +763,7 @@
   }
 
 
-  function initInviteUserDetails() {
+  function initInviteUser() {
     const inviteBtn = document.querySelector('[data-invite-user]');
     if (!inviteBtn) {
       return;
@@ -778,13 +778,7 @@
         phone_number: inviteBtn.getAttribute('data-phone-number') || '',
       };
       const displayName = getUserDisplayname(user);
-      const emailList = user.email
-        ? `<div><strong>Email invitation</strong>: ${user.email}</div>`
-        : '<div><strong>Email invitation</strong>: None</div>';
-      const smsList = user.phone_number
-        ? `<div><strong>SMS invitation</strong>: ${user.phone_number}</div>`
-        : '<div><strong>SMS invitation</strong>: None</div>';
-      const message = `Send an invitation to <strong>${displayName}</strong>?${emailList}${smsList}`;
+      const message = `Send an invitation to <strong>${displayName}</strong>?`;
 
       window.showDeleteConfirm({
         title: 'Invite User',
@@ -816,6 +810,6 @@
     initDeleteUsers();
     initDeactivateUsers();
     initInviteUsers();
-    initInviteUserDetails();
+    initInviteUser();
   });
 })();
