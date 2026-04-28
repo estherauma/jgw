@@ -2,7 +2,11 @@
     {% for organization_group in organization_groups %}
     <tr data-organization-group-row>
         <td>{{ forloop.counter }}</td>
-        <td>{{ organization_group.name }}</td>
+        <td>
+            <a class="text-info text-decoration-none fw-semibold" href="{% url 'user_management:organization_group_details' organization_group_id=organization_group.id %}">
+                {{ organization_group.name }}
+            </a>
+        </td>
         <td>{{ organization_group.group_code }}</td>
     </tr>
     {% endfor %}

@@ -272,6 +272,23 @@ class CreateOrganizationGroupView(View):
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
+
+class OrganizationGroupDetailsView(View):
+    def get(self, request, organization_group_id):
+        if not is_super_or_58_admin(request.user):
+            return redirect("user_management:home")
+
+        organization_group = OrganizationService.get_organization_group(
+            organization_group_id=organization_group_id,
+        )
+        if not organization_group:
+            return HttpResponseNotFound("Organization group not found.")
+
+        context = OrganizationService.build_organization_group_context(
+            organization_group=organization_group,
+        )
+        return render(request, "organization-group-details.html", context)
+
 class CreateWorkCodeView(View):
     def post(self, request):
         if not is_super_or_58_admin(request.user):
