@@ -30,7 +30,7 @@ from .models import (
 from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
 from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
-from users.models import User
+from users.models import User, UserInvitations
 
 
 def get_allowed_orgs(user):
@@ -100,6 +100,10 @@ def get_users_query(current_user, selected_org=None):
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
         user.hide_organisation_information = is_super_or_58_admin(user)
+        user.has_pending_invitation = UserInvitations.objects.filter(
+            user=user,
+            status__in=["SENT", "PENDING"],
+        ).exists()
 
     return users
 
@@ -1245,6 +1249,11 @@ class BulkInviteUsersView(View):
         invite_sms = []
         invited_emails = []
         failed_contacts = []
+        permission_error_message = (
+            "You do not have permission to invite the selected user."
+            if len(raw_ids) == 1
+            else "You do not have permission to invite one or more of the selected users."
+        )
 
         try:
             with transaction.atomic():
@@ -1260,9 +1269,7 @@ class BulkInviteUsersView(View):
                             request=request,
                             flag_name="can_invite_user",
                         ):
-                            raise PermissionError(
-                                "You do not have permission to invite one or more of the selected users."
-                            )
+                            raise PermissionError(permission_error_message)
                         
                     invited = send_invitation(request, user)
 
@@ -1277,18 +1284,33 @@ class BulkInviteUsersView(View):
                             failed_contacts.append(user.email)
                         elif user.phone_number:
                             failed_contacts.append(user.phone_number)
-
+                            
             if len(invited_emails):
+                message = f"Sent email invitations to {', '.join(invited_emails)}."
+
+                if len(invited_emails) == 1:
+                    message = f"Sent email invitation to {invited_emails[0]}."
                 messages.success(
-                    request,
-                    f"Sent email invitations to {', '.join(invited_emails)}.",
-                )
+                                request,
+                                message,
+                            )
+            
             if len(invite_sms):
+                message = f"Sent SMS invitations to {', '.join(invite_sms)}."
+
+                if len(invite_sms) == 1:
+                    message = f"Sent SMS invitation to {invite_sms[0]}."
                 messages.success(
                     request,
-                    f"Sent SMS invitations to {', '.join(invite_sms)} user(s)."
+                    message,
                 )
+            
             if len(failed_contacts):
+                if len(raw_ids) == 1:
+                    return JsonResponse({
+                            "ok": False, 
+                            "error": f"The invitation to {failed_contacts[0]} could not be sent. Please check their contact details."
+                        }, status=400)
                 if not len(invited_emails) and not len(invite_sms):
                     return JsonResponse(
                         {"ok": False, "error": "No invitations were sent."},
@@ -1297,7 +1319,7 @@ class BulkInviteUsersView(View):
                 messages.warning(
                     request,
                     f"Failed to invite the following users: {', '.join(failed_contacts)}. You may not have permission to invite those users or they may not have valid contact information.",
-                ) 
+                )
             return JsonResponse({"ok": True})
         except PermissionError as e:
             return JsonResponse({"ok": False, "error": str(e)}, status=403)

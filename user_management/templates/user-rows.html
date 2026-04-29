@@ -22,7 +22,13 @@
             </a>
         </td>
         <td>{{ u.email|default:"-" }}</td>
-        <td>{{ u.is_active|yesno:"Yes,No" }}</td>
+        <td>
+            {% if not u.is_active and u.has_pending_invitation %}
+                Pending invitation
+            {% else %}
+                {{ u.is_active|yesno:"Yes,No" }}
+            {% endif %}
+        </td>
 
         {% if not selected_org_id %}
         <td>

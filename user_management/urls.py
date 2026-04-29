@@ -24,7 +24,7 @@ from .views import (
     BulkDeactivateUsersView,
     BulkActivateUsersView,
     BulkInviteUsersView,
-    user_details
+    user_details,
 )
 
 app_name = "user_management"
