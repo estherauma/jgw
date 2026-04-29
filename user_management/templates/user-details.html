@@ -20,7 +20,7 @@
 </div>
 
 <div class="um-page um-user-details-page um-navy">
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-end gap-2 flex-wrap">
         {% flag 'can_edit_appuser' %}
         <button
             class="um-btn um-btn-outline mb-2"
@@ -29,6 +29,18 @@
             data-user-id="{{ user.id }}"
         >
             Edit User
+        </button>
+        {% endflag %}
+        {% flag 'can_deactivate_user' %}
+        <button
+            class="um-btn um-btn-outline mb-2"
+            data-deactivate-user
+            data-user-id="{{ user.id }}"
+            data-first-name="{{ user.first_name|default:'' }}"
+            data-last-name="{{ user.last_name|default:'' }}"
+            data-email="{{ user.email|default:'' }}"
+        >
+            {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
         </button>
         {% endflag %}
     </div>
