@@ -763,7 +763,7 @@
     });
   }
 
-  function initDeactivateUser() {
+  function initUpdateUserStatus() {
     const deactivateButton = document.querySelector('[data-deactivate-user]');
     if (!deactivateButton) {
       return;
@@ -787,6 +787,8 @@
       const action = isActive ? 'deactivate' : 'activate';
       const title = isActive ? 'Deactivate User' : 'Activate User';
       const message = `Are you sure you want to ${action} <strong>${userDisplayName}</strong>?`;
+      const warning = isActive ? 'Deactivated users will lose access to the system. They can be reactivated later if needed.'
+        : 'Activated users will be able to access the system immediately.';
       const endpoint = isActive
         ? '/user-management/users/deactivate/'
         : '/user-management/users/activate/';
@@ -794,6 +796,7 @@
       window.showDeleteConfirm({
         title: title,
         message: message,
+        warning: warning,
         url: endpoint,
         method: 'POST',
         body: JSON.stringify({ ids: userId }),
@@ -805,7 +808,7 @@
       });
     });
   }
-  
+
   function initInviteUser() {
     const inviteBtn = document.querySelector('[data-invite-user]');
     if (!inviteBtn) {
@@ -853,7 +856,7 @@
     initDeleteUsers();
     initDeactivateUsers();
     initInviteUsers();
-    initDeactivateUser();
+    initUpdateUserStatus();
     initInviteUser();
   });
 })();

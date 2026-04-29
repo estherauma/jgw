@@ -1212,24 +1212,33 @@ class BulkActivateUsersView(View):
                     user.updated_by = current_user
                     user.save()
                     activation_count += 1
-
+            
             if failed_count and not activation_count:
-                return JsonResponse({"ok": False, "error": "You do not have permission to activate selected users."}, status=403)
+                if len(raw_ids) == 1:
+                    return JsonResponse({
+                        "ok": False, 
+                        "error": "You do not have permission to activate the selected user."
+                    }, status=403)
+                return JsonResponse({
+                    "ok": False, 
+                    "error": "You do not have permission to activate any of the selected users."
+                }, status=403)
 
             if activation_count and failed_count:
                 messages.warning(
                     request,
                     f"{failed_count} user(s) could not be activated. You may not have permission to activate those users.",
                 )
-            messages.success(request, f"Successfully activated {activation_count} user(s).")
+            
+            if activation_count:
+                messages.success(request, f"Successfully activated {activation_count} user(s).")
+            
             return JsonResponse({"ok": True})
 
         except PermissionError as e:
             return JsonResponse({"ok": False, "error": str(e)}, status=403)
         except Exception:
             return JsonResponse({"ok": False, "error": "An error occurred while activating users. Please try again."}, status=500)
-
-
 class BulkInviteUsersView(View):
     def post(self, request):
         current_user = request.user
