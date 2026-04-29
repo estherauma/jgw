@@ -762,6 +762,52 @@
     });
   }
 
+  function initDeactivateUser() {
+    const deactivateButton = document.querySelector('[data-deactivate-user]');
+    if (!deactivateButton) {
+      return;
+    }
+    deactivateButton.addEventListener('click', function (event) {
+      const button = event.currentTarget;
+      const userId = button.getAttribute('data-user-id');
+      const firstName = button.getAttribute('data-first-name') || '';
+      const lastName = button.getAttribute('data-last-name') || '';
+      const email = button.getAttribute('data-email') || '';
+      const phoneNumber = button.getAttribute('data-phone-number') || '';
+      const user = {
+        id: userId,
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        phone_number: phoneNumber,
+      };
+      const userDisplayName = getUserDisplayname(user);
+      const isActive = button.getAttribute('data-is-active') === 'true';
+      const action = isActive ? 'deactivate' : 'activate';
+      const title = isActive ? 'Deactivate User' : 'Activate User';
+      const message = `Are you sure you want to ${action} <strong>${userDisplayName}</strong>?`;
+      const endpoint = isActive
+        ? '/user-management/users/deactivate/'
+        : '/user-management/users/activate/';
+
+      window.showDeleteConfirm({
+        title: title,
+        message: message,
+        url: endpoint,
+        method: 'POST',
+        body: JSON.stringify({ ids: userId }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: isActive ? 'Deactivate' : 'Activate',
+        confirmButtonClass: isActive ? 'um-btn um-btn-danger' : 'um-btn um-btn-lime',
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    });
+  }
+
   window.addEventListener('load', function () {
     initAppUserForm();
     initDashboardUserForm();
@@ -773,5 +819,6 @@
     initDeleteUsers();
     initDeactivateUsers();
     initInviteUsers();
+    initDeactivateUser();
   });
 })();
