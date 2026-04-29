@@ -762,6 +762,43 @@
     });
   }
 
+
+  function initInviteUser() {
+    const inviteBtn = document.querySelector('[data-invite-user]');
+    if (!inviteBtn) {
+      return;
+    }
+
+    inviteBtn.addEventListener('click', function () {
+      const user = {
+        id: inviteBtn.getAttribute('data-user-id') || '',
+        first_name: inviteBtn.getAttribute('data-first-name') || '',
+        last_name: inviteBtn.getAttribute('data-last-name') || '',
+        email: inviteBtn.getAttribute('data-email') || '',
+        phone_number: inviteBtn.getAttribute('data-phone-number') || '',
+      };
+      const displayName = getUserDisplayname(user);
+      const message = `Send an invitation to <strong>${displayName}</strong>?`;
+
+      window.showDeleteConfirm({
+        title: 'Invite User',
+        message: message,
+        warning: 'SMS invitations will only be sent when no email is available.',
+        url: '/user-management/users/invite/',
+        method: 'POST',
+        body: JSON.stringify({ ids: String(user.id) }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: 'Send invite',
+        confirmButtonClass: 'um-btn um-btn-lime',
+        showFullScreenLoader: true,
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    });
+  }
   window.addEventListener('load', function () {
     initAppUserForm();
     initDashboardUserForm();
@@ -773,5 +810,6 @@
     initDeleteUsers();
     initDeactivateUsers();
     initInviteUsers();
+    initInviteUser();
   });
 })();
