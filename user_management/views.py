@@ -1217,44 +1217,42 @@ class BulkInviteUsersView(View):
                             failed_contacts.append(user.email)
                         elif user.phone_number:
                             failed_contacts.append(user.phone_number)
-            if len(invited_emails) == 1:
-                messages.success(
-                    request,
-                    f"Sent an email invitation to {invited_emails[0]}.",
-                )
-            elif len(invited_emails) > 1:
-                messages.success(
-                    request,
-                    f"Sent email invitations to {', '.join(invited_emails)}.",
-                )
-            if len(invite_sms) == 1:
-                messages.success(
-                    request,
-                    f"Sent an SMS invitation to {invite_sms[0]}.",
-                )
-            elif len(invite_sms) > 1:
-                messages.success(
-                    request,
-                    f"Sent SMS invitations to {', '.join(invite_sms)}."
-                )
-            if failed_contacts:
-                is_single_user = len(raw_ids) == 1
-                nothing_sent = not invited_emails and not invite_sms
+                            
+            if len(invited_emails):
+                message = f"Sent email invitations to {', '.join(invited_emails)}."
 
-                if nothing_sent:
-                    if is_single_user:
-                        return JsonResponse({
+                if len(invited_emails) == 1:
+                    message = f"Sent email invitation to {invited_emails[0]}."
+                messages.success(
+                                request,
+                                message,
+                            )
+            
+            if len(invite_sms):
+                message = f"Sent SMS invitations to {', '.join(invite_sms)}."
+
+                if len(invite_sms) == 1:
+                    message = f"Sent SMS invitation to {invite_sms[0]}."
+                messages.success(
+                    request,
+                    message,
+                )
+            
+            if len(failed_contacts):
+                if len(raw_ids) == 1:
+                    return JsonResponse({
                             "ok": False, 
                             "error": f"The invitation to {failed_contacts[0]} could not be sent. Please check their contact details."
                         }, status=400)
-                    else:
-                        return JsonResponse({"ok": False, "error": "No invitations could be sent."}, status=400)
-
-                if not is_single_user:
-                    messages.warning(
-                        request, 
-                        f"Failed to invite: {', '.join(failed_contacts)}. Others were invited successfully."
+                if not len(invited_emails) and not len(invite_sms):
+                    return JsonResponse(
+                        {"ok": False, "error": "No invitations were sent."},
+                        status=400,
                     )
+                messages.warning(
+                    request,
+                    f"Failed to invite the following users: {', '.join(failed_contacts)}. You may not have permission to invite those users or they may not have valid contact information.",
+                )
             return JsonResponse({"ok": True})
         except PermissionError as e:
             return JsonResponse({"ok": False, "error": str(e)}, status=403)
