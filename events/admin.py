@@ -40,6 +40,7 @@ class ChaptersFeedbackStandardAdminDisplay(ExportActionModelAdmin, admin.ModelAd
         "api_created_at",
         "data_source_id",
         "documentId",
+        "preference",
         "origin",
         "destination",
         "feedback_title",
@@ -112,6 +113,7 @@ class ChaptersOpenedAdmin(admin.ModelAdmin):
     list_display = [
         "created_at",
         "event_created_at",
+        "preference",
         "event_name",
         "chapter",
         "get_chapter_text",

@@ -91,11 +91,23 @@ msgstr "Ninguno seleccionado"
 msgid "genericFilterFormImmigrationStatusSearch"
 msgstr "Buscar"
 
-#: core/forms.py:185
+#: core/forms.py:188
+msgid "genericFilterFormSectorsOfWorkLabel"
+msgstr "Sectores de trabajo"
+
+#: core/forms.py:192
+msgid "genericFilterFormSectorsOfWorkNoneSelected"
+msgstr "Ninguno seleccionado"
+
+#: core/forms.py:193
+msgid "genericFilterFormSectorsOfWorkSearch"
+msgstr "Buscar"
+
+#: core/forms.py:203
 msgid "dateRangeFormStartDate"
 msgstr "Fecha de inicio"
 
-#: core/forms.py:196
+#: core/forms.py:214
 msgid "dateRangeFormEndDate"
 msgstr "Fecha de finalización"
 
@@ -634,41 +646,6 @@ msgstr "Preguntas de búsqueda..."
 msgid "messagingQuestionSelectAll"
 msgstr "Seleccionar todo"
 
-#: question/templates/question/inline_question.html:8
-msgid "inlineQuestionsTitle"
-msgstr "Preguntas en línea"
-
-#: question/templates/question/inline_question.html:16
-msgid "inlineQuestionsFilters"
-msgstr "Filtros"
-
-#: question/templates/question/inline_question.html:23
-msgid "inlineQuestionsSubmitButton"
-msgstr "Entregar"
-
-#: question/templates/question/inline_question.html:24
-msgid "inlineQuestionsResetButton"
-msgstr "Reiniciar"
-
-#: question/templates/question/inline_question.html:40
-msgid "inlineQuestionsTotalResponses"
-msgstr "Respuestas totales a las preguntas"
-
-#: question/templates/question/inline_question.html:52
-msgid "inlineQuestionsExportButton"
-msgstr "Exportar"
-
-#: question/templates/question/inline_question.html:57
-msgid "inlineQuestionsExportDataReport"
-msgstr "Exportar informe de datos de preguntas en línea a Excel"
-
-#: question/templates/question/inline_question.html:58
-msgid "inlineQuestionsExportStatistics"
-msgstr "Exportar estadísticas de preguntas en línea a Excel"
-
-#: question/templates/question/inline_question.html:59
-msgid "inlineQuestionsExportPayment"
-msgstr ""
 #: question/templates/question/inline_question.html:8
 msgid "inlineQuestionsTitle"
 msgstr "Preguntas en línea"

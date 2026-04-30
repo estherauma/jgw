@@ -3,7 +3,7 @@ from django import forms
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
-from preference.models import CountryState, ImmigrationStatus
+from preference.models import CountryState, ImmigrationStatus, OriginalSectorOfWork
 from django.utils.translation import gettext_lazy as _
 from users.utils import (
     get_user_factories,
@@ -56,6 +56,10 @@ class GenericFilterForm(forms.Form):
                 "data-actions-box": "true",
             }
         )
+        sectors_of_work = OriginalSectorOfWork.objects.filter(language="en-gc").values_list(
+            "value", "display_name"
+        )
+        self.fields["sectors_of_work"].choices = sorted(list(sectors_of_work))
 
         if "SWSConfig" in user_group:
             self.fields["organisation"].widget.attrs["disabled"] = True
@@ -174,6 +178,20 @@ class GenericFilterForm(forms.Form):
                 "id": "immigration_status",
                 "data-placeholder": _("genericFilterFormImmigrationStatusNoneSelected"),
                 "data-filter-placeholder": _("genericFilterFormImmigrationStatusSearch")
+            }
+        ),
+        required=False,
+    )
+    sectors_of_work = forms.MultipleChoiceField(
+        label=_("genericFilterFormSectorsOfWorkLabel"),
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select selectpicker",
+                "data-live-search": "true",
+                "id": "sectors_of_work",
+                "data-placeholder": _("genericFilterFormSectorsOfWorkNoneSelected"),
+                "data-filter-placeholder": _("genericFilterFormSectorsOfWorkSearch"),
+                "data-actions-box": "true",
             }
         ),
         required=False,

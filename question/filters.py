@@ -96,7 +96,11 @@ def generic_question_filtered_queryset(
         generic_question_filters_q_object &= preference_factory_farm_q
 
     if sector_of_work:
-        pass
+        selected_sectors = sector_of_work or []
+        if selected_sectors:
+            generic_question_filters_q_object &= Q(
+                preference__sectors_of_work__original_sector_of_work__value__in=selected_sectors
+            )
 
     if immigration_status:
         immigration_status_q = Q(immigration_status__name__in=immigration_status)
@@ -105,7 +109,7 @@ def generic_question_filtered_queryset(
         user_immigration_status_q = Q(immigration_status__in=user_immigration_status)
         generic_question_filters_q_object &= user_immigration_status_q
 
-    return queryset.filter(generic_question_filters_q_object)
+    return queryset.filter(generic_question_filters_q_object).distinct()
 
 
 def question_response_filtered_queryset(
@@ -259,7 +263,11 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= combined_factory_farm_q
 
     if sector_of_work:
-        pass
+        selected_sectors = sector_of_work or []
+        if selected_sectors:
+            question_response_filters_q_object &= Q(
+                inline_question__inline_question_standard__preference__sectors_of_work__original_sector_of_work__value__in=selected_sectors
+            )
 
     if immigration_status:
         immigration_status_q = Q(
@@ -272,7 +280,7 @@ def question_response_filtered_queryset(
         ) | Q(inline_question__inline_question_standard__immigration_status__in=user_immigration_status)
         question_response_filters_q_object &= user_immigration_status_q
 
-    return queryset.filter(question_response_filters_q_object)
+    return queryset.filter(question_response_filters_q_object).distinct()
 
 
 def message_data_sent_filtered_queryset(
