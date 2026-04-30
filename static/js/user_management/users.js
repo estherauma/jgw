@@ -764,7 +764,7 @@
   }
 
   function initUpdateUserStatus() {
-    const deactivateButton = document.querySelector('[data-deactivate-user]');
+    const deactivateButton = document.querySelector('[data-toggle-user-status]');
     if (!deactivateButton) {
       return;
     }
