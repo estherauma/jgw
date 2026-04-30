@@ -645,6 +645,62 @@ body .modal-backdrop.show {
     font-size: 12px;
 }
 
+.um-image-picker {
+    display: grid;
+    gap: 10px;
+}
+
+.um-image-picker-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.um-image-picker-meta {
+    color: #6a7c96;
+    font-size: 12px;
+}
+
+.um-image-picker-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 96px));
+    gap: 10px;
+}
+
+.um-image-picker-empty {
+    border: 1px dashed #cbd3df;
+    border-radius: 10px;
+    padding: 16px;
+    color: #6a7c96;
+    font-size: 12px;
+    background: #f8fbff;
+}
+
+.um-image-picker-card {
+    display: grid;
+    gap: 8px;
+}
+
+.um-image-picker-thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 96px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #d9e4f2;
+    background: #fff;
+}
+
+.um-image-picker-remove {
+    border: 0;
+    background: transparent;
+    color: #24aacc;
+    font-size: 12px;
+    padding: 0;
+    text-align: left;
+}
+
 .um-select-option-check {
     display: grid;
     grid-template-columns: 16px minmax(0, 1fr);
