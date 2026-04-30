@@ -805,6 +805,9 @@
         },
         confirmButtonText: isActive ? 'Deactivate' : 'Activate',
         confirmButtonClass: isActive ? 'um-btn um-btn-danger' : 'um-btn um-btn-lime',
+        onSuccess: function () {
+          window.location.reload();
+        },
       });
     });
   }
