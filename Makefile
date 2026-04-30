@@ -53,3 +53,5 @@ docker_assign_default_org_roles:
 
 docker_sync_partner_config_options:
 	docker compose -f docker-compose.dev.yml exec web python manage.py sync_partner_config_options
+
+	  python manage.py migrate content 0001_initial
