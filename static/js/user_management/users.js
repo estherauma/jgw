@@ -764,11 +764,11 @@
   }
 
   function initUpdateUserStatus() {
-    const deactivateButton = document.querySelector('[data-toggle-user-status]');
-    if (!deactivateButton) {
+    const updateStatusBtn = document.querySelector('[data-update-user-status]');
+    if (!updateStatusBtn) {
       return;
     }
-    deactivateButton.addEventListener('click', function (event) {
+    updateStatusBtn.addEventListener('click', function (event) {
       const button = event.currentTarget;
       const userId = button.getAttribute('data-user-id');
       const firstName = button.getAttribute('data-first-name') || '';
