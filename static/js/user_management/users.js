@@ -782,11 +782,10 @@
         email: email,
         phone_number: phoneNumber,
       };
-      const userDisplayName = getUserDisplayname(user);
       const isActive = button.getAttribute('data-is-active') === 'true';
       const action = isActive ? 'deactivate' : 'activate';
       const title = isActive ? 'Deactivate User' : 'Activate User';
-      const message = `Are you sure you want to ${action} <strong>${userDisplayName}</strong>?`;
+      const message = `Are you sure you want to <strong>${action}</strong> this user?`;
       const warning = isActive ? 'Deactivated users will lose access to the system. They can be reactivated later if needed.'
         : 'Activated users will be able to access the system immediately.';
       const endpoint = isActive
