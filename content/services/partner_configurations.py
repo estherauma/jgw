@@ -1,17 +1,197 @@
 import json
 import logging
 import re
+from urllib.parse import urljoin
 
 import requests
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 
+from common.const.value_const import CMS_SYNC_FAILED, CMS_SYNC_SUCCESS
 from content.models import Collection, Locale, WorkSector
 from preference.models import OrganisationAccessCode, OrganisationData, SiteLanguages
 from content.services.utils import get_cms_headers, get_cms_session
 from user_management.roles import add_default_org_roles
 
 logger = logging.getLogger(__name__)
+
+
+class FileUploadError(Exception):
+    pass
+
+
+class PartnerConfigurationSyncError(Exception):
+    pass
+
+
+def _build_media_url(url):
+    if not url:
+        return ""
+
+    base_url = (settings.STRAPI_API_BASE_URL or "").removesuffix("/api")
+    return urljoin(f"{base_url}/", url.lstrip("/"))
+
+
+def upload_files_to_cms(files):
+    base_url = settings.STRAPI_API_BASE_URL
+    token = settings.STRAPI_API_TOKEN
+    if not base_url or not token:
+        raise FileUploadError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    if not files:
+        raise FileUploadError("No files provided for upload.")
+
+    url = f"{base_url.rstrip('/')}/upload"
+    session = get_cms_session()
+    headers = {
+          "Authorization": f"Bearer {settings.STRAPI_API_TOKEN}",
+    }
+    form_files = [("files", file_obj) for file_obj in files]
+
+    try:
+        response = session.post(
+            url,
+            headers=headers,
+            files=form_files,
+            timeout=60,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except  Exception as exc:
+        logger.error("HTTP error uploading file to Strapi: %s", exc)
+        raise FileUploadError("Failed to upload files to Strapi.") from exc
+
+    if not isinstance(payload, list) or not payload:
+        raise FileUploadError("Strapi upload did not return a file URL.")
+
+    uploaded_urls = []
+    for item in payload:
+        url = _build_media_url(item.get("url"))
+        if not url:
+            logger.warning("Strapi upload response item missing URL: %s", item)
+            continue
+        
+        uploaded_urls.append({
+            "id": item.get("id"), 
+            "name": item.get("name"),
+            "url": url
+            })
+    if not uploaded_urls:
+        raise FileUploadError("Strapi upload did not return a valid file URL.")
+
+    return uploaded_urls
+
+
+def _format_collection_languages_for_cms(site_languages):
+    return [
+        {
+            "type": "paragraph",
+            "children": [
+                {
+                    "type": "text",
+                    "text": site_language.code,
+                }
+            ],
+        }
+        for site_language in site_languages
+        if site_language.code
+    ]
+
+
+def _format_work_sector_for_cms(work_sector_slug):
+    if not work_sector_slug:
+        return ""
+
+    work_sector = WorkSector.objects.filter(slug=work_sector_slug).first()
+    if not work_sector:
+        return work_sector_slug
+
+    return f"{work_sector.slug} ({work_sector.display_name})"
+
+
+def build_partner_configuration_payload(organisation):
+    from user_management.models import WorkGroup
+
+    site_languages = list(
+        SiteLanguages.objects.filter(organisation=organisation).order_by("code")
+    )
+    organisation_access_codes = list(
+        OrganisationAccessCode.objects.filter(organisation=organisation).order_by("code")
+    )
+    work_groups = list(
+        WorkGroup.objects.filter(organisation=organisation).prefetch_related("access_codes")
+    )
+
+    payload = {
+        "data": {
+            "org_code": organisation.org_code,
+            "name": organisation.name,
+            "display_name": organisation.display_name or organisation.name,
+            "has_custom_content": organisation.has_custom_content,
+            "content_collection": organisation.content_collection,
+            "access_code": ",".join(
+                access_code.code for access_code in organisation_access_codes if access_code.code
+            ),
+            "work_sector": _format_work_sector_for_cms(organisation.work_sector),
+            "custom_type": organisation.custom_type,
+            "theme": organisation.theme or "",
+            "default_collection_language": organisation.default_collection_language or "",
+            "collection_languages": _format_collection_languages_for_cms(site_languages),
+            "default_report_issue_emails": organisation.default_report_issue_emails or "",
+            "default_feedback_emails": organisation.default_feedback_emails or "",
+            "big_icon": organisation.big_icon_cms_media_id,
+            "small_icon": organisation.small_icon_cms_media_id,
+            "departments": [
+                {
+                    "accessCode": (
+                        work_group.access_codes.order_by("code").first().code
+                        if work_group.access_codes.exists()
+                        else ""
+                    ),
+                    "name": work_group.name,
+                    "uid": work_group.name.lower().replace(" ", "_"),
+                }
+                for work_group in work_groups
+            ],
+        }
+    }
+    return payload
+
+
+def add_partner_configuration_to_cms(organisation):
+    base_url = settings.STRAPI_API_BASE_URL
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        raise PartnerConfigurationSyncError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    url = f"{base_url.rstrip('/')}/partner-configurations"
+    headers = get_cms_headers()
+    payload = build_partner_configuration_payload(organisation)
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        organisation.cms_sync_status = CMS_SYNC_SUCCESS
+        organisation.last_cms_sync_date = timezone.now()
+        organisation.save(update_fields=["cms_sync_status", "last_cms_sync_date"])
+        return response.json()
+    except Exception as exc:
+        organisation.cms_sync_status = CMS_SYNC_FAILED
+        organisation.last_cms_sync_date = timezone.now()
+        organisation.save(update_fields=["cms_sync_status", "last_cms_sync_date"])
+        logger.error(
+            "HTTP error posting partner configuration to CMS: %s body=%s",
+            exc,
+            exc.response.text if exc.response is not None else "",
+        )
+        raise PartnerConfigurationSyncError(
+            "Failed to add partner configuration to CMS."
+        ) from exc
 
 
 def _extract_language_values(collection_languages):
@@ -407,5 +587,3 @@ def sync_partner_config_options():
     except Exception:
         logger.exception("sync_partner_config_options: Unexpected error while syncing partner configuration options")
         return None
-
-

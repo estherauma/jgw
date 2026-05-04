@@ -25,10 +25,11 @@ def get_cms_session(total_retries=3, backoff_factor=2, status_forcelist=None):
     return session
 
 
-def get_cms_headers():
+def get_cms_headers(content_type="application/json"):
     token = settings.STRAPI_API_TOKEN
-    return {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
+    headers = {
+          "Authorization": f"Bearer {token}",
     }
-
+    if content_type:
+        headers["Content-Type"] = content_type
+    return headers

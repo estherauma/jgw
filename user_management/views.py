@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
 from django.shortcuts import render, redirect
@@ -33,6 +34,11 @@ from .roles import add_default_org_roles, apply_role_to_user
 from .services.organization import OrganizationService
 from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
 from users.models import User
+from content.services.partner_configurations import (
+    add_partner_configuration_to_cms,
+    FileUploadError,
+    PartnerConfigurationSyncError,
+)
 
 
 def get_allowed_orgs(user):
@@ -155,16 +161,16 @@ def user_management(request):
         roles = OrganisationRole.objects.filter(organisation=selected_org).prefetch_related(
             "role_permissions"
         ).order_by("name")
-        org_details = {
-            "name": selected_org.name,
-            "code": selected_org.org_code,
-            "custom_type": selected_org.custom_type,
-            "work_sector": selected_org.work_sector,
-            "content_collection": selected_org.content_collection,
-            "default_collection_language": selected_org.default_collection_language,
-            "created_by": "N/A",
-            "created_at": selected_org.created_at,
-        }
+        org_details = OrganizationService.build_organisation_form_payload(
+            organisation=selected_org,
+        )
+        org_details.update(
+            {
+                "code": selected_org.org_code,
+                "created_by": "N/A",
+                "created_at": selected_org.created_at,
+            }
+        )
         org_languages = SiteLanguages.objects.filter(organisation=selected_org).order_by("code")
     else:
         org_languages = SiteLanguages.objects.none()
@@ -246,16 +252,79 @@ class CreateOrganisationView(View):
     def post(self, request):
         if not is_super_or_58_admin(request.user):
             return org_access_denied()
-        form = CreateOrganisationForm(request.POST)
+        form = CreateOrganisationForm(request.POST, request.FILES)
         if form.is_valid():
+            try:
+                uploaded_icons = OrganizationService.upload_org_icons(
+                    org_name=form.cleaned_data.get("name"),
+                    big_icon_file=form.cleaned_data.get("big_icon_file"),
+                    small_icon_file=form.cleaned_data.get("small_icon_file"),
+                )
+                print("Uploaded icons:", uploaded_icons)
+            except FileUploadError as exc:
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+
             organisation = form.save(commit=False)
+            if uploaded_icons.get("big_icon"):
+                organisation.big_icon = uploaded_icons["big_icon"].get("url", "")
+                organisation.big_icon_cms_media_id = uploaded_icons["big_icon"].get("id")
+            if uploaded_icons.get("small_icon"):
+                organisation.small_icon = uploaded_icons["small_icon"].get("url", "")
+                organisation.small_icon_cms_media_id = uploaded_icons["small_icon"].get("id")
             organisation.created_by = request.user
             organisation.updated_by = request.user
-            organisation = form.save()
+            organisation.save()
+            try:
+                OrganizationService.add_org_access_code(
+                    organisation=organisation,
+                    access_code=form.cleaned_data["access_code"],
+                    user=request.user,
+                )
+            except ValidationError as exc:
+                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            OrganizationService.add_collection_languages(
+                organization=organisation,
+                languages=form.cleaned_data.get("collection_languages", []),
+                user=request.user,
+            )
             add_default_org_roles(organisation)
-            return JsonResponse({"ok": True, "org_id": organisation.id})
+            warning_message = None
+            
+            try:
+                add_partner_configuration_to_cms(organisation)
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Organisation was created, but partner configuration sync to CMS failed.",
+                )
+            return JsonResponse(
+                {"ok": True, "org_id": organisation.id, "warning": warning_message}
+            )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class OrganisationDetailsView(View):
+    def get(self, request, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
+
+        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Organisation not found."},
+                status=404,
+            )
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "organisation": OrganizationService.build_organisation_form_payload(
+                    organisation=organisation,
+                ),
+            }
+        )
 
 
 class CreateOrganizationGroupView(View):
@@ -360,11 +429,39 @@ class EditOrganisationView(View):
                 {"ok": False, "error": "Organisation not found."},
                 status=404,
             )
-        form = CreateOrganisationForm(request.POST, instance=organisation)
+        form = CreateOrganisationForm(request.POST, request.FILES, instance=organisation)
         if form.is_valid():
+            try:
+                uploaded_icon_urls = OrganizationService.upload_org_icons(
+                    org_name=form.cleaned_data.get("name"),
+                    big_icon_file=form.cleaned_data.get("big_icon_file"),
+                    small_icon_file=form.cleaned_data.get("small_icon_file"),
+                )
+            except FileUploadError as exc:
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+
             organisation = form.save(commit=False)
+            if uploaded_icon_urls.get("big_icon"):
+                organisation.big_icon = uploaded_icon_urls["big_icon"].get("url", "")
+                organisation.big_icon_cms_media_id = uploaded_icon_urls["big_icon"].get("id")
+            if uploaded_icon_urls.get("small_icon"):
+                organisation.small_icon = uploaded_icon_urls["small_icon"].get("url", "")
+                organisation.small_icon_cms_media_id = uploaded_icon_urls["small_icon"].get("id")
             organisation.updated_by = request.user
-            form.save()
+            organisation.save()
+            try:
+                OrganizationService.add_org_access_code(
+                    organisation=organisation,
+                    access_code=form.cleaned_data["access_code"],
+                    user=request.user,
+                )
+            except ValidationError as exc:
+                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            OrganizationService.add_collection_languages(
+                organization=organisation,
+                languages=form.cleaned_data.get("collection_languages", []),
+                user=request.user,
+            )
             return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
@@ -1247,16 +1344,30 @@ class BulkInviteUsersView(View):
                             failed_contacts.append(user.phone_number)
 
             if len(invited_emails):
+                message = f"Sent email invitations to {', '.join(invited_emails)}."
+
+                if len(invited_emails) == 1:
+                    message = f"Sent email invitation to {invited_emails[0]}."
+
                 messages.success(
                     request,
-                    f"Sent email invitations to {', '.join(invited_emails)}.",
+                    message,
                 )
             if len(invite_sms):
+                message = f"Sent SMS invitations to {', '.join(invite_sms)}."
+
+                if len(invite_sms) == 1:
+                    message = f"Sent SMS invitation to {invite_sms[0]}."
                 messages.success(
                     request,
-                    f"Sent SMS invitations to {', '.join(invite_sms)} user(s)."
+                    message,
                 )
             if len(failed_contacts):
+                if len(raw_ids) == 1:
+                    return JsonResponse({
+                            "ok": False, 
+                            "error": f"The invitation to {failed_contacts[0]} could not be sent. Please check their contact details."
+                        }, status=400)
                 if not len(invited_emails) and not len(invite_sms):
                     return JsonResponse(
                         {"ok": False, "error": "No invitations were sent."},
