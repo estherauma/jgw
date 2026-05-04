@@ -788,9 +788,7 @@
       const message = `Are you sure you want to <strong>${action}</strong> this user?`;
       const warning = isActive ? 'Deactivated users will lose access to the system. They can be reactivated later if needed.'
         : 'Activated users will be able to access the system immediately.';
-      const endpoint = isActive
-        ? '/user-management/users/deactivate/'
-        : '/user-management/users/activate/';
+      const endpoint = '/user-management/users/activate/';
 
       window.showDeleteConfirm({
         title: title,

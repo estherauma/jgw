@@ -1166,7 +1166,7 @@ class BulkDeactivateUsersView(View):
             return JsonResponse({"ok": False, "error": "An error occurred while deactivating users. Please try again."}, status=500)
 
 
-class BulkActivateUsersView(View):
+class BulkActivateDeactivateUsersView(View):
     def post(self, request):
         current_user = request.user
         if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
@@ -1185,7 +1185,23 @@ class BulkActivateUsersView(View):
             return JsonResponse({"ok": False, "error": "Select at least one user."}, status=400)
 
         activation_count = 0
+        deactivation_count = 0
         failed_count = 0
+    
+        if len(raw_ids) == 1:
+            permission_error_message = "You do not have permission to update the selected user."
+        else:
+            permission_error_message = "You do not have permission to update the selected users."
+
+        def success_message(action, count):
+            if count == 1:
+                return f"Successfully {action} the selected user."
+            return f"Successfully {action} {count} users."
+
+        def warning_message(count):
+            if count == 1:
+                return "Could not update the selected user. You may not have permission to update that user."
+            return f"{count} users could not be updated. You may not have permission to update those users."
         try:
             with transaction.atomic():
                 for user_id in raw_ids:
@@ -1199,46 +1215,37 @@ class BulkActivateUsersView(View):
                     if is_org_admin(current_user):
                         user_org = user.organisation_data.first()
                         if not has_org_access(current_user, user_org):
-                            raise PermissionError("'You have no permission to activate one or more of the selected users.'")
-                        if is_org_admin(user):
-                            if getattr(user, 'created_by_id', None) != current_user.id:
-                                failed_count += 1
-                                continue
+                            raise PermissionError(permission_error_message)
+                        if is_org_admin(user) and getattr(user, 'created_by_id', None) != current_user.id:
+                            failed_count += 1
+                            continue
                     if is_58_admin(current_user) and is_super_or_58_admin(user):
                         failed_count += 1
                         continue
+                    if user.is_active:
+                        user.deactivate(deactivated_by=current_user)
+                        deactivation_count += 1
+                    else:
+                        user.is_active = True
+                        user.updated_by = current_user
+                        user.save()
+                        activation_count += 1
+            successful_updates = activation_count + deactivation_count
+            if failed_count and not successful_updates:
+                return JsonResponse({"ok": False, "error": permission_error_message}, status=403)
 
-                    user.is_active = True
-                    user.updated_by = current_user
-                    user.save()
-                    activation_count += 1
-            
-            if failed_count and not activation_count:
-                if len(raw_ids) == 1:
-                    return JsonResponse({
-                        "ok": False, 
-                        "error": "You do not have permission to activate the selected user."
-                    }, status=403)
-                return JsonResponse({
-                    "ok": False, 
-                    "error": "You do not have permission to activate any of the selected users."
-                }, status=403)
-
-            if activation_count and failed_count:
-                messages.warning(
-                    request,
-                    f"{failed_count} user(s) could not be activated. You may not have permission to activate those users.",
-                )
-            
+            if failed_count:
+                messages.warning(request, warning_message(failed_count))
             if activation_count:
-                messages.success(request, f"Successfully activated {activation_count} user(s).")
-            
+                messages.success(request, success_message("activated", activation_count))
+            if deactivation_count:
+                messages.success(request, success_message("deactivated", deactivation_count))
             return JsonResponse({"ok": True})
 
         except PermissionError as e:
             return JsonResponse({"ok": False, "error": str(e)}, status=403)
         except Exception:
-            return JsonResponse({"ok": False, "error": "An error occurred while activating users. Please try again."}, status=500)
+            return JsonResponse({"ok": False, "error": "An error occurred while updating users. Please try again."}, status=500)
 class BulkInviteUsersView(View):
     def post(self, request):
         current_user = request.user
