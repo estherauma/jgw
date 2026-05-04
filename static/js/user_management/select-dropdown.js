@@ -99,7 +99,7 @@
     optionsContainer.innerHTML = '';
 
     Array.from(field.options).forEach((option, index) => {
-      const item = document.createElement(isMultiple ? 'label' : 'button');
+      const item = document.createElement(isMultiple ? 'div' : 'button');
       item.className = 'um-select-option';
       item.setAttribute('data-um-select-option', '');
       item.setAttribute('data-um-select-value', option.value);
@@ -114,7 +114,22 @@
         checkbox.id = `${field.id}-option-${index}`;
         checkbox.setAttribute('data-um-select-checkbox', '');
         checkbox.checked = option.selected;
+        checkbox.addEventListener('click', (event) => {
+          event.stopPropagation();
+        });
         checkbox.addEventListener('change', () => {
+          option.selected = checkbox.checked;
+          syncOptionStates(root);
+        });
+        item.addEventListener('click', (event) => {
+          event.stopPropagation();
+
+          if (event.target === checkbox) {
+            return;
+          }
+
+          event.preventDefault();
+          checkbox.checked = !checkbox.checked;
           option.selected = checkbox.checked;
           syncOptionStates(root);
         });
