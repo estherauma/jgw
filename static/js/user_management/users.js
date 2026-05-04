@@ -771,17 +771,6 @@
     updateStatusBtn.addEventListener('click', function (event) {
       const button = event.currentTarget;
       const userId = button.getAttribute('data-user-id');
-      const firstName = button.getAttribute('data-first-name') || '';
-      const lastName = button.getAttribute('data-last-name') || '';
-      const email = button.getAttribute('data-email') || '';
-      const phoneNumber = button.getAttribute('data-phone-number') || '';
-      const user = {
-        id: userId,
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        phone_number: phoneNumber,
-      };
       const isActive = button.getAttribute('data-is-active') === 'true';
       const action = isActive ? 'deactivate' : 'activate';
       const title = isActive ? 'Deactivate User' : 'Activate User';
