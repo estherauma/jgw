@@ -203,6 +203,9 @@ class OrganisationDataAdmin(admin.ModelAdmin):
         "work_sector",
         "content_collection",
         "default_collection_language",
+        "big_icon_cms_media_id",
+        "small_icon_cms_media_id",
+        "cms_sync_status",
     ]
     list_display = [
         "name",
@@ -215,6 +218,10 @@ class OrganisationDataAdmin(admin.ModelAdmin):
         "work_sector",
         "content_collection",
         "default_collection_language",
+        "big_icon_cms_media_id",
+        "small_icon_cms_media_id",
+        "cms_sync_status",
+        "last_cms_sync_date",
         "created_at",
         "updated_at",
     ]

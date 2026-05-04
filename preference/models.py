@@ -3,7 +3,13 @@ from django.utils import timezone
 from django.conf import settings
 from common.models import AuditFieldsMixin
 
-from common.const.value_const import NOT_SPECIFIED, ORGANISATION_THEME_CHOICES
+from common.const.value_const import (
+    CMS_SYNC_FAILED,
+    CMS_SYNC_PENDING,
+    CMS_SYNC_SUCCESS,
+    NOT_SPECIFIED,
+    ORGANISATION_THEME_CHOICES,
+)
 
 
 class OriginalSectorOfWork(models.Model):
@@ -190,6 +196,12 @@ class OrganizationGroup(AuditFieldsMixin):
 
 
 class OrganisationData(AuditFieldsMixin):
+    CMS_SYNC_STATUS_CHOICES = [
+        (CMS_SYNC_PENDING, "Pending"),
+        (CMS_SYNC_SUCCESS, "Success"),
+        (CMS_SYNC_FAILED, "Failed"),
+    ]
+
     name = models.CharField(max_length=255)
     org_code = models.CharField(max_length=50, unique=True)
     organization_group = models.ForeignKey(
@@ -205,11 +217,19 @@ class OrganisationData(AuditFieldsMixin):
     default_report_issue_emails = models.TextField(null=True, blank=True)
     default_feedback_emails = models.TextField(null=True, blank=True)
     big_icon = models.TextField(null=True, blank=True)
+    big_icon_cms_media_id = models.BigIntegerField(null=True, blank=True)
     small_icon = models.TextField(null=True, blank=True)
+    small_icon_cms_media_id = models.BigIntegerField(null=True, blank=True)
     custom_type = models.CharField(max_length=100, default="version_1")
     work_sector = models.CharField(max_length=255, null=True, blank=True)
     content_collection = models.CharField(max_length=255, null=True, blank=True)
     default_collection_language = models.CharField(max_length=100, null=True, blank=True)
+    last_cms_sync_date = models.DateTimeField(null=True, blank=True)
+    cms_sync_status = models.CharField(
+        max_length=20,
+        choices=CMS_SYNC_STATUS_CHOICES,
+        default=CMS_SYNC_PENDING,
+    )
 
     def __str__(self):
         return self.name

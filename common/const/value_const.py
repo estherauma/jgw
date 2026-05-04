@@ -4,6 +4,10 @@ BIGQUERY_HOMEPAGE_EVENTS_START_DATE = "2023-06-01"
 PUBLIC_USER_DATA_START_DATE = "2024-01-01"
 SESSION_FILTERS_KEY = "session_filters"
 
+CMS_SYNC_PENDING = "pending"
+CMS_SYNC_SUCCESS = "success"
+CMS_SYNC_FAILED = "failed"
+
 ORGANISATION_THEME_CHOICES = [
     ("purple_and_hot_pink", "Purple And Hot Pink"),
     ("orange_and_dark_red", "Orange And Dark Red"),
