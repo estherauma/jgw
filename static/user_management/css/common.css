@@ -163,6 +163,12 @@ thead {
     color: #CBD3DF;
     font-size: 13px;
 }
+.um-input:disabled {
+    background: #EEF2F7;
+    border-color: #D7DEE8;
+    color: #7A8799;
+    cursor: not-allowed;
+}
 .phone-field {
     display: flex;
     gap: 12px;

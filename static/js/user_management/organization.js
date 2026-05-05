@@ -106,6 +106,15 @@
     syncDefaultCollectionLanguageOptions(form);
     bindCollectionLanguageSync(form);
 
+    const setDisabledFields = (disabled) => {
+      ['name', 'org_code', 'access_code'].forEach((fieldName) => {
+        const field = form.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+          field.disabled = disabled;
+        }
+      });
+    };
+
     const setFieldValue = (name, value) => {
       const field = form.querySelector(`[name="${name}"]`);
       if (!field) {
@@ -194,10 +203,12 @@
         errorBox.textContent = '';
       }
       $(form).find('[data-error-for]').text('');
+      setDisabledFields(false);
 
       try {
         const organisation = await loadOrganisationDetails($btn);
         populateEditOrgForm(organisation);
+        setDisabledFields(true);
       } catch (error) {
         if (errorBox) {
           errorBox.textContent = error.message || 'Failed to load organisation details.';
@@ -217,6 +228,7 @@
       }
   
       try {
+        setDisabledFields(false);
         if (window.postFormJson) {
           await window.postFormJson(form);
         }
@@ -238,6 +250,7 @@
           errorBox.classList.remove('d-none');
         }
       } finally {
+        setDisabledFields(true);
         if (submitButton) {
           submitButton.disabled = false;
         }
