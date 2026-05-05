@@ -1,4 +1,8 @@
 (() => {
+  const triggerFieldChange = (field) => {
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
   const getSelectedOptions = (field) =>
     Array.from(field.options).filter(
       (option) => option.selected && option.value !== '',
@@ -62,6 +66,11 @@
     let visibleCount = 0;
 
     root.querySelectorAll('[data-um-select-option]').forEach((item) => {
+      if (item.getAttribute('data-um-select-placeholder-option') === 'true') {
+        item.hidden = true;
+        return;
+      }
+
       const text = item.getAttribute('data-um-select-search-text') || '';
       const matches = !query || text.includes(query);
       item.hidden = !matches;
@@ -104,6 +113,9 @@
       item.setAttribute('data-um-select-option', '');
       item.setAttribute('data-um-select-value', option.value);
       item.setAttribute('data-um-select-search-text', option.text.toLowerCase());
+      if (!isMultiple && option.value === '') {
+        item.setAttribute('data-um-select-placeholder-option', 'true');
+      }
 
       if (isMultiple) {
         item.classList.add('um-select-option-check');
@@ -120,6 +132,7 @@
         checkbox.addEventListener('change', () => {
           option.selected = checkbox.checked;
           syncOptionStates(root);
+          triggerFieldChange(field);
         });
         item.addEventListener('click', (event) => {
           event.stopPropagation();
@@ -132,6 +145,7 @@
           checkbox.checked = !checkbox.checked;
           option.selected = checkbox.checked;
           syncOptionStates(root);
+          triggerFieldChange(field);
         });
 
         item.appendChild(checkbox);
@@ -142,6 +156,7 @@
             candidate.selected = candidate.value === option.value;
           });
           syncOptionStates(root);
+          triggerFieldChange(field);
           closeSelect(root);
         });
       }
@@ -205,7 +220,18 @@
     });
   };
 
+  const rebuildCustomSelect = (root) => {
+    if (!root) {
+      return;
+    }
+
+    buildOptions(root);
+    syncOptionStates(root);
+    filterOptions(root);
+  };
+
   window.initUmSelect = initCustomSelect;
   window.initUmSelects = initCustomSelects;
   window.refreshUmSelect = syncOptionStates;
+  window.rebuildUmSelect = rebuildCustomSelect;
 })();

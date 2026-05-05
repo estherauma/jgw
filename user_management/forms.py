@@ -237,6 +237,19 @@ class CreateOrganisationForm(forms.ModelForm):
             if isinstance(value, str):
                 cleaned_data[field_name] = value.strip()
 
+        collection_languages = cleaned_data.get("collection_languages") or []
+        default_collection_language = cleaned_data.get("default_collection_language")
+        selected_language_codes = {language.code for language in collection_languages}
+
+        if (
+            default_collection_language
+            and default_collection_language not in selected_language_codes
+        ):
+            self.add_error(
+                "default_collection_language",
+                "Default collection language must be one of the selected collection languages.",
+            )
+
         return cleaned_data
 
 class CreateOrganizationGroupForm(forms.ModelForm):

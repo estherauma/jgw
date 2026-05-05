@@ -38,10 +38,13 @@
     var errorBox = document.getElementById('create-org-form-error');
     initCustomFormSelects(form);
     initIconPickers(form);
+    syncDefaultCollectionLanguageOptions(form);
+    bindCollectionLanguageSync(form);
 
     function resetCreateOrgForm() {
       safeClearFormErrors(form, errorBox);
       form.reset();
+      syncDefaultCollectionLanguageOptions(form);
       refreshCustomFormSelects(form);
       resetIconPickers(form);
     }
@@ -100,6 +103,8 @@
     const errorBox = document.getElementById('edit-org-form-error');
     initCustomFormSelects(form);
     initIconPickers(form);
+    syncDefaultCollectionLanguageOptions(form);
+    bindCollectionLanguageSync(form);
 
     const setFieldValue = (name, value) => {
       const field = form.querySelector(`[name="${name}"]`);
@@ -160,6 +165,7 @@
       setIconPickerCurrent(form, 'big_icon_file', organisation.big_icon_url);
       setIconPickerCurrent(form, 'small_icon_file', organisation.small_icon_url);
       form.action = `/user-management/organisations/${organisation.id}/edit/`;
+      syncDefaultCollectionLanguageOptions(form);
       refreshCustomFormSelects(form);
     };
 
@@ -308,6 +314,74 @@
     }
     form.querySelectorAll('[data-um-select]').forEach(function (root) {
       window.refreshUmSelect(root);
+    });
+  }
+
+  function syncDefaultCollectionLanguageOptions(form) {
+    if (!form) {
+      return;
+    }
+
+    const collectionLanguagesField = form.querySelector('[name="collection_languages"]');
+    const defaultLanguageField = form.querySelector('[name="default_collection_language"]');
+
+    if (!collectionLanguagesField || !defaultLanguageField) {
+      return;
+    }
+
+    const currentDefaultLanguage = defaultLanguageField.value || '';
+    const defaultLanguageRoot = defaultLanguageField.closest('[data-um-select]');
+    const selectedCollectionLanguageOptions = Array.from(
+      collectionLanguagesField.selectedOptions,
+    ).filter((option) => option.value);
+    defaultLanguageField.replaceChildren(
+      (() => {
+        const option = document.createElement('option');
+        option.value = '';
+        option.text = '';
+        option.selected = !currentDefaultLanguage;
+        return option;
+      })(),
+      ...selectedCollectionLanguageOptions.map((selectedOption) => {
+        const option = document.createElement('option');
+        option.value = selectedOption.value;
+        option.text = selectedOption.text;
+        option.selected = selectedOption.value === currentDefaultLanguage;
+        return option;
+      }),
+    );
+
+    if (
+      currentDefaultLanguage &&
+      !selectedCollectionLanguageOptions.some(
+        (option) => option.value === currentDefaultLanguage,
+      )
+    ) {
+      defaultLanguageField.value = '';
+    }
+
+    if (defaultLanguageRoot && window.rebuildUmSelect) {
+      window.rebuildUmSelect(defaultLanguageRoot);
+    }
+  }
+
+  function bindCollectionLanguageSync(form) {
+    if (!form || form.getAttribute('data-default-language-sync-ready') === 'true') {
+      return;
+    }
+
+    const collectionLanguagesField = form.querySelector(
+      '[name="collection_languages"]',
+    );
+
+    if (!collectionLanguagesField) {
+      return;
+    }
+
+    form.setAttribute('data-default-language-sync-ready', 'true');
+    collectionLanguagesField.addEventListener('change', () => {
+      syncDefaultCollectionLanguageOptions(form);
+      refreshCustomFormSelects(form);
     });
   }
 

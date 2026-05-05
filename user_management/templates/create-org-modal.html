@@ -73,7 +73,7 @@
                         <div class="col-12 col-md-4">
                             <label class="um-field form-group">
                                 <span>Default collection language</span>
-                                {% include 'components/custom-select.html' with field=form.default_collection_language placeholder='Select default language' search_placeholder='Search language...' no_results_text='No languages found.' %}
+                                {% include 'components/custom-select.html' with field=form.default_collection_language placeholder='Select default language' search_placeholder='Search language...' no_results_text='Select collection languages first' %}
                                 <div class="text-danger small" data-error-for="default_collection_language"></div>
                                 {% if form.default_collection_language.errors %}
                                     <div class="text-danger small">{{ form.default_collection_language.errors }}</div>
