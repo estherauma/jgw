@@ -785,7 +785,7 @@
         warning: warning,
         url: endpoint,
         method: 'POST',
-        body: JSON.stringify({ ids: userId }),
+        body: JSON.stringify({ ids: userId, action: action }),
         headers: {
           'Content-Type': 'application/json',
         },
