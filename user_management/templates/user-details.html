@@ -46,13 +46,6 @@
             Edit User
         </button>
         {% endflag %}
-        {% flag 'can_delete_user' %}
-        <button
-            class="um-btn um-btn-outline mb-2"
-            data-delete-user
-            data-user-id="{{ user.id }}"
-        >
-            Delete User
         {% flag 'can_deactivate_user' %}
         <button
             class="um-btn mb-2 {% if user.is_active %}um-btn-danger{% else %}um-btn-outline{% endif %}"
@@ -61,6 +54,17 @@
             data-action="{{ user.is_active|yesno:'deactivate,activate' }}"
         >
             {% if user.is_active %}Deactivate User{% else %}Activate User{% endif %}
+        </button>
+        {% endflag %}
+        {% flag 'can_delete_user' %}
+        <button
+            type="button"
+            class="um-btn um-btn-danger mb-2"
+            data-delete-user
+            data-user-id="{{ user.id }}"
+            data-home-url="{% url 'user_management:home' %}"
+        >
+            Delete User
         </button>
         {% endflag %}
     </div>
