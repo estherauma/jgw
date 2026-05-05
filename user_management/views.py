@@ -260,7 +260,6 @@ class CreateOrganisationView(View):
                     big_icon_file=form.cleaned_data.get("big_icon_file"),
                     small_icon_file=form.cleaned_data.get("small_icon_file"),
                 )
-                print("Uploaded icons:", uploaded_icons)
             except FileUploadError as exc:
                 return JsonResponse({"ok": False, "error": str(exc)}, status=400)
 
@@ -304,27 +303,6 @@ class CreateOrganisationView(View):
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
-
-class OrganisationDetailsView(View):
-    def get(self, request, organisation_id):
-        if not is_super_or_58_admin(request.user):
-            return org_access_denied()
-
-        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
-        if not organisation:
-            return JsonResponse(
-                {"ok": False, "error": "Organisation not found."},
-                status=404,
-            )
-
-        return JsonResponse(
-            {
-                "ok": True,
-                "organisation": OrganizationService.build_organisation_form_payload(
-                    organisation=organisation,
-                ),
-            }
-        )
 
 
 class CreateOrganizationGroupView(View):
@@ -420,6 +398,25 @@ class CreateWorkCodeView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 class EditOrganisationView(View):
+    def get(self, request, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
+        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Organisation not found."},
+                status=404,
+            )
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "organisation": OrganizationService.build_organisation_form_payload(
+                    organisation=organisation,
+                ),
+            }
+        )
+
     def post(self, request, organisation_id):
         if not is_super_or_58_admin(request.user):
             return org_access_denied()

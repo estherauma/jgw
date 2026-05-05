@@ -8,7 +8,7 @@
         <td>
             <div class="um-action">
                 {% flag 'can_edit_organizations' %}
-                <button class="um-btn um-btn-outline" data-edit-btn data-toggle="modal" data-target="#edit-org-modal" data-org-id="{{ org.id }}" data-org-details-url="{% url 'user_management:organisation_details' org.id %}">
+                <button class="um-btn um-btn-outline" data-edit-btn data-toggle="modal" data-target="#edit-org-modal" data-org-id="{{ org.id }}" data-org-details-url="{% url 'user_management:edit_organisation' org.id %}">
                     Edit
                 </button>
                 {% endflag %}

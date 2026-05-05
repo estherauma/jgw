@@ -188,7 +188,7 @@
                     <div class="um-action">
                         <button class="um-btn um-btn-outline" data-toggle="modal" 
                         data-target="#edit-org-modal" data-org-id="{{ selected_org_id }}"
-                        {% if selected_org_id %}data-org-details-url="{% url 'user_management:organisation_details' selected_org_id %}"{% endif %}
+                        {% if selected_org_id %}data-org-details-url="{% url 'user_management:edit_organisation' selected_org_id %}"{% endif %}
                         data-edit-btn>Edit details</button>
                     </div>
                     {% endflag %}
