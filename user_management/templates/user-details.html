@@ -46,6 +46,15 @@
             Edit User
         </button>
         {% endflag %}
+        {% flag 'can_delete_user' %}
+        <button
+            class="um-btn um-btn-outline mb-2"
+            data-delete-user
+            data-user-id="{{ user.id }}"
+        >
+            Delete User
+        </button>
+        {% endflag %}
     </div>
 
     <div class="um-card um-user-profile-summary mb-3">
