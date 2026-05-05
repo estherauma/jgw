@@ -5,8 +5,9 @@
 
     const image = document.createElement('img');
     image.className = 'um-image-picker-thumb';
-    image.src = src;
+    image.src = (src || '').trim();
     image.alt = alt;
+    image.style.display = 'block';
     item.appendChild(image);
 
     if (removable) {
@@ -159,13 +160,18 @@
       return;
     }
 
-    root.setAttribute('data-image-picker-current-url', currentUrl || '');
+    const normalizedUrl = (currentUrl || '').trim();
+    root.setAttribute('data-image-picker-current-url', normalizedUrl);
     const input = root.querySelector('[data-image-picker-input]');
     if (input) {
       input.value = '';
     }
     renderCurrentPreview(root);
     updateMeta(root, []);
+    window.requestAnimationFrame(() => {
+      renderCurrentPreview(root);
+      updateMeta(root, []);
+    });
   };
 
   window.initUmImagePickers = initImagePickers;
