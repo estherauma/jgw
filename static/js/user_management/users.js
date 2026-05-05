@@ -7,6 +7,7 @@
     });
   }
 
+
   function updateAssignButtonState() {
       const assignWorkGroupButton = document.querySelector('[data-users-workgroup-action]');
       const selectedIds = getSelectedUserIds();
@@ -762,6 +763,40 @@
     });
   }
 
+  function initUpdateUserStatus() {
+    const updateStatusBtn = document.querySelector('[data-update-user-status]');
+    if (!updateStatusBtn) {
+      return;
+    }
+    updateStatusBtn.addEventListener('click', function (event) {
+      const button = event.currentTarget;
+      const userId = button.getAttribute('data-user-id');
+      const action = button.getAttribute('data-action') || 'activate';
+      const isDeactivateAction = action === 'deactivate';
+      const title = isDeactivateAction ? 'Deactivate User' : 'Activate User';
+      const message = `Are you sure you want to <strong>${action}</strong> this user?`;
+      const warning = isDeactivateAction ? 'Deactivated users will lose access to the system. They can be reactivated later if needed.'
+        : 'Activated users will be able to access the system immediately.';
+      const endpoint = '/user-management/users/activate/';
+
+      window.showDeleteConfirm({
+        title: title,
+        message: message,
+        warning: warning,
+        url: endpoint,
+        method: 'POST',
+        body: JSON.stringify({ ids: userId, action: action }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: isDeactivateAction ? 'Deactivate' : 'Activate',
+        confirmButtonClass: isDeactivateAction ? 'um-btn um-btn-danger' : 'um-btn um-btn-lime',
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    });
+  }
 
   function initInviteUser() {
     const inviteBtn = document.querySelector('[data-invite-user]');
@@ -810,6 +845,7 @@
     initDeleteUsers();
     initDeactivateUsers();
     initInviteUsers();
+    initUpdateUserStatus();
     initInviteUser();
   });
 })();

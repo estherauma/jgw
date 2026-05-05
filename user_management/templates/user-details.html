@@ -53,6 +53,14 @@
             data-user-id="{{ user.id }}"
         >
             Delete User
+        {% flag 'can_deactivate_user' %}
+        <button
+            class="um-btn mb-2 {% if user.is_active %}um-btn-danger{% else %}um-btn-outline{% endif %}"
+            data-update-user-status
+            data-user-id="{{ user.id }}"
+            data-action="{{ user.is_active|yesno:'deactivate,activate' }}"
+        >
+            {% if user.is_active %}Deactivate User{% else %}Activate User{% endif %}
         </button>
         {% endflag %}
     </div>
