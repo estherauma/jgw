@@ -220,6 +220,7 @@ class OrganisationData(AuditFieldsMixin):
     big_icon_cms_media_id = models.BigIntegerField(null=True, blank=True)
     small_icon = models.TextField(null=True, blank=True)
     small_icon_cms_media_id = models.BigIntegerField(null=True, blank=True)
+    cms_id = models.CharField(max_length=255, null=True, blank=True)
     custom_type = models.CharField(max_length=100, default="version_1")
     work_sector = models.CharField(max_length=255, null=True, blank=True)
     content_collection = models.CharField(max_length=255, null=True, blank=True)

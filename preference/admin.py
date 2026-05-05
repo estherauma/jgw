@@ -190,6 +190,10 @@ class ImmigrationStatusAdmin(admin.ModelAdmin):
 
 @admin.register(OrganisationData)
 class OrganisationDataAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        "cms_id",
+        "org_code"
+    ]
     search_fields = [
         "name",
         "org_code",
@@ -203,6 +207,7 @@ class OrganisationDataAdmin(admin.ModelAdmin):
         "work_sector",
         "content_collection",
         "default_collection_language",
+        "cms_id",
         "big_icon_cms_media_id",
         "small_icon_cms_media_id",
         "cms_sync_status",
@@ -218,6 +223,7 @@ class OrganisationDataAdmin(admin.ModelAdmin):
         "work_sector",
         "content_collection",
         "default_collection_language",
+        "cms_id",
         "big_icon_cms_media_id",
         "small_icon_cms_media_id",
         "cms_sync_status",
