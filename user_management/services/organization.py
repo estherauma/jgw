@@ -12,11 +12,11 @@ class OrganizationService:
             "id": organisation.id,
             "name": organisation.name,
             "org_code": organisation.org_code,
-            "access_code": (
-                organisation.organisation_access_codes.order_by("created_at", "id")
+            "access_code": ",".join(
+                access_code
+                for access_code in organisation.organisation_access_codes.order_by("code")
                 .values_list("code", flat=True)
-                .first()
-                or ""
+                if access_code
             ),
             "display_name": organisation.display_name,
             "has_custom_content": organisation.has_custom_content,
