@@ -32,8 +32,8 @@ class CreateOrganisationForm(forms.ModelForm):
             attrs={"class": "form-control um-input", "placeholder": "Access code"}
         ),
     )
-    big_icon_file = forms.FileField(required=True)
-    small_icon_file = forms.FileField(required=True)
+    big_icon_file = forms.FileField(required=False)
+    small_icon_file = forms.FileField(required=False)
     content_collection = forms.ModelChoiceField(
         queryset=Collection.objects.none(),
         required=True,
@@ -103,6 +103,8 @@ class CreateOrganisationForm(forms.ModelForm):
             "default_feedback_emails",
             "big_icon",
             "small_icon",
+            "big_icon_file",
+            "small_icon_file",
         ]
 
         for field_name in required_fields:
@@ -147,6 +149,12 @@ class CreateOrganisationForm(forms.ModelForm):
         )
         self.fields["small_icon"].widget = forms.TextInput(
             attrs={"class": "form-control um-input", "placeholder": "Small icon URL"}
+        )
+        self.fields["big_icon_file"].required = not bool(
+            self.instance and self.instance.big_icon
+        )
+        self.fields["small_icon_file"].required = not bool(
+            self.instance and self.instance.small_icon
         )
         collection_qs = Collection.objects.order_by("name")
         work_sector_qs = WorkSector.objects.order_by("display_name")
