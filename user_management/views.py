@@ -38,6 +38,7 @@ from content.services.partner_configurations import (
     add_partner_configuration_to_cms,
     FileUploadError,
     PartnerConfigurationSyncError,
+    update_partner_configuration_in_cms,
 )
 
 
@@ -446,20 +447,24 @@ class EditOrganisationView(View):
                 organisation.small_icon_cms_media_id = uploaded_icon_urls["small_icon"].get("id")
             organisation.updated_by = request.user
             organisation.save()
-            try:
-                OrganizationService.add_org_access_code(
-                    organisation=organisation,
-                    access_code=form.cleaned_data["access_code"],
-                    user=request.user,
-                )
-            except ValidationError as exc:
-                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            
             OrganizationService.add_collection_languages(
                 organization=organisation,
                 languages=form.cleaned_data.get("collection_languages", []),
                 user=request.user,
             )
-            return JsonResponse({"ok": True})
+            warning_message = None
+
+            try:
+                update_partner_configuration_in_cms(organisation)
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Organisation was updated, but partner configuration sync to CMS failed.",
+                )
+
+            return JsonResponse({"ok": True, "warning": warning_message})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 

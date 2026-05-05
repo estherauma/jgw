@@ -13,6 +13,7 @@ from content.models import Collection, Locale, WorkSector
 from preference.models import OrganisationAccessCode, OrganisationData, SiteLanguages
 from content.services.utils import get_cms_headers, get_cms_session
 from user_management.roles import add_default_org_roles
+from user_management.models import WorkGroup
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,6 @@ def _format_work_sector_for_cms(work_sector_slug):
 
 
 def build_partner_configuration_payload(organisation):
-    from user_management.models import WorkGroup
 
     site_languages = list(
         SiteLanguages.objects.filter(organisation=organisation).order_by("code")
@@ -176,10 +176,14 @@ def add_partner_configuration_to_cms(organisation):
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
+        response_payload = response.json()
+        cms_id = _extract_partner_configuration_cms_id(response_payload)
+
         organisation.cms_sync_status = CMS_SYNC_SUCCESS
+        organisation.cms_id = str(cms_id)
         organisation.last_cms_sync_date = timezone.now()
-        organisation.save(update_fields=["cms_sync_status", "last_cms_sync_date"])
-        return response.json()
+        organisation.save(update_fields=["cms_sync_status", "cms_id", "last_cms_sync_date"])
+        return response_payload
     except Exception as exc:
         organisation.cms_sync_status = CMS_SYNC_FAILED
         organisation.last_cms_sync_date = timezone.now()
@@ -193,6 +197,67 @@ def add_partner_configuration_to_cms(organisation):
             "Failed to add partner configuration to CMS."
         ) from exc
 
+
+def _extract_partner_configuration_cms_id(payload):
+    if not isinstance(payload, dict):
+        return None
+
+    data = payload.get("data")
+    if isinstance(data, dict):
+        return data.get("id") or data.get("documentId")
+
+    return payload.get("id") or payload.get("documentId")
+
+
+def resolve_partner_configuration_cms_id(organisation):
+    if organisation.cms_id:
+        return organisation.cms_id
+
+    partner_configuration = get_partner_configuration_by_org_code(organisation.org_code)
+    cms_id = partner_configuration.get("id") or partner_configuration.get("documentId") if partner_configuration else None
+    if not cms_id:
+        return None
+
+    organisation.cms_id = str(cms_id)
+    organisation.save(update_fields=["cms_id"])
+    return organisation.cms_id
+
+
+def update_partner_configuration_in_cms(organisation):
+    base_url = settings.STRAPI_API_BASE_URL
+    cms_id = resolve_partner_configuration_cms_id(organisation)
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        raise PartnerConfigurationSyncError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    if not cms_id:
+        return add_partner_configuration_to_cms(organisation)
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
+    headers = get_cms_headers()
+    payload = build_partner_configuration_payload(organisation)
+
+    try:
+        response = requests.put(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        organisation.cms_sync_status = CMS_SYNC_SUCCESS
+        organisation.last_cms_sync_date = timezone.now()
+        organisation.save(update_fields=["cms_sync_status", "last_cms_sync_date"])
+        return response.json()
+    except Exception as exc:
+        organisation.cms_sync_status = CMS_SYNC_FAILED
+        organisation.last_cms_sync_date = timezone.now()
+        organisation.save(update_fields=["cms_sync_status", "last_cms_sync_date"])
+        logger.error(
+            "HTTP error updating partner configuration in CMS: %s body=%s",
+            exc,
+            exc.response.text if exc.response is not None else "",
+        )
+        raise PartnerConfigurationSyncError(
+            "Failed to update partner configuration in CMS."
+        ) from exc
 
 def _extract_language_values(collection_languages):
     values = []
@@ -297,11 +362,10 @@ def sync_partner_configurations():
     Sync Strapi partner configurations into OrganisationData and SiteLanguages.
     """
     try:
-        payload = get_partner_configurations()
-        if payload is None:
+        items = get_partner_configurations()
+        if items is None:
             return None
 
-        items = payload.get("data", [])
 
         created_count = 0
         updated_count = 0
@@ -323,7 +387,7 @@ def sync_partner_configurations():
         return None
 
 
-def get_partner_configurations():
+def get_partner_configurations(query_params=None):
     """
     Fetch organisation partner configurations from the CMS.
 
@@ -341,21 +405,29 @@ def get_partner_configurations():
     url = f"{base_url.rstrip('/')}/partner-configurations"
     session = get_cms_session()
     headers = get_cms_headers()
+    params = query_params or {}
 
     try:
-        response = session.get(url, headers=headers, timeout=30)
+        response = session.get(url, headers=headers, params=params, timeout=30)
         response.raise_for_status()
         data = response.json()
-        return data
+        print(f"Fetched partner configurations: {data}")
+        return data.get("data", [])
     except requests.exceptions.HTTPError as exc:
-        logger.error(
-            "HTTP error fetching partner configurations from CMS: %s", exc
-        )
+        logger.error("HTTP error fetching partner configurations from CMS: %s", exc)
     except requests.exceptions.RequestException as exc:
-        logger.error(
-            "Error fetching partner configurations from CMS: %s", exc
-        )
+        logger.error("Error fetching partner configurations from CMS: %s", exc)
     return None
+
+
+def get_partner_configuration_by_org_code(org_code, publication_state="draft"):
+    response = get_partner_configurations(
+        query_params={
+            "filters[org_code][$eq]": org_code,
+            "publicationState": publication_state,
+        },
+    )
+    return response[0] if response else None
 
 
 def get_partner_configuration_options():
