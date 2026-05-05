@@ -771,11 +771,11 @@
     updateStatusBtn.addEventListener('click', function (event) {
       const button = event.currentTarget;
       const userId = button.getAttribute('data-user-id');
-      const isActive = button.getAttribute('data-is-active') === 'true';
-      const action = isActive ? 'deactivate' : 'activate';
-      const title = isActive ? 'Deactivate User' : 'Activate User';
+      const action = button.getAttribute('data-action') || 'activate';
+      const isDeactivateAction = action === 'deactivate';
+      const title = isDeactivateAction ? 'Deactivate User' : 'Activate User';
       const message = `Are you sure you want to <strong>${action}</strong> this user?`;
-      const warning = isActive ? 'Deactivated users will lose access to the system. They can be reactivated later if needed.'
+      const warning = isDeactivateAction ? 'Deactivated users will lose access to the system. They can be reactivated later if needed.'
         : 'Activated users will be able to access the system immediately.';
       const endpoint = '/user-management/users/activate/';
 
@@ -789,8 +789,8 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        confirmButtonText: isActive ? 'Deactivate' : 'Activate',
-        confirmButtonClass: isActive ? 'um-btn um-btn-danger' : 'um-btn um-btn-lime',
+        confirmButtonText: isDeactivateAction ? 'Deactivate' : 'Activate',
+        confirmButtonClass: isDeactivateAction ? 'um-btn um-btn-danger' : 'um-btn um-btn-lime',
         onSuccess: function () {
           window.location.reload();
         },

@@ -55,7 +55,7 @@
             data-last-name="{{ user.last_name|default:'' }}"
             data-email="{{ user.email|default:'' }}"
             data-phone-number="{{ user.phone_number|default:'' }}"
-            data-is-active="{{ user.is_active|yesno:'true,false' }}"
+            data-action="{{ user.is_active|yesno:'deactivate,activate' }}"
         >
             {% if user.is_active %}Deactivate User{% else %}Activate User{% endif %}
         </button>

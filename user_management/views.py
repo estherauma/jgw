@@ -1209,19 +1209,6 @@ class BulkActivateDeactivateUsersView(View):
             if action == "activate":
                 return f"{count} users could not be activated. You may not have permission to activate those users."
             return f"{count} users could not be deactivated. You may not have permission to deactivate those users."
-
-        def no_change_message():
-            if action == "activate":
-                if len(raw_ids) == 1:
-                    return "The selected user is already active."
-                else:
-                    return "The selected users are already active."
-            if action == "deactivate":
-                if len(raw_ids) == 1:
-                    return "The selected user is already deactivated."
-                else:
-                    return "The selected users are already deactivated."
-            return "No changes were made."
         try:
             with transaction.atomic():
                 for user_id in raw_ids:
@@ -1243,23 +1230,18 @@ class BulkActivateDeactivateUsersView(View):
                         failed_count += 1
                         continue
                     if action == "deactivate":
-                        if user.is_active:
-                            user.deactivate(deactivated_by=current_user)
-                            deactivation_count += 1
+                        user.deactivate(deactivated_by=current_user)
+                        deactivation_count += 1
 
                     elif action == "activate":
-                        if not user.is_active:
-                            user.is_active = True
-                            user.updated_by = current_user
-                            user.save()
-                            activation_count += 1
+                        user.is_active = True
+                        user.updated_by = current_user
+                        user.save()
+                        activation_count += 1
                         
             successful_updates = activation_count + deactivation_count
             if failed_count and not successful_updates:
                 return JsonResponse({"ok": False, "error": permission_error_message}, status=403)
-            if not successful_updates and not failed_count:
-                messages.warning(request, no_change_message())
-                return JsonResponse({"ok": True})
             if failed_count:
                 messages.warning(request, warning_message(failed_count))
             if activation_count:
