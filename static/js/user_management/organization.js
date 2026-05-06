@@ -106,13 +106,21 @@
     syncDefaultCollectionLanguageOptions(form);
     bindCollectionLanguageSync(form);
 
-    const setDisabledFields = (disabled) => {
-      ['name', 'org_code', 'access_code'].forEach((fieldName) => {
+    const setDisabledFields = (disabled, organisation = null) => {
+      ['name', 'org_code'].forEach((fieldName) => {
         const field = form.querySelector(`[name="${fieldName}"]`);
         if (field) {
           field.disabled = disabled;
         }
       });
+
+      const accessCodeField = form.querySelector('[name="access_code"]');
+      if (!accessCodeField) {
+        return;
+      }
+
+      const hasAccessCode = Boolean((organisation?.access_code || '').trim());
+      accessCodeField.disabled = disabled && hasAccessCode;
     };
 
     const setFieldValue = (name, value) => {
@@ -157,6 +165,7 @@
       setFieldValue('custom_type', organisation.custom_type);
       setFieldValue('theme', organisation.theme);
       setFieldValue('collection_languages', organisation.collection_languages);
+      syncDefaultCollectionLanguageOptions(form);
       setFieldValue(
         'default_collection_language',
         organisation.default_collection_language,
@@ -174,7 +183,6 @@
       setIconPickerCurrent(form, 'big_icon_file', organisation.big_icon_url);
       setIconPickerCurrent(form, 'small_icon_file', organisation.small_icon_url);
       form.action = `/user-management/organisations/${organisation.id}/edit/`;
-      syncDefaultCollectionLanguageOptions(form);
       refreshCustomFormSelects(form);
     };
 
@@ -208,7 +216,7 @@
       try {
         const organisation = await loadOrganisationDetails($btn);
         populateEditOrgForm(organisation);
-        setDisabledFields(true);
+        setDisabledFields(true, organisation);
       } catch (error) {
         if (errorBox) {
           errorBox.textContent = error.message || 'Failed to load organisation details.';

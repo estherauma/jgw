@@ -447,6 +447,20 @@ class EditOrganisationView(View):
                 organisation.small_icon_cms_media_id = uploaded_icon_urls["small_icon"].get("id")
             organisation.updated_by = request.user
             organisation.save()
+
+            has_existing_access_code = organisation.organisation_access_codes.exists()
+            if not has_existing_access_code:
+                try:
+                    OrganizationService.add_org_access_code(
+                        organisation=organisation,
+                        access_code=form.cleaned_data["access_code"],
+                        user=request.user,
+                    )
+                except ValidationError as exc:
+                    return JsonResponse(
+                        {"ok": False, "errors": exc.message_dict},
+                        status=400,
+                    )
             
             OrganizationService.add_collection_languages(
                 organization=organisation,
