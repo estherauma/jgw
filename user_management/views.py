@@ -33,7 +33,7 @@ from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
 from .services.organization import OrganizationService
 from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
-from users.models import User
+from users.models import User, UserInvitations
 from content.services.partner_configurations import (
     add_partner_configuration_to_cms,
     FileUploadError,
@@ -110,6 +110,10 @@ def get_users_query(current_user, selected_org=None):
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
         user.hide_organisation_information = is_super_or_58_admin(user)
+        user.has_pending_invitation = UserInvitations.objects.filter(
+            user=user,
+            status__in=["SENT", "PENDING"],
+        ).exists()
 
     return users
 
@@ -1261,8 +1265,8 @@ class BulkDeleteUsersView(View):
             
         except (json.JSONDecodeError, AttributeError):
             return JsonResponse(
-                {"ok": False, "error": "Invalid JSON data."},status=400,)
-        
+                {"ok": False, "error": "Invalid JSON data."}, status=400
+            )
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "Select at least one user."}, status=400)
         
@@ -1294,11 +1298,14 @@ class BulkDeleteUsersView(View):
 
             if deletion_count and failed_count:
                 messages.warning(request, f"{failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
-            messages.success(request, f"Successfully deleted {deletion_count} user(s).")
+            if deletion_count == 1:
+                messages.success(request, "Successfully deleted user.")
+            else:
+                messages.success(request, f"Successfully deleted {deletion_count} users.")
             return JsonResponse({"ok": True})
             
         except PermissionError as e:
-              return JsonResponse({"ok": False, "error": str(e)}, status=403)
+            return JsonResponse({"ok": False, "error": str(e)}, status=403)
         except Exception:
             return JsonResponse({"ok": False, "error": "An error occurred while deleting users. Please try again."}, status=500)
         
@@ -1312,14 +1319,14 @@ class BulkDeactivateUsersView(View):
             data = json.loads(request.body)
             ids_param = data.get('ids', '')
             raw_ids = [int(uid.strip()) for uid in ids_param.split(',') if uid.strip()]
-            
         except (json.JSONDecodeError, AttributeError):
             return JsonResponse(
-                {"ok": False, "error": "Invalid JSON data."},status=400,)
-        
+                {"ok": False, "error": "Invalid JSON data."}, status=400
+            )
+
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "Select at least one user."}, status=400)
-        
+
         deactivation_count = 0
         failed_count = 0
         try:
@@ -1335,32 +1342,123 @@ class BulkDeactivateUsersView(View):
                     if is_org_admin(current_user):
                         user_org = user.organisation_data.first()
                         if not has_org_access(current_user, user_org):
-                            raise PermissionError("'You have no permission to deactivate one or more of the selected users.'") 
+                            raise PermissionError("'You have no permission to deactivate one or more of the selected users.'")
                         if is_org_admin(user):
-                            if getattr(user,'created_by_id',None) != current_user.id:
+                            if getattr(user, 'created_by_id', None) != current_user.id:
                                 failed_count += 1
                                 continue
                     if is_58_admin(current_user) and is_super_or_58_admin(user):
                         failed_count += 1
                         continue
-                    
+
                     user.deactivate(deactivated_by=current_user)
                     deactivation_count += 1
 
             if failed_count and not deactivation_count:
-                return JsonResponse({"ok": False, "error": f"You do not have permission to deactivate selected users."}, status=403)
+                return JsonResponse({"ok": False, "error": "You do not have permission to deactivate selected users."}, status=403)
 
             if deactivation_count and failed_count:
-                messages.warning(request, f"{failed_count} user(s) could not be deactivated. You may not have permission to deactivate those users.")
+                messages.warning(
+                    request,
+                    f"{failed_count} user(s) could not be deactivated. You may not have permission to deactivate those users.",
+                )
             messages.success(request, f"Successfully deactivated {deactivation_count} user(s).")
             return JsonResponse({"ok": True})
-            
+
         except PermissionError as e:
-              return JsonResponse({"ok": False, "error": str(e)}, status=403)
+            return JsonResponse({"ok": False, "error": str(e)}, status=403)
         except Exception:
-                return JsonResponse({"ok": False, "error": "An error occurred while deactivating users. Please try again."}, status=500)
+            return JsonResponse({"ok": False, "error": "An error occurred while deactivating users. Please try again."}, status=500)
 
 
+class BulkActivateDeactivateUsersView(View):
+    def post(self, request):
+        current_user = request.user
+        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+            return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
+
+        try:
+            data = json.loads(request.body)
+            ids_param = data.get('ids', '')
+            action = data.get('action', '').strip().lower()
+
+            raw_ids = [int(uid.strip()) for uid in ids_param.split(',') if uid.strip()]
+        except (json.JSONDecodeError, AttributeError):
+            return JsonResponse(
+                {"ok": False, "error": "Invalid JSON data."}, status=400
+            )
+        if action not in {"activate", "deactivate"}:
+            return JsonResponse(
+                {"ok": False, "error": "Invalid action. Use 'activate' or 'deactivate'."},
+                status=400,
+            )
+
+        if not raw_ids:
+            return JsonResponse({"ok": False, "error": "Select at least one user."}, status=400)
+
+        activation_count = 0
+        deactivation_count = 0
+        failed_count = 0
+        if len(raw_ids) == 1:
+            permission_error_message = f"You do not have permission to {action} the selected user."
+        else:
+            permission_error_message = f"You do not have permission to {action} selected users."
+        def success_message(done_action, count):
+            if count == 1:
+                return f"Successfully {done_action} the selected user."
+            return f"Successfully {done_action} {count} users."
+
+        def warning_message(count):
+            if count == 1:
+                return f"Could not {action} the selected user. You may not have permission to {action} that user."
+            if action == "activate":
+                return f"{count} users could not be activated. You may not have permission to activate those users."
+            return f"{count} users could not be deactivated. You may not have permission to deactivate those users."
+        try:
+            with transaction.atomic():
+                for user_id in raw_ids:
+                    user = User.objects.filter(id=user_id).first()
+                    if not user or user.id == current_user.id:
+                        failed_count += 1
+                        continue
+                    if user.is_superuser and not current_user.is_superuser:
+                        failed_count += 1
+                        continue
+                    if is_org_admin(current_user):
+                        user_org = user.organisation_data.first()
+                        if not has_org_access(current_user, user_org):
+                            raise PermissionError(permission_error_message)
+                        if is_org_admin(user) and getattr(user, 'created_by_id', None) != current_user.id:
+                            failed_count += 1
+                            continue
+                    if is_58_admin(current_user) and is_super_or_58_admin(user):
+                        failed_count += 1
+                        continue
+                    if action == "deactivate":
+                        user.deactivate(deactivated_by=current_user)
+                        deactivation_count += 1
+
+                    elif action == "activate":
+                        user.is_active = True
+                        user.updated_by = current_user
+                        user.save()
+                        activation_count += 1
+                        
+            successful_updates = activation_count + deactivation_count
+            if failed_count and not successful_updates:
+                return JsonResponse({"ok": False, "error": permission_error_message}, status=403)
+            if failed_count:
+                messages.warning(request, warning_message(failed_count))
+            if activation_count:
+                messages.success(request, success_message("activated", activation_count))
+            if deactivation_count:
+                messages.success(request, success_message("deactivated", deactivation_count))
+            return JsonResponse({"ok": True})
+
+        except PermissionError as e:
+            return JsonResponse({"ok": False, "error": str(e)}, status=403)
+        except Exception:
+            return JsonResponse({"ok": False, "error": "An error occurred while updating users. Please try again."}, status=500)
 class BulkInviteUsersView(View):
     def post(self, request):
         current_user = request.user
@@ -1380,6 +1478,11 @@ class BulkInviteUsersView(View):
         invite_sms = []
         invited_emails = []
         failed_contacts = []
+        permission_error_message = (
+            "You do not have permission to invite the selected user."
+            if len(raw_ids) == 1
+            else "You do not have permission to invite one or more of the selected users."
+        )
 
         try:
             with transaction.atomic():
@@ -1395,9 +1498,7 @@ class BulkInviteUsersView(View):
                             request=request,
                             flag_name="can_invite_user",
                         ):
-                            raise PermissionError(
-                                "You do not have permission to invite one or more of the selected users."
-                            )
+                            raise PermissionError(permission_error_message)
                         
                     invited = send_invitation(request, user)
 
@@ -1412,7 +1513,7 @@ class BulkInviteUsersView(View):
                             failed_contacts.append(user.email)
                         elif user.phone_number:
                             failed_contacts.append(user.phone_number)
-
+                            
             if len(invited_emails):
                 message = f"Sent email invitations to {', '.join(invited_emails)}."
 
@@ -1432,6 +1533,7 @@ class BulkInviteUsersView(View):
                     request,
                     message,
                 )
+            
             if len(failed_contacts):
                 if len(raw_ids) == 1:
                     return JsonResponse({
@@ -1446,7 +1548,7 @@ class BulkInviteUsersView(View):
                 messages.warning(
                     request,
                     f"Failed to invite the following users: {', '.join(failed_contacts)}. You may not have permission to invite those users or they may not have valid contact information.",
-                ) 
+                )
             return JsonResponse({"ok": True})
         except PermissionError as e:
             return JsonResponse({"ok": False, "error": str(e)}, status=403)

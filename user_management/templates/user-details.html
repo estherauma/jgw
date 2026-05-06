@@ -20,7 +20,22 @@
 </div>
 
 <div class="um-page um-user-details-page um-navy">
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-end gap-2 flex-wrap">
+        {% flag 'can_invite_user' %}
+        <button
+            type="button"
+            class="um-btn um-btn-outline mb-2"
+            data-invite-user
+            data-user-id="{{ user.id }}"
+            data-first-name="{{ user.first_name|default:'' }}"
+            data-last-name="{{ user.last_name|default:'' }}"
+            data-email="{{ user.email|default:'' }}"
+            data-phone-number="{{ user.phone_number|default:'' }}"
+            {% if not user.email and not user.phone_number %}disabled{% endif %}
+        >
+            Invite User
+        </button>
+        {% endflag %}
         {% flag 'can_edit_appuser' %}
         <button
             class="um-btn um-btn-outline mb-2"
@@ -29,6 +44,26 @@
             data-user-id="{{ user.id }}"
         >
             Edit User
+        </button>
+        {% endflag %}
+        {% flag 'can_deactivate_user' %}
+        <button
+            class="um-btn mb-2 {% if user.is_active %}um-btn-danger{% else %}um-btn-outline{% endif %}"
+            data-update-user-status
+            data-user-id="{{ user.id }}"
+            data-action="{{ user.is_active|yesno:'deactivate,activate' }}"
+        >
+            {% if user.is_active %}Deactivate User{% else %}Activate User{% endif %}
+        </button>
+        {% endflag %}
+        {% flag 'can_delete_user' %}
+        <button
+            type="button"
+            class="um-btn um-btn-danger mb-2"
+            data-delete-user
+            data-user-id="{{ user.id }}"
+        >
+            Delete User
         </button>
         {% endflag %}
     </div>
@@ -283,6 +318,7 @@
 
 {% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
 {% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form %}
+{% include 'confirm-modal.html' %}
 {% endblock %}
 
 {% block scripts %}

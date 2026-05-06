@@ -7,6 +7,7 @@
     });
   }
 
+
   function updateAssignButtonState() {
       const assignWorkGroupButton = document.querySelector('[data-users-workgroup-action]');
       const selectedIds = getSelectedUserIds();
@@ -567,6 +568,32 @@
     });
   }
 
+  function initDeleteUser() {
+    const deleteBtn = document.querySelector('[data-delete-user]');
+    if (!deleteBtn) {
+      return;
+    }
+
+    deleteBtn.addEventListener('click', function () {
+      const userId = deleteBtn.getAttribute('data-user-id');
+
+      window.showDeleteConfirm({
+        title: 'Delete User',
+        message: `Are you sure you want to delete this user?`,
+        url: '/user-management/users/delete/',
+        method: 'POST',
+        body: JSON.stringify({ ids: String(userId) }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: 'Delete',
+        confirmButtonClass: 'um-btn um-btn-danger',
+        onSuccess: function () {
+          window.location.href = '/user-management/';
+        },
+      });
+    });
+  }
   function getUserDisplayname(user){
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
     if (fullName) {
@@ -762,6 +789,77 @@
     });
   }
 
+  function initUpdateUserStatus() {
+    const updateStatusBtn = document.querySelector('[data-update-user-status]');
+    if (!updateStatusBtn) {
+      return;
+    }
+    updateStatusBtn.addEventListener('click', function (event) {
+      const button = event.currentTarget;
+      const userId = button.getAttribute('data-user-id');
+      const action = button.getAttribute('data-action') || 'activate';
+      const isDeactivateAction = action === 'deactivate';
+      const title = isDeactivateAction ? 'Deactivate User' : 'Activate User';
+      const message = `Are you sure you want to <strong>${action}</strong> this user?`;
+      const warning = isDeactivateAction ? 'Deactivated users will lose access to the system. They can be reactivated later if needed.'
+        : 'Activated users will be able to access the system immediately.';
+      const endpoint = '/user-management/users/activate/';
+
+      window.showDeleteConfirm({
+        title: title,
+        message: message,
+        warning: warning,
+        url: endpoint,
+        method: 'POST',
+        body: JSON.stringify({ ids: userId, action: action }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: isDeactivateAction ? 'Deactivate' : 'Activate',
+        confirmButtonClass: isDeactivateAction ? 'um-btn um-btn-danger' : 'um-btn um-btn-lime',
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    });
+  }
+
+  function initInviteUser() {
+    const inviteBtn = document.querySelector('[data-invite-user]');
+    if (!inviteBtn) {
+      return;
+    }
+
+    inviteBtn.addEventListener('click', function () {
+      const user = {
+        id: inviteBtn.getAttribute('data-user-id') || '',
+        first_name: inviteBtn.getAttribute('data-first-name') || '',
+        last_name: inviteBtn.getAttribute('data-last-name') || '',
+        email: inviteBtn.getAttribute('data-email') || '',
+        phone_number: inviteBtn.getAttribute('data-phone-number') || '',
+      };
+      const displayName = getUserDisplayname(user);
+      const message = `Send an invitation to <strong>${displayName}</strong>?`;
+
+      window.showDeleteConfirm({
+        title: 'Invite User',
+        message: message,
+        warning: 'SMS invitations will only be sent when no email is available.',
+        url: '/user-management/users/invite/',
+        method: 'POST',
+        body: JSON.stringify({ ids: String(user.id) }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: 'Send invite',
+        confirmButtonClass: 'um-btn um-btn-lime',
+        showFullScreenLoader: true,
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    });
+  }
   window.addEventListener('load', function () {
     initAppUserForm();
     initDashboardUserForm();
@@ -771,7 +869,10 @@
     initUserSelection();
     initAssignUsersToWorkGroups();
     initDeleteUsers();
+    initDeleteUser();
     initDeactivateUsers();
     initInviteUsers();
+    initUpdateUserStatus();
+    initInviteUser();
   });
 })();

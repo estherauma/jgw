@@ -27,6 +27,8 @@ def preference_filtered_queryset_for_new_user_data(
     schemes=None,
     factory_farms=None,
     immigration_status=None,
+    sector_of_work=None,
+    sectors_of_work=None,
 ):
     if not current_user or not current_user.is_authenticated or current_user == "AnonymousUser":
         end_date = datetime.now().date()
@@ -109,7 +111,13 @@ def preference_filtered_queryset_for_new_user_data(
     if user_immigration_status and not immigration_status:
         preference_filters_q_object &= Q(immigration_status__in=user_immigration_status)
 
-    return queryset.filter(preference_filters_q_object)
+    selected_sectors = sector_of_work or sectors_of_work or []
+    if selected_sectors:
+        preference_filters_q_object &= Q(
+            sectors_of_work__original_sector_of_work__value__in=selected_sectors
+        )
+
+    return queryset.filter(preference_filters_q_object).distinct()
 
 def preference_filtered_queryset_for_active_users_data(
     queryset: BaseManager[Any],
@@ -123,6 +131,8 @@ def preference_filtered_queryset_for_active_users_data(
     schemes=None,
     factory_farms=None,
     immigration_status=None,
+    sector_of_work=None,
+    sectors_of_work=None,
 ):
 
     user_start_date = get_user_start_date(current_user)
@@ -199,4 +209,10 @@ def preference_filtered_queryset_for_active_users_data(
     if user_immigration_status and not immigration_status:
         preference_filters_q_object &= Q(immigration_status__in=user_immigration_status)
 
-    return queryset.filter(preference_filters_q_object)
+    selected_sectors = sector_of_work or sectors_of_work or []
+    if selected_sectors:
+        preference_filters_q_object &= Q(
+            sectors_of_work__original_sector_of_work__value__in=selected_sectors
+        )
+
+    return queryset.filter(preference_filters_q_object).distinct()
