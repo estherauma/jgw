@@ -1097,7 +1097,7 @@ class BulkDeleteUsersView(View):
             if deletion_count and failed_count:
                 messages.warning(request, f"{failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
             if deletion_count == 1:
-                messages.success(request, "Successfully deleted the selected user.")
+                messages.success(request, "Successfully deleted user.")
             else:
                 messages.success(request, f"Successfully deleted {deletion_count} users.")
             return JsonResponse({"ok": True})

@@ -576,7 +576,6 @@
 
     deleteBtn.addEventListener('click', function () {
       const userId = deleteBtn.getAttribute('data-user-id');
-      const homeUrl = deleteBtn.getAttribute('data-home-url') || '/user-management/';
 
       window.showDeleteConfirm({
         title: 'Delete User',
@@ -590,7 +589,7 @@
         confirmButtonText: 'Delete',
         confirmButtonClass: 'um-btn um-btn-danger',
         onSuccess: function () {
-          window.location.href = homeUrl;
+          window.location.href = '/user-management/';
         },
       });
     });
