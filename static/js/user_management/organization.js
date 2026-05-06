@@ -475,6 +475,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         var data = null;
         if (window.postFormJson) {
@@ -489,12 +492,18 @@
           window.location.reload();
         }
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
         if (submitButton) {
           submitButton.disabled = false;
+        }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
         }
       }
     });
@@ -547,6 +556,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         var data = null;
         if (window.postFormJson) {
@@ -561,12 +573,18 @@
           window.location.reload();
         }
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
         if (submitButton) {
           submitButton.disabled = false;
+        }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
         }
       }
     });
