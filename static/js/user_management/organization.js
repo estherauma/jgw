@@ -1,10 +1,53 @@
 (function () {
+  function initCreateOrganizationGroupForm() {
+    const form = document.getElementById('create-organization-group-form');
+    if (!form) {
+      return;
+    }
+    const errorBox = document.getElementById('create-organization-group-form-error');
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      safeClearFormErrors(form, errorBox);
+      const submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      try {
+        if (window.postFormJson) {
+          await window.postFormJson(form);
+        }
+        window.location.reload();
+      } catch (data) {
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+  }
+
   function initCreateOrgForm() {
     var form = document.getElementById('create-org-form');
     if (!form) {
       return;
     }
     var errorBox = document.getElementById('create-org-form-error');
+    initCustomFormSelects(form);
+    initIconPickers(form);
+    syncDefaultCollectionLanguageOptions(form);
+    bindCollectionLanguageSync(form);
+
+    function resetCreateOrgForm() {
+      safeClearFormErrors(form, errorBox);
+      form.reset();
+      syncDefaultCollectionLanguageOptions(form);
+      refreshCustomFormSelects(form);
+      resetIconPickers(form);
+    }
 
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
@@ -12,6 +55,9 @@
       var submitButton = form.querySelector("button[type='submit']");
       if (submitButton) {
         submitButton.disabled = true;
+      }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
       }
       try {
         var data = null;
@@ -28,6 +74,9 @@
           window.location.reload();
         }
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
@@ -35,25 +84,145 @@
         if (submitButton) {
           submitButton.disabled = false;
         }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
       }
+    });
+
+    $('[data-target="#create-org-modal"]').on('click', function () {
+      resetCreateOrgForm();
     });
   }
 
   function initEditOrgForm() {
-    var modal = document.getElementById('edit-org-modal');
+    const modal = document.getElementById('edit-org-modal');
     if (!modal) return;
-  
-    var form = modal.querySelector('form');
-    var errorBox = document.getElementById('edit-org-form-error');
-  
-    $('[data-edit-btn]').on('click', function() {
-      var $btn = $(this);
-      form.querySelector('[name="name"]').value = $btn.data('org-name');
-      form.querySelector('[name="org_code"]').value = $btn.data('org-code');
-      form.action = '/user-management/organisations/' + $btn.data('org-id') + '/edit/';
-  
-      if (errorBox) errorBox.classList.add('d-none');
-      $(form).find("[data-error-for]").text("");
+
+    const form = modal.querySelector('form');
+    const errorBox = document.getElementById('edit-org-form-error');
+    initCustomFormSelects(form);
+    initIconPickers(form);
+    syncDefaultCollectionLanguageOptions(form);
+    bindCollectionLanguageSync(form);
+
+    const setDisabledFields = (disabled, organisation = null) => {
+      ['name', 'org_code'].forEach((fieldName) => {
+        const field = form.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+          field.disabled = disabled;
+        }
+      });
+
+      const accessCodeField = form.querySelector('[name="access_code"]');
+      if (!accessCodeField) {
+        return;
+      }
+
+      const hasAccessCode = Boolean((organisation?.access_code || '').trim());
+      accessCodeField.disabled = disabled && hasAccessCode;
+    };
+
+    const setFieldValue = (name, value) => {
+      const field = form.querySelector(`[name="${name}"]`);
+      if (!field) {
+        return;
+      }
+      if (field.type === 'checkbox') {
+        field.checked = value === true || value === 'true';
+        return;
+      }
+      if (field.multiple) {
+        const values = Array.isArray(value)
+          ? value.map((item) => String(item).trim()).filter(Boolean)
+          : String(value || '')
+          .split(',')
+          .map(function (item) {
+            return item.trim();
+          })
+          .filter(Boolean);
+        Array.prototype.forEach.call(field.options, function (option) {
+          option.selected = values.indexOf(option.value) !== -1;
+        });
+        refreshCustomFormSelects(form);
+        return;
+      }
+      if (field.type === 'file') {
+        field.value = '';
+        return;
+      }
+      field.value = value || '';
+    };
+
+    const populateEditOrgForm = (organisation) => {
+      setFieldValue('name', organisation.name);
+      setFieldValue('org_code', organisation.org_code);
+      setFieldValue('access_code', organisation.access_code);
+      setFieldValue('display_name', organisation.display_name);
+      setFieldValue('has_custom_content', organisation.has_custom_content);
+      setFieldValue('content_collection', organisation.content_collection);
+      setFieldValue('work_sector', organisation.work_sector);
+      setFieldValue('custom_type', organisation.custom_type);
+      setFieldValue('theme', organisation.theme);
+      setFieldValue('collection_languages', organisation.collection_languages);
+      syncDefaultCollectionLanguageOptions(form);
+      setFieldValue(
+        'default_collection_language',
+        organisation.default_collection_language,
+      );
+      setFieldValue(
+        'default_report_issue_emails',
+        organisation.default_report_issue_emails,
+      );
+      setFieldValue(
+        'default_feedback_emails',
+        organisation.default_feedback_emails,
+      );
+      setFieldValue('big_icon', organisation.big_icon_url);
+      setFieldValue('small_icon', organisation.small_icon_url);
+      setIconPickerCurrent(form, 'big_icon_file', organisation.big_icon_url);
+      setIconPickerCurrent(form, 'small_icon_file', organisation.small_icon_url);
+      form.action = `/user-management/organisations/${organisation.id}/edit/`;
+      refreshCustomFormSelects(form);
+    };
+
+    const loadOrganisationDetails = async ($button) => {
+      const detailsUrl = $button.data('org-details-url');
+      if (!detailsUrl) {
+        throw new Error('Organisation details URL is missing.');
+      }
+
+      const response = await fetch(detailsUrl, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok || !data.organisation) {
+        throw new Error(data?.error || 'Failed to load organisation details.');
+      }
+
+      return data.organisation;
+    };
+
+    $('[data-edit-btn]').on('click', async function() {
+      const $btn = $(this);
+
+      if (errorBox) {
+        errorBox.classList.add('d-none');
+        errorBox.textContent = '';
+      }
+      $(form).find('[data-error-for]').text('');
+      setDisabledFields(false);
+
+      try {
+        const organisation = await loadOrganisationDetails($btn);
+        populateEditOrgForm(organisation);
+        setDisabledFields(true, organisation);
+      } catch (error) {
+        if (errorBox) {
+          errorBox.textContent = error.message || 'Failed to load organisation details.';
+          errorBox.classList.remove('d-none');
+        }
+      }
     });
   
     form.addEventListener('submit', async function(e) {
@@ -62,13 +231,20 @@
   
       var submitButton = form.querySelector("button[type='submit']");
       if (submitButton) submitButton.disabled = true;
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
   
       try {
+        setDisabledFields(false);
         if (window.postFormJson) {
           await window.postFormJson(form);
         }
         window.location.reload();
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (data && data.errors) {
           Object.keys(data.errors).forEach(function (field) {
             var el = form.querySelector("[data-error-for='" + field + "']");
@@ -82,8 +258,12 @@
           errorBox.classList.remove('d-none');
         }
       } finally {
+        setDisabledFields(true);
         if (submitButton) {
           submitButton.disabled = false;
+        }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
         }
       }
     });
@@ -143,6 +323,117 @@
     });
   }
 
+  function initCustomFormSelects(form) {
+    if (window.initUmSelects) {
+      window.initUmSelects(form);
+    }
+  }
+
+  function refreshCustomFormSelects(form) {
+    if (!form || !window.refreshUmSelect) {
+      return;
+    }
+    form.querySelectorAll('[data-um-select]').forEach(function (root) {
+      window.refreshUmSelect(root);
+    });
+  }
+
+  function syncDefaultCollectionLanguageOptions(form) {
+    if (!form) {
+      return;
+    }
+
+    const collectionLanguagesField = form.querySelector('[name="collection_languages"]');
+    const defaultLanguageField = form.querySelector('[name="default_collection_language"]');
+
+    if (!collectionLanguagesField || !defaultLanguageField) {
+      return;
+    }
+
+    const currentDefaultLanguage = defaultLanguageField.value || '';
+    const defaultLanguageRoot = defaultLanguageField.closest('[data-um-select]');
+    const selectedCollectionLanguageOptions = Array.from(
+      collectionLanguagesField.selectedOptions,
+    ).filter((option) => option.value);
+    defaultLanguageField.replaceChildren(
+      (() => {
+        const option = document.createElement('option');
+        option.value = '';
+        option.text = '';
+        option.selected = !currentDefaultLanguage;
+        return option;
+      })(),
+      ...selectedCollectionLanguageOptions.map((selectedOption) => {
+        const option = document.createElement('option');
+        option.value = selectedOption.value;
+        option.text = selectedOption.text;
+        option.selected = selectedOption.value === currentDefaultLanguage;
+        return option;
+      }),
+    );
+
+    if (
+      currentDefaultLanguage &&
+      !selectedCollectionLanguageOptions.some(
+        (option) => option.value === currentDefaultLanguage,
+      )
+    ) {
+      defaultLanguageField.value = '';
+    }
+
+    if (defaultLanguageRoot && window.rebuildUmSelect) {
+      window.rebuildUmSelect(defaultLanguageRoot);
+    }
+  }
+
+  function bindCollectionLanguageSync(form) {
+    if (!form || form.getAttribute('data-default-language-sync-ready') === 'true') {
+      return;
+    }
+
+    const collectionLanguagesField = form.querySelector(
+      '[name="collection_languages"]',
+    );
+
+    if (!collectionLanguagesField) {
+      return;
+    }
+
+    form.setAttribute('data-default-language-sync-ready', 'true');
+    collectionLanguagesField.addEventListener('change', () => {
+      syncDefaultCollectionLanguageOptions(form);
+      refreshCustomFormSelects(form);
+    });
+  }
+
+  function initIconPickers(form) {
+    if (window.initUmImagePickers) {
+      window.initUmImagePickers(form);
+    }
+  }
+
+  function resetIconPickers(form) {
+    if (!form) {
+      return;
+    }
+    setIconPickerCurrent(form, 'big_icon_file', '');
+    setIconPickerCurrent(form, 'small_icon_file', '');
+  }
+
+  function setIconPickerCurrent(form, inputName, currentUrl) {
+    if (!form || !window.refreshUmImagePicker) {
+      return;
+    }
+
+    var input = form.querySelector('[name="' + inputName + '"]');
+    var picker = input ? input.closest('[data-image-picker]') : null;
+    if (!picker) {
+      return;
+    }
+
+    window.refreshUmImagePicker(picker, currentUrl || '');
+  }
+
   function initWorkCodeForm() {
     var form = document.getElementById('add-workcode-form');
     if (!form) {
@@ -184,6 +475,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         var data = null;
         if (window.postFormJson) {
@@ -198,12 +492,18 @@
           window.location.reload();
         }
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
         if (submitButton) {
           submitButton.disabled = false;
+        }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
         }
       }
     });
@@ -256,6 +556,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         var data = null;
         if (window.postFormJson) {
@@ -270,12 +573,18 @@
           window.location.reload();
         }
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
       } finally {
         if (submitButton) {
           submitButton.disabled = false;
+        }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
         }
       }
     });
@@ -379,7 +688,6 @@
       return;
     }
     var errorBox = document.getElementById('assign-workcode-form-error');
-    var codeLabel = document.querySelector('[data-assign-code-label]');
 
     function resetAssignForm(codeValue, selectedGroups) {
       safeClearFormErrors(form, errorBox);
@@ -390,6 +698,7 @@
           '[data-assign-org-label]',
         );
       }
+      var codeLabel = form.querySelector('[data-assign-code-label]');
       if (codeLabel) {
         codeLabel.textContent = codeValue;
       }
@@ -432,6 +741,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         var data = null;
         if (window.postFormJson) {
@@ -446,6 +758,9 @@
           window.location.reload();
         }
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
@@ -453,13 +768,16 @@
         if (submitButton) {
           submitButton.disabled = false;
         }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
       }
     });
 
     $(document).on('click', '[data-workcode-assign]', function () {
-      var codeValue = $(this).data('workcode-code') || '';
-      var codeId = $(this).data('workcode-id') || '';
-      var groupIds = String($(this).data('workcode-groups') || '')
+      var codeValue = this.getAttribute('data-workcode-code') || '';
+      var codeId = this.getAttribute('data-workcode-id') || '';
+      var groupIds = String(this.getAttribute('data-workcode-groups') || '')
         .split(',')
         .map(function (value) {
           return value.trim();
@@ -470,6 +788,10 @@
       resetAssignForm(codeValue, groupIds);
       var workCodeInput = form.querySelector('[data-workcode-id]');
       workCodeInput.value = codeId || '';
+      var codeLabel = form.querySelector('[data-assign-code-label]');
+      if (codeLabel) {
+        codeLabel.textContent = codeValue || '—';
+      }
     });
   }
 
@@ -530,6 +852,9 @@
     });
   }
   
+  window.addEventListener('load', function () {
+    initCreateOrganizationGroupForm();
+  });
   window.addEventListener('load', function () {
     initCreateOrgForm();
   });

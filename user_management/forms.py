@@ -1,15 +1,17 @@
 from django import forms
 from django.contrib.auth.models import Group
 import phonenumbers
+import re
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from content.models import Collection, Locale, WorkSector
 from preference.models import (
+    OrganizationGroup,
     OrganisationAccessCode,
     OrganisationData,
     Country,
     ImmigrationStatus,
     FactoryFarm,
-    Language,
 )
 from dashboard.models import Scheme
 from users.models import User
@@ -25,18 +27,168 @@ from .utils import get_country_code_choices, is_org_admin_or_staff, validate_pho
 
 
 class CreateOrganisationForm(forms.ModelForm):
+    ACCESS_CODE_PATTERN = re.compile(r"^\s*[A-Za-z0-9]+(\s*,\s*[A-Za-z0-9]+)*\s*$")
+
+    access_code = forms.CharField(
+        required=True,
+        widget=forms.TextInput(
+            attrs={"class": "form-control um-input", "placeholder": "Access code"}
+        ),
+    )
+    big_icon_file = forms.FileField(required=False)
+    small_icon_file = forms.FileField(required=False)
+    content_collection = forms.ModelChoiceField(
+        queryset=Collection.objects.none(),
+        required=True,
+        to_field_name="api_name",
+        empty_label="Select content collection",
+        widget=forms.Select(attrs={"class": "form-select um-input"}),
+    )
+    work_sector = forms.ModelChoiceField(
+        queryset=WorkSector.objects.none(),
+        required=False,
+        to_field_name="slug",
+        empty_label="Select work sector",
+        widget=forms.Select(attrs={"class": "form-select um-input"}),
+    )
+    collection_languages = forms.ModelMultipleChoiceField(
+        queryset=Locale.objects.none(),
+        required=True,
+        to_field_name="code",
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select um-input",
+                "data-role": "collection-language-multiselect",
+            }
+        ),
+    )
+    default_collection_language = forms.ModelChoiceField(
+        queryset=Locale.objects.none(),
+        required=True,
+        to_field_name="code",
+        empty_label="Select default language",
+        widget=forms.Select(attrs={"class": "form-select um-input"}),
+    )
+
     class Meta:
         model = OrganisationData
-        fields = ["name", "org_code"]
+        fields = [
+            "name",
+            "org_code",
+            "display_name",
+            "has_custom_content",
+            "content_collection",
+            "default_collection_language",
+            "work_sector",
+            "custom_type",
+            "theme",
+            "default_report_issue_emails",
+            "default_feedback_emails",
+            "big_icon",
+            "small_icon",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        required_fields = [
+            "name",
+            "org_code",
+            "display_name",
+            "access_code",
+            "content_collection",
+            "collection_languages",
+            "default_collection_language",
+        ]
+        optional_fields = [
+            "work_sector",
+            "theme",
+            "default_report_issue_emails",
+            "default_feedback_emails",
+            "big_icon",
+            "small_icon",
+            "big_icon_file",
+            "small_icon_file",
+        ]
+
+        for field_name in required_fields:
+            self.fields[field_name].required = True
+
+        for field_name in optional_fields:
+            self.fields[field_name].required = False
+
         self.fields["name"].widget.attrs.update(
             {"class": "form-control  um-input", "placeholder": "Organisation name"}
         )
         self.fields["org_code"].widget.attrs.update(
             {"class": "form-control  um-input", "placeholder": "Organisation code"}
         )
+        self.fields["display_name"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Display name"}
+        )
+        self.fields["has_custom_content"].widget.attrs.update(
+            {"class": "form-check-input", "role": "switch"}
+        )
+        self.fields["custom_type"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Custom type"}
+        )
+        self.fields["custom_type"].disabled = True
+        self.fields["theme"].widget.attrs.update({"class": "form-select um-input"})
+        self.fields["default_report_issue_emails"].widget.attrs.update(
+            {
+                "class": "form-control um-input",
+                "rows": 2,
+                "placeholder": "ops@example.com,support@example.com",
+            }
+        )
+        self.fields["default_feedback_emails"].widget.attrs.update(
+            {
+                "class": "form-control um-input",
+                "rows": 2,
+                "placeholder": "feedback@example.com",
+            }
+        )
+        self.fields["big_icon"].widget = forms.TextInput(
+            attrs={"class": "form-control um-input", "placeholder": "Big icon URL"}
+        )
+        self.fields["small_icon"].widget = forms.TextInput(
+            attrs={"class": "form-control um-input", "placeholder": "Small icon URL"}
+        )
+        self.fields["big_icon_file"].required = not bool(
+            self.instance and self.instance.big_icon
+        )
+        self.fields["small_icon_file"].required = not bool(
+            self.instance and self.instance.small_icon
+        )
+        collection_qs = Collection.objects.order_by("name")
+        work_sector_qs = WorkSector.objects.order_by("display_name")
+        language_qs = Locale.objects.order_by("name")
+        self.fields["content_collection"].queryset = collection_qs
+        self.fields["work_sector"].queryset = work_sector_qs
+        self.fields["collection_languages"].queryset = language_qs
+        self.fields["default_collection_language"].queryset = language_qs
+        self.fields["collection_languages"].widget.attrs.update(
+            {"class": "form-select um-input", "size": "5"}
+        )
+
+        if self.instance and self.instance.pk:
+            access_code = (
+                self.instance.organisation_access_codes.order_by("created_at", "id")
+                .values_list("code", flat=True)
+                .first()
+            )
+            if access_code:
+                self.fields["access_code"].initial = access_code
+            if self.instance.content_collection:
+                self.fields["content_collection"].initial = (
+                    self.instance.content_collection
+                )
+            if self.instance.work_sector:
+                self.fields["work_sector"].initial = self.instance.work_sector
+            self.fields["collection_languages"].initial = list(
+                self.instance.collection_languages.values_list("code", flat=True)
+            )
+            if self.instance.default_collection_language:
+                self.fields["default_collection_language"].initial = self.instance.default_collection_language
 
     def clean_name(self):
         name = self.cleaned_data.get("name", "").strip().title()
@@ -56,8 +208,101 @@ class CreateOrganisationForm(forms.ModelForm):
             raise forms.ValidationError("Organisation code already exists.")
         return org_code
 
+    def clean_access_code(self):
+        access_code = self.cleaned_data.get("access_code", "").strip().upper()
+        if access_code and not self.ACCESS_CODE_PATTERN.fullmatch(access_code):
+            raise forms.ValidationError(
+                "Access code must contain only letters and numbers, optionally separated by commas."
+            )
+        qs = OrganisationAccessCode.objects.filter(code__iexact=access_code)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(organisation=self.instance)
+        if qs.exists():
+            raise forms.ValidationError("Access code already exists.")
+        return access_code
+
+    def clean_default_collection_language(self):
+        language = self.cleaned_data.get("default_collection_language")
+        return language.code if language else None
+
+    def clean_content_collection(self):
+        collection = self.cleaned_data.get("content_collection")
+        return collection.api_name if collection else ""
+
+    def clean_work_sector(self):
+        work_sector = self.cleaned_data.get("work_sector")
+        return work_sector.slug if work_sector else ""
+
+    def clean(self):
+        cleaned_data = super().clean()
+        strip_fields = [
+            "display_name",
+            "access_code",
+            "content_collection",
+            "work_sector",
+            "custom_type",
+            "theme",
+            "default_report_issue_emails",
+            "default_feedback_emails",
+            "big_icon",
+            "small_icon",
+        ]
+        for field_name in strip_fields:
+            value = cleaned_data.get(field_name)
+            if isinstance(value, str):
+                cleaned_data[field_name] = value.strip()
+
+        collection_languages = cleaned_data.get("collection_languages") or []
+        default_collection_language = cleaned_data.get("default_collection_language")
+        selected_language_codes = {language.code for language in collection_languages}
+
+        if (
+            default_collection_language
+            and default_collection_language not in selected_language_codes
+        ):
+            self.add_error(
+                "default_collection_language",
+                "Default collection language must be one of the selected collection languages.",
+            )
+
+        return cleaned_data
+
+class CreateOrganizationGroupForm(forms.ModelForm):
+    class Meta:
+        model = OrganizationGroup
+        fields = ["name", "group_code"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Organization group name"}
+        )
+        self.fields["group_code"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Group code"}
+        )
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name", "").strip().title()
+        qs = OrganizationGroup.objects.filter(name__iexact=name)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Organization group name already exists.")
+        return name
+
+    def clean_group_code(self):
+        group_code = self.cleaned_data.get("group_code", "").strip().upper()
+        qs = OrganizationGroup.objects.filter(group_code__iexact=group_code)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Group code already exists.")
+        return group_code
+
 
 class AddWorkCodeForm(forms.ModelForm):
+    WORK_CODE_PATTERN = re.compile(r"^[A-Za-z0-9]+$")
+
     class Meta:
         model = OrganisationAccessCode
         fields = ["code", "expiry_date", "requires_login"]
@@ -88,6 +333,10 @@ class AddWorkCodeForm(forms.ModelForm):
 
     def clean_code(self):
         code = self.cleaned_data.get("code", "").strip().upper()
+        if code and not self.WORK_CODE_PATTERN.fullmatch(code):
+            raise forms.ValidationError(
+                "Work code must contain only letters and numbers."
+            )
         return code
     
     def clean_expiry_date(self):
@@ -137,7 +386,7 @@ class DashboardUserForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple(),
     )
     user_languages = forms.ModelMultipleChoiceField(
-        queryset=Language.objects.none(),
+        queryset=Locale.objects.none(),
         required=False,
         widget=forms.CheckboxSelectMultiple(),
     )
@@ -215,7 +464,7 @@ class DashboardUserForm(forms.ModelForm):
         self.fields["destinations"].queryset = Country.objects.filter(
             is_destination=True
         ).order_by("name")
-        self.fields["user_languages"].queryset = Language.objects.all().order_by("translated_name")
+        self.fields["user_languages"].queryset = Locale.objects.all().order_by("name")
         self.fields["excluded_origin_countries"].queryset = Country.objects.filter(
             is_origin=True
         ).order_by("name")
@@ -458,7 +707,7 @@ class OrganisationRoleForm(forms.ModelForm):
 class WorkCodeAssignForm(forms.Form):
     work_groups = forms.ModelMultipleChoiceField(
         queryset=WorkGroup.objects.none(),
-        required=True,
+        required=False,
         widget=forms.CheckboxSelectMultiple(),
     )
 

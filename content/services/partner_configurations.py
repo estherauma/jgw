@@ -1,16 +1,315 @@
 import json
 import logging
+import re
+from urllib.parse import urljoin
 
 import requests
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 
+from common.const.value_const import CMS_SYNC_FAILED, CMS_SYNC_SUCCESS
+from content.models import Collection, Locale, WorkSector
 from preference.models import OrganisationAccessCode, OrganisationData, SiteLanguages
 from content.services.utils import get_cms_headers, get_cms_session
 from user_management.roles import add_default_org_roles
+from user_management.models import WorkGroup
 
 logger = logging.getLogger(__name__)
 
+
+class FileUploadError(Exception):
+    pass
+
+
+class PartnerConfigurationSyncError(Exception):
+    pass
+
+
+def _build_media_url(url):
+    if not url:
+        return ""
+
+    base_url = (settings.STRAPI_API_BASE_URL or "").removesuffix("/api")
+    return urljoin(f"{base_url}/", url.lstrip("/"))
+
+
+def upload_files_to_cms(files):
+    base_url = settings.STRAPI_API_BASE_URL
+    token = settings.STRAPI_API_TOKEN
+    if not base_url or not token:
+        raise FileUploadError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    if not files:
+        raise FileUploadError("No files provided for upload.")
+
+    url = f"{base_url.rstrip('/')}/upload"
+    session = get_cms_session()
+    headers = {
+          "Authorization": f"Bearer {settings.STRAPI_API_TOKEN}",
+    }
+    form_files = [("files", file_obj) for file_obj in files]
+
+    try:
+        response = session.post(
+            url,
+            headers=headers,
+            files=form_files,
+            timeout=120,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except  Exception as exc:
+        logger.error("HTTP error uploading file to Strapi: %s", exc)
+        raise FileUploadError("Failed to upload files to Strapi.") from exc
+
+    if not isinstance(payload, list) or not payload:
+        raise FileUploadError("Strapi upload did not return a file URL.")
+
+    uploaded_urls = []
+    for item in payload:
+        url = _build_media_url(item.get("url"))
+        if not url:
+            logger.warning("Strapi upload response item missing URL: %s", item)
+            continue
+        
+        uploaded_urls.append({
+            "id": item.get("id"), 
+            "name": item.get("name"),
+            "url": url
+            })
+    if not uploaded_urls:
+        raise FileUploadError("Strapi upload did not return a valid file URL.")
+
+    return uploaded_urls
+
+
+def _format_collection_languages_for_cms(site_languages):
+    return [
+        {
+            "type": "paragraph",
+            "children": [
+                {
+                    "type": "text",
+                    "text": site_language.code,
+                }
+            ],
+        }
+        for site_language in site_languages
+        if site_language.code
+    ]
+
+
+def _format_work_sector_for_cms(work_sector_slug):
+    if not work_sector_slug:
+        return ""
+
+    work_sector = WorkSector.objects.filter(slug=work_sector_slug).first()
+    if not work_sector:
+        return work_sector_slug
+
+    return f"{work_sector.slug} ({work_sector.display_name})"
+
+
+def _build_access_code_value_for_cms(organisation):
+    organisation_access_codes = OrganisationAccessCode.objects.filter(
+        organisation=organisation,
+    ).order_by("created_at")
+    return ",".join(
+        access_code.code for access_code in organisation_access_codes if access_code.code
+    )
+
+
+def _build_user_groups_payload_for_cms(organisation ):
+    work_groups = WorkGroup.objects.filter(organisation=organisation).prefetch_related(
+        "access_codes"
+    )
+    payload = []
+    for work_group in work_groups:
+        access_codes = [
+            access_code.code
+            for access_code in work_group.access_codes.order_by("created_at")
+            if access_code.code
+        ]
+        print(f"workgroups.  {work_groups}")
+
+
+        payload.append(
+            {
+                "access_codes": "\n".join(access_codes),
+                "name": work_group.name,
+                "data_platform_ref": str(work_group.id),
+            }
+        )
+        print(f"payload.  {payload}")
+
+    return payload
+
+
+def build_partner_configuration_payload(organisation):
+
+    site_languages = list(
+        SiteLanguages.objects.filter(organisation=organisation).order_by("code")
+    )
+    payload = {
+        "data": {
+            "org_code": organisation.org_code,
+            "name": organisation.name,
+            "display_name": organisation.display_name or organisation.name,
+            "has_custom_content": organisation.has_custom_content,
+            "content_collection": organisation.content_collection,
+            "access_code": _build_access_code_value_for_cms(organisation),
+            "work_sector": _format_work_sector_for_cms(organisation.work_sector),
+            "custom_type": organisation.custom_type,
+            "theme": organisation.theme or "",
+            "default_collection_language": organisation.default_collection_language or "",
+            "collection_languages": _format_collection_languages_for_cms(site_languages),
+            "default_report_issue_emails": organisation.default_report_issue_emails or "",
+            "default_feedback_emails": organisation.default_feedback_emails or "",
+            "big_icon": organisation.big_icon_cms_media_id,
+            "small_icon": organisation.small_icon_cms_media_id,
+            "user_groups": _build_user_groups_payload_for_cms(organisation),
+        }
+    }
+    return payload
+
+
+def add_partner_configuration_to_cms(organisation):
+    base_url = settings.STRAPI_API_BASE_URL
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        raise PartnerConfigurationSyncError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    url = f"{base_url.rstrip('/')}/partner-configurations"
+    headers = get_cms_headers()
+    payload = build_partner_configuration_payload(organisation)
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_payload = response.json()
+        cms_id = _extract_partner_configuration_cms_id(response_payload)
+
+        organisation.cms_sync_status = CMS_SYNC_SUCCESS
+        organisation.cms_id = str(cms_id)
+        organisation.last_cms_sync_date = timezone.now()
+        organisation.save(update_fields=["cms_sync_status", "cms_id", "last_cms_sync_date"])
+        return response_payload
+    except Exception as exc:
+        organisation.cms_sync_status = CMS_SYNC_FAILED
+        organisation.last_cms_sync_date = timezone.now()
+        organisation.save(update_fields=["cms_sync_status", "last_cms_sync_date"])
+        logger.error(
+            "HTTP error posting partner configuration to CMS: %s body=%s",
+            exc,
+            exc.response.text if exc.response is not None else "",
+        )
+        raise PartnerConfigurationSyncError(
+            "Failed to add partner configuration to CMS."
+        ) from exc
+
+
+def _extract_partner_configuration_cms_id(payload):
+    if not isinstance(payload, dict):
+        return None
+
+    data = payload.get("data")
+    if isinstance(data, dict):
+        return data.get("id") or data.get("documentId")
+
+    return payload.get("id") or payload.get("documentId")
+
+
+def resolve_partner_configuration_cms_id(organisation):
+    if organisation.cms_id:
+        return organisation.cms_id
+
+    partner_configuration = get_partner_configuration_by_org_code(organisation.org_code)
+    cms_id = partner_configuration.get("id") or partner_configuration.get("documentId") if partner_configuration else None
+    if not cms_id:
+        return None
+
+    organisation.cms_id = str(cms_id)
+    organisation.save(update_fields=["cms_id"])
+    return organisation.cms_id
+
+
+def execute_partner_configuration_cms_update(*, organisation, url, payload, error_message):
+    try:
+        response = requests.put(url, headers=get_cms_headers(), json=payload, timeout=30)
+        response.raise_for_status()
+        organisation.cms_sync_status = CMS_SYNC_SUCCESS
+        organisation.last_cms_sync_date = timezone.now()
+        organisation.save(update_fields=["cms_sync_status", "last_cms_sync_date"])
+        return response.json()
+    except Exception as exc:
+        organisation.cms_sync_status = CMS_SYNC_FAILED
+        organisation.last_cms_sync_date = timezone.now()
+        organisation.save(update_fields=["cms_sync_status", "last_cms_sync_date"])
+        logger.error(
+            "HTTP error updating partner configuration in CMS: %s body=%s",
+            exc,
+            exc.response.text if exc.response is not None else "",
+        )
+        raise PartnerConfigurationSyncError(error_message) from exc
+
+
+def update_partner_configuration_in_cms(organisation):
+    base_url = settings.STRAPI_API_BASE_URL
+    cms_id = resolve_partner_configuration_cms_id(organisation)
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        raise PartnerConfigurationSyncError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    if not cms_id:
+        return add_partner_configuration_to_cms(organisation)
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
+    payload = build_partner_configuration_payload(organisation)
+    return execute_partner_configuration_cms_update(
+        organisation=organisation,
+        url=url,
+        payload=payload,
+        error_message="Failed to update partner configuration in CMS.",
+    )
+
+
+def update_partner_configuration_work_codes_in_cms(
+    organisation,
+    *,
+    fields_to_update=None,
+):
+    base_url = settings.STRAPI_API_BASE_URL
+    cms_id = resolve_partner_configuration_cms_id(organisation)
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        raise PartnerConfigurationSyncError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    if not cms_id:
+        return update_partner_configuration_in_cms(organisation)
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
+    selected_fields = fields_to_update or ["access_code"]
+    payload_data = {}
+    if "access_code" in selected_fields:
+        payload_data["access_code"] = _build_access_code_value_for_cms(organisation)
+    if "user_groups" in selected_fields:
+        payload_data["user_groups"] = _build_user_groups_payload_for_cms(organisation )
+    payload = {"data": payload_data}
+    return execute_partner_configuration_cms_update(
+        organisation=organisation,
+        url=url,
+        payload=payload,
+        error_message="Failed to update partner configuration work codes in CMS.",
+    )
 
 def _extract_language_values(collection_languages):
     values = []
@@ -38,7 +337,6 @@ def _parse_language_value(value):
         return code.strip(), language_name[:-1].strip()
     return value.strip(), None
 
-
 def sync_organisation_languages(organisation, collection_languages):
     language_values = _extract_language_values(collection_languages)
     parsed_languages = []
@@ -60,23 +358,66 @@ def sync_organisation_languages(organisation, collection_languages):
     return len(parsed_languages)
 
 
+def sync_organisation_user_groups(organisation, user_groups):
+    if not isinstance(user_groups, list):
+        return 0
+
+    synced_count = 0
+    for item in user_groups:
+        group_name = (item.get("name") or "").strip()
+
+        work_group, _ = WorkGroup.all_objects.update_or_create(
+            organisation=organisation,
+            name=group_name,
+            defaults={"is_deleted": False, "deleted_at": None, "deleted_by": None},
+        )
+
+        access_codes = item.get("access_codes")
+
+
+
+        synced_access_codes = []
+        for access_code_value in access_codes:
+            access_code, _ = OrganisationAccessCode.objects.update_or_create(
+                code=access_code_value.strip(),
+                defaults={"organisation": organisation},
+            )
+            synced_access_codes.append(access_code)
+
+        work_group.access_codes.set(synced_access_codes)
+
+        synced_count += 1
+
+    return synced_count
+
+
 def sync_partner_configuration_item(item):
     org_code = (item.get("org_code") or "").strip()
-    name = (item.get("display_name") or (item.get("name") or "")).strip()
 
-    if not org_code or not name:
+    if not org_code:
         logger.warning(
-            "Skipping partner configuration with missing org_code or name: %s",
+            "Skipping partner configuration with missing org_code: %s",
             item,
         )
         return {"created": 0, "updated": 0, "languages_created": 0}
+    big_icon = item.get("big_icon")
+    small_icon = item.get("small_icon")
 
     defaults = {
-        "name": name,
+        "name": item.get("name"),
+        "display_name": item.get("display_name"),
+        "has_custom_content": item.get("has_custom_content", False),
         "custom_type": item.get("custom_type"),
         "work_sector": item.get("work_sector"),
         "content_collection": item.get("content_collection"),
         "default_collection_language": item.get("default_collection_language"),
+        "default_report_issue_emails": item.get("default_report_issue_emails"),
+        "default_feedback_emails": item.get("default_feedback_emails"),
+        "theme": item.get("theme"),
+        "big_icon": _build_media_url(big_icon.get("url")) if big_icon else "",
+        "big_icon_cms_media_id": big_icon.get("id") if big_icon else None,
+        "small_icon": _build_media_url(small_icon.get("url")) if small_icon else "",
+        "small_icon_cms_media_id": small_icon.get("id") if small_icon else None,
     }
 
     with transaction.atomic():
@@ -91,6 +432,10 @@ def sync_partner_configuration_item(item):
         languages_created = sync_organisation_languages(
             organisation=organisation,
             collection_languages=item.get("collection_languages"),
+        )
+        user_groups_synced = sync_organisation_user_groups(
+            organisation=organisation,
+            user_groups=item.get("user_groups") or item.get("departments"),
         )
 
         access_codes_raw = (item.get("access_code") or "").strip()
@@ -107,6 +452,7 @@ def sync_partner_configuration_item(item):
         "created": 1 if created else 0,
         "updated": 0 if created else 1,
         "languages_created": languages_created,
+        "user_groups_synced": user_groups_synced,
     }
 
 
@@ -115,33 +461,35 @@ def sync_partner_configurations():
     Sync Strapi partner configurations into OrganisationData and SiteLanguages.
     """
     try:
-        payload = get_partner_configurations()
-        if payload is None:
+        items = get_partner_configurations()
+        if items is None:
             return None
 
-        items = payload.get("data", [])
 
         created_count = 0
         updated_count = 0
         languages_created_count = 0
+        user_groups_synced_count = 0
 
         for item in items:
             result = sync_partner_configuration_item(item)
             created_count += result["created"]
             updated_count += result["updated"]
             languages_created_count += result["languages_created"]
+            user_groups_synced_count += result["user_groups_synced"]
 
         return {
             "created": created_count,
             "updated": updated_count,
             "languages_created": languages_created_count,
+            "user_groups_synced": user_groups_synced_count,
         }
     except Exception:
         logger.exception("Unexpected error while syncing partner configurations")
         return None
 
 
-def get_partner_configurations():
+def get_partner_configurations(query_params=None):
     """
     Fetch organisation partner configurations from the CMS.
 
@@ -159,18 +507,257 @@ def get_partner_configurations():
     url = f"{base_url.rstrip('/')}/partner-configurations"
     session = get_cms_session()
     headers = get_cms_headers()
+    params = query_params or {}
+
+    try:
+        response = session.get(url, headers=headers, params=params, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        print(f"Fetched partner configurations: {data}")
+        return data.get("data", [])
+    except requests.exceptions.HTTPError as exc:
+        logger.error("HTTP error fetching partner configurations from CMS: %s", exc)
+    except requests.exceptions.RequestException as exc:
+        logger.error("Error fetching partner configurations from CMS: %s", exc)
+    return None
+
+
+def get_partner_configuration_by_org_code(org_code, publication_state="draft"):
+    response = get_partner_configurations(
+        query_params={
+            "filters[org_code][$eq]": org_code,
+            "publicationState": publication_state,
+        },
+    )
+    return response[0] if response else None
+
+
+def get_partner_configuration_options():
+    """
+    Fetch partner configuration options from the CMS.
+
+    Endpoint:
+      /partner-configurations/options
+
+    Returns the parsed JSON response on success, or None on failure.
+    """
+    base_url = settings.STRAPI_API_BASE_URL
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        logger.error(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+        return None
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/options"
+    session = get_cms_session()
+    headers = get_cms_headers()
 
     try:
         response = session.get(url, headers=headers, timeout=30)
         response.raise_for_status()
-        data = response.json()
-        return data
+        return response.json()
     except requests.exceptions.HTTPError as exc:
         logger.error(
-            "HTTP error fetching partner configurations from CMS: %s", exc
+            "HTTP error fetching partner configuration options from CMS: %s", exc
         )
     except requests.exceptions.RequestException as exc:
         logger.error(
-            "Error fetching partner configurations from CMS: %s", exc
+            "Error fetching partner configuration options from CMS: %s", exc
         )
     return None
+
+
+def sync_locales_from_partner_configuration_options(locales=[]):
+    """
+    Upsert locales into content.Locale.
+
+    If `locales` is not provided, options are fetched from
+    /partner-configurations/options and `payload["locales"]` is used.
+
+    Returns:
+        dict: {"created": int, "updated": int, "skipped": int}
+        None: if options payload fetch fails when locales are not passed
+    """
+    try:
+        created_count = 0
+        updated_count = 0
+        skipped_count = 0
+
+        for item in locales:
+            code = (item.get("code") or "").strip()
+            name = (item.get("name") or "").strip()
+            if not code or not name:
+                skipped_count += 1
+                continue
+
+            _, created = Locale.all_objects.update_or_create(
+                code=code,
+                defaults={"name": name, "is_deleted": False},
+            )
+
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+
+        return {
+            "created": created_count,
+            "updated": updated_count,
+            "skipped": skipped_count,
+        }
+    except Exception:
+        logger.exception("sync_locales_from_partner_configuration_options: Unexpected error while syncing locales from partner configuration options")
+        return {
+            "created": created_count,
+            "updated": updated_count,
+            "skipped": skipped_count,
+            "error": "An unexpected error occurred during locale sync. Check logs for details."
+        }
+
+def _parse_work_sector(item):
+    if isinstance(item, str):
+        raw_value = item.strip()
+    else:
+        return "", ""
+
+    if not raw_value:
+        return "", ""
+
+    match = re.match(r"^(?P<slug>.+?)\s*\((?P<display_name>.+)\)$", raw_value)
+    if match:
+        return match.group("slug").strip(), match.group("display_name").strip()
+
+    return raw_value, raw_value
+
+
+def sync_work_sectors_from_partner_configuration_options(work_sectors=[]):
+    """
+    Upsert work sectors into content.WorkSector.
+
+    Accepts either a list of strings or a list of objects.
+    Values like `agriculture (Agriculture)` are parsed into
+    slug=`agriculture` and display_name=`Agriculture`.
+    """
+    try:
+        created_count = 0
+        updated_count = 0
+        skipped_count = 0
+
+        for item in work_sectors:
+            slug, display_name = _parse_work_sector(item)
+            if not slug or not display_name:
+                skipped_count += 1
+                continue
+
+            _, created = WorkSector.all_objects.update_or_create(
+                slug=slug,
+                defaults={"display_name": display_name, "is_deleted": False},
+            )
+
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+
+        return {
+            "created": created_count,
+            "updated": updated_count,
+            "skipped": skipped_count,
+        }
+    except Exception:
+        logger.exception("sync_work_sectors_from_partner_configuration_options: Unexpected error while syncing work sectors from partner configuration options")
+        return {
+            
+            "created": created_count,
+            "updated": updated_count,
+            "skipped": skipped_count,
+            "error": "An unexpected error occurred during work sector sync. Check logs for details."
+        }
+        
+
+def sync_collections_from_partner_configuration_options(collections=[]):
+    """
+    Upsert collections into content.Collection.
+
+    Accepts either a list of objects.
+    For object payloads, `apiName` is treated as the
+    stable identifier and `name` as the display value.
+    """
+    try:
+        created_count = 0
+        updated_count = 0
+        skipped_count = 0
+
+        for item in collections:
+            name =  (item.get("displayName") or "").strip()
+            api_name = (item.get("apiName") or "").strip()
+            if not name or not api_name:
+                logger.warning(
+                    "Skipping collection with missing api_name or name: %s",
+                    item,
+                )
+                skipped_count += 1
+                continue
+
+            _, created = Collection.all_objects.update_or_create(
+                api_name=api_name,
+                defaults={"name": name, "is_deleted": False},
+            )
+            print(f"Processed collection: api_name={api_name}, name={name}, created={created}")
+
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+
+        return {
+            "created": created_count,
+            "updated": updated_count,
+            "skipped": skipped_count,
+        }
+    except Exception:
+        logger.exception("sync_collections_from_partner_configuration_options: Unexpected error while syncing collections from partner configuration options")
+        return {
+            "created": created_count,
+            "updated": updated_count,
+            "skipped": skipped_count,
+            "error": "An unexpected error occurred during collection sync. Check logs for details."
+        }
+
+
+def sync_partner_config_options():
+    """
+    Sync partner configuration options from CMS.
+
+    Currently syncs locales, work sectors, and collections into content and returns
+    fetch counts + sync summaries.
+    """
+    try:
+        payload = get_partner_configuration_options()
+        if payload is None:
+            logger.error("Failed to fetch partner configuration options from CMS.")
+            return None
+
+        locales = payload.get("locales", [])
+        work_sectors = payload.get("work_sectors", []) 
+        collections = payload.get("collections", [])
+
+        locale_summary = sync_locales_from_partner_configuration_options(locales=locales)
+
+        work_sector_summary = sync_work_sectors_from_partner_configuration_options(
+            work_sectors=work_sectors
+        )
+
+        collection_summary = sync_collections_from_partner_configuration_options(
+            collections=collections
+        )
+
+        return {
+            "locale_sync": locale_summary,
+            "work_sector_sync": work_sector_summary,
+            "collection_sync": collection_summary,
+        }
+    except Exception:
+        logger.exception("sync_partner_config_options: Unexpected error while syncing partner configuration options")
+        return None

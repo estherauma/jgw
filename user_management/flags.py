@@ -10,6 +10,11 @@ UM_FLAG_DEFS = [
         "condition": "58_admin",
     },
     {
+        "name": "can_manage_organization_groups",
+        "label": "Manage organization groups",
+        "condition": "58_admin",
+    },
+    {
         "name": "can_create_work_code",
         "label": "Create work codes",
         "condition": "58_admin",
