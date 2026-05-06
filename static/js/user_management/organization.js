@@ -688,7 +688,6 @@
       return;
     }
     var errorBox = document.getElementById('assign-workcode-form-error');
-    var codeLabel = document.querySelector('[data-assign-code-label]');
 
     function resetAssignForm(codeValue, selectedGroups) {
       safeClearFormErrors(form, errorBox);
@@ -699,6 +698,7 @@
           '[data-assign-org-label]',
         );
       }
+      var codeLabel = form.querySelector('[data-assign-code-label]');
       if (codeLabel) {
         codeLabel.textContent = codeValue;
       }
@@ -741,6 +741,9 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         var data = null;
         if (window.postFormJson) {
@@ -755,6 +758,9 @@
           window.location.reload();
         }
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
@@ -762,13 +768,16 @@
         if (submitButton) {
           submitButton.disabled = false;
         }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
       }
     });
 
     $(document).on('click', '[data-workcode-assign]', function () {
-      var codeValue = $(this).data('workcode-code') || '';
-      var codeId = $(this).data('workcode-id') || '';
-      var groupIds = String($(this).data('workcode-groups') || '')
+      var codeValue = this.getAttribute('data-workcode-code') || '';
+      var codeId = this.getAttribute('data-workcode-id') || '';
+      var groupIds = String(this.getAttribute('data-workcode-groups') || '')
         .split(',')
         .map(function (value) {
           return value.trim();
@@ -779,6 +788,10 @@
       resetAssignForm(codeValue, groupIds);
       var workCodeInput = form.querySelector('[data-workcode-id]');
       workCodeInput.value = codeId || '';
+      var codeLabel = form.querySelector('[data-assign-code-label]');
+      if (codeLabel) {
+        codeLabel.textContent = codeValue || '—';
+      }
     });
   }
 

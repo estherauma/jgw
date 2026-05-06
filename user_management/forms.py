@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import Group
 import phonenumbers
+import re
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from content.models import Collection, Locale, WorkSector
@@ -26,6 +27,8 @@ from .utils import get_country_code_choices, is_org_admin_or_staff, validate_pho
 
 
 class CreateOrganisationForm(forms.ModelForm):
+    ACCESS_CODE_PATTERN = re.compile(r"^\s*[A-Za-z0-9]+(\s*,\s*[A-Za-z0-9]+)*\s*$")
+
     access_code = forms.CharField(
         required=True,
         widget=forms.TextInput(
@@ -207,6 +210,10 @@ class CreateOrganisationForm(forms.ModelForm):
 
     def clean_access_code(self):
         access_code = self.cleaned_data.get("access_code", "").strip().upper()
+        if access_code and not self.ACCESS_CODE_PATTERN.fullmatch(access_code):
+            raise forms.ValidationError(
+                "Access code must contain only letters and numbers, optionally separated by commas."
+            )
         qs = OrganisationAccessCode.objects.filter(code__iexact=access_code)
         if self.instance and self.instance.pk:
             qs = qs.exclude(organisation=self.instance)
@@ -294,6 +301,8 @@ class CreateOrganizationGroupForm(forms.ModelForm):
 
 
 class AddWorkCodeForm(forms.ModelForm):
+    WORK_CODE_PATTERN = re.compile(r"^[A-Za-z0-9]+$")
+
     class Meta:
         model = OrganisationAccessCode
         fields = ["code", "expiry_date", "requires_login"]
@@ -324,6 +333,10 @@ class AddWorkCodeForm(forms.ModelForm):
 
     def clean_code(self):
         code = self.cleaned_data.get("code", "").strip().upper()
+        if code and not self.WORK_CODE_PATTERN.fullmatch(code):
+            raise forms.ValidationError(
+                "Work code must contain only letters and numbers."
+            )
         return code
     
     def clean_expiry_date(self):
@@ -694,7 +707,7 @@ class OrganisationRoleForm(forms.ModelForm):
 class WorkCodeAssignForm(forms.Form):
     work_groups = forms.ModelMultipleChoiceField(
         queryset=WorkGroup.objects.none(),
-        required=True,
+        required=False,
         widget=forms.CheckboxSelectMultiple(),
     )
 

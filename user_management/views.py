@@ -39,6 +39,7 @@ from content.services.partner_configurations import (
     FileUploadError,
     PartnerConfigurationSyncError,
     update_partner_configuration_in_cms,
+    update_partner_configuration_work_codes_in_cms,
 )
 
 
@@ -383,13 +384,28 @@ class CreateWorkCodeView(View):
                         work_code.created_by = request.user
                         work_code.updated_by = request.user
                         work_code.save()
-                        msg = f'Work code "{work_code.code}" created successfully.'   
+                        msg = f'Work code "{work_code.code}" created successfully.'
                     messages.success(request, msg)
+
+                warning_message = None
+                try:
+                    update_partner_configuration_work_codes_in_cms(
+                        organisation,
+                        fields_to_update=["access_code"],
+                    )
+                except PartnerConfigurationSyncError as exc:
+                    warning_message = str(exc)
+                    messages.warning(
+                        request,
+                        "Work code was saved, but work code sync to CMS failed.",
+                    )
+
                 return JsonResponse(
                     {
                         "ok": True,
                         "code": work_code.code,
                         "org_id": work_code.organisation_id,
+                        "warning": warning_message,
                     }
                 )
             except IntegrityError:
@@ -918,11 +934,24 @@ class AssignWorkCodeView(View):
         if form.is_valid():
             work_groups = form.cleaned_data["work_groups"]
             work_code.work_groups.set(work_groups)
+            warning_message = None
+            try:
+                update_partner_configuration_work_codes_in_cms(
+                    organisation,
+                    fields_to_update=["access_code", "user_groups"],
+                )
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Work code assignment was saved, but work code sync to CMS failed.",
+                )
             return JsonResponse(
                 {
                     "ok": True,
                     "org_id": organisation.id,
                     "work_code_id": work_code.id,
+                    "warning": warning_message,
                 }
             )
 
@@ -1147,9 +1176,21 @@ class DeleteWorkCodeView(View):
         code = work_code.code
         
         work_code.soft_delete(request.user)
-        
+        warning_message = None
+        try:
+            update_partner_configuration_work_codes_in_cms(
+                work_code.organisation,
+                fields_to_update=["access_code"],
+            )
+        except PartnerConfigurationSyncError as exc:
+            warning_message = str(exc)
+            messages.warning(
+                request,
+                "Work code was deleted, but work code sync to CMS failed.",
+            )
+
         messages.success(request, f'Work code "{code}" deleted successfully.')
-        return JsonResponse({"ok": True})
+        return JsonResponse({"ok": True, "warning": warning_message})
     
 class EditWorkCodeView(View):
     def post(self, request, work_code_id):
@@ -1183,11 +1224,24 @@ class EditWorkCodeView(View):
             work_code = form.save(commit=False)
             work_code.updated_by = request.user
             form.save()
+            warning_message = None
+            try:
+                update_partner_configuration_work_codes_in_cms(
+                    organisation,
+                    fields_to_update=["access_code"],
+                )
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Work code was updated, but work code sync to CMS failed.",
+                )
             return JsonResponse(
                 {
                     "ok": True,
                     "org_id": organisation.id,
                     "work_code_id": work_code.id,
+                    "warning": warning_message,
                 }
             )
 

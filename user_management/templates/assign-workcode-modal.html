@@ -31,6 +31,9 @@
                     {% if form.work_groups and form.work_groups.field.queryset %}
                     <div class="um-field form-group">
                         <span>User groups</span>
+                        <small class="um-helper">
+                            <strong>Important:</strong> If no user groups are selected, this work code will be available to all users in this organisation.
+                        </small>
                         <div class="um-checkbox-list um-checkbox-list-scroll">
                             {{ form.work_groups }}
                         </div>

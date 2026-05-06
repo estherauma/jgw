@@ -57,7 +57,7 @@ def upload_files_to_cms(files):
             url,
             headers=headers,
             files=form_files,
-            timeout=60,
+            timeout=120,
         )
         response.raise_for_status()
         payload = response.json()
@@ -113,18 +113,46 @@ def _format_work_sector_for_cms(work_sector_slug):
     return f"{work_sector.slug} ({work_sector.display_name})"
 
 
+def _build_access_code_value_for_cms(organisation):
+    organisation_access_codes = OrganisationAccessCode.objects.filter(
+        organisation=organisation,
+    ).order_by("created_at")
+    return ",".join(
+        access_code.code for access_code in organisation_access_codes if access_code.code
+    )
+
+
+def _build_user_groups_payload_for_cms(organisation ):
+    work_groups = WorkGroup.objects.filter(organisation=organisation).prefetch_related(
+        "access_codes"
+    )
+    payload = []
+    for work_group in work_groups:
+        access_codes = [
+            access_code.code
+            for access_code in work_group.access_codes.order_by("created_at")
+            if access_code.code
+        ]
+        print(f"workgroups.  {work_groups}")
+
+
+        payload.append(
+            {
+                "access_codes": "\n".join(access_codes),
+                "name": work_group.name,
+                "data_platform_ref": str(work_group.id),
+            }
+        )
+        print(f"payload.  {payload}")
+
+    return payload
+
+
 def build_partner_configuration_payload(organisation):
 
     site_languages = list(
         SiteLanguages.objects.filter(organisation=organisation).order_by("code")
     )
-    organisation_access_codes = list(
-        OrganisationAccessCode.objects.filter(organisation=organisation).order_by("code")
-    )
-    work_groups = list(
-        WorkGroup.objects.filter(organisation=organisation).prefetch_related("access_codes")
-    )
-
     payload = {
         "data": {
             "org_code": organisation.org_code,
@@ -132,9 +160,7 @@ def build_partner_configuration_payload(organisation):
             "display_name": organisation.display_name or organisation.name,
             "has_custom_content": organisation.has_custom_content,
             "content_collection": organisation.content_collection,
-            "access_code": ",".join(
-                access_code.code for access_code in organisation_access_codes if access_code.code
-            ),
+            "access_code": _build_access_code_value_for_cms(organisation),
             "work_sector": _format_work_sector_for_cms(organisation.work_sector),
             "custom_type": organisation.custom_type,
             "theme": organisation.theme or "",
@@ -144,18 +170,7 @@ def build_partner_configuration_payload(organisation):
             "default_feedback_emails": organisation.default_feedback_emails or "",
             "big_icon": organisation.big_icon_cms_media_id,
             "small_icon": organisation.small_icon_cms_media_id,
-            "departments": [
-                {
-                    "accessCode": (
-                        work_group.access_codes.order_by("code").first().code
-                        if work_group.access_codes.exists()
-                        else ""
-                    ),
-                    "name": work_group.name,
-                    "uid": work_group.name.lower().replace(" ", "_"),
-                }
-                for work_group in work_groups
-            ],
+            "user_groups": _build_user_groups_payload_for_cms(organisation),
         }
     }
     return payload
@@ -223,24 +238,9 @@ def resolve_partner_configuration_cms_id(organisation):
     return organisation.cms_id
 
 
-def update_partner_configuration_in_cms(organisation):
-    base_url = settings.STRAPI_API_BASE_URL
-    cms_id = resolve_partner_configuration_cms_id(organisation)
-
-    if not base_url or not settings.STRAPI_API_TOKEN:
-        raise PartnerConfigurationSyncError(
-            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
-        )
-
-    if not cms_id:
-        return add_partner_configuration_to_cms(organisation)
-
-    url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
-    headers = get_cms_headers()
-    payload = build_partner_configuration_payload(organisation)
-
+def execute_partner_configuration_cms_update(*, organisation, url, payload, error_message):
     try:
-        response = requests.put(url, headers=headers, json=payload, timeout=30)
+        response = requests.put(url, headers=get_cms_headers(), json=payload, timeout=30)
         response.raise_for_status()
         organisation.cms_sync_status = CMS_SYNC_SUCCESS
         organisation.last_cms_sync_date = timezone.now()
@@ -255,9 +255,61 @@ def update_partner_configuration_in_cms(organisation):
             exc,
             exc.response.text if exc.response is not None else "",
         )
+        raise PartnerConfigurationSyncError(error_message) from exc
+
+
+def update_partner_configuration_in_cms(organisation):
+    base_url = settings.STRAPI_API_BASE_URL
+    cms_id = resolve_partner_configuration_cms_id(organisation)
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
         raise PartnerConfigurationSyncError(
-            "Failed to update partner configuration in CMS."
-        ) from exc
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    if not cms_id:
+        return add_partner_configuration_to_cms(organisation)
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
+    payload = build_partner_configuration_payload(organisation)
+    return execute_partner_configuration_cms_update(
+        organisation=organisation,
+        url=url,
+        payload=payload,
+        error_message="Failed to update partner configuration in CMS.",
+    )
+
+
+def update_partner_configuration_work_codes_in_cms(
+    organisation,
+    *,
+    fields_to_update=None,
+):
+    base_url = settings.STRAPI_API_BASE_URL
+    cms_id = resolve_partner_configuration_cms_id(organisation)
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        raise PartnerConfigurationSyncError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    if not cms_id:
+        return update_partner_configuration_in_cms(organisation)
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
+    selected_fields = fields_to_update or ["access_code"]
+    payload_data = {}
+    if "access_code" in selected_fields:
+        payload_data["access_code"] = _build_access_code_value_for_cms(organisation)
+    if "user_groups" in selected_fields:
+        payload_data["user_groups"] = _build_user_groups_payload_for_cms(organisation )
+    payload = {"data": payload_data}
+    return execute_partner_configuration_cms_update(
+        organisation=organisation,
+        url=url,
+        payload=payload,
+        error_message="Failed to update partner configuration work codes in CMS.",
+    )
 
 def _extract_language_values(collection_languages):
     values = []
@@ -306,6 +358,39 @@ def sync_organisation_languages(organisation, collection_languages):
     return len(parsed_languages)
 
 
+def sync_organisation_user_groups(organisation, user_groups):
+    if not isinstance(user_groups, list):
+        return 0
+
+    synced_count = 0
+    for item in user_groups:
+        group_name = (item.get("name") or "").strip()
+
+        work_group, _ = WorkGroup.all_objects.update_or_create(
+            organisation=organisation,
+            name=group_name,
+            defaults={"is_deleted": False, "deleted_at": None, "deleted_by": None},
+        )
+
+        access_codes = item.get("access_codes")
+
+
+
+        synced_access_codes = []
+        for access_code_value in access_codes:
+            access_code, _ = OrganisationAccessCode.objects.update_or_create(
+                code=access_code_value.strip(),
+                defaults={"organisation": organisation},
+            )
+            synced_access_codes.append(access_code)
+
+        work_group.access_codes.set(synced_access_codes)
+
+        synced_count += 1
+
+    return synced_count
+
+
 def sync_partner_configuration_item(item):
     org_code = (item.get("org_code") or "").strip()
 
@@ -348,6 +433,10 @@ def sync_partner_configuration_item(item):
             organisation=organisation,
             collection_languages=item.get("collection_languages"),
         )
+        user_groups_synced = sync_organisation_user_groups(
+            organisation=organisation,
+            user_groups=item.get("user_groups") or item.get("departments"),
+        )
 
         access_codes_raw = (item.get("access_code") or "").strip()
         access_codes = [
@@ -363,6 +452,7 @@ def sync_partner_configuration_item(item):
         "created": 1 if created else 0,
         "updated": 0 if created else 1,
         "languages_created": languages_created,
+        "user_groups_synced": user_groups_synced,
     }
 
 
@@ -379,17 +469,20 @@ def sync_partner_configurations():
         created_count = 0
         updated_count = 0
         languages_created_count = 0
+        user_groups_synced_count = 0
 
         for item in items:
             result = sync_partner_configuration_item(item)
             created_count += result["created"]
             updated_count += result["updated"]
             languages_created_count += result["languages_created"]
+            user_groups_synced_count += result["user_groups_synced"]
 
         return {
             "created": created_count,
             "updated": updated_count,
             "languages_created": languages_created_count,
+            "user_groups_synced": user_groups_synced_count,
         }
     except Exception:
         logger.exception("Unexpected error while syncing partner configurations")
