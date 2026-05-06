@@ -565,6 +565,16 @@ body .modal-backdrop.show {
     color: #2f3e52;
     font-weight: 600;
 }
+.um-org-detail-icon {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #d9e4f2;
+    background: #ffffff;
+    margin-right: 8px;
+    vertical-align: middle;
+}
 .um-select {
     position: relative;
     width: 100%;

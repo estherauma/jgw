@@ -195,11 +195,41 @@
                 </div>
                 <div class="um-details um-navy">
                     <div>Name: <span class="um-navy" data-org-detail="name" data-org-default="{{ org_details.name }}">{{ org_details.name }}</span></div>
+                    <div>Display name: <span class="um-navy" data-org-detail="display_name" data-org-default="{{ org_details.display_name|default:'-' }}">{{ org_details.display_name|default:"-" }}</span></div>
                     <div>Organisation code: <span class="um-navy" data-org-detail="code" data-org-default="{{ org_details.code }}">{{ org_details.code }}</span></div>
+                    <div>Access code(s): <span class="um-navy" data-org-detail="access_code" data-org-default="{{ org_details.access_code|default:'-' }}">{{ org_details.access_code|default:"-" }}</span></div>
+                    <div>Has custom content: <span class="um-navy" data-org-detail="has_custom_content" data-org-default="{% if org_details.has_custom_content %}Yes{% else %}No{% endif %}">{% if org_details.has_custom_content %}Yes{% else %}No{% endif %}</span></div>
                     <div>Custom type: <span class="um-navy" data-org-detail="custom_type" data-org-default="{{ org_details.custom_type|default:'-' }}">{{ org_details.custom_type|default:"-" }}</span></div>
+                    <div>Theme: <span class="um-navy" data-org-detail="theme" data-org-default="{{ org_details.theme|default:'-' }}">{{ org_details.theme|default:"-" }}</span></div>
                     <div>Work sector: <span class="um-navy" data-org-detail="work_sector" data-org-default="{{ org_details.work_sector|default:'-' }}">{{ org_details.work_sector|default:"-" }}</span></div>
                     <div>Content collection: <span class="um-navy" data-org-detail="content_collection" data-org-default="{{ org_details.content_collection|default:'-' }}">{{ org_details.content_collection|default:"-" }}</span></div>
                     <div>Default collection language: <span class="um-navy" data-org-detail="default_collection_language" data-org-default="{{ org_details.default_collection_language|default:'-' }}">{{ org_details.default_collection_language|default:"-" }}</span></div>
+
+                    <div>
+                        <div>Big icon CMS media reference: <span class="um-navy" data-org-detail="big_icon_cms_media_id" data-org-default="{{ org_details.big_icon_cms_media_id|default:'-' }}">{{ org_details.big_icon_cms_media_id|default:"-" }}</span></div>
+                        <span class="um-navy d-inline-block mt-1" data-org-detail="big_icon_url" data-org-default="{{ org_details.big_icon_url|default:'-' }}">
+                            {% if org_details.big_icon_url %}
+                                <img src="{{ org_details.big_icon_url }}" alt="Big icon" class="um-org-detail-icon" />
+                            {% else %}
+                                -
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div>
+                        <div>Small icon CMS media reference: <span class="um-navy" data-org-detail="small_icon_cms_media_id" data-org-default="{{ org_details.small_icon_cms_media_id|default:'-' }}">{{ org_details.small_icon_cms_media_id|default:"-" }}</span></div>
+                        <span class="um-navy d-inline-block mt-1" data-org-detail="small_icon_url" data-org-default="{{ org_details.small_icon_url|default:'-' }}">
+                            {% if org_details.small_icon_url %}
+                                <img src="{{ org_details.small_icon_url }}" alt="Small icon" class="um-org-detail-icon" />
+                            {% else %}
+                                -
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div>Default report issue emails: <span class="um-navy" data-org-detail="default_report_issue_emails" data-org-default="{{ org_details.default_report_issue_emails|default:'-' }}">{{ org_details.default_report_issue_emails|default:"-" }}</span></div>
+                    <div>Default feedback emails: <span class="um-navy" data-org-detail="default_feedback_emails" data-org-default="{{ org_details.default_feedback_emails|default:'-' }}">{{ org_details.default_feedback_emails|default:"-" }}</span></div>
+                    <div>CMS reference: <span class="um-navy" data-org-detail="cms_id" data-org-default="{{ org_details.cms_id|default:'-' }}">{{ org_details.cms_id|default:"-" }}</span></div>
+                    <div>CMS sync status: <span class="um-navy" data-org-detail="cms_sync_status" data-org-default="{{ org_details.cms_sync_status|default:'-' }}">{{ org_details.cms_sync_status|default:"-" }}</span></div>
+                    <div>Last CMS sync date: <span class="um-navy" data-org-detail="last_cms_sync_date" data-org-default="{{ org_details.last_cms_sync_date|default:'-' }}">{{ org_details.last_cms_sync_date|default:"-" }}</span></div>
                     <div>Organisation was created by: <span class="um-navy" data-org-detail="created_by" data-org-default="{{ org_details.created_by }}">{{ org_details.created_by }}</span></div>
                     <div>Organisation was created on: <span class="um-navy" data-org-detail="created_at" data-org-default="{{ org_details.created_at }}">{{ org_details.created_at }}</span></div>
                 </div>

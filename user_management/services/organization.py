@@ -30,8 +30,13 @@ class OrganizationService:
             "default_collection_language": organisation.default_collection_language,
             "default_report_issue_emails": organisation.default_report_issue_emails,
             "default_feedback_emails": organisation.default_feedback_emails,
+            "cms_id": organisation.cms_id,
+            "cms_sync_status": organisation.cms_sync_status,
+            "last_cms_sync_date": organisation.last_cms_sync_date,
             "big_icon_url": organisation.big_icon or "",
+            "big_icon_cms_media_id": organisation.big_icon_cms_media_id,
             "small_icon_url": organisation.small_icon or "",
+            "small_icon_cms_media_id": organisation.small_icon_cms_media_id,
         }
 
     @staticmethod
