@@ -268,7 +268,7 @@
       
 
       if (!workGroups?.length) {
-        workGroupsContainer.innerHTML = '<p>No departments available.</p>';
+        workGroupsContainer.innerHTML = '<p>No user groups available.</p>';
         return;
       }
       const workGroupOptions = workGroups.map(function (group, index) {

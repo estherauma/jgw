@@ -196,7 +196,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Departments</span>
+                            <span class="text-muted small">User groups</span>
                             <span class="fw-semibold text-dark text-break">
                                 {% for group in user.work_groups.all %}
                                     {{ group.name }}{% if not forloop.last %}, {% endif %}
