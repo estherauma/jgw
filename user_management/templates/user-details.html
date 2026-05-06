@@ -56,6 +56,16 @@
             {% if user.is_active %}Deactivate User{% else %}Activate User{% endif %}
         </button>
         {% endflag %}
+        {% flag 'can_delete_user' %}
+        <button
+            type="button"
+            class="um-btn um-btn-danger mb-2"
+            data-delete-user
+            data-user-id="{{ user.id }}"
+        >
+            Delete User
+        </button>
+        {% endflag %}
     </div>
 
     <div class="um-card um-user-profile-summary mb-3">
@@ -221,7 +231,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Departments</span>
+                            <span class="text-muted small">User groups</span>
                             <span class="fw-semibold text-dark text-break">
                                 {% for group in user.work_groups.all %}
                                     {{ group.name }}{% if not forloop.last %}, {% endif %}

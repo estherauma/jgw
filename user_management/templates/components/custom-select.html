@@ -1,0 +1,33 @@
+<div
+    class="um-select{% if multiple %} um-multiselect{% endif %}"
+    data-um-select
+    data-um-select-placeholder="{{ placeholder|default:'Select an option' }}"
+    data-um-select-search-placeholder="{{ search_placeholder|default:'Search...' }}"
+    data-um-select-no-results="{{ no_results_text|default:'No results found.' }}"
+    data-um-select-multiple="{% if multiple %}true{% else %}false{% endif %}"
+>
+    <button
+        class="um-select-toggle text-start"
+        type="button"
+        data-um-select-toggle
+    >
+        <span data-um-select-label>{{ placeholder|default:'Select an option' }}</span>
+        <i class="bi bi-chevron-down"></i>
+    </button>
+    <div class="um-select-menu" data-um-select-menu>
+        <input
+            class="form-control"
+            type="text"
+            placeholder="{{ search_placeholder|default:'Search...' }}"
+            aria-label="{{ search_placeholder|default:'Search...' }}"
+            data-um-select-filter
+        />
+        <div class="um-select-options" data-um-select-options></div>
+        <div class="um-select-empty d-none" data-um-select-empty>
+            {{ no_results_text|default:'No results found.' }}
+        </div>
+    </div>
+    <div class="d-none">
+        {{ field }}
+    </div>
+</div>

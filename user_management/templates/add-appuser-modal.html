@@ -92,12 +92,12 @@
                         {% endif %}
                     </label>
                     <div class="um-field form-group">
-                        <span>Departments (optional)</span>
+                        <span>User groups (optional)</span>
                         <div class="um-checkbox-list um-checkbox-list-scroll" data-work-groups-container>
                             {% if form.work_groups and form.work_groups.field.queryset %}
                                 {{ form.work_groups }}
                             {% else %}
-                                <p>No departments available.</p>
+                                <p>No user groups available.</p>
                             {% endif %}
                         </div>
                         <div class="text-danger small" data-error-for="work_groups"></div>

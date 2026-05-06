@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
 from django.shortcuts import render, redirect
@@ -7,11 +8,12 @@ from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
 import json
-from preference.models import OrganisationAccessCode, OrganisationData, SiteLanguages
+from preference.models import OrganizationGroup, OrganisationAccessCode, OrganisationData, SiteLanguages
 
 from .forms import (
     AddWorkCodeForm,
     AppUserForm,
+    CreateOrganizationGroupForm,
     CreateOrganisationForm,
     DashboardUserForm,
     OrganisationRoleForm,
@@ -29,8 +31,16 @@ from .models import (
 )
 from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
+from .services.organization import OrganizationService
 from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
 from users.models import User, UserInvitations
+from content.services.partner_configurations import (
+    add_partner_configuration_to_cms,
+    FileUploadError,
+    PartnerConfigurationSyncError,
+    update_partner_configuration_in_cms,
+    update_partner_configuration_work_codes_in_cms,
+)
 
 
 def get_allowed_orgs(user):
@@ -115,6 +125,7 @@ def user_management(request):
     selected_org_id = None
     selected_org_name = None
     organizations = get_allowed_orgs(user).order_by("name")
+    organization_groups = OrganizationGroup.objects.order_by("name")
 
     work_codes = []
     work_groups = WorkGroup.objects.none()
@@ -156,22 +167,23 @@ def user_management(request):
         roles = OrganisationRole.objects.filter(organisation=selected_org).prefetch_related(
             "role_permissions"
         ).order_by("name")
-        org_details = {
-            "name": selected_org.name,
-            "code": selected_org.org_code,
-            "custom_type": selected_org.custom_type,
-            "work_sector": selected_org.work_sector,
-            "content_collection": selected_org.content_collection,
-            "default_collection_language": selected_org.default_collection_language,
-            "created_by": "N/A",
-            "created_at": selected_org.created_at,
-        }
+        org_details = OrganizationService.build_organisation_form_payload(
+            organisation=selected_org,
+        )
+        org_details.update(
+            {
+                "code": selected_org.org_code,
+                "created_by": "N/A",
+                "created_at": selected_org.created_at,
+            }
+        )
         org_languages = SiteLanguages.objects.filter(organisation=selected_org).order_by("code")
     else:
         org_languages = SiteLanguages.objects.none()
 
     context = {
         "organizations": organizations,
+        "organization_groups": organization_groups,
         "users": users,
         "work_codes": work_codes,
         "work_groups": work_groups,
@@ -181,6 +193,7 @@ def user_management(request):
         "org_details": org_details,
         "org_languages": org_languages,
         "create_org_form": CreateOrganisationForm(),
+        "create_organization_group_form": CreateOrganizationGroupForm(),
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
@@ -206,7 +219,6 @@ def search_organisations(request):
         request=request,
     )
     return JsonResponse({"ok": True, "html": html})
-
 
 def search_users(request):
     user = request.user
@@ -246,17 +258,89 @@ class CreateOrganisationView(View):
     def post(self, request):
         if not is_super_or_58_admin(request.user):
             return org_access_denied()
-        form = CreateOrganisationForm(request.POST)
+        form = CreateOrganisationForm(request.POST, request.FILES)
         if form.is_valid():
+            try:
+                uploaded_icons = OrganizationService.upload_org_icons(
+                    org_name=form.cleaned_data.get("name"),
+                    big_icon_file=form.cleaned_data.get("big_icon_file"),
+                    small_icon_file=form.cleaned_data.get("small_icon_file"),
+                )
+            except FileUploadError as exc:
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+
             organisation = form.save(commit=False)
+            if uploaded_icons.get("big_icon"):
+                organisation.big_icon = uploaded_icons["big_icon"].get("url", "")
+                organisation.big_icon_cms_media_id = uploaded_icons["big_icon"].get("id")
+            if uploaded_icons.get("small_icon"):
+                organisation.small_icon = uploaded_icons["small_icon"].get("url", "")
+                organisation.small_icon_cms_media_id = uploaded_icons["small_icon"].get("id")
             organisation.created_by = request.user
             organisation.updated_by = request.user
-            organisation = form.save()
+            organisation.save()
+            try:
+                OrganizationService.add_org_access_code(
+                    organisation=organisation,
+                    access_code=form.cleaned_data["access_code"],
+                    user=request.user,
+                )
+            except ValidationError as exc:
+                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            OrganizationService.add_collection_languages(
+                organization=organisation,
+                languages=form.cleaned_data.get("collection_languages", []),
+                user=request.user,
+            )
             add_default_org_roles(organisation)
-            return JsonResponse({"ok": True, "org_id": organisation.id})
+            warning_message = None
+            
+            try:
+                add_partner_configuration_to_cms(organisation)
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Organisation was created, but partner configuration sync to CMS failed.",
+                )
+            return JsonResponse(
+                {"ok": True, "org_id": organisation.id, "warning": warning_message}
+            )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
+
+
+class CreateOrganizationGroupView(View):
+    def post(self, request):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
+        form = CreateOrganizationGroupForm(request.POST)
+        if form.is_valid():
+            organization_group = OrganizationService.create_organization_group(
+                form=form,
+                user=request.user,
+            )
+            return JsonResponse({"ok": True, "organization_group_id": organization_group.id})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class OrganizationGroupDetailsView(View):
+    def get(self, request, organization_group_id):
+        if not is_super_or_58_admin(request.user):
+            return redirect("user_management:home")
+
+        organization_group = OrganizationService.get_organization_group(
+            organization_group_id=organization_group_id,
+        )
+        if not organization_group:
+            return HttpResponseNotFound("Organization group not found.")
+
+        context = OrganizationService.build_organization_group_context(
+            organization_group=organization_group,
+        )
+        return render(request, "organization-group-details.html", context)
 
 class CreateWorkCodeView(View):
     def post(self, request):
@@ -304,13 +388,28 @@ class CreateWorkCodeView(View):
                         work_code.created_by = request.user
                         work_code.updated_by = request.user
                         work_code.save()
-                        msg = f'Work code "{work_code.code}" created successfully.'   
+                        msg = f'Work code "{work_code.code}" created successfully.'
                     messages.success(request, msg)
+
+                warning_message = None
+                try:
+                    update_partner_configuration_work_codes_in_cms(
+                        organisation,
+                        fields_to_update=["access_code"],
+                    )
+                except PartnerConfigurationSyncError as exc:
+                    warning_message = str(exc)
+                    messages.warning(
+                        request,
+                        "Work code was saved, but work code sync to CMS failed.",
+                    )
+
                 return JsonResponse(
                     {
                         "ok": True,
                         "code": work_code.code,
                         "org_id": work_code.organisation_id,
+                        "warning": warning_message,
                     }
                 )
             except IntegrityError:
@@ -320,6 +419,25 @@ class CreateWorkCodeView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 class EditOrganisationView(View):
+    def get(self, request, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return org_access_denied()
+        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Organisation not found."},
+                status=404,
+            )
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "organisation": OrganizationService.build_organisation_form_payload(
+                    organisation=organisation,
+                ),
+            }
+        )
+
     def post(self, request, organisation_id):
         if not is_super_or_58_admin(request.user):
             return org_access_denied()
@@ -329,12 +447,58 @@ class EditOrganisationView(View):
                 {"ok": False, "error": "Organisation not found."},
                 status=404,
             )
-        form = CreateOrganisationForm(request.POST, instance=organisation)
+        form = CreateOrganisationForm(request.POST, request.FILES, instance=organisation)
         if form.is_valid():
+            try:
+                uploaded_icon_urls = OrganizationService.upload_org_icons(
+                    org_name=form.cleaned_data.get("name"),
+                    big_icon_file=form.cleaned_data.get("big_icon_file"),
+                    small_icon_file=form.cleaned_data.get("small_icon_file"),
+                )
+            except FileUploadError as exc:
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+
             organisation = form.save(commit=False)
+            if uploaded_icon_urls.get("big_icon"):
+                organisation.big_icon = uploaded_icon_urls["big_icon"].get("url", "")
+                organisation.big_icon_cms_media_id = uploaded_icon_urls["big_icon"].get("id")
+            if uploaded_icon_urls.get("small_icon"):
+                organisation.small_icon = uploaded_icon_urls["small_icon"].get("url", "")
+                organisation.small_icon_cms_media_id = uploaded_icon_urls["small_icon"].get("id")
             organisation.updated_by = request.user
-            form.save()
-            return JsonResponse({"ok": True})
+            organisation.save()
+
+            has_existing_access_code = organisation.organisation_access_codes.exists()
+            if not has_existing_access_code:
+                try:
+                    OrganizationService.add_org_access_code(
+                        organisation=organisation,
+                        access_code=form.cleaned_data["access_code"],
+                        user=request.user,
+                    )
+                except ValidationError as exc:
+                    return JsonResponse(
+                        {"ok": False, "errors": exc.message_dict},
+                        status=400,
+                    )
+            
+            OrganizationService.add_collection_languages(
+                organization=organisation,
+                languages=form.cleaned_data.get("collection_languages", []),
+                user=request.user,
+            )
+            warning_message = None
+
+            try:
+                update_partner_configuration_in_cms(organisation)
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Organisation was updated, but partner configuration sync to CMS failed.",
+                )
+
+            return JsonResponse({"ok": True, "warning": warning_message})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
@@ -774,11 +938,24 @@ class AssignWorkCodeView(View):
         if form.is_valid():
             work_groups = form.cleaned_data["work_groups"]
             work_code.work_groups.set(work_groups)
+            warning_message = None
+            try:
+                update_partner_configuration_work_codes_in_cms(
+                    organisation,
+                    fields_to_update=["access_code", "user_groups"],
+                )
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Work code assignment was saved, but work code sync to CMS failed.",
+                )
             return JsonResponse(
                 {
                     "ok": True,
                     "org_id": organisation.id,
                     "work_code_id": work_code.id,
+                    "warning": warning_message,
                 }
             )
 
@@ -1003,9 +1180,21 @@ class DeleteWorkCodeView(View):
         code = work_code.code
         
         work_code.soft_delete(request.user)
-        
+        warning_message = None
+        try:
+            update_partner_configuration_work_codes_in_cms(
+                work_code.organisation,
+                fields_to_update=["access_code"],
+            )
+        except PartnerConfigurationSyncError as exc:
+            warning_message = str(exc)
+            messages.warning(
+                request,
+                "Work code was deleted, but work code sync to CMS failed.",
+            )
+
         messages.success(request, f'Work code "{code}" deleted successfully.')
-        return JsonResponse({"ok": True})
+        return JsonResponse({"ok": True, "warning": warning_message})
     
 class EditWorkCodeView(View):
     def post(self, request, work_code_id):
@@ -1039,11 +1228,24 @@ class EditWorkCodeView(View):
             work_code = form.save(commit=False)
             work_code.updated_by = request.user
             form.save()
+            warning_message = None
+            try:
+                update_partner_configuration_work_codes_in_cms(
+                    organisation,
+                    fields_to_update=["access_code"],
+                )
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Work code was updated, but work code sync to CMS failed.",
+                )
             return JsonResponse(
                 {
                     "ok": True,
                     "org_id": organisation.id,
                     "work_code_id": work_code.id,
+                    "warning": warning_message,
                 }
             )
 
@@ -1096,7 +1298,10 @@ class BulkDeleteUsersView(View):
 
             if deletion_count and failed_count:
                 messages.warning(request, f"{failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
-            messages.success(request, f"Successfully deleted {deletion_count} user(s).")
+            if deletion_count == 1:
+                messages.success(request, "Successfully deleted user.")
+            else:
+                messages.success(request, f"Successfully deleted {deletion_count} users.")
             return JsonResponse({"ok": True})
             
         except PermissionError as e:
@@ -1251,11 +1456,11 @@ class BulkInviteUsersView(View):
 
                 if len(invited_emails) == 1:
                     message = f"Sent email invitation to {invited_emails[0]}."
+
                 messages.success(
-                                request,
-                                message,
-                            )
-            
+                    request,
+                    message,
+                )
             if len(invite_sms):
                 message = f"Sent SMS invitations to {', '.join(invite_sms)}."
 

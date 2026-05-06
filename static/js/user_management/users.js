@@ -269,7 +269,7 @@
       
 
       if (!workGroups?.length) {
-        workGroupsContainer.innerHTML = '<p>No departments available.</p>';
+        workGroupsContainer.innerHTML = '<p>No user groups available.</p>';
         return;
       }
       const workGroupOptions = workGroups.map(function (group, index) {
@@ -568,6 +568,32 @@
     });
   }
 
+  function initDeleteUser() {
+    const deleteBtn = document.querySelector('[data-delete-user]');
+    if (!deleteBtn) {
+      return;
+    }
+
+    deleteBtn.addEventListener('click', function () {
+      const userId = deleteBtn.getAttribute('data-user-id');
+
+      window.showDeleteConfirm({
+        title: 'Delete User',
+        message: `Are you sure you want to delete this user?`,
+        url: '/user-management/users/delete/',
+        method: 'POST',
+        body: JSON.stringify({ ids: String(userId) }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        confirmButtonText: 'Delete',
+        confirmButtonClass: 'um-btn um-btn-danger',
+        onSuccess: function () {
+          window.location.href = '/user-management/';
+        },
+      });
+    });
+  }
   function getUserDisplayname(user){
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
     if (fullName) {
@@ -843,6 +869,7 @@
     initUserSelection();
     initAssignUsersToWorkGroups();
     initDeleteUsers();
+    initDeleteUser();
     initDeactivateUsers();
     initInviteUsers();
     initUpdateUserStatus();

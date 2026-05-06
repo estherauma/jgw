@@ -1,0 +1,34 @@
+<div
+    class="um-image-picker"
+    data-image-picker
+    data-image-picker-multiple="{% if multiple %}true{% else %}false{% endif %}"
+    data-image-picker-empty="{{ empty_text|default:'No image selected.' }}"
+>
+    <input
+        class="d-none"
+        type="file"
+        id="{{ input_id }}"
+        name="{{ input_name }}"
+        {% if accept %}accept="{{ accept }}"{% endif %}
+        {% if multiple %}multiple{% endif %}
+        data-image-picker-input
+    />
+    <div class="um-image-picker-toolbar">
+        <button
+            class="um-btn um-btn-outline"
+            type="button"
+            data-image-picker-trigger
+        >
+            {{ button_label|default:'Choose image' }}
+        </button>
+        <span class="um-image-picker-meta" data-image-picker-meta>
+            {{ helper_text|default:'PNG, JPG, JPEG' }}
+        </span>
+    </div>
+    <div class="um-image-picker-preview" data-image-picker-preview></div>
+    {% if empty_text %}
+        <div class="um-image-picker-empty" data-image-picker-empty>
+            {{ empty_text }}
+        </div>
+    {% endif %}
+</div>

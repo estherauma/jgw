@@ -137,11 +137,11 @@ class AggregatedContentView(APIView):
 
 
 class ContentWebhookView(APIView):
-    webhook_handlers = {
-        "partner-configuration": {
-            "handler": sync_partner_configuration_item,
-            "events": ["entry.publish"],
-        },
+    webhook_handlers = {# todo: rremove this since patner config will be read only
+        # "partner-configuration": {
+        #     "handler": sync_partner_configuration_item,
+        #     "events": ["entry.publish"],
+        # },
     }
 
     def post(self, request):

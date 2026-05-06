@@ -8,6 +8,7 @@ from preference.models import (
     ImmigrationStatus,
     Organisation,
     OrganisationAccessCode,
+    OrganizationGroup,
     OrganisationData,
     OrganisationSector,
     OriginalSectorOfWork,
@@ -189,24 +190,53 @@ class ImmigrationStatusAdmin(admin.ModelAdmin):
 
 @admin.register(OrganisationData)
 class OrganisationDataAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        "cms_id",
+        "org_code"
+    ]
     search_fields = [
         "name",
         "org_code",
+        "display_name",
+        "organization_group__name",
+        "organization_group__group_code",
         "custom_type",
+        "theme",
+        "default_report_issue_emails",
+        "default_feedback_emails",
         "work_sector",
         "content_collection",
         "default_collection_language",
+        "cms_id",
+        "big_icon_cms_media_id",
+        "small_icon_cms_media_id",
+        "cms_sync_status",
     ]
     list_display = [
         "name",
         "org_code",
+        "display_name",
+        "organization_group",
+        "has_custom_content",
         "custom_type",
+        "theme",
         "work_sector",
         "content_collection",
         "default_collection_language",
+        "cms_id",
+        "big_icon_cms_media_id",
+        "small_icon_cms_media_id",
+        "cms_sync_status",
+        "last_cms_sync_date",
         "created_at",
         "updated_at",
     ]
+
+
+@admin.register(OrganizationGroup)
+class OrganizationGroupAdmin(admin.ModelAdmin):
+    search_fields = ["name", "group_code"]
+    list_display = ["name", "group_code", "created_at", "updated_at"]
 
 
 @admin.register(SiteLanguages)
