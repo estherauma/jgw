@@ -285,7 +285,6 @@ def _parse_language_value(value):
         return code.strip(), language_name[:-1].strip()
     return value.strip(), None
 
-
 def sync_organisation_languages(organisation, collection_languages):
     language_values = _extract_language_values(collection_languages)
     parsed_languages = []
@@ -309,21 +308,31 @@ def sync_organisation_languages(organisation, collection_languages):
 
 def sync_partner_configuration_item(item):
     org_code = (item.get("org_code") or "").strip()
-    name = (item.get("display_name") or (item.get("name") or "")).strip()
 
-    if not org_code or not name:
+    if not org_code:
         logger.warning(
-            "Skipping partner configuration with missing org_code or name: %s",
+            "Skipping partner configuration with missing org_code: %s",
             item,
         )
         return {"created": 0, "updated": 0, "languages_created": 0}
+    big_icon = item.get("big_icon")
+    small_icon = item.get("small_icon")
 
     defaults = {
-        "name": name,
+        "name": item.get("name"),
+        "display_name": item.get("display_name"),
+        "has_custom_content": item.get("has_custom_content", False),
         "custom_type": item.get("custom_type"),
         "work_sector": item.get("work_sector"),
         "content_collection": item.get("content_collection"),
         "default_collection_language": item.get("default_collection_language"),
+        "default_report_issue_emails": item.get("default_report_issue_emails"),
+        "default_feedback_emails": item.get("default_feedback_emails"),
+        "theme": item.get("theme"),
+        "big_icon": _build_media_url(big_icon.get("url")) if big_icon else "",
+        "big_icon_cms_media_id": big_icon.get("id") if big_icon else None,
+        "small_icon": _build_media_url(small_icon.get("url")) if small_icon else "",
+        "small_icon_cms_media_id": small_icon.get("id") if small_icon else None,
     }
 
     with transaction.atomic():
