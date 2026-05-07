@@ -618,6 +618,7 @@
       window.showDeleteConfirm({
         title: activateTitle,
         message: activateMessage,
+        warning: 'Activated users will be able to access the system immediately.',
         url: '/user-management/users/activate/',
         method: 'POST',
         body: JSON.stringify({ ids: selectedUsers.map(u => u.id).join(','), action: 'activate' }),
@@ -780,6 +781,7 @@
       window.showDeleteConfirm({
         title: deactivateTitle,
         message: deactivateMessage,
+        warning: 'Deactivated users will lose access to the system. They can be reactivated later if needed.',
         url: '/user-management/users/activate/',
         method: 'POST',
         body: JSON.stringify({ ids: selectedUsers.map(u => u.id).join(','), action: 'deactivate' }),
