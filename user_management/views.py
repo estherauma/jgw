@@ -1519,6 +1519,10 @@ def user_details(request, user_id):
         
     user.role_display = get_user_role_display(user, selected_org=target_user_org)
     user.hide_organisation_information = is_super_or_58_admin(user)
+    user.has_pending_invitation = UserInvitations.objects.filter(
+        user=user,
+        status__in=["SENT", "PENDING"],
+    ).exists()
     
     work_groups_qs = (
         WorkGroup.objects.filter(organisation=target_user_org).order_by("name")
