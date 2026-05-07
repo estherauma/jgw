@@ -83,9 +83,19 @@
                 <p class="mt-2 mb-0 d-flex flex-wrap align-items-center gap-2 text-muted">
                     <span class="fw-semibold text-info">{{ user.role_display|default:"Not set" }}</span>
                     <span>|</span>
-                    <span class="badge rounded-pill text-uppercase um-status-badge {% if user.is_active %}um-status-active{% else %}um-status-inactive{% endif %}">
-                        {{ user.is_active|yesno:"ACTIVE,INACTIVE" }}
-                    </span>
+                    {% if not user.is_active and user.has_pending_invitation %}
+                        <span class="badge rounded-pill text-uppercase um-status-badge um-status-pending">
+                            Pending Invitation
+                        </span>
+                    {% elif user.is_active %}
+                        <span class="badge rounded-pill text-uppercase um-status-badge um-status-active">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="badge rounded-pill text-uppercase um-status-badge um-status-inactive">
+                            Inactive
+                        </span>
+                    {% endif %}
                 </p>
             </div>
         </div>

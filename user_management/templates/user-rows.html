@@ -25,7 +25,7 @@
         <td>
             {% if not u.is_active and u.has_pending_invitation %}
                 <span class="badge rounded-pill text-uppercase um-status-badge um-status-pending">
-                    Pending
+                    Pending Invitation
                 </span>
             {% elif u.is_active %}
                 <span class="badge rounded-pill text-uppercase um-status-badge um-status-active">
