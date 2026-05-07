@@ -82,6 +82,22 @@ thead {
     color:#ffffff;
     background-color: #37C1E3;
 }
+.um-status-badge {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.um-status-active {
+    background-color: #28a745 !important;
+    color: #ffffff !important;
+}
+.um-status-inactive {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+}
+.um-status-pending {
+    background-color: #f0ad4e !important;
+    color: #ffffff !important;
+}
 .um-header {
     display: flex;
     align-items: center;

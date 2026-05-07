@@ -83,7 +83,7 @@
                 <p class="mt-2 mb-0 d-flex flex-wrap align-items-center gap-2 text-muted">
                     <span class="fw-semibold text-info">{{ user.role_display|default:"Not set" }}</span>
                     <span>|</span>
-                    <span class="badge rounded-pill text-uppercase {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                    <span class="badge rounded-pill text-uppercase um-status-badge {% if user.is_active %}um-status-active{% else %}um-status-inactive{% endif %}">
                         {{ user.is_active|yesno:"ACTIVE,INACTIVE" }}
                     </span>
                 </p>
