@@ -260,6 +260,24 @@ class CreateOrganisationView(View):
             return org_access_denied()
         form = CreateOrganisationForm(request.POST, request.FILES)
         if form.is_valid():
+            organization_group = None
+            organization_group_id = request.POST.get("organization_group_id")
+            if organization_group_id:
+                organization_group = OrganizationGroup.objects.filter(
+                    id=organization_group_id
+                ).first()
+                if not organization_group:
+                    return JsonResponse(
+                        {
+                            "ok": False,
+                            "errors": {
+                                "organization_group": [
+                                    "Selected organization group was not found."
+                                ]
+                            },
+                        },
+                        status=400,
+                    )
             try:
                 uploaded_icons = OrganizationService.upload_org_icons(
                     org_name=form.cleaned_data.get("name"),
@@ -270,6 +288,8 @@ class CreateOrganisationView(View):
                 return JsonResponse({"ok": False, "error": str(exc)}, status=400)
 
             organisation = form.save(commit=False)
+            if organization_group:
+                organisation.organization_group = organization_group
             if uploaded_icons.get("big_icon"):
                 organisation.big_icon = uploaded_icons["big_icon"].get("url", "")
                 organisation.big_icon_cms_media_id = uploaded_icons["big_icon"].get("id")
@@ -339,6 +359,12 @@ class OrganizationGroupDetailsView(View):
 
         context = OrganizationService.build_organization_group_context(
             organization_group=organization_group,
+        )
+        context.update(
+            {
+                "create_org_form": CreateOrganisationForm(),
+                "organization_group_id": organization_group.id,
+            }
         )
         return render(request, "organization-group-details.html", context)
 

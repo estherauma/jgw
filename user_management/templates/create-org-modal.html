@@ -10,6 +10,9 @@
             <div class="um-modal-divider"></div>
             <form id="{{ action_type }}-org-form" method="post" action="{{ form_action }}" novalidate>
                 {% csrf_token %}
+                {% if organization_group_id %}
+                    <input type="hidden" name="organization_group_id" value="{{ organization_group_id }}">
+                {% endif %}
                 <div class="modal-body">
                     <div class="alert alert-danger d-none" id="{{ action_type }}-org-form-error" role="alert"></div>
                     {% if form.non_field_errors %}
