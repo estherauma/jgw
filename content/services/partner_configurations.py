@@ -108,14 +108,13 @@ def _format_collection_languages_for_cms(site_languages):
 
 def _format_work_sector_for_cms(work_sector_slug):
     if not work_sector_slug:
-        return ""
+        return None
 
     work_sector = WorkSector.objects.filter(slug=work_sector_slug).first()
     if not work_sector:
         return work_sector_slug
 
     return f"{work_sector.slug} ({work_sector.display_name})"
-
 
 def _build_access_code_value_for_cms(organisation):
     organisation_access_codes = OrganisationAccessCode.objects.filter(
@@ -156,7 +155,7 @@ def _get_organisation_site_languages(organisation):
 
 def _build_org_payload_for_cms(organisation):
     site_languages = _get_organisation_site_languages(organisation)
-    return {
+    payload = {
         "name": organisation.name,
         "display_name": organisation.display_name or organisation.name,
         "content_collection": organisation.content_collection,
@@ -165,13 +164,18 @@ def _build_org_payload_for_cms(organisation):
         "work_sector": _format_work_sector_for_cms(organisation.work_sector),
         "big_icon": organisation.big_icon_cms_media_id,
         "small_icon": organisation.small_icon_cms_media_id,
-        "theme": organisation.theme or "blue_and_dark_blue",
+        "theme": organisation.theme or None,
         "default_collection_language": organisation.default_collection_language or "",
         "collection_languages": _format_collection_languages_for_cms(site_languages),
         "default_report_issue_emails": organisation.default_report_issue_emails or "",
         "default_feedback_emails": organisation.default_feedback_emails or "",
         "user_groups": _build_user_groups_payload_for_cms(organisation),
     }
+    if payload["work_sector"] is None:
+        payload.pop("work_sector")
+    if payload["theme"] is None:
+        payload.pop("theme")
+    return payload
 
 
 def _build_existing_sites_lookup(existing_group_config):
