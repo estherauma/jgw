@@ -37,8 +37,19 @@ def _build_media_url(url):
     base_url = (settings.STRAPI_API_BASE_URL or "").removesuffix("/api")
     return urljoin(f"{base_url}/", url.lstrip("/"))
 
-
 def upload_files_to_cms(files):
+    """Upload organization asset files to CMS.
+
+    Args:
+        files (list): File-like objects ready to be posted to the CMS upload API.
+
+    Returns:
+        list[dict]: Uploaded file metadata with `id`, `name`, and resolved `url`.
+
+    Raises:
+        FileUploadError: If CMS configuration is missing, no files are provided,
+            or the upload fails.
+    """
     base_url = settings.STRAPI_API_BASE_URL
     token = settings.STRAPI_API_TOKEN
     if not base_url or not token:
@@ -377,8 +388,20 @@ def execute_partner_configuration_cms_update(*, organisation, url, payload, erro
         )
         raise PartnerConfigurationSyncError(error_message) from exc
 
-
 def update_partner_configuration_in_cms(organisation):
+    """Update the CMS partner configuration for an organization.
+
+    Args:
+        organisation (OrganisationData): The organization whose partner
+            configuration should be synced.
+
+    Returns:
+        dict: The CMS response payload.
+
+    Raises:
+        PartnerConfigurationSyncError: If CMS configuration is missing or the
+            update fails.
+    """
     if organisation.organization_group_id:
         return sync_group_partner_configuration_to_cms(organisation)
 
@@ -402,12 +425,26 @@ def update_partner_configuration_in_cms(organisation):
         error_message="Failed to update partner configuration in CMS.",
     )
 
-
 def update_partner_configuration_work_codes_in_cms(
     organisation,
     *,
     fields_to_update=None,
 ):
+    """Update work-code related CMS fields for an organization.
+
+    Args:
+        organisation (OrganisationData): The organization whose partner
+            configuration fields should be updated.
+        fields_to_update (list[str] | None): Optional subset of fields to patch.
+            Supported values are `access_code` and `user_groups`.
+
+    Returns:
+        dict: The CMS response payload.
+
+    Raises:
+        PartnerConfigurationSyncError: If CMS configuration is missing or the
+            update fails.
+    """
     if organisation.organization_group_id:
         return sync_group_partner_configuration_to_cms(organisation)
 
@@ -437,8 +474,19 @@ def update_partner_configuration_work_codes_in_cms(
         error_message="Failed to update partner configuration work codes in CMS.",
     )
 
-
 def add_partner_configuration_to_cms(organisation):
+    """Create a CMS partner configuration for an organization.
+
+    Args:
+        organisation (OrganisationData): The organization to create in CMS.
+
+    Returns:
+        dict: The CMS response payload.
+
+    Raises:
+        PartnerConfigurationSyncError: If CMS configuration is missing or the
+            create request fails.
+    """
     if organisation.organization_group_id:
         return sync_group_partner_configuration_to_cms(organisation)
 
@@ -550,8 +598,16 @@ def sync_organisation_user_groups(organisation, user_groups):
 
     return synced_count
 
-
 def sync_partner_configuration_item(item):
+    """Sync a single CMS partner-configuration record into local data.
+
+    Args:
+        item (dict): One CMS partner-configuration record.
+
+    Returns:
+        dict: Sync counters including `created`, `updated`,
+        `languages_created`, and `user_groups_synced`.
+    """
     org_code = (item.get("org_code") or "").strip()
     custom_type = (item.get("custom_type") or "").strip()
 
@@ -628,10 +684,11 @@ def sync_partner_configuration_item(item):
         "user_groups_synced": user_groups_synced,
     }
 
-
 def sync_partner_configurations():
-    """
-    Sync Strapi partner configurations into OrganisationData and SiteLanguages.
+    """Sync all CMS partner-configuration records into local data.
+
+    Returns:
+        dict | None: Aggregate sync counters on success, otherwise `None`.
     """
     try:
         items = get_partner_configurations()
@@ -661,13 +718,15 @@ def sync_partner_configurations():
         logger.exception("Unexpected error while syncing partner configurations")
         return None
 
-
 def get_partner_configurations(query_params=None):
-    """
-    Fetch organisation partner configurations from the CMS.
+    """Fetch partner-configuration records from the CMS.
 
-    Returns the parsed JSON response on success, or None on failure.
-    Retries up to 3 times with exponential backoff on connection/timeout errors.
+    Args:
+        query_params (dict | None): Optional query parameters passed to the CMS
+            request.
+
+    Returns:
+        list[dict] | None: The CMS `data` list on success, otherwise `None`.
     """
     base_url = settings.STRAPI_API_BASE_URL
 
@@ -693,8 +752,16 @@ def get_partner_configurations(query_params=None):
         logger.error("Error fetching partner configurations from CMS: %s", exc)
     return None
 
-
 def get_partner_configuration_by_org_code(org_code, publication_state="draft"):
+    """Fetch one CMS partner configuration by its top-level org code.
+
+    Args:
+        org_code (str): Top-level `org_code` value in CMS.
+        publication_state (str): CMS publication state filter.
+
+    Returns:
+        dict | None: The first matching CMS record, otherwise `None`.
+    """
     response = get_partner_configurations(
         query_params={
             "filters[org_code][$eq]": org_code,
@@ -703,15 +770,11 @@ def get_partner_configuration_by_org_code(org_code, publication_state="draft"):
     )
     return response[0] if response else None
 
-
 def get_partner_configuration_options():
-    """
-    Fetch partner configuration options from the CMS.
+    """Fetch partner-configuration option values from the CMS.
 
-    Endpoint:
-      /partner-configurations/options
-
-    Returns the parsed JSON response on success, or None on failure.
+    Returns:
+        dict | None: The parsed CMS options payload, otherwise `None`.
     """
     base_url = settings.STRAPI_API_BASE_URL
 
@@ -739,17 +802,15 @@ def get_partner_configuration_options():
         )
     return None
 
-
 def sync_locales_from_partner_configuration_options(locales=[]):
-    """
-    Upsert locales into content.Locale.
+    """Sync CMS locale options into the local Locale table.
 
-    If `locales` is not provided, options are fetched from
-    /partner-configurations/options and `payload["locales"]` is used.
+    Args:
+        locales (list[dict]): Locale option records from CMS.
 
     Returns:
-        dict: {"created": int, "updated": int, "skipped": int}
-        None: if options payload fetch fails when locales are not passed
+        dict: Counters for `created`, `updated`, and `skipped`, plus `error`
+        when an unexpected failure occurs.
     """
     try:
         created_count = 0
@@ -802,14 +863,15 @@ def _parse_work_sector(item):
 
     return raw_value, raw_value
 
-
 def sync_work_sectors_from_partner_configuration_options(work_sectors=[]):
-    """
-    Upsert work sectors into content.WorkSector.
+    """Sync CMS work-sector options into the local WorkSector table.
 
-    Accepts either a list of strings or a list of objects.
-    Values like `agriculture (Agriculture)` are parsed into
-    slug=`agriculture` and display_name=`Agriculture`.
+    Args:
+        work_sectors (list): Work-sector option values from CMS.
+
+    Returns:
+        dict: Counters for `created`, `updated`, and `skipped`, plus `error`
+        when an unexpected failure occurs.
     """
     try:
         created_count = 0
@@ -847,14 +909,15 @@ def sync_work_sectors_from_partner_configuration_options(work_sectors=[]):
             "error": "An unexpected error occurred during work sector sync. Check logs for details."
         }
         
-
 def sync_collections_from_partner_configuration_options(collections=[]):
-    """
-    Upsert collections into content.Collection.
+    """Sync CMS collection options into the local Collection table.
 
-    Accepts either a list of objects.
-    For object payloads, `apiName` is treated as the
-    stable identifier and `name` as the display value.
+    Args:
+        collections (list[dict]): Collection option records from CMS.
+
+    Returns:
+        dict: Counters for `created`, `updated`, and `skipped`, plus `error`
+        when an unexpected failure occurs.
     """
     try:
         created_count = 0
@@ -897,13 +960,11 @@ def sync_collections_from_partner_configuration_options(collections=[]):
             "error": "An unexpected error occurred during collection sync. Check logs for details."
         }
 
-
 def sync_partner_config_options():
-    """
-    Sync partner configuration options from CMS.
+    """Sync all CMS partner-configuration option sets into local lookup tables.
 
-    Currently syncs locales, work sectors, and collections into content and returns
-    fetch counts + sync summaries.
+    Returns:
+        dict | None: Per-option-set sync summaries on success, otherwise `None`.
     """
     try:
         payload = get_partner_configuration_options()
