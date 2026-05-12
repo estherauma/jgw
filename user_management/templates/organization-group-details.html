@@ -86,12 +86,26 @@
 
             <div class="um-card">
                 <div class="um-card-title um-navy">Attach Existing Organization</div>
-                <div class="mt-3">
-                    <button type="button" class="um-btn um-btn-outline mt-2" disabled aria-disabled="true" title="Attach is temporarily unavailable">
+                {% url 'user_management:attach_organizations_to_group' organization_group_id=organization_group.id as attach_organizations_url %}
+                <form
+                    id="attach-organizations-to-group-form"
+                    class="mt-3"
+                    method="post"
+                    action="{{ attach_organizations_url }}"
+                    novalidate
+                >
+                    {% csrf_token %}
+                    <label class="um-field form-group">
+                        <span>Select organizations</span>
+                        {% include 'components/custom-select.html' with field=attach_organizations_form.organizations multiple=True placeholder='Select organizations' search_placeholder='Search organization...' no_results_text='No organizations found.' %}
+                        <div class="text-danger small" data-error-for="organizations"></div>
+                    </label>
+                    <button type="submit" class="um-btn um-btn-outline mt-3">
                         Attach Selected Organizations
                     </button>
-                    <div class="text-muted mt-2">Attach is temporarily unavailable.</div>
-                </div>
+                    <div class="alert alert-danger d-none mt-3 mb-0" id="attach-organizations-to-group-form-error" role="alert"></div>
+                    <div class="text-muted mt-2">Search and select one or more organizations to attach to this group.</div>
+                </form>
             </div>
         </div>
     </div>

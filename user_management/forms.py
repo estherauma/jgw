@@ -300,6 +300,19 @@ class CreateOrganizationGroupForm(forms.ModelForm):
         return group_code
 
 
+class AttachOrganizationsToGroupForm(forms.Form):
+    organizations = forms.ModelMultipleChoiceField(
+        queryset=OrganisationData.objects.none(),
+        required=True,
+        widget=forms.SelectMultiple(attrs={"class": "form-select um-input"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        organisations_qs = kwargs.pop("organisations_qs", OrganisationData.objects.none())
+        super().__init__(*args, **kwargs)
+        self.fields["organizations"].queryset = organisations_qs.order_by("name")
+
+
 class AddWorkCodeForm(forms.ModelForm):
     WORK_CODE_PATTERN = re.compile(r"^[A-Za-z0-9]+$")
 

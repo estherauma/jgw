@@ -1,11 +1,57 @@
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 
 from content.services.partner_configurations import FileUploadError, upload_files_to_cms
-from preference.models import OrganizationGroup, OrganisationAccessCode, SiteLanguages
+from preference.models import (
+    OrganizationGroup,
+    OrganisationAccessCode,
+    OrganisationData,
+    SiteLanguages,
+)
+from user_management.permissions import is_flag_active
+from user_management.utils import is_org_admin_or_staff, is_super_or_58_admin
 
 
 class OrganizationService:
+    @staticmethod
+    def get_allowed_orgs(user):
+        if user.is_anonymous:
+            return OrganisationData.objects.none()
+        if is_super_or_58_admin(user):
+            return OrganisationData.objects.all()
+        if is_org_admin_or_staff(user):
+            org = user.organisation_data.order_by("name").first()
+            if not org:
+                return OrganisationData.objects.none()
+            return OrganisationData.objects.filter(id=org.id)
+        return OrganisationData.objects.none()
+
+    @staticmethod
+    def has_org_access(user, organisation, request=None, flag_name=None):
+        if not organisation:
+            return False
+        if not OrganizationService.get_allowed_orgs(user).filter(
+            id=organisation.id
+        ).exists():
+            return False
+        if flag_name and request and is_org_admin_or_staff(user):
+            return is_flag_active(request, flag_name, organisation=organisation)
+        return True
+
+    @staticmethod
+    def org_access_denied():
+        return JsonResponse(
+            {"ok": False, "error": "You do not have access to this organisation."},
+            status=403,
+        )
+
+    @staticmethod
+    def get_ungrouped_organizations(user):
+        return OrganizationService.get_allowed_orgs(user).filter(
+            organization_group__isnull=True
+        )
+
     @staticmethod
     def build_organisation_form_payload(*, organisation):
         return {
@@ -108,6 +154,15 @@ class OrganizationService:
             "organization_group": organization_group,
             "organizations": organization_group.organizations.order_by("name"),
         }
+
+    @staticmethod
+    def attach_organizations_to_group(*, organization_group, organizations, user):
+        for organization in organizations:
+            if not isinstance(organization, OrganisationData):
+                continue
+            organization.organization_group = organization_group
+            organization.updated_by = user
+            organization.save(update_fields=["organization_group", "updated_by", "updated_at"])
 
     @staticmethod
     def add_collection_languages(*, organization, languages, user):

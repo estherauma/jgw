@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     AssignWorkCodeView,
     AssignUsersToWorkGroupsView,
+    AttachOrganizationsToGroupView,
     CreateAppUserView,
     CreateDashboardUserView,
     EditDashboardUserView,
@@ -34,6 +35,11 @@ urlpatterns = [
     path('', user_management, name="home"),
     path('organization-groups/create/', CreateOrganizationGroupView.as_view(), name="create_organization_group"),
     path('organization-groups/<int:organization_group_id>/', OrganizationGroupDetailsView.as_view(), name="organization_group_details"),
+    path(
+        'organization-groups/<int:organization_group_id>/attach-organizations/',
+        AttachOrganizationsToGroupView.as_view(),
+        name="attach_organizations_to_group",
+    ),
     path('organisations/create/', CreateOrganisationView.as_view(), name="create_organisation"),
     path('organisations/search/', search_organisations, name="search_organisations"),
     path('organisations/<int:organisation_id>/edit/', EditOrganisationView.as_view(), name="edit_organisation"),
