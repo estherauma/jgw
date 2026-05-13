@@ -37,6 +37,8 @@ from users.models import User, UserInvitations
 from content.services.partner_configurations import (
     add_partner_configuration_to_cms,
     FileUploadError,
+    get_group_partner_configuration_sites_by_code,
+    move_partner_configuration_to_group_in_cms,
     PartnerConfigurationSyncError,
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
@@ -323,27 +325,34 @@ class OrganizationGroupDetailsView(View):
         if not is_super_or_58_admin(request.user):
             return redirect("user_management:home")
 
-        organization_group = OrganizationService.get_organization_group(
-            organization_group_id=organization_group_id,
-        )
-        if not organization_group:
-            return HttpResponseNotFound("Organization group not found.")
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return HttpResponseNotFound("Organization group not found.")
 
-        context = OrganizationService.build_organization_group_context(
-            organization_group=organization_group,
-        )
-        context.update(
-            {
-                "create_org_form": CreateOrganisationForm(),
-                "attach_organizations_form": AttachOrganizationsToGroupForm(
-                    organisations_qs=OrganizationService.get_ungrouped_organizations(
-                        request.user
-                    )
-                ),
-                "organization_group_id": organization_group.id,
-            }
-        )
-        return render(request, "organization-group-details.html", context)
+            group_cms_sites_by_code = get_group_partner_configuration_sites_by_code(
+                organization_group
+            )
+            context = OrganizationService.build_organization_group_context(
+                organization_group=organization_group,
+            )
+            context.update(
+                {
+                    "create_org_form": CreateOrganisationForm(),
+                    "attach_organizations_form": AttachOrganizationsToGroupForm(
+                        organisations_qs=OrganizationService.get_ungrouped_organizations(
+                            request.user
+                        )
+                    ),
+                    "organization_group_id": organization_group.id,
+                    "group_cms_sites_by_code": group_cms_sites_by_code,
+                }
+            )
+            return render(request, "organization-group-details.html", context)
+        except Exception:
+            return HttpResponseNotFound("Organization group not found.")
 
 
 class AttachOrganizationsToGroupView(View):
@@ -381,6 +390,48 @@ class AttachOrganizationsToGroupView(View):
                 {
                     "ok": False,
                     "error": "An error occurred while attaching organizations. Please try again.",
+                },
+                status=500,
+            )
+
+
+class SyncOrganizationGroupPartnerConfigurationView(View):
+    def post(self, request, organization_group_id, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return JsonResponse(
+                    {"ok": False, "error": "Organization group not found."},
+                    status=404,
+                )
+
+            organisation = OrganisationData.objects.filter(
+                id=organisation_id,
+                organization_group_id=organization_group_id,
+            ).first()
+            if not organisation:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "error": "Organization not found in this organization group.",
+                    },
+                    status=404,
+                )
+
+            move_partner_configuration_to_group_in_cms(organisation)
+            return JsonResponse({"ok": True})
+        except PartnerConfigurationSyncError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while syncing the organization group to CMS. Please try again.",
                 },
                 status=500,
             )

@@ -1,3 +1,4 @@
+from datetime import datetime,timezone
 import json
 import logging
 import re
@@ -5,7 +6,7 @@ from urllib.parse import urljoin
 
 import requests
 from django.conf import settings
-from django.db import transaction
+from django.db import models, transaction
 from django.utils import timezone
 
 from common.const.value_const import CMS_SYNC_FAILED, CMS_SYNC_SUCCESS
@@ -148,7 +149,8 @@ def _build_user_groups_payload_for_cms(organisation):
             if access_code.code
         ]
         payload.append(
-            {
+            { 
+                #CMS expects access codes  in this format: "YEL2\nYEL3" , "YEL2"
                 "access_codes": "\n".join(access_codes),
                 "name": work_group.name,
                 "data_platform_ref": str(work_group.id),
@@ -189,12 +191,13 @@ def _build_org_payload_for_cms(organisation):
     return payload
 
 
-def _build_existing_sites_lookup(existing_group_config):
+def _build_existing_sites_lookup(existing_group_config={}):
     if not isinstance(existing_group_config, dict):
         return {}
 
     lookup = {}
-    for site in existing_group_config.get("sites") or []:
+    sites = existing_group_config.get("sites") or  existing_group_config.get('attributes', {}).get('sites') or []
+    for site in sites:
         if not isinstance(site, dict):
             continue
         site_code = (site.get("site_code") or "").strip()
@@ -204,12 +207,18 @@ def _build_existing_sites_lookup(existing_group_config):
 
 
 def _build_group_partner_configuration_payload(
-    organisation, existing_group_config=None
+    organisation, existing_group_config=None, orgs_to_sync_ids=None
 ):
     organization_group = organisation.organization_group
     existing_sites_by_code = _build_existing_sites_lookup(existing_group_config)
-    sites_payload = []
     organizations = organization_group.organizations.order_by("name")
+    if orgs_to_sync_ids:
+        organizations = organizations.filter(
+            models.Q(id__in=orgs_to_sync_ids)
+            | models.Q(org_code__in=existing_sites_by_code.keys())
+        ).distinct()
+
+    sites_payload = []
     for grouped_organisation in organizations:
         site_payload = _build_org_payload_for_cms(grouped_organisation)
         site_payload["site_code"] = grouped_organisation.org_code
@@ -229,12 +238,15 @@ def _build_group_partner_configuration_payload(
     }
 
 
-def build_partner_configuration_payload(organisation, existing_group_config=None):
+def build_partner_configuration_payload(
+    organisation, existing_group_config=None, orgs_to_sync_ids=None
+):
     payload_data = _build_org_payload_for_cms(organisation)
     if organisation.organization_group_id:
         return _build_group_partner_configuration_payload(
             organisation,
             existing_group_config=existing_group_config,
+            orgs_to_sync_ids=orgs_to_sync_ids,
         )
     else:
         payload_data["org_code"] = organisation.org_code
@@ -255,13 +267,41 @@ def _extract_partner_configuration_cms_id(payload):
     return payload.get("id")
 
 
+def _with_rebublish_flag(payload):
+    if not isinstance(payload, dict):
+        return payload
+    updated_payload = dict(payload)
+    updated_payload['data']["force_publish"] = True
+    return updated_payload
+
+
 def get_partner_configuration_by_id(cms_id):
-    response = get_partner_configurations(
-        query_params={
-            "filters[id][$eq]": cms_id,
-        }
-    )
-    return response[0] if response else None
+    """Fetch one CMS partner configuration by its id endpoint."""
+    base_url = settings.STRAPI_API_BASE_URL
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        logger.error(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+        return None
+
+    if not cms_id:
+        return None
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
+    session = get_cms_session()
+    headers = get_cms_headers()
+
+    try:
+        response = session.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        return data.get("data")
+    except requests.exceptions.HTTPError as exc:
+        logger.error("HTTP error fetching partner configuration by id from CMS: %s", exc)
+    except requests.exceptions.RequestException as exc:
+        logger.error("Error fetching partner configuration by id from CMS: %s", exc)
+    return None
 
 
 def _mark_organisation_sync_success(organisation, cms_id=None):
@@ -299,16 +339,22 @@ def _mark_group_sync_failed(organization_group):
 def _get_existing_group_config(organization_group):
     group_config = None
     if organization_group.cms_id:
-        response = get_partner_configurations(
-        query_params={
-            "filters[id][$eq]": organization_group.cms_id,
-        }
-    )
-        group_config = response[0] if response else None
+        group_config = get_partner_configuration_by_id(organization_group.cms_id)
     return group_config
 
 
-def sync_group_partner_configuration_to_cms(organisation):
+def get_group_partner_configuration_sites_by_code(organization_group):
+    if not organization_group.cms_id:
+        return {}
+
+    group_config = get_partner_configuration_by_id(organization_group.cms_id)
+    if group_config is None:
+        return None
+
+    return _build_existing_sites_lookup(group_config)
+
+
+def sync_group_partner_configuration_to_cms(organisation, orgs_to_sync_ids=None):
     organization_group = organisation.organization_group
     if not organization_group:
         raise PartnerConfigurationSyncError(
@@ -325,6 +371,7 @@ def sync_group_partner_configuration_to_cms(organisation):
     payload = build_partner_configuration_payload(
         organisation,
         existing_group_config=existing_group_config,
+        orgs_to_sync_ids=orgs_to_sync_ids,
     )
     headers = get_cms_headers()
 
@@ -332,7 +379,13 @@ def sync_group_partner_configuration_to_cms(organisation):
         if existing_group_config:
             cms_id = existing_group_config.get("id") 
             url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
-            response = requests.put(url, headers=headers, json=payload, timeout=30)
+            print(f"Updating existing group partner configuration in CMS with id={_with_rebublish_flag(payload).get('data', {}).get('sites')}")
+            response = requests.put(
+                url,
+                headers=headers,
+                json=_with_rebublish_flag(payload),
+                timeout=30,
+            )
         else:
             url = f"{base_url.rstrip('/')}/partner-configurations"
             response = requests.post(url, headers=headers, json=payload, timeout=30)
@@ -356,6 +409,50 @@ def sync_group_partner_configuration_to_cms(organisation):
         ) from exc
 
 
+def delete_partner_configuration_from_cms(cms_id):
+    base_url = settings.STRAPI_API_BASE_URL
+
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        raise PartnerConfigurationSyncError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    if not cms_id:
+        return
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
+    try:
+        response = requests.delete(url, headers=get_cms_headers(), timeout=30)
+        response.raise_for_status()
+    except Exception as exc:
+        logger.error(
+            "HTTP error deleting partner configuration from CMS: %s body=%s",
+            exc,
+            exc.response.text if getattr(exc, "response", None) is not None else "",
+        )
+        raise PartnerConfigurationSyncError(
+            "Failed to delete the existing organization partner configuration from CMS."
+        ) from exc
+
+
+def move_partner_configuration_to_group_in_cms(organisation):
+    if not organisation.organization_group_id:
+        raise PartnerConfigurationSyncError(
+            "Organisation is not assigned to an organization group."
+        )
+    sync_response = sync_group_partner_configuration_to_cms(
+        organisation,
+        orgs_to_sync_ids=[organisation.id],
+    )
+
+    if organisation.cms_id:
+        delete_partner_configuration_from_cms(organisation.cms_id)
+        organisation.cms_id = None
+        organisation.save(update_fields=["cms_id"])
+
+    return sync_response
+
+
 def resolve_partner_configuration_cms_id(organisation):
     if organisation.organization_group_id:
         return None
@@ -375,7 +472,12 @@ def resolve_partner_configuration_cms_id(organisation):
 
 def execute_partner_configuration_cms_update(*, organisation, url, payload, error_message):
     try:
-        response = requests.put(url, headers=get_cms_headers(), json=payload, timeout=30)
+        response = requests.put(
+            url,
+            headers=get_cms_headers(),
+            json=_with_rebublish_flag(payload),
+            timeout=30,
+        )
         response.raise_for_status()
         _mark_organisation_sync_success(organisation)
         return response.json()
@@ -664,7 +766,7 @@ def sync_partner_configuration_item(item):
         )
         user_groups_synced = sync_organisation_user_groups(
             organisation=organisation,
-            user_groups=item.get("user_groups") or item.get("departments"),
+            user_groups=item.get("user_groups")
         )
 
         access_codes_raw = (item.get("access_code") or "").strip()

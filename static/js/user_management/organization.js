@@ -38,12 +38,31 @@
     const errorBox = document.getElementById(
       'attach-organizations-to-group-form-error',
     );
+    const organizationsField = form.querySelector('[name="organizations"]');
+    const submitButton = form.querySelector('[data-attach-organizations-submit]');
     initCustomFormSelects(form);
+
+    function syncAttachSubmitState() {
+      if (!organizationsField || !submitButton) {
+        return;
+      }
+      const hasSelectedOrganizations = Array.from(
+        organizationsField.selectedOptions || [],
+      ).some(function (option) {
+        return Boolean(option.value);
+      });
+      submitButton.classList.toggle('d-none', !hasSelectedOrganizations);
+      submitButton.disabled = !hasSelectedOrganizations;
+    }
+
+    if (organizationsField) {
+      organizationsField.addEventListener('change', syncAttachSubmitState);
+    }
+    syncAttachSubmitState();
 
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
       safeClearFormErrors(form, errorBox);
-      const submitButton = form.querySelector("button[type='submit']");
       if (submitButton) {
         submitButton.disabled = true;
       }
@@ -61,6 +80,39 @@
           submitButton.disabled = false;
         }
       }
+    });
+  }
+
+  function initSyncOrganizationGroupCms() {
+    $(document).on('click', '[data-sync-group-cms-btn]', function () {
+      var $btn = $(this);
+      var syncUrl = $btn.data('sync-url');
+      var orgName = $btn.data('org-name') || 'this organization';
+      var groupName = $btn.data('group-name') || 'this organization group';
+
+      if (!syncUrl || !window.showDeleteConfirm) {
+        console.log('Sync URL or confirmation dialog not available. Cannot sync to CMS.');
+        return;
+      }
+
+      window.showDeleteConfirm({
+        url: syncUrl,
+        title: 'Sync to CMS',
+        message:
+          'This will delete the existing Strapi partner configuration for "' +
+          orgName +
+          '" and move it into the "' +
+          groupName +
+          '" organization group partner configuration.',
+        warning:
+          'This action is not reversible. Make sure you want to permanently remove the standalone organization configuration before continuing.',
+        confirmButtonText: 'Sync to CMS',
+        confirmButtonClass: 'um-btn um-btn-blue',
+        showFullScreenLoader: true,
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
     });
   }
 
@@ -891,6 +943,9 @@
   });
   window.addEventListener('load', function () {
     initAttachOrganizationsToGroupForm();
+  });
+  window.addEventListener('load', function () {
+    initSyncOrganizationGroupCms();
   });
   window.addEventListener('load', function () {
     initCreateOrgForm();

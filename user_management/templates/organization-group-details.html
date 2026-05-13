@@ -40,6 +40,7 @@
                                     <th>#</th>
                                     <th>Name</th>
                                     <th>Code</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -55,10 +56,35 @@
                                         </a>
                                     </td>
                                     <td>{{ organization.org_code }}</td>
+                                    <td class="text-end">
+                                        {% if not organization_group.cms_id %}
+                                        <button
+                                            class="um-btn um-btn-pending um-btn-sm"
+                                            type="button"
+                                            data-sync-group-cms-btn
+                                            data-org-name="{{ organization.name }}"
+                                            data-group-name="{{ organization_group.name }}"
+                                            data-sync-url="{% url 'user_management:sync_organization_group_partner_configuration' organization_group_id=organization_group.id organisation_id=organization.id %}"
+                                        >
+                                            Sync to CMS
+                                        </button>
+                                        {% elif group_cms_sites_by_code is not None and organization.org_code not in group_cms_sites_by_code %}
+                                        <button
+                                            class="um-btn um-btn-pending um-btn-sm"
+                                            type="button"
+                                            data-sync-group-cms-btn
+                                            data-org-name="{{ organization.name }}"
+                                            data-group-name="{{ organization_group.name }}"
+                                            data-sync-url="{% url 'user_management:sync_organization_group_partner_configuration' organization_group_id=organization_group.id organisation_id=organization.id %}"
+                                        >
+                                            Sync to CMS
+                                        </button>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="3">No organizations added to this organization group yet.</td>
+                                    <td colspan="4">No organizations added to this organization group yet.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -100,7 +126,11 @@
                         {% include 'components/custom-select.html' with field=attach_organizations_form.organizations multiple=True placeholder='Select organizations' search_placeholder='Search organization...' no_results_text='No organizations found.' %}
                         <div class="text-danger small" data-error-for="organizations"></div>
                     </label>
-                    <button type="submit" class="um-btn um-btn-outline mt-3">
+                    <button
+                        type="submit"
+                        class="um-btn um-btn-lime mt-3 d-none"
+                        data-attach-organizations-submit
+                    >
                         Attach Selected Organizations
                     </button>
                     <div class="alert alert-danger d-none mt-3 mb-0" id="attach-organizations-to-group-form-error" role="alert"></div>
@@ -112,7 +142,8 @@
 </div>
 {% url 'user_management:create_organisation' as create_org_url %}
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form organization_group_id=organization_group_id %}
-<div class="um-fullscreen-loader d-none" data-um-loader>
+{% include 'confirm-modal.html' %}
+<div class="um-fullscreen-loader d-none">
     <div class="um-loader-spinner" role="status" aria-live="polite" aria-label="Loading"></div>
     <span class="um-loader-text">Please wait...</span>
 </div>

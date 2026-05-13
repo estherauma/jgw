@@ -26,6 +26,7 @@ from .views import (
     BulkInviteUsersView,
     CreateOrganizationGroupView,
     OrganizationGroupDetailsView,
+    SyncOrganizationGroupPartnerConfigurationView,
     user_details
 )
 
@@ -39,6 +40,11 @@ urlpatterns = [
         'organization-groups/<int:organization_group_id>/attach-organizations/',
         AttachOrganizationsToGroupView.as_view(),
         name="attach_organizations_to_group",
+    ),
+    path(
+        'organization-groups/<int:organization_group_id>/organisations/<int:organisation_id>/sync-cms/',
+        SyncOrganizationGroupPartnerConfigurationView.as_view(),
+        name="sync_organization_group_partner_configuration",
     ),
     path('organisations/create/', CreateOrganisationView.as_view(), name="create_organisation"),
     path('organisations/search/', search_organisations, name="search_organisations"),
