@@ -209,7 +209,7 @@
                         <div>Big icon CMS media reference: <span class="um-navy" data-org-detail="big_icon_cms_media_id" data-org-default="{{ org_details.big_icon_cms_media_id|default:'-' }}">{{ org_details.big_icon_cms_media_id|default:"-" }}</span></div>
                         <span class="um-navy d-inline-block mt-1" data-org-detail="big_icon_url" data-org-default="{{ org_details.big_icon_url|default:'-' }}">
                             {% if org_details.big_icon_url %}
-                                <img src="{{ org_details.big_icon_url }}" alt="Big icon" class="um-org-detail-icon" />
+                                <img src="{{ org_details.big_icon_url }}" alt="Big icon" class="um-org-detail-icon" referrerpolicy="no-referrer" />
                             {% else %}
                                 -
                             {% endif %}
@@ -219,7 +219,7 @@
                         <div>Small icon CMS media reference: <span class="um-navy" data-org-detail="small_icon_cms_media_id" data-org-default="{{ org_details.small_icon_cms_media_id|default:'-' }}">{{ org_details.small_icon_cms_media_id|default:"-" }}</span></div>
                         <span class="um-navy d-inline-block mt-1" data-org-detail="small_icon_url" data-org-default="{{ org_details.small_icon_url|default:'-' }}">
                             {% if org_details.small_icon_url %}
-                                <img src="{{ org_details.small_icon_url }}" alt="Small icon" class="um-org-detail-icon" />
+                                <img src="{{ org_details.small_icon_url }}" alt="Small icon" class="um-org-detail-icon" referrerpolicy="no-referrer" />
                             {% else %}
                                 -
                             {% endif %}
