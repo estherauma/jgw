@@ -25,6 +25,7 @@ from .views import (
     BulkActivateDeactivateUsersView,
     BulkInviteUsersView,
     CreateOrganizationGroupView,
+    EditOrganizationGroupView,
     OrganizationGroupDetailsView,
     RemoveOrganizationFromGroupView,
     SyncOrganizationGroupPartnerConfigurationView,
@@ -36,6 +37,11 @@ app_name = "user_management"
 urlpatterns = [
     path('', user_management, name="home"),
     path('organization-groups/create/', CreateOrganizationGroupView.as_view(), name="create_organization_group"),
+    path(
+        'organization-groups/<int:organization_group_id>/edit/',
+        EditOrganizationGroupView.as_view(),
+        name="edit_organization_group",
+    ),
     path('organization-groups/<int:organization_group_id>/', OrganizationGroupDetailsView.as_view(), name="organization_group_details"),
     path(
         'organization-groups/<int:organization_group_id>/attach-organizations/',

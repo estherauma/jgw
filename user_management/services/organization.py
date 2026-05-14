@@ -168,6 +168,13 @@ class OrganizationService:
         return organization_group
 
     @staticmethod
+    def edit_organization_group(*, form, user):
+        organization_group = form.save(commit=False)
+        organization_group.updated_by = user
+        organization_group.save()
+        return organization_group
+
+    @staticmethod
     def get_organization_group(*, organization_group_id):
         return (
             OrganizationGroup.objects.prefetch_related("organizations")

@@ -22,13 +22,21 @@
                 <h3 class="mb-1 text-dark">{{ organization_group.name }}</h3>
                 <div class="text-muted">Code: {{ organization_group.group_code }}</div>
             </div>
+            <button
+                class="um-btn um-btn-outline-black"
+                type="button"
+                data-toggle="modal"
+                data-target="#edit-organization-group-modal"
+            >
+                Edit Group
+            </button>
         </div>
     </div>
 
     <div class="row g-3 align-items-start">
         <div class="col-12 col-lg-7">
             <div class="um-card">
-                <div class="um-card-title um-navy">Organizations in This Organization Group</div>
+                <div class="um-card-title um-navy">Group Organizations</div>
                 <div class="um-table-scroll-wrapper mt-3">
                     <div class="um-scrollbar">
                         <div class="um-scrollbar-thumb"></div>
@@ -143,6 +151,8 @@
 </div>
 {% url 'user_management:create_organisation' as create_org_url %}
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form organization_group_id=organization_group_id %}
+{% url 'user_management:edit_organization_group' organization_group_id=organization_group.id as edit_organization_group_url %}
+{% include 'edit-organization-group-modal.html' with modal_title='Edit brand name' submit_label='Save changes' form_action=edit_organization_group_url form=edit_organization_group_form %}
 {% include 'confirm-modal.html' %}
 <div class="um-fullscreen-loader d-none">
     <div class="um-loader-spinner" role="status" aria-live="polite" aria-label="Loading"></div>

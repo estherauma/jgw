@@ -424,6 +424,48 @@ def sync_group_partner_configuration_to_cms(
         ) from exc
 
 
+def edit_organization_group_in_cms(organization_group, fields_to_update=None):
+    if not organization_group.cms_id:
+        return None
+
+    base_url = settings.STRAPI_API_BASE_URL
+    if not base_url or not settings.STRAPI_API_TOKEN:
+        raise PartnerConfigurationSyncError(
+            "STRAPI_API_BASE_URL or STRAPI_API_TOKEN is not configured."
+        )
+
+    url = f"{base_url.rstrip('/')}/partner-configurations/{organization_group.cms_id}"
+    fields_to_update = fields_to_update or ["name", "display_name"]
+    payload_data = {}
+    for field_name in fields_to_update:
+        payload_data[field_name] = getattr(organization_group, field_name)
+
+    payload = {"data": payload_data}
+
+    try:
+        response = requests.put(
+            url,
+            headers=get_cms_headers(),
+            json=_with_rebublish_flag(payload),
+            timeout=30,
+        )
+        response.raise_for_status()
+        response_payload = response.json()
+        cms_id = response_payload.get("data", {}).get("id") or organization_group.cms_id
+        _mark_group_sync_success(organization_group, cms_id=cms_id)
+        return response_payload
+    except Exception as exc:
+        _mark_group_sync_failed(organization_group)
+        logger.error(
+            "HTTP error updating organization group name in CMS: %s body=%s",
+            exc,
+            exc.response.text if getattr(exc, "response", None) is not None else "",
+        )
+        raise PartnerConfigurationSyncError(
+            "Failed to update organization group name in CMS."
+        ) from exc
+
+
 def delete_partner_configuration_from_cms(cms_id):
     base_url = settings.STRAPI_API_BASE_URL
 

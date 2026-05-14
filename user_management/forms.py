@@ -351,6 +351,27 @@ class CreateOrganizationGroupForm(forms.ModelForm):
         return group_code
 
 
+class EditOrganizationGroupForm(forms.ModelForm):
+    class Meta:
+        model = OrganizationGroup
+        fields = ["name"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Brand name"}
+        )
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name", "").strip().title()
+        qs = OrganizationGroup.objects.filter(name__iexact=name)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Organization group name already exists.")
+        return name
+
+
 class AttachOrganizationsToGroupForm(forms.Form):
     organizations = forms.ModelMultipleChoiceField(
         queryset=OrganisationData.objects.none(),

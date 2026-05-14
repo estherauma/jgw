@@ -17,6 +17,7 @@ from .forms import (
     CreateOrganizationGroupForm,
     CreateOrganisationForm,
     DashboardUserForm,
+    EditOrganizationGroupForm,
     OrganisationRoleForm,
     WorkCodeAssignForm,
     WorkGroupForm,
@@ -41,6 +42,7 @@ from content.services.partner_configurations import (
     move_partner_configuration_to_group_in_cms,
     PartnerConfigurationSyncError,
     remove_partner_configuration_from_group_in_cms,
+    edit_organization_group_in_cms,
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
 )
@@ -321,6 +323,51 @@ class CreateOrganizationGroupView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
+class EditOrganizationGroupView(View):
+    def post(self, request, organization_group_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return JsonResponse(
+                    {"ok": False, "error": "Organization group not found."},
+                    status=404,
+                )
+
+            form = EditOrganizationGroupForm(
+                request.POST,
+                instance=organization_group,
+            )
+            if not form.is_valid():
+                return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+            with transaction.atomic():
+                organization_group = OrganizationService.edit_organization_group(
+                    form=form,
+                    user=request.user,
+                )
+                edit_organization_group_in_cms(
+                    organization_group,
+                    fields_to_update=["name"],
+                )
+
+            return JsonResponse({"ok": True})
+        except PartnerConfigurationSyncError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while updating the brand name. Please try again.",
+                },
+                status=500,
+            )
+
+
 class OrganizationGroupDetailsView(View):
     def get(self, request, organization_group_id):
         if not is_super_or_58_admin(request.user):
@@ -342,6 +389,9 @@ class OrganizationGroupDetailsView(View):
             context.update(
                 {
                     "create_org_form": CreateOrganisationForm(),
+                    "edit_organization_group_form": EditOrganizationGroupForm(
+                        instance=organization_group
+                    ),
                     "attach_organizations_form": AttachOrganizationsToGroupForm(
                         organisations_qs=OrganizationService.get_ungrouped_organizations(
                             request.user
