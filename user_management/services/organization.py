@@ -1,6 +1,7 @@
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from django.db.models import Exists, OuterRef
 
 from content.services.partner_configurations import FileUploadError, upload_files_to_cms
 from preference.models import (
@@ -48,8 +49,31 @@ class OrganizationService:
 
     @staticmethod
     def get_ungrouped_organizations(user):
-        return OrganizationService.get_allowed_orgs(user).filter(
-            organization_group__isnull=True
+        access_code_exists = OrganisationAccessCode.objects.filter(
+            organisation_id=OuterRef("pk")
+        ).exclude(code__isnull=True).exclude(code="")
+        collection_language_exists = SiteLanguages.objects.filter(
+            organisation_id=OuterRef("pk")
+        ).exclude(code__isnull=True).exclude(code="")
+
+        return (
+            OrganizationService.get_allowed_orgs(user)
+            .filter(organization_group__isnull=True)
+            .exclude(display_name__isnull=True)
+            .exclude(display_name="")
+            .exclude(content_collection__isnull=True)
+            .exclude(content_collection="")
+            .exclude(default_collection_language__isnull=True)
+            .exclude(default_collection_language="")
+            .exclude(big_icon__isnull=True)
+            .exclude(big_icon="")
+            .exclude(small_icon__isnull=True)
+            .exclude(small_icon="")
+            .annotate(
+                has_access_code=Exists(access_code_exists),
+                has_collection_language=Exists(collection_language_exists),
+            )
+            .filter(has_access_code=True, has_collection_language=True)
         )
 
     @staticmethod

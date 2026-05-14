@@ -347,7 +347,7 @@ class OrganizationGroupDetailsView(View):
                         )
                     ),
                     "organization_group_id": organization_group.id,
-                    "group_cms_sites_by_code": group_cms_sites_by_code,
+                    "group_cms_sites_by_code": group_cms_sites_by_code or {},
                 }
             )
             return render(request, "organization-group-details.html", context)
