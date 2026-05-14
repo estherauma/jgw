@@ -19,6 +19,7 @@
     <div class="um-grid">
         <div>
             {% flag 'can_view_organizations_table' %}
+            {% include "select-org.html" with options=organizations selected=selected_org_name selected_id=selected_org_id %}
             {% if not selected_org_id %}
             <div class="um-card">
                 <div class="um-row">
@@ -30,7 +31,7 @@
                     <button class="um-btn" type="button" data-toggle="modal" data-target="#create-organization-group-modal">Add organization group</button>
                     {% endflag %}
                 </div>
-                <div class="um-table-scroll-wrapper">
+                <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm">
                     <div class="um-scrollbar">
                         <div class="um-scrollbar-thumb"></div>
                     </div>
@@ -86,7 +87,6 @@
                 </div>
             </div>
             {% endif %}
-            {% include "select-org.html" with options=organizations selected=selected_org_name selected_id=selected_org_id %}
             {% endflag %}
 
             {% flag 'can_view_work_codes' %}
