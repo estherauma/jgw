@@ -207,7 +207,10 @@ def _build_existing_sites_lookup(existing_group_config={}):
 
 
 def _build_group_partner_configuration_payload(
-    organisation, existing_group_config=None, orgs_to_sync_ids=None
+    organisation,
+    existing_group_config=None,
+    orgs_to_sync_ids=None,
+    orgs_to_exclude_ids=None,
 ):
     organization_group = organisation.organization_group
     existing_sites_by_code = _build_existing_sites_lookup(existing_group_config)
@@ -217,6 +220,8 @@ def _build_group_partner_configuration_payload(
             models.Q(id__in=orgs_to_sync_ids)
             | models.Q(org_code__in=existing_sites_by_code.keys())
         ).distinct()
+    if orgs_to_exclude_ids:
+        organizations = organizations.exclude(id__in=orgs_to_exclude_ids)
 
     sites_payload = []
     for grouped_organisation in organizations:
@@ -239,7 +244,10 @@ def _build_group_partner_configuration_payload(
 
 
 def build_partner_configuration_payload(
-    organisation, existing_group_config=None, orgs_to_sync_ids=None
+    organisation,
+    existing_group_config=None,
+    orgs_to_sync_ids=None,
+    orgs_to_exclude_ids=None,
 ):
     payload_data = _build_org_payload_for_cms(organisation)
     if organisation.organization_group_id:
@@ -247,6 +255,7 @@ def build_partner_configuration_payload(
             organisation,
             existing_group_config=existing_group_config,
             orgs_to_sync_ids=orgs_to_sync_ids,
+            orgs_to_exclude_ids=orgs_to_exclude_ids,
         )
     else:
         payload_data["org_code"] = organisation.org_code
@@ -354,7 +363,11 @@ def get_group_partner_configuration_sites_by_code(organization_group):
     return _build_existing_sites_lookup(group_config)
 
 
-def sync_group_partner_configuration_to_cms(organisation, orgs_to_sync_ids=None):
+def sync_group_partner_configuration_to_cms(
+    organisation,
+    orgs_to_sync_ids=None,
+    orgs_to_exclude_ids=None,
+):
     organization_group = organisation.organization_group
     if not organization_group:
         raise PartnerConfigurationSyncError(
@@ -372,6 +385,7 @@ def sync_group_partner_configuration_to_cms(organisation, orgs_to_sync_ids=None)
         organisation,
         existing_group_config=existing_group_config,
         orgs_to_sync_ids=orgs_to_sync_ids,
+        orgs_to_exclude_ids=orgs_to_exclude_ids,
     )
     headers = get_cms_headers()
 
@@ -451,6 +465,24 @@ def move_partner_configuration_to_group_in_cms(organisation):
         organisation.save(update_fields=["cms_id"])
 
     return sync_response
+
+
+def remove_partner_configuration_from_group_in_cms(organisation):
+    organization_group = organisation.organization_group
+    if not organization_group:
+        raise PartnerConfigurationSyncError(
+            "Organisation is not assigned to an organization group."
+        )
+
+    if organization_group.cms_id:
+        sync_group_partner_configuration_to_cms(
+            organisation,
+            orgs_to_exclude_ids=[organisation.id],
+        )
+
+    organisation.organization_group = None
+    update_partner_configuration_in_cms(organisation)
+    return organisation
 
 
 def resolve_partner_configuration_cms_id(organisation):

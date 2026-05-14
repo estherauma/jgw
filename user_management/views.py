@@ -40,6 +40,7 @@ from content.services.partner_configurations import (
     get_group_partner_configuration_sites_by_code,
     move_partner_configuration_to_group_in_cms,
     PartnerConfigurationSyncError,
+    remove_partner_configuration_from_group_in_cms,
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
 )
@@ -432,6 +433,52 @@ class SyncOrganizationGroupPartnerConfigurationView(View):
                 {
                     "ok": False,
                     "error": "An error occurred while syncing the organization group to CMS. Please try again.",
+                },
+                status=500,
+            )
+
+
+class RemoveOrganizationFromGroupView(View):
+    def post(self, request, organization_group_id, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return JsonResponse(
+                    {"ok": False, "error": "Organization group not found."},
+                    status=404,
+                )
+
+            organisation = OrganisationData.objects.filter(
+                id=organisation_id,
+                organization_group_id=organization_group_id,
+            ).first()
+            if not organisation:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "error": "Organization not found in this organization group.",
+                    },
+                    status=404,
+                )
+
+            remove_partner_configuration_from_group_in_cms(organisation)
+            OrganizationService.remove_organization_from_group(
+                organization=organisation,
+                user=request.user,
+            )
+            return JsonResponse({"ok": True})
+        except PartnerConfigurationSyncError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while removing the organization from the group. Please try again.",
                 },
                 status=500,
             )

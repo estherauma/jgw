@@ -189,6 +189,12 @@ class OrganizationService:
             organization.save(update_fields=["organization_group", "updated_by", "updated_at"])
 
     @staticmethod
+    def remove_organization_from_group(*, organization, user):
+        organization.organization_group = None
+        organization.updated_by = user
+        organization.save(update_fields=["organization_group", "updated_by", "updated_at"])
+
+    @staticmethod
     def add_collection_languages(*, organization, languages, user):
         selected_codes = {language.code for language in languages}
         existing_languages = {

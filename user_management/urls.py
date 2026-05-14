@@ -26,6 +26,7 @@ from .views import (
     BulkInviteUsersView,
     CreateOrganizationGroupView,
     OrganizationGroupDetailsView,
+    RemoveOrganizationFromGroupView,
     SyncOrganizationGroupPartnerConfigurationView,
     user_details
 )
@@ -45,6 +46,11 @@ urlpatterns = [
         'organization-groups/<int:organization_group_id>/organisations/<int:organisation_id>/sync-cms/',
         SyncOrganizationGroupPartnerConfigurationView.as_view(),
         name="sync_organization_group_partner_configuration",
+    ),
+    path(
+        'organization-groups/<int:organization_group_id>/organisations/<int:organisation_id>/detach/',
+        RemoveOrganizationFromGroupView.as_view(),
+        name="remove_organization_from_group",
     ),
     path('organisations/create/', CreateOrganisationView.as_view(), name="create_organisation"),
     path('organisations/search/', search_organisations, name="search_organisations"),

@@ -118,6 +118,39 @@
     });
   }
 
+  function initRemoveOrganizationFromGroup() {
+    $(document).on('click', '[data-remove-org-group-btn]', function (event) {
+      event.preventDefault();
+      var $btn = $(this);
+      var removeUrl = $btn.data('remove-url');
+      var orgName = $btn.data('org-name') || 'this organization';
+      var groupName = $btn.data('group-name') || 'this organization group';
+
+      if (!removeUrl || !window.showDeleteConfirm) {
+        return;
+      }
+
+      window.showDeleteConfirm({
+        url: removeUrl,
+        title: 'Remove from Group',
+        message:
+          'This will remove "' +
+          orgName +
+          '" from the "' +
+          groupName +
+          '" organization group.',
+        warning:
+          'If a standalone partner configuration does not exist in CMS, one will be created for the removed organization. This action cannot be reversed automatically.',
+        confirmButtonText: 'Remove from group',
+        confirmButtonClass: 'um-btn um-btn-danger',
+        showFullScreenLoader: true,
+        onSuccess: function () {
+          window.location.reload();
+        },
+      });
+    });
+  }
+
   function initCreateOrgForm() {
     var form = document.getElementById('create-org-form');
     if (!form) {
@@ -1055,6 +1088,9 @@
   });
   window.addEventListener('load', function () {
     initSyncOrganizationGroupCms();
+  });
+  window.addEventListener('load', function () {
+    initRemoveOrganizationFromGroup();
   });
   window.addEventListener('load', function () {
     initCreateOrgForm();
