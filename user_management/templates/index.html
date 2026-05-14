@@ -429,8 +429,8 @@
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% include 'add-workcode-modal.html' with action_type='edit' modal_title='Edit work code' submit_label='Save Changes' form=add_work_code_form %}
 {% include 'assign-workcode-modal.html' with action_type='assign' modal_title='Assign work code' submit_label='Assign' form_action=assign_work_code_url form=assign_work_code_form %}
-{% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add department' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
-{% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit department' submit_label='Save changes' form_action='' form=work_group_form %}
+{% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add User Group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
+{% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit User Group' submit_label='Save changes' form_action='' form=work_group_form %}
 {% include 'add-role-modal.html' with action_type='add' modal_title='Add role' submit_label='Save' form_action=create_role_url form=role_form %}
 {% include 'add-role-modal.html' with action_type='edit' modal_title='Edit role' submit_label='Save changes' form_action='' form=role_form %}
 {% url 'user_management:create_dashboard_user' as create_dashboard_user_url %}

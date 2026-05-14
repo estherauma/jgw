@@ -739,36 +739,57 @@ class CreateWorkGroupView(View):
     
 class EditWorkGroupView(View):
     def post(self, request, work_group_id):
-        work_group = WorkGroup.objects.filter(pk=work_group_id).first()
-        if not work_group:
-            return JsonResponse(
-                {"ok": False, "error": "Work group not found."},
-                status=404,
-            )
-        if not OrganizationService.has_org_access(
-            request.user,
-            work_group.organisation,
-            request=request,
-            flag_name="can_edit_workgroup",
-        ):
-            return OrganizationService.org_access_denied()
-        
-        form = WorkGroupForm(request.POST, instance=work_group)
-        if form.is_valid():
-            if WorkGroup.objects.filter(
-                organisation=work_group.organisation,
-                name__iexact=form.cleaned_data["name"]
-            ).exclude(pk=work_group_id).exists():
+        try:
+            work_group = WorkGroup.objects.filter(pk=work_group_id).first()
+            if not work_group:
                 return JsonResponse(
-                    {"ok": False, "errors": {"name": ["Work group already exists."]}},
-                    status=400,
+                    {"ok": False, "error": "Work group not found."},
+                    status=404,
                 )
-            work_group = form.save(commit=False)
-            work_group.updated_by = request.user
-            form.save()
-            return JsonResponse({"ok": True})
+            if not OrganizationService.has_org_access(
+                request.user,
+                work_group.organisation,
+                request=request,
+                flag_name="can_edit_workgroup",
+            ):
+                return OrganizationService.org_access_denied()
+            
+            form = WorkGroupForm(request.POST, instance=work_group)
+            if form.is_valid():
+                if WorkGroup.objects.filter(
+                    organisation=work_group.organisation,
+                    name__iexact=form.cleaned_data["name"]
+                ).exclude(pk=work_group_id).exists():
+                    return JsonResponse(
+                        {"ok": False, "errors": {"name": ["Work group already exists."]}},
+                        status=400,
+                    )
+                work_group = form.save(commit=False)
+                work_group.updated_by = request.user
+                work_group.save()
+                warning_message = None
+                try:
+                    update_partner_configuration_work_codes_in_cms(
+                        work_group.organisation,
+                        fields_to_update=["user_groups"],
+                    )
+                except PartnerConfigurationSyncError as exc:
+                    warning_message = str(exc)
+                    messages.warning(
+                        request,
+                        "User group was updated, but user group sync to CMS failed.",
+                    )
+                return JsonResponse({"ok": True, "warning": warning_message})
 
-        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+            return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while updating the user group. Please try again.",
+                },
+                status=500,
+            )
 
 
 class CreateAppUserView(View):
