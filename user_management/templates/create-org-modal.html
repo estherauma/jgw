@@ -53,6 +53,32 @@
                         </div>
                     </div>
                     <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <div class="form-group mt-3">
+                                <div class="form-check form-switch">
+                                    {{ form.has_custom_content }}
+                                    <label class="form-check-label um-navy" for="{{ form.has_custom_content.id_for_label }}">
+                                        Has custom content
+                                    </label>
+                                </div>
+                                <div class="text-danger small" data-error-for="has_custom_content"></div>
+                                {% if form.has_custom_content.errors %}
+                                    <div class="text-danger small">{{ form.has_custom_content.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="um-field form-group mt-1">
+                                <span>Access code</span>
+                                {{ form.access_code }}
+                                <div class="text-danger small" data-error-for="access_code"></div>
+                                {% if form.access_code.errors %}
+                                    <div class="text-danger small">{{ form.access_code.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <label class="um-field form-group">
                                 <span>Content collection</span>
@@ -87,16 +113,6 @@
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <label class="um-field form-group">
-                                <span>Access code</span>
-                                {{ form.access_code }}
-                                <div class="text-danger small" data-error-for="access_code"></div>
-                                {% if form.access_code.errors %}
-                                    <div class="text-danger small">{{ form.access_code.errors }}</div>
-                                {% endif %}
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label class="um-field form-group">
                                 <span>Big icon</span>
                                 {% include 'components/image-picker.html' with input_id=action_type|add:'-big-icon-file' input_name='big_icon_file' button_label='Choose big icon' helper_text='PNG, JPG, SVG' empty_text='' accept='image/png,image/jpeg,image/svg+xml' %}
                                 <div class="text-danger small" data-error-for="big_icon_file"></div>
@@ -121,9 +137,7 @@
                                 </div>
                             </label>
                         </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <label class="um-field form-group">
                                 <span>Work sector (Optional)</span>
                                 {% include 'components/custom-select.html' with field=form.work_sector placeholder='Select work sector' search_placeholder='Search work sector...' no_results_text='No work sectors found.' %}
@@ -133,7 +147,9 @@
                                 {% endif %}
                             </label>
                         </div>
-                        <div class="col-12 col-md-6">
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
                             <label class="um-field form-group">
                                 <span>Theme (Optional)</span>
                                 {{ form.theme }}
@@ -143,9 +159,7 @@
                                 {% endif %}
                             </label>
                         </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <label class="um-field form-group">
                                 <span>Default report issue emails (Optional)</span>
                                 {{ form.default_report_issue_emails }}
@@ -155,7 +169,7 @@
                                 {% endif %}
                             </label>
                         </div>
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <label class="um-field form-group">
                                 <span>Default feedback emails (Optional)</span>
                                 {{ form.default_feedback_emails }}
@@ -176,20 +190,6 @@
                                     <div class="text-danger small">{{ form.custom_type.errors }}</div>
                                 {% endif %}
                             </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="form-group mt-4">
-                                <div class="form-check form-switch">
-                                    {{ form.has_custom_content }}
-                                    <label class="form-check-label um-navy" for="{{ form.has_custom_content.id_for_label }}">
-                                        Has custom content
-                                    </label>
-                                </div>
-                                <div class="text-danger small" data-error-for="has_custom_content"></div>
-                                {% if form.has_custom_content.errors %}
-                                    <div class="text-danger small">{{ form.has_custom_content.errors }}</div>
-                                {% endif %}
-                            </div>
                         </div>
                     </div>
                 </div>

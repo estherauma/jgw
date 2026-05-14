@@ -126,12 +126,15 @@
     var errorBox = document.getElementById('create-org-form-error');
     initCustomFormSelects(form);
     initIconPickers(form);
+    syncContentCollectionForCustomContent(form);
+    bindCustomContentSync(form);
     syncDefaultCollectionLanguageOptions(form);
     bindCollectionLanguageSync(form);
 
     function resetCreateOrgForm() {
       safeClearFormErrors(form, errorBox);
       form.reset();
+      syncContentCollectionForCustomContent(form);
       syncDefaultCollectionLanguageOptions(form);
       refreshCustomFormSelects(form);
       resetIconPickers(form);
@@ -191,6 +194,8 @@
     const errorBox = document.getElementById('edit-org-form-error');
     initCustomFormSelects(form);
     initIconPickers(form);
+    syncContentCollectionForCustomContent(form);
+    bindCustomContentSync(form);
     syncDefaultCollectionLanguageOptions(form);
     bindCollectionLanguageSync(form);
 
@@ -249,6 +254,7 @@
       setFieldValue('display_name', organisation.display_name);
       setFieldValue('has_custom_content', organisation.has_custom_content);
       setFieldValue('content_collection', organisation.content_collection);
+      syncContentCollectionForCustomContent(form);
       setFieldValue('work_sector', organisation.work_sector);
       setFieldValue('custom_type', organisation.custom_type);
       setFieldValue('theme', organisation.theme);
@@ -472,6 +478,107 @@
     if (defaultLanguageRoot && window.rebuildUmSelect) {
       window.rebuildUmSelect(defaultLanguageRoot);
     }
+  }
+
+  function syncContentCollectionForCustomContent(form) {
+    if (!form) {
+      return;
+    }
+
+    const hasCustomContentField = form.querySelector('[name="has_custom_content"]');
+    const contentCollectionField = form.querySelector('[name="content_collection"]');
+    if (!hasCustomContentField || !contentCollectionField) {
+      return;
+    }
+
+    const genericCollectionValue =
+      contentCollectionField.getAttribute('data-generic-collection-value') || '';
+    const genericCollectionLabel =
+      contentCollectionField.getAttribute('data-generic-collection-label') || '';
+    const contentCollectionRoot = contentCollectionField.closest('[data-um-select]');
+    const currentValue = contentCollectionField.value || '';
+    const allOptions = Array.from(contentCollectionField.options).map(function (option) {
+      return {
+        value: option.value,
+        text: option.text,
+      };
+    });
+
+    if (!contentCollectionField.dataset.allOptions) {
+      contentCollectionField.dataset.allOptions = JSON.stringify(allOptions);
+    }
+
+    const storedOptions = JSON.parse(contentCollectionField.dataset.allOptions || '[]');
+    const hasCustomContent = Boolean(hasCustomContentField.checked);
+    const targetOptions = hasCustomContent
+      ? storedOptions
+      : storedOptions.filter(function (option) {
+          return option.value === genericCollectionValue;
+        });
+
+    contentCollectionField.replaceChildren(
+      ...targetOptions.map(function (option) {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.value;
+        optionElement.text = option.text;
+        optionElement.selected = option.value === currentValue;
+        return optionElement;
+      }),
+    );
+
+    if (!hasCustomContent && genericCollectionValue) {
+      contentCollectionField.value = genericCollectionValue;
+    } else if (
+      hasCustomContent &&
+      Array.from(contentCollectionField.options).some(function (option) {
+        return option.value === currentValue;
+      })
+    ) {
+      contentCollectionField.value = currentValue;
+    } else if (
+      contentCollectionField.value &&
+      !Array.from(contentCollectionField.options).some(function (option) {
+        return option.value === contentCollectionField.value;
+      })
+    ) {
+      contentCollectionField.value = '';
+    }
+
+    if (
+      !hasCustomContent &&
+      genericCollectionValue &&
+      !Array.from(contentCollectionField.options).some(function (option) {
+        return option.value === genericCollectionValue;
+      })
+    ) {
+      const genericOption = document.createElement('option');
+      genericOption.value = genericCollectionValue;
+      genericOption.text = genericCollectionLabel || genericCollectionValue;
+      genericOption.selected = true;
+      contentCollectionField.appendChild(genericOption);
+      contentCollectionField.value = genericCollectionValue;
+    }
+
+    if (contentCollectionRoot && window.rebuildUmSelect) {
+      window.rebuildUmSelect(contentCollectionRoot);
+    }
+  }
+
+  function bindCustomContentSync(form) {
+    if (!form || form.getAttribute('data-custom-content-sync-ready') === 'true') {
+      return;
+    }
+
+    const hasCustomContentField = form.querySelector('[name="has_custom_content"]');
+    if (!hasCustomContentField) {
+      return;
+    }
+
+    form.setAttribute('data-custom-content-sync-ready', 'true');
+    hasCustomContentField.addEventListener('change', function () {
+      syncContentCollectionForCustomContent(form);
+      refreshCustomFormSelects(form);
+    });
   }
 
   function bindCollectionLanguageSync(form) {
