@@ -234,12 +234,32 @@ thead {
     color: #24AACC;
     border: 1px solid #bfe7f7;
 }
+.um-link-pending {
+    color: #f0ad4e !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+.um-link-pending:hover,
+.um-link-pending:focus {
+    color: #d7902c !important;
+    text-decoration: underline;
+}
 /* Modal styles */
 .um-modal-divider {
     height: 0.5px;
     background: #19356080;
     width: 100%;
     margin: 10px 0 0;
+}
+.um-confirm-warning-message {
+    color: #7a4200 !important;
+    background: #fff7ea;
+    border: 1px solid #f5cf88;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-weight: 600;
 }
 .um-modal-title {
     margin: 0;

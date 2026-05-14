@@ -161,6 +161,7 @@
     var messageEl = modal.querySelector('[data-message]');
     if (messageEl) {
       messageEl.innerHTML = options.message || 'Are you sure you want to delete this item?';
+      messageEl.className = 'um-navy' + (options.messageClass ? ' ' + options.messageClass : '');
     }
 
     var warningEl = modal.querySelector('[data-warning]');

@@ -84,7 +84,8 @@
   }
 
   function initSyncOrganizationGroupCms() {
-    $(document).on('click', '[data-sync-group-cms-btn]', function () {
+    $(document).on('click', '[data-sync-group-cms-btn]', function (event) {
+      event.preventDefault();
       var $btn = $(this);
       var syncUrl = $btn.data('sync-url');
       var orgName = $btn.data('org-name') || 'this organization';
@@ -99,15 +100,16 @@
         url: syncUrl,
         title: 'Sync to CMS',
         message:
-          'This will delete the existing Strapi partner configuration for "' +
+          'This will permanently delete the existing Strapi partner configuration for "' +
           orgName +
-          '" and move it into the "' +
+          '" and move it to the "' +
           groupName +
           '" organization group partner configuration.',
         warning:
-          'This action is not reversible. Make sure you want to permanently remove the standalone organization configuration before continuing.',
+          'This action cannot be reversed. Continue only if you are sure.',
         confirmButtonText: 'Sync to CMS',
         confirmButtonClass: 'um-btn um-btn-blue',
+        messageClass: 'um-confirm-warning-message',
         showFullScreenLoader: true,
         onSuccess: function () {
           window.location.reload();

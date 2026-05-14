@@ -56,29 +56,18 @@
                                         </a>
                                     </td>
                                     <td>{{ organization.org_code }}</td>
-                                    <td class="text-end">
-                                        {% if not organization_group.cms_id %}
-                                        <button
-                                            class="um-btn um-btn-pending um-btn-sm"
-                                            type="button"
+                                    <td class="">
+                                        {% if organization.org_code not in group_cms_sites_by_code %}
+                                        <a
+                                            class="um-link-pending"
+                                            href="#"
                                             data-sync-group-cms-btn
                                             data-org-name="{{ organization.name }}"
                                             data-group-name="{{ organization_group.name }}"
                                             data-sync-url="{% url 'user_management:sync_organization_group_partner_configuration' organization_group_id=organization_group.id organisation_id=organization.id %}"
                                         >
                                             Sync to CMS
-                                        </button>
-                                        {% elif group_cms_sites_by_code is not None and organization.org_code not in group_cms_sites_by_code %}
-                                        <button
-                                            class="um-btn um-btn-pending um-btn-sm"
-                                            type="button"
-                                            data-sync-group-cms-btn
-                                            data-org-name="{{ organization.name }}"
-                                            data-group-name="{{ organization_group.name }}"
-                                            data-sync-url="{% url 'user_management:sync_organization_group_partner_configuration' organization_group_id=organization_group.id organisation_id=organization.id %}"
-                                        >
-                                            Sync to CMS
-                                        </button>
+                                        </a>
                                         {% endif %}
                                     </td>
                                 </tr>
