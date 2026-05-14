@@ -89,6 +89,9 @@ class OrganizationService:
                 if access_code
             ),
             "display_name": organisation.display_name,
+            "organization_group": organisation.organization_group.name
+            if organisation.organization_group
+            else "",
             "has_custom_content": organisation.has_custom_content,
             "content_collection": organisation.content_collection,
             "work_sector": organisation.work_sector,
