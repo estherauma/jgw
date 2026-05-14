@@ -12,6 +12,7 @@ from django.utils import timezone
 from common.const.value_const import CMS_SYNC_FAILED, CMS_SYNC_SUCCESS
 from content.models import Collection, Locale, WorkSector
 from preference.models import (
+    OrganizationGroup,
     OrganisationAccessCode,
     OrganisationData,
     SiteLanguages,
@@ -493,7 +494,7 @@ def resolve_partner_configuration_cms_id(organisation):
         return organisation.cms_id
 
     partner_configuration = get_partner_configuration_by_org_code(organisation.org_code)
-    cms_id = partner_configuration.get("id") or partner_configuration.get("documentId") if partner_configuration else None
+    cms_id = partner_configuration.get("id") if partner_configuration else None
     if not cms_id:
         return None
 
@@ -707,6 +708,8 @@ def sync_organisation_user_groups(organisation, user_groups):
     synced_count = 0
     for item in user_groups:
         group_name = (item.get("name") or "").strip()
+        if not group_name:
+            continue
 
         work_group, _ = WorkGroup.all_objects.update_or_create(
             organisation=organisation,
@@ -715,13 +718,21 @@ def sync_organisation_user_groups(organisation, user_groups):
         )
 
         access_codes = item.get("access_codes")
-
-
+        if isinstance(access_codes, str):
+            access_codes = [
+                code.strip() for code in access_codes.splitlines() if code and code.strip()
+            ]
+        elif isinstance(access_codes, list):
+            access_codes = [
+                str(code).strip() for code in access_codes if str(code).strip()
+            ]
+        else:
+            access_codes = []
 
         synced_access_codes = []
         for access_code_value in access_codes:
             access_code, _ = OrganisationAccessCode.objects.update_or_create(
-                code=access_code_value.strip(),
+                code=access_code_value,
                 defaults={"organisation": organisation},
             )
             synced_access_codes.append(access_code)
@@ -732,37 +743,46 @@ def sync_organisation_user_groups(organisation, user_groups):
 
     return synced_count
 
-def sync_partner_configuration_item(item):
-    """Sync a single CMS partner-configuration record into local data.
 
-    Args:
-        item (dict): One CMS partner-configuration record.
+def sync_organisation_partner_configuration_item(*, org_code, defaults, item):
+    organisation, created = OrganisationData.objects.update_or_create(
+        org_code=org_code,
+        defaults=defaults,
+    )
 
-    Returns:
-        dict: Sync counters including `created`, `updated`,
-        `languages_created`, and `user_groups_synced`.
-    """
-    org_code = (item.get("org_code") or "").strip()
-    custom_type = (item.get("custom_type") or "").strip()
+    if created:
+        add_default_org_roles(organisation)
 
-    if custom_type == "organization_group":
-        logger.info(
-            "Skipping organization group partner configuration sync for org_code=%s",
-            org_code or "<missing>",
+    languages_created = sync_organisation_languages(
+        organisation=organisation,
+        collection_languages=item.get("collection_languages"),
+    )
+    user_groups_synced = sync_organisation_user_groups(
+        organisation=organisation,
+        user_groups=item.get("user_groups")
+    )
+
+    access_codes_raw = (item.get("access_code") or "").strip()
+    access_codes = [
+        code.strip() for code in access_codes_raw.split(",") if code and code.strip()
+    ]
+    for code in access_codes:
+        OrganisationAccessCode.objects.update_or_create(
+            code=code,
+            defaults={"organisation": organisation},
         )
-        return {
-            "created": 0,
-            "updated": 0,
-            "languages_created": 0,
-            "user_groups_synced": 0,
-        }
 
-    if not org_code:
-        logger.warning(
-            "Skipping partner configuration with missing org_code: %s",
-            item,
-        )
-        return {"created": 0, "updated": 0, "languages_created": 0}
+    return {
+        "organisation": organisation,
+        "created": created,
+        "languages_created": languages_created,
+        "user_groups_synced": user_groups_synced,
+    }
+
+
+def build_organisation_partner_configuration_defaults(
+    *, item, organization_group=None, cms_id=None
+):
     big_icon = item.get("big_icon")
     small_icon = item.get("small_icon")
 
@@ -770,7 +790,7 @@ def sync_partner_configuration_item(item):
         "name": item.get("name"),
         "display_name": item.get("display_name"),
         "has_custom_content": item.get("has_custom_content", False),
-        "custom_type": item.get("custom_type"),
+        "custom_type": item.get("custom_type") or "version_1",
         "work_sector": item.get("work_sector"),
         "content_collection": item.get("content_collection"),
         "default_collection_language": item.get("default_collection_language"),
@@ -783,39 +803,118 @@ def sync_partner_configuration_item(item):
         "small_icon_cms_media_id": small_icon.get("id") if small_icon else None,
     }
 
+    if organization_group is not None:
+        defaults["organization_group"] = organization_group
+
+    if cms_id is not None:
+        defaults["cms_id"] = cms_id
+
+    return defaults
+
+
+def sync_organization_group_partner_configuration_item(item):
+    group_code = (item.get("org_code") or "").strip()
+    if not group_code:
+        logger.warning(
+            "Skipping organization group partner configuration with missing group code: %s",
+            item,
+        )
+        return {
+            "created": 0,
+            "updated": 0,
+            "languages_created": 0,
+            "user_groups_synced": 0,
+        }
+
+    group_defaults = {
+        "name": item.get("name"),
+        "custom_type": item.get("custom_type"),
+        "cms_id": str(item.get("id")) 
+    }
+
     with transaction.atomic():
-        organisation, created = OrganisationData.objects.update_or_create(
-            org_code=org_code,
-            defaults=defaults,
+        organization_group, group_created = OrganizationGroup.objects.update_or_create(
+            group_code=group_code,
+            defaults=group_defaults,
         )
 
-        if created:
-            add_default_org_roles(organisation)
+        results = {
+            "created": 1 if group_created else 0,
+            "updated": 0 if group_created else 1,
+            "languages_created": 0,
+            "user_groups_synced": 0,
+        }
 
-        languages_created = sync_organisation_languages(
-            organisation=organisation,
-            collection_languages=item.get("collection_languages"),
-        )
-        user_groups_synced = sync_organisation_user_groups(
-            organisation=organisation,
-            user_groups=item.get("user_groups")
-        )
+        for site in item.get("sites") or []:
+            site_code = (site.get("site_code") or "").strip()
+            if not site_code:
+                logger.warning(
+                    "Skipping organization group site with missing site_code: %s",
+                    site,
+                )
+                continue
 
-        access_codes_raw = (item.get("access_code") or "").strip()
-        access_codes = [
-            code.strip() for code in access_codes_raw.split(",") if code and code.strip()
-        ]
-        for code in access_codes:
-            OrganisationAccessCode.objects.update_or_create(
-                code=code,
-                defaults={"organisation": organisation},
+            defaults = build_organisation_partner_configuration_defaults(
+                item=site,
+                organization_group=organization_group,
             )
 
+            sync_result = sync_organisation_partner_configuration_item(
+                org_code=site_code,
+                defaults=defaults,
+                item=site,
+            )
+            results["languages_created"] += sync_result["languages_created"]
+            results["user_groups_synced"] += sync_result["user_groups_synced"]
+
+            if sync_result["created"]:
+                results["created"] += 1
+            else:
+                results["updated"] += 1
+
+        return results
+
+def sync_partner_configuration_item(item):
+    """Sync a single CMS partner-configuration record into local data.
+
+    Args:
+        item (dict): One CMS partner-configuration record.
+
+    Returns:
+        dict: Sync counters including `created`, `updated`,
+        `languages_created`, and `user_groups_synced`.
+    """
+    org_code = (item.get("org_code") or "").strip()
+    custom_type = (item.get("custom_type"
+    ) or "").strip()
+
+    if not org_code:
+        logger.warning(
+            "Skipping partner configuration with missing org_code: %s",
+            item,
+        )
+        return {"created": 0, "updated": 0, "languages_created": 0, "user_groups_synced": 0}
+
+    if custom_type == "organization_group":
+        return sync_organization_group_partner_configuration_item(item)
+
+    defaults = build_organisation_partner_configuration_defaults(
+        item=item,
+        cms_id=item.get("id"),
+    )
+
+    with transaction.atomic():
+        sync_result = sync_organisation_partner_configuration_item(
+            org_code=org_code,
+            defaults=defaults,
+            item=item,
+        )
+
     return {
-        "created": 1 if created else 0,
-        "updated": 0 if created else 1,
-        "languages_created": languages_created,
-        "user_groups_synced": user_groups_synced,
+        "created": 1 if sync_result["created"] else 0,
+        "updated": 0 if sync_result["created"] else 1,
+        "languages_created": sync_result["languages_created"],
+        "user_groups_synced": sync_result["user_groups_synced"],
     }
 
 def sync_partner_configurations():
