@@ -7,6 +7,7 @@
     image.className = 'um-image-picker-thumb';
     image.src = (src || '').trim();
     image.alt = alt;
+    image.referrerPolicy = 'no-referrer';
     image.style.display = 'block';
     item.appendChild(image);
 

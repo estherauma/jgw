@@ -19,8 +19,9 @@
     <div class="um-grid">
         <div>
             {% flag 'can_view_organizations_table' %}
+            {% include "select-org.html" with options=organizations selected=selected_org_name selected_id=selected_org_id %}
             {% if not selected_org_id %}
-            <div class="um-card d-none">
+            <div class="um-card">
                 <div class="um-row">
                     <div class="um-card-title um-navy">
                         <span class="title-icon">🗂️</span>
@@ -30,7 +31,7 @@
                     <button class="um-btn" type="button" data-toggle="modal" data-target="#create-organization-group-modal">Add organization group</button>
                     {% endflag %}
                 </div>
-                <div class="um-table-scroll-wrapper">
+                <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm">
                     <div class="um-scrollbar">
                         <div class="um-scrollbar-thumb"></div>
                     </div>
@@ -86,7 +87,6 @@
                 </div>
             </div>
             {% endif %}
-            {% include "select-org.html" with options=organizations selected=selected_org_name selected_id=selected_org_id %}
             {% endflag %}
 
             {% flag 'can_view_work_codes' %}
@@ -139,6 +139,20 @@
                                             >
                                                 Assign
                                             </button>
+                                            {% if code.work_groups.count %}
+                                            <button
+                                                class="um-btn um-btn-outline-black"
+                                                type="button"
+                                                data-toggle="modal"
+                                                data-target="#unassign-workcode-modal"
+                                                data-workcode-unassign
+                                                data-workcode-id="{{ code.id }}"
+                                                data-workcode-code="{{ code.code }}"
+                                                data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                            >
+                                                Unassign
+                                            </button>
+                                            {% endif %}
                                             {% endflag %}
                                             {% flag 'can_delete_work_code' %}
                                             <button class="um-btn um-btn-outline-black um-navy"
@@ -196,8 +210,10 @@
                 <div class="um-details um-navy">
                     <div>Name: <span class="um-navy" data-org-detail="name" data-org-default="{{ org_details.name }}">{{ org_details.name }}</span></div>
                     <div>Display name: <span class="um-navy" data-org-detail="display_name" data-org-default="{{ org_details.display_name|default:'-' }}">{{ org_details.display_name|default:"-" }}</span></div>
+                    {% if org_details.organization_group %}
+                    <div>Organization group: <span class="um-navy" data-org-detail="organization_group" data-org-default="{{ org_details.organization_group }}">{{ org_details.organization_group }}</span></div>
+                    {% endif %}
                     <div>Organisation code: <span class="um-navy" data-org-detail="code" data-org-default="{{ org_details.code }}">{{ org_details.code }}</span></div>
-                    <div>Access code(s): <span class="um-navy" data-org-detail="access_code" data-org-default="{{ org_details.access_code|default:'-' }}">{{ org_details.access_code|default:"-" }}</span></div>
                     <div>Has custom content: <span class="um-navy" data-org-detail="has_custom_content" data-org-default="{% if org_details.has_custom_content %}Yes{% else %}No{% endif %}">{% if org_details.has_custom_content %}Yes{% else %}No{% endif %}</span></div>
                     <div>Custom type: <span class="um-navy" data-org-detail="custom_type" data-org-default="{{ org_details.custom_type|default:'-' }}">{{ org_details.custom_type|default:"-" }}</span></div>
                     <div>Theme: <span class="um-navy" data-org-detail="theme" data-org-default="{{ org_details.theme|default:'-' }}">{{ org_details.theme|default:"-" }}</span></div>
@@ -209,7 +225,7 @@
                         <div>Big icon CMS media reference: <span class="um-navy" data-org-detail="big_icon_cms_media_id" data-org-default="{{ org_details.big_icon_cms_media_id|default:'-' }}">{{ org_details.big_icon_cms_media_id|default:"-" }}</span></div>
                         <span class="um-navy d-inline-block mt-1" data-org-detail="big_icon_url" data-org-default="{{ org_details.big_icon_url|default:'-' }}">
                             {% if org_details.big_icon_url %}
-                                <img src="{{ org_details.big_icon_url }}" alt="Big icon" class="um-org-detail-icon" />
+                                <img src="{{ org_details.big_icon_url }}" alt="Big icon" class="um-org-detail-icon" referrerpolicy="no-referrer" />
                             {% else %}
                                 -
                             {% endif %}
@@ -219,7 +235,7 @@
                         <div>Small icon CMS media reference: <span class="um-navy" data-org-detail="small_icon_cms_media_id" data-org-default="{{ org_details.small_icon_cms_media_id|default:'-' }}">{{ org_details.small_icon_cms_media_id|default:"-" }}</span></div>
                         <span class="um-navy d-inline-block mt-1" data-org-detail="small_icon_url" data-org-default="{{ org_details.small_icon_url|default:'-' }}">
                             {% if org_details.small_icon_url %}
-                                <img src="{{ org_details.small_icon_url }}" alt="Small icon" class="um-org-detail-icon" />
+                                <img src="{{ org_details.small_icon_url }}" alt="Small icon" class="um-org-detail-icon" referrerpolicy="no-referrer" />
                             {% else %}
                                 -
                             {% endif %}
@@ -407,10 +423,10 @@
         </div>
     </div>
     <!-- full screen loader -->
-    <div class="um-fullscreen-loader d-none" data-um-loader>
-        <div class="um-loader-spinner" role="status" aria-live="polite" aria-label="Loading"></div>
-        <span class="um-loader-text">Please wait...</span>
-    </div>
+<div class="um-fullscreen-loader d-none">
+    <div class="um-loader-spinner" role="status" aria-live="polite" aria-label="Loading"></div>
+    <span class="um-loader-text">Please wait...</span>
+</div>
 </div>
 
 {% url 'user_management:create_work_code' as create_work_code_url %}
@@ -427,8 +443,10 @@
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% include 'add-workcode-modal.html' with action_type='edit' modal_title='Edit work code' submit_label='Save Changes' form=add_work_code_form %}
 {% include 'assign-workcode-modal.html' with action_type='assign' modal_title='Assign work code' submit_label='Assign' form_action=assign_work_code_url form=assign_work_code_form %}
-{% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add department' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
-{% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit department' submit_label='Save changes' form_action='' form=work_group_form %}
+{% url 'user_management:unassign_work_code' as unassign_work_code_url %}
+{% include 'unassign-workcode-modal.html' with modal_title='Unassign work code' submit_label='Save changes' form_action=unassign_work_code_url %}
+{% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add User Group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
+{% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit User Group' submit_label='Save changes' form_action='' form=work_group_form %}
 {% include 'add-role-modal.html' with action_type='add' modal_title='Add role' submit_label='Save' form_action=create_role_url form=role_form %}
 {% include 'add-role-modal.html' with action_type='edit' modal_title='Edit role' submit_label='Save changes' form_action='' form=role_form %}
 {% url 'user_management:create_dashboard_user' as create_dashboard_user_url %}

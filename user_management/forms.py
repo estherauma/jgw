@@ -1,3 +1,4 @@
+import json
 from django import forms
 from django.contrib.auth.models import Group
 import phonenumbers
@@ -28,6 +29,7 @@ from .utils import get_country_code_choices, is_org_admin_or_staff, validate_pho
 
 class CreateOrganisationForm(forms.ModelForm):
     ACCESS_CODE_PATTERN = re.compile(r"^\s*[A-Za-z0-9]+(\s*,\s*[A-Za-z0-9]+)*\s*$")
+    GENERIC_CUSTOM_CONTENT_COLLECTION_NAME = "Custom-Content-Generic"
 
     access_code = forms.CharField(
         required=True,
@@ -87,6 +89,14 @@ class CreateOrganisationForm(forms.ModelForm):
             "big_icon",
             "small_icon",
         ]
+
+    @classmethod
+    def get_generic_custom_content_collection(cls):
+        return Collection.objects.filter(
+            name__iexact=cls.GENERIC_CUSTOM_CONTENT_COLLECTION_NAME
+        ).first() or Collection.objects.filter(
+            api_name__iexact=cls.GENERIC_CUSTOM_CONTENT_COLLECTION_NAME
+        ).first()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -169,6 +179,21 @@ class CreateOrganisationForm(forms.ModelForm):
         self.fields["collection_languages"].widget.attrs.update(
             {"class": "form-select um-input", "size": "5"}
         )
+        generic_collection = self.get_generic_custom_content_collection()
+        if generic_collection:
+            self.fields["content_collection"].widget.attrs.update(
+                {
+                    "data-generic-collection-value": generic_collection.api_name,
+                    "data-generic-collection-label": generic_collection.name,
+                    "data-all-options": json.dumps(
+                        [{"value": "", "text": "Select content collection"}]
+                        + [
+                            {"value": collection.api_name, "text": collection.name}
+                            for collection in collection_qs
+                        ]
+                    ),
+                }
+            )
 
         if self.instance and self.instance.pk:
             access_code = (
@@ -189,6 +214,21 @@ class CreateOrganisationForm(forms.ModelForm):
             )
             if self.instance.default_collection_language:
                 self.fields["default_collection_language"].initial = self.instance.default_collection_language
+
+        has_custom_content_value = None
+        if self.is_bound:
+            posted_value = self.data.get("has_custom_content")
+            has_custom_content_value = posted_value in (True, "true", "True", "on", "1", 1)
+        elif self.instance and self.instance.pk:
+            has_custom_content_value = self.instance.has_custom_content
+        else:
+            has_custom_content_value = self.initial.get("has_custom_content", self.fields["has_custom_content"].initial)
+
+        if has_custom_content_value is False and generic_collection:
+            self.fields["content_collection"].queryset = Collection.objects.filter(
+                pk=generic_collection.pk
+            )
+            self.fields["content_collection"].initial = generic_collection
 
     def clean_name(self):
         name = self.cleaned_data.get("name", "").strip().title()
@@ -252,6 +292,17 @@ class CreateOrganisationForm(forms.ModelForm):
             if isinstance(value, str):
                 cleaned_data[field_name] = value.strip()
 
+        has_custom_content = cleaned_data.get("has_custom_content")
+        generic_collection = self.get_generic_custom_content_collection()
+        if has_custom_content is False:
+            if not generic_collection:
+                self.add_error(
+                    "content_collection",
+                    "Custom content generic collection was not found.",
+                )
+            else:
+                cleaned_data["content_collection"] = generic_collection.api_name
+
         collection_languages = cleaned_data.get("collection_languages") or []
         default_collection_language = cleaned_data.get("default_collection_language")
         selected_language_codes = {language.code for language in collection_languages}
@@ -298,6 +349,40 @@ class CreateOrganizationGroupForm(forms.ModelForm):
         if qs.exists():
             raise forms.ValidationError("Group code already exists.")
         return group_code
+
+
+class EditOrganizationGroupForm(forms.ModelForm):
+    class Meta:
+        model = OrganizationGroup
+        fields = ["name"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Brand name"}
+        )
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name", "").strip().title()
+        qs = OrganizationGroup.objects.filter(name__iexact=name)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Organization group name already exists.")
+        return name
+
+
+class AttachOrganizationsToGroupForm(forms.Form):
+    organizations = forms.ModelMultipleChoiceField(
+        queryset=OrganisationData.objects.none(),
+        required=True,
+        widget=forms.SelectMultiple(attrs={"class": "form-select um-input"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        organisations_qs = kwargs.pop("organisations_qs", OrganisationData.objects.none())
+        super().__init__(*args, **kwargs)
+        self.fields["organizations"].queryset = organisations_qs.order_by("name")
 
 
 class AddWorkCodeForm(forms.ModelForm):

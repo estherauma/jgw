@@ -11,7 +11,11 @@ from common.const.value_const import (
     ORGANISATION_THEME_CHOICES,
 )
 
-
+CMS_SYNC_STATUS_CHOICES = [
+        (CMS_SYNC_PENDING, "Pending"),
+        (CMS_SYNC_SUCCESS, "Success"),
+        (CMS_SYNC_FAILED, "Failed"),
+    ]
 class OriginalSectorOfWork(models.Model):
     language = models.CharField(max_length=10)
     key = models.CharField(max_length=255)
@@ -190,17 +194,22 @@ class ImmigrationStatus(models.Model):
 class OrganizationGroup(AuditFieldsMixin):
     name = models.CharField(max_length=255, unique=True)
     group_code = models.CharField(max_length=50, unique=True)
+    cms_id = models.CharField(max_length=255, null=True, blank=True)
+    last_cms_sync_date = models.DateTimeField(null=True, blank=True)
+    cms_sync_status = models.CharField(
+        max_length=20,
+        choices=CMS_SYNC_STATUS_CHOICES,
+        default=CMS_SYNC_PENDING,
+    )
+    custom_type = models.CharField(max_length=100, default="organization_group")
+
 
     def __str__(self):
         return self.name
 
 
 class OrganisationData(AuditFieldsMixin):
-    CMS_SYNC_STATUS_CHOICES = [
-        (CMS_SYNC_PENDING, "Pending"),
-        (CMS_SYNC_SUCCESS, "Success"),
-        (CMS_SYNC_FAILED, "Failed"),
-    ]
+    
 
     name = models.CharField(max_length=255)
     org_code = models.CharField(max_length=50, unique=True)

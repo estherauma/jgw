@@ -22,13 +22,21 @@
                 <h3 class="mb-1 text-dark">{{ organization_group.name }}</h3>
                 <div class="text-muted">Code: {{ organization_group.group_code }}</div>
             </div>
+            <button
+                class="um-btn um-btn-outline-black"
+                type="button"
+                data-toggle="modal"
+                data-target="#edit-organization-group-modal"
+            >
+                Edit Group
+            </button>
         </div>
     </div>
 
     <div class="row g-3 align-items-start">
         <div class="col-12 col-lg-7">
             <div class="um-card">
-                <div class="um-card-title um-navy">Organizations in This Organization Group</div>
+                <div class="um-card-title um-navy">Group Organizations</div>
                 <div class="um-table-scroll-wrapper mt-3">
                     <div class="um-scrollbar">
                         <div class="um-scrollbar-thumb"></div>
@@ -40,18 +48,52 @@
                                     <th>#</th>
                                     <th>Name</th>
                                     <th>Code</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for organization in organizations %}
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
-                                    <td>{{ organization.name }}</td>
+                                    <td>
+                                        <a
+                                            class="text-info text-decoration-none fw-semibold"
+                                            href="{% url 'user_management:home' %}?selected_org_id={{ organization.id }}"
+                                        >
+                                            {{ organization.name }}
+                                        </a>
+                                    </td>
                                     <td>{{ organization.org_code }}</td>
+                                    <td class="">
+                                        <div class="d-flex justify-content-end gap-3">
+                                        {% if organization.org_code not in group_cms_sites_by_code %}
+                                        <a
+                                            class="um-btn um-btn-outline-pending um-btn-xs text-decoration-none"
+                                            href="#"
+                                            data-sync-group-cms-btn
+                                            data-org-name="{{ organization.name }}"
+                                            data-group-name="{{ organization_group.name }}"
+                                            data-sync-url="{% url 'user_management:sync_organization_group_partner_configuration' organization_group_id=organization_group.id organisation_id=organization.id %}"
+                                        >
+                                            Sync to CMS
+                                        </a>
+                                        {% endif %}
+                                        <a
+                                            class="um-btn um-btn-outline-black um-btn-xs text-decoration-none"
+                                            href="#"
+                                            data-remove-org-group-btn
+                                            data-org-name="{{ organization.name }}"
+                                            data-group-name="{{ organization_group.name }}"
+                                            data-remove-url="{% url 'user_management:remove_organization_from_group' organization_group_id=organization_group.id organisation_id=organization.id %}"
+                                        >
+                                            Remove
+                                        </a>
+                                        </div>
+                                    </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="3">No organizations added to this organization group yet.</td>
+                                    <td colspan="4">No organizations added to this organization group yet.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -65,23 +107,62 @@
             <div class="um-card">
                 <div class="um-row">
                     <div class="um-card-title um-navy">Create New Organization</div>
-                    <button class="um-btn um-btn-lime" type="button" disabled aria-disabled="true" title="Create is temporarily unavailable">
+                    <button
+                        class="um-btn um-btn-lime"
+                        type="button"
+                        data-toggle="modal"
+                        data-target="#create-org-modal"
+                    >
                         Create Organization
                     </button>
                 </div>
-                <div class="text-muted mt-3">Create is temporarily unavailable.</div>
+                <div class="text-muted mt-3">Creates the organization directly inside this group.</div>
             </div>
 
             <div class="um-card">
                 <div class="um-card-title um-navy">Attach Existing Organization</div>
-                <div class="mt-3">
-                    <button type="button" class="um-btn um-btn-outline mt-2" disabled aria-disabled="true" title="Attach is temporarily unavailable">
+                {% url 'user_management:attach_organizations_to_group' organization_group_id=organization_group.id as attach_organizations_url %}
+                <form
+                    id="attach-organizations-to-group-form"
+                    class="mt-3"
+                    method="post"
+                    action="{{ attach_organizations_url }}"
+                    novalidate
+                >
+                    {% csrf_token %}
+                    <label class="um-field form-group">
+                        <span>Select organizations</span>
+                        {% include 'components/custom-select.html' with field=attach_organizations_form.organizations multiple=True placeholder='Select organizations' search_placeholder='Search organization...' no_results_text='No organizations found.' %}
+                        <div class="text-danger small" data-error-for="organizations"></div>
+                    </label>
+                    <button
+                        type="submit"
+                        class="um-btn um-btn-lime mt-3 d-none"
+                        data-attach-organizations-submit
+                    >
                         Attach Selected Organizations
                     </button>
-                    <div class="text-muted mt-2">Attach is temporarily unavailable.</div>
-                </div>
+                    <div class="alert alert-danger d-none mt-3 mb-0" id="attach-organizations-to-group-form-error" role="alert"></div>
+                    <div class="text-muted mt-2">Search and select one or more organizations to attach to this group.</div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+{% url 'user_management:create_organisation' as create_org_url %}
+{% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form organization_group_id=organization_group_id %}
+{% url 'user_management:edit_organization_group' organization_group_id=organization_group.id as edit_organization_group_url %}
+{% include 'edit-organization-group-modal.html' with modal_title='Edit brand name' submit_label='Save changes' form_action=edit_organization_group_url form=edit_organization_group_form %}
+{% include 'confirm-modal.html' %}
+<div class="um-fullscreen-loader d-none">
+    <div class="um-loader-spinner" role="status" aria-live="polite" aria-label="Loading"></div>
+    <span class="um-loader-text">Please wait...</span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/user_management/common.js' %}"></script>
+<script src="{% static 'js/user_management/image-picker.js' %}"></script>
+<script src="{% static 'js/user_management/select-dropdown.js' %}"></script>
+<script src="{% static 'js/user_management/organization.js' %}"></script>
 {% endblock %}
