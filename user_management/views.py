@@ -1174,6 +1174,79 @@ class AssignWorkCodeView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
+class UnassignWorkCodeView(View):
+    def post(self, request):
+        try:
+            org_id = request.POST.get("selected_org_id")
+            work_code_id = request.POST.get("work_code_id")
+            organisation = None
+            if org_id:
+                organisation = OrganisationData.objects.filter(id=org_id).first()
+            if not organisation:
+                return JsonResponse(
+                    {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
+                    status=400,
+                )
+            if not OrganizationService.has_org_access(
+                request.user,
+                organisation,
+                request=request,
+                flag_name="can_assign_work_code",
+            ):
+                return OrganizationService.org_access_denied()
+            if not work_code_id:
+                return JsonResponse(
+                    {"ok": False, "errors": {"work_code_id": ["Select a work code first."]}},
+                    status=400,
+                )
+            work_code = OrganisationAccessCode.objects.filter(
+                id=work_code_id, organisation=organisation
+            ).first()
+            if not work_code:
+                return JsonResponse(
+                    {"ok": False, "errors": {"work_code_id": ["Work code not found."]}},
+                    status=400,
+                )
+
+            assigned_work_groups_qs = work_code.work_groups.order_by("name")
+            form = WorkCodeAssignForm(request.POST, work_groups_qs=assigned_work_groups_qs)
+            if not form.is_valid():
+                return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+            work_groups = form.cleaned_data["work_groups"]
+            work_code.work_groups.set(work_groups)
+
+            warning_message = None
+            try:
+                update_partner_configuration_work_codes_in_cms(
+                    organisation,
+                    fields_to_update=["access_code", "user_groups"],
+                )
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Work code unassignment was saved, but work code sync to CMS failed.",
+                )
+
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "org_id": organisation.id,
+                    "work_code_id": work_code.id,
+                    "warning": warning_message,
+                }
+            )
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while unassigning user groups. Please try again.",
+                },
+                status=500,
+            )
+
+
 class DeleteWorkGroupView(View):
     def post(self, request, work_group_id):
         allowed_orgs = OrganizationService.get_allowed_orgs(request.user)

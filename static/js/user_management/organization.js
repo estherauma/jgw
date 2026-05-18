@@ -1074,6 +1074,260 @@
     });
   }
 
+  function initUnassignWorkCodeForm() {
+    var form = document.getElementById('unassign-workcode-form');
+    if (!form) {
+      return;
+    }
+    var errorBox = document.getElementById('unassign-workcode-form-error');
+    var list = form.querySelector('[data-unassign-workgroup-list]');
+    var emptyState = form.querySelector('[data-unassign-empty-state]');
+    var summary = form.querySelector('[data-unassign-summary]');
+    var submitButton = form.querySelector('[data-unassign-submit]');
+    var initialGroupIds = [];
+
+    function getWorkGroupNameById(groupId) {
+      var input = document.querySelector(
+        '#assign-workcode-form input[name="work_groups"][value="' + groupId + '"]',
+      );
+      if (!input) {
+        return 'User group';
+      }
+      var label = input.closest('label');
+      return label ? label.textContent.trim() : 'User group';
+    }
+
+    function getSelectedGroupIds() {
+      return Array.from(form.querySelectorAll('input[name="work_groups"]')).map(
+        function (input) {
+          return input.value;
+        },
+      );
+    }
+
+    function getRemovedGroupIds() {
+      var remaining = new Set(getSelectedGroupIds());
+      return initialGroupIds.filter(function (groupId) {
+        return !remaining.has(groupId);
+      });
+    }
+
+    function syncSubmitState() {
+      if (!submitButton) {
+        return;
+      }
+      submitButton.disabled = getRemovedGroupIds().length === 0;
+    }
+
+    function syncEmptyState() {
+      if (!emptyState || !list) {
+        return;
+      }
+      emptyState.classList.toggle('d-none', getSelectedGroupIds().length > 0);
+    }
+
+    function syncSummary() {
+      if (!summary) {
+        return;
+      }
+      var removedGroupIds = getRemovedGroupIds();
+      if (!removedGroupIds.length) {
+        summary.classList.add('d-none');
+        summary.textContent = '';
+        return;
+      }
+      var removedGroupNames = removedGroupIds.map(getWorkGroupNameById);
+      summary.classList.remove('d-none');
+      summary.innerHTML =
+        '<strong>Summary:</strong> You are about to unassign ' +
+        removedGroupNames.join(', ') +
+        ' from this work code.';
+    }
+
+    function renderGroupPills(groupIds) {
+      if (!list) {
+        return;
+      }
+      list.innerHTML = '';
+
+      groupIds.forEach(function (groupId) {
+        var hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'work_groups';
+        hiddenInput.value = groupId;
+        form.appendChild(hiddenInput);
+
+        var pill = document.createElement('div');
+        pill.className = 'um-pill';
+        pill.setAttribute('data-group-id', groupId);
+
+        var label = document.createElement('span');
+        label.textContent = getWorkGroupNameById(groupId);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'um-pill-remove';
+        removeBtn.setAttribute('data-unassign-remove', groupId);
+        removeBtn.setAttribute('aria-label', 'Remove user group');
+        removeBtn.textContent = '×';
+
+        pill.appendChild(label);
+        pill.appendChild(removeBtn);
+        list.appendChild(pill);
+      });
+
+      syncEmptyState();
+      syncSummary();
+      syncSubmitState();
+    }
+
+    function resetUnassignForm(codeValue, selectedGroups) {
+      safeClearFormErrors(form, errorBox);
+      Array.from(form.querySelectorAll('input[name="work_groups"]')).forEach(
+        function (input) {
+          input.remove();
+        },
+      );
+      if (window.syncSelectedOrganization) {
+        window.syncSelectedOrganization(
+          'unassign-workcode-form',
+          '[data-unassign-org-label]',
+        );
+      }
+      var codeLabel = form.querySelector('[data-unassign-code-label]');
+      if (codeLabel) {
+        codeLabel.textContent = codeValue;
+      }
+      initialGroupIds = (selectedGroups || []).slice();
+      var confirmError = form.querySelector('[data-error-for="confirmation"]');
+      if (confirmError) {
+        confirmError.textContent = '';
+      }
+      renderGroupPills(selectedGroups || []);
+    }
+
+    if (list) {
+      list.addEventListener('click', function (event) {
+        var removeButton = event.target.closest('[data-unassign-remove]');
+        if (!removeButton) {
+          return;
+        }
+        var groupId = removeButton.getAttribute('data-unassign-remove');
+        var hiddenInput = form.querySelector(
+          'input[name="work_groups"][value="' + groupId + '"]',
+        );
+        var pill = list.querySelector('[data-group-id="' + groupId + '"]');
+        if (hiddenInput) {
+          hiddenInput.remove();
+        }
+        if (pill) {
+          pill.remove();
+        }
+        syncEmptyState();
+        syncSummary();
+        syncSubmitState();
+      });
+    }
+
+    $(document).on('click', '[data-workcode-unassign]', function () {
+      var codeValue = this.getAttribute('data-workcode-code') || '';
+      var codeId = this.getAttribute('data-workcode-id') || '';
+      var groupIds = String(this.getAttribute('data-workcode-groups') || '')
+        .split(',')
+        .map(function (value) {
+          return value.trim();
+        })
+        .filter(Boolean);
+
+      resetUnassignForm(codeValue, groupIds);
+
+      var selectedInput = form.querySelector('[data-selected-org-id]');
+      if (selectedInput && window.getSelectedOrgData) {
+        var selectedOrg = window.getSelectedOrgData();
+        selectedInput.value = selectedOrg && selectedOrg.id ? selectedOrg.id : '';
+      }
+
+      var workCodeInput = form.querySelector('[data-workcode-id]');
+      if (workCodeInput) {
+        workCodeInput.value = codeId;
+      }
+    });
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      safeClearFormErrors(form, errorBox);
+
+      if (window.syncSelectedOrganization) {
+        window.syncSelectedOrganization(
+          'unassign-workcode-form',
+          '[data-unassign-org-label]',
+        );
+      }
+
+      var selectedInput = form.querySelector('[data-selected-org-id]');
+      var selectedId = selectedInput ? selectedInput.value || '' : '';
+      var workCodeInput = form.querySelector('[data-workcode-id]');
+      var workCodeId = workCodeInput ? workCodeInput.value || '' : '';
+      if (!selectedId) {
+        if (errorBox) {
+          errorBox.textContent = 'Select an organisation first.';
+          errorBox.classList.remove('d-none');
+        }
+        return;
+      }
+      if (!workCodeId) {
+        if (errorBox) {
+          errorBox.textContent = 'Select a work code first.';
+          errorBox.classList.remove('d-none');
+        }
+        return;
+      }
+      if (getRemovedGroupIds().length === 0) {
+        var confirmError = form.querySelector('[data-error-for="confirmation"]');
+        if (confirmError) {
+          confirmError.textContent = 'Remove at least one user group before continuing.';
+        }
+        return;
+      }
+
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
+
+      try {
+        var data = null;
+        if (window.postFormJson) {
+          data = await window.postFormJson(form);
+        }
+        if (data && data.org_id && !window.isOrgAdmin) {
+          var homeUrl = window.location.pathname;
+          var target =
+            homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
+          window.location.href = target;
+        } else {
+          window.location.reload();
+        }
+      } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
+        if (window.handleErrors) {
+          window.handleErrors({ form: form, errorBox: errorBox, data: data });
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
+      }
+    });
+  }
+
   function initEditWorkCodeForm() {
     var modal = document.getElementById('edit-workcode-modal');
     if (!modal) return;
@@ -1160,6 +1414,9 @@
   });
   window.addEventListener('load', function () {
     initAssignWorkCodeForm();
+  });
+  window.addEventListener('load', function () {
+    initUnassignWorkCodeForm();
   });
   window.addEventListener('load', function () {
     initEditOrgForm();

@@ -610,6 +610,50 @@ body .modal-backdrop.show {
     background: #fbfdff;
     font-size: 12px;
 }
+.um-pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.um-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid #d9e4f2;
+    border-radius: 999px;
+    background: #fbfdff;
+    font-size: 12px;
+    color: #193560;
+}
+.um-pill-remove {
+    border: none;
+    background: transparent;
+    color: #193560;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+.um-confirm-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    color: #193560;
+}
+.um-confirm-check input {
+    margin-top: 2px;
+}
+.um-unassign-summary {
+    color: #7a4200;
+    background: #fff7ea;
+    border: 1px solid #f5cf88;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+}
 .um-details {
     display: grid;
     grid-template-columns: 1fr 1fr;

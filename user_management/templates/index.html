@@ -139,6 +139,20 @@
                                             >
                                                 Assign
                                             </button>
+                                            {% if code.work_groups.count %}
+                                            <button
+                                                class="um-btn um-btn-outline-black"
+                                                type="button"
+                                                data-toggle="modal"
+                                                data-target="#unassign-workcode-modal"
+                                                data-workcode-unassign
+                                                data-workcode-id="{{ code.id }}"
+                                                data-workcode-code="{{ code.code }}"
+                                                data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                            >
+                                                Unassign
+                                            </button>
+                                            {% endif %}
                                             {% endflag %}
                                             {% flag 'can_delete_work_code' %}
                                             <button class="um-btn um-btn-outline-black um-navy"
@@ -429,6 +443,8 @@
 {% include 'add-workcode-modal.html' with action_type='add' modal_title='Add work code' submit_label='Save' form_action=create_work_code_url form=add_work_code_form %}
 {% include 'add-workcode-modal.html' with action_type='edit' modal_title='Edit work code' submit_label='Save Changes' form=add_work_code_form %}
 {% include 'assign-workcode-modal.html' with action_type='assign' modal_title='Assign work code' submit_label='Assign' form_action=assign_work_code_url form=assign_work_code_form %}
+{% url 'user_management:unassign_work_code' as unassign_work_code_url %}
+{% include 'unassign-workcode-modal.html' with modal_title='Unassign work code' submit_label='Save changes' form_action=unassign_work_code_url %}
 {% include 'add-workgroup-modal.html' with action_type='add' modal_title='Add User Group' submit_label='Save' form_action=create_work_group_url form=work_group_form %}
 {% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit User Group' submit_label='Save changes' form_action='' form=work_group_form %}
 {% include 'add-role-modal.html' with action_type='add' modal_title='Add role' submit_label='Save' form_action=create_role_url form=role_form %}

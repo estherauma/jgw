@@ -29,6 +29,7 @@ from .views import (
     OrganizationGroupDetailsView,
     RemoveOrganizationFromGroupView,
     SyncOrganizationGroupPartnerConfigurationView,
+    UnassignWorkCodeView,
     user_details
 )
 
@@ -63,6 +64,7 @@ urlpatterns = [
     path('organisations/<int:organisation_id>/edit/', EditOrganisationView.as_view(), name="edit_organisation"),
     path('work-codes/create/', CreateWorkCodeView.as_view(), name="create_work_code"),
     path('work-codes/assign/', AssignWorkCodeView.as_view(), name="assign_work_code"),
+    path('work-codes/unassign/', UnassignWorkCodeView.as_view(), name="unassign_work_code"),
     path('work-groups/assign-users/', AssignUsersToWorkGroupsView.as_view(), name="assign_users_work_groups"),
     path('work-groups/create/', CreateWorkGroupView.as_view(), name="create_work_group"),
     path('app-users/create/', CreateAppUserView.as_view(), name="create_app_user"),
