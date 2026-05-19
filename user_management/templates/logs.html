@@ -8,6 +8,7 @@
 
 {% block styles %}
 @import url("{% static 'user_management/css/common.css' %}");
+@import url("https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css");
 {% endblock %}
 
 {% block content %}
@@ -22,48 +23,35 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-        <div class="um-logs-subheader">
-            <span class="um-navy">Log Level</span>
-            <span class="um-navy">Timestamp</span>
-            <span class="um-navy">Log Message</span>
-        </div>
-        <div class="um-logs-body" data-logs-body>
-            {% for activity in page_obj %}
-            <div class="um-log-row">
-                <div class="um-log-level">
-                    <span class="um-log-icon um-log-icon-{{ activity.log_level }}">◆</span>
-                    <span class="um-log-level-text um-log-level-{{ activity.log_level }}">{{ activity.get_log_level_display }}</span>
-                </div>
-                <div class="um-log-timestamp">{{ activity.timestamp|date:"Y-m-d H:i:s" }}</div>
-                <div class="um-log-message">{{ activity.message }}</div>
-            </div>
-            {% empty %}
-            <div class="um-log-row um-log-empty">
-                <div class="um-navy" style="grid-column: 1 / -1; text-align: center; padding: 24px;">No activity logs found.</div>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="um-logs-footer">
-            <span class="um-logs-count um-navy" data-logs-count>
-                {{ page_obj.start_index|default:0 }}-{{ page_obj.end_index|default:0 }} of {{ total }} row(s) shown.
-            </span>
-            <div class="um-logs-pagination" data-logs-pagination>
-                <button class="um-page-btn" data-page-prev {% if not page_obj.has_previous %}disabled{% endif %}>Previous</button>
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                    <button class="um-page-btn um-page-btn-active" data-page="{{ num }}">{{ num }}</button>
-                    {% elif num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
-                    <button class="um-page-btn" data-page="{{ num }}">{{ num }}</button>
-                    {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
-                    <span class="um-page-ellipsis">...</span>
-                    {% endif %}
-                {% endfor %}
-                <button class="um-page-btn" data-page-next {% if not page_obj.has_next %}disabled{% endif %}>Next</button>
-            </div>
+        <div class="p-4">
+            <table id="um-logs-table" class="table table-striped w-100">
+                <thead>
+                    <tr>
+                        <th>Log Level</th>
+                        <th>Timestamp</th>
+                        <th>Log Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                    <tr>
+                        <td>
+                            <div class="um-log-level">
+                                <span class="um-log-icon um-log-icon-{{ activity.log_level }}">◆</span>
+                                <span class="um-log-level-text um-log-level-{{ activity.log_level }}">{{ activity.get_log_level_display }}</span>
+                            </div>
+                        </td>
+                        <td class="um-log-timestamp">{{ activity.timestamp|date:"Y-m-d H:i:s" }}</td>
+                        <td class="um-log-message">{{ activity.message }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'js/user_management/logs.js' %}"></script>
 {% endblock %}

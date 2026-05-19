@@ -2,7 +2,6 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator
 from django.db import transaction, IntegrityError
 from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
 from django.shortcuts import render, redirect
@@ -1803,7 +1802,7 @@ def user_activity_list(request):
     thirty_days_ago = timezone.now() - timedelta(days=30)
     activities = UserActivity.objects.select_related(
         "user", "organisation"
-    ).filter(timestamp__gte=thirty_days_ago)
+    ).filter(timestamp__gte=thirty_days_ago).order_by("-timestamp")
 
     if is_super_user(user):
         pass  # super admin sees all
@@ -1817,36 +1816,11 @@ def user_activity_list(request):
     else:
         activities = activities.none()
 
-    paginator = Paginator(activities, 10)
-    page_number = request.GET.get("page", 1)
-    page_obj = paginator.get_page(page_number)
-
-    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        rows = [
-            {
-                "log_level": activity.get_log_level_display(),
-                "log_level_key": activity.log_level,
-                "timestamp": activity.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-                "message": activity.message,
-            }
-            for activity in page_obj
-        ]
-        return JsonResponse(
-            {
-                "ok": True,
-                "rows": rows,
-                "page": page_obj.number,
-                "num_pages": paginator.num_pages,
-                "total": paginator.count,
-            }
-        )
-
     return render(
         request,
         "logs.html",
         {
-            "page_obj": page_obj,
-            "total": paginator.count,
+            "activities": activities,
         },
     )
 
