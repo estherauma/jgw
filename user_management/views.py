@@ -32,6 +32,7 @@ from .models import (
     ShortLink,
 )
 from .roles import add_default_org_roles, apply_role_to_user
+from .services.activity import UserActivityService
 from .services.organization import OrganizationService
 from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
 from users.models import User, UserInvitations
@@ -290,6 +291,11 @@ class CreateOrganisationView(View):
                 user=request.user,
             )
             add_default_org_roles(organisation)
+            UserActivityService.log_organisation_created(
+                actor=request.user,
+                organisation=organisation,
+                after_snapshot=UserActivityService.organisation_snapshot(organisation),
+            )
             warning_message = None
             
             try:
@@ -638,6 +644,7 @@ class EditOrganisationView(View):
                 {"ok": False, "error": "Organisation not found."},
                 status=404,
             )
+        before_snapshot = UserActivityService.organisation_snapshot(organisation)
         form = CreateOrganisationForm(request.POST, request.FILES, instance=organisation)
         if form.is_valid():
             try:
@@ -677,6 +684,13 @@ class EditOrganisationView(View):
                 organization=organisation,
                 languages=form.cleaned_data.get("collection_languages", []),
                 user=request.user,
+            )
+            after_snapshot = UserActivityService.organisation_snapshot(organisation)
+            UserActivityService.log_organisation_updated(
+                actor=request.user,
+                organisation=organisation,
+                before_snapshot=before_snapshot,
+                after_snapshot=after_snapshot,
             )
             warning_message = None
 

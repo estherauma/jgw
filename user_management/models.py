@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 import secrets
@@ -120,3 +121,33 @@ class ShortLink(models.Model):
                     expires_at=expires_at,
                 )
         raise ValueError("Unable to generate unique short link code.")
+    
+class UserActivity(models.Model):
+    class Action(models.TextChoices):
+        CREATED = "created", "Created"
+        UPDATED = "updated", "Updated"
+        DELETED = "deleted", "Deleted"
+        ASSIGNED = "assigned", "Assigned"
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="activity_logs"
+    )
+    action = models.CharField(max_length=32, choices=Action.choices)
+    record_type = models.CharField(max_length=100)
+    record_id = models.CharField(max_length=100)
+    organisation = models.ForeignKey(
+        OrganisationData, on_delete=models.SET_NULL, null=True, blank=True, related_name="activity_logs"
+    )
+    summary = models.TextField()
+    changes = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("User activity entries are immutable and cannot be updated.")
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("User activity entries are immutable and cannot be deleted.")
