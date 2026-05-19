@@ -5,6 +5,7 @@ from .models import (
     OrganisationRoleAssignment,
     OrganisationRolePermission,
     ShortLink,
+    UserActivity,
     WorkGroup,
 )
 
@@ -34,6 +35,15 @@ class OrganisationRoleAssignmentAdmin(admin.ModelAdmin):
     list_display = ("user", "organisation", "role")
     list_select_related = ("user", "organisation", "role")
     search_fields = ("user__email", "organisation__name", "role__name")
+
+
+@admin.register(UserActivity)
+class UserActivityAdmin(admin.ModelAdmin):
+    list_display = ("user", "log_level", "message", "timestamp")
+    list_filter = ("log_level", "timestamp")
+    list_select_related = ("user", "organisation")
+    search_fields = ("user__email", "message")
+    readonly_fields = ("timestamp",)
 
 
 @admin.register(ShortLink)

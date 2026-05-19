@@ -99,6 +99,45 @@ class OrganisationRoleAssignment(models.Model):
         ]
 
 
+LOG_LEVEL_CHOICES = [
+    ("info", "Info"),
+    ("warning", "Warning"),
+    ("error", "Error"),
+]
+
+
+class UserActivity(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="activities",
+    )
+    organisation = models.ForeignKey(
+        OrganisationData,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="activities",
+    )
+    log_level = models.CharField(
+        max_length=10,
+        choices=LOG_LEVEL_CHOICES,
+        default="info",
+    )
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-timestamp",)
+        indexes = [
+            models.Index(fields=["-timestamp"]),
+            models.Index(fields=["user"]),
+        ]
+
+    def __str__(self):
+        return f"[{self.get_log_level_display()}] {self.user} - {self.message[:50]}"
+
+
 class ShortLink(models.Model):
     code = models.CharField(max_length=16, unique=True)
     target_url = models.URLField(max_length=2048)

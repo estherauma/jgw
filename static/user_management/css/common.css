@@ -856,3 +856,147 @@ body .modal-backdrop.show {
     font-size: 1.2rem;
     font-weight: bold;
 }
+
+/* Activity Logs */
+.um-logs-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(25, 45, 85, 0.08);
+    border: 1px solid #e3ebf5;
+    max-width: 960px;
+    margin: 0 auto;
+}
+.um-logs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px 12px;
+}
+.um-logs-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+.um-logs-close {
+    font-size: 22px;
+    color: #193560;
+    opacity: 0.5;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.um-logs-subheader {
+    display: grid;
+    grid-template-columns: 140px 200px 1fr;
+    gap: 12px;
+    padding: 10px 24px;
+    background: #CBD3DF;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.um-logs-body {
+    min-height: 100px;
+}
+.um-log-row {
+    display: grid;
+    grid-template-columns: 140px 200px 1fr;
+    gap: 12px;
+    padding: 12px 24px;
+    border-bottom: 1px solid #e6eef8;
+    font-size: 13px;
+    align-items: center;
+}
+.um-log-row:last-child {
+    border-bottom: none;
+}
+.um-log-level {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.um-log-icon {
+    font-size: 14px;
+}
+.um-log-icon-info {
+    color: #3b82f6;
+}
+.um-log-icon-warning {
+    color: #f59e0b;
+}
+.um-log-icon-error {
+    color: #ef4444;
+}
+.um-log-level-info {
+    color: #3b82f6;
+    font-weight: 600;
+}
+.um-log-level-warning {
+    color: #f59e0b;
+    font-weight: 600;
+}
+.um-log-level-error {
+    color: #ef4444;
+    font-weight: 600;
+}
+.um-log-timestamp {
+    color: #47566e;
+}
+.um-log-message {
+    color: #47566e;
+}
+.um-logs-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-top: 1px solid #e6eef8;
+    font-size: 12px;
+}
+.um-logs-count {
+    font-size: 12px;
+}
+.um-logs-pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.um-page-btn {
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid #d9e4f2;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #193560;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 10px;
+}
+.um-page-btn:hover:not(:disabled) {
+    background: #f0f6ff;
+}
+.um-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.um-page-btn-active {
+    background: #e87722;
+    color: #ffffff;
+    border-color: #e87722;
+}
+.um-page-btn-active:hover {
+    background: #d56a1a;
+}
+.um-page-ellipsis {
+    padding: 0 4px;
+    color: #6a7c96;
+}
+@media (max-width: 768px) {
+    .um-logs-subheader,
+    .um-log-row {
+        grid-template-columns: 100px 160px 1fr;
+        gap: 8px;
+        padding: 10px 16px;
+    }
+}

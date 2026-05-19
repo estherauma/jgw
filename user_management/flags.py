@@ -149,5 +149,9 @@ UM_FLAG_DEFS = [
         "label": "Delete users",
         "condition": "org_admin",
     },
-
+    {
+        "name": "can_view_activity_logs",
+        "label": "View activity logs",
+        "condition": "org_admin",
+    },
 ]

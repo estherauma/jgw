@@ -1,10 +1,14 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db import transaction, IntegrityError
 from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.views import View
 import phonenumbers
 import json
@@ -28,12 +32,13 @@ from .decorators import group_required
 from .models import (
     OrganisationRole,
     OrganisationRoleAssignment,
+    UserActivity,
     WorkGroup,
     ShortLink,
 )
 from .roles import add_default_org_roles, apply_role_to_user
 from .services.organization import OrganizationService
-from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
+from .utils import is_58_admin, is_org_admin_or_staff, is_org_staff, is_super_or_58_admin, is_super_user, is_org_admin
 from users.models import User, UserInvitations
 from content.services.partner_configurations import (
     add_partner_configuration_to_cms,
@@ -1792,6 +1797,60 @@ class BulkInviteUsersView(View):
                 {"ok": False, "error": "An error occurred while sending invitations. Please try again."},
                 status=500,
             )
+@group_required("user_management")
+def user_activity_list(request):
+    user = request.user
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    activities = UserActivity.objects.select_related(
+        "user", "organisation"
+    ).filter(timestamp__gte=thirty_days_ago)
+
+    if is_super_user(user):
+        pass  # super admin sees all
+    elif is_58_admin(user):
+        activities = activities.exclude(user__is_superuser=True)
+    elif is_org_admin(user):
+        user_orgs = user.organisation_data.all()
+        activities = activities.filter(organisation__in=user_orgs)
+    elif is_org_staff(user):
+        activities = activities.filter(user=user)
+    else:
+        activities = activities.none()
+
+    paginator = Paginator(activities, 10)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        rows = [
+            {
+                "log_level": activity.get_log_level_display(),
+                "log_level_key": activity.log_level,
+                "timestamp": activity.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                "message": activity.message,
+            }
+            for activity in page_obj
+        ]
+        return JsonResponse(
+            {
+                "ok": True,
+                "rows": rows,
+                "page": page_obj.number,
+                "num_pages": paginator.num_pages,
+                "total": paginator.count,
+            }
+        )
+
+    return render(
+        request,
+        "logs.html",
+        {
+            "page_obj": page_obj,
+            "total": paginator.count,
+        },
+    )
+
+
 @group_required("user_management")           
 def user_details(request, user_id):
     user = User.objects.prefetch_related(
