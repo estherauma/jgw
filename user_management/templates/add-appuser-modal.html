@@ -15,7 +15,7 @@
                     {{ form.non_field_errors }}
                 </div>
              {% endif %}
-            <form id="{{ action_type }}-appuser-form" method="post" action="{{ form_action }}">
+            <form id="{{ action_type }}-appuser-form" method="post" action="{{ form_action }}" novalidate>
                 {% csrf_token %}
                 <div class="modal-body um-modal-grid">
                     <input
@@ -40,7 +40,7 @@
                     {% endif %}
                     <label class="um-field form-group um-field-full">
                         <span>Role</span>
-                        {{ form.role }}
+                        {% include 'components/custom-select.html' with field=form.role placeholder='Select role' search_placeholder='Search roles...' no_results_text='No roles found.' %}
                         <small class="um-helper">Workers will not have access to the dashboard.</small>
                         <div class="text-danger small" data-error-for="role"></div>
                         {% if form.role.errors %}
@@ -60,7 +60,7 @@
                         <span>Phone number (optional)</span>
                         <div class="phone-field align-items-center">
                             <div class="w-25 phone-code">
-                                {{ form.phone_country_iso }}
+                                {% include 'components/custom-select.html' with field=form.phone_country_iso placeholder='Code' search_placeholder='Search code...' no_results_text='No country codes found.' %}
                                 <div class="text-danger small" data-error-for="phone_country_iso"></div>
                                 {% if form.phone_country_iso.errors %}
                                     <div class="text-danger small">{{ form.phone_country_iso.errors }}</div>
@@ -93,12 +93,8 @@
                     </label>
                     <div class="um-field form-group">
                         <span>User groups (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll" data-work-groups-container>
-                            {% if form.work_groups and form.work_groups.field.queryset %}
-                                {{ form.work_groups }}
-                            {% else %}
-                                <p>No user groups available.</p>
-                            {% endif %}
+                        <div data-work-groups-container>
+                            {% include 'components/custom-select.html' with field=form.work_groups multiple=True placeholder='Select user groups' search_placeholder='Search user groups...' no_results_text='No user groups available.' %}
                         </div>
                         <div class="text-danger small" data-error-for="work_groups"></div>
                         {% if form.work_groups.errors %}

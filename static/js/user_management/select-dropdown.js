@@ -48,11 +48,17 @@
         (candidate) => candidate.value === optionValue,
       );
       const isSelected = !!option?.selected;
+      const isDisabled = !!option?.disabled;
 
       item.classList.toggle('is-selected', isSelected);
+      item.classList.toggle('is-disabled', isDisabled);
       const checkbox = item.querySelector('[data-um-select-checkbox]');
       if (checkbox) {
         checkbox.checked = isSelected;
+        checkbox.disabled = isDisabled;
+      }
+      if (item.tagName === 'BUTTON') {
+        item.disabled = isDisabled;
       }
     });
 
@@ -109,10 +115,12 @@
 
     Array.from(field.options).forEach((option, index) => {
       const item = document.createElement(isMultiple ? 'div' : 'button');
+      const isDisabled = !!option.disabled;
       item.className = 'um-select-option';
       item.setAttribute('data-um-select-option', '');
       item.setAttribute('data-um-select-value', option.value);
       item.setAttribute('data-um-select-search-text', option.text.toLowerCase());
+      item.classList.toggle('is-disabled', isDisabled);
       if (!isMultiple && option.value === '') {
         item.setAttribute('data-um-select-placeholder-option', 'true');
       }
@@ -126,6 +134,7 @@
         checkbox.id = `${field.id}-option-${index}`;
         checkbox.setAttribute('data-um-select-checkbox', '');
         checkbox.checked = option.selected;
+        checkbox.disabled = isDisabled;
         checkbox.addEventListener('click', (event) => {
           event.stopPropagation();
         });
@@ -136,6 +145,10 @@
         });
         item.addEventListener('click', (event) => {
           event.stopPropagation();
+
+          if (checkbox.disabled) {
+            return;
+          }
 
           if (event.target === checkbox) {
             return;
@@ -151,7 +164,11 @@
         item.appendChild(checkbox);
       } else {
         item.type = 'button';
+        item.disabled = isDisabled;
         item.addEventListener('click', () => {
+          if (item.disabled) {
+            return;
+          }
           Array.from(field.options).forEach((candidate) => {
             candidate.selected = candidate.value === option.value;
           });

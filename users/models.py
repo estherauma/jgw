@@ -67,6 +67,13 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
     factories = models.ManyToManyField(FactoryFarm, blank=True)
     organisations = models.ManyToManyField(Organisation, blank=True)
     organisation_data = models.ManyToManyField(OrganisationData, blank=True)
+    organization_group = models.ForeignKey(
+        "preference.OrganizationGroup",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users",
+    )
     work_groups = models.ManyToManyField("user_management.WorkGroup", blank=True, related_name="users")
     destinations = models.ManyToManyField(Country, blank=True)
     user_languages = models.ManyToManyField(Language, blank=True)

@@ -5,6 +5,7 @@ from preference.models import Country, FactoryFarm, Language, OrganisationData
 ALL_GROUPS = [
     "58_admin",
     "org_admin",
+    "org_group_admin",
     "org_staff",
     "user_management",
     "worker",

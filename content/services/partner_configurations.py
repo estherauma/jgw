@@ -394,16 +394,15 @@ def sync_group_partner_configuration_to_cms(
         if existing_group_config:
             cms_id = existing_group_config.get("id") 
             url = f"{base_url.rstrip('/')}/partner-configurations/{cms_id}"
-            print(f"Updating existing group partner configuration in CMS with id={_with_rebublish_flag(payload).get('data', {}).get('sites')}")
             response = requests.put(
                 url,
                 headers=headers,
                 json=_with_rebublish_flag(payload),
-                timeout=30,
+                timeout=60,
             )
         else:
             url = f"{base_url.rstrip('/')}/partner-configurations"
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            response = requests.post(url, headers=headers, json=payload, timeout=60)
 
         response.raise_for_status()
         response_payload = response.json()
@@ -412,6 +411,8 @@ def sync_group_partner_configuration_to_cms(
         _mark_group_sync_success(organization_group, cms_id=cms_id)
         return response_payload
     except Exception as exc:
+        print(f"payload: {_with_rebublish_flag(payload)}")
+
         _mark_organisation_sync_failed(organisation)
         _mark_group_sync_failed(organization_group)
         logger.error(
@@ -481,6 +482,22 @@ def delete_partner_configuration_from_cms(cms_id):
     try:
         response = requests.delete(url, headers=get_cms_headers(), timeout=30)
         response.raise_for_status()
+    except requests.exceptions.HTTPError as exc:
+        response = getattr(exc, "response", None)
+        if response is not None and response.status_code == 404:
+            logger.warning(
+                "Partner configuration cms_id=%s was already missing in CMS during delete.",
+                cms_id,
+            )
+            return
+        logger.error(
+            "HTTP error deleting partner configuration from CMS: %s body=%s",
+            exc,
+            response.text if response is not None else "",
+        )
+        raise PartnerConfigurationSyncError(
+            "Failed to delete the existing organization partner configuration from CMS."
+        ) from exc
     except Exception as exc:
         logger.error(
             "HTTP error deleting partner configuration from CMS: %s body=%s",
