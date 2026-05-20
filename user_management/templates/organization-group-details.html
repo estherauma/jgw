@@ -2,7 +2,7 @@
 {% load static %}
 {% load um_waffle_flags %}
 
-{% block title %}Organization Group Details{% endblock %}
+{% block title %}Organisation Group Details{% endblock %}
 
 {% block styles %}
 @import url("{% static 'user_management/css/common.css' %}");
@@ -39,7 +39,7 @@
     <div class="row g-3 align-items-start">
         <div class="col-12 col-lg-7">
             <div class="um-card">
-                <div class="um-card-title um-navy">Group Organizations</div>
+                <div class="um-card-title um-navy">Group Organisations</div>
                 <div class="um-table-scroll-wrapper mt-3">
                     <div class="um-scrollbar">
                         <div class="um-scrollbar-thumb"></div>
@@ -98,7 +98,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4">No organizations added to this organization group yet.</td>
+                                    <td colspan="4">No organisations added to this organisation group yet.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -112,21 +112,21 @@
             {% flag 'can_add_organization_group' %}
             <div class="um-card">
                 <div class="um-row">
-                    <div class="um-card-title um-navy">Create New Organization</div>
+                    <div class="um-card-title um-navy">Create New Organisation</div>
                     <button
                         class="um-btn um-btn-lime"
                         type="button"
                         data-toggle="modal"
                         data-target="#create-org-modal"
                     >
-                        Create Organization
+                        Create Organisation
                     </button>
                 </div>
-                <div class="text-muted mt-3">Creates the organization directly inside this group.</div>
+                <div class="text-muted mt-3">Creates the organisation directly inside this group.</div>
             </div>
 
             <div class="um-card">
-                <div class="um-card-title um-navy">Attach Existing Organization</div>
+                <div class="um-card-title um-navy">Attach Existing Organisation</div>
                 {% url 'user_management:attach_organizations_to_group' organization_group_id=organization_group.id as attach_organizations_url %}
                 <form
                     id="attach-organizations-to-group-form"
@@ -137,8 +137,8 @@
                 >
                     {% csrf_token %}
                     <label class="um-field form-group">
-                        <span>Select organizations</span>
-                        {% include 'components/custom-select.html' with field=attach_organizations_form.organizations multiple=True placeholder='Select organizations' search_placeholder='Search organization...' no_results_text='No organizations found.' %}
+                        <span>Select organisations</span>
+                        {% include 'components/custom-select.html' with field=attach_organizations_form.organizations multiple=True placeholder='Select organisations' search_placeholder='Search organisation...' no_results_text='No organisations found.' %}
                         <div class="text-danger small" data-error-for="organizations"></div>
                     </label>
                     <button
@@ -146,10 +146,10 @@
                         class="um-btn um-btn-lime mt-3 d-none"
                         data-attach-organizations-submit
                     >
-                        Attach Selected Organizations
+                        Attach Selected Organisations
                     </button>
                     <div class="alert alert-danger d-none mt-3 mb-0" id="attach-organizations-to-group-form-error" role="alert"></div>
-                    <div class="text-muted mt-2">Search and select one or more organizations to attach to this group.</div>
+                    <div class="text-muted mt-2">Search and select one or more organisations to attach to this group.</div>
                 </form>
             </div>
             {% endflag %}

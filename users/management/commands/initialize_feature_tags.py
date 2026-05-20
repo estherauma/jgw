@@ -107,7 +107,7 @@ class Command(BaseCommand):
             "org_admin": ["org_admin", "org_group_admin", "58_admin"],  # 58_admin and org_group_admin have all org_admin permissions
             "org_group_admin": ["org_group_admin", "58_admin"],  # 58_admin has all org_group_admin permissions
             "58_admin": ["58_admin"],  # 58_admin permissions only
-            "user_management": ["user_management", "org_group_admin", "58_admin"],
+            "user_management": ["user_management", "58_admin"],
         }
   
         for flag in flags_list:
