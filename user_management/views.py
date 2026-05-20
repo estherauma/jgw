@@ -1,9 +1,9 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
 from django.shortcuts import render, redirect
-from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
@@ -361,6 +361,19 @@ class OrganizationGroupDetailsView(View):
             group_cms_sites_by_code = get_group_partner_configuration_sites_by_code(
                 organization_group
             )
+            users = User.objects.none()
+            if is_org_group_admin(request.user):
+                users = (
+                    User.objects.filter(
+                        organization_group=organization_group,
+                        groups__name="org_group_admin",
+                    )
+                    .prefetch_related("organisation_data", "groups")
+                    .distinct()
+                    .order_by("first_name", "last_name", "email")
+                )
+            for user in users:
+                user.role_display = get_user_role_display(user)
             context = OrganizationService.build_organization_group_context(
                 organization_group=organization_group,
             )
@@ -377,6 +390,7 @@ class OrganizationGroupDetailsView(View):
                     ),
                     "organization_group_id": organization_group.id,
                     "group_cms_sites_by_code": group_cms_sites_by_code or {},
+                    "users": users,
                 }
             )
             return render(request, "organization-group-details.html", context)
