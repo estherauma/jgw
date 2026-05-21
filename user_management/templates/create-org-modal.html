@@ -1,5 +1,5 @@
 <div class="modal fade" id="{{ action_type }}-org-modal" tabindex="-1" role="dialog" aria-labelledby="{{ action_type }}-org-title" aria-hidden="true" >
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="um-modal-title um-navy" id="{{ action_type }}-org-title">{{ modal_title }}</h5>
@@ -8,8 +8,11 @@
                 </button>
             </div>
             <div class="um-modal-divider"></div>
-            <form id="{{ action_type }}-org-form" method="post" action="{{ form_action }}" >
+            <form id="{{ action_type }}-org-form" method="post" action="{{ form_action }}" novalidate>
                 {% csrf_token %}
+                {% if organization_group_id %}
+                    <input type="hidden" name="organization_group_id" value="{{ organization_group_id }}">
+                {% endif %}
                 <div class="modal-body">
                     <div class="alert alert-danger d-none" id="{{ action_type }}-org-form-error" role="alert"></div>
                     {% if form.non_field_errors %}
@@ -17,22 +20,178 @@
                             {{ form.non_field_errors }}
                         </div>
                     {% endif %}
-                    <label class="um-field form-group mt-1">
-                        <span>Name</span>
-                        {{ form.name }}
-                        <div class="text-danger small" data-error-for="name"></div>
-                        {% if form.name.errors %}
-                            <div class="text-danger small">{{ form.name.errors }}</div>
-                        {% endif %}
-                    </label>
-                    <label class="um-field form-group">
-                        <span>Code</span>
-                        {{ form.org_code }}
-                        <div class="text-danger small" data-error-for="org_code"></div>
-                        {% if form.org_code.errors %}
-                            <div class="text-danger small">{{ form.org_code.errors }}</div>
-                        {% endif %}
-                    </label>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mt-1">
+                                <span>Name</span>
+                                {{ form.name }}
+                                <div class="text-danger small" data-error-for="name"></div>
+                                {% if form.name.errors %}
+                                    <div class="text-danger small">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mt-1">
+                                <span>Display name</span>
+                                {{ form.display_name }}
+                                <div class="text-danger small" data-error-for="display_name"></div>
+                                {% if form.display_name.errors %}
+                                    <div class="text-danger small">{{ form.display_name.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mt-1">
+                                <span>Code</span>
+                                {{ form.org_code }}
+                                <div class="text-danger small" data-error-for="org_code"></div>
+                                {% if form.org_code.errors %}
+                                    <div class="text-danger small">{{ form.org_code.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <div class="form-group mt-3">
+                                <div class="form-check form-switch">
+                                    {{ form.has_custom_content }}
+                                    <label class="form-check-label um-navy" for="{{ form.has_custom_content.id_for_label }}">
+                                        Has custom content
+                                    </label>
+                                </div>
+                                <div class="text-danger small" data-error-for="has_custom_content"></div>
+                                {% if form.has_custom_content.errors %}
+                                    <div class="text-danger small">{{ form.has_custom_content.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="um-field form-group mt-1">
+                                <span>Access code</span>
+                                {{ form.access_code }}
+                                <div class="text-danger small" data-error-for="access_code"></div>
+                                {% if form.access_code.errors %}
+                                    <div class="text-danger small">{{ form.access_code.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Content collection</span>
+                                {% include 'components/custom-select.html' with field=form.content_collection placeholder='Select content collection' search_placeholder='Search collection...' no_results_text='No collections found.' %}
+                                <div class="text-danger small" data-error-for="content_collection"></div>
+                                {% if form.content_collection.errors %}
+                                    <div class="text-danger small">{{ form.content_collection.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Collection languages</span>
+                                {% include 'components/custom-select.html' with field=form.collection_languages multiple=True placeholder='Select collection languages' search_placeholder='Search language...' no_results_text='No languages found.' %}
+                                <div class="text-danger small" data-error-for="collection_languages"></div>
+                                {% if form.collection_languages.errors %}
+                                    <div class="text-danger small">{{ form.collection_languages.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Default collection language</span>
+                                {% include 'components/custom-select.html' with field=form.default_collection_language placeholder='Select default language' search_placeholder='Search language...' no_results_text='Select collection languages first' %}
+                                <div class="text-danger small" data-error-for="default_collection_language"></div>
+                                {% if form.default_collection_language.errors %}
+                                    <div class="text-danger small">{{ form.default_collection_language.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Big icon</span>
+                                {% include 'components/image-picker.html' with input_id=action_type|add:'-big-icon-file' input_name='big_icon_file' button_label='Choose big icon' helper_text='PNG, JPG, SVG' empty_text='' accept='image/png,image/jpeg,image/svg+xml' %}
+                                <div class="text-danger small" data-error-for="big_icon_file"></div>
+                                {% if form.big_icon_file.errors %}
+                                    <div class="text-danger small">{{ form.big_icon_file.errors }}</div>
+                                {% endif %}
+                                <div class="d-none">
+                                    {{ form.big_icon }}
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Small icon</span>
+                                {% include 'components/image-picker.html' with input_id=action_type|add:'-small-icon-file' input_name='small_icon_file' button_label='Choose small icon' helper_text='PNG, JPG, SVG' empty_text='' accept='image/png,image/jpeg,image/svg+xml' %}
+                                <div class="text-danger small" data-error-for="small_icon_file"></div>
+                                {% if form.small_icon_file.errors %}
+                                    <div class="text-danger small">{{ form.small_icon_file.errors }}</div>
+                                {% endif %}
+                                <div class="d-none">
+                                    {{ form.small_icon }}
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Work sector (Optional)</span>
+                                {% include 'components/custom-select.html' with field=form.work_sector placeholder='Select work sector' search_placeholder='Search work sector...' no_results_text='No work sectors found.' %}
+                                <div class="text-danger small" data-error-for="work_sector"></div>
+                                {% if form.work_sector.errors %}
+                                    <div class="text-danger small">{{ form.work_sector.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Theme (Optional)</span>
+                                {{ form.theme }}
+                                <div class="text-danger small" data-error-for="theme"></div>
+                                {% if form.theme.errors %}
+                                    <div class="text-danger small">{{ form.theme.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Default report issue emails (Optional)</span>
+                                {{ form.default_report_issue_emails }}
+                                <div class="text-danger small" data-error-for="default_report_issue_emails"></div>
+                                {% if form.default_report_issue_emails.errors %}
+                                    <div class="text-danger small">{{ form.default_report_issue_emails.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group">
+                                <span>Default feedback emails (Optional)</span>
+                                {{ form.default_feedback_emails }}
+                                <div class="text-danger small" data-error-for="default_feedback_emails"></div>
+                                {% if form.default_feedback_emails.errors %}
+                                    <div class="text-danger small">{{ form.default_feedback_emails.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="um-field form-group">
+                                <span>Custom type</span>
+                                {{ form.custom_type }}
+                                <div class="text-danger small" data-error-for="custom_type"></div>
+                                {% if form.custom_type.errors %}
+                                    <div class="text-danger small">{{ form.custom_type.errors }}</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 <div class="um-modal-footer modal-footer">
                     <button type="button" class="um-btn um-btn-gray" data-dismiss="modal" data-bs-dismiss="modal">

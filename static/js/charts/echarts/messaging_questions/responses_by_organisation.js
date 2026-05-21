@@ -25,10 +25,14 @@ function initMessagingQuestionsResponsesByOrganisationChart(organisationData, cu
 
     let organisations = [];
     let counts = [];
+    let noDataMessage = 'No data available';
 
     if (typeof organisationData === 'object' && organisationData.labels && organisationData.counts) {
         organisations = [...organisationData.labels];
         counts = [...organisationData.counts];
+        if (organisationData.message) {
+            noDataMessage = organisationData.message;
+        }
     } else if (Array.isArray(organisationData)) {
         organisationData.forEach(item => {
             const org = item.name || item.organisation || item.label || '';
@@ -50,6 +54,21 @@ function initMessagingQuestionsResponsesByOrganisationChart(organisationData, cu
 
     if (organisations.length === 0 || counts.length === 0) {
         console.warn('No valid data for Messaging Questions Responses by Organisation chart');
+        myChart.setOption({
+            title: {
+                text: noDataMessage,
+                left: 'center',
+                top: 'middle',
+                textStyle: {
+                    color: '#6c757d',
+                    fontSize: 14,
+                    fontWeight: 'normal'
+                }
+            },
+            xAxis: { show: false },
+            yAxis: { show: false },
+            series: []
+        });
         return myChart;
     }
 

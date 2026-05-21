@@ -1,19 +1,23 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
 from django.shortcuts import render, redirect
-from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
 import json
-from preference.models import OrganisationAccessCode, OrganisationData
+from preference.models import OrganizationGroup, OrganisationAccessCode, OrganisationData, SiteLanguages
 
 from .forms import (
     AddWorkCodeForm,
     AppUserForm,
+    AttachOrganizationsToGroupForm,
+    CreateOrganizationGroupForm,
     CreateOrganisationForm,
     DashboardUserForm,
+    EditOrganizationGroupForm,
     OrganisationRoleForm,
     WorkCodeAssignForm,
     WorkGroupForm,
@@ -27,91 +31,41 @@ from .models import (
     WorkGroup,
     ShortLink,
 )
-from .permissions import is_flag_active
 from .roles import add_default_org_roles, apply_role_to_user
-from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
-from users.models import User
-
-
-def get_allowed_orgs(user):
-    if user.is_anonymous:
-        return OrganisationData.objects.none()
-    if is_super_or_58_admin(user):
-        return OrganisationData.objects.all()
-    if is_org_admin_or_staff(user):
-        org = user.organisation_data.order_by("name").first()
-        if not org:
-            return OrganisationData.objects.none()
-        return OrganisationData.objects.filter(id=org.id)
-    return OrganisationData.objects.none()
-
-
-def has_org_access(user, organisation, request=None, flag_name=None):
-    if not organisation:
-        return False
-    if not get_allowed_orgs(user).filter(id=organisation.id).exists():
-        return False
-    if flag_name and request and is_org_admin_or_staff(user):
-        return is_flag_active(request, flag_name, organisation=organisation)
-    return True
-
-
-def org_access_denied():
-    return JsonResponse(
-        {"ok": False, "error": "You do not have access to this organisation."},
-        status=403,
-    )
-
-def get_user_role_display(user, selected_org=None):
-    if user.is_superuser:
-        return "Super Admin"
-
-    group_names = {group.name for group in user.groups.all()}
-    if "58_admin" in group_names:
-        return "Fiftyeight Admin"
-    if "worker" in group_names:
-         return "Worker"
-    if "org_admin" in group_names:
-        return "Administrator" if selected_org else "Org Admin"
-    if "org_staff" in group_names:
-        assignment = user.org_roles.all().first()
-        if assignment and assignment.role:
-            return assignment.role.name
-    return "—"
-
-
-def get_users_query(current_user, selected_org=None):
-    users = (
-        User.objects.filter(is_deleted=False)
-        .prefetch_related(
-            "groups",
-            "organisation_data",
-            "work_groups",
-            "org_roles__role",
-            "org_roles__organisation",
-        )
-        .order_by("-created_at")
-        .distinct()
-    )
-    if selected_org:
-        users = users.filter(organisation_data=selected_org)
-
-    if is_org_admin_or_staff(current_user):
-        allowed_orgs = get_allowed_orgs(current_user)
-        users = users.filter(organisation_data__in=allowed_orgs).distinct()
-    for user in users:
-        user.role_display = get_user_role_display(user, selected_org=selected_org)
-
-    return users
-
+from .services.organization import OrganizationService
+from .services.user import get_user_role_display, get_users_query
+from .permissions import is_flag_active
+from .utils import (
+    get_active_role,
+    is_58_admin,
+    is_org_admin,
+    is_org_group_admin,
+    is_org_or_group_admin,
+    is_super_or_58_admin,
+)
+from users.models import User, UserInvitations
+from content.services.partner_configurations import (
+    add_partner_configuration_to_cms,
+    FileUploadError,
+    get_group_partner_configuration_sites_by_code,
+    move_partner_configuration_to_group_in_cms,
+    PartnerConfigurationSyncError,
+    remove_partner_configuration_from_group_in_cms,
+    edit_organization_group_in_cms,
+    update_partner_configuration_in_cms,
+    update_partner_configuration_work_codes_in_cms,
+)
 
 @group_required("user_management")
 def user_management(request):
     user = request.user
+    user_role = get_active_role(user)
+    allowed_group = OrganizationService.get_allowed_organization_group(user)
     selected_org = None
     selected_org_id = None
     selected_org_name = None
-    organizations = get_allowed_orgs(user).order_by("name")
+    organizations = OrganizationService.get_allowed_orgs(user).order_by("name")
+    organization_groups = OrganizationGroup.objects.order_by("name")
 
     work_codes = []
     work_groups = WorkGroup.objects.none()
@@ -123,13 +77,20 @@ def user_management(request):
     selected_org_name = None
 
     requested_org_id = request.GET.get("selected_org_id")
+    if user_role == "org_group_admin" and not requested_org_id:
+        if allowed_group:
+            return redirect(
+                "user_management:organization_group_details",
+                organization_group_id=allowed_group.id,
+            )
+
     if requested_org_id:
         selected_org = organizations.filter(id=requested_org_id).first()
         if selected_org:
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
 
-    if is_org_admin_or_staff(user):
+    if user_role in {"org_admin", "org_staff"}:
         selected_org = organizations.first()
         if selected_org:
             selected_org_id = str(selected_org.id)
@@ -141,7 +102,7 @@ def user_management(request):
     if selected_org:
         work_codes = (
             OrganisationAccessCode.objects.select_related("organisation")
-            .filter(organisation=selected_org, is_deleted=False)
+            .filter(organisation=selected_org)
             .order_by("-created_at")
         )
         work_groups = (
@@ -153,23 +114,34 @@ def user_management(request):
         roles = OrganisationRole.objects.filter(organisation=selected_org).prefetch_related(
             "role_permissions"
         ).order_by("name")
-        org_details = {
-            "name": selected_org.name,
-            "code": selected_org.org_code,
-            "created_by": "N/A",
-            "created_at": selected_org.created_at,
-        }
+        org_details = OrganizationService.build_organisation_form_payload(
+            organisation=selected_org,
+        )
+        org_details.update(
+            {
+                "code": selected_org.org_code,
+                "created_by": "N/A",
+                "created_at": selected_org.created_at,
+            }
+        )
+        org_languages = SiteLanguages.objects.filter(organisation=selected_org).order_by("code")
+    else:
+        org_languages = SiteLanguages.objects.none()
 
     context = {
         "organizations": organizations,
+        "organization_groups": organization_groups,
         "users": users,
         "work_codes": work_codes,
         "work_groups": work_groups,
         "assigned_work_codes": assigned_work_codes,
         "selected_org_id": selected_org_id,
         "selected_org_name": selected_org_name,
+        "allowed_organization_group": allowed_group,
         "org_details": org_details,
+        "org_languages": org_languages,
         "create_org_form": CreateOrganisationForm(),
+        "create_organization_group_form": CreateOrganizationGroupForm(),
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
@@ -184,7 +156,7 @@ def user_management(request):
 def search_organisations(request):
     user = request.user
     query = request.GET.get("q", "").strip()
-    organisations = get_allowed_orgs(user).order_by("name")
+    organisations = OrganizationService.get_allowed_orgs(user).order_by("name")
     if query:
         organisations = organisations.filter(
             Q(name__icontains=query) | Q(org_code__icontains=query)
@@ -196,7 +168,6 @@ def search_organisations(request):
     )
     return JsonResponse({"ok": True, "html": html})
 
-
 def search_users(request):
     user = request.user
     query = request.GET.get("q", "").strip()
@@ -204,7 +175,9 @@ def search_users(request):
     organisation = None
 
     if selected_org_id:
-        organisation = get_allowed_orgs(user).filter(id=selected_org_id).first()
+        organisation = OrganizationService.get_allowed_orgs(user).filter(
+            id=selected_org_id
+        ).first()
 
     users = get_users_query(user, organisation)
 
@@ -234,23 +207,328 @@ def short_link_redirect(request, code):
 class CreateOrganisationView(View):
     def post(self, request):
         if not is_super_or_58_admin(request.user):
-            return org_access_denied()
-        form = CreateOrganisationForm(request.POST)
+            return OrganizationService.org_access_denied()
+        form = CreateOrganisationForm(request.POST, request.FILES)
         if form.is_valid():
+            organization_group = None
+            organization_group_id = request.POST.get("organization_group_id")
+            if organization_group_id:
+                organization_group = OrganizationGroup.objects.filter(
+                    id=organization_group_id
+                ).first()
+                if not organization_group:
+                    return JsonResponse(
+                        {
+                            "ok": False,
+                            "errors": {
+                                "organization_group": [
+                                    "Selected organization group was not found."
+                                ]
+                            },
+                        },
+                        status=400,
+                    )
+            try:
+                uploaded_icons = OrganizationService.upload_org_icons(
+                    org_name=form.cleaned_data.get("name"),
+                    big_icon_file=form.cleaned_data.get("big_icon_file"),
+                    small_icon_file=form.cleaned_data.get("small_icon_file"),
+                )
+            except FileUploadError as exc:
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+
             organisation = form.save(commit=False)
+            if organization_group:
+                organisation.organization_group = organization_group
+            if uploaded_icons.get("big_icon"):
+                organisation.big_icon = uploaded_icons["big_icon"].get("url", "")
+                organisation.big_icon_cms_media_id = uploaded_icons["big_icon"].get("id")
+            if uploaded_icons.get("small_icon"):
+                organisation.small_icon = uploaded_icons["small_icon"].get("url", "")
+                organisation.small_icon_cms_media_id = uploaded_icons["small_icon"].get("id")
             organisation.created_by = request.user
             organisation.updated_by = request.user
-            organisation = form.save()
+            organisation.save()
+            try:
+                OrganizationService.add_org_access_code(
+                    organisation=organisation,
+                    access_code=form.cleaned_data["access_code"],
+                    user=request.user,
+                )
+            except ValidationError as exc:
+                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            OrganizationService.add_collection_languages(
+                organization=organisation,
+                languages=form.cleaned_data.get("collection_languages", []),
+                user=request.user,
+            )
             add_default_org_roles(organisation)
-            return JsonResponse({"ok": True, "org_id": organisation.id})
+            warning_message = None
+            
+            try:
+                add_partner_configuration_to_cms(organisation)
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Organisation was created, but partner configuration sync to CMS failed.",
+                )
+            return JsonResponse(
+                {"ok": True, "org_id": organisation.id, "warning": warning_message}
+            )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
+
+class CreateOrganizationGroupView(View):
+    def post(self, request):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+        form = CreateOrganizationGroupForm(request.POST)
+        if form.is_valid():
+            organization_group = OrganizationService.create_organization_group(
+                form=form,
+                user=request.user,
+            )
+            return JsonResponse({"ok": True, "organization_group_id": organization_group.id})
+
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class EditOrganizationGroupView(View):
+    def post(self, request, organization_group_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return JsonResponse(
+                    {"ok": False, "error": "Organization group not found."},
+                    status=404,
+                )
+
+            form = EditOrganizationGroupForm(
+                request.POST,
+                instance=organization_group,
+            )
+            if not form.is_valid():
+                return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+            with transaction.atomic():
+                organization_group = OrganizationService.edit_organization_group(
+                    form=form,
+                    user=request.user,
+                )
+                edit_organization_group_in_cms(
+                    organization_group,
+                    fields_to_update=["name"],
+                )
+
+            return JsonResponse({"ok": True})
+        except PartnerConfigurationSyncError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while updating the brand name. Please try again.",
+                },
+                status=500,
+            )
+
+
+class OrganizationGroupDetailsView(View):
+    def get(self, request, organization_group_id):
+        allowed_group = OrganizationService.get_allowed_organization_group(request.user)
+        if not is_super_or_58_admin(request.user) and not is_org_group_admin(request.user):
+
+            return redirect("user_management:home")
+        if is_org_group_admin(request.user):
+            if not allowed_group or allowed_group.id != organization_group_id:
+                return render(request, "403.html", status=403)
+
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return HttpResponseNotFound("Organization group not found.")
+
+            group_cms_sites_by_code = get_group_partner_configuration_sites_by_code(
+                organization_group
+            )
+            users = User.objects.none()
+            if is_org_group_admin(request.user):
+                users = (
+                    User.objects.filter(
+                        organization_group=organization_group,
+                        groups__name="org_group_admin",
+                    )
+                    .prefetch_related("organisation_data", "groups")
+                    .distinct()
+                    .order_by("first_name", "last_name", "email")
+                )
+            for user in users:
+                user.role_display = get_user_role_display(user)
+            context = OrganizationService.build_organization_group_context(
+                organization_group=organization_group,
+            )
+            context.update(
+                {
+                    "create_org_form": CreateOrganisationForm(),
+                    "edit_organization_group_form": EditOrganizationGroupForm(
+                        instance=organization_group
+                    ),
+                    "attach_organizations_form": AttachOrganizationsToGroupForm(
+                        organisations_qs=OrganizationService.get_ungrouped_organizations(
+                            request.user
+                        )
+                    ),
+                    "organization_group_id": organization_group.id,
+                    "group_cms_sites_by_code": group_cms_sites_by_code or {},
+                    "users": users,
+                }
+            )
+            return render(request, "organization-group-details.html", context)
+        except Exception:
+            return HttpResponseNotFound("Organization group not found.")
+
+
+class AttachOrganizationsToGroupView(View):
+    def post(self, request, organization_group_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return JsonResponse(
+                    {"ok": False, "error": "Organization group not found."},
+                    status=404,
+                )
+
+            form = AttachOrganizationsToGroupForm(
+                request.POST,
+                organisations_qs=OrganizationService.get_ungrouped_organizations(
+                    request.user
+                ),
+            )
+            if not form.is_valid():
+                return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+            OrganizationService.attach_organizations_to_group(
+                organization_group=organization_group,
+                organizations=form.cleaned_data["organizations"],
+                user=request.user,
+            )
+            return JsonResponse({"ok": True})
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while attaching organizations. Please try again.",
+                },
+                status=500,
+            )
+
+
+class SyncOrganizationGroupPartnerConfigurationView(View):
+    def post(self, request, organization_group_id, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return JsonResponse(
+                    {"ok": False, "error": "Organization group not found."},
+                    status=404,
+                )
+
+            organisation = OrganisationData.objects.filter(
+                id=organisation_id,
+                organization_group_id=organization_group_id,
+            ).first()
+            if not organisation:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "error": "Organization not found in this organization group.",
+                    },
+                    status=404,
+                )
+
+            move_partner_configuration_to_group_in_cms(organisation)
+            return JsonResponse({"ok": True})
+        except PartnerConfigurationSyncError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while syncing the organization group to CMS. Please try again.",
+                },
+                status=500,
+            )
+
+
+class RemoveOrganizationFromGroupView(View):
+    def post(self, request, organization_group_id, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        try:
+            organization_group = OrganizationService.get_organization_group(
+                organization_group_id=organization_group_id,
+            )
+            if not organization_group:
+                return JsonResponse(
+                    {"ok": False, "error": "Organization group not found."},
+                    status=404,
+                )
+
+            organisation = OrganisationData.objects.filter(
+                id=organisation_id,
+                organization_group_id=organization_group_id,
+            ).first()
+            if not organisation:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "error": "Organization not found in this organization group.",
+                    },
+                    status=404,
+                )
+
+            remove_partner_configuration_from_group_in_cms(organisation)
+            OrganizationService.remove_organization_from_group(
+                organization=organisation,
+                user=request.user,
+            )
+            return JsonResponse({"ok": True})
+        except PartnerConfigurationSyncError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while removing the organization from the group. Please try again.",
+                },
+                status=500,
+            )
+
 class CreateWorkCodeView(View):
     def post(self, request):
         if not is_super_or_58_admin(request.user):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         form = AddWorkCodeForm(request.POST)
         org_id = request.POST.get("selected_org_id")
         organisation = None
@@ -265,7 +543,7 @@ class CreateWorkCodeView(View):
             code_value = form.cleaned_data["code"].strip()
             try:
                 with transaction.atomic():
-                    existing_code = OrganisationAccessCode.objects.filter(
+                    existing_code = OrganisationAccessCode.all_objects.filter(
                         code__iexact=code_value
                         ).first()
                     if existing_code:
@@ -293,13 +571,28 @@ class CreateWorkCodeView(View):
                         work_code.created_by = request.user
                         work_code.updated_by = request.user
                         work_code.save()
-                        msg = f'Work code "{work_code.code}" created successfully.'   
+                        msg = f'Work code "{work_code.code}" created successfully.'
                     messages.success(request, msg)
+
+                warning_message = None
+                try:
+                    update_partner_configuration_work_codes_in_cms(
+                        organisation,
+                        fields_to_update=["access_code"],
+                    )
+                except PartnerConfigurationSyncError as exc:
+                    warning_message = str(exc)
+                    messages.warning(
+                        request,
+                        "Work code was saved, but work code sync to CMS failed.",
+                    )
+
                 return JsonResponse(
                     {
                         "ok": True,
                         "code": work_code.code,
                         "org_id": work_code.organisation_id,
+                        "warning": warning_message,
                     }
                 )
             except IntegrityError:
@@ -309,21 +602,86 @@ class CreateWorkCodeView(View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 class EditOrganisationView(View):
-    def post(self, request, organisation_id):
+    def get(self, request, organisation_id):
         if not is_super_or_58_admin(request.user):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         organisation = OrganisationData.objects.filter(pk=organisation_id).first()
         if not organisation:
             return JsonResponse(
                 {"ok": False, "error": "Organisation not found."},
                 status=404,
             )
-        form = CreateOrganisationForm(request.POST, instance=organisation)
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "organisation": OrganizationService.build_organisation_form_payload(
+                    organisation=organisation,
+                ),
+            }
+        )
+
+    def post(self, request, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Organisation not found."},
+                status=404,
+            )
+        form = CreateOrganisationForm(request.POST, request.FILES, instance=organisation)
         if form.is_valid():
+            try:
+                uploaded_icon_urls = OrganizationService.upload_org_icons(
+                    org_name=form.cleaned_data.get("name"),
+                    big_icon_file=form.cleaned_data.get("big_icon_file"),
+                    small_icon_file=form.cleaned_data.get("small_icon_file"),
+                )
+            except FileUploadError as exc:
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+
             organisation = form.save(commit=False)
+            if uploaded_icon_urls.get("big_icon"):
+                organisation.big_icon = uploaded_icon_urls["big_icon"].get("url", "")
+                organisation.big_icon_cms_media_id = uploaded_icon_urls["big_icon"].get("id")
+            if uploaded_icon_urls.get("small_icon"):
+                organisation.small_icon = uploaded_icon_urls["small_icon"].get("url", "")
+                organisation.small_icon_cms_media_id = uploaded_icon_urls["small_icon"].get("id")
             organisation.updated_by = request.user
-            form.save()
-            return JsonResponse({"ok": True})
+            organisation.save()
+
+            has_existing_access_code = organisation.organisation_access_codes.exists()
+            if not has_existing_access_code:
+                try:
+                    OrganizationService.add_org_access_code(
+                        organisation=organisation,
+                        access_code=form.cleaned_data["access_code"],
+                        user=request.user,
+                    )
+                except ValidationError as exc:
+                    return JsonResponse(
+                        {"ok": False, "errors": exc.message_dict},
+                        status=400,
+                    )
+            
+            OrganizationService.add_collection_languages(
+                organization=organisation,
+                languages=form.cleaned_data.get("collection_languages", []),
+                user=request.user,
+            )
+            warning_message = None
+
+            try:
+                update_partner_configuration_in_cms(organisation)
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Organisation was updated, but partner configuration sync to CMS failed.",
+                )
+
+            return JsonResponse({"ok": True, "warning": warning_message})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
@@ -340,14 +698,14 @@ class CreateWorkGroupView(View):
                 status=400,
             )
         print("Organisation for new work group:", organisation)
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_create_workgroup",
         ):
             print("User does not have access to create work group in this organisation.")
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         if form.is_valid():
             if WorkGroup.objects.filter(
                 organisation=organisation, name__iexact=form.cleaned_data["name"]
@@ -373,36 +731,57 @@ class CreateWorkGroupView(View):
     
 class EditWorkGroupView(View):
     def post(self, request, work_group_id):
-        work_group = WorkGroup.objects.filter(pk=work_group_id).first()
-        if not work_group:
-            return JsonResponse(
-                {"ok": False, "error": "Work group not found."},
-                status=404,
-            )
-        if not has_org_access(
-            request.user,
-            work_group.organisation,
-            request=request,
-            flag_name="can_edit_workgroup",
-        ):
-            return org_access_denied()
-        
-        form = WorkGroupForm(request.POST, instance=work_group)
-        if form.is_valid():
-            if WorkGroup.objects.filter(
-                organisation=work_group.organisation,
-                name__iexact=form.cleaned_data["name"]
-            ).exclude(pk=work_group_id).exists():
+        try:
+            work_group = WorkGroup.objects.filter(pk=work_group_id).first()
+            if not work_group:
                 return JsonResponse(
-                    {"ok": False, "errors": {"name": ["Work group already exists."]}},
-                    status=400,
+                    {"ok": False, "error": "Work group not found."},
+                    status=404,
                 )
-            work_group = form.save(commit=False)
-            work_group.updated_by = request.user
-            form.save()
-            return JsonResponse({"ok": True})
+            if not OrganizationService.has_org_access(
+                request.user,
+                work_group.organisation,
+                request=request,
+                flag_name="can_edit_workgroup",
+            ):
+                return OrganizationService.org_access_denied()
+            
+            form = WorkGroupForm(request.POST, instance=work_group)
+            if form.is_valid():
+                if WorkGroup.objects.filter(
+                    organisation=work_group.organisation,
+                    name__iexact=form.cleaned_data["name"]
+                ).exclude(pk=work_group_id).exists():
+                    return JsonResponse(
+                        {"ok": False, "errors": {"name": ["Work group already exists."]}},
+                        status=400,
+                    )
+                work_group = form.save(commit=False)
+                work_group.updated_by = request.user
+                work_group.save()
+                warning_message = None
+                try:
+                    update_partner_configuration_work_codes_in_cms(
+                        work_group.organisation,
+                        fields_to_update=["user_groups"],
+                    )
+                except PartnerConfigurationSyncError as exc:
+                    warning_message = str(exc)
+                    messages.warning(
+                        request,
+                        "User group was updated, but user group sync to CMS failed.",
+                    )
+                return JsonResponse({"ok": True, "warning": warning_message})
 
-        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+            return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while updating the user group. Please try again.",
+                },
+                status=500,
+            )
 
 
 class CreateAppUserView(View):
@@ -417,13 +796,13 @@ class CreateAppUserView(View):
                 {"ok": False, "error": "Select an organisation first."},
                 status=400,
             )
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_create_appuser",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by("name")
         form = AppUserForm(
             request.POST,
@@ -468,10 +847,10 @@ class CreateAppUserView(View):
 class CreateDashboardUserView(View):
     def post(self, request):
         if not is_super_or_58_admin(request.user):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         form = DashboardUserForm(
             request.POST,
-            orgs_qs=get_allowed_orgs(request.user),
+            orgs_qs=OrganizationService.get_allowed_orgs(request.user),
         )
         if form.is_valid():
             user = form.save(commit=False)
@@ -527,7 +906,7 @@ class EditDashboardUserView(View):
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
         if not is_super_or_58_admin(request.user):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
 
         return JsonResponse(
             {
@@ -544,6 +923,7 @@ class EditDashboardUserView(View):
                     else "",
                     "end_date": user.end_date.isoformat() if user.end_date else "",
                     "groups": list(user.groups.values_list("id", flat=True)),
+                    "organisation_group_id": user.organization_group_id,
                     "organisation_data": list(
                         user.organisation_data.values_list("id", flat=True)
                     ),
@@ -567,12 +947,12 @@ class EditDashboardUserView(View):
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
         if not is_super_or_58_admin(request.user):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
 
         form = DashboardUserForm(
             request.POST,
             instance=user,
-            orgs_qs=get_allowed_orgs(request.user),
+            orgs_qs=OrganizationService.get_allowed_orgs(request.user),
         )
         if form.is_valid():
             user = form.save(commit=False)
@@ -602,17 +982,17 @@ class EditAppUserView(View):
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
 
-        allowed_orgs = get_allowed_orgs(request.user)
+        allowed_orgs = OrganizationService.get_allowed_orgs(request.user)
         organisation = user.organisation_data.filter(id__in=allowed_orgs).first()
         if not organisation:
-            return org_access_denied()
-        if not has_org_access(
+            return OrganizationService.org_access_denied()
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_edit_appuser",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
 
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by(
             "name"
@@ -669,17 +1049,17 @@ class EditAppUserView(View):
         if not user:
             return JsonResponse({"ok": False, "error": "User not found."}, status=404)
 
-        allowed_orgs = get_allowed_orgs(request.user)
+        allowed_orgs = OrganizationService.get_allowed_orgs(request.user)
         organisation = user.organisation_data.filter(id__in=allowed_orgs).first()
         if not organisation:
-            return org_access_denied()
-        if not has_org_access(
+            return OrganizationService.org_access_denied()
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_edit_appuser",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
 
         work_groups_qs = WorkGroup.objects.filter(organisation=organisation).order_by(
             "name"
@@ -738,20 +1118,20 @@ class AssignWorkCodeView(View):
                 {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
                 status=400,
             )
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_assign_work_code",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         if not work_code_id:
             return JsonResponse(
                 {"ok": False, "errors": {"work_code_id": ["Select a work code first."]}},
                 status=400,
             )
         work_code = OrganisationAccessCode.objects.filter(
-            id=work_code_id, organisation=organisation, is_deleted=False
+            id=work_code_id, organisation=organisation
         ).first()
         if not work_code:
             return JsonResponse(
@@ -763,31 +1143,117 @@ class AssignWorkCodeView(View):
         if form.is_valid():
             work_groups = form.cleaned_data["work_groups"]
             work_code.work_groups.set(work_groups)
+            warning_message = None
+            try:
+                update_partner_configuration_work_codes_in_cms(
+                    organisation,
+                    fields_to_update=["access_code", "user_groups"],
+                )
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Work code assignment was saved, but work code sync to CMS failed.",
+                )
             return JsonResponse(
                 {
                     "ok": True,
                     "org_id": organisation.id,
                     "work_code_id": work_code.id,
+                    "warning": warning_message,
                 }
             )
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
+class UnassignWorkCodeView(View):
+    def post(self, request):
+        try:
+            org_id = request.POST.get("selected_org_id")
+            work_code_id = request.POST.get("work_code_id")
+            organisation = None
+            if org_id:
+                organisation = OrganisationData.objects.filter(id=org_id).first()
+            if not organisation:
+                return JsonResponse(
+                    {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
+                    status=400,
+                )
+            if not OrganizationService.has_org_access(
+                request.user,
+                organisation,
+                request=request,
+                flag_name="can_assign_work_code",
+            ):
+                return OrganizationService.org_access_denied()
+            if not work_code_id:
+                return JsonResponse(
+                    {"ok": False, "errors": {"work_code_id": ["Select a work code first."]}},
+                    status=400,
+                )
+            work_code = OrganisationAccessCode.objects.filter(
+                id=work_code_id, organisation=organisation
+            ).first()
+            if not work_code:
+                return JsonResponse(
+                    {"ok": False, "errors": {"work_code_id": ["Work code not found."]}},
+                    status=400,
+                )
+
+            assigned_work_groups_qs = work_code.work_groups.order_by("name")
+            form = WorkCodeAssignForm(request.POST, work_groups_qs=assigned_work_groups_qs)
+            if not form.is_valid():
+                return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+            work_groups = form.cleaned_data["work_groups"]
+            work_code.work_groups.set(work_groups)
+
+            warning_message = None
+            try:
+                update_partner_configuration_work_codes_in_cms(
+                    organisation,
+                    fields_to_update=["access_code", "user_groups"],
+                )
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Work code unassignment was saved, but work code sync to CMS failed.",
+                )
+
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "org_id": organisation.id,
+                    "work_code_id": work_code.id,
+                    "warning": warning_message,
+                }
+            )
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while unassigning user groups. Please try again.",
+                },
+                status=500,
+            )
+
+
 class DeleteWorkGroupView(View):
     def post(self, request, work_group_id):
-        allowed_orgs = get_allowed_orgs(request.user)
+        allowed_orgs = OrganizationService.get_allowed_orgs(request.user)
         work_group = WorkGroup.objects.filter(id=work_group_id, organisation__in=allowed_orgs).first()
         if not work_group:
             return JsonResponse({"ok": False, "error": "Work group not found."}, status=404)
         organisation = work_group.organisation
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_delete_workgroup",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         if work_group.users.exists():
             return JsonResponse(
                 {"ok": False, "error": "This work group cannot be deleted because it has assigned users. Remove users first."},
@@ -810,13 +1276,13 @@ class CreateOrganisationRoleView(View):
                 {"ok": False, "errors": {"organisation": ["Select an organisation first."]}},
                 status=400,
             )
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_create_role",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         form = OrganisationRoleForm(request.POST, organisation=organisation)
         if form.is_valid():
             role = form.save()
@@ -827,17 +1293,20 @@ class CreateOrganisationRoleView(View):
 class EditOrganisationRoleView(View):
     def get(self, request, role_id):
         role = OrganisationRole.objects.filter(
-            id=role_id, organisation__in=get_allowed_orgs(request.user)
+            id=role_id,
+            organisation__in=OrganizationService.get_allowed_orgs(
+                request.user
+            ),
         ).first()
         if not role:
             return JsonResponse({"ok": False, "error": "Role not found."}, status=404)
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             role.organisation,
             request=request,
             flag_name="can_edit_role",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         permission_ids = list(role.role_permissions.values_list("flag_id", flat=True))
         return JsonResponse(
             {
@@ -855,17 +1324,20 @@ class EditOrganisationRoleView(View):
 
     def post(self, request, role_id):
         role = OrganisationRole.objects.filter(
-            id=role_id, organisation__in=get_allowed_orgs(request.user)
+            id=role_id,
+            organisation__in=OrganizationService.get_allowed_orgs(
+                request.user
+            ),
         ).first()
         if not role:
             return JsonResponse({"ok": False, "error": "Role not found."}, status=404)
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             role.organisation,
             request=request,
             flag_name="can_edit_role",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         form = OrganisationRoleForm(
             request.POST, instance=role, organisation=role.organisation
         )
@@ -878,17 +1350,20 @@ class EditOrganisationRoleView(View):
 class DeleteOrganisationRoleView(View):
     def post(self, request, role_id):
         role = OrganisationRole.objects.filter(
-            id=role_id, organisation__in=get_allowed_orgs(request.user)
+            id=role_id,
+            organisation__in=OrganizationService.get_allowed_orgs(
+                request.user
+            ),
         ).first()
         if not role:
             return JsonResponse({"ok": False, "error": "Role not found."}, status=404)
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             role.organisation,
             request=request,
             flag_name="can_delete_role",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         if role.is_system:
             return JsonResponse(
                 {"ok": False, "error": "System roles cannot be deleted."},
@@ -917,13 +1392,13 @@ class AssignUsersToWorkGroupsView(View):
                 {"ok": False, "error": "Select an organisation first."},
                 status=400,
             )
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_assign_users_to_workgroups",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
 
         user_ids = [
             value
@@ -960,12 +1435,11 @@ class AssignUsersToWorkGroupsView(View):
 class DeleteWorkCodeView(View):
     def post(self, request, work_code_id):
         if not is_super_or_58_admin(request.user):
-            return org_access_denied()
-        allowed_orgs = get_allowed_orgs(request.user)
+            return OrganizationService.org_access_denied()
+        allowed_orgs = OrganizationService.get_allowed_orgs(request.user)
         work_code = OrganisationAccessCode.objects.filter(
             id=work_code_id,
             organisation__in=allowed_orgs,
-            is_deleted=False
         ).first()
 
         if not work_code:
@@ -973,13 +1447,13 @@ class DeleteWorkCodeView(View):
                 {"ok": False, "error": "Work code not found."},
                 status=404,
             )
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             work_code.organisation,
             request=request,
             flag_name="can_delete_work_code",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
 
         if work_code.work_groups.exists():
             return JsonResponse(
@@ -993,9 +1467,21 @@ class DeleteWorkCodeView(View):
         code = work_code.code
         
         work_code.soft_delete(request.user)
-        
+        warning_message = None
+        try:
+            update_partner_configuration_work_codes_in_cms(
+                work_code.organisation,
+                fields_to_update=["access_code"],
+            )
+        except PartnerConfigurationSyncError as exc:
+            warning_message = str(exc)
+            messages.warning(
+                request,
+                "Work code was deleted, but work code sync to CMS failed.",
+            )
+
         messages.success(request, f'Work code "{code}" deleted successfully.')
-        return JsonResponse({"ok": True})
+        return JsonResponse({"ok": True, "warning": warning_message})
     
 class EditWorkCodeView(View):
     def post(self, request, work_code_id):
@@ -1008,17 +1494,16 @@ class EditWorkCodeView(View):
                 {"ok": False, "error": "Select an organisation first."},
                 status=400,
             )
-        if not has_org_access(
+        if not OrganizationService.has_org_access(
             request.user,
             organisation,
             request=request,
             flag_name="can_edit_work_code",
         ):
-            return org_access_denied()
+            return OrganizationService.org_access_denied()
         work_code = OrganisationAccessCode.objects.filter(
             id=work_code_id,
             organisation=organisation,
-            is_deleted=False
         ).first()
         if not work_code:
             return JsonResponse(
@@ -1030,11 +1515,24 @@ class EditWorkCodeView(View):
             work_code = form.save(commit=False)
             work_code.updated_by = request.user
             form.save()
+            warning_message = None
+            try:
+                update_partner_configuration_work_codes_in_cms(
+                    organisation,
+                    fields_to_update=["access_code"],
+                )
+            except PartnerConfigurationSyncError as exc:
+                warning_message = str(exc)
+                messages.warning(
+                    request,
+                    "Work code was updated, but work code sync to CMS failed.",
+                )
             return JsonResponse(
                 {
                     "ok": True,
                     "org_id": organisation.id,
                     "work_code_id": work_code.id,
+                    "warning": warning_message,
                 }
             )
 
@@ -1044,7 +1542,7 @@ class EditWorkCodeView(View):
 class BulkDeleteUsersView(View):
     def post(self, request):
         current_user = request.user
-        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+        if not (is_super_or_58_admin(current_user) or is_org_or_group_admin(current_user)):
             return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
         try:
@@ -1054,8 +1552,8 @@ class BulkDeleteUsersView(View):
             
         except (json.JSONDecodeError, AttributeError):
             return JsonResponse(
-                {"ok": False, "error": "Invalid JSON data."},status=400,)
-        
+                {"ok": False, "error": "Invalid JSON data."}, status=400
+            )
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "Select at least one user."}, status=400)
         
@@ -1071,9 +1569,11 @@ class BulkDeleteUsersView(View):
                     if user.is_superuser and not current_user.is_superuser:
                         failed_count += 1
                         continue
-                    if is_org_admin(current_user):
+                    if is_org_or_group_admin(current_user):
                         user_org = user.organisation_data.first()
-                        if not has_org_access(current_user, user_org):
+                        if not OrganizationService.has_org_access(
+                            current_user, user_org
+                        ):
                             raise PermissionError("'You have no permission to delete one or more of the selected users.'") 
                     if is_58_admin(current_user):
                         if getattr(user, 'created_by_id', None) != current_user.id and is_58_admin(user):
@@ -1087,34 +1587,62 @@ class BulkDeleteUsersView(View):
 
             if deletion_count and failed_count:
                 messages.warning(request, f"{failed_count} user(s) could not be deleted. You may not have permission to delete those users.")
-            messages.success(request, f"Successfully deleted {deletion_count} user(s).")
+            if deletion_count == 1:
+                messages.success(request, "Successfully deleted user.")
+            else:
+                messages.success(request, f"Successfully deleted {deletion_count} users.")
             return JsonResponse({"ok": True})
             
         except PermissionError as e:
-              return JsonResponse({"ok": False, "error": str(e)}, status=403)
+            return JsonResponse({"ok": False, "error": str(e)}, status=403)
         except Exception:
             return JsonResponse({"ok": False, "error": "An error occurred while deleting users. Please try again."}, status=500)
-        
-class BulkDeactivateUsersView(View):
+class BulkActivateDeactivateUsersView(View):
     def post(self, request):
         current_user = request.user
-        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+        if not (
+            is_super_or_58_admin(current_user)
+            or is_org_or_group_admin(current_user)
+        ):
             return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
         try:
             data = json.loads(request.body)
             ids_param = data.get('ids', '')
+            action = data.get('action', '').strip().lower()
+
             raw_ids = [int(uid.strip()) for uid in ids_param.split(',') if uid.strip()]
-            
         except (json.JSONDecodeError, AttributeError):
             return JsonResponse(
-                {"ok": False, "error": "Invalid JSON data."},status=400,)
-        
+                {"ok": False, "error": "Invalid JSON data."}, status=400
+            )
+        if action not in {"activate", "deactivate"}:
+            return JsonResponse(
+                {"ok": False, "error": "Invalid action. Use 'activate' or 'deactivate'."},
+                status=400,
+            )
+
         if not raw_ids:
             return JsonResponse({"ok": False, "error": "Select at least one user."}, status=400)
-        
+
+        activation_count = 0
         deactivation_count = 0
         failed_count = 0
+        if len(raw_ids) == 1:
+            permission_error_message = f"You do not have permission to {action} the selected user."
+        else:
+            permission_error_message = f"You do not have permission to {action} selected users."
+        def success_message(done_action, count):
+            if count == 1:
+                return f"Successfully {done_action} the selected user."
+            return f"Successfully {done_action} {count} users."
+
+        def warning_message(count):
+            if count == 1:
+                return f"Could not {action} the selected user. You may not have permission to {action} that user."
+            if action == "activate":
+                return f"{count} users could not be activated. You may not have permission to activate those users."
+            return f"{count} users could not be deactivated. You may not have permission to deactivate those users."
         try:
             with transaction.atomic():
                 for user_id in raw_ids:
@@ -1125,39 +1653,50 @@ class BulkDeactivateUsersView(View):
                     if user.is_superuser and not current_user.is_superuser:
                         failed_count += 1
                         continue
-                    if is_org_admin(current_user):
+                    if is_org_or_group_admin(current_user):
                         user_org = user.organisation_data.first()
-                        if not has_org_access(current_user, user_org):
-                            raise PermissionError("'You have no permission to deactivate one or more of the selected users.'") 
-                        if is_org_admin(user):
-                            if getattr(user,'created_by_id',None) != current_user.id:
-                                failed_count += 1
-                                continue
+                        if not OrganizationService.has_org_access(
+                            current_user, user_org
+                        ):
+                            raise PermissionError(permission_error_message)
+                        if is_org_admin(user) and getattr(user, 'created_by_id', None) != current_user.id:
+                            failed_count += 1
+                            continue
                     if is_58_admin(current_user) and is_super_or_58_admin(user):
                         failed_count += 1
                         continue
-                    
-                    user.deactivate(deactivated_by=current_user)
-                    deactivation_count += 1
+                    if action == "deactivate":
+                        user.deactivate(deactivated_by=current_user)
+                        deactivation_count += 1
 
-            if failed_count and not deactivation_count:
-                return JsonResponse({"ok": False, "error": f"You do not have permission to deactivate selected users."}, status=403)
-
-            if deactivation_count and failed_count:
-                messages.warning(request, f"{failed_count} user(s) could not be deactivated. You may not have permission to deactivate those users.")
-            messages.success(request, f"Successfully deactivated {deactivation_count} user(s).")
+                    elif action == "activate":
+                        user.is_active = True
+                        user.updated_by = current_user
+                        user.save()
+                        activation_count += 1
+                        
+            successful_updates = activation_count + deactivation_count
+            if failed_count and not successful_updates:
+                return JsonResponse({"ok": False, "error": permission_error_message}, status=403)
+            if failed_count:
+                messages.warning(request, warning_message(failed_count))
+            if activation_count:
+                messages.success(request, success_message("activated", activation_count))
+            if deactivation_count:
+                messages.success(request, success_message("deactivated", deactivation_count))
             return JsonResponse({"ok": True})
-            
+
         except PermissionError as e:
-              return JsonResponse({"ok": False, "error": str(e)}, status=403)
+            return JsonResponse({"ok": False, "error": str(e)}, status=403)
         except Exception:
-                return JsonResponse({"ok": False, "error": "An error occurred while deactivating users. Please try again."}, status=500)
-
-
+            return JsonResponse({"ok": False, "error": "An error occurred while updating users. Please try again."}, status=500)
 class BulkInviteUsersView(View):
     def post(self, request):
         current_user = request.user
-        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+        if not (
+            is_super_or_58_admin(current_user)
+            or is_org_or_group_admin(current_user)
+        ):
             return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
         try:
@@ -1173,24 +1712,27 @@ class BulkInviteUsersView(View):
         invite_sms = []
         invited_emails = []
         failed_contacts = []
+        permission_error_message = (
+            "You do not have permission to invite the selected user."
+            if len(raw_ids) == 1
+            else "You do not have permission to invite one or more of the selected users."
+        )
 
         try:
             with transaction.atomic():
                 for user_id in raw_ids:
-                    user = User.objects.filter(id=user_id, is_deleted=False).first()
+                    user = User.objects.filter(id=user_id).first()
                     if not user or (not user.email and not user.phone_number):
                         continue
-                    if is_org_admin(current_user):
+                    if is_org_or_group_admin(current_user):
                         user_org = user.organisation_data.first()
-                        if not has_org_access(
+                        if not OrganizationService.has_org_access(
                             current_user,
                             user_org,
                             request=request,
                             flag_name="can_invite_user",
                         ):
-                            raise PermissionError(
-                                "You do not have permission to invite one or more of the selected users."
-                            )
+                            raise PermissionError(permission_error_message)
                         
                     invited = send_invitation(request, user)
 
@@ -1205,18 +1747,33 @@ class BulkInviteUsersView(View):
                             failed_contacts.append(user.email)
                         elif user.phone_number:
                             failed_contacts.append(user.phone_number)
-
+                            
             if len(invited_emails):
+                message = f"Sent email invitations to {', '.join(invited_emails)}."
+
+                if len(invited_emails) == 1:
+                    message = f"Sent email invitation to {invited_emails[0]}."
+
                 messages.success(
                     request,
-                    f"Sent email invitations to {', '.join(invited_emails)}.",
+                    message,
                 )
             if len(invite_sms):
+                message = f"Sent SMS invitations to {', '.join(invite_sms)}."
+
+                if len(invite_sms) == 1:
+                    message = f"Sent SMS invitation to {invite_sms[0]}."
                 messages.success(
                     request,
-                    f"Sent SMS invitations to {', '.join(invite_sms)} user(s)."
+                    message,
                 )
+            
             if len(failed_contacts):
+                if len(raw_ids) == 1:
+                    return JsonResponse({
+                            "ok": False, 
+                            "error": f"The invitation to {failed_contacts[0]} could not be sent. Please check their contact details."
+                        }, status=400)
                 if not len(invited_emails) and not len(invite_sms):
                     return JsonResponse(
                         {"ok": False, "error": "No invitations were sent."},
@@ -1225,7 +1782,7 @@ class BulkInviteUsersView(View):
                 messages.warning(
                     request,
                     f"Failed to invite the following users: {', '.join(failed_contacts)}. You may not have permission to invite those users or they may not have valid contact information.",
-                ) 
+                )
             return JsonResponse({"ok": True})
         except PermissionError as e:
             return JsonResponse({"ok": False, "error": str(e)}, status=403)
@@ -1234,3 +1791,57 @@ class BulkInviteUsersView(View):
                 {"ok": False, "error": "An error occurred while sending invitations. Please try again."},
                 status=500,
             )
+@group_required("user_management")           
+def user_details(request, user_id):
+    user = User.objects.prefetch_related(
+        "organisation_data",
+        "groups",
+        "work_groups",
+        "destinations",
+        "user_languages",
+        "excluded_origin_countries",
+        'org_roles__role',
+        "immigration_status",
+        "factories",
+        "dashboard_prefs"
+        ).filter(id=user_id).first()
+    if not user:
+        return JsonResponse({"ok": False, "error": "User not found."}, status=404)
+    
+    current_user = request.user
+    target_user_org = user.organisation_data.first()
+    
+    if is_org_or_group_admin(current_user) and not OrganizationService.has_org_access(
+        current_user, target_user_org
+    ):
+        return OrganizationService.org_access_denied()
+        
+    user.role_display = get_user_role_display(user, selected_org=target_user_org)
+    user.hide_organisation_information = is_super_or_58_admin(user)
+    user.has_pending_invitation = UserInvitations.objects.filter(
+        user=user,
+        status__in=["SENT", "PENDING"],
+    ).exists()
+    
+    work_groups_qs = (
+        WorkGroup.objects.filter(organisation=target_user_org).order_by("name")
+        if target_user_org
+        else WorkGroup.objects.none()
+    )
+    
+    dashboard_preferences = getattr(user, "dashboard_prefs", None)
+
+    context = {
+        "user": user,
+        "dashboard_preferences": dashboard_preferences,
+        "app_user_form": AppUserForm(
+            work_groups_qs=work_groups_qs,
+            organisation=target_user_org,
+        ),
+        "dashboard_user_form": DashboardUserForm(
+            orgs_qs=OrganizationService.get_allowed_orgs(
+                current_user
+            ).order_by("name")
+        ),
+    }
+    return render(request, "user-details.html", context)

@@ -12,18 +12,34 @@
             >
         </td>
         <td>{{ forloop.counter }}</td>
-        <td class="w-25">{{ u.first_name }} {{ u.last_name }}</td>
+        <td class="w-25">
+            <a href="{% url 'user_management:user_details' u.id %}">
+                {% if u.first_name or u.last_name %}
+                    {{ u.first_name }} {{ u.last_name }}
+                {% else %}
+                    View
+                {% endif %}
+            </a>
+        </td>
         <td>{{ u.email|default:"-" }}</td>
-        <td>{{ u.is_active|yesno:"Yes,No" }}</td>
+        <td>
+            {% if not u.is_active and u.has_pending_invitation %}
+                <span class="badge rounded-pill text-uppercase um-status-badge um-status-pending">
+                    Pending Invitation
+                </span>
+            {% elif u.is_active %}
+                <span class="badge rounded-pill text-uppercase um-status-badge um-status-active">
+                    Active
+                </span>
+            {% else %}
+                <span class="badge rounded-pill text-uppercase um-status-badge um-status-inactive">
+                    Inactive
+                </span>
+            {% endif %}
+        </td>
 
         {% if not selected_org_id %}
-        <td>
-            {% for org in u.organisation_data.all %}
-                {{ org.name }}{% if not forloop.last %}, {% endif %}
-            {% empty %}
-                —
-            {% endfor %}
-        </td>
+        <td>{{ u.organisation_display|default:"—" }}</td>
         {% endif %}
         {% if selected_org_id %}
         <td>

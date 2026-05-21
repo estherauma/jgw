@@ -1,0 +1,341 @@
+{% extends 'core/layouts/base.html' %}
+{% load crispy_forms_tags %} 
+{% load static %}
+{% load um_waffle_flags %}
+{% load i18n %}
+
+{% block title %}User Details{% endblock %}
+
+{% block styles %}
+@import url("{% static 'user_management/css/common.css' %}");
+@import url("{% static 'user_management/css/user-details.css' %}");
+{% endblock %}
+
+{% block content %}
+<div class="my-3">
+    <a class="d-inline-flex align-items-center gap-2 fw-semibold text-info text-decoration-none" href="{% url 'user_management:home' %}">
+        <i class="bi bi-chevron-left"></i>
+        <span>Back to User Management</span>
+    </a>
+</div>
+
+<div class="um-page um-user-details-page um-navy">
+    <div class="d-flex justify-content-end gap-2 flex-wrap">
+        {% flag 'can_invite_user' %}
+        <button
+            type="button"
+            class="um-btn um-btn-outline mb-2"
+            data-invite-user
+            data-user-id="{{ user.id }}"
+            data-first-name="{{ user.first_name|default:'' }}"
+            data-last-name="{{ user.last_name|default:'' }}"
+            data-email="{{ user.email|default:'' }}"
+            data-phone-number="{{ user.phone_number|default:'' }}"
+            {% if not user.email and not user.phone_number %}disabled{% endif %}
+        >
+            Invite User
+        </button>
+        {% endflag %}
+        {% flag 'can_edit_appuser' %}
+        <button
+            class="um-btn um-btn-outline mb-2"
+            data-toggle="modal" 
+            data-target="{% if user.access_type == 'dashboard' and not is_org_admin_or_staff %}#edit-dashboard-user-modal{% else %}#edit-appuser-modal{% endif %}"
+            data-user-id="{{ user.id }}"
+        >
+            Edit User
+        </button>
+        {% endflag %}
+        {% flag 'can_deactivate_user' %}
+        <button
+            class="um-btn mb-2 {% if user.is_active %}um-btn-danger{% else %}um-btn-outline{% endif %}"
+            data-update-user-status
+            data-user-id="{{ user.id }}"
+            data-action="{{ user.is_active|yesno:'deactivate,activate' }}"
+        >
+            {% if user.is_active %}Deactivate User{% else %}Activate User{% endif %}
+        </button>
+        {% endflag %}
+        {% flag 'can_delete_user' %}
+        <button
+            type="button"
+            class="um-btn um-btn-danger mb-2"
+            data-delete-user
+            data-user-id="{{ user.id }}"
+        >
+            Delete User
+        </button>
+        {% endflag %}
+    </div>
+
+    <div class="um-card um-user-profile-summary mb-3">
+        <div class="um-user-profile-primary">
+            <div class="w-100">
+                <h3 class="mb-0 text-dark">
+                    {% if user.first_name or user.last_name %}
+                        {{ user.first_name|title }} {{ user.last_name|title }}
+                    {% elif user.email %}
+                        {{ user.email }}
+                    {% else %}
+                        User #{{ user.id }}
+                    {% endif %}
+                </h3>
+                <p class="mt-2 mb-0 d-flex flex-wrap align-items-center gap-2 text-muted">
+                    <span class="fw-semibold text-info">{{ user.role_display|default:"Not set" }}</span>
+                    <span>|</span>
+                    {% if not user.is_active and user.has_pending_invitation %}
+                        <span class="badge rounded-pill text-uppercase um-status-badge um-status-pending">
+                            Pending Invitation
+                        </span>
+                    {% elif user.is_active %}
+                        <span class="badge rounded-pill text-uppercase um-status-badge um-status-active">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="badge rounded-pill text-uppercase um-status-badge um-status-inactive">
+                            Inactive
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="d-flex align-items-baseline gap-1 flex-wrap">
+                    <span class="text-muted">User ID:</span>
+                    <span class="fw-semibold text-dark">{{ user.id }}</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-baseline gap-1 flex-wrap">
+                    <span class="text-muted">Last Login:</span>
+                    <span class="fw-semibold text-dark">{{ user.last_login|date:"M d, Y H:i"|default:"Not set" }}</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-baseline gap-1 flex-wrap">
+                    <span class="text-muted">Access type:</span>
+                    <span class="fw-semibold text-dark">{{ user.access_type|title|default:"Not set" }}</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-baseline gap-1 flex-wrap">
+                    <span class="text-muted">Total logged hours:</span>
+                    <span class="fw-semibold text-dark">{{ user.total_logged_hours|default:"Not set" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-start">
+        <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+            <section class="um-card p-4">
+                <h4 class="h5 mb-0 text-muted">Account Information</h4>
+                <div class="um-section-divider my-3"></div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">First Name</span>
+                            <span class="fw-semibold text-dark">{{ user.first_name|title|default:"Not provided" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Last Name</span>
+                            <span class="fw-semibold text-dark">{{ user.last_name|title|default:"Not provided" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Email</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.email|default:"Not provided" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Phone number</span>
+                            <span class="fw-semibold text-dark">
+                                {% if user.phone_number %}
+                                    +({{ user.phone_country_iso }}) {{ user.phone_number }}
+                                {% else %}
+                                    Not provided
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Role</span>
+                            <span class="fw-semibold text-dark">{{ user.role_display|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">User languages</span>
+                            <span class="fw-semibold text-dark text-break">
+                                {% for language in user.user_languages.all %}
+                                    {{ language.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Not set
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Is staff</span>
+                            <span class="fw-semibold text-dark">{{ user.is_staff|yesno:"Yes,No" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Receive marketing emails</span>
+                            <span class="fw-semibold text-dark">{{ user.receive_marketing_emails|yesno:"Yes,No" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Created By</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.created_by|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Created At</span>
+                            <span class="fw-semibold text-dark">{{ user.created_at|date:"M d, Y H:i"|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Updated By</span>
+                            <span class="fw-semibold text-dark text-break">{{ user.updated_by|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Updated At</span>
+                            <span class="fw-semibold text-dark">{{ user.updated_at|date:"M d, Y H:i"|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {% if not user.hide_organisation_information %}
+                {% include 'dashboard-prefs-card.html' %}
+            {% endif %}
+        </div>
+
+        <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+            {% if not user.hide_organisation_information %}
+            <section class="um-card p-4">
+                <h4 class="h5 mb-0 text-muted">Organisation Information</h4>
+                <div class="um-section-divider my-3"></div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Organisation</span>
+                            <span class="fw-semibold text-dark text-break">
+                                {{ user.organisation_data.all.0.name|default:"Not set" }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">User groups</span>
+                            <span class="fw-semibold text-dark text-break">
+                                {% for group in user.work_groups.all %}
+                                    {{ group.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Not set
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Start date</span>
+                            <span class="fw-semibold text-dark">{{ user.start_date|date:"M d, Y"|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">End date</span>
+                            <span class="fw-semibold text-dark">{{ user.end_date|date:"M d, Y"|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Scheme</span>
+                            <span class="fw-semibold text-dark">{{ user.scheme.name|default:"Not set" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Factories</span>
+                            <span class="fw-semibold text-dark text-break">
+                                {% for factory in user.factories.all %}
+                                    {{ factory.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Not set
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Destinations</span>
+                            <span class="fw-semibold text-dark text-break">
+                                {% for destination in user.destinations.all %}
+                                    {{ destination.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Not set
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Immigration status</span>
+                            <span class="fw-semibold text-dark text-break">
+                                {% for status in user.immigration_status.all %}
+                                    {{ status.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Not set
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-1">
+                            <span class="text-muted small">Excluded origin countries</span>
+                            <span class="fw-semibold text-dark text-break">
+                                {% for country in user.excluded_origin_countries.all %}
+                                    {{ country.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Not set
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% else %}
+                {% include 'dashboard-prefs-card.html' %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
+{% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form %}
+{% include 'confirm-modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/user_management/common.js' %}"></script>
+<script src="{% static 'js/user_management/select-dropdown.js' %}"></script>
+<script src="{% static 'js/user_management/organization.js' %}"></script>
+<script src="{% static 'js/user_management/role-group-selector.js' %}"></script>
+<script src="{% static 'js/user_management/users.js' %}"></script>
+<script src="{% static 'js/user_management/roles.js' %}"></script>
+{% endblock %}

@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     AssignWorkCodeView,
     AssignUsersToWorkGroupsView,
+    AttachOrganizationsToGroupView,
     CreateAppUserView,
     CreateDashboardUserView,
     EditDashboardUserView,
@@ -21,19 +22,49 @@ from .views import (
     EditWorkCodeView,
     DeleteWorkCodeView,
     BulkDeleteUsersView,
-    BulkDeactivateUsersView,
+    BulkActivateDeactivateUsersView,
     BulkInviteUsersView,
+    CreateOrganizationGroupView,
+    EditOrganizationGroupView,
+    OrganizationGroupDetailsView,
+    RemoveOrganizationFromGroupView,
+    SyncOrganizationGroupPartnerConfigurationView,
+    UnassignWorkCodeView,
+    user_details
 )
 
 app_name = "user_management"
 
 urlpatterns = [
     path('', user_management, name="home"),
+    path('organization-groups/create/', CreateOrganizationGroupView.as_view(), name="create_organization_group"),
+    path(
+        'organization-groups/<int:organization_group_id>/edit/',
+        EditOrganizationGroupView.as_view(),
+        name="edit_organization_group",
+    ),
+    path('organization-groups/<int:organization_group_id>/', OrganizationGroupDetailsView.as_view(), name="organization_group_details"),
+    path(
+        'organization-groups/<int:organization_group_id>/attach-organizations/',
+        AttachOrganizationsToGroupView.as_view(),
+        name="attach_organizations_to_group",
+    ),
+    path(
+        'organization-groups/<int:organization_group_id>/organisations/<int:organisation_id>/sync-cms/',
+        SyncOrganizationGroupPartnerConfigurationView.as_view(),
+        name="sync_organization_group_partner_configuration",
+    ),
+    path(
+        'organization-groups/<int:organization_group_id>/organisations/<int:organisation_id>/detach/',
+        RemoveOrganizationFromGroupView.as_view(),
+        name="remove_organization_from_group",
+    ),
     path('organisations/create/', CreateOrganisationView.as_view(), name="create_organisation"),
     path('organisations/search/', search_organisations, name="search_organisations"),
     path('organisations/<int:organisation_id>/edit/', EditOrganisationView.as_view(), name="edit_organisation"),
     path('work-codes/create/', CreateWorkCodeView.as_view(), name="create_work_code"),
     path('work-codes/assign/', AssignWorkCodeView.as_view(), name="assign_work_code"),
+    path('work-codes/unassign/', UnassignWorkCodeView.as_view(), name="unassign_work_code"),
     path('work-groups/assign-users/', AssignUsersToWorkGroupsView.as_view(), name="assign_users_work_groups"),
     path('work-groups/create/', CreateWorkGroupView.as_view(), name="create_work_group"),
     path('app-users/create/', CreateAppUserView.as_view(), name="create_app_user"),
@@ -49,6 +80,7 @@ urlpatterns = [
     path('roles/create/', CreateOrganisationRoleView.as_view(), name="create_role"),
     path('roles/<int:role_id>/edit/', EditOrganisationRoleView.as_view(), name="edit_role"),
     path('roles/<int:role_id>/delete/', DeleteOrganisationRoleView.as_view(), name="delete_role"),
-    path('users/deactivate/', BulkDeactivateUsersView.as_view(), name="deactivate_users"),
+    path('users/activate/', BulkActivateDeactivateUsersView.as_view(), name="activate_users"),
     path('users/invite/', BulkInviteUsersView.as_view(), name="invite_users"),
+    path('users/<int:user_id>/', user_details, name="user_details"),
 ]

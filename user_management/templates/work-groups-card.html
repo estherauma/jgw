@@ -1,7 +1,7 @@
 {% load um_waffle_flags %}
 <div class="um-card" data-org-dependent>
     <div class="um-row">
-        <div class="um-card-title um-navy">Departments</div>
+        <div class="um-card-title um-navy">User groups</div>
         {% flag 'can_create_workgroup' %}
         <button
             class="um-btn um-navy"
@@ -9,7 +9,7 @@
             data-toggle="modal"
             data-target="#add-workgroup-modal"
         >
-            Create department
+            Create user group
         </button>
         {% endflag %}
     </div>

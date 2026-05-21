@@ -2,6 +2,7 @@ from django.db import transaction
 from jgwpandas import settings
 from preference.models import OrganisationAccessCode, OrganisationData
 from common.logger import KunfuPandaLogger
+from user_management.roles import add_default_org_roles
 import requests
 
 logger = KunfuPandaLogger(log_file="logs/add_organisation_data.log")
@@ -38,6 +39,7 @@ def add_organisation_data_to_db():
 
                         if created:
                             created_count += 1
+                            add_default_org_roles(obj)
                             logger.info(f"Created organization from API: {display_name} with code {code}")
                         else:
                             updated_count += 1

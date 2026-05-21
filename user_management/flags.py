@@ -10,6 +10,11 @@ UM_FLAG_DEFS = [
         "condition": "58_admin",
     },
     {
+        "name": "can_manage_organization_groups",
+        "label": "Manage organization groups",
+        "condition": "58_admin",
+    },
+    {
         "name": "can_create_work_code",
         "label": "Create work codes",
         "condition": "58_admin",
@@ -143,6 +148,16 @@ UM_FLAG_DEFS = [
         "name": "can_delete_user",
         "label": "Delete users",
         "condition": "org_admin",
+    },
+    {
+        "name": "can_add_organization_group",
+        "label": "Add organization groups",
+        "condition": "58_admin",
+    },
+    {
+        "name": "can_view_organization_group_page",
+        "label": "View organization group page",
+        "condition": "org_group_admin",
     },
 
 ]

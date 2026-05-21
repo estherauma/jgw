@@ -11,7 +11,7 @@ $('#inline-question-select-id').multiselect({ ... generalMultiSelectConfig });
 $('#messaging-question-select-id').multiselect({ ... generalMultiSelectConfig });
 $('#all-inline-question-select-id').multiselect({ ... generalMultiSelectConfig });
 $('#immigration_status').multiselect({ ... generalMultiSelectConfig, enableClickableOptGroups: true });
-
+$('#sectors_of_work').multiselect({ ... generalMultiSelectConfig });
 // Create User
 $('#create-new-user-destinations-id').multiselect({ ... generalMultiSelectConfig });
 $('#create-new-user-factory-farms-id').multiselect({ ... generalMultiSelectConfig });

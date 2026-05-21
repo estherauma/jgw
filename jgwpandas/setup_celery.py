@@ -29,4 +29,12 @@ celery_app.conf.beat_schedule = {
         "task": "fetch_summerberry_data",
         "schedule": crontab(minute=0, hour=0),  # everyday at midnight
     },
+    "sync-partner-configurations": {
+        "task": "sync_partner_configurations",
+        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
+    },
+    "sync-partner-config-options": {
+        "task": "sync_partner_config_options",
+        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
+    },
 }

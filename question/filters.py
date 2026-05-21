@@ -28,11 +28,19 @@ def generic_question_filtered_queryset(
     immigration_status=None,
     show_new_user_data=False,
 ):
-    if start_date is None:
-        start_date = get_date_13_months_ago()
+    user_start_date = get_user_start_date(current_user)
+    user_end_date = get_user_end_date(current_user)
 
-    if end_date is None:
-        end_date = datetime.now().date()
+    final_start_date = (
+        max(start_date, user_start_date)
+        if start_date and user_start_date
+        else (start_date or user_start_date or get_date_13_months_ago())
+    )
+    final_end_date = (
+        min(end_date, user_end_date)
+        if end_date and user_end_date
+        else (end_date or user_end_date or datetime.now().date())
+    )
 
     if destination_countries is None:
         destination_countries = []
@@ -60,6 +68,7 @@ def generic_question_filtered_queryset(
     generic_question_filters_q_object = Q()
 
     generic_question_filters_q_object &= Q(is_test_data=False)
+    generic_question_filters_q_object &= Q(api_created_at__range=(final_start_date, final_end_date))
 
     if user_orgs:
         user_org_names = [org.name for org in user_orgs]
@@ -69,9 +78,6 @@ def generic_question_filtered_queryset(
     if user_destinations:
         user_destination_q = Q(destination__in=user_destinations)
         generic_question_filters_q_object &= user_destination_q
-
-    if start_date and end_date:
-        generic_question_filters_q_object &= Q(api_created_at__range=(start_date, end_date))
 
     if destination_countries:
         preference_dest_q = Q(destination__name__in=destination_countries)
@@ -90,7 +96,11 @@ def generic_question_filtered_queryset(
         generic_question_filters_q_object &= preference_factory_farm_q
 
     if sector_of_work:
-        pass
+        selected_sectors = sector_of_work or []
+        if selected_sectors:
+            generic_question_filters_q_object &= Q(
+                preference__sectors_of_work__original_sector_of_work__value__in=selected_sectors
+            )
 
     if immigration_status:
         immigration_status_q = Q(immigration_status__name__in=immigration_status)
@@ -99,7 +109,7 @@ def generic_question_filtered_queryset(
         user_immigration_status_q = Q(immigration_status__in=user_immigration_status)
         generic_question_filters_q_object &= user_immigration_status_q
 
-    return queryset.filter(generic_question_filters_q_object)
+    return queryset.filter(generic_question_filters_q_object).distinct()
 
 
 def question_response_filtered_queryset(
@@ -253,7 +263,11 @@ def question_response_filtered_queryset(
         question_response_filters_q_object &= combined_factory_farm_q
 
     if sector_of_work:
-        pass
+        selected_sectors = sector_of_work or []
+        if selected_sectors:
+            question_response_filters_q_object &= Q(
+                inline_question__inline_question_standard__preference__sectors_of_work__original_sector_of_work__value__in=selected_sectors
+            )
 
     if immigration_status:
         immigration_status_q = Q(
@@ -266,7 +280,7 @@ def question_response_filtered_queryset(
         ) | Q(inline_question__inline_question_standard__immigration_status__in=user_immigration_status)
         question_response_filters_q_object &= user_immigration_status_q
 
-    return queryset.filter(question_response_filters_q_object)
+    return queryset.filter(question_response_filters_q_object).distinct()
 
 
 def message_data_sent_filtered_queryset(

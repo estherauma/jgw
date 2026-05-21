@@ -1,0 +1,224 @@
+{% extends 'core/layouts/base.html' %}
+{% load static %}
+{% load um_waffle_flags %}
+
+{% block title %}Organisation Group Details{% endblock %}
+
+{% block styles %}
+@import url("{% static 'user_management/css/common.css' %}");
+{% endblock %}
+
+{% block content %}
+<div class="my-3">
+    <a class="d-inline-flex align-items-center gap-2 fw-semibold text-info text-decoration-none" href="{% url 'user_management:home' %}">
+        <i class="bi bi-chevron-left"></i>
+        <span>Back</span>
+    </a>
+</div>
+
+<div class="um-page um-navy">
+    <div class="um-card mb-3">
+        <div class="um-row">
+            <div>
+                <h3 class="mb-1 text-dark">{{ organization_group.name }}</h3>
+                <div class="text-muted">Code: {{ organization_group.group_code }}</div>
+            </div>
+            {% flag 'can_add_organization_group' %}
+            <button
+                class="um-btn um-btn-outline-black"
+                type="button"
+                data-toggle="modal"
+                data-target="#edit-organization-group-modal"
+            >
+                Edit Group
+            </button>
+            {% endflag %}
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-start">
+        <div class="col-12 col-xl-7">
+            <div class="um-card">
+                <div class="um-card-title um-navy">Group Organisations</div>
+                <div class="um-table-scroll-wrapper mt-3">
+                    <div class="um-scrollbar">
+                        <div class="um-scrollbar-thumb"></div>
+                    </div>
+                    <div class="um-table-scroll">
+                        <table class="um-table table table-sm um-navy">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for organization in organizations %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <a
+                                            class="text-info text-decoration-none fw-semibold"
+                                            href="{% url 'user_management:home' %}?selected_org_id={{ organization.id }}"
+                                        >
+                                            {{ organization.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ organization.org_code }}</td>
+                                    <td class="">
+                                        {% flag 'can_add_organization_group' %}
+                                        <div class="d-flex justify-content-end gap-3">
+                                        {% if organization.org_code not in group_cms_sites_by_code %}
+                                        <a
+                                            class="um-btn um-btn-outline-pending um-btn-xs text-decoration-none"
+                                            href="#"
+                                            data-sync-group-cms-btn
+                                            data-org-name="{{ organization.name }}"
+                                            data-group-name="{{ organization_group.name }}"
+                                            data-sync-url="{% url 'user_management:sync_organization_group_partner_configuration' organization_group_id=organization_group.id organisation_id=organization.id %}"
+                                        >
+                                            Sync to CMS
+                                        </a>
+                                        {% endif %}
+                                        <a
+                                            class="um-btn um-btn-outline-black um-btn-xs text-decoration-none"
+                                            href="#"
+                                            data-remove-org-group-btn
+                                            data-org-name="{{ organization.name }}"
+                                            data-group-name="{{ organization_group.name }}"
+                                            data-remove-url="{% url 'user_management:remove_organization_from_group' organization_group_id=organization_group.id organisation_id=organization.id %}"
+                                        >
+                                            Remove
+                                        </a>
+                                        </div>
+                                        {% endflag %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4">No organisations added to this organisation group yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-5 d-flex flex-column gap-3">
+            {% if is_org_group_admin %}
+            <div class="um-card">
+                <div class="um-card-title um-navy">Group Administrators </div>
+                <div class="um-table-scroll-wrapper mt-3">
+                    <div class="um-scrollbar">
+                        <div class="um-scrollbar-thumb"></div>
+                    </div>
+                    <div class="um-table-scroll">
+                        <table class="um-table table table-sm um-navy">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <a
+                                            class="text-info text-decoration-none fw-semibold"
+                                            href="{% url 'user_management:user_details' user.id %}"
+                                        >
+                                            {% if user.first_name or user.last_name %}
+                                                {{ user.first_name }} {{ user.last_name }}
+                                            {% else %}
+                                                {{ user.email|default:"View" }}
+                                            {% endif %}
+                                        </a>
+                                    </td>
+                                    <td>{{ user.email|default:"-" }}</td>
+                                    <td>{{ user.role_display|default:"—" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4">No users in this organisation group yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% flag 'can_add_organization_group' %}
+            <div class="um-card">
+                <div class="um-row">
+                    <div class="um-card-title um-navy">Create New Organisation</div>
+                    <button
+                        class="um-btn um-btn-lime"
+                        type="button"
+                        data-toggle="modal"
+                        data-target="#create-org-modal"
+                    >
+                        Create Organisation
+                    </button>
+                </div>
+                <div class="text-muted mt-3">Creates the organisation directly inside this group.</div>
+            </div>
+
+            <div class="um-card">
+                <div class="um-card-title um-navy">Attach Existing Organisation</div>
+                {% url 'user_management:attach_organizations_to_group' organization_group_id=organization_group.id as attach_organizations_url %}
+                <form
+                    id="attach-organizations-to-group-form"
+                    class="mt-3"
+                    method="post"
+                    action="{{ attach_organizations_url }}"
+                    novalidate
+                >
+                    {% csrf_token %}
+                    <label class="um-field form-group">
+                        <span>Select organisations</span>
+                        {% include 'components/custom-select.html' with field=attach_organizations_form.organizations multiple=True placeholder='Select organisations' search_placeholder='Search organisation...' no_results_text='No organisations found.' %}
+                        <div class="text-danger small" data-error-for="organizations"></div>
+                    </label>
+                    <button
+                        type="submit"
+                        class="um-btn um-btn-lime mt-3 d-none"
+                        data-attach-organizations-submit
+                    >
+                        Attach Selected Organisations
+                    </button>
+                    <div class="alert alert-danger d-none mt-3 mb-0" id="attach-organizations-to-group-form-error" role="alert"></div>
+                    <div class="text-muted mt-2">Search and select one or more organisations to attach to this group.</div>
+                </form>
+            </div>
+            {% endflag %}
+        </div>
+    </div>
+</div>
+{% url 'user_management:create_organisation' as create_org_url %}
+{% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form organization_group_id=organization_group_id %}
+{% flag 'can_add_organization_group' %}
+{% url 'user_management:edit_organization_group' organization_group_id=organization_group.id as edit_organization_group_url %}
+{% include 'edit-organization-group-modal.html' with modal_title='Edit brand name' submit_label='Save changes' form_action=edit_organization_group_url form=edit_organization_group_form %}
+{% endflag %}
+{% include 'confirm-modal.html' %}
+<div class="um-fullscreen-loader d-none">
+    <div class="um-loader-spinner" role="status" aria-live="polite" aria-label="Loading"></div>
+    <span class="um-loader-text">Please wait...</span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/user_management/common.js' %}"></script>
+<script src="{% static 'js/user_management/image-picker.js' %}"></script>
+<script src="{% static 'js/user_management/select-dropdown.js' %}"></script>
+<script src="{% static 'js/user_management/organization.js' %}"></script>
+{% endblock %}

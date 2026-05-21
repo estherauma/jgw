@@ -1,3 +1,10 @@
+import json
+import logging
+
+from django.conf import settings
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from decouple import config
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -5,7 +12,10 @@ from rest_framework import status
 import requests
 from content.models import AggregatedContent
 from content.serializers import AggregatedContentSerializer
+from content.services.partner_configurations import sync_partner_configuration_item
 # from drf_yasg.utils import swagger_auto_schema
+
+logger = logging.getLogger(__name__)
 
 
 class ContentAPI:
@@ -124,3 +134,56 @@ class AggregatedContentView(APIView):
             }, status.HTTP_200_OK)
         except AggregatedContent.DoesNotExist:
             return Response({}, status.HTTP_200_OK)
+
+
+class ContentWebhookView(APIView):
+    webhook_handlers = {# todo: rremove this since patner config will be read only
+        "partner-configuration": {
+            "handler": sync_partner_configuration_item,
+            "events": ["entry.publish"],
+        },
+    }
+
+    def post(self, request):
+        try:
+            expected_secret = getattr(settings, "STRAPI_WEBHOOK_SECRET", None)
+            received_secret = request.headers.get("X-Secret")
+
+            if not expected_secret or received_secret != expected_secret:
+                logger.warning("Unauthorized webhook attempt", extra={"received_secret": received_secret})
+                return JsonResponse({"ok": False, "error": "Unauthorized"}, status=403)
+
+            try:
+                payload = json.loads(request.body.decode("utf-8") or "{}")
+            except json.JSONDecodeError:
+                logger.warning("Invalid JSON payload received in webhook")
+                return JsonResponse({"ok": False, "error": "Invalid JSON payload"}, status=400)
+
+            content_type = payload.get("model")
+            data = payload.get("entry")
+            event = payload.get("event")
+
+            if not isinstance(data, dict):
+                logger.warning("Invalid webhook item payload")
+                return JsonResponse({"ok": False, "error": "Invalid webhook item payload"}, status=400)
+
+            handler_config = self.webhook_handlers.get(content_type)
+            if not handler_config:
+                return JsonResponse(
+                    {"ok": False, "error": f"No webhook handler for content type: {content_type}"},
+                    status=400,
+                )
+
+            allowed_events = handler_config.get("events", [])
+            if event not in allowed_events:
+                logger.info(f"Ignored event '{event}' for content type: {content_type}")
+                return JsonResponse({"ok": True, "message": f"Event '{event}' ignored for '{content_type}'"})
+
+            handler = handler_config.get("handler")
+            logger.info(f"Received {event} event for content type: {content_type}, data: {data}")
+
+            result = handler(data)
+            return JsonResponse({"ok": True, "data": result})
+        except Exception:
+            logger.exception("Unexpected error while handling content webhook")
+            return JsonResponse({"ok": False, "error": "Failed to process webhook"}, status=500)

@@ -21,7 +21,7 @@ services:
 
   web:
     image: fiftyeight/jgw-pandas-staging:latest
-    command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py create_super_user && python manage.py initialize_feature_tags && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py create_super_user && python manage.py initialize_feature_tags &&	python manage.py sync_partner_config_options && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     env_file:

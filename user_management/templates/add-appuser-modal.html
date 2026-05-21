@@ -15,7 +15,7 @@
                     {{ form.non_field_errors }}
                 </div>
              {% endif %}
-            <form id="{{ action_type }}-appuser-form" method="post" action="{{ form_action }}">
+            <form id="{{ action_type }}-appuser-form" method="post" action="{{ form_action }}" novalidate>
                 {% csrf_token %}
                 <div class="modal-body um-modal-grid">
                     <input
@@ -29,6 +29,7 @@
                         Organisation: <span class="fw-bold" data-appuser-org-label>None selected</span>
                     </div>
                     {% endflag %}
+                    {% if action_type == 'add' %}
                     <label class="um-field form-group um-field-inline">
                         {{ form.send_invite }}<span>Send invitation email/sms</span>
                         <div class="text-danger small" data-error-for="send_invite"></div>
@@ -36,9 +37,10 @@
                             <div class="text-danger small">{{ form.send_invite.errors }}</div>
                         {% endif %}
                     </label>
+                    {% endif %}
                     <label class="um-field form-group um-field-full">
                         <span>Role</span>
-                        {{ form.role }}
+                        {% include 'components/custom-select.html' with field=form.role placeholder='Select role' search_placeholder='Search roles...' no_results_text='No roles found.' %}
                         <small class="um-helper">Workers will not have access to the dashboard.</small>
                         <div class="text-danger small" data-error-for="role"></div>
                         {% if form.role.errors %}
@@ -58,7 +60,7 @@
                         <span>Phone number (optional)</span>
                         <div class="phone-field align-items-center">
                             <div class="w-25 phone-code">
-                                {{ form.phone_country_iso }}
+                                {% include 'components/custom-select.html' with field=form.phone_country_iso placeholder='Code' search_placeholder='Search code...' no_results_text='No country codes found.' %}
                                 <div class="text-danger small" data-error-for="phone_country_iso"></div>
                                 {% if form.phone_country_iso.errors %}
                                     <div class="text-danger small">{{ form.phone_country_iso.errors }}</div>
@@ -90,13 +92,9 @@
                         {% endif %}
                     </label>
                     <div class="um-field form-group">
-                        <span>Departments (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll" data-work-groups-container>
-                            {% if form.work_groups and form.work_groups.field.queryset %}
-                                {{ form.work_groups }}
-                            {% else %}
-                                <p>No departments available.</p>
-                            {% endif %}
+                        <span>User groups (optional)</span>
+                        <div data-work-groups-container>
+                            {% include 'components/custom-select.html' with field=form.work_groups multiple=True placeholder='Select user groups' search_placeholder='Search user groups...' no_results_text='No user groups available.' %}
                         </div>
                         <div class="text-danger small" data-error-for="work_groups"></div>
                         {% if form.work_groups.errors %}

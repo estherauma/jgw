@@ -89,11 +89,23 @@ msgstr "None selected"
 msgid "genericFilterFormImmigrationStatusSearch"
 msgstr "Search"
 
-#: core/forms.py:185
+#: core/forms.py:188
+msgid "genericFilterFormSectorsOfWorkLabel"
+msgstr "Sectors of work"
+
+#: core/forms.py:192
+msgid "genericFilterFormSectorsOfWorkNoneSelected"
+msgstr "None selected"
+
+#: core/forms.py:193
+msgid "genericFilterFormSectorsOfWorkSearch"
+msgstr "Search"
+
+#: core/forms.py:203
 msgid "dateRangeFormStartDate"
 msgstr "Start Date"
 
-#: core/forms.py:196
+#: core/forms.py:214
 msgid "dateRangeFormEndDate"
 msgstr "End Date"
 

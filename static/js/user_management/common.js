@@ -128,7 +128,7 @@
   window.handleErrors = handleErrors;
 
   function toggleFullScreenLoader(show) {
-    var loader = document.querySelector('[data-um-loader]');
+    var loader = document.querySelector('.um-fullscreen-loader');
     if (!loader) {
       return;
     }
@@ -161,6 +161,7 @@
     var messageEl = modal.querySelector('[data-message]');
     if (messageEl) {
       messageEl.innerHTML = options.message || 'Are you sure you want to delete this item?';
+      messageEl.className = 'um-navy' + (options.messageClass ? ' ' + options.messageClass : '');
     }
 
     var warningEl = modal.querySelector('[data-warning]');
@@ -177,7 +178,7 @@
 
     confirmBtn.onclick = async function () {
       const confirmBtn = modal.querySelector('[data-confirm-btn]');
-      const loader = document.getElementById('um-fullscreen-loader');
+      const loader = document.querySelector('.um-fullscreen-loader');
       confirmBtn.disabled = true;
       if (options.showFullScreenLoader && loader) {
         loader.classList.remove('d-none');

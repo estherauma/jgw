@@ -61,7 +61,7 @@ def fetch_chapters_feedback_from_api_to_db():
         try:
             add_chapter_feedback_to_db(chapter_feedback)
         except Exception as e:
-            print("An error occurred during inline questions creation:", str(e))
+            print("An error occurred during chapters feedback import:", str(e))
             transaction.set_rollback(True)
             raise
     kunfu_panda_logger.info(f"Added {len(chapters_feedback)} chapters feedback to the database")
@@ -237,9 +237,17 @@ def add_chapter_feedback_to_db(chapter_feedback):
                         immigration_status_chapter_title=immigration_status_title,
                     )
                 else:
-                    chapter_instance, _ = Chapter.objects.get_or_create(
-                        number_key=feedback_data_key, destination=destination_data
-                    )
+                    chapter_instance = Chapter.objects.filter(
+                        number_key=feedback_data_key,
+                        destination=destination_data,
+                        origin=origin_data,
+                    ).first()
+                    if chapter_instance is None:
+                        chapter_instance = Chapter.objects.create(
+                            number_key=feedback_data_key,
+                            destination=destination_data,
+                            origin=origin_data,
+                        )
                     ChaptersFeedback.objects.create(
                         feedback_standard=chapters_feedback_standard,
                         feedback_question=feedback_question,

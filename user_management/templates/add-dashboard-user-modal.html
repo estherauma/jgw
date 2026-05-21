@@ -10,7 +10,7 @@
             </div>
             <div class="alert alert-danger d-none" id="{{ action_type }}-dashboard-user-form-error" role="alert"></div>
             <div class="um-modal-divider"></div>
-            <form id="{{ action_type }}-dashboard-user-form" method="post" action="{{ form_action }}">
+            <form id="{{ action_type }}-dashboard-user-form" method="post" action="{{ form_action }}" novalidate>
                 {% csrf_token %}
                 <div class="modal-body um-modal-grid">
                     {% if form.non_field_errors %}
@@ -25,6 +25,7 @@
                             <div class="text-danger small">{{ form.is_active.errors }}</div>
                         {% endif %}
                     </label>
+                    {% if action_type == 'add' %}
                     <label class="um-field form-group um-field-inline mb-3">
                         {{ form.send_invite }}<span>Send invitation email/sms</span>
                         <div class="text-danger small" data-error-for="send_invite"></div>
@@ -32,12 +33,21 @@
                             <div class="text-danger small">{{ form.send_invite.errors }}</div>
                         {% endif %}
                     </label>
+                    {% endif %}
                     <label class="um-field form-group">
                         <span>Email</span>
                         {{ form.email }}
                         <div class="text-danger small" data-error-for="email"></div>
                         {% if form.email.errors %}
                             <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </label>
+                    <label class="um-field form-group">
+                        <span>Roles & Permissions</span>
+                        {% include 'components/custom-select.html' with field=form.groups multiple=True placeholder='Select roles and permissions' search_placeholder='Search roles and permissions...' no_results_text='No roles found.' %}
+                        <div class="text-danger small" data-error-for="groups"></div>
+                        {% if form.groups.errors %}
+                            <div class="text-danger small">{{ form.groups.errors }}</div>
                         {% endif %}
                     </label>
                     <label class="um-field form-group">
@@ -56,7 +66,7 @@
                             <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>Start date (optional)</span>
                         {{ form.start_date }}
                         <div class="text-danger small" data-error-for="start_date"></div>
@@ -64,7 +74,7 @@
                             <div class="text-danger small">{{ form.start_date.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>End date (optional)</span>
                         {{ form.end_date }}
                         <div class="text-danger small" data-error-for="end_date"></div>
@@ -72,79 +82,65 @@
                             <div class="text-danger small">{{ form.end_date.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
-                        <span>Roles & Permissions (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll">
-                            {{ form.groups }}
-                        </div>
-                        <div class="text-danger small" data-error-for="groups"></div>
-                        {% if form.groups.errors %}
-                            <div class="text-danger small">{{ form.groups.errors }}</div>
+                    <label class="um-field form-group d-none" data-dashboard-org-group-field>
+                        <span>Organisation group</span>
+                        {% include 'components/custom-select.html' with field=form.organisation_group placeholder='Select organisation group' search_placeholder='Search organisation groups...' no_results_text='No organisation groups found.' %}
+                        <div class="text-danger small" data-error-for="organisation_group"></div>
+                        {% if form.organisation_group.errors %}
+                            <div class="text-danger small">{{ form.organisation_group.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
-                        <span>Organization (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll">
-                            {{ form.organisation_data }}
-                        </div>
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
+                        <span>Organisation (optional)</span>
+                        {% include 'components/custom-select.html' with field=form.organisation_data multiple=True placeholder='Select organisations' search_placeholder='Search organisations...' no_results_text='No organisations found.' %}
                         <div class="text-danger small" data-error-for="organisation_data"></div>
                         {% if form.organisation_data.errors %}
                             <div class="text-danger small">{{ form.organisation_data.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>Factories (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll">
-                            {{ form.factories }}
-                        </div>
+                        {% include 'components/custom-select.html' with field=form.factories multiple=True placeholder='Select factories' search_placeholder='Search factories...' no_results_text='No factories found.' %}
                         <div class="text-danger small" data-error-for="factories"></div>
                         {% if form.factories.errors %}
                             <div class="text-danger small">{{ form.factories.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>Scheme (optional)</span>
-                        {{ form.scheme }}
+                        {% include 'components/custom-select.html' with field=form.scheme placeholder='Select scheme' search_placeholder='Search schemes...' no_results_text='No schemes found.' %}
                         <div class="text-danger small" data-error-for="scheme"></div>
                         {% if form.scheme.errors %}
                             <div class="text-danger small">{{ form.scheme.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>Destinations (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll">
-                            {{ form.destinations }}
-                        </div>
+                        {% include 'components/custom-select.html' with field=form.destinations multiple=True placeholder='Select destinations' search_placeholder='Search destinations...' no_results_text='No destinations found.' %}
                         <div class="text-danger small" data-error-for="destinations"></div>
                         {% if form.destinations.errors %}
                             <div class="text-danger small">{{ form.destinations.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>Excluded origin countries (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll">
-                            {{ form.excluded_origin_countries }}
-                        </div>
+                        {% include 'components/custom-select.html' with field=form.excluded_origin_countries multiple=True placeholder='Select excluded origin countries' search_placeholder='Search origin countries...' no_results_text='No origin countries found.' %}
                         <div class="text-danger small" data-error-for="excluded_origin_countries"></div>
                         {% if form.excluded_origin_countries.errors %}
                             <div class="text-danger small">{{ form.excluded_origin_countries.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>User languages (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll">
-                            {{ form.user_languages }}
-                        </div>
+                        {% include 'components/custom-select.html' with field=form.user_languages multiple=True placeholder='Select user languages' search_placeholder='Search languages...' no_results_text='No languages found.' %}
                         <div class="text-danger small" data-error-for="user_languages"></div>
                         {% if form.user_languages.errors %}
                             <div class="text-danger small">{{ form.user_languages.errors }}</div>
                         {% endif %}
                     </label>
-                    <label class="um-field form-group">
+                    <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>Immigration status (optional)</span>
-                        <div class="um-checkbox-list um-checkbox-list-scroll">
-                            {{ form.immigration_status }}
-                        </div>
+                        {% include 'components/custom-select.html' with field=form.immigration_status multiple=True placeholder='Select immigration statuses' search_placeholder='Search immigration statuses...' no_results_text='No immigration statuses found.' %}
                         <div class="text-danger small" data-error-for="immigration_status"></div>
                         {% if form.immigration_status.errors %}
                             <div class="text-danger small">{{ form.immigration_status.errors }}</div>
