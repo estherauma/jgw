@@ -1,0 +1,34 @@
+{% load i18n %}
+<div class="user-insights-follow-up-block" data-depth="{{ depth|default:1 }}">
+    <div class="user-insights-follow-up-question">
+        <span class="user-insights-follow-up-code">{{ question.code }}</span>
+        <span class="user-insights-follow-up-text">{{ question.text }}</span>
+    </div>
+    <div class="user-insights-option-list" role="list">
+        {% for option in question.options %}
+        <div class="user-insights-option-wrap" role="listitem" data-option-id="{{ option.id }}">
+            <button
+                type="button"
+                class="user-insights-option-row{% if option.selected %} is-selected{% endif %}"
+                data-option-id="{{ option.id }}"
+                data-option-label="{{ option.label }}"
+                data-panel-id="{{ panel_id }}"
+            >
+                <span class="user-insights-option-label">{{ option.label }}</span>
+                <span class="user-insights-option-count">{{ option.count }}/{{ option.total }}</span>
+            </button>
+            {% if option.follow_up %}
+            <div
+                class="user-insights-follow-up-branch{% if not option.selected %} d-none{% endif %}"
+                data-branch-for="{{ option.id }}"
+            >
+                <span class="user-insights-branch-connector" aria-hidden="true"></span>
+                {% with depth=depth|add:1 %}
+                {% include "preference/includes/user_insights_follow_up.html" with question=option.follow_up panel_id=panel_id depth=depth %}
+                {% endwith %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>

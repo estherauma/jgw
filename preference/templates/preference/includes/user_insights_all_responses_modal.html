@@ -1,0 +1,59 @@
+{% load i18n %}
+<div
+    class="modal fade user-insights-all-responses-modal"
+    id="user-insights-all-responses-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="user-insights-all-responses-modal-title"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered user-insights-all-responses-dialog" role="document">
+        <div class="modal-content user-insights-all-responses-content">
+            <div class="modal-body user-insights-all-responses-body">
+                <div class="user-insights-all-responses-head">
+                    <div class="user-insights-all-responses-head-main">
+                        <div class="user-insights-all-responses-title-row">
+                            <h4 class="user-insights-all-responses-title chart-main-title" id="user-insights-all-responses-modal-title">
+                                {% translate "userInsightsAllResponses" %}
+                            </h4>
+                            <span class="user-insights-all-responses-subtitle" id="user-insights-all-responses-count"></span>
+                        </div>
+                        <nav class="user-insights-all-responses-breadcrumb" id="user-insights-all-responses-breadcrumb" aria-label="{% translate 'userInsightsAllResponsesBreadcrumbAria' %}"></nav>
+                    </div>
+                    <div class="user-insights-all-responses-search-wrap">
+                        <span class="user-insights-all-responses-search-icon" aria-hidden="true"><i class="mdi mdi-magnify"></i></span>
+                        <input
+                            type="search"
+                            class="user-insights-all-responses-search"
+                            id="user-insights-all-responses-search"
+                            placeholder="{% translate 'userInsightsAllResponsesSearchPlaceholder' %}"
+                            autocomplete="off"
+                            aria-label="{% translate 'userInsightsAllResponsesSearchAria' %}"
+                        />
+                    </div>
+                </div>
+                <div class="user-insights-all-responses-table-wrap">
+                    <table class="user-insights-all-responses-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="user-insights-all-responses-th-date">
+                                    <span>{% translate "userInsightsAllResponsesColDate" %}</span>
+                                    <span class="user-insights-all-responses-sort-icon" aria-hidden="true"><i class="mdi mdi-menu-down"></i></span>
+                                </th>
+                                <th scope="col">{% translate "userInsightsAllResponsesColId" %}</th>
+                                <th scope="col">{% translate "userInsightsNativeResponseHeader" %}</th>
+                                <th scope="col">{% translate "userInsightsTranslationEnglishHeader" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-insights-all-responses-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="user-insights-all-responses-footer">
+                    <button type="button" class="user-insights-all-responses-close-btn" data-bs-dismiss="modal">
+                        {% translate "userInsightsAllResponsesClose" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
