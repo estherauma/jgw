@@ -13,11 +13,7 @@ thead {
     overflow-y: auto;
 }
 
- .um-modal .modal-dialog,
-  .um-modal .modal-content,
-  .um-modal .modal-body {
-    overflow: visible;
-  }
+
 .um-modal .um-select {
     position: relative;
     z-index: 1;
