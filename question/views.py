@@ -728,6 +728,9 @@ def export_payment_inline_questions(request):
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
     response["Content-Disposition"] = "attachment; filename=payment_inline_questions.xlsx"
+    return response
+
+
 def export_lead_questions_with_followups(request):
     """
     Exports lead questions with their follow-up and follow-up-to-follow-up questions to Excel
