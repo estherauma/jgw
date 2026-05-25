@@ -653,7 +653,7 @@ class EditOrganisationView(View):
                     small_icon_file=form.cleaned_data.get("small_icon_file"),
                 )
             except FileUploadError as exc:
-                return JsonResponse({"ok": False, "error": str(exc)}, status=400)   
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
 
             organisation = form.save(commit=False)
             if uploaded_icon_urls.get("big_icon"):
@@ -663,6 +663,11 @@ class EditOrganisationView(View):
                 organisation.small_icon = uploaded_icon_urls["small_icon"].get("url", "")
                 organisation.small_icon_cms_media_id = uploaded_icon_urls["small_icon"].get("id")
             organisation.updated_by = request.user
+            UserActivityService.log_organisation_updated(
+                actor=request.user,
+                organisation_id=organisation_id,
+                organisation=organisation,
+            )
             organisation.save()
 
             has_existing_access_code = organisation.organisation_access_codes.exists()
@@ -683,11 +688,6 @@ class EditOrganisationView(View):
                 organization=organisation,
                 languages=form.cleaned_data.get("collection_languages", []),
                 user=request.user,
-            )
-            UserActivityService.log_organisation_updated(
-                actor=request.user,
-                organisation_id=organisation_id,
-                organisation=organisation,
             )
             warning_message = None
 
