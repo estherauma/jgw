@@ -16,7 +16,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content fullscreen-chart-modal">
             <div class="modal-header">
-                <h4 class="modal-title" id="fullscreen-modal-label">Monthly Active Users</h4>
+                <h4 class="modal-title" id="fullscreen-modal-label">{% translate "userOverviewMonthlyActiveUsersTitle" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
@@ -60,7 +60,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content fullscreen-chart-modal">
             <div class="modal-header">
-                <h4 class="modal-title" id="origin-fullscreen-modal-label">User by Origin Country</h4>
+                <h4 class="modal-title" id="origin-fullscreen-modal-label">{% translate "userOverviewUsersByOriginCountryTitle" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
@@ -94,7 +94,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content fullscreen-chart-modal">
             <div class="modal-header">
-                <h4 class="modal-title" id="gender-fullscreen-modal-label">User by Gender</h4>
+                <h4 class="modal-title" id="gender-fullscreen-modal-label">{% translate "userOverviewUsersByGenderTitle" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
@@ -128,7 +128,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content fullscreen-chart-modal">
             <div class="modal-header">
-                <h4 class="modal-title" id="destination-fullscreen-modal-label">User Destination Country</h4>
+                <h4 class="modal-title" id="destination-fullscreen-modal-label">{% translate "userOverviewUsersByDestinationCountryTitle" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
@@ -230,7 +230,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content fullscreen-chart-modal">
             <div class="modal-header">
-                <h4 class="modal-title" id="immigration-status-fullscreen-modal-label">{% translate "userOverviewUsersByImmigrationStatusTitle" %}</h4>
+                <h4 class="modal-title" id="immigration-status-fullscreen-modal-label">{% translate "userOverviewAreaOfInterestTitle" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
@@ -486,7 +486,7 @@
                     <div data-chart-id="monthly_active_users" id="chart-monthly_active_users">
                     <div class="chart-header">
                         <div class="chart-header-left">
-                            <h4 class="chart-main-title">Monthly Active Users</h4>
+                            <h4 class="chart-main-title">{% translate "userOverviewMonthlyActiveUsersTitle" %}</h4>
                             <div class="chart-metrics">
                                 <div class="metric-item">
                                     <span class="metric-label">New Users:</span>
@@ -527,7 +527,7 @@
                 <div data-chart-id="users_by_origin_country" id="chart-users_by_origin_country">
                 <div class="chart-header">
                     <div class="chart-header-left">
-                        <h4 class="chart-main-title">User Origin Country</h4>
+                        <h4 class="chart-main-title">{% translate "userOverviewUsersByOriginCountryTitle" %}</h4>
                     </div>
                     <div class="chart-header-actions">
                         <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-origin-fullscreen-modal">
@@ -559,7 +559,7 @@
                 <div data-chart-id="users_by_gender" id="chart-users_by_gender">
                 <div class="chart-header">
                     <div class="chart-header-left">
-                        <h4 class="chart-main-title">User by Gender</h4>
+                        <h4 class="chart-main-title">{% translate "userOverviewUsersByGenderTitle" %}</h4>
                     </div>
                     <div class="chart-header-actions">
                         <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-gender-fullscreen-modal">
@@ -591,7 +591,7 @@
                 <div data-chart-id="users_by_destination_country" id="chart-users_by_destination_country">
                 <div class="chart-header">
                     <div class="chart-header-left">
-                        <h4 class="chart-main-title">User Destination Country</h4>
+                        <h4 class="chart-main-title">{% translate "userOverviewUsersByDestinationCountryTitle" %}</h4>
                     </div>
                     <div class="chart-header-actions">
                         <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-destination-fullscreen-modal">
@@ -688,7 +688,7 @@
                 <div data-chart-id="users_by_immigration_status" id="chart-users_by_immigration_status">
                 <div class="chart-header" style="margin-bottom: 0;">
                     <div class="chart-header-left">
-                        <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewUsersByImmigrationStatusTitle" %}</h4>
+                        <h4 class="chart-main-title" style="margin-bottom: 8px;">{% translate "userOverviewAreaOfInterestTitle" %}</h4>
                     </div>
                     <div class="chart-header-actions">
                         <button class="fullscreen-btn" title="Fullscreen" data-bs-toggle="modal" data-bs-target="#users-by-immigration-status-fullscreen-modal">

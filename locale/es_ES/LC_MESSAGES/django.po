@@ -412,8 +412,8 @@ msgstr ""
 "trabajando cuando usan la aplicación por primera vez."
 
 #: preference/templates/preference/user_overview.html:198
-msgid "userOverviewUsersByImmigrationStatusTitle"
-msgstr "Usuarios por estatus migratorio"
+msgid "userOverviewAreaOfInterestTitle"
+msgstr "Área de interés"
 
 #: preference/templates/preference/user_overview.html:202
 msgid "userOverviewUsersByImmigrationStatusTooltip"

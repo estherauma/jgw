@@ -408,8 +408,8 @@ msgstr ""
 "use the app."
 
 #: preference/templates/preference/user_overview.html:198
-msgid "userOverviewUsersByImmigrationStatusTitle"
-msgstr "Users by immigration status"
+msgid "userOverviewAreaOfInterestTitle"
+msgstr "Area of Interest"
 
 #: preference/templates/preference/user_overview.html:202
 msgid "userOverviewUsersByImmigrationStatusTooltip"
