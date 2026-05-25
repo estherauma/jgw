@@ -264,7 +264,6 @@ class CreateOrganisationView(View):
                 )
             except FileUploadError as exc:
                 return JsonResponse({"ok": False, "error": str(exc)}, status=400)
-
             organisation = form.save(commit=False)
             if organization_group:
                 organisation.organization_group = organization_group
@@ -294,7 +293,7 @@ class CreateOrganisationView(View):
             UserActivityService.log_organisation_created(
                 actor=request.user,
                 organisation=organisation,
-                after_snapshot=UserActivityService.organisation_snapshot(organisation),
+                after_state=UserActivityService.organisation_state(organisation),
             )
             warning_message = None
             
@@ -306,6 +305,7 @@ class CreateOrganisationView(View):
                     request,
                     "Organisation was created, but partner configuration sync to CMS failed.",
                 )
+
             return JsonResponse(
                 {"ok": True, "org_id": organisation.id, "warning": warning_message}
             )
@@ -644,7 +644,8 @@ class EditOrganisationView(View):
                 {"ok": False, "error": "Organisation not found."},
                 status=404,
             )
-        before_snapshot = UserActivityService.organisation_snapshot(organisation)
+        org_before_update = OrganisationData.objects.get(pk=organisation_id)
+        before_state = UserActivityService.organisation_state(org_before_update)
         form = CreateOrganisationForm(request.POST, request.FILES, instance=organisation)
         if form.is_valid():
             try:
@@ -654,7 +655,7 @@ class EditOrganisationView(View):
                     small_icon_file=form.cleaned_data.get("small_icon_file"),
                 )
             except FileUploadError as exc:
-                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)   
 
             organisation = form.save(commit=False)
             if uploaded_icon_urls.get("big_icon"):
@@ -685,12 +686,13 @@ class EditOrganisationView(View):
                 languages=form.cleaned_data.get("collection_languages", []),
                 user=request.user,
             )
-            after_snapshot = UserActivityService.organisation_snapshot(organisation)
+            org_after_update = OrganisationData.objects.get(pk=organisation_id)
+            after_state = UserActivityService.organisation_state(org_after_update)
             UserActivityService.log_organisation_updated(
                 actor=request.user,
-                organisation=organisation,
-                before_snapshot=before_snapshot,
-                after_snapshot=after_snapshot,
+                organisation=org_before_update,
+                before_state=before_state,
+                after_state=after_state,
             )
             warning_message = None
 

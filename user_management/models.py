@@ -137,7 +137,7 @@ class UserActivity(models.Model):
     organisation = models.ForeignKey(
         OrganisationData, on_delete=models.SET_NULL, null=True, blank=True, related_name="activity_logs"
     )
-    summary = models.TextField()
+    message = models.TextField()
     changes = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

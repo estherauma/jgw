@@ -3,9 +3,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from django.db import models
-
 from user_management.models import UserActivity
-
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +15,8 @@ class UserActivityService:
     def _normalize(cls, value):
         if isinstance(value, models.Model):
             return value.pk
+        if hasattr(value, "all") and callable(getattr(value, "all")):
+            return [cls._normalize(item) for item in value.all()]
         if isinstance(value, (datetime, date)):
             return value.isoformat()
         if isinstance(value, Decimal):
@@ -28,9 +28,10 @@ class UserActivityService:
         return value
 
     @classmethod
-    def organisation_snapshot(cls, organisation):
+    def organisation_state(cls, organisation):
         if not organisation:
             return {}
+            
         access_code = (
             organisation.organisation_access_codes.order_by("created_at", "id")
             .values_list("code", flat=True)
@@ -39,6 +40,7 @@ class UserActivityService:
         collection_languages = list(
             organisation.collection_languages.order_by("code").values_list("code", flat=True)
         )
+        
         data = {
             "name": organisation.name,
             "org_code": organisation.org_code,
@@ -85,14 +87,15 @@ class UserActivityService:
         record_type,
         record_id,
         organisation=None,
-        summary,
+        message,
         changes=None,
     ):
-        if not summary:
+        if not message:
             return None
 
         actor_user = actor if getattr(actor, "is_authenticated", False) else None
         payload_changes = changes or {"before": {}, "after": {}}
+        
         if "before" not in payload_changes or "after" not in payload_changes:
             payload_changes = {
                 "before": payload_changes.get("before", {}),
@@ -106,7 +109,7 @@ class UserActivityService:
                 record_type=record_type,
                 record_id=str(record_id),
                 organisation=organisation,
-                summary=summary,
+                message=message,
                 changes=payload_changes,
             )
         except Exception:
@@ -119,33 +122,29 @@ class UserActivityService:
             return None
 
     @classmethod
-    def log_organisation_created(cls, *, actor, organisation, after_snapshot=None):
-        after_snapshot = after_snapshot or cls.organisation_snapshot(organisation)
+    def log_organisation_created(cls, *, actor, organisation, after_state=None):
+        after_state = after_state or cls.organisation_state(organisation)
         return cls.log_action(
             actor=actor,
             action=UserActivity.Action.CREATED,
             record_type=cls.ORGANISATION_RECORD_TYPE,
             record_id=organisation.id,
             organisation=organisation,
-            summary=f'Created organisation "{organisation.name}"',
-            changes={"before": {}, "after": after_snapshot},
+            message=f'Created organisation "{organisation.name}"',
+            changes={"before": {}, "after": after_state},
         )
 
     @classmethod
-    def log_organisation_updated(cls, *, actor, organisation, before_snapshot, after_snapshot):
-        changes = cls.build_changes(before_snapshot, after_snapshot)
-        if not changes["before"] and not changes["after"]:
-            changes = {
-                "before": before_snapshot or {},
-                "after": after_snapshot or {},
-            }
+    def log_organisation_updated(cls, *, actor, organisation, before_state=None, after_state=None):
+        changes = cls.build_changes(before_state, after_state)
+        # Cleaned up: Removed heavy snapshot fallback if no changes occurred.
         return cls.log_action(
             actor=actor,
             action=UserActivity.Action.UPDATED,
             record_type=cls.ORGANISATION_RECORD_TYPE,
             record_id=organisation.id,
             organisation=organisation,
-            summary=f'Updated organisation "{organisation.name}"',
+            message=f'Updated organisation "{organisation.name}"',
             changes=changes,
         )
 
@@ -157,7 +156,7 @@ class UserActivityService:
         organisation_id,
         organisation_name,
         organisation=None,
-        before_snapshot=None,
+        before_state=None,
     ):
         return cls.log_action(
             actor=actor,
@@ -165,6 +164,6 @@ class UserActivityService:
             record_type=cls.ORGANISATION_RECORD_TYPE,
             record_id=organisation_id,
             organisation=organisation,
-            summary=f'Deleted organisation "{organisation_name}"',
-            changes={"before": before_snapshot or {}, "after": {}},
+            message=f'Deleted organisation "{organisation_name}"',
+            changes={"before": before_state or {}, "after": {}},
         )
