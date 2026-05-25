@@ -3,6 +3,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from django.db import models
+from django.forms.models import model_to_dict
 from user_management.models import UserActivity
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,8 @@ class UserActivityService:
         if not organisation:
             return {}
             
+        state_data = model_to_dict(organisation)
+        
         access_code = (
             organisation.organisation_access_codes.order_by("created_at", "id")
             .values_list("code", flat=True)
@@ -41,23 +44,10 @@ class UserActivityService:
             organisation.collection_languages.order_by("code").values_list("code", flat=True)
         )
         
-        data = {
-            "name": organisation.name,
-            "org_code": organisation.org_code,
-            "display_name": organisation.display_name,
-            "has_custom_content": organisation.has_custom_content,
-            "content_collection": organisation.content_collection,
-            "default_collection_language": organisation.default_collection_language,
-            "work_sector": organisation.work_sector,
-            "custom_type": organisation.custom_type,
-            "theme": organisation.theme,
-            "default_report_issue_emails": organisation.default_report_issue_emails,
-            "default_feedback_emails": organisation.default_feedback_emails,
-            "organization_group_id": organisation.organization_group_id,
-            "access_code": access_code,
-            "collection_languages": collection_languages,
-        }
-        return {key: cls._normalize(value) for key, value in data.items()}
+        state_data["access_code"] = access_code
+        state_data["collection_languages"] = collection_languages
+        
+        return {key: cls._normalize(value) for key, value in state_data.items()}
 
     @classmethod
     def build_changes(cls, before=None, after=None):
