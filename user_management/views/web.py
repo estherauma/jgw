@@ -10,7 +10,7 @@ import phonenumbers
 import json
 from preference.models import OrganizationGroup, OrganisationAccessCode, OrganisationData, SiteLanguages
 
-from .forms import (
+from ..forms import (
     AddWorkCodeForm,
     AppUserForm,
     AttachOrganizationsToGroupForm,
@@ -23,19 +23,19 @@ from .forms import (
     WorkGroupForm,
     UsersWorkGroupAssignForm,
 )
-from .invitations import send_invitation
-from .decorators import group_required
-from .models import (
+from ..invitations import send_invitation
+from ..decorators import group_required
+from ..models import (
     OrganisationRole,
     OrganisationRoleAssignment,
     WorkGroup,
     ShortLink,
 )
-from .roles import add_default_org_roles, apply_role_to_user
-from .services.organization import OrganizationService
-from .services.user import get_user_role_display, get_users_query
-from .permissions import is_flag_active
-from .utils import (
+from ..roles import add_default_org_roles, apply_role_to_user
+from ..services.organization import OrganizationService
+from ..services.user import get_user_role_display, get_users_query
+from ..permissions import is_flag_active
+from ..utils import (
     get_active_role,
     is_58_admin,
     is_org_admin,
