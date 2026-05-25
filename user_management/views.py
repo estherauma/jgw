@@ -644,8 +644,6 @@ class EditOrganisationView(View):
                 {"ok": False, "error": "Organisation not found."},
                 status=404,
             )
-        org_before_update = OrganisationData.objects.get(pk=organisation_id)
-        before_state = UserActivityService.organisation_state(org_before_update)
         form = CreateOrganisationForm(request.POST, request.FILES, instance=organisation)
         if form.is_valid():
             try:
@@ -686,13 +684,10 @@ class EditOrganisationView(View):
                 languages=form.cleaned_data.get("collection_languages", []),
                 user=request.user,
             )
-            org_after_update = OrganisationData.objects.get(pk=organisation_id)
-            after_state = UserActivityService.organisation_state(org_after_update)
             UserActivityService.log_organisation_updated(
                 actor=request.user,
-                organisation=org_before_update,
-                before_state=before_state,
-                after_state=after_state,
+                organisation_id=organisation_id,
+                organisation=organisation,
             )
             warning_message = None
 

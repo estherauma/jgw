@@ -135,14 +135,21 @@ class UserActivityService:
         )
 
     @classmethod
-    def log_organisation_updated(cls, *, actor, organisation, before_state=None, after_state=None):
+    def log_organisation_updated(cls, *, actor, organisation_id, organisation):
+        try:
+            db_current = organisation.__class__.objects.get(pk=organisation_id)
+            before_state = cls.organisation_state(db_current)
+        except Exception:
+            before_state = {}
+
+        after_state = cls.organisation_state(organisation)
         changes = cls.build_changes(before_state, after_state)
-        # Cleaned up: Removed heavy snapshot fallback if no changes occurred.
+
         return cls.log_action(
             actor=actor,
             action=UserActivity.Action.UPDATED,
             record_type=cls.ORGANISATION_RECORD_TYPE,
-            record_id=organisation.id,
+            record_id=str(organisation_id),
             organisation=organisation,
             message=f'Updated organisation "{organisation.name}"',
             changes=changes,
