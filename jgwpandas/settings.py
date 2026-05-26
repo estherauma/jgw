@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # installed packages (3rd party)
     "rest_framework",
+    "drf_spectacular",
     "crispy_forms",
     "crispy_bootstrap5",
     "debug_toolbar",
@@ -188,6 +189,17 @@ HTML_MINIFY = True
 AUTH_USER_MODEL = "users.User"
 
 LOGIN_URL = "/accounts/login/"
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "JGW Data platform API",
+    "DESCRIPTION": "API documentation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

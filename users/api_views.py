@@ -1,9 +1,24 @@
 from django.db import transaction
+from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from users.api_serializers import (
+    ErrorResponseSerializer,
+    FormErrorResponseSerializer,
+    LoginRequestSerializer,
+    LoginResponseSerializer,
+    RefreshTokenRequestSerializer,
+    RefreshTokenResponseSerializer,
+    RegisterUserRequestSerializer,
+    RegisterUserResponseSerializer,
+    ResendRegistrationCodeRequestSerializer,
+    ResendRegistrationCodeResponseSerializer,
+    VerifyRegistrationCodeRequestSerializer,
+    VerifyRegistrationCodeResponseSerializer,
+)
 from users.forms import APIAppUserForm, APIDashboardUserForm
 from users.services.authentication import (
     create_registration_verification_code,
@@ -24,6 +39,57 @@ class RegisterUserApiView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Register a new user",
+        description=(
+            "Creates an inactive app or dashboard user, then sends a verification code by email "
+            "or SMS depending on the contact details provided."
+        ),
+        request=RegisterUserRequestSerializer,
+        responses={
+            201: RegisterUserResponseSerializer,
+            400: FormErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "App registration with email",
+                value={
+                    "access_type": "app",
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "email": "john.doe@example.com",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "App registration with phone",
+                value={
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "phone_number": "0781590902",
+                    "phone_country_iso": "UG",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Dashboard registration",
+                value={
+                    "access_type": "dashboard",
+                    "first_name": "Jane",
+                    "last_name": "Admin",
+                    "email": "jane.admin@example.com",
+                    "password1": "StrongPassword123!",
+                },
+                request_only=True,
+            ),
+        ],
+    )
     def post(self, request):
         try:
             access_type = (
@@ -67,7 +133,7 @@ class RegisterUserApiView(APIView):
                         },
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     )
-        except Exception as e:
+        except Exception:
             return Response(
                 {
                     "ok": False,
@@ -91,6 +157,36 @@ class LoginApiView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Log in",
+        description="Authenticates a user with email or phone number and returns JWT tokens.",
+        request=LoginRequestSerializer,
+        responses={
+            200: LoginResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Login with email",
+                value={
+                    "email": "login@example.com",
+                    "password": "StrongPassword123!",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Login with phone",
+                value={
+                    "phone_number": "0781590902",
+                    "phone_country_iso": "UG",
+                    "password": "StrongPassword123!",
+                },
+                request_only=True,
+            ),
+        ],
+    )
     def post(self, request):
         try:
             result = login_api_user(
@@ -130,6 +226,23 @@ class RefreshTokenApiView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Refresh access token",
+        request=RefreshTokenRequestSerializer,
+        responses={
+            200: RefreshTokenResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Refresh token request",
+                value={"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."},
+                request_only=True,
+            )
+        ],
+    )
     def post(self, request):
         try:
             result = refresh_api_access_token(
@@ -167,6 +280,36 @@ class VerifyRegistrationCodeApiView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Verify registration code",
+        description="Verifies the code sent during registration and activates the user account.",
+        request=VerifyRegistrationCodeRequestSerializer,
+        responses={
+            200: VerifyRegistrationCodeResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Verify with email",
+                value={
+                    "email": "john.doe@example.com",
+                    "code": "AXRDP5",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Verify with phone",
+                value={
+                    "phone_number": "0781590902",
+                    "phone_country_iso": "UG",
+                    "code": "AXRDP5",
+                },
+                request_only=True,
+            ),
+        ],
+    )
     def post(self, request):
         try:
             result = verify_registration_code(
@@ -198,6 +341,32 @@ class ResendRegistrationCodeApiView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Resend registration code",
+        description="Sends a fresh registration verification code to the user's email or phone.",
+        request=ResendRegistrationCodeRequestSerializer,
+        responses={
+            200: ResendRegistrationCodeResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Resend with email",
+                value={"email": "john.doe@example.com"},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Resend with phone",
+                value={
+                    "phone_number": "0781590902",
+                    "phone_country_iso": "UG",
+                },
+                request_only=True,
+            ),
+        ],
+    )
     def post(self, request):
         try:
             result = resend_registration_verification_code(

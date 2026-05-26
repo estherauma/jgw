@@ -15,7 +15,7 @@ from common.const.value_const import (
 )
 from user_management.sms import send_sms
 from user_management.utils import normalize_phone_number_for_lookup
-from users.models import User, UserSession, UserVerificationCode
+from users.models import User, UserVerificationCode
 from users.tasks import send_email_notification
 
 
