@@ -15,17 +15,9 @@ from user_management.utils import (
 def assign_default_app_registration_membership(user, organisation):
     add_default_org_roles(organisation)
     worker_role = organisation.roles.filter(name__iexact="Worker").first()
-    if not worker_role:
-        raise ValueError("Default Worker role was not found for this organisation.")
-
-    worker_work_group, _ = WorkGroup.objects.get_or_create(
-        organisation=organisation,
-        name="Worker",
-    )
     user.organisation_data.add(organisation)
     apply_role_to_user(user, organisation, worker_role)
-    user.work_groups.add(worker_work_group)
-    return {"role": worker_role, "work_group": worker_work_group}
+    return {"role": worker_role}
 
 
 def get_user_role_display(user, selected_org=None):
