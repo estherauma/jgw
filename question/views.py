@@ -293,8 +293,16 @@ def export_inline_question_data(request):
         ws.cell(row=4, column=idx, value=header)
 
     for idx, data in enumerate(inline_data, start=5):
-        created_at = data["created_at"]
-        updated_at = data["updated_at"]
+        created_at = (
+            timezone.localtime(data["created_at"]).strftime("%Y-%m-%d %H:%M:%S")
+            if data["created_at"]
+            else None
+        )
+        updated_at = (
+            timezone.localtime(data["updated_at"]).strftime("%Y-%m-%d %H:%M:%S")
+            if data["updated_at"]
+            else None
+        )
         route_value = data["route"] if data["route"] else None
         language_value = data["language"] if data["language"] else None
         origin_value = data["origin"] if data["origin"] else None

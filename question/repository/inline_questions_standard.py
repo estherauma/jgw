@@ -381,12 +381,8 @@ def get_all_inline_question_responses_data(**filters):
         data.append(
             {
                 "device_id": response["inline_question__inline_question_standard__device_id"],
-                "created_at": response["inline_question__inline_question_standard__api_created_at"].strftime(
-                    "%Y-%m-%d"
-                ),
-                "updated_at": response["inline_question__inline_question_standard__api_updated_at"].strftime(
-                    "%Y-%m-%d"
-                ),
+                "created_at": response["inline_question__inline_question_standard__api_created_at"],
+                "updated_at": response["inline_question__inline_question_standard__api_updated_at"],
                 "language": response["inline_question__inline_question_standard__language__name"],
                 "origin": response["inline_question__inline_question_standard__origin__name"],
                 "destination": response["inline_question__inline_question_standard__destination__name"],
