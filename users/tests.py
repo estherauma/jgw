@@ -25,7 +25,7 @@ from .forms import (
     UserMgtForm,
 )
 from .models import User, UserInvitations, UserVerificationCode
-from django.utils.translation import gettext as _ 
+from django.utils.translation import gettext as _
 
 
 class AuthTests(TestCase):
