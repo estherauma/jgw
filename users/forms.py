@@ -8,9 +8,9 @@ from common.helpers.model_helpers.preference import get_unique_langaues_list
 
 from preference.models import Country, ImmigrationStatus, FactoryFarm, OrganisationData
 from user_management.utils import (
-    add_user_phone_validation_errors,
     clean_user_email,
     get_country_code_choices,
+    validate_user_phone_number,
 )
 
 from .models import User, UserInvitations
@@ -471,5 +471,5 @@ class APIAppUserForm(forms.ModelForm):
         phone_number = (cleaned.get("phone_number") or "").strip()
         if not email and not phone_number:
             raise forms.ValidationError("Provide either an email or phone number for app users.")
-        add_user_phone_validation_errors(self, cleaned)
+        validate_user_phone_number(self, cleaned)
         return cleaned

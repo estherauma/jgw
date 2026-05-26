@@ -145,7 +145,7 @@ def clean_user_email(email, instance=None, required=False):
     return normalized_email
 
 
-def add_password_confirmation_error(
+def validate_password_confirmation(
     form,
     cleaned_data,
     password_field="password",
@@ -157,7 +157,7 @@ def add_password_confirmation_error(
         form.add_error(confirmation_field, "Passwords do not match.")
 
 
-def add_user_phone_validation_errors(
+def validate_user_phone_number(
     form,
     cleaned_data,
     phone_field="phone_number",
@@ -166,6 +166,7 @@ def add_user_phone_validation_errors(
     phone_number = (cleaned_data.get(phone_field) or "").strip()
     country_iso = (cleaned_data.get(country_field) or "").strip()
     if not phone_number:
+        cleaned_data[country_field] = None
         return cleaned_data
 
     if not country_iso:

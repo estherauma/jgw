@@ -24,11 +24,11 @@ from .models import (
 )
 from .flags import UM_FLAG_DEFS
 from .utils import (
-    add_password_confirmation_error,
-    add_user_phone_validation_errors,
     clean_user_email,
     get_country_code_choices,
     is_org_admin_or_staff,
+    validate_password_confirmation,
+    validate_user_phone_number,
 )
 
 
@@ -605,7 +605,7 @@ class DashboardUserForm(forms.ModelForm):
         is_org_group_admin = "org_group_admin" in selected_group_names
         is_58_admin_selected = "58_admin" in selected_group_names
 
-        add_password_confirmation_error(self, cleaned, "password", "password_confirm")
+        validate_password_confirmation(self, cleaned, "password", "password_confirm")
 
         if is_58_admin_selected:
             cleaned["organisation_group"] = None
@@ -736,7 +736,7 @@ class AppUserForm(forms.ModelForm):
         role = cleaned.get("role")
         phone_number = cleaned.get("phone_number", "") or ""
         email = (cleaned.get("email") or "").strip()
-        add_password_confirmation_error(self, cleaned, "password", "password_confirm")
+        validate_password_confirmation(self, cleaned, "password", "password_confirm")
         if role and not role.grants_dashboard_access and not email and not phone_number:
             self.add_error(
                 "email",
@@ -744,7 +744,7 @@ class AppUserForm(forms.ModelForm):
             )
         if role and role.grants_dashboard_access and not email:
             self.add_error("email", "Email is required for dashboard users.")
-        add_user_phone_validation_errors(self, cleaned)
+        validate_user_phone_number(self, cleaned)
         return cleaned
 
 

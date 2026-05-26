@@ -10,7 +10,7 @@ from django.urls import reverse
 from dashboard.models import Factory, Scheme
 from preference.models import OrganisationData
 from user_management.models import WorkGroup
-from users.services.registration import (
+from users.services.authentication import (
     REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
     create_registration_verification_code,
 )
@@ -335,7 +335,7 @@ class RegistrationApiTests(TestCase):
     @patch("users.api_views.send_registration_verification_email")
     def test_register_user_sends_verification_email(self, send_email_mock, init_prefs_mock):
         with patch(
-            "users.services.registration.generate_registration_verification_code",
+            "users.services.authentication.generate_registration_verification_code",
             return_value="AB23CD45",
         ):
             response = self.client.post(
@@ -381,6 +381,30 @@ class RegistrationApiTests(TestCase):
         )
 
     @patch("users.api_views.send_registration_verification_email")
+    def test_register_user_ignores_phone_country_iso_without_phone_number(self, send_email_mock):
+        with patch(
+            "users.services.authentication.generate_registration_verification_code",
+            return_value="AB23CD45",
+        ):
+            response = self.client.post(
+                reverse("user_management_api:register_user_api"),
+                data={
+                    "first_name": "No",
+                    "last_name": "Phone",
+                    "email": "nophone@example.com",
+                    "phone_country_iso": "UG",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+            )
+
+        self.assertEqual(response.status_code, 201)
+        user = User.all_objects.get(email="nophone@example.com")
+        self.assertIsNone(user.phone_country_iso)
+        self.assertIsNone(response.json()["phone_country_iso"])
+        send_email_mock.assert_called_once()
+
+    @patch("users.api_views.send_registration_verification_email")
     def test_register_user_returns_validation_errors(self, send_email_mock):
         response = self.client.post(
             reverse("user_management_api:register_user_api"),
@@ -419,7 +443,7 @@ class RegistrationApiTests(TestCase):
     @patch("users.api_views.send_registration_verification_email")
     def test_register_user_respects_provided_access_type(self, send_email_mock, init_prefs_mock):
         with patch(
-            "users.services.registration.generate_registration_verification_code",
+            "users.services.authentication.generate_registration_verification_code",
             return_value="AB23CD45",
         ):
             response = self.client.post(
@@ -443,7 +467,7 @@ class RegistrationApiTests(TestCase):
     @patch("users.api_views.send_registration_verification_email")
     def test_verify_registration_code_activates_user(self, send_email_mock, init_prefs_mock):
         with patch(
-            "users.services.registration.generate_registration_verification_code",
+            "users.services.authentication.generate_registration_verification_code",
             return_value="AB23CD45",
         ):
             self.client.post(
@@ -480,7 +504,7 @@ class RegistrationApiTests(TestCase):
     def test_register_app_user_with_phone_only_sends_sms(self, send_sms_mock):
         send_sms_mock.return_value = True
         with patch(
-            "users.services.registration.generate_registration_verification_code",
+            "users.services.authentication.generate_registration_verification_code",
             return_value="AB23CD45",
         ):
             response = self.client.post(
@@ -529,7 +553,7 @@ class RegistrationApiTests(TestCase):
         user.refresh_from_db()
         self.assertFalse(user.is_active)
 
-    @patch("users.services.registration.generate_registration_verification_code", return_value="AB23CD45")
+    @patch("users.services.authentication.generate_registration_verification_code", return_value="AB23CD45")
     def test_verify_registration_code_rejects_wrong_code(self, _code_mock):
         user = User.objects.create_user(
             email="wrongcode@example.com",
@@ -572,7 +596,7 @@ class RegistrationApiTests(TestCase):
     def test_verify_registration_code_accepts_phone_number(self, send_sms_mock):
         send_sms_mock.return_value = True
         with patch(
-            "users.services.registration.generate_registration_verification_code",
+            "users.services.authentication.generate_registration_verification_code",
             return_value="AB23CD45",
         ):
             self.client.post(
@@ -602,7 +626,7 @@ class RegistrationApiTests(TestCase):
     def test_verify_registration_code_accepts_local_phone_with_country_iso(self, send_sms_mock):
         send_sms_mock.return_value = True
         with patch(
-            "users.services.registration.generate_registration_verification_code",
+            "users.services.authentication.generate_registration_verification_code",
             return_value="AB23CD45",
         ):
             self.client.post(
@@ -633,7 +657,7 @@ class RegistrationApiTests(TestCase):
     def test_verify_registration_code_requires_country_iso_for_local_phone(self, send_sms_mock):
         send_sms_mock.return_value = True
         with patch(
-            "users.services.registration.generate_registration_verification_code",
+            "users.services.authentication.generate_registration_verification_code",
             return_value="AB23CD45",
         ):
             self.client.post(
@@ -660,8 +684,8 @@ class RegistrationApiTests(TestCase):
         self.assertEqual(response.json()["ok"], False)
         self.assertEqual(response.json()["error"], "Select a country code.")
 
-    @patch("users.services.registration.send_registration_verification_email")
-    @patch("users.services.registration.generate_registration_verification_code", return_value="ZX12CV")
+    @patch("users.services.authentication.send_registration_verification_email")
+    @patch("users.services.authentication.generate_registration_verification_code", return_value="ZX12CV")
     def test_resend_registration_code_by_email(self, _code_mock, send_email_mock):
         user = User.objects.create_user(
             email="resend@example.com",
@@ -683,8 +707,8 @@ class RegistrationApiTests(TestCase):
         self.assertIn("new verification code", response.json()["message"].lower())
         send_email_mock.assert_called_once_with(user, "ZX12CV")
 
-    @patch("users.services.registration.send_registration_verification_sms")
-    @patch("users.services.registration.generate_registration_verification_code", return_value="ZX12CV")
+    @patch("users.services.authentication.send_registration_verification_sms")
+    @patch("users.services.authentication.generate_registration_verification_code", return_value="ZX12CV")
     def test_resend_registration_code_by_local_phone(self, _code_mock, send_sms_mock):
         send_sms_mock.return_value = True
         user = User.objects.create_user(
@@ -722,7 +746,7 @@ class RegistrationApiTests(TestCase):
         self.assertEqual(response.json()["ok"], False)
         self.assertEqual(response.json()["error"], "Provide a user ID, email or phone number.")
 
-    @patch("users.services.registration.send_registration_verification_email")
+    @patch("users.services.authentication.send_registration_verification_email")
     def test_resend_registration_code_for_verified_user(self, send_email_mock):
         user = User.objects.create_user(
             email="verified@example.com",
@@ -740,6 +764,161 @@ class RegistrationApiTests(TestCase):
         self.assertEqual(response.json()["message"], "Contact already verified.")
         self.assertEqual(response.json()["user_id"], user.id)
         send_email_mock.assert_not_called()
+
+
+class LoginApiTests(AuthTests):
+    def setUp(self):
+        super().setUp()
+        self.password = "StrongPassword123!"
+        self.user = User.objects.create_user(
+            email="login@example.com",
+            password=self.password,
+            is_active=True,
+            access_type="dashboard",
+        )
+
+    def test_login_api_returns_user_payload_and_updates_last_login(self):
+        self.assertIsNone(self.user.last_login)
+        response = self.client.post(
+            reverse("user_management_api:login_api"),
+            data={
+                "email": "login@example.com",
+                "password": self.password,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        self.assertEqual(response.json()["message"], "Login successful.")
+        self.assertIn("access_token", response.json())
+        self.assertIn("refresh_token", response.json())
+        self.assertIn("access_expires_at", response.json())
+        self.assertIn("refresh_expires_at", response.json())
+        self.assertEqual(response.json()["user_id"], self.user.id)
+        self.assertEqual(response.json()["email"], "login@example.com")
+        self.assertIsNone(response.json()["phone_number"])
+        self.assertIsNone(response.json()["phone_country_iso"])
+        self.assertEqual(response.json()["access_type"], "dashboard")
+        self.user.refresh_from_db()
+        self.assertIsNotNone(self.user.last_login)
+
+    def test_login_api_rejects_invalid_password(self):
+        response = self.client.post(
+            reverse("user_management_api:login_api"),
+            data={
+                "email": "login@example.com",
+                "password": "wrong-password",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Invalid login credentials.")
+
+    def test_login_api_rejects_inactive_user(self):
+        inactive_user = User.objects.create_user(
+            email="inactive@example.com",
+            password=self.password,
+            is_active=False,
+        )
+
+        response = self.client.post(
+            reverse("user_management_api:login_api"),
+            data={
+                "email": "inactive@example.com",
+                "password": self.password,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Account is not active.")
+        inactive_user.refresh_from_db()
+        self.assertIsNone(inactive_user.last_login)
+
+    def test_login_api_allows_worker_user(self):
+        worker_group, _ = Group.objects.get_or_create(name="worker")
+        worker_user = User.objects.create_user(
+            email="worker-api@example.com",
+            password=self.password,
+            is_active=True,
+            access_type="app",
+        )
+        worker_user.groups.add(worker_group)
+
+        response = self.client.post(
+            reverse("user_management_api:login_api"),
+            data={
+                "email": "worker-api@example.com",
+                "password": self.password,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        self.assertEqual(response.json()["user_id"], worker_user.id)
+        self.assertEqual(response.json()["access_type"], "app")
+        self.assertIn("access_token", response.json())
+        self.assertIn("refresh_token", response.json())
+
+    def test_login_api_allows_phone_login(self):
+        phone_user = User.objects.create_user(
+            email=None,
+            password=self.password,
+            is_active=True,
+            access_type="app",
+            phone_number="+256781590905",
+            phone_country_iso="UG",
+        )
+
+        response = self.client.post(
+            reverse("user_management_api:login_api"),
+            data={
+                "phone_number": "0781590905",
+                "phone_country_iso": "UG",
+                "password": self.password,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        self.assertEqual(response.json()["user_id"], phone_user.id)
+        self.assertIsNone(response.json()["email"])
+        self.assertEqual(response.json()["phone_number"], "+256781590905")
+        self.assertEqual(response.json()["phone_country_iso"], "UG")
+        self.assertIn("access_token", response.json())
+        self.assertIn("refresh_token", response.json())
+
+    def test_refresh_token_api_returns_new_tokens(self):
+        login_response = self.client.post(
+            reverse("user_management_api:login_api"),
+            data={
+                "email": "login@example.com",
+                "password": self.password,
+            },
+        )
+
+        refresh_response = self.client.post(
+            reverse("user_management_api:refresh_token_api"),
+            data={"refresh_token": login_response.json()["refresh_token"]},
+        )
+
+        self.assertEqual(refresh_response.status_code, 200)
+        self.assertEqual(refresh_response.json()["ok"], True)
+        self.assertEqual(refresh_response.json()["message"], "Token refreshed successfully.")
+        self.assertIn("access_token", refresh_response.json())
+        self.assertIn("refresh_token", refresh_response.json())
+        self.assertEqual(refresh_response.json()["user_id"], self.user.id)
+
+    def test_refresh_token_api_rejects_invalid_token(self):
+        response = self.client.post(
+            reverse("user_management_api:refresh_token_api"),
+            data={"refresh_token": "not-a-real-token"},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Invalid refresh token.")
 
     def test_set_password_OK(self):
         response = self.client.post(
