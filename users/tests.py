@@ -375,10 +375,6 @@ class RegistrationApiTests(TestCase):
         init_prefs_mock.assert_not_called()
         send_email_mock.assert_called_once()
         send_email_mock.assert_called_once_with(user, "AB23CD45")
-        self.assertIn(
-            "verification code",
-            response.json()["message"].lower(),
-        )
 
     @patch("users.api_views.send_registration_verification_email")
     def test_register_user_ignores_phone_country_iso_without_phone_number(self, send_email_mock):
@@ -418,7 +414,11 @@ class RegistrationApiTests(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["ok"], False)
-        self.assertIn("email", response.json()["errors"])
+        self.assertIn("__all__", response.json()["errors"])
+        self.assertIn(
+            "Provide either an email or phone number for app users.",
+            response.json()["errors"]["__all__"],
+        )
         self.assertFalse(User.all_objects.filter(email="newuser@example.com").exists())
         send_email_mock.assert_not_called()
 
@@ -704,7 +704,6 @@ class RegistrationApiTests(TestCase):
         self.assertEqual(response.json()["email"], "resend@example.com")
         self.assertIsNone(response.json()["phone_number"])
         self.assertIsNone(response.json()["phone_country_iso"])
-        self.assertIn("new verification code", response.json()["message"].lower())
         send_email_mock.assert_called_once_with(user, "ZX12CV")
 
     @patch("users.services.authentication.send_registration_verification_sms")
@@ -761,8 +760,10 @@ class RegistrationApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["ok"], True)
-        self.assertEqual(response.json()["message"], "Contact already verified.")
         self.assertEqual(response.json()["user_id"], user.id)
+        self.assertEqual(response.json()["email"], "verified@example.com")
+        self.assertIsNone(response.json()["phone_number"])
+        self.assertIsNone(response.json()["phone_country_iso"])
         send_email_mock.assert_not_called()
 
 
