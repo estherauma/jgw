@@ -778,7 +778,7 @@ class LoginApiTests(AuthTests):
             access_type="dashboard",
         )
 
-    def test_login_api_returns_user_payload_and_updates_last_login(self):
+    def test_login_api_returns_tokens_and_updates_last_login(self):
         self.assertIsNone(self.user.last_login)
         response = self.client.post(
             reverse("user_management_api:login_api"),
@@ -790,16 +790,12 @@ class LoginApiTests(AuthTests):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["ok"], True)
-        self.assertEqual(response.json()["message"], "Login successful.")
-        self.assertIn("access_token", response.json())
-        self.assertIn("refresh_token", response.json())
-        self.assertIn("access_expires_at", response.json())
-        self.assertIn("refresh_expires_at", response.json())
-        self.assertEqual(response.json()["user_id"], self.user.id)
-        self.assertEqual(response.json()["email"], "login@example.com")
-        self.assertIsNone(response.json()["phone_number"])
-        self.assertIsNone(response.json()["phone_country_iso"])
-        self.assertEqual(response.json()["access_type"], "dashboard")
+        self.assertEqual(
+            set(response.json().keys()),
+            {"ok", "access_token", "refresh_token"},
+        )
+        self.assertTrue(response.json()["access_token"])
+        self.assertTrue(response.json()["refresh_token"])
         self.user.refresh_from_db()
         self.assertIsNotNone(self.user.last_login)
 
@@ -857,10 +853,12 @@ class LoginApiTests(AuthTests):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["ok"], True)
-        self.assertEqual(response.json()["user_id"], worker_user.id)
-        self.assertEqual(response.json()["access_type"], "app")
-        self.assertIn("access_token", response.json())
-        self.assertIn("refresh_token", response.json())
+        self.assertEqual(
+            set(response.json().keys()),
+            {"ok", "access_token", "refresh_token"},
+        )
+        self.assertTrue(response.json()["access_token"])
+        self.assertTrue(response.json()["refresh_token"])
 
     def test_login_api_allows_phone_login(self):
         phone_user = User.objects.create_user(
@@ -883,12 +881,14 @@ class LoginApiTests(AuthTests):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["ok"], True)
-        self.assertEqual(response.json()["user_id"], phone_user.id)
-        self.assertIsNone(response.json()["email"])
-        self.assertEqual(response.json()["phone_number"], "+256781590905")
-        self.assertEqual(response.json()["phone_country_iso"], "UG")
-        self.assertIn("access_token", response.json())
-        self.assertIn("refresh_token", response.json())
+        self.assertEqual(
+            set(response.json().keys()),
+            {"ok", "access_token", "refresh_token"},
+        )
+        self.assertTrue(response.json()["access_token"])
+        self.assertTrue(response.json()["refresh_token"])
+        phone_user.refresh_from_db()
+        self.assertIsNotNone(phone_user.last_login)
 
     def test_refresh_token_api_returns_new_tokens(self):
         login_response = self.client.post(
@@ -906,7 +906,6 @@ class LoginApiTests(AuthTests):
 
         self.assertEqual(refresh_response.status_code, 200)
         self.assertEqual(refresh_response.json()["ok"], True)
-        self.assertEqual(refresh_response.json()["message"], "Token refreshed successfully.")
         self.assertIn("access_token", refresh_response.json())
         self.assertIn("refresh_token", refresh_response.json())
         self.assertEqual(refresh_response.json()["user_id"], self.user.id)
