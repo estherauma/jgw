@@ -5,6 +5,8 @@
 ### Django ###
 *.log
 *.pot
+# Compiled gettext catalogs — build on deploy with: python manage.py compilemessages
+**/LC_MESSAGES/*.mo
 *.pyc
 __pycache__/
 local_settings.py

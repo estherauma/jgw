@@ -50,6 +50,7 @@ class Command(BaseCommand):
             {"condition": "testers", "tag": "can_view_gender_chart_on_messaging_question_page"},
             {"condition": "testers", "tag": "can_view_organisation_chart_on_messaging_question_page"},
             {"condition": "testers", "tag": "can_view_inline_questions_page"},
+            {"condition": "testers", "tag": "can_view_user_insights_page"},
             {"condition": "testers", "tag": "can_view_new_monthly_users_chart"},
             {"condition": "testers", "tag": "can_view_get_users_by_country_state_chart"},
             {"condition": "testers", "tag": "can_view_get_users_by_sector_chart"},
