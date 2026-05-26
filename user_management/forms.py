@@ -1,7 +1,6 @@
 import json
 from django import forms
 from django.contrib.auth.models import Group
-import phonenumbers
 import re
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -25,9 +24,11 @@ from .models import (
 )
 from .flags import UM_FLAG_DEFS
 from .utils import (
+    add_password_confirmation_error,
+    add_user_phone_validation_errors,
+    clean_user_email,
     get_country_code_choices,
     is_org_admin_or_staff,
-    validate_phone_number,
 )
 
 
@@ -589,21 +590,14 @@ class DashboardUserForm(forms.ModelForm):
             self.initial["organisation_group"] = self.instance.organization_group_id
 
     def clean_email(self):
-        email = self.cleaned_data.get("email") or ""
-        email = email.strip().lower()
-        if not email:
-            raise forms.ValidationError("Email is required")
-        qs = User.all_objects.filter(email__iexact=email)
-        if self.instance and self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise forms.ValidationError("Email already exists.")
-        return email
+        return clean_user_email(
+            self.cleaned_data.get("email"),
+            instance=self.instance,
+            required=True,
+        )
 
     def clean(self):
         cleaned = super().clean()
-        password = cleaned.get("password")
-        password_confirm = cleaned.get("password_confirm")
         admin_groups = cleaned.get("groups")
         organisation_group = cleaned.get("organisation_group")
         organisation_data = cleaned.get("organisation_data")
@@ -611,9 +605,7 @@ class DashboardUserForm(forms.ModelForm):
         is_org_group_admin = "org_group_admin" in selected_group_names
         is_58_admin_selected = "58_admin" in selected_group_names
 
-        if password or password_confirm:
-            if password != password_confirm:
-                self.add_error("password_confirm", "Passwords do not match.")
+        add_password_confirmation_error(self, cleaned, "password", "password_confirm")
 
         if is_58_admin_selected:
             cleaned["organisation_group"] = None
@@ -737,28 +729,14 @@ class AppUserForm(forms.ModelForm):
             self.fields["work_groups"].queryset = work_groups_qs
 
     def clean_email(self):
-        email = (self.cleaned_data.get("email") or "").strip().lower()
-        if not email:
-            return None
-        qs = User.all_objects.filter(email__iexact=email)
-
-        if self.instance and self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise forms.ValidationError("Email already exists.")
-        return email
+        return clean_user_email(self.cleaned_data.get("email"), instance=self.instance)
 
     def clean(self):
         cleaned = super().clean()
         role = cleaned.get("role")
         phone_number = cleaned.get("phone_number", "") or ""
-        phone_country_iso = cleaned.get("phone_country_iso", "") or ""
         email = (cleaned.get("email") or "").strip()
-        password = cleaned.get("password")
-        password_confirm = cleaned.get("password_confirm")
-        if password or password_confirm:
-            if password != password_confirm:
-                self.add_error("password_confirm", "Passwords do not match.")
+        add_password_confirmation_error(self, cleaned, "password", "password_confirm")
         if role and not role.grants_dashboard_access and not email and not phone_number:
             self.add_error(
                 "email",
@@ -766,31 +744,7 @@ class AppUserForm(forms.ModelForm):
             )
         if role and role.grants_dashboard_access and not email:
             self.add_error("email", "Email is required for dashboard users.")
-        if phone_number and not phone_country_iso:
-            self.add_error("phone_country_iso", "Select a country code.")
-            return cleaned
-        if phone_number and phone_country_iso:
-            parsed, error_message = validate_phone_number(phone_number, phone_country_iso)
-            if error_message:
-                if "country code" in error_message:
-                    self.add_error("phone_country_iso", error_message)
-                else:
-                    self.add_error("phone_number", error_message)
-                return cleaned
-            cleaned["phone_number"] = phonenumbers.format_number(
-                parsed, phonenumbers.PhoneNumberFormat.E164
-            )
-            phone_qs = User.all_objects.filter(
-                phone_number=cleaned["phone_number"],
-                phone_country_iso=phone_country_iso,
-            )
-            if self.instance and self.instance.pk:
-                phone_qs = phone_qs.exclude(pk=self.instance.pk)
-            if phone_qs.exists():
-                self.add_error(
-                    "phone_number",
-                    "Phone number already exists for the selected country.",
-                )
+        add_user_phone_validation_errors(self, cleaned)
         return cleaned
 
 

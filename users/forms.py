@@ -7,6 +7,11 @@ from django.core.exceptions import ValidationError
 from common.helpers.model_helpers.preference import get_unique_langaues_list
 
 from preference.models import Country, ImmigrationStatus, FactoryFarm, OrganisationData
+from user_management.utils import (
+    add_user_phone_validation_errors,
+    clean_user_email,
+    get_country_code_choices,
+)
 
 from .models import User, UserInvitations
 
@@ -407,3 +412,64 @@ class EditUserForm(forms.ModelForm):
             "immigration_status",
             "groups",
         ]
+
+
+class APIDashboardUserForm(forms.ModelForm):
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+    password1 = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    class Meta:
+        model = User
+        fields = ["email", "first_name", "last_name"]
+
+    def clean_email(self):
+        return clean_user_email(
+            self.cleaned_data.get("email"),
+            instance=self.instance,
+            required=True,
+        )
+
+class APIAppUserForm(forms.ModelForm):
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+    org_code = forms.CharField(required=True)
+    password1 = forms.CharField(widget=forms.PasswordInput, required=True)
+    phone_country_iso = forms.ChoiceField(required=False, choices=())
+
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "phone_country_iso",
+            "org_code",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["phone_country_iso"].choices = get_country_code_choices()
+
+    def clean_email(self):
+        return clean_user_email(self.cleaned_data.get("email"), instance=self.instance)
+
+    def clean_org_code(self):
+        org_code = (self.cleaned_data.get("org_code") or "").strip().upper()
+        if not org_code:
+            raise forms.ValidationError("Organisation code is required.")
+        organisation = OrganisationData.objects.filter(org_code__iexact=org_code).first()
+        if not organisation:
+            raise forms.ValidationError("Organisation code was not found.")
+        self.cleaned_data["organisation"] = organisation
+        return org_code
+
+    def clean(self):
+        cleaned = super().clean()
+        email = (cleaned.get("email") or "").strip()
+        phone_number = (cleaned.get("phone_number") or "").strip()
+        if not email and not phone_number:
+            raise forms.ValidationError("Provide either an email or phone number for app users.")
+        add_user_phone_validation_errors(self, cleaned)
+        return cleaned

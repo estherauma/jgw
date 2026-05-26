@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from users.forms import UserAdminForm
-from .models import User, UserInvitations, UserSession
+from .models import User, UserInvitations, UserSession, UserVerificationCode
 from import_export.admin import ExportActionModelAdmin
 
 class UserAdmin(ExportActionModelAdmin, admin.ModelAdmin):
@@ -49,3 +49,20 @@ admin.site.register(User, UserAdmin)
 admin.site.register(UserInvitations)
 
 admin.site.register(UserSession)
+
+
+@admin.register(UserVerificationCode)
+class UserVerificationCodeAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "purpose",
+        "attempts",
+        "max_attempts",
+        "expires_at",
+        "used_at",
+        "created_at",
+    )
+    list_select_related = ("user",)
+    list_filter = ("purpose", "expires_at", "used_at", "created_at")
+    search_fields = ("user__email", "user__phone_number", "purpose")
+    readonly_fields = ("code_hash", "created_at", "used_at")

@@ -3,13 +3,28 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from unittest.mock import patch
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.test import TestCase
 from django.urls import reverse
 
 from dashboard.models import Factory, Scheme
+from preference.models import OrganisationData
+from user_management.models import WorkGroup
+from users.services.registration import (
+    REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+    create_registration_verification_code,
+)
 
-from .forms import ChangeEmailForm, CreateUserForm, InviteUserForm, SetPasswordForm, UserMgtForm
-from .models import User, UserInvitations
+from .forms import (
+    APIAppUserForm,
+    APIDashboardUserForm,
+    ChangeEmailForm,
+    CreateUserForm,
+    InviteUserForm,
+    SetPasswordForm,
+    UserMgtForm,
+)
+from .models import User, UserInvitations, UserVerificationCode
 from django.utils.translation import gettext as _ 
 
 
@@ -79,6 +94,30 @@ class AuthTests(TestCase):
             reverse("users:login_user"), {"email": self.test_email, "password": self.test_pword}
         )
         self.assertEqual(response.status_code, 302)
+
+    def test_worker_user_login_is_blocked_from_dashboard_ui(self):
+        worker_group, _ = Group.objects.get_or_create(name="worker")
+        worker_user = User.objects.create_user(
+            email="worker@test.local",
+            password=self.test_pword,
+            is_active=True,
+            scheme=self.test_scheme,
+            access_type="app",
+        )
+        worker_user.groups.add(worker_group)
+
+        response = self.client.post(
+            reverse("users:login_user"),
+            {"email": "worker@test.local", "password": self.test_pword},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        messages = [str(i) for i in response.context["messages"]]
+        self.assertEqual(
+            messages,
+            ["This account is not allowed to access the dashboard."],
+        )
+        self.assertNotIn("user_id", self.client.session)
 
     def test_login_form_validation(self):
         """
@@ -176,6 +215,48 @@ class AuthTests(TestCase):
         self.assertTemplateUsed(response, "users/sign_up.html")
         self.assertIsInstance(response.context["form"], CreateUserForm)
 
+    def test_api_dashboard_user_form_only_contains_api_fields(self):
+        form = APIDashboardUserForm()
+
+        self.assertEqual(
+            set(form.fields.keys()),
+            {"email", "first_name", "last_name", "password1"},
+        )
+
+    def test_api_app_user_form_only_contains_api_fields(self):
+        OrganisationData.objects.create(name="Test Org", org_code="TESTORG")
+
+        form = APIAppUserForm()
+
+        self.assertEqual(
+            set(form.fields.keys()),
+            {
+                "email",
+                "first_name",
+                "last_name",
+                "phone_number",
+                "phone_country_iso",
+                "org_code",
+                "password1",
+            },
+        )
+
+    def test_api_app_user_form_accepts_email_registration_without_ui_only_fields(self):
+        OrganisationData.objects.create(name="Test Org", org_code="TESTORG")
+
+        form = APIAppUserForm(
+            data={
+                "email": "api-user@test.local",
+                "first_name": "Api",
+                "last_name": "User",
+                "org_code": "testorg",
+                "password1": self.test_pword,
+            }
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["organisation"].org_code, "TESTORG")
+
     def test_list_users_view_renders_correctly(self):
         response = self.client.get(reverse("users:list_users"))
         self.assertEqual(response.status_code, 200)
@@ -241,6 +322,424 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/set_password.html")
         self.assertIsInstance(response.context["form"], SetPasswordForm)
+
+
+class RegistrationApiTests(TestCase):
+    def setUp(self):
+        self.organisation = OrganisationData.objects.create(
+            name="Test Org",
+            org_code="TESTORG",
+        )
+
+    @patch("users.api_views.initialize_user_dashboard_preferences")
+    @patch("users.api_views.send_registration_verification_email")
+    def test_register_user_sends_verification_email(self, send_email_mock, init_prefs_mock):
+        with patch(
+            "users.services.registration.generate_registration_verification_code",
+            return_value="AB23CD45",
+        ):
+            response = self.client.post(
+                reverse("user_management_api:register_user_api"),
+                data={
+                    "first_name": "New",
+                    "last_name": "User",
+                    "email": "newuser@example.com",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+            )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()["ok"], True)
+        user = User.all_objects.get(email="newuser@example.com")
+        self.assertEqual(response.json()["user_id"], user.id)
+        self.assertEqual(response.json()["email"], "newuser@example.com")
+        self.assertIsNone(response.json()["phone_number"])
+        self.assertIsNone(response.json()["phone_country_iso"])
+        self.assertFalse(user.is_active)
+        self.assertEqual(user.access_type, "app")
+        self.assertTrue(user.check_password("StrongPassword123!"))
+        self.assertTrue(user.organisation_data.filter(id=self.organisation.id).exists())
+        verification = UserVerificationCode.objects.get(
+            user=user,
+            purpose=REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+        )
+        self.assertEqual(len(verification.code_hash) > 0, True)
+        worker_group = Group.objects.get(name="worker")
+        worker_work_group = WorkGroup.objects.get(
+            organisation=self.organisation,
+            name="Worker",
+        )
+        self.assertTrue(user.groups.filter(id=worker_group.id).exists())
+        self.assertTrue(user.work_groups.filter(id=worker_work_group.id).exists())
+        init_prefs_mock.assert_not_called()
+        send_email_mock.assert_called_once()
+        send_email_mock.assert_called_once_with(user, "AB23CD45")
+        self.assertIn(
+            "verification code",
+            response.json()["message"].lower(),
+        )
+
+    @patch("users.api_views.send_registration_verification_email")
+    def test_register_user_returns_validation_errors(self, send_email_mock):
+        response = self.client.post(
+            reverse("user_management_api:register_user_api"),
+            data={
+                "first_name": "New",
+                "last_name": "User",
+                "org_code": "TESTORG",
+                "password1": "StrongPassword123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertIn("email", response.json()["errors"])
+        self.assertFalse(User.all_objects.filter(email="newuser@example.com").exists())
+        send_email_mock.assert_not_called()
+
+    @patch("users.api_views.send_registration_verification_email")
+    def test_register_user_requires_first_and_last_name(self, send_email_mock):
+        response = self.client.post(
+            reverse("user_management_api:register_user_api"),
+            data={
+                "email": "newuser@example.com",
+                "password1": "StrongPassword123!",
+                "org_code": "TESTORG",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertIn("first_name", response.json()["errors"])
+        self.assertIn("last_name", response.json()["errors"])
+        send_email_mock.assert_not_called()
+
+    @patch("users.api_views.initialize_user_dashboard_preferences")
+    @patch("users.api_views.send_registration_verification_email")
+    def test_register_user_respects_provided_access_type(self, send_email_mock, init_prefs_mock):
+        with patch(
+            "users.services.registration.generate_registration_verification_code",
+            return_value="AB23CD45",
+        ):
+            response = self.client.post(
+                reverse("user_management_api:register_user_api"),
+                data={
+                    "first_name": "Dashboard",
+                    "last_name": "User",
+                    "email": "dashboarduser@example.com",
+                    "password1": "StrongPassword123!",
+                    "access_type": "dashboard",
+                },
+            )
+
+        self.assertEqual(response.status_code, 201)
+        user = User.all_objects.get(email="dashboarduser@example.com")
+        self.assertEqual(user.access_type, "dashboard")
+        init_prefs_mock.assert_called_once()
+        send_email_mock.assert_called_once()
+
+    @patch("users.api_views.initialize_user_dashboard_preferences")
+    @patch("users.api_views.send_registration_verification_email")
+    def test_verify_registration_code_activates_user(self, send_email_mock, init_prefs_mock):
+        with patch(
+            "users.services.registration.generate_registration_verification_code",
+            return_value="AB23CD45",
+        ):
+            self.client.post(
+                reverse("user_management_api:register_user_api"),
+                data={
+                    "first_name": "Verify",
+                    "last_name": "Me",
+                    "email": "verifyme@example.com",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+            )
+
+        user = User.all_objects.get(email="verifyme@example.com")
+        verification = UserVerificationCode.objects.get(
+            user=user,
+            purpose=REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+        )
+        self.assertIsNone(verification.used_at)
+
+        response = self.client.post(
+            reverse("user_management_api:verify_registration_code"),
+            data={"email": "verifyme@example.com", "code": "AB23CD45"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        user.refresh_from_db()
+        verification.refresh_from_db()
+        self.assertTrue(user.is_active)
+        self.assertIsNotNone(verification.used_at)
+
+    @patch("users.api_views.send_registration_verification_sms")
+    def test_register_app_user_with_phone_only_sends_sms(self, send_sms_mock):
+        send_sms_mock.return_value = True
+        with patch(
+            "users.services.registration.generate_registration_verification_code",
+            return_value="AB23CD45",
+        ):
+            response = self.client.post(
+                reverse("user_management_api:register_user_api"),
+                data={
+                    "first_name": "Phone",
+                    "last_name": "Only",
+                    "phone_number": "771234567",
+                    "phone_country_iso": "UG",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+            )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()["ok"], True)
+        user = User.all_objects.get(phone_number="+256771234567")
+        self.assertEqual(response.json()["user_id"], user.id)
+        self.assertIsNone(response.json()["email"])
+        self.assertEqual(response.json()["phone_number"], "+256771234567")
+        self.assertEqual(response.json()["phone_country_iso"], "UG")
+        self.assertEqual(user.access_type, "app")
+        send_sms_mock.assert_called_once()
+
+    def test_verify_registration_code_rejects_expired_code(self):
+        user = User.objects.create_user(
+            email="verifyme@example.com",
+            password="StrongPassword123!",
+            is_active=False,
+        )
+        UserVerificationCode.objects.create(
+            user=user,
+            purpose=REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+            code_hash="pbkdf2_sha256$260000$invalid$hash",
+            expires_at=user.created_at,
+        )
+
+        response = self.client.post(
+            reverse("user_management_api:verify_registration_code"),
+            data={"email": "verifyme@example.com", "code": "BADCODE2"},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertIn("expired", response.json()["error"].lower())
+        user.refresh_from_db()
+        self.assertFalse(user.is_active)
+
+    @patch("users.services.registration.generate_registration_verification_code", return_value="AB23CD45")
+    def test_verify_registration_code_rejects_wrong_code(self, _code_mock):
+        user = User.objects.create_user(
+            email="wrongcode@example.com",
+            password="StrongPassword123!",
+            is_active=False,
+        )
+        create_registration_verification_code(user)
+
+        response = self.client.post(
+            reverse("user_management_api:verify_registration_code"),
+            data={"email": "wrongcode@example.com", "code": "ZZ99YY88"},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertIn("invalid", response.json()["error"].lower())
+
+    def test_verify_registration_code_adds_worker_group_for_app_user(self):
+        user = User.objects.create_user(
+            email="appuser@example.com",
+            password="StrongPassword123!",
+            is_active=False,
+            access_type="app",
+        )
+        create_registration_verification_code(user)
+
+        response = self.client.post(
+            reverse("user_management_api:verify_registration_code"),
+            data={"email": "appuser@example.com", "code": "AB23CD45"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        worker_group = Group.objects.get(name="worker")
+        user.refresh_from_db()
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.groups.filter(id=worker_group.id).exists())
+
+    @patch("users.api_views.send_registration_verification_sms")
+    def test_verify_registration_code_accepts_phone_number(self, send_sms_mock):
+        send_sms_mock.return_value = True
+        with patch(
+            "users.services.registration.generate_registration_verification_code",
+            return_value="AB23CD45",
+        ):
+            self.client.post(
+                reverse("user_management_api:register_user_api"),
+                data={
+                    "first_name": "Phone",
+                    "last_name": "Verify",
+                    "phone_number": "771234568",
+                    "phone_country_iso": "UG",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+            )
+
+        user = User.all_objects.get(phone_number="+256771234568")
+        response = self.client.post(
+            reverse("user_management_api:verify_registration_code"),
+            data={"phone_number": user.phone_number, "code": "AB23CD45"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        user.refresh_from_db()
+        self.assertTrue(user.is_active)
+
+    @patch("users.api_views.send_registration_verification_sms")
+    def test_verify_registration_code_accepts_local_phone_with_country_iso(self, send_sms_mock):
+        send_sms_mock.return_value = True
+        with patch(
+            "users.services.registration.generate_registration_verification_code",
+            return_value="AB23CD45",
+        ):
+            self.client.post(
+                reverse("user_management_api:register_user_api"),
+                data={
+                    "first_name": "Phone",
+                    "last_name": "User",
+                    "phone_number": "781590902",
+                    "phone_country_iso": "UG",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+            )
+
+        response = self.client.post(
+            reverse("user_management_api:verify_registration_code"),
+            data={
+                "phone_number": "0781590902",
+                "phone_country_iso": "UG",
+                "code": "AB23CD45",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+
+    @patch("users.api_views.send_registration_verification_sms")
+    def test_verify_registration_code_requires_country_iso_for_local_phone(self, send_sms_mock):
+        send_sms_mock.return_value = True
+        with patch(
+            "users.services.registration.generate_registration_verification_code",
+            return_value="AB23CD45",
+        ):
+            self.client.post(
+                reverse("user_management_api:register_user_api"),
+                data={
+                    "first_name": "Phone",
+                    "last_name": "User",
+                    "phone_number": "781590903",
+                    "phone_country_iso": "UG",
+                    "password1": "StrongPassword123!",
+                    "org_code": "TESTORG",
+                },
+            )
+
+        response = self.client.post(
+            reverse("user_management_api:verify_registration_code"),
+            data={
+                "phone_number": "0781590903",
+                "code": "AB23CD45",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Select a country code.")
+
+    @patch("users.services.registration.send_registration_verification_email")
+    @patch("users.services.registration.generate_registration_verification_code", return_value="ZX12CV")
+    def test_resend_registration_code_by_email(self, _code_mock, send_email_mock):
+        user = User.objects.create_user(
+            email="resend@example.com",
+            password="StrongPassword123!",
+            is_active=False,
+        )
+
+        response = self.client.post(
+            reverse("user_management_api:resend_registration_code"),
+            data={"user_id": user.id, "email": "resend@example.com"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        self.assertEqual(response.json()["user_id"], user.id)
+        self.assertEqual(response.json()["email"], "resend@example.com")
+        self.assertIsNone(response.json()["phone_number"])
+        self.assertIsNone(response.json()["phone_country_iso"])
+        self.assertIn("new verification code", response.json()["message"].lower())
+        send_email_mock.assert_called_once_with(user, "ZX12CV")
+
+    @patch("users.services.registration.send_registration_verification_sms")
+    @patch("users.services.registration.generate_registration_verification_code", return_value="ZX12CV")
+    def test_resend_registration_code_by_local_phone(self, _code_mock, send_sms_mock):
+        send_sms_mock.return_value = True
+        user = User.objects.create_user(
+            email=None,
+            password="StrongPassword123!",
+            is_active=False,
+            phone_number="+256781590902",
+            phone_country_iso="UG",
+        )
+
+        response = self.client.post(
+            reverse("user_management_api:resend_registration_code"),
+            data={
+                "user_id": user.id,
+                "phone_number": "0781590902",
+                "phone_country_iso": "UG",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        self.assertEqual(response.json()["user_id"], user.id)
+        self.assertIsNone(response.json()["email"])
+        self.assertEqual(response.json()["phone_number"], "+256781590902")
+        self.assertEqual(response.json()["phone_country_iso"], "UG")
+        send_sms_mock.assert_called_once_with(user, "ZX12CV")
+
+    def test_resend_registration_code_requires_identifier(self):
+        response = self.client.post(
+            reverse("user_management_api:resend_registration_code"),
+            data={},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Provide a user ID, email or phone number.")
+
+    @patch("users.services.registration.send_registration_verification_email")
+    def test_resend_registration_code_for_verified_user(self, send_email_mock):
+        user = User.objects.create_user(
+            email="verified@example.com",
+            password="StrongPassword123!",
+            is_active=True,
+        )
+
+        response = self.client.post(
+            reverse("user_management_api:resend_registration_code"),
+            data={"user_id": user.id, "email": "verified@example.com"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        self.assertEqual(response.json()["message"], "Contact already verified.")
+        self.assertEqual(response.json()["user_id"], user.id)
+        send_email_mock.assert_not_called()
 
     def test_set_password_OK(self):
         response = self.client.post(

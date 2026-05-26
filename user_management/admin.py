@@ -5,7 +5,6 @@ from .models import (
     OrganisationRoleAssignment,
     OrganisationRolePermission,
     ShortLink,
-    UserVerificationCode,
     WorkGroup,
 )
 
@@ -42,20 +41,3 @@ class ShortLinkAdmin(admin.ModelAdmin):
     list_display = ("code", "target_url", "expires_at", "created_at")
     list_filter = ("expires_at", "created_at")
     search_fields = ("code", "target_url")
-
-
-@admin.register(UserVerificationCode)
-class UserVerificationCodeAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "purpose",
-        "attempts",
-        "max_attempts",
-        "expires_at",
-        "used_at",
-        "created_at",
-    )
-    list_select_related = ("user",)
-    list_filter = ("purpose", "expires_at", "used_at", "created_at")
-    search_fields = ("user__email", "user__phone_number", "purpose")
-    readonly_fields = ("code_hash", "created_at", "used_at")

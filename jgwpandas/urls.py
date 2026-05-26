@@ -45,6 +45,7 @@ urlpatterns = [
     path("help-contacts/", include("help_contacts.urls")),
     path("events/", include("events.urls")),
     path("payment/", include("payment.urls")),
+    path("api/v1/accounts/", include("users.api_urls")),
     path("user-management/", include("user_management.urls")),
     path("s/<slug:code>/", short_link_redirect, name="short_link"),
     path("__debug__/", include("debug_toolbar.urls")),
