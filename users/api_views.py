@@ -5,8 +5,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.forms import APIAppUserForm, APIDashboardUserForm
-from users.services.registration import (
+from users.services.authentication import (
     create_registration_verification_code,
+    login_api_user,
+    refresh_api_access_token,
     resend_registration_verification_code,
     send_registration_verification_email,
     send_registration_verification_sms,
@@ -66,7 +68,6 @@ class RegisterUserApiView(APIView):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     )
         except Exception as e:
-            print(f"Error in RegisterUserApiView: {e}")
             return Response(
                 {
                     "ok": False,
@@ -77,13 +78,88 @@ class RegisterUserApiView(APIView):
         return Response(
             {
                 "ok": True,
-                "message": "Registration successful. A verification code has been sent.",
                 "user_id": user.id,
                 "email": user.email,
                 "phone_number": user.phone_number,
                 "phone_country_iso": user.phone_country_iso,
             },
             status=status.HTTP_201_CREATED,
+        )
+
+
+class LoginApiView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request):
+        try:
+            result = login_api_user(
+                email=request.data.get("email"),
+                phone_number=request.data.get("phone_number"),
+                phone_country_iso=request.data.get("phone_country_iso"),
+                password=request.data.get("password"),
+            )
+        except Exception:
+            return Response(
+                {
+                    "ok": False,
+                    "error": "Could not log in. Please try again.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        if not result["ok"]:
+            return Response(
+                {"ok": False, "error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        tokens = result["tokens"]
+        return Response(
+            {
+                "ok": True,
+                "access_token": tokens["access_token"],
+                "refresh_token": tokens["refresh_token"],
+                
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class RefreshTokenApiView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request):
+        try:
+            result = refresh_api_access_token(
+                request.data.get("refresh_token"),
+            )
+        except Exception:
+            return Response(
+                {
+                    "ok": False,
+                    "error": "Could not refresh the access token. Please try again.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        if not result["ok"]:
+            return Response(
+                {"ok": False, "error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = result["user"]
+        tokens = result["tokens"]
+        return Response(
+            {
+                "ok": True,
+                "access_token": tokens["access_token"],
+                "refresh_token": tokens["refresh_token"],
+                "user_id": user.id,
+            },
+            status=status.HTTP_200_OK,
         )
 
 
@@ -94,7 +170,7 @@ class VerifyRegistrationCodeApiView(APIView):
     def post(self, request):
         try:
             result = verify_registration_code(
-                submitted_code=request.data.get("code"),
+                code=request.data.get("code"),
                 email=request.data.get("email"),
                 phone_number=request.data.get("phone_number"),
                 phone_country_iso=request.data.get("phone_country_iso"),
@@ -113,7 +189,7 @@ class VerifyRegistrationCodeApiView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(
-            {"ok": True, "message": result["message"]},
+            {"ok": True, "user_id": result["user"].id},
             status=status.HTTP_200_OK,
         )
 
@@ -149,7 +225,6 @@ class ResendRegistrationCodeApiView(APIView):
         return Response(
             {
                 "ok": True,
-                "message": result["message"],
                 "user_id": user.id,
                 "email": user.email,
                 "phone_number": user.phone_number,

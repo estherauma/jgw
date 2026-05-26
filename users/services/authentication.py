@@ -1,6 +1,8 @@
 from datetime import timedelta
 import secrets
 
+import jwt
+from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -13,9 +15,12 @@ from common.const.value_const import (
 )
 from user_management.sms import send_sms
 from user_management.utils import normalize_phone_number_for_lookup
-
-from users.models import User, UserVerificationCode
+from users.models import User, UserSession, UserVerificationCode
 from users.tasks import send_email_notification
+
+
+ACCESS_TOKEN_MINUTES = 60
+REFRESH_TOKEN_DAYS = 30
 
 
 def generate_registration_verification_code(length=6):
@@ -111,10 +116,10 @@ def get_registration_user_by_contact(email=None, phone_number=None, phone_countr
     return user, None
 
 
-def verify_registration_code(submitted_code, email=None, phone_number=None, phone_country_iso=None):
+def verify_registration_code(code, email=None, phone_number=None, phone_country_iso=None):
     email = (email or "").strip().lower()
     phone_number = (phone_number or "").strip()
-    code = (submitted_code or "").strip().upper()
+    code = (code or "").strip().upper()
     if (not email and not phone_number) or not code:
         return {
             "ok": False,
@@ -209,4 +214,127 @@ def resend_registration_verification_code(email=None, phone_number=None, phone_c
         "ok": True,
         "message": "A new verification code has been sent.",
         "user": user,
+    }
+
+
+def build_auth_token(user, token_type, expires_at):
+    payload = {
+        "user_id": user.id,
+        "token_type": token_type,
+        "exp": expires_at,
+        "iat": timezone.now(),
+    }
+    return jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
+
+
+def issue_auth_tokens(user):
+    access_expires_at = timezone.now() + timedelta(minutes=ACCESS_TOKEN_MINUTES)
+    refresh_expires_at = timezone.now() + timedelta(days=REFRESH_TOKEN_DAYS)
+    return {
+        "access_token": build_auth_token(user, "access", access_expires_at),
+        "refresh_token": build_auth_token(user, "refresh", refresh_expires_at),
+        "access_expires_at": access_expires_at,
+        "refresh_expires_at": refresh_expires_at,
+    }
+
+
+def login_api_user(email=None, phone_number=None, phone_country_iso=None, password=None):
+    normalized_email = (email or "").strip().lower()
+    raw_phone_number = (phone_number or "").strip()
+    raw_password = password or ""
+    if (not normalized_email and not raw_phone_number) or not raw_password:
+        return {
+            "ok": False,
+            "error": "Provide email or phone number, and password.",
+        }
+
+    normalized_phone_number = None
+    if raw_phone_number:
+        normalized_phone_number, phone_error = normalize_phone_number_for_lookup(
+            raw_phone_number,
+            phone_country_iso,
+        )
+        if phone_error:
+            return {
+                "ok": False,
+                "error": phone_error,
+            }
+
+    user_qs = User.objects.none()
+    if normalized_email:
+        user_qs = User.objects.filter(email__iexact=normalized_email)
+    else:
+        user_qs = User.objects.filter(phone_number=normalized_phone_number)
+    user = user_qs.first()
+    if not user:
+        return {
+            "ok": False,
+            "error": "Invalid login credentials.",
+        }
+
+    if not user.check_password(raw_password):
+        return {
+            "ok": False,
+            "error": "Invalid login credentials.",
+        }
+
+    if not user.is_active:
+        return {
+            "ok": False,
+            "error": "Account is not active.",
+        }
+
+    user.last_login = timezone.now()
+    user.save(update_fields=["last_login"])
+
+    return {
+        "ok": True,
+        "user": user,
+        "tokens": issue_auth_tokens(user),
+    }
+
+
+def refresh_api_access_token(refresh_token):
+    raw_refresh_token = (refresh_token or "").strip()
+    if not raw_refresh_token:
+        return {
+            "ok": False,
+            "error": "Refresh token is required.",
+        }
+
+    try:
+        payload = jwt.decode(raw_refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        return {
+            "ok": False,
+            "error": "Refresh token has expired.",
+        }
+    except jwt.InvalidTokenError:
+        return {
+            "ok": False,
+            "error": "Invalid refresh token.",
+        }
+
+    if payload.get("token_type") != "refresh":
+        return {
+            "ok": False,
+            "error": "Invalid refresh token.",
+        }
+
+    user = User.objects.filter(id=payload.get("user_id"), is_deleted=False).first()
+    if not user:
+        return {
+            "ok": False,
+            "error": "Invalid refresh token.",
+        }
+    if not user.is_active:
+        return {
+            "ok": False,
+            "error": "Account is not active.",
+        }
+
+    return {
+        "ok": True,
+        "user": user,
+        "tokens": issue_auth_tokens(user),
     }
