@@ -1,0 +1,23 @@
+{% load i18n %}
+<div class="user-insights-text-responses-inner">
+    <button type="button" class="user-insights-explore-all-btn" aria-haspopup="dialog">
+        {% translate "userInsightsExploreAllResponses" %} ({{ text_detail.total_count }})
+    </button>
+    <div class="user-insights-text-response-list" tabindex="0">
+        {% for item in text_detail.responses %}
+        <article class="user-insights-text-response-card">
+            <div class="user-insights-text-response-card-head">
+                <span class="user-insights-text-response-id">{{ item.label }}</span>
+            </div>
+            <div class="user-insights-text-response-field">
+                <span class="user-insights-text-response-field-label">{% translate "userInsightsNativeResponse" %}</span>
+                <div class="user-insights-text-response-box">{{ item.native }}</div>
+            </div>
+            <div class="user-insights-text-response-field">
+                <span class="user-insights-text-response-field-label">{% translate "userInsightsTranslationEnglish" %}</span>
+                <div class="user-insights-text-response-box">{{ item.translation }}</div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</div>

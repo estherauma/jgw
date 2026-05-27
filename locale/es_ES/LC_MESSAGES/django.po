@@ -412,8 +412,8 @@ msgstr ""
 "trabajando cuando usan la aplicación por primera vez."
 
 #: preference/templates/preference/user_overview.html:198
-msgid "userOverviewUsersByImmigrationStatusTitle"
-msgstr "Usuarios por estatus migratorio"
+msgid "userOverviewAreaOfInterestTitle"
+msgstr "Área de interés"
 
 #: preference/templates/preference/user_overview.html:202
 msgid "userOverviewUsersByImmigrationStatusTooltip"
@@ -774,6 +774,539 @@ msgstr "Panel de control de Summerberry"
 #: templates/includes/sidebar.html:24
 msgid "sideBarUsersOverview"
 msgstr "Descripción general de los usuarios"
+
+#: templates/includes/sidebar.html:31
+msgid "sideBarUserInsights"
+msgstr "Información del usuario"
+
+#: preference/templates/preference/user_insights.html
+msgid "userInsightsPageTitle"
+msgstr "Información del usuario"
+
+#: preference/views.py
+msgid "userInsightsLatestReports"
+msgstr "ÚLTIMOS INFORMES:"
+
+#: preference/views.py
+msgid "userInsightsReportEarlyRisk"
+msgstr "Informe de riesgo temprano"
+
+#: preference/views.py
+msgid "userInsightsReportEarlyRiskDesc"
+msgstr "El informe de riesgo temprano muestra datos de las respuestas de las personas trabajadoras para ayudar a identificar posibles riesgos."
+
+#: preference/views.py
+msgid "userInsightsReportClickGraph"
+msgstr "Haga clic en un gráfico para ver más detalles."
+
+#: preference/views.py
+msgid "userInsightsDownloadPdf"
+msgstr "Descargar PDF de preguntas"
+
+#: preference/views.py
+msgid "userInsightsDownloadPdfQuestions"
+msgstr "Descargar PDF de preguntas"
+
+#: preference/views.py
+msgid "userInsightsDownloadPdfCategories"
+msgstr "Descargar PDF de categorías"
+
+#: preference/views.py
+msgid "userInsightsDEIndicatorsHeader"
+msgstr "Indicadores de empleo decente:"
+
+#: preference/views.py
+msgid "userInsightsRRIndicatorsHeader"
+msgstr "Indicadores de contratación responsable:"
+
+#: preference/views.py
+msgid "userInsightsDEDonutFairWages"
+msgstr "Salarios justos"
+
+#: preference/views.py
+msgid "userInsightsDEDonutWorkingHours"
+msgstr "Horas de trabajo"
+
+#: preference/views.py
+msgid "userInsightsDEDonutHealthSafety"
+msgstr "Salud y seguridad"
+
+#: preference/views.py
+msgid "userInsightsDEDonutContracts"
+msgstr "Contratos"
+
+#: preference/views.py
+msgid "userInsightsDEDonutWorkLifeBalance"
+msgstr "Equilibrio vida laboral"
+
+#: preference/views.py
+msgid "userInsightsRRDonutRecruitment"
+msgstr "Contratación"
+
+#: preference/views.py
+msgid "userInsightsRRDonutOnboarding"
+msgstr "Incorporación"
+
+#: preference/views.py
+msgid "userInsightsRRDonutEmployment"
+msgstr "Empleo"
+
+#: preference/views.py
+msgid "userInsightsRRDonutAddressingIssues"
+msgstr "Tratamiento de incidencias"
+
+#: preference/views.py
+msgid "userInsightsDEIndDecentWork"
+msgstr "Trabajo decente"
+
+#: preference/views.py
+msgid "userInsightsDEIndEqualTreatment"
+msgstr "Trato igualitario"
+
+#: preference/views.py
+msgid "userInsightsDEIndSafeWorkplace"
+msgstr "Lugar de trabajo seguro"
+
+#: preference/views.py
+msgid "userInsightsDEIndSocialProtection"
+msgstr "Protección social"
+
+#: preference/views.py
+msgid "userInsightsDEIndDialogue"
+msgstr "Diálogo en el trabajo"
+
+#: preference/views.py
+msgid "userInsightsDEIndCareerDevelopment"
+msgstr "Desarrollo profesional"
+
+#: preference/views.py
+msgid "userInsightsRRIndAccommodation"
+msgstr "Alojamiento"
+
+#: preference/views.py
+msgid "userInsightsRRIndFairTreatment"
+msgstr "Trato justo"
+
+#: preference/views.py
+msgid "userInsightsRRIndOnboarding"
+msgstr "Incorporación"
+
+#: preference/views.py
+msgid "userInsightsRRIndAddressingIssues"
+msgstr "Tratamiento de incidencias"
+
+#: preference/views.py
+msgid "userInsightsRRIndChangingJob"
+msgstr "Cambio de empleo"
+
+#: preference/views.py
+msgid "userInsightsRRIndRecruitment"
+msgstr "Contratación"
+
+#: preference/views.py
+msgid "userInsightsRRIndTravel"
+msgstr "Viaje"
+
+#: preference/views.py
+msgid "userInsightsRRIndEmployment"
+msgstr "Empleo"
+
+#: preference/views.py
+msgid "userInsightsReportDecentEmployment"
+msgstr "Informe de empleo decente"
+
+#: preference/views.py
+msgid "userInsightsReportResponsibleRecruitment"
+msgstr "Informe de contratación responsable"
+
+#: preference/views.py
+msgid "userInsightsReportDecentEmploymentDesc"
+msgstr "El informe de empleo decente muestra datos de las respuestas de las personas trabajadoras sobre la calidad del empleo y las condiciones laborales."
+
+#: preference/views.py
+msgid "userInsightsReportDecentEmploymentHint"
+msgstr "Haga clic en un gráfico para ver más detalles."
+
+#: preference/views.py
+msgid "userInsightsReportResponsibleRecruitmentDesc"
+msgstr "El informe de contratación responsable muestra datos de las respuestas sobre las prácticas de contratación y la transparencia."
+
+#: preference/views.py
+msgid "userInsightsReportResponsibleRecruitmentHint"
+msgstr "Haga clic en un gráfico para ver más detalles."
+
+#: preference/views.py
+msgid "userInsightsNeedHelp"
+msgstr "¿Necesita ayuda?"
+
+#: preference/views.py
+msgid "userInsightsReportView"
+msgstr "Vista del informe"
+
+#: preference/views.py
+msgid "userInsightsRiskIndicators"
+msgstr "Indicadores de riesgo"
+
+#: preference/templates/preference/user_insights.html
+msgid "userInsightsAllIndicators"
+msgstr "Todos los indicadores"
+
+#: preference/templates/preference/user_insights.html
+msgid "userInsightsIndicatorsSelected"
+msgstr "indicadores seleccionados"
+
+#: preference/views.py
+msgid "userInsightsLegendNeedsAction"
+msgstr "Requiere acción"
+
+#: preference/views.py
+msgid "userInsightsLegendOnTrack"
+msgstr "En buen camino"
+
+#: preference/views.py
+msgid "userInsightsLegendNoResponse"
+msgstr "Sin respuesta"
+
+#: preference/views.py
+msgid "userInsightsDonutAbuseVulnerability"
+msgstr "Abuso de vulnerabilidad"
+
+#: preference/views.py
+msgid "userInsightsDonutAbusiveConditions"
+msgstr "Condiciones abusivas de trabajo y vida"
+
+#: preference/views.py
+msgid "userInsightsDonutDeception"
+msgstr "Engaño"
+
+#: preference/views.py
+msgid "userInsightsDonutIdentityDocs"
+msgstr "Retención de documentos de identidad"
+
+#: preference/views.py
+msgid "userInsightsDonutIntimidation"
+msgstr "Intimidación y amenazas"
+
+#: preference/views.py
+msgid "userInsightsReportBreakdown"
+msgstr "DESGLOSE DEL INFORME:"
+
+#: preference/views.py
+msgid "userInsightsKeywordSearch"
+msgstr "Búsqueda por palabra clave"
+
+#: preference/views.py
+msgid "userInsightsIndicatorsHeader"
+msgstr "Indicadores:"
+
+#: preference/views.py
+msgid "userInsightsIndicatorAbuseVulnerability"
+msgstr "Abuso de vulnerabilidad"
+
+#: preference/views.py
+msgid "userInsightsIndicatorDeception"
+msgstr "Engaño"
+
+#: preference/views.py
+msgid "userInsightsIndicatorRestrictionMovement"
+msgstr "Restricción de movimiento"
+
+#: preference/views.py
+msgid "userInsightsIndicatorIsolation"
+msgstr "Aislamiento"
+
+#: preference/views.py
+msgid "userInsightsIndicatorPhysicalSexualViolence"
+msgstr "Violencia física y sexual"
+
+#: preference/views.py
+msgid "userInsightsIndicatorIntimidationThreats"
+msgstr "Intimidación y amenazas"
+
+#: preference/views.py
+msgid "userInsightsIndicatorRetentionIdentity"
+msgstr "Retención de documentos de identidad"
+
+#: preference/views.py
+msgid "userInsightsIndicatorWithholdingWages"
+msgstr "Retención de salarios"
+
+#: preference/views.py
+msgid "userInsightsIndicatorDebtBondage"
+msgstr "Servidumbre por deudas"
+
+#: preference/views.py
+msgid "userInsightsIndicatorAbusiveConditions"
+msgstr "Condiciones abusivas de trabajo y vida"
+
+#: preference/views.py
+msgid "userInsightsIndicatorExcessiveOvertime"
+msgstr "Horas extras excesivas"
+
+#: preference/views.py
+msgid "userInsightsIndicatorDetailPlaceholder"
+msgstr "Aquí aparecerá un desglose más detallado y las respuestas para este indicador."
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsRiskIndicatorsLabel"
+msgstr "Indicadores de riesgo:"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsUserResponses"
+msgstr "Respuestas de usuarios"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsInlineQuestions"
+msgstr "Preguntas en línea"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsMessagingQuestions"
+msgstr "Preguntas de mensajería"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsTotalResponses"
+msgstr "Respuestas totales"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsDateFrom"
+msgstr "Desde:"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsDateTo"
+msgstr "Hasta:"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsDateFromAria"
+msgstr "Filtrar fecha desde"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsDateToAria"
+msgstr "Filtrar fecha hasta"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsDateFilterCalendarAria"
+msgstr "Abrir calendario"
+
+#: preference/views.py
+msgid "userInsightsMockQ1Payments"
+msgstr "¿Alguien le ha pedido que haga otros pagos?"
+
+#: preference/views.py
+msgid "userInsightsMockQ2PaidFor"
+msgstr "¿Para qué pagó?"
+
+#: preference/views.py
+msgid "userInsightsMockQ3Contract"
+msgstr "¿Qué partes de su contrato le han resultado difíciles de entender?"
+
+#: preference/views.py
+msgid "userInsightsMockTextResponseCrumb"
+msgstr "respuesta de texto de %(question)s"
+
+#: preference/views.py
+msgid "userInsightsMockNative1"
+msgstr "Me dijeron que tenía que pagar la formación, pero no estaba en el contrato."
+
+#: preference/views.py
+msgid "userInsightsMockTranslation1"
+msgstr "Me dijeron que tenía que pagar la formación, pero no estaba en el contrato."
+
+#: preference/views.py
+msgid "userInsightsMockNative2"
+msgstr "No entiendo la cláusula sobre la retención del salario durante los primeros tres meses."
+
+#: preference/views.py
+msgid "userInsightsMockTranslation2"
+msgstr "No entiendo la cláusula sobre la retención del salario durante los primeros tres meses."
+
+#: preference/views.py
+msgid "userInsightsMockNative3"
+msgstr "El contrato tiene muchas palabras legales que son difíciles de traducir."
+
+#: preference/views.py
+msgid "userInsightsMockTranslation3"
+msgstr "El contrato tiene muchas palabras legales que son difíciles de traducir."
+
+#: preference/views.py
+msgid "userInsightsMockDateFrom"
+msgstr "1 de enero de 2025"
+
+#: preference/views.py
+msgid "userInsightsMockDateTo"
+msgstr "1 de enero de 2025"
+
+#: preference/views.py
+msgid "userInsightsMockAnswerYes"
+msgstr "Sí"
+
+#: preference/views.py
+msgid "userInsightsMockAnswerNo"
+msgstr "No"
+
+#: preference/views.py
+msgid "userInsightsMockQ1AFollowUp"
+msgstr "Profundicemos un poco más. ¿A quién pagó?"
+
+#: preference/views.py
+msgid "userInsightsMockQ1BFollowUp"
+msgstr "¿Cuánto pagó?"
+
+#: preference/views.py
+msgid "userInsightsMockWhoAgent"
+msgstr "Agente"
+
+#: preference/views.py
+msgid "userInsightsMockWhoEmployer"
+msgstr "Empleador"
+
+#: preference/views.py
+msgid "userInsightsMockWhoOther"
+msgstr "Otro"
+
+#: preference/views.py
+msgid "userInsightsMockWhoRecruiter"
+msgstr "Reclutador"
+
+#: preference/views.py
+msgid "userInsightsMockWhoSubagent"
+msgstr "Subagente"
+
+#: preference/views.py
+msgid "userInsightsMockAmount1k2k"
+msgstr "entre $1,000 y $2,000"
+
+#: preference/views.py
+msgid "userInsightsMockAmount5001k"
+msgstr "entre $500 y $1,000"
+
+#: preference/views.py
+msgid "userInsightsMockAmountLt500"
+msgstr "menos de $500"
+
+#: preference/templates/preference/includes/user_insights_lead_question.html
+msgid "userInsightsAnswerOptions"
+msgstr "Opciones de respuesta"
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsSunburstAria"
+msgstr "Gráfico sunburst de la ruta de respuesta"
+
+#: preference/templates/preference/includes/user_insights_lead_question.html
+msgid "userInsightsOpenTextHint"
+msgstr "Seleccione esta pregunta para ver las respuestas de texto abiertas."
+
+#: preference/templates/preference/includes/user_insights_indicator_detail.html
+msgid "userInsightsSelectQuestionHint"
+msgstr "Expanda una pregunta a la izquierda para ver el desglose de respuestas."
+
+#: preference/templates/preference/includes/user_insights_text_responses.html
+msgid "userInsightsStarredResponses"
+msgstr "Respuestas destacadas"
+
+#: preference/templates/preference/includes/user_insights_text_responses.html
+msgid "userInsightsStarredLabel"
+msgstr "destacadas"
+
+#: preference/templates/preference/includes/user_insights_text_responses.html:4
+#, python-format
+msgid "userInsightsExploreAllResponses"
+msgstr "Explorar todas las respuestas"
+
+#: preference/templates/preference/includes/user_insights_text_responses.html
+msgid "userInsightsStarredResponse"
+msgstr "Respuesta destacada"
+
+#: preference/templates/preference/includes/user_insights_text_responses.html
+msgid "userInsightsNativeResponse"
+msgstr "Respuesta original:"
+
+#: preference/templates/preference/includes/user_insights_text_responses.html
+msgid "userInsightsTranslationEnglish"
+msgstr "Traducción (inglés):"
+
+#: preference/views.py
+msgid "userInsightsAllResponses"
+msgstr "Todas las respuestas"
+
+#: preference/views.py preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsAllResponsesCountTemplate"
+msgstr "(%(count)s respuestas enviadas)"
+
+#: preference/views.py
+msgid "userInsightsTranslationNA"
+msgstr "N/D"
+
+#: preference/views.py
+msgid "userInsightsMockNativeTable1"
+msgstr "Descargué la aplicación para leer el contrato, pero los términos legales siguen sin estar claros."
+
+#: preference/views.py
+msgid "userInsightsMockTranslationApp"
+msgstr "I downloaded the app to read my contract but the legal terms are still unclear."
+
+#: preference/views.py
+msgid "userInsightsMockNativeTable2"
+msgstr "El agente dijo que tenía que pagar la formación por adelantado."
+
+#: preference/views.py
+msgid "userInsightsMockNativeTable3"
+msgstr "El contrato tiene muchas palabras legales que son difíciles de traducir."
+
+#: preference/views.py
+msgid "userInsightsMockNativeTable4"
+msgstr "No puedo entender la sección sobre alojamiento."
+
+#: preference/views.py
+msgid "userInsightsMockNativeTable5"
+msgstr "Nadie me explicó cómo presentar una queja a través de la plataforma."
+
+#: preference/views.py
+msgid "userInsightsMockTranslationTable5"
+msgstr "No one explained how to file a complaint through the platform app."
+
+#: preference/views.py
+msgid "userInsightsMockNativeTable6"
+msgstr "El contrato está en otro idioma y la aplicación no tiene traducción."
+
+#: preference/views.py
+msgid "userInsightsMockTranslationTable6"
+msgstr "The contract is in another language and the app has no translation."
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsAllResponsesBreadcrumbAria"
+msgstr "Ruta de navegación de todas las respuestas"
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsAllResponsesSearchPlaceholder"
+msgstr "Buscar respuestas"
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsAllResponsesSearchAria"
+msgstr "Buscar todas las respuestas"
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsNativeResponseHeader"
+msgstr "Respuesta original"
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsTranslationEnglishHeader"
+msgstr "Traducción (inglés)"
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsAllResponsesColDate"
+msgstr "Fecha"
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsAllResponsesColId"
+msgstr "#"
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsAllResponsesColStar"
+msgstr "Estrella"
+
+#: preference/templates/preference/includes/user_insights_all_responses_modal.html
+msgid "userInsightsAllResponsesClose"
+msgstr "Cerrar"
 
 #: templates/includes/sidebar.html:31
 msgid "sideBarWhatMattersToWorkers"

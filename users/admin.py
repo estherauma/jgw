@@ -1,13 +1,13 @@
 from django.contrib import admin
 
 from users.forms import UserAdminForm
-from .models import User, UserInvitations, UserSession
+from .models import User, UserInvitations, UserSession, UserVerificationCode
 from import_export.admin import ExportActionModelAdmin
 
 class UserAdmin(ExportActionModelAdmin, admin.ModelAdmin):
     form = UserAdminForm
-    list_display = ['email', 'first_name', 'last_name', 'role', 'is_active', 'is_staff']
-    list_filter = ['role', 'is_active', 'is_staff']
+    list_display = ['email', 'first_name', 'last_name', 'role', 'organization_group', 'is_active', 'is_staff']
+    list_filter = ['role', 'organization_group', 'is_active', 'is_staff']
     search_fields = ['email', 'first_name', 'last_name', 'phone_number']
     readonly_fields = ('created_at_display', 'updated_at_display', 'total_logged_hours', 'deleted_at', 'deleted_by')
     fieldsets = (
@@ -18,7 +18,7 @@ class UserAdmin(ExportActionModelAdmin, admin.ModelAdmin):
             'fields': ('start_date', 'end_date')
         }),
         ('Relationships', {
-            'fields': ('factories', 'organisations', 'organisation_data', 'work_groups', 'destinations',
+            'fields': ('factories', 'organisations', 'organization_group', 'organisation_data', 'work_groups', 'destinations',
                       'user_languages', 'excluded_origin_countries', 'immigration_status')
         }),
         ('Permissions', {
@@ -49,3 +49,20 @@ admin.site.register(User, UserAdmin)
 admin.site.register(UserInvitations)
 
 admin.site.register(UserSession)
+
+
+@admin.register(UserVerificationCode)
+class UserVerificationCodeAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "purpose",
+        "attempts",
+        "max_attempts",
+        "expires_at",
+        "used_at",
+        "created_at",
+    )
+    list_select_related = ("user",)
+    list_filter = ("purpose", "expires_at", "used_at", "created_at")
+    search_fields = ("user__email", "user__phone_number", "purpose")
+    readonly_fields = ("code_hash", "created_at", "used_at")

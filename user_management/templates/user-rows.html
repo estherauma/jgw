@@ -39,13 +39,7 @@
         </td>
 
         {% if not selected_org_id %}
-        <td>
-            {% for org in u.organisation_data.all %}
-                {{ org.name }}{% if not forloop.last %}, {% endif %}
-            {% empty %}
-                —
-            {% endfor %}
-        </td>
+        <td>{{ u.organisation_display|default:"—" }}</td>
         {% endif %}
         {% if selected_org_id %}
         <td>

@@ -1,0 +1,55 @@
+{% load i18n %}
+<div
+    class="user-insights-lead-card{% if question.expanded %} is-expanded{% endif %}{% if question.active %} is-active{% endif %}"
+    data-lead-id="{{ question.id }}"
+    data-response-type="{{ question.response_type|default:'choice' }}"
+>
+    <button
+        type="button"
+        class="user-insights-lead-header"
+        data-bs-toggle="collapse"
+        data-bs-target="#user-insights-lead-{{ panel_id }}-{{ question.id }}"
+        aria-expanded="{% if question.expanded %}true{% else %}false{% endif %}"
+        aria-controls="user-insights-lead-{{ panel_id }}-{{ question.id }}"
+    >
+        <span class="user-insights-lead-code">Q{{ question.number }}</span>
+        <span class="user-insights-lead-text">{{ question.text }}</span>
+        <span class="user-insights-lead-chevron" aria-hidden="true"><i class="mdi mdi-chevron-down"></i></span>
+    </button>
+    <div
+        class="collapse user-insights-lead-body{% if question.expanded %} show{% endif %}"
+        id="user-insights-lead-{{ panel_id }}-{{ question.id }}"
+    >
+        {% if question.response_type == "open_text" %}
+        <p class="user-insights-open-text-hint">{% translate "userInsightsOpenTextHint" %}</p>
+        {% elif question.responses %}
+        <div class="user-insights-answer-bars" role="group" aria-label="{% translate 'userInsightsAnswerOptions' %}">
+            {% for response in question.responses %}
+            <button
+                type="button"
+                class="user-insights-answer-bar{% if response.selected %} is-selected{% endif %}{% if response.id == 'yes' %} user-insights-answer-bar--yes{% else %} user-insights-answer-bar--no{% endif %}"
+                data-response-id="{{ response.id }}"
+                data-response-label="{{ response.label }}"
+                data-panel-id="{{ panel_id }}"
+                data-lead-id="{{ question.id }}"
+            >
+                <span class="user-insights-answer-label">{{ response.label }}</span>
+                <span class="user-insights-answer-count">{{ response.count }}/{{ response.total }}</span>
+            </button>
+            {% endfor %}
+        </div>
+        {% for response in question.responses %}
+            {% if response.follow_up %}
+            <div
+                class="user-insights-lead-follow-up-root{% if not response.selected %} d-none{% endif %}"
+                data-follow-up-for="{{ response.id }}"
+                data-lead-id="{{ question.id }}"
+            >
+                <span class="user-insights-branch-connector user-insights-branch-connector--lead" aria-hidden="true"></span>
+                {% include "preference/includes/user_insights_follow_up.html" with question=response.follow_up panel_id=panel_id depth=1 %}
+            </div>
+            {% endif %}
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>

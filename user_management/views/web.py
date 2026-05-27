@@ -1,16 +1,16 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
 from django.shortcuts import render, redirect
-from django.db.models import Q
 from django.template.loader import render_to_string
 from django.views import View
 import phonenumbers
 import json
 from preference.models import OrganizationGroup, OrganisationAccessCode, OrganisationData, SiteLanguages
 
-from .forms import (
+from ..forms import (
     AddWorkCodeForm,
     AppUserForm,
     AttachOrganizationsToGroupForm,
@@ -23,17 +23,26 @@ from .forms import (
     WorkGroupForm,
     UsersWorkGroupAssignForm,
 )
-from .invitations import send_invitation
-from .decorators import group_required
-from .models import (
+from ..invitations import send_invitation
+from ..decorators import group_required
+from ..models import (
     OrganisationRole,
     OrganisationRoleAssignment,
     WorkGroup,
     ShortLink,
 )
-from .roles import add_default_org_roles, apply_role_to_user
-from .services.organization import OrganizationService
-from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
+from ..roles import add_default_org_roles, apply_role_to_user
+from ..services.organization import OrganizationService
+from ..services.user import get_user_role_display, get_users_query
+from ..permissions import is_flag_active
+from ..utils import (
+    get_active_role,
+    is_58_admin,
+    is_org_admin,
+    is_org_group_admin,
+    is_org_or_group_admin,
+    is_super_or_58_admin,
+)
 from users.models import User, UserInvitations
 from content.services.partner_configurations import (
     add_partner_configuration_to_cms,
@@ -47,55 +56,11 @@ from content.services.partner_configurations import (
     update_partner_configuration_work_codes_in_cms,
 )
 
-def get_user_role_display(user, selected_org=None):
-    if user.is_superuser:
-        return "Super Admin"
-
-    group_names = {group.name for group in user.groups.all()}
-    if "58_admin" in group_names:
-        return "Fiftyeight Admin"
-    if "worker" in group_names:
-         return "Worker"
-    if "org_admin" in group_names:
-        return "Administrator" if selected_org else "Org Admin"
-    if "org_staff" in group_names:
-        assignment = user.org_roles.all().first()
-        if assignment and assignment.role:
-            return assignment.role.name
-    return "—"
-
-def get_users_query(current_user, selected_org=None):
-    users = (
-        User.objects.prefetch_related(
-            "groups",
-            "organisation_data",
-            "work_groups",
-            "org_roles__role",
-            "org_roles__organisation",
-        )
-        .order_by("-created_at")
-        .distinct()
-    )
-    if selected_org:
-        users = users.filter(organisation_data=selected_org)
-
-    if is_org_admin_or_staff(current_user):
-        allowed_orgs = OrganizationService.get_allowed_orgs(current_user)
-        users = users.filter(organisation_data__in=allowed_orgs).distinct()
-    for user in users:
-        user.role_display = get_user_role_display(user, selected_org=selected_org)
-        user.hide_organisation_information = is_super_or_58_admin(user)
-        user.has_pending_invitation = UserInvitations.objects.filter(
-            user=user,
-            status__in=["SENT", "PENDING"],
-        ).exists()
-
-    return users
-
-
 @group_required("user_management")
 def user_management(request):
     user = request.user
+    user_role = get_active_role(user)
+    allowed_group = OrganizationService.get_allowed_organization_group(user)
     selected_org = None
     selected_org_id = None
     selected_org_name = None
@@ -112,13 +77,20 @@ def user_management(request):
     selected_org_name = None
 
     requested_org_id = request.GET.get("selected_org_id")
+    if user_role == "org_group_admin" and not requested_org_id:
+        if allowed_group:
+            return redirect(
+                "user_management:organization_group_details",
+                organization_group_id=allowed_group.id,
+            )
+
     if requested_org_id:
         selected_org = organizations.filter(id=requested_org_id).first()
         if selected_org:
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
 
-    if is_org_admin_or_staff(user):
+    if user_role in {"org_admin", "org_staff"}:
         selected_org = organizations.first()
         if selected_org:
             selected_org_id = str(selected_org.id)
@@ -165,6 +137,7 @@ def user_management(request):
         "assigned_work_codes": assigned_work_codes,
         "selected_org_id": selected_org_id,
         "selected_org_name": selected_org_name,
+        "allowed_organization_group": allowed_group,
         "org_details": org_details,
         "org_languages": org_languages,
         "create_org_form": CreateOrganisationForm(),
@@ -370,8 +343,13 @@ class EditOrganizationGroupView(View):
 
 class OrganizationGroupDetailsView(View):
     def get(self, request, organization_group_id):
-        if not is_super_or_58_admin(request.user):
+        allowed_group = OrganizationService.get_allowed_organization_group(request.user)
+        if not is_super_or_58_admin(request.user) and not is_org_group_admin(request.user):
+
             return redirect("user_management:home")
+        if is_org_group_admin(request.user):
+            if not allowed_group or allowed_group.id != organization_group_id:
+                return render(request, "403.html", status=403)
 
         try:
             organization_group = OrganizationService.get_organization_group(
@@ -383,6 +361,19 @@ class OrganizationGroupDetailsView(View):
             group_cms_sites_by_code = get_group_partner_configuration_sites_by_code(
                 organization_group
             )
+            users = User.objects.none()
+            if is_org_group_admin(request.user):
+                users = (
+                    User.objects.filter(
+                        organization_group=organization_group,
+                        groups__name="org_group_admin",
+                    )
+                    .prefetch_related("organisation_data", "groups")
+                    .distinct()
+                    .order_by("first_name", "last_name", "email")
+                )
+            for user in users:
+                user.role_display = get_user_role_display(user)
             context = OrganizationService.build_organization_group_context(
                 organization_group=organization_group,
             )
@@ -399,6 +390,7 @@ class OrganizationGroupDetailsView(View):
                     ),
                     "organization_group_id": organization_group.id,
                     "group_cms_sites_by_code": group_cms_sites_by_code or {},
+                    "users": users,
                 }
             )
             return render(request, "organization-group-details.html", context)
@@ -931,6 +923,7 @@ class EditDashboardUserView(View):
                     else "",
                     "end_date": user.end_date.isoformat() if user.end_date else "",
                     "groups": list(user.groups.values_list("id", flat=True)),
+                    "organisation_group_id": user.organization_group_id,
                     "organisation_data": list(
                         user.organisation_data.values_list("id", flat=True)
                     ),
@@ -1549,7 +1542,7 @@ class EditWorkCodeView(View):
 class BulkDeleteUsersView(View):
     def post(self, request):
         current_user = request.user
-        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+        if not (is_super_or_58_admin(current_user) or is_org_or_group_admin(current_user)):
             return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
         try:
@@ -1576,7 +1569,7 @@ class BulkDeleteUsersView(View):
                     if user.is_superuser and not current_user.is_superuser:
                         failed_count += 1
                         continue
-                    if is_org_admin(current_user):
+                    if is_org_or_group_admin(current_user):
                         user_org = user.organisation_data.first()
                         if not OrganizationService.has_org_access(
                             current_user, user_org
@@ -1607,7 +1600,10 @@ class BulkDeleteUsersView(View):
 class BulkActivateDeactivateUsersView(View):
     def post(self, request):
         current_user = request.user
-        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+        if not (
+            is_super_or_58_admin(current_user)
+            or is_org_or_group_admin(current_user)
+        ):
             return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
         try:
@@ -1657,7 +1653,7 @@ class BulkActivateDeactivateUsersView(View):
                     if user.is_superuser and not current_user.is_superuser:
                         failed_count += 1
                         continue
-                    if is_org_admin(current_user):
+                    if is_org_or_group_admin(current_user):
                         user_org = user.organisation_data.first()
                         if not OrganizationService.has_org_access(
                             current_user, user_org
@@ -1697,7 +1693,10 @@ class BulkActivateDeactivateUsersView(View):
 class BulkInviteUsersView(View):
     def post(self, request):
         current_user = request.user
-        if not (is_super_or_58_admin(current_user) or is_org_admin(current_user)):
+        if not (
+            is_super_or_58_admin(current_user)
+            or is_org_or_group_admin(current_user)
+        ):
             return JsonResponse({"ok": False, "error": "Permission denied."}, status=403)
 
         try:
@@ -1725,7 +1724,7 @@ class BulkInviteUsersView(View):
                     user = User.objects.filter(id=user_id).first()
                     if not user or (not user.email and not user.phone_number):
                         continue
-                    if is_org_admin(current_user):
+                    if is_org_or_group_admin(current_user):
                         user_org = user.organisation_data.first()
                         if not OrganizationService.has_org_access(
                             current_user,
@@ -1812,7 +1811,7 @@ def user_details(request, user_id):
     current_user = request.user
     target_user_org = user.organisation_data.first()
     
-    if is_org_admin(current_user) and not OrganizationService.has_org_access(
+    if is_org_or_group_admin(current_user) and not OrganizationService.has_org_access(
         current_user, target_user_org
     ):
         return OrganizationService.org_access_denied()

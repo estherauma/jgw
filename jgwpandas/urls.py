@@ -13,6 +13,10 @@ from django.conf import settings
 from user_management.views import short_link_redirect
 from django.conf.urls.static import static
 from django.conf.urls.i18n import set_language
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+)
 
 from django.conf import settings
 
@@ -45,6 +49,13 @@ urlpatterns = [
     path("help-contacts/", include("help_contacts.urls")),
     path("events/", include("events.urls")),
     path("payment/", include("payment.urls")),
+    path("api/v1/accounts/", include("users.api_urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
+    path(
+        "api/docs/swagger/",
+        SpectacularSwaggerView.as_view(url_name="api-schema"),
+        name="api-docs-swagger",
+    ),
     path("user-management/", include("user_management.urls")),
     path("s/<slug:code>/", short_link_redirect, name="short_link"),
     path("__debug__/", include("debug_toolbar.urls")),

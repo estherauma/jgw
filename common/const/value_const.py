@@ -8,6 +8,9 @@ CMS_SYNC_PENDING = "pending"
 CMS_SYNC_SUCCESS = "success"
 CMS_SYNC_FAILED = "failed"
 
+REGISTRATION_EMAIL_VERIFICATION_PURPOSE = "registration_email_verification"
+REGISTRATION_VERIFICATION_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+
 ORGANISATION_THEME_CHOICES = [
     ("purple_and_hot_pink", "Purple And Hot Pink"),
     ("orange_and_dark_red", "Orange And Dark Red"),

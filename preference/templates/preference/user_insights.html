@@ -1,0 +1,139 @@
+{% extends 'core/layouts/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% translate "userInsightsPageTitle" %}{% endblock title %}
+
+{% block main_base_head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'themes/ubold/libs/flatpickr/flatpickr.min.css' %}">
+{% endblock main_base_head %}
+
+{% block content %}
+<div class="user-insights-page">
+    <header class="user-insights-title">{% translate "userInsightsPageTitle" %}</header>
+
+    <div class="row g-3 align-items-start">
+        <div class="col-lg-3 col-md-4">
+            <div class="user-insights-latest-reports-card">
+                <div class="user-insights-latest-label">{% translate "userInsightsLatestReports" %}</div>
+                <div class="user-insights-reports-accordion" role="tablist" aria-label="{% translate 'userInsightsLatestReports' %}">
+                    {% for report in reports %}
+                    <div class="user-insights-report-accordion-item{% if report.active %} is-expanded{% endif %}" data-report-id="{{ report.id }}">
+                        <button type="button" class="user-insights-report-collapsed" aria-expanded="{% if report.active %}true{% else %}false{% endif %}">
+                            <span class="user-insights-report-collapsed-inner">{{ report.title }}</span>
+                        </button>
+                        <div class="user-insights-report-expanded">
+                            <div class="user-insights-report-active-panel">
+                                <div class="user-insights-report-active-title">{{ report.title }}</div>
+                                {% if report.description %}
+                                <p class="report-desc">{{ report.description }}</p>
+                                {% endif %}
+                                {% if report.hint %}
+                                <p class="report-hint">{{ report.hint }}</p>
+                                {% endif %}
+                                {% if report.pdf_label %}
+                                <a href="#" class="report-pdf text-primary text-decoration-underline fw-bold">{{ report.pdf_label }}</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="#" class="user-insights-help-link text-primary text-decoration-underline">{% translate "userInsightsNeedHelp" %}</a>
+            </div>
+        </div>
+
+        <div class="col-lg-9 col-md-8">
+            <div class="user-insights-main-card" id="user-insights-main-chart-card" data-active-report="{% for report in reports %}{% if report.active %}{{ report.id }}{% endif %}{% endfor %}">
+                <div class="user-insights-chart-head">
+                    <h4 id="user-insights-active-report-title" class="user-insights-chart-head-title chart-main-title">{% for report in reports %}{% if report.active %}{{ report.title }}{% endif %}{% endfor %}</h4>
+                    <div class="user-insights-chart-controls" id="user-insights-chart-controls">
+                        <span class="user-insights-chart-controls-label">{% translate "userInsightsReportView" %}</span>
+                        {% for report in reports %}
+                        <div class="user-insights-indicator-filter-wrap{% if not report.active %} d-none{% endif %}" data-indicator-filter-for="{{ report.id }}">
+                            <select
+                                class="user-insights-chart-controls-select user-insights-indicator-filter"
+                                multiple="multiple"
+                                data-role="multiselect"
+                                data-report-id="{{ report.id }}"
+                                aria-label="{{ report.breakdown_header }}"
+                                data-all-text="{% translate 'userInsightsAllIndicators' %}"
+                                data-n-selected-text="{% translate 'userInsightsIndicatorsSelected' %}"
+                            >
+                                {% for opt in report.indicator_options %}
+                                <option
+                                    value="{{ opt.donut_slot }}"
+                                    data-breakdown-index="{{ opt.breakdown_index }}"
+                                >{{ opt.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="user-insights-legend">
+                    {% for leg in chart_legends %}
+                    <button type="button" class="user-insights-legend-item" data-legend="{{ leg.class }}">
+                        <span class="user-insights-legend-swatch user-insights-legend-swatch--{{ leg.class }}" aria-hidden="true"></span>
+                        <span class="user-insights-legend-text">{{ leg.label }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+                <div class="user-insights-donut-row" id="user-insights-donut-row" data-donut-count="{{ active_report.donut_count }}" data-active-report="{{ active_report.id }}">
+                    {% for slot in donut_slots %}
+                    <div class="user-insights-donut-slot-wrap{% if forloop.counter0 >= active_report.donut_count %} d-none{% endif %}" data-slot="{{ forloop.counter0 }}" data-donut-slot="{{ forloop.counter0 }}">
+                        <div class="user-insights-donut-cell" role="button" tabindex="0">
+                            <div id="user-insights-donut-{{ forloop.counter0 }}" class="echarts-host" role="img" aria-label=""></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="user-insights-breakdown-card" id="user-insights-breakdown-root">
+                <div class="user-insights-breakdown-head">
+                    <div class="user-insights-breakdown-label mb-0">{% translate "userInsightsReportBreakdown" %}</div>
+                    <div class="user-insights-search-wrap">
+                        <span class="search-icon"><i class="mdi mdi-magnify"></i></span>
+                        <input type="search" id="user-insights-keyword-search" placeholder="{% translate 'userInsightsKeywordSearch' %}" autocomplete="off" />
+                    </div>
+                </div>
+                {% for report in reports %}
+                <div class="user-insights-breakdown-stack{% if not report.active %} d-none{% endif %}" data-breakdown-for="{{ report.id }}">
+                    <div class="user-insights-indicators-header">{{ report.breakdown_header }}</div>
+                    <div class="user-insights-indicator-list">
+                        {% for opt in report.indicator_options %}
+                        <div class="user-insights-indicator-block" data-indicator-name="{{ opt.name|lower }}" data-breakdown-index="{{ opt.breakdown_index }}" data-donut-slot="{{ opt.donut_slot }}" data-report-id="{{ report.id }}">
+                            <button type="button" class="user-insights-indicator-row" data-bs-toggle="collapse" data-bs-target="#user-insights-ind-{{ report.id }}-{{ opt.breakdown_index }}" aria-expanded="false" aria-controls="user-insights-ind-{{ report.id }}-{{ opt.breakdown_index }}">
+                                <span class="accent-bar" style="background-color: {{ opt.color }};"></span>
+                                <span class="indicator-name">{{ opt.name }}</span>
+                                <span class="expand-icon" aria-hidden="true">+</span>
+                            </button>
+                            <div class="collapse user-insights-indicator-detail" id="user-insights-ind-{{ report.id }}-{{ opt.breakdown_index }}">
+                                {% include "preference/includes/user_insights_indicator_detail.html" with detail=opt.detail report=report opt=opt %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "preference/includes/user_insights_all_responses_modal.html" %}
+{{ user_insights_all_responses_config|json_script:"user-insights-all-responses-config" }}
+{{ chart_payload|json_script:"user-insights-chart-payload" }}
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'js/charts/echarts/user_insights/risk_indicator_donuts.js' %}"></script>
+<script src="{% static 'js/charts/echarts/user_insights/question_drilldown_sunburst.js' %}"></script>
+<script src="{% static 'themes/ubold/libs/flatpickr/flatpickr.min.js' %}"></script>
+<script src="{% static 'js/app/user_insights_date_filter.js' %}"></script>
+<script src="{% static 'js/app/user_insights_drilldown.js' %}"></script>
+<script src="{% static 'js/app/user_insights_all_responses.js' %}"></script>
+<script src="{% static 'js/app/user_insights.js' %}"></script>
+{% endblock scripts %}
