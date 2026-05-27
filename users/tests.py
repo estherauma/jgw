@@ -710,14 +710,14 @@ class LoginApiTests(AuthTests):
         self.assertIsNone(inactive_user.last_login)
 
     def test_login_api_allows_phone_login(self):
-        phone_user = User.objects.create_user(
-            email=None,
-            password=self.password,
+        phone_user = User(
             is_active=True,
             access_type="app",
             phone_number="+256781590905",
             phone_country_iso="UG",
         )
+        phone_user.set_password(self.password)
+        phone_user.save()
 
         response = self.client.post(
             reverse("user_management_api:login_api"),
