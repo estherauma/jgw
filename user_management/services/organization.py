@@ -16,23 +16,44 @@ from user_management.utils import is_org_admin_or_staff, is_org_group_admin, is_
 
 class OrganizationService:
     @staticmethod
-    def get_access_code_details(*, access_code):
+    def get_access_code_record(*, access_code, include_workgroups=False):
         normalized_code = (access_code or "").strip().upper()
         if not normalized_code:
             return None
 
-        work_code = (
-            OrganisationAccessCode.objects.select_related("organisation")
-            .prefetch_related("work_groups")
-            .filter(code__iexact=normalized_code)
-            .first()
-        )
+        query = OrganisationAccessCode.objects.select_related("organisation")
+        if include_workgroups:
+            query = query.prefetch_related("work_groups")
+
+        work_code = query.filter(code__iexact=normalized_code).first()
         if not work_code:
             return None
 
         organisation = work_code.organisation
         if not organisation or organisation.is_deleted:
             return None
+        return work_code
+
+    @staticmethod
+    def get_access_code_status(*, access_code):
+        work_code = OrganizationService.get_access_code_record(access_code=access_code)
+        if not work_code:
+            return None
+        return {
+            "code": work_code.code,
+            "requires_login": work_code.requires_login,
+        }
+
+    @staticmethod
+    def get_access_code_details(*, access_code):
+        work_code = OrganizationService.get_access_code_record(
+            access_code=access_code,
+            include_workgroups=True,
+        )
+        if not work_code:
+            return None
+
+        organisation = work_code.organisation
         return {
             "id": work_code.id,
             "code": work_code.code,

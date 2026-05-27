@@ -9,11 +9,54 @@ from rest_framework.views import APIView
 from user_management.api_serializers import (
     AccessCodeLookupErrorSerializer,
     AccessCodeLookupResponseSerializer,
+    AccessCodeStatusResponseSerializer,
 )
 from user_management.services.organization import OrganizationService
 
 
 logger = logging.getLogger(__name__)
+
+
+class AccessCodeStatusApiView(APIView):
+    authentication_classes = []
+
+    @extend_schema(
+        tags=["User Management"],
+        summary="Get access code status",
+        description="Looks up an organisation access code and returns whether it requires login.",
+        responses={
+            200: AccessCodeStatusResponseSerializer,
+            404: AccessCodeLookupErrorSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Access code status response",
+                value={
+                    "code": "TEST123",
+                    "requires_login": True,
+                },
+                response_only=True,
+            )
+        ],
+    )
+    def get(self, request, access_code):
+        try:
+            result = OrganizationService.get_access_code_status(access_code=access_code)
+            if not result:
+                return Response(
+                    {"ok": False, "error": "Access code not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            return Response(result, status=status.HTTP_200_OK)
+        except Exception:
+            logger.exception(
+                "Failed to fetch access code status.",
+                extra={"access_code": access_code},
+            )
+            return Response(
+                {"ok": False, "error": "Could not fetch access code status. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class AccessCodeDetailsApiView(APIView):

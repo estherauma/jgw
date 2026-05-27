@@ -47,6 +47,34 @@ class AccessCodeDetailsApiTests(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
 
+    def test_access_code_status_returns_public_response(self):
+        response = self.client.get(
+            reverse(
+                "user_management_v1_api:access_code_status_api",
+                args=("test123",),
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "code": "TEST123",
+                "requires_login": True,
+            },
+        )
+
+    def test_access_code_status_returns_404_when_not_found(self):
+        response = self.client.get(
+            reverse(
+                "user_management_v1_api:access_code_status_api",
+                args=("missing123",),
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})
+
     def test_access_code_details_requires_user_to_belong_to_organization(self):
         outsider = User.objects.create_user(
             email="outsider@example.com",
@@ -111,6 +139,19 @@ class AccessCodeDetailsApiTests(TestCase):
                 args=("test123",),
             ),
             **self.auth_headers,
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})
+
+    def test_access_code_status_returns_404_when_organization_is_soft_deleted(self):
+        self.organisation.soft_delete(self.user)
+
+        response = self.client.get(
+            reverse(
+                "user_management_v1_api:access_code_status_api",
+                args=("test123",),
+            )
         )
 
         self.assertEqual(response.status_code, 404)

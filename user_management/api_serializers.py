@@ -1,6 +1,11 @@
 from rest_framework import serializers
 
 
+class AccessCodeStatusResponseSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    requires_login = serializers.BooleanField()
+
+
 class AccessCodeLookupResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     code = serializers.CharField()
