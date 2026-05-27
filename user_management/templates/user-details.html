@@ -13,7 +13,11 @@
 
 {% block content %}
 <div class="my-3">
-    <a class="d-inline-flex align-items-center gap-2 fw-semibold text-info text-decoration-none" href="{% url 'user_management:home' %}">
+    <a
+        class="d-inline-flex align-items-center gap-2 fw-semibold text-info text-decoration-none"
+        href="{% url 'user_management:home' %}"
+        onclick="if (window.history.length > 1) { window.history.back(); return false; }"
+    >
         <i class="bi bi-chevron-left"></i>
         <span>Back to User Management</span>
     </a>

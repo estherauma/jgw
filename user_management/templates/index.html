@@ -108,7 +108,19 @@
 
             {% flag 'can_view_work_codes' %}
             <div class="um-card" data-org-dependent>
-                <div class="um-card-title um-navy">Work Codes</div>
+                <div class="um-row">
+                    <div class="um-card-title um-navy">Work Codes</div>
+                    {% flag 'can_create_work_code' %}
+                    <button
+                        class="um-btn"
+                        type="button"
+                        data-toggle="modal"
+                        data-target="#add-workcode-modal"
+                    >
+                        Create work code
+                    </button>
+                    {% endflag %}
+                </div>
                 <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm" data-org-workcode-list>
                     <div class="um-scrollbar">
                         <div class="um-scrollbar-thumb"></div>
