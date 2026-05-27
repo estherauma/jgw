@@ -1,6 +1,8 @@
 from users.models import User, UserInvitations
+from user_management.models import WorkGroup
 
 from user_management.services.organization import OrganizationService
+from user_management.roles import add_default_org_roles, apply_role_to_user
 from user_management.utils import (
     get_active_role,
     get_group_names,
@@ -8,6 +10,14 @@ from user_management.utils import (
     is_org_group_admin,
     is_super_or_58_admin,
 )
+
+
+def assign_default_app_registration_membership(user, organisation):
+    add_default_org_roles(organisation)
+    worker_role = organisation.roles.filter(name__iexact="Worker").first()
+    user.organisation_data.add(organisation)
+    apply_role_to_user(user, organisation, worker_role)
+    return {"role": worker_role}
 
 
 def get_user_role_display(user, selected_org=None):

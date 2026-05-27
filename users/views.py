@@ -227,6 +227,21 @@ def login_user(request):
                 user = User.objects.get(email__iexact=email)
                 user = authenticate(request, username=user.email, password=password)
                 if user is not None:
+                    if has_group(user, "worker"):
+                        track_event(
+                            event_name="user_login_failed",
+                            user_id=str(user.id),
+                            user_email=user.email,
+                            properties={
+                                "reason": "worker_dashboard_access_denied",
+                            },
+                            request=request
+                        )
+                        messages.error(
+                            request,
+                            "This account is not allowed to access the dashboard.",
+                        )
+                        return render(request, "users/sign_in.html", {"form": form})
                     login(request, user)
                     UserSession.objects.create(user=user)
                     request.session['login_time'] = datetime.now(timezone.utc).isoformat()

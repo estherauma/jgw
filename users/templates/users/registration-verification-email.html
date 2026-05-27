@@ -1,0 +1,11 @@
+<html>
+  <body>
+    <p>Hello{% if user.first_name %} {{ user.first_name }}{% endif %},</p>
+    <p>Thank you for registering on Just Good Work.</p>
+    <p>Please use the verification code below to verify your email address:</p>
+    <p><strong>{{ verification_code }}</strong></p>
+    <p>This code expires in {{ expiry_minutes }} minutes.</p>
+    <p>If you did not create this account, you can ignore this email.</p>
+    <p>Regards,<br />JGW Team</p>
+  </body>
+</html>

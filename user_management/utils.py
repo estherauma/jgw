@@ -1,5 +1,8 @@
 import phonenumbers
 import pycountry
+from django.core.exceptions import ValidationError
+
+from users.models import User
 
 
 ROLE_PRECEDENCE = (
@@ -101,3 +104,95 @@ def validate_phone_number(phone_number, country_iso):
     if not phonenumbers.is_possible_number(parsed) or not phonenumbers.is_valid_number(parsed):
         return None, "Enter a valid phone number."
     return parsed, None
+
+
+def normalize_phone_number_for_lookup(phone_number, country_iso=None):
+    raw_number = (phone_number or "").strip()
+    normalized_country_iso = (country_iso or "").strip().upper()
+    if not raw_number:
+        return None, None
+
+    if raw_number.startswith("+"):
+        try:
+            parsed = phonenumbers.parse(raw_number, None)
+        except phonenumbers.NumberParseException:
+            return None, "Enter a valid phone number."
+        if not phonenumbers.is_possible_number(parsed) or not phonenumbers.is_valid_number(parsed):
+            return None, "Enter a valid phone number."
+        return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164), None
+
+    if not normalized_country_iso:
+        return None, "Select a country code."
+
+    parsed, error_message = validate_phone_number(raw_number, normalized_country_iso)
+    if error_message:
+        return None, error_message
+    return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164), None
+
+
+def clean_user_email(email, instance=None, required=False):
+    normalized_email = (email or "").strip().lower()
+    if not normalized_email:
+        if required:
+            raise ValidationError("Email is required")
+        return None
+
+    qs = User.all_objects.filter(email__iexact=normalized_email)
+    if instance and instance.pk:
+        qs = qs.exclude(pk=instance.pk)
+    if qs.exists():
+        raise ValidationError("Email already exists.")
+    return normalized_email
+
+
+def validate_password_confirmation(
+    form,
+    cleaned_data,
+    password_field="password",
+    confirmation_field="password_confirm",
+):
+    password = cleaned_data.get(password_field)
+    confirmation = cleaned_data.get(confirmation_field)
+    if (password or confirmation) and password != confirmation:
+        form.add_error(confirmation_field, "Passwords do not match.")
+
+
+def validate_user_phone_number(
+    form,
+    cleaned_data,
+    phone_field="phone_number",
+    country_field="phone_country_iso",
+):
+    phone_number = (cleaned_data.get(phone_field) or "").strip()
+    country_iso = (cleaned_data.get(country_field) or "").strip()
+    if not phone_number:
+        cleaned_data[country_field] = None
+        return cleaned_data
+
+    if not country_iso:
+        form.add_error(country_field, "Select a country code.")
+        return cleaned_data
+
+    parsed, error_message = validate_phone_number(phone_number, country_iso)
+    if error_message:
+        if "country code" in error_message:
+            form.add_error(country_field, error_message)
+        else:
+            form.add_error(phone_field, error_message)
+        return cleaned_data
+
+    cleaned_data[phone_field] = phonenumbers.format_number(
+        parsed, phonenumbers.PhoneNumberFormat.E164
+    )
+    phone_qs = User.all_objects.filter(
+        phone_number=cleaned_data[phone_field],
+        phone_country_iso=country_iso,
+    )
+    if form.instance and form.instance.pk:
+        phone_qs = phone_qs.exclude(pk=form.instance.pk)
+    if phone_qs.exists():
+        form.add_error(
+            phone_field,
+            "Phone number already exists for the selected country.",
+        )
+    return cleaned_data

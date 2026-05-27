@@ -161,3 +161,27 @@ class UserSession(models.Model):
             self.user.save()
         
         super().save(*args, **kwargs)
+
+
+class UserVerificationCode(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="verification_codes",
+    )
+    purpose = models.CharField(max_length=64, db_index=True)
+    code_hash = models.CharField(max_length=128)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveIntegerField(default=0)
+    max_attempts = models.PositiveIntegerField(default=3)
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "user_management_userverificationcode"
+        indexes = [
+            models.Index(fields=["user", "purpose", "created_at"]),
+        ]
+
+    def is_expired(self):
+        return self.expires_at <= timezone.now()
