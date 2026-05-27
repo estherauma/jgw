@@ -236,7 +236,6 @@ class CreateOrganisationView(View):
                 )
             except FileUploadError as exc:
                 return JsonResponse({"ok": False, "error": str(exc)}, status=400)
-
             organisation = form.save(commit=False)
             if organization_group:
                 organisation.organization_group = organization_group
@@ -273,6 +272,7 @@ class CreateOrganisationView(View):
                     request,
                     "Organisation was created, but partner configuration sync to CMS failed.",
                 )
+
             return JsonResponse(
                 {"ok": True, "org_id": organisation.id, "warning": warning_message}
             )
