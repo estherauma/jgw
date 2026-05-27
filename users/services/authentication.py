@@ -19,7 +19,7 @@ from users.models import User, UserVerificationCode
 from users.tasks import send_email_notification
 
 
-ACCESS_TOKEN_MINUTES = 60
+ACCESS_TOKEN_MINUTES = 480
 REFRESH_TOKEN_DAYS = 30
 
 

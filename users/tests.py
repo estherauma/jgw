@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from dashboard.models import Factory, Scheme
-from preference.models import OrganisationData
+from preference.models import OrganisationAccessCode, OrganisationData
 from user_management.models import WorkGroup
 from users.services.authentication import (
     REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
@@ -295,7 +295,7 @@ class RegistrationApiTests(TestCase):
             return_value="AB23CD45",
         ):
             response = self.client.post(
-                reverse("user_management_api:register_user_api"),
+                reverse("users_api:register_user_api"),
                 data={
                     "first_name": "New",
                     "last_name": "User",
@@ -330,7 +330,7 @@ class RegistrationApiTests(TestCase):
     @patch("users.api_views.send_registration_verification_email")
     def test_register_user_returns_validation_errors(self, send_email_mock):
         response = self.client.post(
-            reverse("user_management_api:register_user_api"),
+            reverse("users_api:register_user_api"),
             data={
                 "first_name": "New",
                 "last_name": "User",
@@ -352,7 +352,7 @@ class RegistrationApiTests(TestCase):
     @patch("users.api_views.send_registration_verification_email")
     def test_register_user_requires_first_and_last_name(self, send_email_mock):
         response = self.client.post(
-            reverse("user_management_api:register_user_api"),
+            reverse("users_api:register_user_api"),
             data={
                 "email": "newuser@example.com",
                 "password1": "StrongPassword123!",
@@ -374,7 +374,7 @@ class RegistrationApiTests(TestCase):
             return_value="AB23CD45",
         ):
             response = self.client.post(
-                reverse("user_management_api:register_user_api"),
+                reverse("users_api:register_user_api"),
                 data={
                     "first_name": "Dashboard",
                     "last_name": "User",
@@ -398,7 +398,7 @@ class RegistrationApiTests(TestCase):
             return_value="AB23CD45",
         ):
             self.client.post(
-                reverse("user_management_api:register_user_api"),
+                reverse("users_api:register_user_api"),
                 data={
                     "first_name": "Verify",
                     "last_name": "Me",
@@ -416,7 +416,7 @@ class RegistrationApiTests(TestCase):
         self.assertIsNone(verification.used_at)
 
         response = self.client.post(
-            reverse("user_management_api:verify_registration_code"),
+            reverse("users_api:verify_registration_code"),
             data={"email": "verifyme@example.com", "code": "AB23CD45"},
         )
 
@@ -435,7 +435,7 @@ class RegistrationApiTests(TestCase):
             return_value="AB23CD45",
         ):
             response = self.client.post(
-                reverse("user_management_api:register_user_api"),
+                reverse("users_api:register_user_api"),
                 data={
                     "first_name": "Phone",
                     "last_name": "Only",
@@ -470,7 +470,7 @@ class RegistrationApiTests(TestCase):
         )
 
         response = self.client.post(
-            reverse("user_management_api:verify_registration_code"),
+            reverse("users_api:verify_registration_code"),
             data={"email": "verifyme@example.com", "code": "BADCODE2"},
         )
 
@@ -490,7 +490,7 @@ class RegistrationApiTests(TestCase):
         create_registration_verification_code(user)
 
         response = self.client.post(
-            reverse("user_management_api:verify_registration_code"),
+            reverse("users_api:verify_registration_code"),
             data={"email": "wrongcode@example.com", "code": "ZZ99YY88"},
         )
 
@@ -508,7 +508,7 @@ class RegistrationApiTests(TestCase):
         _, verification_code = create_registration_verification_code(user)
 
         response = self.client.post(
-            reverse("user_management_api:verify_registration_code"),
+            reverse("users_api:verify_registration_code"),
             data={"email": "appuser@example.com", "code": verification_code},
         )
 
@@ -527,7 +527,7 @@ class RegistrationApiTests(TestCase):
             return_value="AB23CD45",
         ):
             self.client.post(
-                reverse("user_management_api:register_user_api"),
+                reverse("users_api:register_user_api"),
                 data={
                     "first_name": "Phone",
                     "last_name": "Verify",
@@ -540,7 +540,7 @@ class RegistrationApiTests(TestCase):
 
         user = User.all_objects.get(phone_number="+256771234568")
         response = self.client.post(
-            reverse("user_management_api:verify_registration_code"),
+            reverse("users_api:verify_registration_code"),
             data={"phone_number": user.phone_number, "code": "AB23CD45"},
         )
 
@@ -557,7 +557,7 @@ class RegistrationApiTests(TestCase):
             return_value="AB23CD45",
         ):
             self.client.post(
-                reverse("user_management_api:register_user_api"),
+                reverse("users_api:register_user_api"),
                 data={
                     "first_name": "Phone",
                     "last_name": "User",
@@ -569,7 +569,7 @@ class RegistrationApiTests(TestCase):
             )
 
         response = self.client.post(
-            reverse("user_management_api:verify_registration_code"),
+            reverse("users_api:verify_registration_code"),
             data={
                 "phone_number": "0781590903",
                 "code": "AB23CD45",
@@ -590,7 +590,7 @@ class RegistrationApiTests(TestCase):
         )
 
         response = self.client.post(
-            reverse("user_management_api:resend_registration_code"),
+            reverse("users_api:resend_registration_code"),
             data={"user_id": user.id, "email": "resend@example.com"},
         )
 
@@ -616,7 +616,7 @@ class RegistrationApiTests(TestCase):
         user.save()
 
         response = self.client.post(
-            reverse("user_management_api:resend_registration_code"),
+            reverse("users_api:resend_registration_code"),
             data={
                 "user_id": user.id,
                 "phone_number": "0700000000",
@@ -634,7 +634,7 @@ class RegistrationApiTests(TestCase):
 
     def test_resend_registration_code_requires_identifier(self):
         response = self.client.post(
-            reverse("user_management_api:resend_registration_code"),
+            reverse("users_api:resend_registration_code"),
             data={},
         )
 
@@ -657,7 +657,7 @@ class LoginApiTests(AuthTests):
     def test_login_api_returns_tokens_and_updates_last_login(self):
         self.assertIsNone(self.user.last_login)
         response = self.client.post(
-            reverse("user_management_api:login_api"),
+            reverse("users_api:login_api"),
             data={
                 "email": "login@example.com",
                 "password": self.password,
@@ -677,7 +677,7 @@ class LoginApiTests(AuthTests):
 
     def test_login_api_rejects_invalid_password(self):
         response = self.client.post(
-            reverse("user_management_api:login_api"),
+            reverse("users_api:login_api"),
             data={
                 "email": "login@example.com",
                 "password": "wrong-password",
@@ -696,7 +696,7 @@ class LoginApiTests(AuthTests):
         )
 
         response = self.client.post(
-            reverse("user_management_api:login_api"),
+            reverse("users_api:login_api"),
             data={
                 "email": "inactive@example.com",
                 "password": self.password,
@@ -720,7 +720,7 @@ class LoginApiTests(AuthTests):
         phone_user.save()
 
         response = self.client.post(
-            reverse("user_management_api:login_api"),
+            reverse("users_api:login_api"),
             data={
                 "phone_number": "0781590905",
                 "phone_country_iso": "UG",
@@ -739,9 +739,104 @@ class LoginApiTests(AuthTests):
         phone_user.refresh_from_db()
         self.assertIsNotNone(phone_user.last_login)
 
+    def test_get_current_user_requires_authentication(self):
+        response = self.client.get(
+            reverse("users_api:me_api"),
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
+
+    def test_get_current_user_returns_authenticated_user(self):
+        self.user.first_name = "John"
+        self.user.last_name = "Doe"
+        self.user.save(update_fields=["first_name", "last_name"])
+        organisation = OrganisationData.objects.create(
+            name="Test Org",
+            org_code="TESTORG",
+            display_name="Test Organisation",
+        )
+        self.user.organisation_data.add(organisation)
+        worker_group = WorkGroup.objects.create(name="Worker", organisation=organisation)
+        supervisor_group = WorkGroup.objects.create(name="Supervisor", organisation=organisation)
+        self.user.work_groups.add(worker_group)
+        role_group = Group.objects.create(name="worker")
+        self.user.groups.add(role_group)
+        public_access_code = OrganisationAccessCode.objects.create(
+            code="PUBLIC123",
+            organisation=organisation,
+            requires_login=False,
+        )
+        worker_access_code = OrganisationAccessCode.objects.create(
+            code="PRIVATE123",
+            organisation=organisation,
+            requires_login=True,
+        )
+        worker_access_code.work_groups.add(worker_group)
+        supervisor_access_code = OrganisationAccessCode.objects.create(
+            code="SUPERVISOR123",
+            organisation=organisation,
+            requires_login=True,
+        )
+        supervisor_access_code.work_groups.add(supervisor_group)
+        login_response = self.client.post(
+            reverse("users_api:login_api"),
+            data={
+                "email": "login@example.com",
+                "password": self.password,
+            },
+        )
+
+        response = self.client.get(
+            reverse("users_api:me_api"),
+            HTTP_AUTHORIZATION=f"Bearer {login_response.json()['access_token']}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "id": self.user.id,
+                "email": "login@example.com",
+                "phone_number": None,
+                "phone_country_iso": None,
+                "first_name": "John",
+                "last_name": "Doe",
+                "role": "worker",
+                "access_type": "dashboard",
+                "is_active": True,
+                "organisation": {
+                    "id": organisation.id,
+                    "name": "Test Org",
+                    "org_code": "TESTORG",
+                    "display_name": "Test Organisation",
+                    "user_groups": [
+                        {
+                            "id": worker_group.id,
+                            "name": "Worker",
+                        }
+                    ],
+                    "access_codes": [
+                        {
+                            "id": public_access_code.id,
+                            "code": "PUBLIC123",
+                            "requires_login": False,
+                            "expiry_date": None,
+                        },
+                        {
+                            "id": worker_access_code.id,
+                            "code": "PRIVATE123",
+                            "requires_login": True,
+                            "expiry_date": None,
+                        },
+                    ],
+                },
+            },
+        )
+
     def test_refresh_token_api_returns_new_tokens(self):
         login_response = self.client.post(
-            reverse("user_management_api:login_api"),
+            reverse("users_api:login_api"),
             data={
                 "email": "login@example.com",
                 "password": self.password,
@@ -749,7 +844,7 @@ class LoginApiTests(AuthTests):
         )
 
         refresh_response = self.client.post(
-            reverse("user_management_api:refresh_token_api"),
+            reverse("users_api:refresh_token_api"),
             data={"refresh_token": login_response.json()["refresh_token"]},
         )
 
@@ -761,7 +856,7 @@ class LoginApiTests(AuthTests):
 
     def test_refresh_token_api_rejects_invalid_token(self):
         response = self.client.post(
-            reverse("user_management_api:refresh_token_api"),
+            reverse("users_api:refresh_token_api"),
             data={"refresh_token": "not-a-real-token"},
         )
 

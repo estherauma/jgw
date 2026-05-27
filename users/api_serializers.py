@@ -58,6 +58,40 @@ class RefreshTokenResponseSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
 
 
+class AccessCodeSummarySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    code = serializers.CharField()
+    requires_login = serializers.BooleanField()
+    expiry_date = serializers.DateField(allow_null=True)
+
+
+class WorkGroupSummarySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
+class OrganizationSummarySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    org_code = serializers.CharField()
+    display_name = serializers.CharField(allow_null=True, allow_blank=True)
+    user_groups = WorkGroupSummarySerializer(many=True)
+    access_codes = AccessCodeSummarySerializer(many=True)
+
+
+class CurrentUserResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.EmailField(allow_null=True)
+    phone_number = serializers.CharField(allow_null=True)
+    phone_country_iso = serializers.CharField(allow_null=True)
+    first_name = serializers.CharField(allow_blank=True)
+    last_name = serializers.CharField(allow_blank=True)
+    role = serializers.CharField(allow_null=True, allow_blank=True)
+    access_type = serializers.CharField()
+    is_active = serializers.BooleanField()
+    organisation = OrganizationSummarySerializer(allow_null=True)
+
+
 class VerifyRegistrationCodeRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True)
     phone_number = serializers.CharField(required=False, allow_blank=True)

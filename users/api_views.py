@@ -1,10 +1,12 @@
 from django.db import transaction
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.api_serializers import (
+    CurrentUserResponseSerializer,
     ErrorResponseSerializer,
     FormErrorResponseSerializer,
     LoginRequestSerializer,
@@ -28,10 +30,70 @@ from users.services.authentication import (
     send_registration_verification_sms,
     verify_registration_code,
 )
+from users.services.profile import get_current_user_payload
 from users.views import initialize_user_dashboard_preferences
 from user_management.services.user import (
     assign_default_app_registration_membership,
 )
+
+
+class CurrentUserApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Get current user",
+        description="Returns the currently authenticated user linked to the access token.",
+        responses={
+            200: CurrentUserResponseSerializer,
+            401: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Current user response",
+                value={
+                    "id": 123,
+                    "email": "john.doe@example.com",
+                    "phone_number": None,
+                    "phone_country_iso": None,
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "role": "worker",
+                    "access_type": "dashboard",
+                    "is_active": True,
+                    "organisation": {
+                        "id": 5,
+                        "name": "Test Org",
+                        "org_code": "TESTORG",
+                        "display_name": "Test Organisation",
+                        "user_groups": [
+                            {
+                                "id": 3,
+                                "name": "Worker",
+                            }
+                        ],
+                        "access_codes": [
+                            {
+                                "id": 11,
+                                "code": "PUBLIC123",
+                                "requires_login": False,
+                                "expiry_date": None,
+                            },
+                            {
+                                "id": 12,
+                                "code": "PRIVATE123",
+                                "requires_login": True,
+                                "expiry_date": None,
+                            },
+                        ],
+                    },
+                },
+                response_only=True,
+            )
+        ],
+    )
+    def get(self, request):
+        return Response(get_current_user_payload(request.user), status=status.HTTP_200_OK)
 
 
 class RegisterUserApiView(APIView):
