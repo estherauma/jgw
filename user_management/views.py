@@ -32,7 +32,6 @@ from .models import (
     ShortLink,
 )
 from .roles import add_default_org_roles, apply_role_to_user
-from .services.activity import UserActivityService
 from .services.organization import OrganizationService
 from .utils import is_58_admin, is_org_admin_or_staff, is_super_or_58_admin,is_org_admin
 from users.models import User, UserInvitations
@@ -290,11 +289,6 @@ class CreateOrganisationView(View):
                 user=request.user,
             )
             add_default_org_roles(organisation)
-            UserActivityService.log_organisation_created(
-                actor=request.user,
-                organisation=organisation,
-                after_state=UserActivityService.organisation_state(organisation),
-            )
             warning_message = None
             
             try:
@@ -663,11 +657,6 @@ class EditOrganisationView(View):
                 organisation.small_icon = uploaded_icon_urls["small_icon"].get("url", "")
                 organisation.small_icon_cms_media_id = uploaded_icon_urls["small_icon"].get("id")
             organisation.updated_by = request.user
-            UserActivityService.log_organisation_updated(
-                actor=request.user,
-                organisation_id=organisation_id,
-                organisation=organisation,
-            )
             organisation.save()
 
             has_existing_access_code = organisation.organisation_access_codes.exists()
