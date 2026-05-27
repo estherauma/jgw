@@ -70,7 +70,7 @@ class RegisterUserApiView(APIView):
                 value={
                     "first_name": "John",
                     "last_name": "Doe",
-                    "phone_number": "0781590902",
+                    "phone_number": "0700000000",
                     "phone_country_iso": "UG",
                     "password1": "StrongPassword123!",
                     "org_code": "TESTORG",
@@ -179,7 +179,7 @@ class LoginApiView(APIView):
             OpenApiExample(
                 "Login with phone",
                 value={
-                    "phone_number": "0781590902",
+                    "phone_number": "0700000000",
                     "phone_country_iso": "UG",
                     "password": "StrongPassword123!",
                 },
@@ -302,7 +302,7 @@ class VerifyRegistrationCodeApiView(APIView):
             OpenApiExample(
                 "Verify with phone",
                 value={
-                    "phone_number": "0781590902",
+                    "phone_number": "0700000000",
                     "phone_country_iso": "UG",
                     "code": "AXRDP5",
                 },
@@ -360,7 +360,7 @@ class ResendRegistrationCodeApiView(APIView):
             OpenApiExample(
                 "Resend with phone",
                 value={
-                    "phone_number": "0781590902",
+                    "phone_number": "0700000000",
                     "phone_country_iso": "UG",
                 },
                 request_only=True,

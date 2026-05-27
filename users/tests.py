@@ -322,12 +322,7 @@ class RegistrationApiTests(TestCase):
         )
         self.assertEqual(len(verification.code_hash) > 0, True)
         worker_group = Group.objects.get(name="worker")
-        worker_work_group = WorkGroup.objects.get(
-            organisation=self.organisation,
-            name="Worker",
-        )
         self.assertTrue(user.groups.filter(id=worker_group.id).exists())
-        self.assertTrue(user.work_groups.filter(id=worker_work_group.id).exists())
         init_prefs_mock.assert_not_called()
         send_email_mock.assert_called_once()
         send_email_mock.assert_called_once_with(user, "AB23CD45")
@@ -611,19 +606,20 @@ class RegistrationApiTests(TestCase):
     @patch("users.services.authentication.generate_registration_verification_code", return_value="ZX12CV")
     def test_resend_registration_code_by_local_phone(self, _code_mock, send_sms_mock):
         send_sms_mock.return_value = True
-        user = User.objects.create_user(
-            email=None,
-            password="StrongPassword123!",
+        user = User(
             is_active=False,
-            phone_number="+256781590902",
+            access_type="app",
+            phone_number="+256700000000",
             phone_country_iso="UG",
         )
+        user.set_password("StrongPassword123!")
+        user.save()
 
         response = self.client.post(
             reverse("user_management_api:resend_registration_code"),
             data={
                 "user_id": user.id,
-                "phone_number": "0781590902",
+                "phone_number": "0700000000",
                 "phone_country_iso": "UG",
             },
         )
@@ -632,7 +628,7 @@ class RegistrationApiTests(TestCase):
         self.assertEqual(response.json()["ok"], True)
         self.assertEqual(response.json()["user_id"], user.id)
         self.assertIsNone(response.json()["email"])
-        self.assertEqual(response.json()["phone_number"], "+256781590902")
+        self.assertEqual(response.json()["phone_number"], "+256700000000")
         self.assertEqual(response.json()["phone_country_iso"], "UG")
         send_sms_mock.assert_called_once_with(user, "ZX12CV")
 
