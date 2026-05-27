@@ -1,7 +1,6 @@
 from django.db import transaction
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -36,7 +35,6 @@ from user_management.services.user import (
 
 
 class RegisterUserApiView(APIView):
-    permission_classes = [AllowAny]
     authentication_classes = []
 
     @extend_schema(
@@ -154,7 +152,6 @@ class RegisterUserApiView(APIView):
 
 
 class LoginApiView(APIView):
-    permission_classes = [AllowAny]
     authentication_classes = []
 
     @extend_schema(
@@ -223,7 +220,6 @@ class LoginApiView(APIView):
 
 
 class RefreshTokenApiView(APIView):
-    permission_classes = [AllowAny]
     authentication_classes = []
 
     @extend_schema(
@@ -277,7 +273,6 @@ class RefreshTokenApiView(APIView):
 
 
 class VerifyRegistrationCodeApiView(APIView):
-    permission_classes = [AllowAny]
     authentication_classes = []
 
     @extend_schema(
@@ -338,7 +333,6 @@ class VerifyRegistrationCodeApiView(APIView):
 
 
 class ResendRegistrationCodeApiView(APIView):
-    permission_classes = [AllowAny]
     authentication_classes = []
 
     @extend_schema(
