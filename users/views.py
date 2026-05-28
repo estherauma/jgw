@@ -44,6 +44,8 @@ from users.templatetags.user_role_tags import has_group
 
 from django.utils.translation import gettext as _ 
 
+def get_public_demo_email():
+    return getattr(settings, "PUBLIC_DEMO_EMAIL").strip().lower()
 
 def initialize_user_dashboard_preferences(user, request=None):
     """Initialize dashboard preferences for a newly created user"""
@@ -284,6 +286,54 @@ def login_user(request):
         else:
             messages.error(request, _("loginUserViewInvalidForm"))
     return render(request, "users/sign_in.html", {"form": form})
+
+
+def public_demo_login(request):
+    """
+    Logs an anonymous visitor into the public demo dashboard account.
+
+    This is intentionally passwordless and should only grant access to the
+    demo user's data scope (enforced in dashboard filtering).
+    """
+    logout(request)
+    user, _created = User.objects.get_or_create(
+        email=get_public_demo_email(),
+        defaults={
+            "first_name": "Public",
+            "last_name": "Demo",
+            "is_active": True,
+            "role": "STAFF",
+            "access_type": "dashboard",
+        },
+    )
+    if not user.is_active:
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+
+    login(request, user)
+    UserSession.objects.create(user=user)
+    request.session["login_time"] = datetime.now(timezone.utc).isoformat()
+    request.session["user_email"] = user.email
+    request.session["user_id"] = user.id
+    request.session["user_role"] = user.groups.first().name if user.groups.exists() else "No Role"
+
+    track_event(
+        event_name="public_demo_logged_in",
+        user_id=str(user.id),
+        user_email=user.email,
+        properties={
+            "user_role": request.session.get("user_role"),
+            "is_staff": user.is_staff,
+        },
+        request=request,
+    )
+    identify_user(
+        user_id=str(user.id),
+        user_email=user.email,
+        request=request,
+    )
+
+    return redirect("preference:user_overview")
 
 
 @login_required
