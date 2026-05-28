@@ -43,6 +43,8 @@ from preference.repository.preference_repository import (
 from users.utils import get_user_organisations
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.decorators import login_required
+from datetime import datetime as dt
+from django.conf import settings
 from django.utils.translation import gettext as _
 from django.db import transaction
 from django.http import JsonResponse
@@ -574,6 +576,14 @@ def user_overview(request):
     filters = form_filter_params["filters"]
     filter_form = form_filter_params["filter_form"]
     date_range_form = DateRangeForm()
+
+    if getattr(request.user, "email", "").lower() == getattr(settings, "PUBLIC_DEMO_EMAIL").strip().lower():
+        if not any(k in request.GET for k in ("start_date", "end_date", "time_range")):
+            from common.const.value_const import PUBLIC_USER_DATA_START_DATE
+
+            filters["show_new_user_data"] = True
+            filters["start_date"] = dt.strptime(PUBLIC_USER_DATA_START_DATE, "%Y-%m-%d").date()
+            filters["end_date"] = dt.now().date()
 
     total_user_overview_responses = preferences_count(**filters, current_user=request.user)
     preferences_per_origin_country_responses = preferences_by_origin(**filters, current_user=request.user)

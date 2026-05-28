@@ -52,6 +52,9 @@ POSTHOG_SKIP_LOCALHOST = os.getenv("POSTHOG_SKIP_LOCALHOST", "False").lower() ==
 STRAPI_WEBHOOK_SECRET = os.getenv("STRAPI_WEBHOOK_SECRET")
 
 
+PUBLIC_DEMO_EMAIL = os.getenv("PUBLIC_DEMO_EMAIL", "demo@fiftyeight.io").strip().lower()
+
+
 # Application definition
 
 INSTALLED_APPS = [
