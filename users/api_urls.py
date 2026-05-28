@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .api_views import (
+    CurrentUserApiView,
     LoginApiView,
     RefreshTokenApiView,
     RegisterUserApiView,
@@ -8,9 +9,10 @@ from .api_views import (
     VerifyRegistrationCodeApiView,
 )
 
-app_name = "user_management_api"
+app_name = "users_api"
 
 urlpatterns = [
+    path("me/", CurrentUserApiView.as_view(), name="me_api"),
     path("login/", LoginApiView.as_view(), name="login_api"),
     path("token/refresh/", RefreshTokenApiView.as_view(), name="refresh_token_api"),
     path("register/", RegisterUserApiView.as_view(), name="register_user_api"),
