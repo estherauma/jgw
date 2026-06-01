@@ -12,6 +12,15 @@ thead {
     max-height: 70vh;
     overflow-y: auto;
 }
+
+
+.um-modal .um-select {
+    position: relative;
+    z-index: 1;
+}
+.um-modal .um-select.is-open {
+    z-index: 1065;
+}
 .um-modal-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -744,6 +753,13 @@ body .modal-backdrop.show {
 .um-select-option.is-selected {
     background: #37C1E3;
     color: #ffffff;
+}
+.um-select-option.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+.um-select-option.is-disabled:hover {
+    background: #f8fbff;
 }
 
 .um-multiselect .um-select-menu {

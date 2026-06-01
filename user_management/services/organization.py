@@ -11,22 +11,112 @@ from preference.models import (
     SiteLanguages,
 )
 from user_management.permissions import is_flag_active
-from user_management.utils import is_org_admin_or_staff, is_super_or_58_admin
+from user_management.utils import is_org_admin_or_staff, is_org_group_admin, is_super_or_58_admin
 
 
 class OrganizationService:
+    @staticmethod
+    def get_access_code_record(*, access_code, include_workgroups=False):
+        normalized_code = (access_code or "").strip().upper()
+        if not normalized_code:
+            return None
+
+        query = OrganisationAccessCode.objects.select_related("organisation")
+        if include_workgroups:
+            query = query.prefetch_related("work_groups")
+
+        work_code = query.filter(code__iexact=normalized_code).first()
+        if not work_code:
+            return None
+
+        organisation = work_code.organisation
+        if not organisation or organisation.is_deleted:
+            return None
+        return work_code
+
+    @staticmethod
+    def get_access_code_status(*, access_code):
+        work_code = OrganizationService.get_access_code_record(access_code=access_code)
+        if not work_code:
+            return None
+        return {
+            "code": work_code.code,
+            "requires_login": work_code.requires_login,
+        }
+
+    @staticmethod
+    def get_access_code_details(*, access_code):
+        work_code = OrganizationService.get_access_code_record(
+            access_code=access_code,
+            include_workgroups=True,
+        )
+        if not work_code:
+            return None
+
+        organisation = work_code.organisation
+        return {
+            "id": work_code.id,
+            "code": work_code.code,
+            "requires_login": work_code.requires_login,
+            "expiry_date": work_code.expiry_date.isoformat() if work_code.expiry_date else None,
+            "organization": 
+                {
+                    "id": organisation.id,
+                    "name": organisation.name,
+                    "org_code": organisation.org_code,
+                    "display_name": organisation.display_name,
+                    "theme": organisation.theme,
+                    "work_sector": organisation.work_sector,
+                    "content_collection": organisation.content_collection,
+                    "default_collection_language": organisation.default_collection_language,
+                },
+            "workgroups": [
+                {
+                    "id": work_group.id,
+                    "name": work_group.name,
+                }
+                for work_group in work_code.work_groups.order_by("name")
+            ],
+        }
+
     @staticmethod
     def get_allowed_orgs(user):
         if user.is_anonymous:
             return OrganisationData.objects.none()
         if is_super_or_58_admin(user):
             return OrganisationData.objects.all()
+        if is_org_group_admin(user):
+            organization_group_id = getattr(user, "organization_group_id", None)
+
+            if not organization_group_id:
+                return OrganisationData.objects.none()
+            return OrganisationData.objects.filter(
+                organization_group_id=organization_group_id
+            )
         if is_org_admin_or_staff(user):
             org = user.organisation_data.order_by("name").first()
             if not org:
                 return OrganisationData.objects.none()
             return OrganisationData.objects.filter(id=org.id)
         return OrganisationData.objects.none()
+
+    @staticmethod
+    def get_allowed_organization_group(user):
+        if user.is_anonymous:
+            return None
+        if is_super_or_58_admin(user):
+            return None
+        if getattr(user, "organization_group_id", None):
+            return user.organization_group
+        group_org = (
+            user.organisation_data.select_related("organization_group")
+            .filter(organization_group__isnull=False)
+            .order_by("organization_group__name", "name")
+            .first()
+        )
+        if not group_org:
+            return None
+        return group_org.organization_group
 
     @staticmethod
     def has_org_access(user, organisation, request=None, flag_name=None):

@@ -13,7 +13,11 @@
 
 {% block content %}
 <div class="my-3">
-    <a class="d-inline-flex align-items-center gap-2 fw-semibold text-info text-decoration-none" href="{% url 'user_management:home' %}">
+    <a
+        class="d-inline-flex align-items-center gap-2 fw-semibold text-info text-decoration-none"
+        href="{% url 'user_management:home' %}"
+        onclick="if (window.history.length > 1) { window.history.back(); return false; }"
+    >
         <i class="bi bi-chevron-left"></i>
         <span>Back to User Management</span>
     </a>
@@ -233,7 +237,7 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="d-grid gap-1">
-                            <span class="text-muted small">Organization</span>
+                            <span class="text-muted small">Organisation</span>
                             <span class="fw-semibold text-dark text-break">
                                 {{ user.organisation_data.all.0.name|default:"Not set" }}
                             </span>
@@ -333,7 +337,9 @@
 
 {% block scripts %}
 <script src="{% static 'js/user_management/common.js' %}"></script>
+<script src="{% static 'js/user_management/select-dropdown.js' %}"></script>
 <script src="{% static 'js/user_management/organization.js' %}"></script>
+<script src="{% static 'js/user_management/role-group-selector.js' %}"></script>
 <script src="{% static 'js/user_management/users.js' %}"></script>
 <script src="{% static 'js/user_management/roles.js' %}"></script>
 {% endblock %}

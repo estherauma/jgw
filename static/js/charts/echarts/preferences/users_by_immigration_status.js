@@ -110,7 +110,7 @@ function initUsersByImmigrationStatusChart(immigrationData, customContainerId, c
             },
             series: [
                 {
-                    name: 'Immigration Status',
+                    name: 'Area of Interest',
                     type: 'pie',
                     radius: radius,
                     center: ['50%', '50%'],

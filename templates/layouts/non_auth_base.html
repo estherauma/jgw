@@ -83,7 +83,7 @@
                             </a>
                         {% else %}
                             <a href="{% url 'users:login_user' %}" class="btn btn-info navbar-btn">{% translate "nonAuthBaseLogin" %}</a>
-                            <a href="{% url 'preference:user_overview' %}" class="btn btn-info navbar-btn">{% translate "nonAuthBaseTryNow" %}</a>
+                            <a href="{% url 'users:public_demo_login' %}" class="btn btn-info navbar-btn">{% translate "nonAuthBaseTryNow" %}</a>
                         {% endif %}
                     </div>
                 </div>

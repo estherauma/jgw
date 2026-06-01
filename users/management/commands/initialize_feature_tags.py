@@ -50,6 +50,7 @@ class Command(BaseCommand):
             {"condition": "testers", "tag": "can_view_gender_chart_on_messaging_question_page"},
             {"condition": "testers", "tag": "can_view_organisation_chart_on_messaging_question_page"},
             {"condition": "testers", "tag": "can_view_inline_questions_page"},
+            {"condition": "testers", "tag": "can_view_user_insights_page"},
             {"condition": "testers", "tag": "can_view_new_monthly_users_chart"},
             {"condition": "testers", "tag": "can_view_get_users_by_country_state_chart"},
             {"condition": "testers", "tag": "can_view_get_users_by_sector_chart"},
@@ -104,7 +105,8 @@ class Command(BaseCommand):
             )
         WaffleFlag = get_waffle_flag_model()
         ROLE_INHERITANCE = {
-            "org_admin": ["org_admin", "58_admin"],  # 58_admin has all org_admin permissions
+            "org_admin": ["org_admin", "org_group_admin", "58_admin"],  # 58_admin and org_group_admin have all org_admin permissions
+            "org_group_admin": ["org_group_admin", "58_admin"],  # 58_admin has all org_group_admin permissions
             "58_admin": ["58_admin"],  # 58_admin permissions only
             "user_management": ["user_management", "58_admin"],
         }

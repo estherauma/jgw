@@ -1,7 +1,6 @@
 import json
 from django import forms
 from django.contrib.auth.models import Group
-import phonenumbers
 import re
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -24,7 +23,13 @@ from .models import (
     WorkGroup,
 )
 from .flags import UM_FLAG_DEFS
-from .utils import get_country_code_choices, is_org_admin_or_staff, validate_phone_number
+from .utils import (
+    clean_user_email,
+    get_country_code_choices,
+    is_org_admin_or_staff,
+    validate_password_confirmation,
+    validate_user_phone_number,
+)
 
 
 class CreateOrganisationForm(forms.ModelForm):
@@ -452,38 +457,44 @@ class WorkGroupForm(forms.ModelForm):
 class DashboardUserForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
+        required=True,
+        widget=forms.SelectMultiple(),
+    )
+    organisation_group = forms.ModelChoiceField(
+        queryset=OrganizationGroup.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        empty_label="",
+        widget=forms.Select(),
     )
     organisation_data = forms.ModelMultipleChoiceField(
         queryset=OrganisationData.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.SelectMultiple(),
     )
     factories = forms.ModelMultipleChoiceField(
         queryset=FactoryFarm.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.SelectMultiple(),
     )
     destinations = forms.ModelMultipleChoiceField(
         queryset=Country.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.SelectMultiple(),
     )
     user_languages = forms.ModelMultipleChoiceField(
         queryset=Locale.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.SelectMultiple(),
     )
     excluded_origin_countries = forms.ModelMultipleChoiceField(
         queryset=Country.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.SelectMultiple(),
     )
     immigration_status = forms.ModelMultipleChoiceField(
         queryset=ImmigrationStatus.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.SelectMultiple(),
     )
     password = forms.CharField(widget=forms.PasswordInput, required=False)
     password_confirm = forms.CharField(widget=forms.PasswordInput, required=False)
@@ -501,6 +512,7 @@ class DashboardUserForm(forms.ModelForm):
             "end_date",
             "is_active",
             "groups",
+            "organisation_group",
             "organisation_data",
             "factories",
             "destinations",
@@ -542,8 +554,28 @@ class DashboardUserForm(forms.ModelForm):
         self.fields["send_invite"].widget = forms.CheckboxInput(
             attrs={"class": "form-check-input"}
         )
+        for field_name in [
+            "groups",
+            "organisation_group",
+            "organisation_data",
+            "factories",
+            "destinations",
+            "user_languages",
+            "excluded_origin_countries",
+            "immigration_status",
+        ]:
+            self.fields[field_name].widget.attrs.update({"class": "form-control um-input"})
         if orgs_qs is not None:
             self.fields["organisation_data"].queryset = orgs_qs
+            self.fields["organisation_group"].queryset = (
+                OrganizationGroup.objects.filter(organizations__in=orgs_qs)
+                .distinct()
+                .order_by("name")
+            )
+        else:
+            self.fields["organisation_group"].queryset = OrganizationGroup.objects.order_by(
+                "name"
+            )
         self.fields["scheme"].queryset = Scheme.objects.all().order_by("name")
         self.fields["factories"].queryset = FactoryFarm.objects.all().order_by("name")
         self.fields["destinations"].queryset = Country.objects.filter(
@@ -554,39 +586,81 @@ class DashboardUserForm(forms.ModelForm):
             is_origin=True
         ).order_by("name")
         self.fields["immigration_status"].queryset = ImmigrationStatus.objects.all().order_by("name")
+        if self.instance and self.instance.pk:
+            self.initial["organisation_group"] = self.instance.organization_group_id
 
     def clean_email(self):
-        email = self.cleaned_data.get("email") or ""
-        email = email.strip().lower()
-        if not email:
-            raise forms.ValidationError("Email is required")
-        qs = User.all_objects.filter(email__iexact=email)
-        if self.instance and self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise forms.ValidationError("Email already exists.")
-        return email
+        return clean_user_email(
+            self.cleaned_data.get("email"),
+            instance=self.instance,
+            required=True,
+        )
 
     def clean(self):
         cleaned = super().clean()
-        password = cleaned.get("password")
-        password_confirm = cleaned.get("password_confirm")
         admin_groups = cleaned.get("groups")
+        organisation_group = cleaned.get("organisation_group")
         organisation_data = cleaned.get("organisation_data")
+        selected_group_names = {group.name for group in admin_groups} if admin_groups else set()
+        is_org_group_admin = "org_group_admin" in selected_group_names
+        is_58_admin_selected = "58_admin" in selected_group_names
 
-        if password or password_confirm:
-            if password != password_confirm:
-                self.add_error("password_confirm", "Passwords do not match.")
+        validate_password_confirmation(self, cleaned, "password", "password_confirm")
 
-        if admin_groups and not organisation_data:
-            has_org_admin = any(group.name == "org_admin" for group in admin_groups)
-            if has_org_admin:
+        if is_58_admin_selected:
+            cleaned["organisation_group"] = None
+            cleaned["organisation_data"] = OrganisationData.objects.none()
+            cleaned["scheme"] = None
+            cleaned["start_date"] = None
+            cleaned["end_date"] = None
+            cleaned["factories"] = FactoryFarm.objects.none()
+            cleaned["destinations"] = Country.objects.none()
+            cleaned["user_languages"] = Locale.objects.none()
+            cleaned["excluded_origin_countries"] = Country.objects.none()
+            cleaned["immigration_status"] = ImmigrationStatus.objects.none()
+        elif is_org_group_admin:
+            if not organisation_group:
+                self.add_error(
+                    "organisation_group",
+                    "Select an organisation group for org group admins.",
+                )
+            cleaned["organisation_data"] = OrganisationData.objects.none()
+            cleaned["scheme"] = None
+            cleaned["start_date"] = None
+            cleaned["end_date"] = None
+            cleaned["factories"] = FactoryFarm.objects.none()
+            cleaned["destinations"] = Country.objects.none()
+            cleaned["user_languages"] = Locale.objects.none()
+            cleaned["excluded_origin_countries"] = Country.objects.none()
+            cleaned["immigration_status"] = ImmigrationStatus.objects.none()
+        elif admin_groups and not organisation_data:
+            cleaned["organisation_group"] = None
+            has_org_scoped_role = any(
+                group.name in {"org_admin", "org_staff"}
+                for group in admin_groups
+            )
+            if has_org_scoped_role:
                 self.add_error(
                     "organisation_data",
-                    "Select at least one organisation for org admins.",
+                    "Select an organisation",
                 )
+        else:
+            cleaned["organisation_group"] = None
 
         return cleaned
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        admin_groups = self.cleaned_data.get("groups")
+        selected_group_names = {group.name for group in admin_groups} if admin_groups else set()
+        if "org_group_admin" in selected_group_names:
+            user.organization_group = self.cleaned_data.get("organisation_group")
+        else:
+            user.organization_group = None
+        if commit:
+            user.save()
+            self.save_m2m()
+        return user
 
 
 class AppUserForm(forms.ModelForm):
@@ -628,7 +702,9 @@ class AppUserForm(forms.ModelForm):
         self.fields["phone_country_iso"].widget.attrs.update(
             {"class": "form-control um-input"}
         )
-        self.fields["work_groups"].widget = forms.CheckboxSelectMultiple()
+        self.fields["work_groups"].widget = forms.SelectMultiple(
+            attrs={"class": "form-control um-input"}
+        )
 
         self.fields["password"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Password"}
@@ -653,28 +729,14 @@ class AppUserForm(forms.ModelForm):
             self.fields["work_groups"].queryset = work_groups_qs
 
     def clean_email(self):
-        email = (self.cleaned_data.get("email") or "").strip().lower()
-        if not email:
-            return None
-        qs = User.all_objects.filter(email__iexact=email)
-
-        if self.instance and self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise forms.ValidationError("Email already exists.")
-        return email
+        return clean_user_email(self.cleaned_data.get("email"), instance=self.instance)
 
     def clean(self):
         cleaned = super().clean()
         role = cleaned.get("role")
         phone_number = cleaned.get("phone_number", "") or ""
-        phone_country_iso = cleaned.get("phone_country_iso", "") or ""
         email = (cleaned.get("email") or "").strip()
-        password = cleaned.get("password")
-        password_confirm = cleaned.get("password_confirm")
-        if password or password_confirm:
-            if password != password_confirm:
-                self.add_error("password_confirm", "Passwords do not match.")
+        validate_password_confirmation(self, cleaned, "password", "password_confirm")
         if role and not role.grants_dashboard_access and not email and not phone_number:
             self.add_error(
                 "email",
@@ -682,31 +744,7 @@ class AppUserForm(forms.ModelForm):
             )
         if role and role.grants_dashboard_access and not email:
             self.add_error("email", "Email is required for dashboard users.")
-        if phone_number and not phone_country_iso:
-            self.add_error("phone_country_iso", "Select a country code.")
-            return cleaned
-        if phone_number and phone_country_iso:
-            parsed, error_message = validate_phone_number(phone_number, phone_country_iso)
-            if error_message:
-                if "country code" in error_message:
-                    self.add_error("phone_country_iso", error_message)
-                else:
-                    self.add_error("phone_number", error_message)
-                return cleaned
-            cleaned["phone_number"] = phonenumbers.format_number(
-                parsed, phonenumbers.PhoneNumberFormat.E164
-            )
-            phone_qs = User.all_objects.filter(
-                phone_number=cleaned["phone_number"],
-                phone_country_iso=phone_country_iso,
-            )
-            if self.instance and self.instance.pk:
-                phone_qs = phone_qs.exclude(pk=self.instance.pk)
-            if phone_qs.exists():
-                self.add_error(
-                    "phone_number",
-                    "Phone number already exists for the selected country.",
-                )
+        validate_user_phone_number(self, cleaned)
         return cleaned
 
 
