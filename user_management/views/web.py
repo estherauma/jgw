@@ -241,7 +241,7 @@ class CreateOrganisationView(View):
                     small_icon_file=form.cleaned_data.get("small_icon_file"),
                 )
             except FileUploadError as exc:
-                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+                uploaded_icons = {}
             organisation = form.save(commit=False)
             if organization_group:
                 organisation.organization_group = organization_group
@@ -645,7 +645,7 @@ class EditOrganisationView(View):
                     small_icon_file=form.cleaned_data.get("small_icon_file"),
                 )
             except FileUploadError as exc:
-                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+                uploaded_icon_urls = {}
 
             organisation = form.save(commit=False)
             if uploaded_icon_urls.get("big_icon"):
@@ -1802,27 +1802,25 @@ def user_activity_list(request):
     user = request.user
     thirty_days_ago = timezone.now() - timedelta(days=30)
     activities = UserActivity.objects.select_related(
-        "user", "organisation"
-    ).filter(timestamp__gte=thirty_days_ago).order_by("-timestamp")
+        "actor", "organisation"
+    ).filter(created_at__gte=thirty_days_ago)
 
     if is_super_user(user):
-        pass  # super admin sees all
+        pass
     elif is_58_admin(user):
-        activities = activities.exclude(user__is_superuser=True)
+        activities = activities.exclude(actor__is_superuser=True)
     elif is_org_admin(user):
         user_orgs = user.organisation_data.all()
         activities = activities.filter(organisation__in=user_orgs)
     elif is_org_staff(user):
-        activities = activities.filter(user=user)
+        activities = activities.filter(actor=user)
     else:
         activities = activities.none()
 
     return render(
         request,
         "logs.html",
-        {
-            "activities": activities,
-        },
+        {"logs": activities},
     )
 
 

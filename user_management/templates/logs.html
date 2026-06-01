@@ -1,48 +1,42 @@
 {% extends 'core/layouts/base.html' %}
-{% load crispy_forms_tags %} 
 {% load static %}
-{% load um_waffle_flags %}
-{% load i18n %}
 
 {% block title %}Logs{% endblock %}
 
 {% block styles %}
 @import url("{% static 'user_management/css/common.css' %}");
-@import url("https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css");
+@import url("https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css");
 {% endblock %}
 
 {% block content %}
 <div class="um-page">
     <div class="um-header">
-        <h1 class="um-title">User Management</h1>
+        <h1 class="um-title">Activity Logs</h1>
     </div>
-    <div class="um-logs-card">
+    <div class="um-card">
         <div class="um-logs-header">
-            <h2 class="um-logs-title um-navy">Logs</h2>
-            <button type="button" class="close um-logs-close" aria-label="Close" onclick="window.history.back()">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <h2 class="um-logs-title um-navy"></h2>
         </div>
-        <div class="p-4">
-            <table id="um-logs-table" class="table table-striped w-100">
+        
+        <div class="table-responsive" style="padding: 20px;">
+            <table id="um-logs-table" class="display col-12">
                 <thead>
-                    <tr>
+                    <tr class="um-navy">
                         <th>Log Level</th>
                         <th>Timestamp</th>
                         <th>Log Message</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for activity in activities %}
+                    {% for activity in logs %}
                     <tr>
                         <td>
-                            <div class="um-log-level">
-                                <span class="um-log-icon um-log-icon-{{ activity.log_level }}">◆</span>
-                                <span class="um-log-level-text um-log-level-{{ activity.log_level }}">{{ activity.get_log_level_display }}</span>
-                            </div>
+                            <span class="um-log-level-text um-log-level-{{ activity.action }}">
+                                &#x25C6; {{ activity.action|title }}
+                            </span>
                         </td>
-                        <td class="um-log-timestamp">{{ activity.timestamp|date:"Y-m-d H:i:s" }}</td>
-                        <td class="um-log-message">{{ activity.message }}</td>
+                        <td>{{ activity.created_at|date:"Y-m-d H:i:s" }}</td>
+                        <td>{{ activity.message }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -51,7 +45,9 @@
     </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="{% static 'js/user_management/logs.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'user_management/js/logs.js' %}"></script>
 {% endblock %}
