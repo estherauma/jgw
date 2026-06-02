@@ -241,7 +241,7 @@ class CreateOrganisationView(View):
                     small_icon_file=form.cleaned_data.get("small_icon_file"),
                 )
             except FileUploadError as exc:
-                uploaded_icons = {}
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
             organisation = form.save(commit=False)
             if organization_group:
                 organisation.organization_group = organization_group
@@ -645,7 +645,7 @@ class EditOrganisationView(View):
                     small_icon_file=form.cleaned_data.get("small_icon_file"),
                 )
             except FileUploadError as exc:
-                uploaded_icon_urls = {}
+                return JsonResponse({"ok": False, "error": str(exc)}, status=400)
 
             organisation = form.save(commit=False)
             if uploaded_icon_urls.get("big_icon"):

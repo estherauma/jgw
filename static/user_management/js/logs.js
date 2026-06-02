@@ -4,7 +4,7 @@ $(document).ready(function () {
     pageLength: 10,
     lengthMenu: [10, 25, 50, 100],
     language: {
-      search: "Search logs:",
+      search: "Search Logs:",
       emptyTable: "No activity logs found.",
       info: "_START_-_END_ of _TOTAL_ row(s) shown.",
       infoEmpty: "0 of 0 row(s) shown.",
