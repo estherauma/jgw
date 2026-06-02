@@ -22,7 +22,9 @@ class ContentAPI:
     def __init__(self):
         self.api_url = config('JGW_CMS_API_URL')
         self.access_token = config('JGW_CMS_API_TOKEN')
-        self.headers = {}
+        self.headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
         self.languages = []
         self.fetch_content()
         self.documents = {}
