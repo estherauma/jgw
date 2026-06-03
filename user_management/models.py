@@ -31,7 +31,7 @@ class WorkGroup(AuditFieldsMixin):
         ]
 
 
-class OrganisationRole(models.Model):
+class OrganisationRole(AuditFieldsMixin):
     organisation = models.ForeignKey(
         OrganisationData, on_delete=models.CASCADE, related_name="roles"
     )
@@ -45,13 +45,11 @@ class OrganisationRole(models.Model):
         default=False,
         help_text="Marks default roles created by the system; not a user-created role.",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.name} ({self.organisation})"
 
-    class Meta:
+    class Meta(AuditFieldsMixin.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=["organisation", "name"],
@@ -60,16 +58,15 @@ class OrganisationRole(models.Model):
         ]
 
 
-class OrganisationRolePermission(models.Model):
+class OrganisationRolePermission(AuditFieldsMixin):
     role = models.ForeignKey(
         OrganisationRole, on_delete=models.CASCADE, related_name="role_permissions"
     )
     flag = models.ForeignKey(
         Flag, on_delete=models.CASCADE, related_name="role_permissions"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
+    class Meta(AuditFieldsMixin.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=["role", "flag"],
@@ -78,7 +75,7 @@ class OrganisationRolePermission(models.Model):
         ]
 
 
-class OrganisationRoleAssignment(models.Model):
+class OrganisationRoleAssignment(AuditFieldsMixin):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="org_roles"
     )
@@ -88,10 +85,8 @@ class OrganisationRoleAssignment(models.Model):
     role = models.ForeignKey(
         OrganisationRole, on_delete=models.CASCADE, related_name="assignments"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(AuditFieldsMixin.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=["user", "organisation"],
@@ -127,7 +122,11 @@ class UserActivity(models.Model):
         CREATED = "created", "Created"
         UPDATED = "updated", "Updated"
         DELETED = "deleted", "Deleted"
+        ACTIVATED = "activated", "Activated"
+        DEACTIVATED = "deactivated", "Deactivated"
+        INVITED = "invited", "Invited"
         ASSIGNED = "assigned", "Assigned"
+        UNASSIGNED = "unassigned", "Unassigned"
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="activity_logs"
     )

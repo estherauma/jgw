@@ -120,7 +120,7 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         super().soft_delete(deleted_by)
 
 
-class UserInvitations(models.Model):
+class UserInvitations(AuditFieldsMixin):
     STATUS = models.TextChoices("Status", " ".join(STATUS))
     user = models.ForeignKey(
         User,

@@ -5,6 +5,7 @@ from .models import (
     OrganisationRoleAssignment,
     OrganisationRolePermission,
     ShortLink,
+    UserActivity,
     WorkGroup,
 )
 
@@ -41,3 +42,41 @@ class ShortLinkAdmin(admin.ModelAdmin):
     list_display = ("code", "target_url", "expires_at", "created_at")
     list_filter = ("expires_at", "created_at")
     search_fields = ("code", "target_url")
+
+
+@admin.register(UserActivity)
+class UserActivityAdmin(admin.ModelAdmin):
+    list_display = (
+        "created_at",
+        "actor",
+        "action",
+        "record_type",
+        "record_id",
+        "organisation",
+        "message",
+    )
+    list_filter = ("action", "record_type", "created_at")
+    list_select_related = ("actor", "organisation")
+    search_fields = (
+        "actor__email",
+        "record_type",
+        "record_id",
+        "organisation__name",
+        "message",
+    )
+    readonly_fields = (
+        "actor",
+        "action",
+        "record_type",
+        "record_id",
+        "organisation",
+        "message",
+        "changes",
+        "created_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
