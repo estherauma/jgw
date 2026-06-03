@@ -23,20 +23,22 @@
             <table id="um-logs-table" class="display col-12">
                 <thead>
                     <tr class="um-navy">
+                        <th>Performed By</th>
+                        <th>Performed At</th>
                         <th>Log Level</th>
-                        <th>Timestamp</th>
                         <th>Log Message</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for activity in logs %}
                     <tr>
+                        <td>{{ activity.actor }}</td>
+                        <td>{{ activity.created_at|date:"Y-m-d H:i:s" }}</td>
                         <td>
                             <span class="um-log-level-text um-log-level-{{ activity.action }}">
-                                &#x25C6; {{ activity.action|title }}
+                                {{ activity.action|title }}
                             </span>
                         </td>
-                        <td>{{ activity.created_at|date:"Y-m-d H:i:s" }}</td>
                         <td>{{ activity.message }}</td>
                     </tr>
                     {% endfor %}
