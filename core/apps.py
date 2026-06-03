@@ -20,6 +20,8 @@ class CoreConfig(AppConfig):
         PostHog configuration is loaded from environment variables.
         Exception autocapture requires PostHog SDK v3.7.0 or higher.
         """
+        import common.signals
+
         if posthog is None:
             return
 
