@@ -1805,9 +1805,7 @@ def user_activity_list(request):
         "actor", "organisation"
     ).filter(created_at__gte=thirty_days_ago)
 
-    if is_super_user(user):
-        pass
-    elif is_58_admin(user):
+    if is_58_admin(user):
         activities = activities.exclude(actor__is_superuser=True)
     elif is_org_admin(user):
         user_orgs = user.organisation_data.all()
