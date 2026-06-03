@@ -46,7 +46,6 @@ from ..utils import (
     is_org_group_admin,
     is_org_or_group_admin,
     is_super_or_58_admin,
-    is_super_user,
     is_org_staff,
 )
 from users.models import User, UserInvitations
@@ -1808,6 +1807,9 @@ def user_activity_list(request):
     if is_58_admin(user):
         activities = activities.exclude(actor__is_superuser=True)
     elif is_org_admin(user):
+        user_org = user.organisation_data.first()
+        activities = activities.filter(organisation__in=user_org)
+    elif is_org_group_admin(user):
         user_orgs = user.organisation_data.all()
         activities = activities.filter(organisation__in=user_orgs)
     elif is_org_staff(user):

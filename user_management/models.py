@@ -98,14 +98,6 @@ class OrganisationRoleAssignment(models.Model):
                 name="unique_role_assignment_per_org",
             )
         ]
-
-
-LOG_LEVEL_CHOICES = [
-    ("info", "Info"),
-    ("warning", "Warning"),
-    ("error", "Error"),
-]
-
 class ShortLink(models.Model):
     code = models.CharField(max_length=16, unique=True)
     target_url = models.URLField(max_length=2048)

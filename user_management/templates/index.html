@@ -31,13 +31,14 @@
                 User Management
             {% endif %}
         </h1>
+        {% flag 'can_view_activity_logs' %}
         <button class="um-btn um-btn-outline">
             <a href="{% url 'user_management:user_activity_logs' %}">
                 <i class="fe-file-text"></i>
-                View Activity Logs
+                User Activity Logs
             </a>
         </button>
-        
+        {% endflag %}
     </div>
 
     <div class="um-grid">

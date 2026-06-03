@@ -84,5 +84,5 @@ urlpatterns = [
     path('users/activate/', BulkActivateDeactivateUsersView.as_view(), name="activate_users"),
     path('users/invite/', BulkInviteUsersView.as_view(), name="invite_users"),
     path('users/<int:user_id>/', user_details, name="user_details"),
-    path('logs/', user_activity_list, name="user_activity_logs"),
+    path('user-activities/', user_activity_list, name="user_activity_logs"),
 ]
