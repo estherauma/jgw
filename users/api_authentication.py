@@ -2,6 +2,7 @@ import jwt
 from django.conf import settings
 from rest_framework import authentication, exceptions
 
+from common.current_user import set_current_user
 from users.models import User
 
 
@@ -34,6 +35,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
         if not user.is_active:
             raise exceptions.AuthenticationFailed("User account is inactive.")
 
+        set_current_user(user)
         return user, token
 
     def authenticate_header(self, request):

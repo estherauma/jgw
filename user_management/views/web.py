@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.contrib import messages
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.db.models import Q
@@ -513,7 +514,8 @@ class RemoveOrganizationFromGroupView(View):
                     status=404,
                 )
 
-            remove_partner_configuration_from_group_in_cms(organisation)
+            if not getattr(settings, "SKIP_CMS_SYNC", False):
+                remove_partner_configuration_from_group_in_cms(organisation)
             OrganizationService.remove_organization_from_group(
                 organization=organisation,
                 user=request.user,

@@ -875,6 +875,7 @@
           url: '/user-management/work-groups/' + workGroupId + '/delete/',
           title: 'Delete Work Group',
           message: 'Are you sure you want to delete the department "' + workGroupName + '"?',
+          showFullScreenLoader: true,
           onSuccess: function() {
             window.location.reload();
           }
