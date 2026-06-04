@@ -43,7 +43,7 @@ class AuditFieldsMixin(models.Model):
                 self.created_by = current_user
                 auto_update_fields.add("created_by")
 
-            if self.updated_by_id != current_user.id:
+            if not (self.is_deleted and self.deleted_by_id) and self.updated_by_id != current_user.id:
                 self.updated_by = current_user
                 auto_update_fields.add("updated_by")
 
