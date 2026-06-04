@@ -2,6 +2,7 @@ import logging
 from datetime import date, datetime
 from decimal import Decimal
 
+from django.db import connection
 from django.db import models
 from django.forms.models import model_to_dict
 
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class AuditService:
+    USER_ACTIVITY_TABLE = "user_management_useractivity"
     TRACKED_MODELS = {
         "preference.organisationdata",
         "preference.organizationgroup",
@@ -395,6 +397,12 @@ class AuditService:
 
         activity_message = message or cls.build_message(action, instance)
         if not activity_message:
+            return None
+        # ignore logging when running migrations
+        try:
+            if cls.USER_ACTIVITY_TABLE not in connection.introspection.table_names():
+                return None
+        except Exception:
             return None
 
         actor_user = cls.get_actor(instance, action)
