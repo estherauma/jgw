@@ -20,13 +20,14 @@ class CoreConfig(AppConfig):
         PostHog configuration is loaded from environment variables.
         Exception autocapture requires PostHog SDK v3.7.0 or higher.
         """
-        import common.signals
-
+   
         if posthog is None:
             return
 
         if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
             return
+        
+        import common.signals
 
         posthog_api_key = getattr(settings, 'POSTHOG_PROJECT_API_KEY', None)
         posthog_host = getattr(settings, 'POSTHOG_HOST', os.getenv('POSTHOG_HOST', 'https://us.i.posthog.com'))
