@@ -872,3 +872,13 @@ body .modal-backdrop.show {
     font-size: 1.2rem;
     font-weight: bold;
 }
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 20px !important;
+}
+
+.table-responsive{
+    padding: 20px;
+}
+

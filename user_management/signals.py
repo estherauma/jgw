@@ -31,13 +31,14 @@ def log_organisation_activity(sender, instance, created, **kwargs):
         before_state = getattr(instance, "_pre_save_state", {})
         after_state = UserActivityService.organisation_state(instance)
         changes = UserActivityService.build_changes(before_state, after_state)
+        message = UserActivityService._build_update_message(instance.name, changes)
         UserActivityService.log_action(
             actor=getattr(instance, "updated_by", None),
             action="updated",
             record_type=UserActivityService.ORGANISATION_RECORD_TYPE,
             record_id=str(instance.id),
             organisation=instance,
-            message=f'Updated organisation "{instance.name}"',
+            message=message,
             changes=changes,
         )
 

@@ -818,15 +818,15 @@ class LoginApiTests(AuthTests):
                     ],
                     "access_codes": [
                         {
-                            "id": public_access_code.id,
-                            "code": "PUBLIC123",
-                            "requires_login": False,
-                            "expiry_date": None,
-                        },
-                        {
                             "id": worker_access_code.id,
                             "code": "PRIVATE123",
                             "requires_login": True,
+                            "expiry_date": None,
+                        },
+                        {
+                            "id": public_access_code.id,
+                            "code": "PUBLIC123",
+                            "requires_login": False,
                             "expiry_date": None,
                         },
                     ],

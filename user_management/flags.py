@@ -150,6 +150,11 @@ UM_FLAG_DEFS = [
         "condition": "org_admin",
     },
     {
+        "name": "can_view_activity_logs",
+        "label": "View activity logs",
+        "condition": "org_admin",
+    },
+    {
         "name": "can_add_organization_group",
         "label": "Add organization groups",
         "condition": "58_admin",
