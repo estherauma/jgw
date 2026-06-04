@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -6,6 +8,7 @@ from django.db.models import Q
 from django.http import JsonResponse, HttpResponseGone, HttpResponseNotFound
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.views import View
 import phonenumbers
 import json
@@ -29,6 +32,7 @@ from ..decorators import group_required
 from ..models import (
     OrganisationRole,
     OrganisationRoleAssignment,
+    UserActivity,
     WorkGroup,
     ShortLink,
 )
@@ -43,6 +47,7 @@ from ..utils import (
     is_org_group_admin,
     is_org_or_group_admin,
     is_super_or_58_admin,
+    is_org_staff,
 )
 from users.models import User, UserInvitations
 from content.services.partner_configurations import (
@@ -1793,6 +1798,37 @@ class BulkInviteUsersView(View):
                 {"ok": False, "error": "An error occurred while sending invitations. Please try again."},
                 status=500,
             )
+@group_required("user_management")
+def user_activity_list(request):
+    user = request.user
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    activities = UserActivity.objects.select_related(
+        "actor", "organisation"
+    ).filter(created_at__gte=thirty_days_ago)
+
+    if user.is_superuser:
+        return render(request,"logs.html",{"logs": activities})
+        
+    elif is_58_admin(user):
+        activities = activities.exclude(actor__is_superuser=True)
+    elif is_org_admin(user):
+        user_org = user.organisation_data.first()
+        activities = activities.filter(organisation=user_org)
+    elif is_org_group_admin(user):
+        user_orgs = user.organisation_data.all()
+        activities = activities.filter(organisation__in=user_orgs)
+    elif is_org_staff(user):
+        activities = activities.filter(actor=user)
+    else:
+        activities = activities.none()
+
+    return render(
+        request,
+        "logs.html",
+        {"logs": activities},
+    )
+
+
 @group_required("user_management")           
 def user_details(request, user_id):
     user = User.objects.prefetch_related(

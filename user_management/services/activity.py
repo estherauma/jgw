@@ -125,6 +125,23 @@ class UserActivityService:
         )
 
     @classmethod
+    def _build_update_message(cls, name, changes):
+        before = changes.get("before", {})
+        after = changes.get("after", {})
+        if not before and not after:
+            return f'Updated organisation "{name}"'
+
+        parts = []
+        for field in sorted(before.keys() | after.keys()):
+            label = field.replace("_", " ").capitalize()
+            old = before.get(field)
+            new = after.get(field)
+            parts.append(f'{label} from "{old}" to "{new}"')
+
+        detail = ", ".join(parts)
+        return f'Updated organisation "{name}": {detail}'
+
+    @classmethod
     def log_organisation_updated(cls, *, actor, organisation_id, organisation):
         try:
             db_current = organisation.__class__.objects.get(pk=organisation_id)
@@ -141,7 +158,7 @@ class UserActivityService:
             record_type=cls.ORGANISATION_RECORD_TYPE,
             record_id=str(organisation_id),
             organisation=organisation,
-            message=f'Updated organisation "{organisation.name}"',
+            message=cls._build_update_message(organisation.name, changes),
             changes=changes,
         )
 

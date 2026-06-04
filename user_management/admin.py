@@ -7,6 +7,7 @@ from .models import (
     ShortLink,
     UserActivity,
     WorkGroup,
+    UserActivity,
 )
 
 
@@ -35,8 +36,6 @@ class OrganisationRoleAssignmentAdmin(admin.ModelAdmin):
     list_display = ("user", "organisation", "role")
     list_select_related = ("user", "organisation", "role")
     search_fields = ("user__email", "organisation__name", "role__name")
-
-
 @admin.register(ShortLink)
 class ShortLinkAdmin(admin.ModelAdmin):
     list_display = ("code", "target_url", "expires_at", "created_at")
@@ -79,4 +78,7 @@ class UserActivityAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
         return False
