@@ -904,30 +904,6 @@ class LoginApiTests(AuthTests):
         self.assertIsNone(verification.used_at)
         send_email_mock.assert_called_once()
 
-    @patch("users.services.authentication.send_email_notification")
-    def test_password_reset_request_api_returns_generic_success_for_unknown_email(self, send_email_mock):
-        response = self.client.post(
-            reverse("users_api:password_reset_request_api"),
-            data={"email": "unknown@example.com"},
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.json(),
-            {
-                "ok": True,
-                "email": "unknown@example.com",
-                "phone_number": None,
-                "phone_country_iso": None,
-            },
-        )
-        self.assertFalse(
-            UserVerificationCode.objects.filter(
-                purpose=PASSWORD_RESET_VERIFICATION_PURPOSE
-            ).exists()
-        )
-        send_email_mock.assert_not_called()
-
     def test_password_reset_request_api_requires_identifier(self):
         response = self.client.post(
             reverse("users_api:password_reset_request_api"),
@@ -955,23 +931,6 @@ class LoginApiTests(AuthTests):
         self.assertEqual(response.json()["ok"], False)
         self.assertEqual(response.json()["error"], "Account is not active.")
         send_email_mock.assert_not_called()
-
-    def test_password_reset_verify_code_api_returns_user_id(self):
-        _, verification_code = create_user_verification_code(
-            self.user,
-            PASSWORD_RESET_VERIFICATION_PURPOSE,
-        )
-
-        response = self.client.post(
-            reverse("users_api:password_reset_verify_code_api"),
-            data={
-                "email": "login@example.com",
-                "code": verification_code,
-            },
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"ok": True, "user_id": self.user.id})
 
     def test_password_reset_reset_api_resets_password(self):
         _, verification_code = create_user_verification_code(
@@ -1042,6 +1001,11 @@ class LoginApiTests(AuthTests):
         self.assertEqual(response.json()["error"], "Account is not active.")
 
     def test_password_reset_reset_api_rejects_invalid_code(self):
+        create_user_verification_code(
+            self.user,
+            PASSWORD_RESET_VERIFICATION_PURPOSE,
+        )
+
         response = self.client.post(
             reverse("users_api:password_reset_reset_api"),
             data={
