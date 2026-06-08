@@ -53,6 +53,11 @@ from preference.dashboard_config import (
     get_default_dashboard_preferences,
 )
 from preference.models import DashboardPreferences, ChartSettings
+from preference.user_insights_context import (
+    build_report_context_entry,
+    load_active_user_insights_reports,
+)
+from preference.user_insights_indicator_data import build_indicator_detail
 from user_management.permissions import is_flag_active
 import logging
 
@@ -60,6 +65,10 @@ import logging
 @login_required
 def user_insights(request):
     """User Insights page."""
+    form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
+    filters = form_filter_params["filters"]
+    filter_form = form_filter_params["filter_form"]
+
     figma_colors = {"needs_action": "#9e1b32", "on_track": "#99b945", "no_response": "#d1d5db"}
     legend_labels = {
         "needs_action": str(_("userInsightsLegendNeedsAction")),
@@ -67,464 +76,31 @@ def user_insights(request):
         "no_response": str(_("userInsightsLegendNoResponse")),
     }
 
-    def _d(title, na, ot, breakdown_index):
-        nr = 100 - na - ot
-        return {
-            "title": str(title),
-            "needs_action": na,
-            "on_track": ot,
-            "no_response": nr,
-            "breakdown_index": breakdown_index,
-        }
+    na_label = str(_("userInsightsTranslationNA"))
+    current_user = request.user
 
-    def _br(name, color):
-        return {"name": str(name), "color": color}
-
-    donuts_early = [
-        _d(_("userInsightsDonutAbuseVulnerability"), 8, 12, 0),
-        _d(_("userInsightsDonutAbusiveConditions"), 6, 15, 9),
-        _d(_("userInsightsDonutDeception"), 10, 14, 1),
-        _d(_("userInsightsDonutIdentityDocs"), 7, 11, 6),
-        _d(_("userInsightsDonutIntimidation"), 9, 13, 5),
-    ]
-    donuts_decent = [
-        _d(_("userInsightsDEDonutFairWages"), 10, 16, 0),
-        _d(_("userInsightsDEDonutWorkingHours"), 7, 13, 1),
-        _d(_("userInsightsDEDonutHealthSafety"), 9, 12, 2),
-        _d(_("userInsightsDEDonutContracts"), 6, 14, 3),
-        _d(_("userInsightsDEDonutWorkLifeBalance"), 8, 11, 5),
-    ]
-    donuts_responsible = [
-        _d(_("userInsightsRRDonutRecruitment"), 11, 14, 5),
-        _d(_("userInsightsRRDonutOnboarding"), 8, 17, 2),
-        _d(_("userInsightsRRDonutEmployment"), 9, 15, 7),
-        _d(_("userInsightsRRDonutAddressingIssues"), 7, 12, 3),
-    ]
-
-    breakdown_early = [
-        _br(_("userInsightsIndicatorAbuseVulnerability"), "#e67e22"),
-        _br(_("userInsightsIndicatorDeception"), "#1abc9c"),
-        _br(_("userInsightsIndicatorRestrictionMovement"), "#f1c40f"),
-        _br(_("userInsightsIndicatorIsolation"), "#3498db"),
-        _br(_("userInsightsIndicatorPhysicalSexualViolence"), "#e74c3c"),
-        _br(_("userInsightsIndicatorIntimidationThreats"), "#9b59b6"),
-        _br(_("userInsightsIndicatorRetentionIdentity"), "#e91e63"),
-        _br(_("userInsightsIndicatorWithholdingWages"), "#00bcd4"),
-        _br(_("userInsightsIndicatorDebtBondage"), "#795548"),
-        _br(_("userInsightsIndicatorAbusiveConditions"), "#607d8b"),
-        _br(_("userInsightsIndicatorExcessiveOvertime"), "#ff5722"),
-    ]
-    breakdown_decent = [
-        _br(_("userInsightsDEIndDecentWork"), "#2980b9"),
-        _br(_("userInsightsDEIndEqualTreatment"), "#8e44ad"),
-        _br(_("userInsightsDEIndSafeWorkplace"), "#16a085"),
-        _br(_("userInsightsDEIndSocialProtection"), "#d35400"),
-        _br(_("userInsightsDEIndDialogue"), "#c0392b"),
-        _br(_("userInsightsDEIndCareerDevelopment"), "#27ae60"),
-    ]
-    breakdown_responsible = [
-        _br(_("userInsightsRRIndAccommodation"), "#e67e22"),
-        _br(_("userInsightsRRIndFairTreatment"), "#2ecc71"),
-        _br(_("userInsightsRRIndOnboarding"), "#3498db"),
-        _br(_("userInsightsRRIndAddressingIssues"), "#9b59b6"),
-        _br(_("userInsightsRRIndChangingJob"), "#e74c3c"),
-        _br(_("userInsightsRRIndRecruitment"), "#1abc9c"),
-        _br(_("userInsightsRRIndTravel"), "#f39c12"),
-        _br(_("userInsightsRRIndEmployment"), "#34495e"),
-    ]
-
-    def _mock_follow_up_option(label, count, total, selected=False, follow_up=None):
-        option = {
-            "id": label.lower().replace(" ", "-").replace("$", "").replace(",", ""),
-            "label": label,
-            "count": count,
-            "total": total,
-            "selected": selected,
-        }
-        if follow_up:
-            option["follow_up"] = follow_up
-        return option
-
-    def _mock_follow_up_question(code, text, options):
-        return {"code": code, "text": text, "options": options}
-
-    def _mock_lead_question(
-        number, qid, text, total, responses, expanded=False, response_type="choice", active=False
-    ):
-        return {
-            "id": qid,
-            "number": number,
-            "text": text,
-            "total": total,
-            "expanded": expanded,
-            "responses": responses,
-            "response_type": response_type,
-            "active": active,
-        }
-
-    def _mock_text_response_item(response_id, native, translation, starred=True):
-        return {
-            "id": response_id,
-            "label": f"Response #{response_id}",
-            "native": native,
-            "translation": translation,
-            "starred": starred,
-        }
-
-    def _mock_all_responses_row(date, response_id, native, translation=None, starred=False):
-        return {
-            "date": date,
-            "id": response_id,
-            "label": f"#{response_id}",
-            "native": native,
-            "translation": translation,
-            "starred": starred,
-        }
-
-    def _mock_all_responses_table_rows():
-        na = str(_("userInsightsTranslationNA"))
-        return [
-            _mock_all_responses_row(
-                "05/12/2025",
-                "589323",
-                str(_("userInsightsMockNativeTable1")),
-                str(_("userInsightsMockTranslationApp")),
-                starred=True,
-            ),
-            _mock_all_responses_row(
-                "04/12/2025",
-                "589301",
-                str(_("userInsightsMockNativeTable2")),
-                str(_("userInsightsMockTranslation2")),
-            ),
-            _mock_all_responses_row(
-                "03/12/2025",
-                "589288",
-                str(_("userInsightsMockNativeTable3")),
-                str(_("userInsightsMockTranslation3")),
-            ),
-            _mock_all_responses_row(
-                "02/12/2025",
-                "589271",
-                str(_("userInsightsMockNative1")),
-                str(_("userInsightsMockTranslation1")),
-            ),
-            _mock_all_responses_row(
-                "01/12/2025",
-                "589254",
-                str(_("userInsightsMockNativeTable4")),
-                na,
-            ),
-            _mock_all_responses_row(
-                "30/11/2025",
-                "589240",
-                str(_("userInsightsMockNativeTable5")),
-                str(_("userInsightsMockTranslationTable5")),
-            ),
-            _mock_all_responses_row(
-                "29/11/2025",
-                "589221",
-                str(_("userInsightsMockNative2")),
-                str(_("userInsightsMockTranslationApp")),
-            ),
-            _mock_all_responses_row(
-                "28/11/2025",
-                "589198",
-                str(_("userInsightsMockNativeTable6")),
-                str(_("userInsightsMockTranslationTable6")),
-                starred=True,
-            ),
-        ]
-
-    def _mock_open_text_detail(question_label, indicator_name):
-        text_crumb = str(_("userInsightsMockTextResponseCrumb")) % {"question": question_label}
-        return {
-            "breadcrumb": [
-                text_crumb,
-                str(_("userInsightsStarredResponses")),
-            ],
-            "starred_count": 22,
-            "total_count": 198,
-            "all_responses": {
-                "breadcrumb": [
-                    indicator_name,
-                    text_crumb,
-                    str(_("userInsightsAllResponses")),
-                ],
-                "total_count": 198,
-                "rows": _mock_all_responses_table_rows(),
-            },
-            "responses": [
-                _mock_text_response_item(
-                    "58203",
-                    str(_("userInsightsMockNative1")),
-                    str(_("userInsightsMockTranslation1")),
-                ),
-                _mock_text_response_item(
-                    "58197",
-                    str(_("userInsightsMockNative2")),
-                    str(_("userInsightsMockTranslation2")),
-                ),
-                _mock_text_response_item(
-                    "58188",
-                    str(_("userInsightsMockNative3")),
-                    str(_("userInsightsMockTranslation3")),
-                    starred=False,
-                ),
-            ],
-        }
-
-    def _mock_open_text_lead(
-        number, qid, text, indicator_name, expanded=False, active=False
-    ):
-        question_label = f"Q{number}"
-        lead = _mock_lead_question(
-            number,
-            qid,
-            text,
-            None,
-            [],
-            expanded=expanded,
-            response_type="open_text",
-            active=active,
+    def indicator_detail(indicator):
+        return build_indicator_detail(
+            indicator,
+            na_label=na_label,
+            current_user=current_user,
+            filters=filters,
         )
-        lead["text_detail"] = _mock_open_text_detail(question_label, indicator_name)
-        return lead
 
-    def _mock_sunburst_tree(lead_question_text, follow_up_1a_text, follow_up_1b_text):
-        """Sunburst nodes include question text for per-layer hover tooltips."""
-        return [
-            {
-                "name": str(_("userInsightsMockAnswerYes")),
-                "value": 62,
-                "question": lead_question_text,
-                "itemStyle": {"color": "#9e1b32"},
-                "children": [
-                    {
-                        "name": str(_("userInsightsMockWhoAgent")),
-                        "value": 10,
-                        "question": follow_up_1a_text,
-                        "itemStyle": {"color": "#7a1530"},
-                        "children": [
-                            {
-                                "name": str(_("userInsightsMockAmountLt500")),
-                                "value": 2,
-                                "question": follow_up_1b_text,
-                                "itemStyle": {"color": "#e8a4b8"},
-                            },
-                            {
-                                "name": str(_("userInsightsMockAmount5001k")),
-                                "value": 1,
-                                "question": follow_up_1b_text,
-                                "itemStyle": {"color": "#f0c4d0"},
-                            },
-                            {
-                                "name": str(_("userInsightsMockAmount1k2k")),
-                                "value": 1,
-                                "question": follow_up_1b_text,
-                                "itemStyle": {"color": "#f5d5de"},
-                            },
-                        ],
-                    },
-                    {
-                        "name": str(_("userInsightsMockWhoEmployer")),
-                        "value": 4,
-                        "question": follow_up_1a_text,
-                        "itemStyle": {"color": "#a82845"},
-                    },
-                    {
-                        "name": str(_("userInsightsMockWhoRecruiter")),
-                        "value": 6,
-                        "question": follow_up_1a_text,
-                        "itemStyle": {"color": "#b8324f"},
-                    },
-                    {
-                        "name": str(_("userInsightsMockWhoSubagent")),
-                        "value": 5,
-                        "question": follow_up_1a_text,
-                        "itemStyle": {"color": "#c43d59"},
-                    },
-                    {
-                        "name": str(_("userInsightsMockWhoOther")),
-                        "value": 3,
-                        "question": follow_up_1a_text,
-                        "itemStyle": {"color": "#d04863"},
-                    },
-                ],
-            },
-            {
-                "name": str(_("userInsightsMockAnswerNo")),
-                "value": 135,
-                "question": lead_question_text,
-                "itemStyle": {"color": "#c5d0dc"},
-            },
-        ]
+    db_reports = load_active_user_insights_reports()
+    active_slug = request.GET.get("report")
+    valid_slugs = {report.slug for report in db_reports}
+    if db_reports and (not active_slug or active_slug not in valid_slugs):
+        active_slug = db_reports[0].slug
 
-    def _mock_indicator_detail(breakdown_index, report_id, indicator_name):
-        """Nested lead / follow-up question mock for UI/UX; replace with DB later."""
-        base_responses = 1166 - (breakdown_index * 53)
-        panel_script_id = f"user-insights-drilldown-{report_id}-{breakdown_index}"
-
-        follow_up_1b = _mock_follow_up_question(
-            "1B",
-            str(_("userInsightsMockQ1BFollowUp")),
-            [
-                _mock_follow_up_option(str(_("userInsightsMockAmount1k2k")), 1, 9),
-                _mock_follow_up_option(str(_("userInsightsMockAmount5001k")), 1, 9),
-                _mock_follow_up_option(
-                    str(_("userInsightsMockAmountLt500")), 2, 9, selected=True
-                ),
-            ],
+    reports = []
+    for report in db_reports:
+        entry = build_report_context_entry(report, indicator_detail)
+        entry["breakdown_header"] = entry["breakdown_header"] or str(
+            _("userInsightsIndicatorsHeader")
         )
-        follow_up_1a = _mock_follow_up_question(
-            "1A",
-            str(_("userInsightsMockQ1AFollowUp")),
-            [
-                _mock_follow_up_option(
-                    str(_("userInsightsMockWhoAgent")),
-                    10,
-                    28,
-                    selected=True,
-                    follow_up=follow_up_1b,
-                ),
-                _mock_follow_up_option(str(_("userInsightsMockWhoEmployer")), 4, 28),
-                _mock_follow_up_option(str(_("userInsightsMockWhoOther")), 3, 28),
-                _mock_follow_up_option(str(_("userInsightsMockWhoRecruiter")), 6, 28),
-                _mock_follow_up_option(str(_("userInsightsMockWhoSubagent")), 5, 28),
-            ],
-        )
-        lead_q1 = _mock_lead_question(
-            1,
-            "q1",
-            str(_("userInsightsMockQ1Payments")),
-            197,
-            [
-                {
-                    "id": "yes",
-                    "label": str(_("userInsightsMockAnswerYes")),
-                    "count": 62,
-                    "total": 197,
-                    "selected": True,
-                    "follow_up": follow_up_1a,
-                },
-                {
-                    "id": "no",
-                    "label": str(_("userInsightsMockAnswerNo")),
-                    "count": 135,
-                    "total": 197,
-                    "selected": False,
-                },
-            ],
-            expanded=True,
-            active=True,
-        )
-        lead_q2 = _mock_open_text_lead(
-            2,
-            "q2",
-            str(_("userInsightsMockQ2PaidFor")),
-            indicator_name,
-            expanded=False,
-            active=False,
-        )
-        lead_q3 = _mock_open_text_lead(
-            3,
-            "q3",
-            str(_("userInsightsMockQ3Contract")),
-            indicator_name,
-            expanded=False,
-            active=True,
-        )
-        lead_questions = [lead_q1, lead_q2, lead_q3]
-
-        return {
-            "indicator_name": indicator_name,
-            "user_responses": base_responses,
-            "date_from": "2025-01-01",
-            "date_to": "2025-01-01",
-            "date_from_display": str(_("userInsightsMockDateFrom")),
-            "date_to_display": str(_("userInsightsMockDateTo")),
-            "panel_script_id": panel_script_id,
-            "panel_dom_id": f"user-insights-panel-{report_id}-{breakdown_index}",
-            "lead_questions": lead_questions,
-            "choice_breadcrumb": [
-                str(_("userInsightsMockAnswerYes")),
-                str(_("userInsightsMockWhoAgent")),
-                str(_("userInsightsMockAmountLt500")),
-            ],
-            "breadcrumb": lead_q3["text_detail"]["breadcrumb"],
-            "sunburst": _mock_sunburst_tree(
-                lead_q1["text"],
-                follow_up_1a["text"],
-                follow_up_1b["text"],
-            ),
-            "sunburst_highlight": str(_("userInsightsMockAmountLt500")),
-        }
-
-    def _indicator_options(donuts, breakdown_rows, report_id):
-        """One entry per donut chart, aligned with dropdown and breakdown rows."""
-        options = []
-        for slot, donut in enumerate(donuts):
-            breakdown_index = donut["breakdown_index"]
-            row = breakdown_rows[breakdown_index]
-            options.append(
-                {
-                    "breakdown_index": breakdown_index,
-                    "name": row["name"],
-                    "color": row["color"],
-                    "donut_slot": slot,
-                    "detail": _mock_indicator_detail(
-                        breakdown_index, report_id, row["name"]
-                    ),
-                }
-            )
-        return options
-
-    report_donuts = {
-        "early_risk": donuts_early,
-        "decent_employment": donuts_decent,
-        "responsible_recruitment": donuts_responsible,
-    }
-
-    reports = [
-        {
-            "id": "early_risk",
-            "title": _("userInsightsReportEarlyRisk"),
-            "description": _("userInsightsReportEarlyRiskDesc"),
-            "hint": _("userInsightsReportClickGraph"),
-            "pdf_label": _("userInsightsDownloadPdfQuestions"),
-            "breakdown_header": _("userInsightsIndicatorsHeader"),
-            "breakdown_rows": breakdown_early,
-            "donut_count": 5,
-            "indicator_options": _indicator_options(donuts_early, breakdown_early, "early_risk"),
-            "active": True,
-        },
-        {
-            "id": "decent_employment",
-            "title": _("userInsightsReportDecentEmployment"),
-            "description": _("userInsightsReportDecentEmploymentDesc"),
-            "hint": _("userInsightsReportDecentEmploymentHint"),
-            "pdf_label": _("userInsightsDownloadPdfQuestions"),
-            "breakdown_header": _("userInsightsDEIndicatorsHeader"),
-            "breakdown_rows": breakdown_decent,
-            "donut_count": 5,
-            "indicator_options": _indicator_options(donuts_decent, breakdown_decent, "decent_employment"),
-            "active": False,
-        },
-        {
-            "id": "responsible_recruitment",
-            "title": _("userInsightsReportResponsibleRecruitment"),
-            "description": _("userInsightsReportResponsibleRecruitmentDesc"),
-            "hint": _("userInsightsReportResponsibleRecruitmentHint"),
-            "pdf_label": _("userInsightsDownloadPdfCategories"),
-            "breakdown_header": _("userInsightsRRIndicatorsHeader"),
-            "breakdown_rows": breakdown_responsible,
-            "donut_count": 4,
-            "indicator_options": _indicator_options(
-                donuts_responsible, breakdown_responsible, "responsible_recruitment"
-            ),
-            "active": False,
-        },
-    ]
+        entry["active"] = report.slug == active_slug
+        reports.append(entry)
 
     chart_legends = [
         {"class": "needs-action", "label": legend_labels["needs_action"]},
@@ -532,34 +108,34 @@ def user_insights(request):
         {"class": "no-response", "label": legend_labels["no_response"]},
     ]
 
+    active_report = next((r for r in reports if r.get("active")), None)
+    default_report_id = active_report["id"] if active_report else ""
+    default_donuts = active_report["donuts"] if active_report else []
+
     chart_payload = {
         "legends": legend_labels,
         "colors": figma_colors,
-        "donuts": donuts_early,
+        "donuts": default_donuts,
         "by_report": {
-            report_id: {
-                "donuts": report_donuts[report_id],
-                "donut_count": next(r["donut_count"] for r in reports if r["id"] == report_id),
-                "indicator_options": next(
-                    r["indicator_options"] for r in reports if r["id"] == report_id
-                ),
-                "breakdown_header": str(
-                    next(r["breakdown_header"] for r in reports if r["id"] == report_id)
-                ),
+            report["id"]: {
+                "donuts": report["donuts"],
+                "donut_count": report["donut_count"],
+                "indicator_options": report["indicator_options"],
+                "breakdown_header": str(report["breakdown_header"]),
             }
-            for report_id in report_donuts
+            for report in reports
         },
-        "default_report_id": "early_risk",
+        "default_report_id": default_report_id,
     }
 
-    active_report = next((r for r in reports if r.get("active")), reports[0])
-    max_donut_slots = max(r["donut_count"] for r in reports)
+    max_donut_slots = max((r["donut_count"] for r in reports), default=0)
     context = {
         "reports": reports,
         "chart_legends": chart_legends,
         "active_report": active_report,
         "donut_slots": list(range(max_donut_slots)),
         "chart_payload": chart_payload,
+        "filter_form": filter_form,
         "user_insights_all_responses_config": {
             "na_label": str(_("userInsightsTranslationNA")),
             "count_template": str(_("userInsightsAllResponsesCountTemplate")),

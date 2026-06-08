@@ -3,6 +3,7 @@ from pipeline.models import CommandLog
 from common.services.api_client import MessagingAPIClient
 
 from question.logic.add_messaging_question_logic import store_new_v2_messaging_questions
+from question.unique_question_sync import sync_unique_messaging_questions
 
 
 class Command(BaseCommand):
@@ -13,7 +14,7 @@ class Command(BaseCommand):
             self.stdout.write('Starting to fetch messaging questions v2 from API...')
             
             jgw_api_client = MessagingAPIClient()
-            
+            sync_unique_messaging_questions()
             created_count = store_new_v2_messaging_questions(jgw_api_client) or 0
             
             if created_count > 0:

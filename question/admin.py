@@ -2,7 +2,20 @@ from django.contrib import admin
 from import_export.admin import ExportActionModelAdmin
 
 from question.actions import export_responses
+from question.user_insights_admin import (
+    UserInsightsIndicatorAdminForm,
+    UserInsightsIndicatorInlineQuestionAdminForm,
+    UserInsightsIndicatorMessagingQuestionAdminForm,
+    sync_indicator_inline_questions,
+    sync_indicator_messaging_questions,
+)
 from question.models import (
+    UniqueInlineQuestion,
+    UniqueMessagingQuestion,
+    UserInsightsIndicator,
+    UserInsightsIndicatorInlineQuestion,
+    UserInsightsIndicatorMessagingQuestion,
+    UserInsightsReport,
     ActualMessageSent,
     FollowUpQuestion,
     FollowupFollowupInlineQuestionResponse,
@@ -200,8 +213,10 @@ class LeadMessagingQuestionResponseAdmin(admin.ModelAdmin):
         "api_created_at", 
         "data_source_id", 
         "device_id", 
+        "get_question_indicators",
         "get_question_key", 
         "get_question_text", 
+        "questionresponsetype",
         "get_response_key", 
         "get_response_text",
         "org_info", 
@@ -224,6 +239,19 @@ class LeadMessagingQuestionResponseAdmin(admin.ModelAdmin):
         "messaging_question__question_category__code"
     ]
     ordering = ["-api_created_at"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("question_indicators")
+
+    @admin.display(description="Question indicators")
+    def get_question_indicators(self, obj):
+        indicators = list(obj.question_indicators.all())
+        if not indicators:
+            return "—"
+        labels = [str(indicator) for indicator in indicators[:5]]
+        if len(indicators) > 5:
+            labels.append(f"+{len(indicators) - 5} more")
+        return ", ".join(labels)
 
     def get_question_key(self, obj):
         return obj.messaging_question.question_key if obj.messaging_question else None
@@ -256,6 +284,7 @@ class FollowupMessagingQuestionResponseAdmin(admin.ModelAdmin):
         "lead_question",
         "get_question_key", 
         "get_question_text", 
+        "questionresponsetype",
         "get_response_key", 
         "get_response_text", 
         "get_question_category", 
@@ -305,6 +334,7 @@ class FollowupFollowupMessagingQuestionResponseAdmin(admin.ModelAdmin):
         "followup_question",
         "get_question_key", 
         "get_question_text", 
+        "questionresponsetype",
         "get_response_key", 
         "get_response_text", 
         "get_question_category", 
@@ -352,8 +382,10 @@ class LeadInlineQuestionResponseAdmin(admin.ModelAdmin):
         "api_created_at", 
         "data_source_id", 
         "device_id", 
+        "get_question_indicators",
         "get_question_key", 
         "get_question_text", 
+        "questionresponsetype",
         "get_response_key", 
         "get_response_text",
         "organisation", 
@@ -386,6 +418,19 @@ class LeadInlineQuestionResponseAdmin(admin.ModelAdmin):
     ]
     ordering = ["-api_created_at"]
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("question_indicators")
+
+    @admin.display(description="Question indicators")
+    def get_question_indicators(self, obj):
+        indicators = list(obj.question_indicators.all())
+        if not indicators:
+            return "—"
+        labels = [str(indicator) for indicator in indicators[:5]]
+        if len(indicators) > 5:
+            labels.append(f"+{len(indicators) - 5} more")
+        return ", ".join(labels)
+
     def get_question_key(self, obj):
         return obj.inline_question.question_key if obj.inline_question else None
     get_question_key.short_description = "Question Key"
@@ -417,6 +462,7 @@ class FollowupInlineQuestionResponseAdmin(admin.ModelAdmin):
         "lead_question",
         "get_question_key", 
         "get_question_text", 
+        "questionresponsetype",
         "get_response_key", 
         "get_response_text", 
         "get_question_category", 
@@ -468,6 +514,7 @@ class FollowupFollowupInlineQuestionResponseAdmin(admin.ModelAdmin):
         "followup_question",
         "get_question_key", 
         "get_question_text", 
+        "questionresponsetype",
         "get_response_key", 
         "get_response_text", 
         "get_question_category", 
@@ -538,3 +585,260 @@ class InlineQuestionResponseV1Admin(admin.ModelAdmin):
     list_display = ["response_key", "response_text", "response_text_translated", "created_at", "updated_at"]
     search_fields = ["response_key", "response_text", "response_text_translated"]
     ordering = ["-created_at"]
+
+
+class UserInsightsIndicatorInline(admin.TabularInline):
+    model = UserInsightsIndicator
+    extra = 0
+    fields = [
+        "slug",
+        "name",
+        "color",
+        "breakdown_index",
+        "show_on_donut",
+        "donut_slot",
+        "display_order",
+        "is_active",
+    ]
+    show_change_link = True
+
+
+@admin.register(UniqueInlineQuestion)
+class UniqueInlineQuestionAdmin(admin.ModelAdmin):
+    list_display = ["question_key", "question_text", "updated_at"]
+    search_fields = ["question_key", "question_text"]
+    ordering = ["question_key"]
+
+
+@admin.register(UniqueMessagingQuestion)
+class UniqueMessagingQuestionAdmin(admin.ModelAdmin):
+    list_display = ["question_key", "question_text", "updated_at"]
+    search_fields = ["question_key", "question_text"]
+    ordering = ["question_key"]
+
+
+@admin.register(UserInsightsReport)
+class UserInsightsReportAdmin(admin.ModelAdmin):
+    list_display = ["title", "slug", "display_order", "is_active", "updated_at"]
+    list_filter = ["is_active"]
+    search_fields = ["slug", "title"]
+    prepopulated_fields = {"slug": ("title",)}
+    inlines = [UserInsightsIndicatorInline]
+
+
+@admin.register(UserInsightsIndicator)
+class UserInsightsIndicatorAdmin(admin.ModelAdmin):
+    form = UserInsightsIndicatorAdminForm
+    list_display = [
+        "name",
+        "report",
+        "slug",
+        "breakdown_index",
+        "inline_question_count",
+        "messaging_question_count",
+        "show_on_donut",
+        "donut_slot",
+        "is_active",
+    ]
+    list_filter = ["report", "is_active", "show_on_donut"]
+    search_fields = ["name", "slug", "report__slug"]
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "report",
+                    "slug",
+                    "name",
+                    "color",
+                    "display_order",
+                    "breakdown_index",
+                    "show_on_donut",
+                    "donut_slot",
+                    "is_active",
+                ),
+            },
+        ),
+        (
+            "Inline questions",
+            {
+                "fields": ("inline_questions",),
+                "classes": ("wide",),
+                "description": (
+                    "Select all lead inline questions for this indicator. "
+                    "Run sync_unique_lead_questions if the list is empty."
+                ),
+            },
+        ),
+        (
+            "Messaging questions",
+            {
+                "fields": ("messaging_questions",),
+                "classes": ("wide",),
+                "description": (
+                    "Select all lead messaging questions for this indicator."
+                ),
+            },
+        ),
+    )
+
+    @admin.display(description="Inline Qs")
+    def inline_question_count(self, obj):
+        return obj.indicator_inline_questions.count()
+
+    @admin.display(description="Messaging Qs")
+    def messaging_question_count(self, obj):
+        return obj.indicator_messaging_questions.count()
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        sync_indicator_inline_questions(
+            obj, form.cleaned_data.get("inline_questions", [])
+        )
+        sync_indicator_messaging_questions(
+            obj, form.cleaned_data.get("messaging_questions", [])
+        )
+
+
+@admin.register(UserInsightsIndicatorInlineQuestion)
+class UserInsightsIndicatorInlineQuestionAdmin(admin.ModelAdmin):
+    form = UserInsightsIndicatorInlineQuestionAdminForm
+    list_display = [
+        "indicator",
+        "report_title",
+        "question_key_display",
+        "question_text_display",
+        "updated_at",
+    ]
+    list_filter = ["indicator__report", "indicator"]
+    list_select_related = ("indicator", "indicator__report", "question")
+    search_fields = [
+        "indicator__name",
+        "indicator__slug",
+        "indicator__report__title",
+        "question__question_key",
+        "question__question_text",
+    ]
+    autocomplete_fields = ["indicator"]
+    ordering = ["indicator__report__title", "indicator__name", "question__question_key"]
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": ("indicator", "questions"),
+                "classes": ("wide",),
+                "description": (
+                    "Pick an indicator, then check every inline question that belongs to it. "
+                    "Saving replaces all inline links for that indicator."
+                ),
+            },
+        ),
+    )
+
+    @admin.display(description="Report", ordering="indicator__report__title")
+    def report_title(self, obj):
+        return obj.indicator.report.title
+
+    @admin.display(description="Question key", ordering="question__question_key")
+    def question_key_display(self, obj):
+        return obj.question.question_key
+
+    @admin.display(description="Question text", ordering="question__question_text")
+    def question_text_display(self, obj):
+        return obj.question.question_text
+
+    def save_model(self, request, obj, form, change):
+        indicator = form.cleaned_data["indicator"]
+        sync_indicator_inline_questions(
+            indicator, form.cleaned_data.get("questions", [])
+        )
+        link = indicator.indicator_inline_questions.order_by("pk").first()
+        if link:
+            obj.pk = link.pk
+            obj.indicator = link.indicator
+            obj.question = link.question
+
+    def save_form(self, request, form, change):
+        return form.save(commit=False)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        if obj.pk:
+            return super().response_add(request, obj, post_url_continue)
+        return self.response_post_save_add(request, obj)
+
+    def response_change(self, request, obj):
+        if obj.pk:
+            return super().response_change(request, obj)
+        return self.response_post_save_change(request, obj)
+
+
+@admin.register(UserInsightsIndicatorMessagingQuestion)
+class UserInsightsIndicatorMessagingQuestionAdmin(admin.ModelAdmin):
+    form = UserInsightsIndicatorMessagingQuestionAdminForm
+    list_display = [
+        "indicator",
+        "report_title",
+        "question_key_display",
+        "question_text_display",
+        "updated_at",
+    ]
+    list_filter = ["indicator__report", "indicator"]
+    list_select_related = ("indicator", "indicator__report", "question")
+    search_fields = [
+        "indicator__name",
+        "indicator__slug",
+        "indicator__report__title",
+        "question__question_key",
+        "question__question_text",
+    ]
+    autocomplete_fields = ["indicator"]
+    ordering = ["indicator__report__title", "indicator__name", "question__question_key"]
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": ("indicator", "questions"),
+                "classes": ("wide",),
+                "description": (
+                    "Pick an indicator, then check every messaging question that belongs to it. "
+                    "Saving replaces all messaging links for that indicator."
+                ),
+            },
+        ),
+    )
+
+    @admin.display(description="Report", ordering="indicator__report__title")
+    def report_title(self, obj):
+        return obj.indicator.report.title
+
+    @admin.display(description="Question key", ordering="question__question_key")
+    def question_key_display(self, obj):
+        return obj.question.question_key
+
+    @admin.display(description="Question text", ordering="question__question_text")
+    def question_text_display(self, obj):
+        return obj.question.question_text
+
+    def save_model(self, request, obj, form, change):
+        indicator = form.cleaned_data["indicator"]
+        sync_indicator_messaging_questions(
+            indicator, form.cleaned_data.get("questions", [])
+        )
+        link = indicator.indicator_messaging_questions.order_by("pk").first()
+        if link:
+            obj.pk = link.pk
+            obj.indicator = link.indicator
+            obj.question = link.question
+
+    def save_form(self, request, form, change):
+        return form.save(commit=False)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        if obj.pk:
+            return super().response_add(request, obj, post_url_continue)
+        return self.response_post_save_add(request, obj)
+
+    def response_change(self, request, obj):
+        if obj.pk:
+            return super().response_change(request, obj)
+        return self.response_post_save_change(request, obj)

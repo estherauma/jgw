@@ -182,15 +182,19 @@
             !detail ||
             !lead ||
             (lead.response_type || "choice") !== "choice" ||
-            !detail.sunburst ||
             typeof initUserInsightsSunburst !== "function"
         ) {
+            return;
+        }
+        var sunburstData =
+            lead.sunburst && lead.sunburst.length ? lead.sunburst : detail.sunburst;
+        if (!sunburstData || !sunburstData.length) {
             return;
         }
         var containerId = detail.panel_dom_id + "-sunburst";
         initUserInsightsSunburst(
             containerId,
-            detail.sunburst,
+            sunburstData,
             getSunburstHighlight(panelEl, detail, lead.id)
         );
         if (typeof resizeUserInsightsSunburst === "function") {
@@ -198,11 +202,96 @@
         }
     }
 
+    function ensureDefaultOptionSelection(container) {
+        if (!container) {
+            return;
+        }
+        container.querySelectorAll(".user-insights-option-list").forEach(function (list) {
+            if (list.querySelector(".user-insights-option-row.is-selected")) {
+                return;
+            }
+            var wraps = list.querySelectorAll(":scope > .user-insights-option-wrap");
+            var targetWrap = null;
+            wraps.forEach(function (wrap) {
+                if (targetWrap) {
+                    return;
+                }
+                if (wrap.querySelector(".user-insights-follow-up-branch")) {
+                    targetWrap = wrap;
+                }
+            });
+            if (!targetWrap && wraps.length) {
+                targetWrap = wraps[0];
+            }
+            if (!targetWrap) {
+                return;
+            }
+            var row = targetWrap.querySelector(".user-insights-option-row");
+            if (row) {
+                row.classList.add("is-selected");
+            }
+            var branch = targetWrap.querySelector(".user-insights-follow-up-branch");
+            if (branch) {
+                branch.classList.remove("d-none");
+                ensureDefaultOptionSelection(branch);
+            }
+        });
+    }
+
+    function ensureDefaultAnswerSelection(panelEl, leadId) {
+        var card = panelEl.querySelector('.user-insights-lead-card[data-lead-id="' + leadId + '"]');
+        if (!card) {
+            return;
+        }
+        var selectedBar = card.querySelector(".user-insights-answer-bar.is-selected");
+        if (selectedBar) {
+            var selectedId = selectedBar.getAttribute("data-response-id");
+            card.querySelectorAll(".user-insights-lead-follow-up-root").forEach(function (root) {
+                root.classList.toggle("d-none", root.getAttribute("data-follow-up-for") !== selectedId);
+            });
+            ensureDefaultOptionSelection(
+                card.querySelector(".user-insights-lead-follow-up-root:not(.d-none)")
+            );
+            return;
+        }
+        var bars = card.querySelectorAll(".user-insights-answer-bar");
+        var targetBar = null;
+        bars.forEach(function (bar) {
+            if (targetBar) {
+                return;
+            }
+            var responseId = bar.getAttribute("data-response-id");
+            var root = card.querySelector(
+                '.user-insights-lead-follow-up-root[data-follow-up-for="' + responseId + '"]'
+            );
+            if (root) {
+                targetBar = bar;
+            }
+        });
+        if (!targetBar && bars.length) {
+            targetBar = bars[0];
+        }
+        if (!targetBar) {
+            return;
+        }
+        var responseId = targetBar.getAttribute("data-response-id");
+        bars.forEach(function (bar) {
+            bar.classList.toggle("is-selected", bar === targetBar);
+        });
+        card.querySelectorAll(".user-insights-lead-follow-up-root").forEach(function (root) {
+            root.classList.toggle("d-none", root.getAttribute("data-follow-up-for") !== responseId);
+        });
+        ensureDefaultOptionSelection(
+            card.querySelector(".user-insights-lead-follow-up-root:not(.d-none)")
+        );
+    }
+
     function activateChoiceQuestion(panelEl, detail, lead) {
         panelEl.setAttribute("data-active-lead-id", lead.id);
         setActiveLeadCard(panelEl, lead.id);
         showDrilldownDetail(panelEl, true);
         showSideView(panelEl, "chart");
+        ensureDefaultAnswerSelection(panelEl, lead.id);
         var crumbs = buildChoiceBreadcrumb(panelEl, lead.id);
         if (!crumbs.length && detail.choice_breadcrumb) {
             crumbs = detail.choice_breadcrumb.slice();

@@ -3,7 +3,7 @@ from pipeline.models import CommandLog
 from common.services.api_client import JustGoodWorkAPIClient
 
 from question.logic.add_inline_question_logic import store_new_v3_inline_questions
-
+from question.unique_question_sync import sync_unique_inline_questions
 
 class Command(BaseCommand):
     help = 'Fetches inline questions v3 from API and stores them in the new chain structure (Lead, Followup, FollowupFollowup)'
@@ -13,8 +13,9 @@ class Command(BaseCommand):
             self.stdout.write('Starting to fetch inline questions v3 from API...')
             
             jgw_api_client = JustGoodWorkAPIClient()
-            
+            sync_unique_inline_questions()
             created_count = store_new_v3_inline_questions(jgw_api_client)
+
             
             if created_count > 0:
                 CommandLog.objects.create(

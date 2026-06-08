@@ -12,6 +12,7 @@ from question.models import (
     LeadMessagingQuestionResponse,
     FollowupMessagingQuestionResponse,
     FollowupFollowupMessagingQuestionResponse,
+    UniqueMessagingQuestion,
 )
 
 

@@ -338,3 +338,163 @@ def message_data_sent_filtered_queryset(
 
     return queryset.filter(message_data_push_filters_q_object)
 
+
+def _lead_response_filter_date_range(current_user, start_date=None, end_date=None):
+    user_start_date = get_user_start_date(current_user)
+    user_end_date = get_user_end_date(current_user)
+
+    final_start_date = (
+        max(start_date, user_start_date)
+        if start_date and user_start_date
+        else (start_date or user_start_date or get_date_13_months_ago())
+    )
+    final_end_date = (
+        min(end_date, user_end_date)
+        if end_date and user_end_date
+        else (end_date or user_end_date or datetime.now().date())
+    )
+    return final_start_date, final_end_date
+
+
+def lead_inline_question_response_filtered_queryset(
+    current_user,
+    queryset: BaseManager[Any],
+    start_date=None,
+    end_date=None,
+    destination_countries=None,
+    origin_countries=None,
+    organisations=None,
+    schemes=None,
+    factory_farms=None,
+    sector_of_work=None,
+    immigration_status=None,
+    show_new_user_data=False,
+):
+    """
+    Apply GenericFilterForm constraints to LeadInlineQuestionResponse rows.
+
+    Uses the same filter parameters as generic_question_filtered_queryset, mapped to
+    lead inline metadata (organisation, destination, factory_farm, etc.).
+    """
+    del schemes, sector_of_work, show_new_user_data, origin_countries
+
+    final_start_date, final_end_date = _lead_response_filter_date_range(
+        current_user, start_date, end_date
+    )
+
+    if destination_countries is None:
+        destination_countries = []
+    if organisations is None:
+        organisations = []
+    if factory_farms is None:
+        factory_farms = []
+    if immigration_status is None:
+        immigration_status = []
+
+    user_factories = get_user_factories(current_user)
+    user_orgs = get_user_organisations(current_user)
+    user_destinations = get_user_destinations(current_user)
+    user_immigration_status = get_user_immigration_status(current_user)
+
+    q = Q(api_created_at__range=(final_start_date, final_end_date))
+
+    if user_orgs:
+        user_org_names = [org.name for org in user_orgs]
+        q &= Q(organisation__name__in=user_org_names)
+
+    if user_destinations:
+        q &= Q(destination__in=user_destinations)
+
+    if destination_countries:
+        q &= Q(destination__name__in=destination_countries)
+
+    if organisations:
+        q &= Q(organisation__name__in=organisations)
+
+    if user_factories:
+        q &= Q(factory_farm__in=user_factories)
+
+    if factory_farms:
+        q &= Q(factory_farm__name__in=factory_farms)
+
+    if immigration_status:
+        q &= Q(immigration_status__name__in=immigration_status)
+    elif user_immigration_status:
+        q &= Q(immigration_status__in=user_immigration_status)
+
+    return queryset.filter(q).distinct()
+
+
+def lead_messaging_question_response_filtered_queryset(
+    current_user,
+    queryset: BaseManager[Any],
+    start_date=None,
+    end_date=None,
+    destination_countries=None,
+    origin_countries=None,
+    organisations=None,
+    schemes=None,
+    factory_farms=None,
+    sector_of_work=None,
+    immigration_status=None,
+    show_new_user_data=False,
+):
+    """
+    Apply GenericFilterForm constraints to LeadMessagingQuestionResponse rows.
+    """
+    del schemes, show_new_user_data
+
+    final_start_date, final_end_date = _lead_response_filter_date_range(
+        current_user, start_date, end_date
+    )
+
+    if destination_countries is None:
+        destination_countries = []
+    if origin_countries is None:
+        origin_countries = []
+    if organisations is None:
+        organisations = []
+    if factory_farms is None:
+        factory_farms = []
+    if immigration_status is None:
+        immigration_status = []
+
+    user_orgs = get_user_organisations(current_user)
+    user_destinations = get_user_destinations(current_user)
+    user_immigration_status = get_user_immigration_status(current_user)
+
+    q = Q(api_created_at__range=(final_start_date, final_end_date))
+
+    if user_orgs:
+        user_org_names = [org.name for org in user_orgs]
+        q &= Q(org_info__name__in=user_org_names)
+
+    if user_destinations:
+        q &= Q(destination__in=user_destinations)
+
+    if destination_countries:
+        q &= Q(destination__name__in=destination_countries)
+
+    if origin_countries:
+        q &= Q(origin__name__in=origin_countries)
+
+    if organisations:
+        q &= Q(org_info__name__in=organisations)
+
+    if factory_farms:
+        q &= Q(preference__factory_farm__name__in=factory_farms)
+
+    if sector_of_work:
+        selected_sectors = sector_of_work or []
+        if selected_sectors:
+            q &= Q(
+                preference__sectors_of_work__original_sector_of_work__value__in=selected_sectors
+            )
+
+    if immigration_status:
+        q &= Q(immigration_status__name__in=immigration_status)
+    elif user_immigration_status:
+        q &= Q(immigration_status__in=user_immigration_status)
+
+    return queryset.filter(q).distinct()
+
