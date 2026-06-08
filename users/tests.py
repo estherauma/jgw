@@ -569,7 +569,7 @@ class RegistrationApiTests(TestCase):
                 data={
                     "first_name": "Phone",
                     "last_name": "User",
-                    "phone_number": "781590903",
+                    "phone_number": "781000000",
                     "phone_country_iso": "UG",
                     "password1": "StrongPassword123!",
                     "org_code": "TESTORG",
@@ -579,7 +579,7 @@ class RegistrationApiTests(TestCase):
         response = self.client.post(
             reverse("users_api:verify_registration_code"),
             data={
-                "phone_number": "0781590903",
+                "phone_number": "0781000000",
                 "code": "AB23CD45",
             },
         )

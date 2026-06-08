@@ -125,7 +125,7 @@ def verify_registration_code(code, email=None, phone_number=None, phone_country_
             "error": "Either email or phone number and the verification code are required.",
         }
 
-    user, _ = get_user_by_contact(
+    user, user_error = get_user_by_contact(
         email=email,
         phone_number=phone_number,
         phone_country_iso=phone_country_iso,
@@ -475,7 +475,7 @@ def login_api_user(email=None, phone_number=None, phone_country_iso=None, passwo
     if not user.is_active:
         return {
             "ok": False,
-            "error": "Invalid contact details or reset code.",
+            "error": "Account is not active.",
         }
 
     user.last_login = timezone.now()
