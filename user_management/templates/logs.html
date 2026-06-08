@@ -1,4 +1,5 @@
 {% extends 'core/layouts/base.html' %}
+{% load humanize %}
 {% load static %}
 
 {% block title %}Logs{% endblock %}
@@ -23,23 +24,41 @@
             <table id="um-logs-table" class="display col-12">
                 <thead>
                     <tr class="um-navy">
-                        <th>Performed By</th>
-                        <th>Performed At</th>
+                        <th>Actor</th>
+                        <th>Time</th>
                         <th>Log Level</th>
-                        <th>Log Message</th>
+                        <th>Activity</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for activity in logs %}
                     <tr>
                         <td>{{ activity.actor }}</td>
-                        <td>{{ activity.created_at|date:"Y-m-d H:i:s" }}</td>
+                        <td>
+                            {% with nat_day=activity.created_at|naturalday %}
+                                {% if nat_day == "today" or nat_day == "yesterday" %}
+                                    {{ nat_day|title }}, {{ activity.created_at|date:"H:i" }}
+                                {% else %}
+                                    {{ activity.created_at|date:"b j, H:i"|title }}
+                                {% endif %}
+                            {% endwith %}
+                        </td>
                         <td>
                             <span class="um-log-level-text um-log-level-{{ activity.action }}">
                                 {{ activity.action|title }}
                             </span>
                         </td>
-                        <td>{{ activity.message }}</td>
+                        <td>
+                            View details
+                            <button
+                                class="btn btn-link p-0 um-log-details-btn"
+                                data-toggle="modal"
+                                data-target="#log-details-modal"
+                                data-log-id="{{ activity.id }}"
+                            >
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

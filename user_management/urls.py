@@ -32,6 +32,7 @@ from .views import (
     UnassignWorkCodeView,
     user_activity_list,
     user_details,
+    user_activity_details,
 )
 
 app_name = "user_management"
@@ -85,4 +86,5 @@ urlpatterns = [
     path('users/invite/', BulkInviteUsersView.as_view(), name="invite_users"),
     path('users/<int:user_id>/', user_details, name="user_details"),
     path('user-activities/', user_activity_list, name="user_activity_logs"),
+    path('user-activities/<int:activity_id>/', user_activity_details, name="user_activity_details"),
 ]

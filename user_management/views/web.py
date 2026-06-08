@@ -1883,3 +1883,20 @@ def user_details(request, user_id):
         ),
     }
     return render(request, "user-details.html", context)
+
+@group_required("user_management")
+def user_activity_details(request, activity_id):
+    activity = UserActivity.objects.select_related("actor", "organisation").filter(id=activity_id).first()
+    if not activity:
+        return JsonResponse({"ok": False, "error": "Activity not found."}, status=404)
+    
+    current_user = request.user
+    if is_org_or_group_admin(current_user) and not OrganizationService.has_org_access(
+        current_user, activity.organisation
+    ):
+        return OrganizationService.org_access_denied()
+    
+    context = {
+        "activity": activity,
+    }
+    return render(request, "user-activity-details.html", context)

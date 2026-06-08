@@ -1,0 +1,21 @@
+{% load um_waffle_flags %}
+<div class="modal fade um-modal um-modal-lg" id="log-details-modal" tabindex="-1" role="dialog" aria-labelledby="log-details-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="um-modal-title um-navy" id="log-details-title">Log Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="um-modal-divider"></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>Before:</strong> <span data-log-before></span>
+                </div>
+                <div class="mb-3">
+                    <strong>After:</strong> <span data-log-after></span>
+                </div>
+            </div>
+        </div>
+    </div>
