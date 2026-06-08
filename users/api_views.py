@@ -427,7 +427,7 @@ class PasswordResetVerifyCodeApiView(APIView):
     @extend_schema(
         tags=["Authentication"],
         summary="Verify password reset code",
-        description="Verifies a password reset code and returns a short-lived reset token.",
+        description="Verifies a password reset code for the provided email or phone number.",
         request=PasswordResetVerifyCodeRequestSerializer,
         responses={
             200: PasswordResetVerifyCodeResponseSerializer,

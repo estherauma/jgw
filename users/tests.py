@@ -927,9 +927,16 @@ class LoginApiTests(AuthTests):
             data={"email": inactive_user.email},
         )
 
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["ok"], False)
-        self.assertEqual(response.json()["error"], "Account is not active.")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "email": inactive_user.email,
+                "phone_number": None,
+                "phone_country_iso": None,
+            },
+        )
         send_email_mock.assert_not_called()
 
     def test_password_reset_reset_api_resets_password(self):
@@ -998,7 +1005,7 @@ class LoginApiTests(AuthTests):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["ok"], False)
-        self.assertEqual(response.json()["error"], "Account is not active.")
+        self.assertEqual(response.json()["error"], "Invalid contact details or reset code.")
 
     def test_password_reset_reset_api_rejects_invalid_code(self):
         create_user_verification_code(
@@ -1041,7 +1048,7 @@ class LoginApiTests(AuthTests):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["ok"], False)
-        self.assertEqual(response.json()["error"], "Account is not active.")
+        self.assertEqual(response.json()["error"], "Invalid contact details or reset code.")
 
     @patch("users.services.authentication.send_email_notification")
     def test_password_reset_resend_api_returns_generic_success(self, send_email_mock):
@@ -1081,9 +1088,16 @@ class LoginApiTests(AuthTests):
             data={"email": inactive_user.email},
         )
 
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["ok"], False)
-        self.assertEqual(response.json()["error"], "Account is not active.")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "email": inactive_user.email,
+                "phone_number": None,
+                "phone_country_iso": None,
+            },
+        )
         send_email_mock.assert_not_called()
 
     def test_set_password_OK(self):

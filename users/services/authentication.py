@@ -98,7 +98,6 @@ def get_user_by_contact(email=None, phone_number=None, phone_country_iso=None, u
             raw_phone_number,
             phone_country_iso,
         )
-        print("Normalized phone number:", normalized_phone_number)  
         if phone_error:
             return None, phone_error
 
@@ -126,7 +125,7 @@ def verify_registration_code(code, email=None, phone_number=None, phone_country_
             "error": "Either email or phone number and the verification code are required.",
         }
 
-    user, user_error = get_user_by_contact(
+    user, _ = get_user_by_contact(
         email=email,
         phone_number=phone_number,
         phone_country_iso=phone_country_iso,
@@ -248,10 +247,10 @@ def request_password_reset_code(email=None, phone_number=None, phone_country_iso
         }
     
     if not user:
-        return {"ok": False, "error": 'Something went wrong. Please try again.'}
+        return {"ok": True, "message": PASSWORD_RESET_GENERIC_MESSAGE}
 
     if not user.is_active:
-        return {"ok": False, "error": "Account is not active."}
+        return {"ok": True, "message": PASSWORD_RESET_GENERIC_MESSAGE}
 
     _, verification_code = create_user_verification_code(
         user,
@@ -270,7 +269,6 @@ def request_password_reset_code(email=None, phone_number=None, phone_country_iso
             f"Your Just Good Work password reset code is {verification_code}. "
             f"It expires in 15 minutes.",
         )
-        print("Password reset SMS sent:", sms_sent)
         if not sms_sent:
             return {
                 "ok": False,
@@ -300,13 +298,10 @@ def verify_password_reset_code(
         phone_country_iso=phone_country_iso,
     )
     if not user:
-        return {
-            "ok": False,
-            "error": user_error or "Invalid contact details or reset code.",
-        }
+        return {"ok": False, "error": "Invalid contact details or reset code."}
 
     if not user.is_active:
-        return {"ok": False, "error": "Account is not active."}
+        return {"ok": False, "error": "Invalid contact details or reset code."}
 
     verification = (
         UserVerificationCode.objects.filter(
@@ -360,13 +355,10 @@ def reset_password_with_code(code, password, email=None, phone_number=None, phon
         phone_country_iso=phone_country_iso,
     )
     if not user:
-        return {
-            "ok": False,
-            "error": user_error or "Invalid contact details or reset code.",
-        }
+        return {"ok": False, "error": "Invalid contact details or reset code."}
 
     if not user.is_active:
-        return {"ok": False, "error": "Account is not active."}
+        return {"ok": False, "error": "Invalid contact details or reset code."}
     
     verification = (
         UserVerificationCode.objects.filter(
@@ -483,7 +475,7 @@ def login_api_user(email=None, phone_number=None, phone_country_iso=None, passwo
     if not user.is_active:
         return {
             "ok": False,
-            "error": "Account is not active.",
+            "error": "Invalid contact details or reset code.",
         }
 
     user.last_login = timezone.now()
@@ -532,7 +524,7 @@ def refresh_api_access_token(refresh_token):
     if not user.is_active:
         return {
             "ok": False,
-            "error": "Account is not active.",
+            "error": "Invalid contact details or reset code.",
         }
 
     return {
