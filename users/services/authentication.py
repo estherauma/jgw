@@ -15,6 +15,7 @@ from common.const.value_const import (
     REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
     REGISTRATION_VERIFICATION_CODE_ALPHABET,
 )
+from common.services.audit import AuditService
 from user_management.sms import send_sms
 from user_management.utils import normalize_phone_number_for_lookup
 from users.models import User, UserVerificationCode
@@ -97,6 +98,7 @@ def get_user_by_contact(email=None, phone_number=None, phone_country_iso=None, u
             raw_phone_number,
             phone_country_iso,
         )
+        print("Normalized phone number:", normalized_phone_number)  
         if phone_error:
             return None, phone_error
 
@@ -244,9 +246,9 @@ def request_password_reset_code(email=None, phone_number=None, phone_country_iso
             "ok": False,
             "error": user_error,
         }
-
+    
     if not user:
-        return {"ok": True, "message": PASSWORD_RESET_GENERIC_MESSAGE}
+        return {"ok": False, "error": 'Something went wrong. Please try again.'}
 
     if not user.is_active:
         return {"ok": False, "error": "Account is not active."}
@@ -268,6 +270,7 @@ def request_password_reset_code(email=None, phone_number=None, phone_country_iso
             f"Your Just Good Work password reset code is {verification_code}. "
             f"It expires in 15 minutes.",
         )
+        print("Password reset SMS sent:", sms_sent)
         if not sms_sent:
             return {
                 "ok": False,
@@ -411,6 +414,7 @@ def reset_password_with_code(code, password, email=None, phone_number=None, phon
         ).exclude(pk=verification.pk).delete()
         user.set_password(password)
         user.save()
+        AuditService.log_action(instance=user, action="password_reset")
 
     return {"ok": True, "user": user}
 
