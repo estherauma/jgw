@@ -58,6 +58,44 @@ class RefreshTokenResponseSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
 
 
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
+    phone_country_iso = serializers.CharField(required=False, allow_blank=True)
+
+
+class PasswordResetRequestResponseSerializer(serializers.Serializer):
+    ok = serializers.BooleanField(default=True)
+    email = serializers.EmailField(allow_null=True)
+    phone_number = serializers.CharField(allow_null=True)
+    phone_country_iso = serializers.CharField(allow_null=True)
+
+
+class PasswordResetVerifyCodeRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
+    phone_country_iso = serializers.CharField(required=False, allow_blank=True)
+    code = serializers.CharField()
+
+
+class PasswordResetVerifyCodeResponseSerializer(serializers.Serializer):
+    ok = serializers.BooleanField(default=True)
+    user_id = serializers.IntegerField()
+
+
+class PasswordResetResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
+    phone_country_iso = serializers.CharField(required=False, allow_blank=True)
+    code = serializers.CharField()
+    password = serializers.CharField()
+
+
+class PasswordResetResetResponseSerializer(serializers.Serializer):
+    ok = serializers.BooleanField(default=True)
+    user_id = serializers.IntegerField()
+
+
 class AccessCodeSummarySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     code = serializers.CharField()
