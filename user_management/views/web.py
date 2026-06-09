@@ -1887,24 +1887,25 @@ def user_details(request, user_id):
 @group_required("user_management")
 def user_activity_details(request, activity_id):
     user = request.user
-    activities = UserActivity.objects.select_related("actor", "organisation")
-
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    activities = UserActivity.objects.select_related("actor", "organisation").filter(
+         created_at__gte=thirty_days_ago
+     )
     if user.is_superuser:
-        pass
+         activity = activities.filter(id=activity_id).first()
     elif is_58_admin(user):
-        activities = activities.exclude(actor__is_superuser=True)
+         activity = activities.exclude(actor__is_superuser=True).filter(id=activity_id).first()
     elif is_org_admin(user):
-        user_org = user.organisation_data.first()
-        activities = activities.filter(organisation=user_org)
+         user_org = user.organisation_data.first()
+         activity = activities.filter(organisation=user_org, id=activity_id).first()
     elif is_org_group_admin(user):
-        user_orgs = user.organisation_data.all()
-        activities = activities.filter(organisation__in=user_orgs)
+         user_orgs = user.organisation_data.all()
+         activity = activities.filter(organisation__in=user_orgs, id=activity_id).first()
     elif is_org_staff(user):
-        activities = activities.filter(actor=user)
+         activity = activities.filter(actor=user, id=activity_id).first()
     else:
-        activities = activities.none()
-
-    activity = activities.filter(id=activity_id).first()
+         activity = None
+         
     if not activity:
         return JsonResponse({"ok": False, "error": "Activity not found."}, status=404)
     
