@@ -56,25 +56,19 @@ $(document).ready(function () {
         rowAfter.find(".target-val").text(valAfter);
 
         if (valBefore !== valAfter) {
-          rowAfter.find(".target-val").addClass("text-primary fw-bold");
+          rowAfter.find(".target-val").addClass("fw-bold");
         }
         containerAfter.append(rowAfter);
       });
     }).fail(function () {
       $("#modal-loader").addClass("d-none");
       $("#modal-cards-row").removeClass("d-none");
-      containerBefore.html('<div class="text-danger">Failed to connect to authentication streams.</div>');
-      containerAfter.html('<div class="text-danger">Failed to connect to authentication streams.</div>');
+      containerBefore.html('<div class="text-danger">Failed to load log details.</div>');
+      containerAfter.html('<div class="text-danger">Failed to load log details.</div>');
     });
   });
 
-  $(document).on("click", "#log-details-modal [data-dismiss='modal']", function () {
-    setTimeout(reloadLogsPage, 150);
-  });
-
-  $(document).on("hidden.bs.modal", "#log-details-modal", function () {
-    $(".modal-backdrop").remove();
-    $("body").removeClass("modal-open").css("padding-right", "");
+  $("#log-details-modal").on("hidden.bs.modal", function () {
     $("#log-before-fields").empty();
     $("#log-after-fields").empty();
     reloadLogsPage();

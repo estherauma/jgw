@@ -26,7 +26,6 @@
                     <tr class="um-navy">
                         <th>Actor</th>
                         <th>Time</th>
-                        <th>Log Level</th>
                         <th>Activity</th>
                     </tr>
                 </thead>
@@ -34,19 +33,10 @@
                     {% for activity in logs %}
                     <tr>
                         <td>{{ activity.actor }}</td>
-                        <td>
-                            {% with nat_day=activity.created_at|naturalday %}
-                                {% if nat_day == "today" or nat_day == "yesterday" %}
-                                    {{ nat_day|title }}, {{ activity.created_at|date:"H:i" }}
-                                {% else %}
-                                    {{ activity.created_at|date:"b j, H:i"|title }}
-                                {% endif %}
+                        <td data-order="{{ activity.created_at|date:'U' }}">
+                            {% with nat_day=activity.created_at|naturalday:"b j" %}
+                                {{ nat_day|capfirst }}, {{ activity.created_at|date:"H:i" }}
                             {% endwith %}
-                        </td>
-                        <td>
-                            <span class="um-log-level-text um-log-level-{{ activity.action }}">
-                                {{ activity.action|title }}
-                            </span>
                         </td>
                         <td>
                            
@@ -72,5 +62,8 @@
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script src="{% static 'user_management/js/logs.js' %}"></script>
 {% endblock %}

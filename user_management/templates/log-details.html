@@ -1,30 +1,30 @@
-{% load um_waffle_flags %}
-<div class="modal um-modal" id="log-details-modal" tabindex="-1" role="dialog" aria-labelledby="log-details-title" aria-hidden="true">
+<div class="modal fade um-modal" id="log-details-modal" tabindex="-1" role="dialog" aria-labelledby="log-details-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document"> 
-        <div class="modal-content" style="border-radius: 12px; border: none; background-color: #f8fafc;">
-            <div class="modal-header bg-white" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                <h5 class="um-modal-title um-navy fw-bold" id="log-details-title" style="color: #193560;">Activity History Log</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="font-size: 1.75rem;">
-                    <span aria-hidden="true">&times;</span>
+        <div class="modal-content um-modal-content">
+            
+            <div class="modal-header bg-white align-items-center py-3 px-4 um-modal-header">
+                <h5 class="um-modal-title um-navy fw-bold m-0" id="log-details-title">Activity Log Details</h5>
+                
+                <button type="button" class="btn btn-sm btn-light d-flex align-items-center justify-content-center p-1 um-modal-close-btn" data-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x-lg um-modal-close-icon"></i>
                 </button>
             </div>
-            <div class="um-modal-divider" style="height: 1px; background-color: #e2e8f0;"></div>
             
-            <div class="modal-body p-4">
+            <div class="modal-body px-4 pb-4 pt-3">
                 <div id="modal-loader" class="text-center py-4 d-none">
                     <div class="spinner-border text-primary" role="status"></div>
                 </div>
 
-                <div class="row g-4 d-none" id="modal-cards-row">
+                <div class="row g-3 d-none" id="modal-cards-row">
                     <div class="col-12 col-md-6">
-                        <div class="um-detail-card bg-white p-4 h-100 shadow-sm" style="border-radius: 8px;">
-                            <div class="um-detail-card-header fw-bold text-muted text-uppercase small pb-3 mb-3 border-bottom">Before</div>
+                        <div class="um-detail-card">
+                            <div class="um-detail-card-header">Before</div>
                             <div id="log-before-fields"></div>
                         </div>
                     </div>
                     <div class="col-12 col-md-6">
-                        <div class="um-detail-card bg-white p-4 h-100 shadow-sm" style="border-radius: 8px;">
-                            <div class="um-detail-card-header fw-bold text-muted text-uppercase small pb-3 mb-3 border-bottom">After</div>
+                        <div class="um-detail-card">
+                            <div class="um-detail-card-header">After</div>
                             <div id="log-after-fields"></div>
                         </div>
                     </div>
@@ -35,8 +35,8 @@
 </div>
 
 <template id="field-row-template">
-    <div class="um-detail-field mb-3 pb-2 border-bottom">
-        <div class="um-detail-label small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.75rem;"></div>
-        <div class="um-detail-value fw-semibold text-dark target-val"></div>
+    <div class="um-detail-field">
+        <div class="um-detail-label"></div>
+        <div class="um-detail-value target-val"></div>
     </div>
 </template>

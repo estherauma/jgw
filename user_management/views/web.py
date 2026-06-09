@@ -1886,12 +1886,32 @@ def user_details(request, user_id):
 
 @group_required("user_management")
 def user_activity_details(request, activity_id):
-    activity = UserActivity.objects.select_related("actor", "organisation").filter(id=activity_id).first()
+    user = request.user
+    activities = UserActivity.objects.select_related("actor", "organisation")
+
+    if user.is_superuser:
+        pass
+    elif is_58_admin(user):
+        activities = activities.exclude(actor__is_superuser=True)
+    elif is_org_admin(user):
+        user_org = user.organisation_data.first()
+        activities = activities.filter(organisation=user_org)
+    elif is_org_group_admin(user):
+        user_orgs = user.organisation_data.all()
+        activities = activities.filter(organisation__in=user_orgs)
+    elif is_org_staff(user):
+        activities = activities.filter(actor=user)
+    else:
+        activities = activities.none()
+
+    activity = activities.filter(id=activity_id).first()
     if not activity:
         return JsonResponse({"ok": False, "error": "Activity not found."}, status=404)
     
     changes = activity.changes or {"before": {}, "after": {}}
-    all_fields = set(changes.get("before", {}).keys()) | set(changes.get("after", {}).keys())
+    all_fields = sorted(
+        set(changes.get("before", {}).keys()) | set(changes.get("after", {}).keys())
+    )
     
     before_formatted = {}
     after_formatted = {}
