@@ -1105,16 +1105,6 @@ body.modal-open {
     }
 }
 
-/* Modal Backdrop with White Opacity */
-.modal-backdrop {
-    background-color: rgba(255, 255, 255, 0.85) !important;
-    opacity: 1 !important;
-}
-
-.modal-backdrop.show {
-    background-color: rgba(255, 255, 255, 0.85);
-}
-
 /* Close button styling */
 .fullscreen-chart-modal .btn-close {
     background: none;

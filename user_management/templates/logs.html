@@ -49,14 +49,14 @@
                             </span>
                         </td>
                         <td>
-                            View details
+                           
                             <button
                                 class="btn btn-link p-0 um-log-details-btn"
                                 data-toggle="modal"
                                 data-target="#log-details-modal"
                                 data-log-id="{{ activity.id }}"
                             >
-                                <i class="bi bi-eye"></i>
+                                 View Changes
                             </button>
                         </td>
                     </tr>
@@ -66,6 +66,7 @@
         </div>
     </div>
 </div>
+{% include 'log-details.html' %}
 {% endblock %}
 
 {% block scripts %}

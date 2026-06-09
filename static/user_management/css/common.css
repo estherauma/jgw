@@ -882,3 +882,42 @@ body .modal-backdrop.show {
     padding: 20px;
 }
 
+/* Log detail modal cards */
+.um-detail-card {
+    background: #ffffff;
+    border: 1px solid #e3ebf5;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.um-detail-card-header {
+    background: #eef2f7;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #193560;
+    border-bottom: 1px solid #e3ebf5;
+}
+.um-detail-field {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f4f8;
+}
+.um-detail-field:last-child {
+    border-bottom: none;
+}
+.um-detail-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #193560;
+    margin-bottom: 4px;
+}
+.um-detail-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d3e50;
+    word-break: break-word;
+}
+

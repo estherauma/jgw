@@ -1890,13 +1890,28 @@ def user_activity_details(request, activity_id):
     if not activity:
         return JsonResponse({"ok": False, "error": "Activity not found."}, status=404)
     
-    current_user = request.user
-    if is_org_or_group_admin(current_user) and not OrganizationService.has_org_access(
-        current_user, activity.organisation
-    ):
-        return OrganizationService.org_access_denied()
+    changes = activity.changes or {"before": {}, "after": {}}
+    all_fields = set(changes.get("before", {}).keys()) | set(changes.get("after", {}).keys())
     
-    context = {
-        "activity": activity,
-    }
-    return render(request, "user-activity-details.html", context)
+    before_formatted = {}
+    after_formatted = {}
+    
+    for field in all_fields:
+        clean_label = field.replace("_", " ").title()
+        
+        for state_key, target_dict in [("before", before_formatted), ("after", after_formatted)]:
+            val = changes.get(state_key, {}).get(field)
+            
+            if isinstance(val, list):
+                target_dict[clean_label] = ", ".join(str(v) for v in val)
+            elif val is None or val == "":
+                target_dict[clean_label] = "–"
+            else:
+                target_dict[clean_label] = str(val)
+
+    return JsonResponse({
+        "ok": True,
+        "action": activity.action,
+        "before": before_formatted,
+        "after": after_formatted,
+    })
