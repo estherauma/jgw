@@ -30,6 +30,7 @@
             <table id="um-logs-table">
                 <thead>
                     <tr class="um-navy">
+                        <th class="fw-semibold">Actor</th>
                         <th class="um-time-col fw-semibold">Time</th>
                         <th class="fw-semibold">Message</th>
                         <th class="fw-semibold um-activity-col">Activity</th>
@@ -38,6 +39,7 @@
                 <tbody>
                     {% for activity in logs %}
                     <tr class="border-top">
+                        <td>{{ activity.actor }}</td>
                         <td class="um-time-col" data-order="{{ activity.created_at|date:'U' }}">{{ activity.created_at|date:"M d, H:i" }}</td>
                         <td>{{ activity.message }}</td>
                         <td class="um-activity-col">

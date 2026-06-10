@@ -109,9 +109,11 @@ thead {
     white-space: nowrap;
 }
 
-.um-view-details-link {
+.um-view-details-link,
+.um-view-details-link a,
+a.um-view-details-link {
     color: #24AACC !important;
-    text-decoration: none;
+    text-decoration: none !important;
     font-weight: 500;
     transition: color 0.2s ease;
     display: inline-block;
@@ -122,10 +124,13 @@ thead {
     line-height: 1.35;
 }
 
-.um-message-link:hover,
-.um-view-details-link:hover {
+.um-view-details-link:hover,
+.um-view-details-link a:hover,
+a.um-view-details-link:hover,
+.um-view-details-link a:focus,
+a.um-view-details-link:focus {
     color: #24AACC !important;
-    text-decoration: underline;
+    text-decoration: underline !important;
 }
 
 .um-status-badge {
