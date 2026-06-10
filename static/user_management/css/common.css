@@ -882,3 +882,79 @@ body .modal-backdrop.show {
     padding: 20px;
 }
 
+.um-modal-content {
+    border-radius: 12px;
+    border: none;
+    background-color: #f8fafc;
+}
+
+.um-modal-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.um-modal-title {
+    color: #193560;
+    font-size: 1.15rem;
+    letter-spacing: 0.2px;
+}
+
+.um-modal-close-btn {
+    border-radius: 6px;
+    width: 35px;
+    height: 35px;
+}
+
+.um-modal-close-btn:hover {
+    background-color: #e2e8f0 !important;
+}
+
+.um-modal-close-icon {
+    font-size: 1rem;
+    color: #193560 !important;
+    -webkit-text-stroke: 0.75px; 
+}
+
+.um-detail-card {
+    background: #ffffff;
+    border: 1px solid #e3ebf5;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.um-detail-card-header {
+    background: #eef2f7;
+    padding: 12px 14px;            
+    font-size: 15px;               
+    font-weight: 800;              
+    text-transform: uppercase;
+    letter-spacing: 0.8px;        
+    color: #1e293b;
+    border-bottom: 1px solid #e3ebf5;
+}
+
+.um-detail-field {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f0f4f8;
+}
+
+.um-detail-field:last-child {
+    border-bottom: none;
+}
+
+.um-detail-label {
+    font-size: 12px; 
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #64748b; 
+    margin-bottom: 2px;
+}
+
+.um-detail-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    word-break: break-word;
+}

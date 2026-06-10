@@ -1883,3 +1883,56 @@ def user_details(request, user_id):
         ),
     }
     return render(request, "user-details.html", context)
+
+@group_required("user_management")
+def user_activity_details(request, activity_id):
+    user = request.user
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    activities = UserActivity.objects.select_related("actor", "organisation").filter(
+         created_at__gte=thirty_days_ago
+     )
+    if user.is_superuser:
+         activity = activities.filter(id=activity_id).first()
+    elif is_58_admin(user):
+         activity = activities.exclude(actor__is_superuser=True).filter(id=activity_id).first()
+    elif is_org_admin(user):
+         user_org = user.organisation_data.first()
+         activity = activities.filter(organisation=user_org, id=activity_id).first()
+    elif is_org_group_admin(user):
+         user_orgs = user.organisation_data.all()
+         activity = activities.filter(organisation__in=user_orgs, id=activity_id).first()
+    elif is_org_staff(user):
+         activity = activities.filter(actor=user, id=activity_id).first()
+    else:
+         activity = None
+         
+    if not activity:
+        return JsonResponse({"ok": False, "error": "Activity not found."}, status=404)
+    
+    changes = activity.changes or {"before": {}, "after": {}}
+    all_fields = sorted(
+        set(changes.get("before", {}).keys()) | set(changes.get("after", {}).keys())
+    )
+    
+    before_formatted = {}
+    after_formatted = {}
+    
+    for field in all_fields:
+        clean_label = field.replace("_", " ").title()
+        
+        for state_key, target_dict in [("before", before_formatted), ("after", after_formatted)]:
+            val = changes.get(state_key, {}).get(field)
+            
+            if isinstance(val, list):
+                target_dict[clean_label] = ", ".join(str(v) for v in val)
+            elif val is None or val == "":
+                target_dict[clean_label] = "–"
+            else:
+                target_dict[clean_label] = str(val)
+
+    return JsonResponse({
+        "ok": True,
+        "action": activity.action,
+        "before": before_formatted,
+        "after": after_formatted,
+    })
