@@ -18,7 +18,9 @@
                 <tbody>
                     {% for activity in activities %}
                     <tr class="border-top">
-                        <td class="um-time-col">{{ activity.created_at|date:"M d, H:i" }}</td>
+                        <td class="um-time-col" data-order="{{ activity.created_at|date:"U" }}">
+                            {{ activity.created_at|date:"M d, H:i" }}
+                        </td>
                         <td>
                             {{ activity.message }}
                         </td>

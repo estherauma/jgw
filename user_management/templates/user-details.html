@@ -16,8 +16,8 @@
 <div class="my-3">
     <a
         class="d-inline-flex align-items-center gap-2 fw-semibold text-info text-decoration-none"
-        href="#"
-        onclick="window.history.back(); return false;"
+        href="{% url 'user_management:home' %}"
+        onclick="if (window.history.length > 1) { window.history.back(); return false; }"
     >
         <i class="bi bi-chevron-left"></i>
         <span>Back</span>
@@ -226,7 +226,9 @@
             </section>
 
             {% if not user.hide_organisation_information %}
-                {% include 'activity-logs-card.html' %}
+                {% flag 'can_view_activity_logs' %}
+                    {% include 'activity-logs-card.html' %}
+                {% endflag %}
             {% endif %}
         </div>
 
@@ -325,7 +327,9 @@
                 </div>
             </section>
             {% else %}
-                {% include 'activity-logs-card.html' %}
+                {% flag 'can_view_activity_logs' %}
+                    {% include 'activity-logs-card.html' %}
+                {% endflag %}
             {% endif %}
         </div>
     </div>
@@ -334,7 +338,7 @@
 {% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
 {% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form %}
 {% include 'confirm-modal.html' %}
-{% include 'activitly-log-details-modal.html' %}
+{% include 'activity-log-details-modal.html' %}
 {% endblock %}
 
 {% block scripts %}
@@ -344,7 +348,6 @@
 <script src="{% static 'js/user_management/role-group-selector.js' %}"></script>
 <script src="{% static 'js/user_management/users.js' %}"></script>
 <script src="{% static 'js/user_management/roles.js' %}"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'user_management/js/logs.js' %}"></script>
 {% endblock %}

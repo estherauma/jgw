@@ -13,8 +13,8 @@
 <div class="um-page">
     <div class = "my-3">
         <a class="d-inline-flex align-items-center gap-2 fw-semibold text-info text-decoration-none"
-        href="#"
-        onclick="window.history.back(); return false;"
+        href="{% url 'user_management:home' %}"
+        onclick="if (window.history.length > 1) { window.history.back(); return false; }"
         >
         <i class="bi bi-chevron-left"></i>
         <span>Back</span>
@@ -30,8 +30,8 @@
             <table id="um-logs-table">
                 <thead>
                     <tr class="um-navy">
-                        <th class="fw-semibold">Actor</th>
                         <th class="um-time-col fw-semibold">Time</th>
+                        <th class="fw-semibold">Actor</th>
                         <th class="fw-semibold">Message</th>
                         <th class="fw-semibold um-activity-col">Activity</th>
                     </tr>
@@ -39,8 +39,8 @@
                 <tbody>
                     {% for activity in logs %}
                     <tr class="border-top">
-                        <td>{{ activity.actor }}</td>
                         <td class="um-time-col" data-order="{{ activity.created_at|date:'U' }}">{{ activity.created_at|date:"M d, H:i" }}</td>
+                        <td>{{ activity.actor }}</td>
                         <td>{{ activity.message }}</td>
                         <td class="um-activity-col">
                             <button
@@ -60,7 +60,7 @@
         </div>
     </div>
 </div>
-{% include 'activitly-log-details-modal.html' %}
+{% include 'activity-log-details-modal.html' %}
 {% endblock %}
 
 {% block scripts %}

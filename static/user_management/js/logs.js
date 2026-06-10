@@ -1,6 +1,6 @@
 $(document).ready(function () {
   $("#um-logs-table").DataTable({
-    order: [[1, "desc"]],
+    order: [[0, "desc"]],
     pageLength: 10,
     lengthMenu: [10, 25, 50, 100],
     language: {
@@ -68,19 +68,8 @@ $(document).ready(function () {
     $("#log-details-modal").modal("hide");
   });
 
-  $("#log-details-modal").on("hide.bs.modal", function () {
-    setTimeout(function () {
-      $("#log-before-fields").empty();
-      $("#log-after-fields").empty();
-      $(".modal-backdrop").remove();
-      $("body").removeClass("modal-open").css("overflow", "auto");
-      $("body").removeAttr("style");
-      $("html").removeAttr("style");
-    }, 0);
-  });
-
-  $("#log-details-modal").on("hidden.bs.modal", function () {
-    $(".modal-backdrop").remove();
-    $("body").removeClass("modal-open").css("overflow", "auto");
+  $(document).on("hidden.bs.modal", "#log-details-modal", function () {
+    $("#log-before-fields").empty();
+    $("#log-after-fields").empty();
   });
 });
