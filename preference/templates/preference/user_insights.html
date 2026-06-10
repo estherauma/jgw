@@ -1,6 +1,7 @@
 {% extends 'core/layouts/base.html' %}
 {% load static %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 
 {% block title %}{% translate "userInsightsPageTitle" %}{% endblock title %}
 
@@ -10,8 +11,43 @@
 {% endblock main_base_head %}
 
 {% block content %}
+<div class="modal fade" id="user-insights-filter-modal" tabindex="-1" role="dialog" aria-labelledby="user-insights-filter-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="user-insights-filter-modal-label">{% translate "inlineQuestionsFilters" %}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="user-insights-filter-form">
+                    {% csrf_token %}
+                    {{ filter_form|crispy }}
+                    <button type="submit" class="btn btn-primary">{% translate "inlineQuestionsSubmitButton" %}</button>
+                    <button type="submit" name="reset" value="true" class="btn btn-secondary">{% translate "inlineQuestionsResetButton" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="user-insights-page">
-    <header class="user-insights-title">{% translate "userInsightsPageTitle" %}</header>
+    <div class="row user-overview-header-row">
+        <div class="col-md-6">
+            <header class="user-insights-title">{% translate "userInsightsPageTitle" %}</header>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="user-overview-actions">
+                <button
+                    data-bs-toggle="modal"
+                    data-bs-target="#user-insights-filter-modal"
+                    role="button"
+                    class="btn btn-primary waves-effect text-center bg-jgw-deep-blue"
+                >
+                    {% translate "inlineQuestionsFilters" %}
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div class="row g-3 align-items-start">
         <div class="col-lg-3 col-md-4">
@@ -80,9 +116,9 @@
                     </button>
                     {% endfor %}
                 </div>
-                <div class="user-insights-donut-row" id="user-insights-donut-row" data-donut-count="{{ active_report.donut_count }}" data-active-report="{{ active_report.id }}">
+                <div class="user-insights-donut-row" id="user-insights-donut-row"{% if active_report %} data-donut-count="{{ active_report.donut_count }}" data-active-report="{{ active_report.id }}"{% endif %}>
                     {% for slot in donut_slots %}
-                    <div class="user-insights-donut-slot-wrap{% if forloop.counter0 >= active_report.donut_count %} d-none{% endif %}" data-slot="{{ forloop.counter0 }}" data-donut-slot="{{ forloop.counter0 }}">
+                    <div class="user-insights-donut-slot-wrap{% if active_report and forloop.counter0 >= active_report.donut_count %} d-none{% endif %}" data-slot="{{ forloop.counter0 }}" data-donut-slot="{{ forloop.counter0 }}">
                         <div class="user-insights-donut-cell" role="button" tabindex="0">
                             <div id="user-insights-donut-{{ forloop.counter0 }}" class="echarts-host" role="img" aria-label=""></div>
                         </div>

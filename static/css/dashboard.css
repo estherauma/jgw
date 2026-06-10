@@ -2070,7 +2070,7 @@ body.modal-open {
     font-weight: 700;
     color: #fff;
     line-height: 1.2;
-    margin: 0 0 1.25rem;
+    margin: 0;
 }
 
 .user-insights-latest-label,

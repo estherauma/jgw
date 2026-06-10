@@ -44,6 +44,9 @@ from question.models import (
 )
 from preference.models import Country, Organisation, OrganisationData, Preference, TextTranslations
 from question.tasks import translate_and_clean_inline_question_fields
+from question.user_insights_helpers import (
+    get_user_insights_indicators_for_inline_question_key,
+)
 
 kunfu_panda_logger = KunfuPandaLogger(log_file="logs/inline_question_tasks.log")
 
@@ -980,6 +983,7 @@ def store_new_v3_inline_questions(jgw_api_client):
                     inline_question_response=inline_question_response_v1,
                     response_value=value_key,
                     organisation=organisation_data,
+                    questionresponsetype=question.get('questionResponseType'),
                     organisation_code=org_code,
                     immigration_status=immigration_status_data,
                     factory_farm=factory_farm_data,
@@ -990,6 +994,11 @@ def store_new_v3_inline_questions(jgw_api_client):
                     api_created_at=api_created_at,
                     api_updated_at=api_updated_at
                 )
+                question_indicators = get_user_insights_indicators_for_inline_question_key(
+                    question.get("questionKey")
+                )
+                if question_indicators.exists():
+                    lead_response.question_indicators.set(question_indicators)
                 created_leads += 1
 
                 if followup_key:
@@ -1051,6 +1060,7 @@ def store_new_v3_inline_questions(jgw_api_client):
                                 lead_question=lead_response,
                                 data_source_id=followup_question.get('_id'),
                                 device_id=followup_question.get('deviceId'),
+                                questionresponsetype=followup_question.get('questionResponseType'),
                                 inline_question=f_inline_question_v1,
                                 inline_question_response=f_inline_question_response_v1,
                                 response_value=f_value_key,
@@ -1113,6 +1123,7 @@ def store_new_v3_inline_questions(jgw_api_client):
                                         followup_question=followup_response,
                                         data_source_id=followup_followup_question.get('_id'),
                                         device_id=followup_followup_question.get('deviceId'),
+                                        questionresponsetype=followup_followup_question.get('questionResponseType'),
                                         inline_question=ff_inline_question_v1,
                                         inline_question_response=ff_inline_question_response_v1,
                                         response_value=ff_value_key,

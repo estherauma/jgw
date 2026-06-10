@@ -409,7 +409,21 @@ class LeadMessagingQuestionResponse(models.Model):
     )
     
     response_value = models.TextField(blank=True, null=True)
-    
+    questionresponsetype = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Response widget type from source data (e.g. select, radio, text).",
+    )
+    question_indicators = models.ManyToManyField(
+        "question.UserInsightsIndicator",
+        blank=True,
+        related_name="lead_messaging_question_responses",
+        verbose_name="Question indicators",
+        help_text="User Insights indicators linked to this lead messaging response.",
+    )
+
     route = models.ForeignKey(
         Route, on_delete=models.CASCADE, null=True, blank=True, related_name="lead_messaging_question_route"
     )
@@ -499,7 +513,14 @@ class FollowupMessagingQuestionResponse(models.Model):
     
     # Keep response_value for backward compatibility or additional data
     response_value = models.TextField(blank=True, null=True)
-    
+    questionresponsetype = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Response widget type from source data (e.g. select, radio, text).",
+    )
+
     question_response_date = models.DateTimeField(blank=True, null=True)
     api_created_at = models.DateTimeField(default=timezone.now)
     api_updated_at = models.DateTimeField(default=timezone.now)
@@ -550,7 +571,14 @@ class FollowupFollowupMessagingQuestionResponse(models.Model):
     )
     
     response_value = models.TextField(blank=True, null=True)
-    
+    questionresponsetype = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Response widget type from source data (e.g. select, radio, text).",
+    )
+
     question_response_date = models.DateTimeField(blank=True, null=True)
     api_created_at = models.DateTimeField(default=timezone.now)
     api_updated_at = models.DateTimeField(default=timezone.now)
@@ -637,6 +665,50 @@ class MessageDataSent(models.Model):
         return f"{self.message_id} - {self.device_id}"
 
 
+class UniqueInlineQuestion(models.Model):
+    """
+    Distinct inline question_key / question_text pairs for admin and User Insights.
+
+    Populated from LeadInlineQuestionResponse (and InlineQuestionV1) via sync command.
+    """
+
+    question_key = models.CharField(max_length=512, unique=True, db_index=True)
+    question_text = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["question_key"]
+        verbose_name = "Unique inline question"
+        verbose_name_plural = "Unique inline questions"
+
+    def __str__(self):
+        text = (self.question_text or "").strip()
+        return f"{text} | {self.question_key}" if text else self.question_key
+
+
+class UniqueMessagingQuestion(models.Model):
+    """
+    Distinct messaging question_key / question_text pairs for admin and User Insights.
+
+    Populated from LeadMessagingQuestionResponse (and MessagingQuestionV1) via sync command.
+    """
+
+    question_key = models.CharField(max_length=512, unique=True, db_index=True)
+    question_text = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["question_key"]
+        verbose_name = "Unique messaging question"
+        verbose_name_plural = "Unique messaging questions"
+
+    def __str__(self):
+        text = (self.question_text or "").strip()
+        return f"{text} | {self.question_key}" if text else self.question_key
+
+
 class LeadInlineQuestionResponse(models.Model):
     """
     Lead/initial inline question response.
@@ -665,7 +737,21 @@ class LeadInlineQuestionResponse(models.Model):
     
     # Keep response_value for backward compatibility or additional data
     response_value = models.TextField(blank=True, null=True)
-    
+    questionresponsetype = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Response widget type from source data (e.g. select, radio, text).",
+    )
+    question_indicators = models.ManyToManyField(
+        "question.UserInsightsIndicator",
+        blank=True,
+        related_name="lead_inline_question_responses",
+        verbose_name="Question indicators",
+        help_text="User Insights indicators linked to this lead inline response.",
+    )
+
     organisation = models.ForeignKey(
         OrganisationData, 
         on_delete=models.CASCADE, 
@@ -756,7 +842,14 @@ class FollowupInlineQuestionResponse(models.Model):
     )
     
     response_value = models.TextField(blank=True, null=True)
-    
+    questionresponsetype = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Response widget type from source data (e.g. select, radio, text).",
+    )
+
     question_response_date = models.DateTimeField()
     api_created_at = models.DateTimeField()
     api_updated_at = models.DateTimeField()
@@ -804,7 +897,14 @@ class FollowupFollowupInlineQuestionResponse(models.Model):
     )
     
     response_value = models.TextField(blank=True, null=True)
-    
+    questionresponsetype = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Response widget type from source data (e.g. select, radio, text).",
+    )
+
     question_response_date = models.DateTimeField()
     api_created_at = models.DateTimeField()
     api_updated_at = models.DateTimeField()
@@ -822,4 +922,11 @@ class FollowupFollowupInlineQuestionResponse(models.Model):
         question_text = self.inline_question.question_text if self.inline_question else "No question"
         return f"{question_text} - {self.device_id}"
 
+
+from question.user_insights_models import (  # noqa: E402, F401
+    UserInsightsIndicator,
+    UserInsightsIndicatorInlineQuestion,
+    UserInsightsIndicatorMessagingQuestion,
+    UserInsightsReport,
+)
 
