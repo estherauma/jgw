@@ -1848,6 +1848,11 @@ def user_details(request, user_id):
     
     current_user = request.user
     target_user_org = user.organisation_data.first()
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    activities = UserActivity.objects.filter(
+        actor=user,
+        created_at__gte=thirty_days_ago
+    )
     
     if is_org_or_group_admin(current_user) and not OrganizationService.has_org_access(
         current_user, target_user_org
@@ -1881,5 +1886,6 @@ def user_details(request, user_id):
                 current_user
             ).order_by("name")
         ),
+        "activities": activities,
     }
     return render(request, "user-details.html", context)
