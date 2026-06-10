@@ -51,6 +51,7 @@ POSTHOG_WEB_ENABLED = os.getenv("POSTHOG_WEB_ENABLED", "True").lower() == "true"
 POSTHOG_SKIP_LOCALHOST = os.getenv("POSTHOG_SKIP_LOCALHOST", "False").lower() == "true"
 STRAPI_WEBHOOK_SECRET = os.getenv("STRAPI_WEBHOOK_SECRET")
 SKIP_CMS_SYNC = os.getenv("SKIP_CMS_SYNC", "False").lower() == "true"
+EXTERNAL_API_KEY = (os.getenv("EXTERNAL_API_KEY") or "").strip()
 
 
 PUBLIC_DEMO_EMAIL = os.getenv("PUBLIC_DEMO_EMAIL", "demo@fiftyeight.io").strip().lower()
