@@ -10,23 +10,27 @@
             <table id="um-logs-table">
                 <thead>
                     <tr class="um-navy">
-                        <th class="ps-0 fw-semibold">Action</th>
+                        <th class="pe-0 fw-semibold">Time</th>
                         <th class="fw-semibold">Record</th>
-                        <th class="fw-semibold">Message</th>
-                        <th class="pe-0 fw-semibold">Date</th>
+                        <th class="fw-semibold">Activity</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for activity in activities %}
                     <tr class="border-top">
-                        <td class="ps-0 align-middle">
-                            <span class="um-status-badge um-status-{% if activity.action == 'created' or activity.action == 'activated' or activity.action == 'assigned' or activity.action == 'invited' %}active{% elif activity.action == 'deleted' or activity.action == 'deactivated' or activity.action == 'unassigned' %}inactive{% else %}pending{% endif %}">
-                                {{ activity.action|title }}
-                            </span>
-                        </td>
-                        <td class="align-middle text-dark small">{{ activity.record_type }}</td>
-                        <td class="align-middle text-muted small">{{ activity.message }}</td>
                         <td class="pe-0 align-middle text-muted small text-nowrap">{{ activity.created_at|date:"M d, H:i" }}</td>
+                        <td class="align-middle text-dark small">{{ activity.record_type }}</td>
+                        <td class="align-middle small">
+                            <button
+                                class="btn btn-link p-0 um-log-details-btn"
+                                data-toggle="modal"
+                                data-target="#log-details-modal"
+                                data-log-id="{{ activity.id }}"
+                                type="button"
+                            >
+                                View Changes
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

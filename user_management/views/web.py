@@ -1829,7 +1829,7 @@ def user_activity_list(request):
     )
 
 
-@group_required("user_management")           
+@group_required("user_management")
 def user_details(request, user_id):
     user = User.objects.prefetch_related(
         "organisation_data",
