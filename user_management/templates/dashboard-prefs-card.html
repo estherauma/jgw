@@ -1,31 +1,41 @@
 <section class="um-card p-4">
     <div class="d-flex align-items-center justify-content-between mb-0">
-        <h4 class="h5 mb-0 text-muted">Dashboard Preferences</h4>
-        {% if dashboard_preferences %}
-            <span class="badge bg-light text-dark border small">v{{ dashboard_preferences.version }}</span>
-        {% endif %}
+        <h4 class="h5 mb-0 text-muted">Recent Activity</h4>
+        <span class="text-muted small">Last 30 days</span>
     </div>
     <div class="um-section-divider my-3"></div>
 
-    {% if dashboard_preferences %}
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="d-grid gap-1">
-                    <span class="text-muted small">Default Start Date</span>
-                    <span class="fw-semibold text-dark">{{ dashboard_preferences.filter_start_date|date:"M d, Y"|default:"Not set" }}</span>
-                </div>
-            </div>
-            <div class="col-12 mt-2">
-                <div class="d-grid gap-1">
-                    <span class="text-muted small">Layout Configuration</span>
-                    <pre class="p-3 bg-light rounded border mb-0 small text-dark fw-medium" style="max-height: 150px; overflow-y: auto; font-family: inherit;">{{ dashboard_preferences.layout }}</pre>
-                </div>
-            </div>
+    {% if activities %}
+        <div class="table-responsive">
+            <table id="um-logs-table">
+                <thead>
+                    <tr class="um-navy">
+                        <th class="ps-0 fw-semibold">Action</th>
+                        <th class="fw-semibold">Record</th>
+                        <th class="fw-semibold">Message</th>
+                        <th class="pe-0 fw-semibold">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                    <tr class="border-top">
+                        <td class="ps-0 align-middle">
+                            <span class="um-status-badge um-status-{% if activity.action == 'created' or activity.action == 'activated' or activity.action == 'assigned' or activity.action == 'invited' %}active{% elif activity.action == 'deleted' or activity.action == 'deactivated' or activity.action == 'unassigned' %}inactive{% else %}pending{% endif %}">
+                                {{ activity.action|title }}
+                            </span>
+                        </td>
+                        <td class="align-middle text-dark small">{{ activity.record_type }}</td>
+                        <td class="align-middle text-muted small">{{ activity.message }}</td>
+                        <td class="pe-0 align-middle text-muted small text-nowrap">{{ activity.created_at|date:"M d, H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
         <div class="text-center py-4">
-            <i class="bi bi-gear-wide-connected text-muted fs-2 mb-2 d-block"></i>
-            <p class="text-muted italic mb-0">No dashboard preferences found.</p>
+            <i class="bi bi-activity text-muted fs-2 mb-2 d-block"></i>
+            <p class="text-muted mb-0">No activity in the last 30 days.</p>
         </div>
     {% endif %}
 </section>
