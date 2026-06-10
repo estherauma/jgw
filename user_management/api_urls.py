@@ -1,6 +1,9 @@
 from django.urls import path
 
-from user_management.views.api import AccessCodeDetailsApiView, AccessCodeStatusApiView
+from user_management.views.api import (
+    AccessCodeDetailsApiView,
+    AccessCodeStatusApiView,
+)
 
 
 app_name = "user_management_v1_api"

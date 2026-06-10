@@ -2,7 +2,6 @@ import logging
 
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -60,14 +59,14 @@ class AccessCodeStatusApiView(APIView):
 
 
 class AccessCodeDetailsApiView(APIView):
-    permission_classes = [IsAuthenticated]
-
     @extend_schema(
         tags=["User Management"],
         summary="Get access code details",
         description=(
             "Looks up an organisation access code and returns the access code details, "
-            "the linked organisation, and the attached work groups."
+            "the linked organisation, and the attached work groups. Public access codes can "
+            "be fetched without authentication. Access codes that require login still require "
+            "an authenticated user from the same organisation."
         ),
         responses={
             200: AccessCodeLookupResponseSerializer,
@@ -93,7 +92,7 @@ class AccessCodeDetailsApiView(APIView):
                         "content_collection": "test-org",
                         "default_collection_language": "en",
                     },
-                    "workgroups": [
+                    "access_code_user_groups": [
                         {"id": 3, "name": "Worker"},
                         {"id": 4, "name": "Supervisor"},
                     ],
@@ -104,11 +103,23 @@ class AccessCodeDetailsApiView(APIView):
     )
     def get(self, request, access_code):
         try:
-            result = OrganizationService.get_access_code_details(access_code=access_code)
+            result = OrganizationService.get_access_code_details(
+                access_code=access_code,
+                user=request.user,
+            )
             if not result:
                 return Response(
                     {"ok": False, "error": "Access code not found."},
                     status=status.HTTP_404_NOT_FOUND,
+                )
+
+            if not result.get("requires_login"):
+                return Response(result, status=status.HTTP_200_OK)
+
+            if not request.user.is_authenticated:
+                return Response(
+                    {"detail": "Authentication credentials were not provided."},
+                    status=status.HTTP_401_UNAUTHORIZED,
                 )
 
             organization = result.get("organization")
