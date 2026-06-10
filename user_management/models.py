@@ -122,6 +122,7 @@ class UserActivity(models.Model):
         DELETED = "deleted", "Deleted"
         ACTIVATED = "activated", "Activated"
         DEACTIVATED = "deactivated", "Deactivated"
+        PASSWORD_RESET = "password_reset", "Password Reset"
         INVITED = "invited", "Invited"
         ASSIGNED = "assigned", "Assigned"
         UNASSIGNED = "unassigned", "Unassigned"

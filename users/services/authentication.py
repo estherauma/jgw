@@ -4,6 +4,8 @@ import secrets
 import jwt
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -13,6 +15,7 @@ from common.const.value_const import (
     REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
     REGISTRATION_VERIFICATION_CODE_ALPHABET,
 )
+from common.services.audit import AuditService
 from user_management.sms import send_sms
 from user_management.utils import normalize_phone_number_for_lookup
 from users.models import User, UserVerificationCode
@@ -21,6 +24,10 @@ from users.tasks import send_email_notification
 
 ACCESS_TOKEN_MINUTES = 480
 REFRESH_TOKEN_DAYS = 30
+PASSWORD_RESET_VERIFICATION_PURPOSE = "password_reset"
+PASSWORD_RESET_GENERIC_MESSAGE = (
+    "If an account exists for the provided contact details, a password reset code has been sent."
+)
 
 
 def generate_registration_verification_code(length=6):
@@ -30,8 +37,9 @@ def generate_registration_verification_code(length=6):
     )
 
 
-def create_registration_verification_code(
+def create_user_verification_code(
     user,
+    purpose,
     expires_in_minutes=15,
     max_attempts=3,
 ):
@@ -39,12 +47,12 @@ def create_registration_verification_code(
     expires_at = timezone.now() + timedelta(minutes=expires_in_minutes)
     UserVerificationCode.objects.filter(
         user=user,
-        purpose=REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+        purpose=purpose,
         used_at__isnull=True,
     ).delete()
     verification = UserVerificationCode.objects.create(
         user=user,
-        purpose=REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+        purpose=purpose,
         code_hash=make_password(code),
         expires_at=expires_at,
         max_attempts=max_attempts,
@@ -52,13 +60,9 @@ def create_registration_verification_code(
     return verification, code
 
 
-def send_registration_verification_email(
-    user,
-    verification_code,
-    expiry_minutes=15,
-):
+def send_code_email(user, verification_code, template_name, subject, expiry_minutes=15):
     html_message = render_to_string(
-        "users/registration-verification-email.html",
+        template_name,
         {
             "user": user,
             "verification_code": verification_code,
@@ -66,7 +70,7 @@ def send_registration_verification_email(
         },
     )
     send_email_notification(
-        subject="Verify your email - Just Good Work",
+        subject=subject,
         message=strip_tags(html_message),
         recipients=[user.email],
         attachment_path=None,
@@ -75,21 +79,16 @@ def send_registration_verification_email(
     )
 
 
-def send_registration_verification_sms(
+def send_code_sms(
     user,
-    verification_code,
-    expiry_minutes=15,
+    message,
 ):
     if not user.phone_number:
         return False
-    message = (
-        f"Your Just Good Work verification code is {verification_code}. "
-        f"It expires in {expiry_minutes} minutes."
-    )
     return send_sms(user.phone_number, message)
 
 
-def get_registration_user_by_contact(email=None, phone_number=None, phone_country_iso=None, user_id=None):
+def get_user_by_contact(email=None, phone_number=None, phone_country_iso=None, user_id=None):
     normalized_email = (email or "").strip().lower()
     raw_phone_number = (phone_number or "").strip()
     normalized_phone_number = None
@@ -102,7 +101,7 @@ def get_registration_user_by_contact(email=None, phone_number=None, phone_countr
         if phone_error:
             return None, phone_error
 
-    user_qs = User.all_objects.filter(is_deleted=False)
+    user_qs = User.objects.all()
     if user_id:
         user_qs = user_qs.filter(id=user_id)
     if normalized_email:
@@ -126,7 +125,7 @@ def verify_registration_code(code, email=None, phone_number=None, phone_country_
             "error": "Either email or phone number and the verification code are required.",
         }
 
-    user, user_error = get_registration_user_by_contact(
+    user, user_error = get_user_by_contact(
         email=email,
         phone_number=phone_number,
         phone_country_iso=phone_country_iso,
@@ -184,7 +183,7 @@ def resend_registration_verification_code(email=None, phone_number=None, phone_c
             "error": "Provide a user ID, email or phone number.",
         }
 
-    user, user_error = get_registration_user_by_contact(
+    user, user_error = get_user_by_contact(
         email=email,
         phone_number=phone_number,
         phone_country_iso=phone_country_iso,
@@ -199,11 +198,23 @@ def resend_registration_verification_code(email=None, phone_number=None, phone_c
     if user.is_active:
         return {"ok": True, "message": "Contact already verified.", "user": user}
 
-    _, verification_code = create_registration_verification_code(user)
+    _, verification_code = create_user_verification_code(
+        user,
+        REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+    )
     if user.email:
-        send_registration_verification_email(user, verification_code)
+        send_code_email(
+            user,
+            verification_code,
+            "users/registration-verification-email.html",
+            "Verify your email - Just Good Work",
+        )
     else:
-        sms_sent = send_registration_verification_sms(user, verification_code)
+        sms_sent = send_code_sms(
+            user,
+            f"Your Just Good Work verification code is {verification_code}. "
+            f"It expires in 15 minutes.",
+        )
         if not sms_sent:
             return {
                 "ok": False,
@@ -215,6 +226,189 @@ def resend_registration_verification_code(email=None, phone_number=None, phone_c
         "message": "A new verification code has been sent.",
         "user": user,
     }
+
+
+def request_password_reset_code(email=None, phone_number=None, phone_country_iso=None):
+    if not email and not phone_number:
+        return {
+            "ok": False,
+            "error": "Provide email or phone number.",
+        }
+
+    user, user_error = get_user_by_contact(
+        email=email,
+        phone_number=phone_number,
+        phone_country_iso=phone_country_iso,
+    )
+    if user_error and user_error != "Invalid contact details.":
+        return {
+            "ok": False,
+            "error": user_error,
+        }
+    
+    if not user:
+        return {"ok": True, "message": PASSWORD_RESET_GENERIC_MESSAGE}
+
+    if not user.is_active:
+        return {"ok": True, "message": PASSWORD_RESET_GENERIC_MESSAGE}
+
+    _, verification_code = create_user_verification_code(
+        user,
+        PASSWORD_RESET_VERIFICATION_PURPOSE,
+    )
+    if user.email:
+        send_code_email(
+            user,
+            verification_code,
+            "users/password-reset-code-email.html",
+            "Reset your password - Just Good Work",
+        )
+    else:
+        sms_sent = send_code_sms(
+            user,
+            f"Your Just Good Work password reset code is {verification_code}. "
+            f"It expires in 15 minutes.",
+        )
+        if not sms_sent:
+            return {
+                "ok": False,
+                "error": "Could not send the password reset code. Please try again.",
+            }
+
+    return {"ok": True, "message": PASSWORD_RESET_GENERIC_MESSAGE}
+
+
+def verify_password_reset_code(
+    code,
+    email=None,
+    phone_number=None,
+    phone_country_iso=None,
+):
+    normalized_code = (code or "").strip().upper()
+
+    if (not email and not phone_number) or not normalized_code:
+        return {
+            "ok": False,
+            "error": "Provide email or phone number, and the reset code.",
+        }
+
+    user, user_error = get_user_by_contact(
+        email=email,
+        phone_number=phone_number,
+        phone_country_iso=phone_country_iso,
+    )
+    if not user:
+        return {"ok": False, "error": "Invalid contact details or reset code."}
+
+    if not user.is_active:
+        return {"ok": False, "error": "Invalid contact details or reset code."}
+
+    verification = (
+        UserVerificationCode.objects.filter(
+            user=user,
+            purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+            used_at__isnull=True,
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    if not verification:
+        return {"ok": False, "error": "No active password reset code was found."}
+
+    if verification.is_expired():
+        return {"ok": False, "error": "This password reset code has expired."}
+
+    if verification.attempts >= verification.max_attempts:
+        return {
+            "ok": False,
+            "error": "This password reset code has been locked. Request a new code.",
+        }
+
+    if not check_password(normalized_code, verification.code_hash):
+        verification.attempts += 1
+        verification.save(update_fields=["attempts"])
+        if verification.attempts >= verification.max_attempts:
+            return {
+                "ok": False,
+                "error": "This password reset code has been locked. Request a new code.",
+            }
+        return {"ok": False, "error": "Invalid contact details or reset code."}
+
+    return {"ok": True, "user": user}
+
+
+def reset_password_with_code(code, password, email=None, phone_number=None, phone_country_iso=None):
+    normalized_code = (code or "").strip().upper()
+
+    if (not email and not phone_number) or not normalized_code:
+        return {
+            "ok": False,
+            "error": "Provide email or phone number, and the reset code.",
+        }
+
+    if not password:
+        return {"ok": False, "error": "Password is required."}
+
+    user, user_error = get_user_by_contact(
+        email=email,
+        phone_number=phone_number,
+        phone_country_iso=phone_country_iso,
+    )
+    if not user:
+        return {"ok": False, "error": "Invalid contact details or reset code."}
+
+    if not user.is_active:
+        return {"ok": False, "error": "Invalid contact details or reset code."}
+    
+    verification = (
+        UserVerificationCode.objects.filter(
+            user=user,
+            purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+            used_at__isnull=True,
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    if not verification:
+        return {"ok": False, "error": "No active password reset code was found."}
+
+    if verification.is_expired():
+        return {"ok": False, "error": "This password reset code has expired."}
+
+    if verification.attempts >= verification.max_attempts:
+        return {
+            "ok": False,
+            "error": "This password reset code has been locked. Request a new code.",
+        }
+
+    if not check_password(normalized_code, verification.code_hash):
+        verification.attempts += 1
+        verification.save(update_fields=["attempts"])
+        if verification.attempts >= verification.max_attempts:
+            return {
+                "ok": False,
+                "error": "This password reset code has been locked. Request a new code.",
+            }
+        return {"ok": False, "error": "Invalid contact details or reset code."}
+
+    try:
+        validate_password(password, user=user)
+    except DjangoValidationError as exc:
+        return {"ok": False, "error": exc.messages[0]}
+
+    with transaction.atomic():
+        verification.used_at = timezone.now()
+        verification.save(update_fields=["used_at"])
+        UserVerificationCode.objects.filter(
+            user=user,
+            purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+            used_at__isnull=True,
+        ).exclude(pk=verification.pk).delete()
+        user.set_password(password)
+        user.save()
+        AuditService.log_action(instance=user, action="password_reset")
+
+    return {"ok": True, "user": user}
 
 
 def build_auth_token(user, token_type, expires_at):
@@ -330,7 +524,7 @@ def refresh_api_access_token(refresh_token):
     if not user.is_active:
         return {
             "ok": False,
-            "error": "Account is not active.",
+            "error": "Invalid contact details or reset code.",
         }
 
     return {

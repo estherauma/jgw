@@ -11,8 +11,9 @@ from dashboard.models import Factory, Scheme
 from preference.models import OrganisationAccessCode, OrganisationData
 from user_management.models import WorkGroup
 from users.services.authentication import (
+    PASSWORD_RESET_VERIFICATION_PURPOSE,
     REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
-    create_registration_verification_code,
+    create_user_verification_code,
 )
 
 from .forms import (
@@ -288,7 +289,7 @@ class RegistrationApiTests(TestCase):
         )
 
     @patch("users.api_views.initialize_user_dashboard_preferences")
-    @patch("users.api_views.send_registration_verification_email")
+    @patch("users.api_views.send_code_email")
     def test_register_user_sends_verification_email(self, send_email_mock, init_prefs_mock):
         with patch(
             "users.services.authentication.generate_registration_verification_code",
@@ -324,10 +325,14 @@ class RegistrationApiTests(TestCase):
         worker_group = Group.objects.get(name="worker")
         self.assertTrue(user.groups.filter(id=worker_group.id).exists())
         init_prefs_mock.assert_not_called()
-        send_email_mock.assert_called_once()
-        send_email_mock.assert_called_once_with(user, "AB23CD45")
+        send_email_mock.assert_called_once_with(
+            user,
+            "AB23CD45",
+            "users/registration-verification-email.html",
+            "Verify your email - Just Good Work",
+        )
 
-    @patch("users.api_views.send_registration_verification_email")
+    @patch("users.api_views.send_code_email")
     def test_register_user_returns_validation_errors(self, send_email_mock):
         response = self.client.post(
             reverse("users_api:register_user_api"),
@@ -349,7 +354,7 @@ class RegistrationApiTests(TestCase):
         self.assertFalse(User.all_objects.filter(email="newuser@example.com").exists())
         send_email_mock.assert_not_called()
 
-    @patch("users.api_views.send_registration_verification_email")
+    @patch("users.api_views.send_code_email")
     def test_register_user_requires_first_and_last_name(self, send_email_mock):
         response = self.client.post(
             reverse("users_api:register_user_api"),
@@ -367,7 +372,7 @@ class RegistrationApiTests(TestCase):
         send_email_mock.assert_not_called()
 
     @patch("users.api_views.initialize_user_dashboard_preferences")
-    @patch("users.api_views.send_registration_verification_email")
+    @patch("users.api_views.send_code_email")
     def test_register_user_respects_provided_access_type(self, send_email_mock, init_prefs_mock):
         with patch(
             "users.services.authentication.generate_registration_verification_code",
@@ -391,7 +396,7 @@ class RegistrationApiTests(TestCase):
         send_email_mock.assert_called_once()
 
     @patch("users.api_views.initialize_user_dashboard_preferences")
-    @patch("users.api_views.send_registration_verification_email")
+    @patch("users.api_views.send_code_email")
     def test_verify_registration_code_activates_user(self, send_email_mock, init_prefs_mock):
         with patch(
             "users.services.authentication.generate_registration_verification_code",
@@ -427,7 +432,7 @@ class RegistrationApiTests(TestCase):
         self.assertTrue(user.is_active)
         self.assertIsNotNone(verification.used_at)
 
-    @patch("users.api_views.send_registration_verification_sms")
+    @patch("users.api_views.send_code_sms")
     def test_register_app_user_with_phone_only_sends_sms(self, send_sms_mock):
         send_sms_mock.return_value = True
         with patch(
@@ -487,7 +492,7 @@ class RegistrationApiTests(TestCase):
             password="StrongPassword123!",
             is_active=False,
         )
-        create_registration_verification_code(user)
+        create_user_verification_code(user, REGISTRATION_EMAIL_VERIFICATION_PURPOSE)
 
         response = self.client.post(
             reverse("users_api:verify_registration_code"),
@@ -505,7 +510,10 @@ class RegistrationApiTests(TestCase):
             is_active=False,
             access_type="app",
         )
-        _, verification_code = create_registration_verification_code(user)
+        _, verification_code = create_user_verification_code(
+            user,
+            REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+        )
 
         response = self.client.post(
             reverse("users_api:verify_registration_code"),
@@ -519,7 +527,7 @@ class RegistrationApiTests(TestCase):
         self.assertTrue(user.is_active)
         self.assertTrue(user.groups.filter(id=worker_group.id).exists())
 
-    @patch("users.api_views.send_registration_verification_sms")
+    @patch("users.api_views.send_code_sms")
     def test_verify_registration_code_accepts_phone_number(self, send_sms_mock):
         send_sms_mock.return_value = True
         with patch(
@@ -549,7 +557,7 @@ class RegistrationApiTests(TestCase):
         user.refresh_from_db()
         self.assertTrue(user.is_active)
 
-    @patch("users.api_views.send_registration_verification_sms")
+    @patch("users.api_views.send_code_sms")
     def test_verify_registration_code_requires_country_iso_for_local_phone(self, send_sms_mock):
         send_sms_mock.return_value = True
         with patch(
@@ -561,7 +569,7 @@ class RegistrationApiTests(TestCase):
                 data={
                     "first_name": "Phone",
                     "last_name": "User",
-                    "phone_number": "781590903",
+                    "phone_number": "781000000",
                     "phone_country_iso": "UG",
                     "password1": "StrongPassword123!",
                     "org_code": "TESTORG",
@@ -571,7 +579,7 @@ class RegistrationApiTests(TestCase):
         response = self.client.post(
             reverse("users_api:verify_registration_code"),
             data={
-                "phone_number": "0781590903",
+                "phone_number": "0781000000",
                 "code": "AB23CD45",
             },
         )
@@ -580,7 +588,7 @@ class RegistrationApiTests(TestCase):
         self.assertEqual(response.json()["ok"], False)
         self.assertEqual(response.json()["error"], "Select a country code.")
 
-    @patch("users.services.authentication.send_registration_verification_email")
+    @patch("users.services.authentication.send_code_email")
     @patch("users.services.authentication.generate_registration_verification_code", return_value="ZX12CV")
     def test_resend_registration_code_by_email(self, _code_mock, send_email_mock):
         user = User.objects.create_user(
@@ -600,9 +608,14 @@ class RegistrationApiTests(TestCase):
         self.assertEqual(response.json()["email"], "resend@example.com")
         self.assertIsNone(response.json()["phone_number"])
         self.assertIsNone(response.json()["phone_country_iso"])
-        send_email_mock.assert_called_once_with(user, "ZX12CV")
+        send_email_mock.assert_called_once_with(
+            user,
+            "ZX12CV",
+            "users/registration-verification-email.html",
+            "Verify your email - Just Good Work",
+        )
 
-    @patch("users.services.authentication.send_registration_verification_sms")
+    @patch("users.services.authentication.send_code_sms")
     @patch("users.services.authentication.generate_registration_verification_code", return_value="ZX12CV")
     def test_resend_registration_code_by_local_phone(self, _code_mock, send_sms_mock):
         send_sms_mock.return_value = True
@@ -630,7 +643,10 @@ class RegistrationApiTests(TestCase):
         self.assertIsNone(response.json()["email"])
         self.assertEqual(response.json()["phone_number"], "+256700000000")
         self.assertEqual(response.json()["phone_country_iso"], "UG")
-        send_sms_mock.assert_called_once_with(user, "ZX12CV")
+        send_sms_mock.assert_called_once_with(
+            user,
+            "Your Just Good Work verification code is ZX12CV. It expires in 15 minutes.",
+        )
 
     def test_resend_registration_code_requires_identifier(self):
         response = self.client.post(
@@ -863,6 +879,226 @@ class LoginApiTests(AuthTests):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["ok"], False)
         self.assertEqual(response.json()["error"], "Invalid refresh token.")
+
+    @patch("users.services.authentication.send_email_notification")
+    def test_password_reset_request_api_sends_code_for_existing_email(self, send_email_mock):
+        response = self.client.post(
+            reverse("users_api:password_reset_request_api"),
+            data={"email": "login@example.com"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "email": "login@example.com",
+                "phone_number": None,
+                "phone_country_iso": None,
+            },
+        )
+        verification = UserVerificationCode.objects.get(
+            user=self.user,
+            purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+        )
+        self.assertIsNone(verification.used_at)
+        send_email_mock.assert_called_once()
+
+    def test_password_reset_request_api_requires_identifier(self):
+        response = self.client.post(
+            reverse("users_api:password_reset_request_api"),
+            data={},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Provide email or phone number.")
+
+    @patch("users.services.authentication.send_email_notification")
+    def test_password_reset_request_api_rejects_inactive_user(self, send_email_mock):
+        inactive_user = User.objects.create_user(
+            email="inactive-reset@example.com",
+            password=self.password,
+            is_active=False,
+        )
+
+        response = self.client.post(
+            reverse("users_api:password_reset_request_api"),
+            data={"email": inactive_user.email},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "email": inactive_user.email,
+                "phone_number": None,
+                "phone_country_iso": None,
+            },
+        )
+        send_email_mock.assert_not_called()
+
+    def test_password_reset_reset_api_resets_password(self):
+        _, verification_code = create_user_verification_code(
+            self.user,
+            PASSWORD_RESET_VERIFICATION_PURPOSE,
+        )
+
+        response = self.client.post(
+            reverse("users_api:password_reset_reset_api"),
+            data={
+                "email": "login@example.com",
+                "code": verification_code,
+                "password": "NewStrongPassword123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"ok": True, "user_id": self.user.id})
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("NewStrongPassword123!"))
+        self.assertFalse(
+            UserVerificationCode.objects.filter(
+                user=self.user,
+                purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+                used_at__isnull=True,
+            ).exists()
+        )
+
+    def test_password_reset_verify_code_api_rejects_invalid_code(self):
+        create_user_verification_code(
+            self.user,
+            PASSWORD_RESET_VERIFICATION_PURPOSE,
+        )
+
+        response = self.client.post(
+            reverse("users_api:password_reset_verify_code_api"),
+            data={
+                "email": "login@example.com",
+                "code": "WRONG1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Invalid contact details or reset code.")
+
+    def test_password_reset_verify_code_api_rejects_inactive_user(self):
+        inactive_user = User.objects.create_user(
+            email="inactive-verify@example.com",
+            password=self.password,
+            is_active=False,
+        )
+        _, verification_code = create_user_verification_code(
+            inactive_user,
+            PASSWORD_RESET_VERIFICATION_PURPOSE,
+        )
+
+        response = self.client.post(
+            reverse("users_api:password_reset_verify_code_api"),
+            data={
+                "email": inactive_user.email,
+                "code": verification_code,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Invalid contact details or reset code.")
+
+    def test_password_reset_reset_api_rejects_invalid_code(self):
+        create_user_verification_code(
+            self.user,
+            PASSWORD_RESET_VERIFICATION_PURPOSE,
+        )
+
+        response = self.client.post(
+            reverse("users_api:password_reset_reset_api"),
+            data={
+                "email": "login@example.com",
+                "code": "NOTREAL",
+                "password": "NewStrongPassword123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Invalid contact details or reset code.")
+
+    def test_password_reset_reset_api_rejects_inactive_user(self):
+        inactive_user = User.objects.create_user(
+            email="inactive-code@example.com",
+            password=self.password,
+            is_active=False,
+        )
+        _, verification_code = create_user_verification_code(
+            inactive_user,
+            PASSWORD_RESET_VERIFICATION_PURPOSE,
+        )
+
+        response = self.client.post(
+            reverse("users_api:password_reset_reset_api"),
+            data={
+                "email": inactive_user.email,
+                "code": verification_code,
+                "password": "NewStrongPassword123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Invalid contact details or reset code.")
+
+    @patch("users.services.authentication.send_email_notification")
+    def test_password_reset_resend_api_returns_generic_success(self, send_email_mock):
+        response = self.client.post(
+            reverse("users_api:password_reset_resend_api"),
+            data={"email": "login@example.com"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "email": "login@example.com",
+                "phone_number": None,
+                "phone_country_iso": None,
+            },
+        )
+        self.assertTrue(
+            UserVerificationCode.objects.filter(
+                user=self.user,
+                purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+            ).exists()
+        )
+        send_email_mock.assert_called_once()
+
+    @patch("users.services.authentication.send_email_notification")
+    def test_password_reset_resend_api_rejects_inactive_user(self, send_email_mock):
+        inactive_user = User.objects.create_user(
+            email="inactive-resend@example.com",
+            password=self.password,
+            is_active=False,
+        )
+
+        response = self.client.post(
+            reverse("users_api:password_reset_resend_api"),
+            data={"email": inactive_user.email},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "email": inactive_user.email,
+                "phone_number": None,
+                "phone_country_iso": None,
+            },
+        )
+        send_email_mock.assert_not_called()
 
     def test_set_password_OK(self):
         response = self.client.post(
