@@ -1,8 +1,4 @@
 $(document).ready(function () {
-  const reloadLogsPage = function () {
-    window.location.reload();
-  };
-
   $("#um-logs-table").DataTable({
     order: [[1, "desc"]],
     pageLength: 10,
@@ -68,9 +64,23 @@ $(document).ready(function () {
     });
   });
 
+  $(document).on("click", ".um-modal-close-btn", function () {
+    $("#log-details-modal").modal("hide");
+  });
+
+  $("#log-details-modal").on("hide.bs.modal", function () {
+    setTimeout(function () {
+      $("#log-before-fields").empty();
+      $("#log-after-fields").empty();
+      $(".modal-backdrop").remove();
+      $("body").removeClass("modal-open").css("overflow", "auto");
+      $("body").removeAttr("style");
+      $("html").removeAttr("style");
+    }, 0);
+  });
+
   $("#log-details-modal").on("hidden.bs.modal", function () {
-    $("#log-before-fields").empty();
-    $("#log-after-fields").empty();
-    reloadLogsPage();
+    $(".modal-backdrop").remove();
+    $("body").removeClass("modal-open").css("overflow", "auto");
   });
 });

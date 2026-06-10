@@ -10,19 +10,21 @@
             <table id="um-logs-table">
                 <thead>
                     <tr class="um-navy">
-                        <th class="pe-0 fw-semibold">Time</th>
-                        <th class="fw-semibold">Record</th>
-                        <th class="fw-semibold">Activity</th>
+                        <th class="um-time-col fw-semibold">Time</th>
+                        <th class="fw-semibold">Message</th>
+                        <th class="fw-semibold um-activity-col">Activity</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for activity in activities %}
                     <tr class="border-top">
-                        <td class="pe-0 align-middle text-muted small text-nowrap">{{ activity.created_at|date:"M d, H:i" }}</td>
-                        <td class="align-middle text-dark small">{{ activity.record_type }}</td>
-                        <td class="align-middle small">
+                        <td class="um-time-col">{{ activity.created_at|date:"M d, H:i" }}</td>
+                        <td>
+                            {{ activity.message }}
+                        </td>
+                        <td class="um-activity-col">
                             <button
-                                class="btn btn-link p-0 um-log-details-btn"
+                                class="btn btn-link p-0 um-log-details-btn um-view-details-link"
                                 data-toggle="modal"
                                 data-target="#log-details-modal"
                                 data-log-id="{{ activity.id }}"
