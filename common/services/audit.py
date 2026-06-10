@@ -42,7 +42,7 @@ class AuditService:
         ("users.user", "work_groups", "post_remove"): "unassigned",
         ("users.user", "work_groups", "post_clear"): "unassigned",
     }
-    ACTIONS_WITHOUT_CHANGES = {"assigned", "unassigned", "deleted", "invited"}
+    ACTIONS_WITHOUT_CHANGES = {"assigned", "unassigned", "deleted", "invited", "password_reset"}
 
 
 
@@ -155,6 +155,8 @@ class AuditService:
 
     @classmethod
     def build_message(cls, action, instance):
+        if action == "password_reset" and isinstance(instance, User):
+            return f'Reset password for user "{cls.get_instance_label(instance)}"'
         if instance._meta.label_lower == "user_management.organisationrolepermission":
             permission_name = getattr(getattr(instance, "flag", None), "name", "")
             role_name = getattr(getattr(instance, "role", None), "name", "")
@@ -352,6 +354,8 @@ class AuditService:
 
     @classmethod
     def get_actor(cls, instance, action):
+        if action == "password_reset" and isinstance(instance, User):
+            return instance
         if instance._meta.label_lower == "user_management.organisationrolepermission":
             role = getattr(instance, "role", None)
             return getattr(role, "updated_by", None) or getattr(role, "created_by", None)

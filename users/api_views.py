@@ -11,6 +11,12 @@ from users.api_serializers import (
     FormErrorResponseSerializer,
     LoginRequestSerializer,
     LoginResponseSerializer,
+    PasswordResetRequestResponseSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetResetRequestSerializer,
+    PasswordResetResetResponseSerializer,
+    PasswordResetVerifyCodeRequestSerializer,
+    PasswordResetVerifyCodeResponseSerializer,
     RefreshTokenRequestSerializer,
     RefreshTokenResponseSerializer,
     RegisterUserRequestSerializer,
@@ -22,12 +28,16 @@ from users.api_serializers import (
 )
 from users.forms import APIAppUserForm, APIDashboardUserForm
 from users.services.authentication import (
-    create_registration_verification_code,
+    REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+    create_user_verification_code,
     login_api_user,
+    request_password_reset_code,
+    reset_password_with_code,
     refresh_api_access_token,
     resend_registration_verification_code,
-    send_registration_verification_email,
-    send_registration_verification_sms,
+    send_code_email,
+    send_code_sms,
+    verify_password_reset_code,
     verify_registration_code,
 )
 from users.services.profile import get_current_user_payload
@@ -179,12 +189,24 @@ class RegisterUserApiView(APIView):
                     )
                 else:
                     initialize_user_dashboard_preferences(user, request)
-                _, verification_code = create_registration_verification_code(user)
+                _, verification_code = create_user_verification_code(
+                    user,
+                    REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
+                )
 
             if user.email:
-                send_registration_verification_email(user, verification_code)
+                send_code_email(
+                    user,
+                    verification_code,
+                    "users/registration-verification-email.html",
+                    "Verify your email - Just Good Work",
+                )
             else:
-                sms_sent = send_registration_verification_sms(user, verification_code)
+                sms_sent = send_code_sms(
+                    user,
+                    f"Your Just Good Work verification code is {verification_code}. "
+                    f"It expires in 15 minutes.",
+                )
                 if not sms_sent:
                     return Response(
                         {
@@ -332,6 +354,218 @@ class RefreshTokenApiView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class PasswordResetRequestApiView(APIView):
+    authentication_classes = []
+
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Request password reset code",
+        description="Sends a password reset verification code to the user's email or phone number.",
+        request=PasswordResetRequestSerializer,
+        responses={
+            200: PasswordResetRequestResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Request reset with email",
+                value={"email": "login@example.com"},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Request reset with phone",
+                value={
+                    "phone_number": "0700000000",
+                    "phone_country_iso": "UG",
+                },
+                request_only=True,
+            ),
+        ],
+    )
+    def post(self, request):
+        email = request.data.get("email")
+        phone_number = request.data.get("phone_number")
+        phone_country_iso = request.data.get("phone_country_iso")
+        try:
+            result = request_password_reset_code(
+                email=email,
+                phone_number=phone_number,
+                phone_country_iso=phone_country_iso,
+            )
+        except Exception:
+            return Response(
+                {
+                    "ok": False,
+                    "error": "Could not request a password reset code. Please try again.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        if not result["ok"]:
+            return Response(
+                {"ok": False, "error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "ok": True,
+                "email": email or None,
+                "phone_number": phone_number or None,
+                "phone_country_iso": phone_country_iso or None,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetVerifyCodeApiView(APIView):
+    authentication_classes = []
+
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Verify password reset code",
+        description="Verifies a password reset code for the provided email or phone number.",
+        request=PasswordResetVerifyCodeRequestSerializer,
+        responses={
+            200: PasswordResetVerifyCodeResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Verify reset code with email",
+                value={
+                    "email": "login@example.com",
+                    "code": "AXRDP5",
+                },
+                request_only=True,
+            )
+        ],
+    )
+    def post(self, request):
+        try:
+            result = verify_password_reset_code(
+                code=request.data.get("code"),
+                email=request.data.get("email"),
+                phone_number=request.data.get("phone_number"),
+                phone_country_iso=request.data.get("phone_country_iso"),
+            )
+        except Exception:
+            return Response(
+                {
+                    "ok": False,
+                    "error": "Could not verify the password reset code. Please try again.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        if not result["ok"]:
+            return Response(
+                {"ok": False, "error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "ok": True,
+                "user_id": result["user"].id,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetResendApiView(APIView):
+    authentication_classes = []
+
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Resend password reset code",
+        description="Sends a fresh password reset verification code to the user's email or phone number.",
+        request=PasswordResetRequestSerializer,
+        responses={
+            200: PasswordResetRequestResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+    )
+    def post(self, request):
+        email = request.data.get("email")
+        phone_number = request.data.get("phone_number")
+        phone_country_iso = request.data.get("phone_country_iso")
+        try:
+            result = request_password_reset_code(
+                email=email,
+                phone_number=phone_number,
+                phone_country_iso=phone_country_iso,
+            )
+        except Exception:
+            return Response(
+                {
+                    "ok": False,
+                    "error": "Could not resend the password reset code. Please try again.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        if not result["ok"]:
+            return Response(
+                {"ok": False, "error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "ok": True,
+                "email": email or None,
+                "phone_number": phone_number or None,
+                "phone_country_iso": phone_country_iso or None,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetResetApiView(APIView):
+    authentication_classes = []
+
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Reset password",
+        description="Resets the user's password using the verified reset code.",
+        request=PasswordResetResetRequestSerializer,
+        responses={
+            200: PasswordResetResetResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+    )
+    def post(self, request):
+        try:
+            result = reset_password_with_code(
+                code=request.data.get("code"),
+                password=request.data.get("password"),
+                email=request.data.get("email"),
+                phone_number=request.data.get("phone_number"),
+                phone_country_iso=request.data.get("phone_country_iso"),
+            )
+        except Exception:
+            return Response(
+                {
+                    "ok": False,
+                    "error": "Could not reset the password. Please try again.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        if not result["ok"]:
+            return Response(
+                {"ok": False, "error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response({"ok": True, "user_id": result["user"].id}, status=status.HTTP_200_OK)
 
 
 class VerifyRegistrationCodeApiView(APIView):
