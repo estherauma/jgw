@@ -226,7 +226,7 @@
             </section>
 
             {% if not user.hide_organisation_information %}
-                {% include 'dashboard-prefs-card.html' %}
+                {% include 'activity-logs-card.html' %}
             {% endif %}
         </div>
 
@@ -325,7 +325,7 @@
                 </div>
             </section>
             {% else %}
-                {% include 'dashboard-prefs-card.html' %}
+                {% include 'activity-logs-card.html' %}
             {% endif %}
         </div>
     </div>
@@ -334,7 +334,7 @@
 {% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
 {% include 'add-appuser-modal.html' with action_type='edit' modal_title='Edit user' submit_label='Save Changes' form_action='' form=app_user_form %}
 {% include 'confirm-modal.html' %}
-{% include 'log-details.html' %}
+{% include 'activitly-log-details-modal.html' %}
 {% endblock %}
 
 {% block scripts %}
