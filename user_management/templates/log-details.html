@@ -1,0 +1,42 @@
+<div class="modal fade um-modal" id="log-details-modal" tabindex="-1" role="dialog" aria-labelledby="log-details-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document"> 
+        <div class="modal-content um-modal-content">
+            
+            <div class="modal-header bg-white align-items-center py-3 px-4 um-modal-header">
+                <h5 class="um-modal-title um-navy fw-bold m-0" id="log-details-title">Activity Log Details</h5>
+                
+                <button type="button" class="btn btn-sm btn-light d-flex align-items-center justify-content-center p-1 um-modal-close-btn" data-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x-lg um-modal-close-icon"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body px-4 pb-4 pt-3">
+                <div id="modal-loader" class="text-center py-4 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+
+                <div class="row g-3 d-none" id="modal-cards-row">
+                    <div class="col-12 col-md-6">
+                        <div class="um-detail-card">
+                            <div class="um-detail-card-header">Before</div>
+                            <div id="log-before-fields"></div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="um-detail-card">
+                            <div class="um-detail-card-header">After</div>
+                            <div id="log-after-fields"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="field-row-template">
+    <div class="um-detail-field">
+        <div class="um-detail-label"></div>
+        <div class="um-detail-value target-val"></div>
+    </div>
+</template>
