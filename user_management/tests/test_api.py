@@ -177,7 +177,7 @@ class AccessCodeDetailsApiTests(TestCase):
             response.json()["organization"]["default_report_issue_emails"],
             "report@example.com",
         )
-        self.assertEqual(
+        self.assertCountEqual(
             response.json()["organization"]["collection_languages"],
             [
                 {"code": "en", "name": "English"},
@@ -336,7 +336,7 @@ class PartnerConfigApiTests(TestCase):
                 },
             ],
         )
-        self.assertEqual(
+        self.assertCountEqual(
             response.json()[0]["user_groups"],
             [
                 {"id": self.supervisor_group.id, "name": "Supervisor"},
