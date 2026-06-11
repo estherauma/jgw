@@ -48,6 +48,10 @@ class AccessCodeLookupErrorSerializer(serializers.Serializer):
     error = serializers.CharField()
 
 
+class AuthenticationErrorDetailSerializer(serializers.Serializer):
+    detail = serializers.CharField()
+
+
 class PartnerConfigAccessCodeSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     code = serializers.CharField()

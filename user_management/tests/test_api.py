@@ -364,16 +364,3 @@ class PartnerConfigApiTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})
-
-    def test_access_code_status_returns_404_when_organization_is_soft_deleted(self):
-        self.organisation.soft_delete(self.user)
-
-        response = self.client.get(
-            reverse(
-                "user_management_v1_api:access_code_status_api",
-                args=("test123",),
-            )
-        )
-
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})

@@ -11,6 +11,7 @@ from user_management.api_serializers import (
     AccessCodeLookupErrorSerializer,
     AccessCodeLookupResponseSerializer,
     AccessCodeStatusResponseSerializer,
+    AuthenticationErrorDetailSerializer,
     PartnerConfigOrganizationSerializer,
 )
 from user_management.services.organization import OrganizationService
@@ -89,11 +90,21 @@ class AccessCodeDetailsApiView(APIView):
                         "id": 5,
                         "name": "Test Org",
                         "org_code": "TESTORG",
-                        "display_name": "Test Org",
+                        "display_name": "Test Organisation",
+                        "has_custom_content": True,
                         "theme": "default",
+                        "custom_type": "version_1",
                         "work_sector": "Agriculture",
                         "content_collection": "test-org",
                         "default_collection_language": "en",
+                        "default_feedback_emails": "feedback@example.com",
+                        "default_report_issue_emails": "report@example.com",
+                        "collection_languages": [
+                            {"code": "en", "name": "English"},
+                            {"code": "sw", "name": "Swahili"},
+                        ],
+                        "big_icon_url": "https://cdn.example.com/big.png",
+                        "small_icon_url": "https://cdn.example.com/small.png",
                     },
                     "access_code_user_groups": [
                         {"id": 3, "name": "Worker"},
@@ -161,7 +172,7 @@ class PartnerConfigsApiView(APIView):
         ),
         responses={
             200: PartnerConfigOrganizationSerializer(many=True),
-            401: AccessCodeLookupErrorSerializer,
+            401: AuthenticationErrorDetailSerializer,
         },
         examples=[
             OpenApiExample(

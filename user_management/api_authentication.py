@@ -1,3 +1,4 @@
+import secrets
 from dataclasses import dataclass
 
 from django.conf import settings
@@ -25,7 +26,7 @@ class ExternalApiKeyAuthentication(authentication.BaseAuthentication):
         if not provided_key:
             raise exceptions.AuthenticationFailed("API key was not provided.")
 
-        if provided_key != configured_key:
+        if not secrets.compare_digest(provided_key, configured_key):
             raise exceptions.AuthenticationFailed("Invalid API key.")
 
         return ExternalApiPrincipal(), provided_key

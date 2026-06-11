@@ -17,16 +17,26 @@ from user_management.utils import is_org_admin_or_staff, is_org_group_admin, is_
 class OrganizationService:
     @staticmethod
     def serialize_collection_languages(*, organisation):
+        languages = getattr(organisation, "_prefetched_objects_cache", {}).get(
+            "collection_languages"
+        )
+        if languages is None:
+            languages = organisation.collection_languages.all()
         return [
             {
                 "code": language.code,
                 "name": language.name,
             }
-            for language in organisation.collection_languages.order_by("code")
+            for language in languages
         ]
 
     @staticmethod
     def serialize_access_codes(*, organisation):
+        access_codes = getattr(organisation, "_prefetched_objects_cache", {}).get(
+            "organisation_access_codes"
+        )
+        if access_codes is None:
+            access_codes = organisation.organisation_access_codes.all()
         return [
             {
                 "id": access_code.id,
@@ -36,17 +46,22 @@ class OrganizationService:
                 if access_code.expiry_date
                 else None,
             }
-            for access_code in organisation.organisation_access_codes.order_by("code")
+            for access_code in access_codes
         ]
 
     @staticmethod
     def serialize_user_groups(*, organisation):
+        work_groups = getattr(organisation, "_prefetched_objects_cache", {}).get(
+            "work_groups"
+        )
+        if work_groups is None:
+            work_groups = organisation.work_groups.all()
         return [
             {
                 "id": work_group.id,
                 "name": work_group.name,
             }
-            for work_group in organisation.work_groups.order_by("name")
+            for work_group in work_groups
         ]
 
     @staticmethod
@@ -171,9 +186,14 @@ class OrganizationService:
 
     @staticmethod
     def get_partner_configs():
+        organisations = OrganisationData.objects.prefetch_related(
+            "collection_languages",
+            "organisation_access_codes",
+            "work_groups",
+        )
         return [
             OrganizationService.build_partner_config_payload(organisation=organisation)
-            for organisation in OrganisationData.objects.order_by("name")
+            for organisation in organisations
         ]
 
     @staticmethod
