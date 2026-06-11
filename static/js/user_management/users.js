@@ -838,6 +838,16 @@
 
     deleteBtn.addEventListener('click', function () {
       const userId = deleteBtn.getAttribute('data-user-id');
+      const orgId = deleteBtn.getAttribute('data-org-id');
+
+      function redirectToHomePreservingOrg() {
+        if (orgId) {
+          window.location.href =
+            '/user-management/?selected_org_id=' + encodeURIComponent(orgId);
+          return;
+        }
+        window.location.href = '/user-management/';
+      }
 
       window.showDeleteConfirm({
         title: 'Delete User',
@@ -851,7 +861,7 @@
         confirmButtonText: 'Delete',
         confirmButtonClass: 'um-btn um-btn-danger',
         onSuccess: function () {
-          window.location.href = '/user-management/';
+          redirectToHomePreservingOrg();
         },
       });
     });

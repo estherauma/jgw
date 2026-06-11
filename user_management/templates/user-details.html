@@ -67,6 +67,7 @@
             class="um-btn um-btn-danger mb-2"
             data-delete-user
             data-user-id="{{ user.id }}"
+            data-org-id="{{ user.organisation_data.all.0.id|default:'' }}"
         >
             Delete User
         </button>
