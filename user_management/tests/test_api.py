@@ -128,6 +128,103 @@ class AccessCodeDetailsApiTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})
 
+    def test_access_code_details_requires_user_to_belong_to_organization(self):
+        outsider = User.objects.create_user(
+            email="outsider@example.com",
+            password="StrongPassword123!",
+            is_active=True,
+        )
+
+        response = self.client.get(
+            reverse(
+                "user_management_v1_api:access_code_details_api",
+                args=("test123",),
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {issue_auth_tokens(outsider)['access_token']}",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            response.json(),
+            {"ok": False, "error": "You do not have access to this organisation."},
+        )
+
+    def test_access_code_details_returns_code_org_and_user_groups(self):
+        response = self.client.get(
+            reverse(
+                "user_management_v1_api:access_code_details_api",
+                args=("test123",),
+            ),
+            **self.auth_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["id"], self.access_code.id)
+        self.assertEqual(response.json()["code"], "TEST123")
+        self.assertEqual(response.json()["requires_login"], True)
+        self.assertIsNone(response.json()["expiry_date"])
+        self.assertEqual(response.json()["organization"]["id"], self.organisation.id)
+        self.assertEqual(response.json()["organization"]["name"], "Test Org")
+        self.assertEqual(response.json()["organization"]["org_code"], "TESTORG")
+        self.assertEqual(response.json()["organization"]["has_custom_content"], True)
+        self.assertEqual(response.json()["organization"]["theme"], "default")
+        self.assertEqual(response.json()["organization"]["custom_type"], "version_1")
+        self.assertEqual(
+            response.json()["organization"]["default_feedback_emails"],
+            "feedback@example.com",
+        )
+        self.assertEqual(
+            response.json()["organization"]["default_report_issue_emails"],
+            "report@example.com",
+        )
+        self.assertEqual(
+            response.json()["organization"]["collection_languages"],
+            [
+                {"code": "en", "name": "English"},
+                {"code": "sw", "name": "Swahili"},
+            ],
+        )
+        self.assertEqual(
+            response.json()["organization"]["big_icon_url"],
+            "https://cdn.example.com/big.png",
+        )
+        self.assertEqual(
+            response.json()["organization"]["small_icon_url"],
+            "https://cdn.example.com/small.png",
+        )
+        self.assertEqual(
+            response.json()["access_code_user_groups"],
+            [
+                {"id": self.worker_group.id, "name": "Worker"},
+            ],
+        )
+
+    def test_access_code_details_returns_404_when_not_found(self):
+        response = self.client.get(
+            reverse(
+                "user_management_v1_api:access_code_details_api",
+                args=("missing123",),
+            ),
+            **self.auth_headers,
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})
+
+    def test_access_code_details_returns_404_when_organization_is_soft_deleted(self):
+        self.organisation.soft_delete(self.user)
+
+        response = self.client.get(
+            reverse(
+                "user_management_v1_api:access_code_details_api",
+                args=("test123",),
+            ),
+            **self.auth_headers,
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})
+
 
 @override_settings(EXTERNAL_API_KEY="external-secret")
 class PartnerConfigApiTests(TestCase):
@@ -267,100 +364,3 @@ class PartnerConfigApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [])
-
-    def test_access_code_details_requires_user_to_belong_to_organization(self):
-        outsider = User.objects.create_user(
-            email="outsider@example.com",
-            password="StrongPassword123!",
-            is_active=True,
-        )
-
-        response = self.client.get(
-            reverse(
-                "user_management_v1_api:access_code_details_api",
-                args=("test123",),
-            ),
-            HTTP_AUTHORIZATION=f"Bearer {issue_auth_tokens(outsider)['access_token']}",
-        )
-
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            response.json(),
-            {"ok": False, "error": "You do not have access to this organisation."},
-        )
-
-    def test_access_code_details_returns_code_org_and_user_groups(self):
-        response = self.client.get(
-            reverse(
-                "user_management_v1_api:access_code_details_api",
-                args=("test123",),
-            ),
-            **self.auth_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["id"], self.access_code.id)
-        self.assertEqual(response.json()["code"], "TEST123")
-        self.assertEqual(response.json()["requires_login"], True)
-        self.assertIsNone(response.json()["expiry_date"])
-        self.assertEqual(response.json()["organization"]["id"], self.organisation.id)
-        self.assertEqual(response.json()["organization"]["name"], "Test Org")
-        self.assertEqual(response.json()["organization"]["org_code"], "TESTORG")
-        self.assertEqual(response.json()["organization"]["has_custom_content"], True)
-        self.assertEqual(response.json()["organization"]["theme"], "default")
-        self.assertEqual(response.json()["organization"]["custom_type"], "version_1")
-        self.assertEqual(
-            response.json()["organization"]["default_feedback_emails"],
-            "feedback@example.com",
-        )
-        self.assertEqual(
-            response.json()["organization"]["default_report_issue_emails"],
-            "report@example.com",
-        )
-        self.assertEqual(
-            response.json()["organization"]["collection_languages"],
-            [
-                {"code": "en", "name": "English"},
-                {"code": "sw", "name": "Swahili"},
-            ],
-        )
-        self.assertEqual(
-            response.json()["organization"]["big_icon_url"],
-            "https://cdn.example.com/big.png",
-        )
-        self.assertEqual(
-            response.json()["organization"]["small_icon_url"],
-            "https://cdn.example.com/small.png",
-        )
-        self.assertEqual(
-            response.json()["access_code_user_groups"],
-            [
-                {"id": self.worker_group.id, "name": "Worker"},
-            ],
-        )
-
-    def test_access_code_details_returns_404_when_not_found(self):
-        response = self.client.get(
-            reverse(
-                "user_management_v1_api:access_code_details_api",
-                args=("missing123",),
-            ),
-            **self.auth_headers,
-        )
-
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})
-
-    def test_access_code_details_returns_404_when_organization_is_soft_deleted(self):
-        self.organisation.soft_delete(self.user)
-
-        response = self.client.get(
-            reverse(
-                "user_management_v1_api:access_code_details_api",
-                args=("test123",),
-            ),
-            **self.auth_headers,
-        )
-
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json(), {"ok": False, "error": "Access code not found."})
