@@ -1873,10 +1873,12 @@ def user_details(request, user_id):
     )
     
     dashboard_preferences = getattr(user, "dashboard_prefs", None)
+    return_selected_org_id = request.GET.get("selected_org_id") or ""
 
     context = {
         "user": user,
         "dashboard_preferences": dashboard_preferences,
+        "return_selected_org_id": return_selected_org_id,
         "app_user_form": AppUserForm(
             work_groups_qs=work_groups_qs,
             organisation=target_user_org,
