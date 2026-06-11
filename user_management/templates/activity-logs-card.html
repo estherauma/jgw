@@ -1,0 +1,49 @@
+<section class="um-card p-4">
+    <div class="d-flex align-items-center justify-content-between mb-0">
+        <h4 class="h5 mb-0 text-muted">Recent Activity</h4>
+        <span class="text-muted">Last 30 days</span>
+    </div>
+    <div class="um-section-divider my-3"></div>
+
+    {% if activities %}
+        <div class="table-responsive">
+            <table id="um-logs-table">
+                <thead>
+                    <tr class="um-navy">
+                        <th class="um-time-col fw-semibold">Time</th>
+                        <th class="fw-semibold">Message</th>
+                        <th class="fw-semibold um-activity-col">Changes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                    <tr class="border-top">
+                        <td class="um-time-col" data-order="{{ activity.created_at|date:"U" }}">
+                            {{ activity.created_at|date:"M d, H:i" }}
+                        </td>
+                        <td>
+                            {{ activity.message }}
+                        </td>
+                        <td class="um-activity-col">
+                            <button
+                                class="btn btn-link p-0 um-log-details-btn um-view-details-link"
+                                data-toggle="modal"
+                                data-target="#log-details-modal"
+                                data-log-id="{{ activity.id }}"
+                                type="button"
+                            >
+                                View Changes
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-activity text-muted fs-2 mb-2 d-block"></i>
+            <p class="text-muted mb-0">No activity in the last 30 days.</p>
+        </div>
+    {% endif %}
+</section>

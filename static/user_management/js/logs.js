@@ -1,19 +1,20 @@
 $(document).ready(function () {
-  const reloadLogsPage = function () {
-    window.location.reload();
-  };
-
-  $("#um-logs-table").DataTable({
-    order: [[1, "desc"]],
-    pageLength: 10,
-    lengthMenu: [10, 25, 50, 100],
-    language: {
-      search: "Search Logs:",
-      emptyTable: "No activity logs found.",
-      info: "_START_-_END_ of _TOTAL_ row(s) shown.",
-      infoEmpty: "0 of 0 row(s) shown.",
-    },
-  });
+  const $logsTable = $("#um-logs-table");
+  if ($logsTable.length && typeof $.fn.DataTable !== 'undefined') {
+    if (!$.fn.dataTable.isDataTable('#um-logs-table')) {
+      $logsTable.DataTable({
+        order: [[0, "desc"]],
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
+        language: {
+          search: "Search Logs:",
+          emptyTable: "No activity logs found.",
+          info: "_START_-_END_ of _TOTAL_ row(s) shown.",
+          infoEmpty: "0 of 0 row(s) shown.",
+        },
+      });
+    }
+  }
 
   $("#um-logs-table").on("click", ".um-log-details-btn", function () {
     const logId = $(this).data("log-id");
@@ -68,9 +69,12 @@ $(document).ready(function () {
     });
   });
 
-  $("#log-details-modal").on("hidden.bs.modal", function () {
+  $(document).on("click", ".um-modal-close-btn", function () {
+    $("#log-details-modal").modal("hide");
+  });
+
+  $(document).on("hidden.bs.modal", "#log-details-modal", function () {
     $("#log-before-fields").empty();
     $("#log-after-fields").empty();
-    reloadLogsPage();
   });
 });
