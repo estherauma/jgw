@@ -40,11 +40,6 @@ def get_user_role_display(user, selected_org=None):
         return "Worker"
     return "—"
 
-def paginate_users(queryset, page_number):
-    paginator = Paginator(queryset, 20)
-    return paginator.get_page(page_number)
-
-
 def filter_users_query(queryset, query=""):
     query = (query or "").strip()
     if not query:
