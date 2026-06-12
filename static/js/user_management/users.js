@@ -858,7 +858,9 @@
       function redirectAfterDelete() {
         if (returnOrgId) {
           if (window.storeSelectedOrganisation) {
-            window.storeSelectedOrganisation(returnOrgId, '');
+            const storedOrg = window.getSelectedOrgData?.() || null;
+            const orgName = (storedOrg && String(storedOrg.id) === String(returnOrgId)) ? (storedOrg.name || ''): '';
+             window.storeSelectedOrganisation(returnOrgId, orgName);
           }
           window.location.href =
             '/user-management/?selected_org_id=' + encodeURIComponent(returnOrgId);
