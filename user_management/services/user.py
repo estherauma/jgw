@@ -40,6 +40,7 @@ def get_user_role_display(user, selected_org=None):
         return "Worker"
     return "—"
 
+
 def filter_users_query(queryset, query=""):
     query = (query or "").strip()
     if not query:
