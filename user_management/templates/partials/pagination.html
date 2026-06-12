@@ -1,0 +1,48 @@
+{% if page_obj and page_obj.paginator.count %}
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+    <div class="small text-muted">
+        Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} {{ item_label|default:"items" }}
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav aria-label="{{ nav_label|default:'Pagination' }}">
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                <button
+                    class="page-link"
+                    type="button"
+                    {{ page_link_attr|default:"data-pagination-link" }}
+                    data-page="{% if page_obj.has_previous %}{{ page_obj.previous_page_number }}{% else %}1{% endif %}"
+                    {% if not page_obj.has_previous %}disabled{% endif %}
+                >
+                    Previous
+                </button>
+            </li>
+            {% for page_number in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == page_number %}active{% endif %}">
+                <button
+                    class="page-link"
+                    type="button"
+                    {{ page_link_attr|default:"data-pagination-link" }}
+                    data-page="{{ page_number }}"
+                    {% if page_obj.number == page_number %}aria-current="page"{% endif %}
+                >
+                    {{ page_number }}
+                </button>
+            </li>
+            {% endfor %}
+            <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                <button
+                    class="page-link"
+                    type="button"
+                    {{ page_link_attr|default:"data-pagination-link" }}
+                    data-page="{% if page_obj.has_next %}{{ page_obj.next_page_number }}{% else %}{{ page_obj.paginator.num_pages }}{% endif %}"
+                    {% if not page_obj.has_next %}disabled{% endif %}
+                >
+                    Next
+                </button>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endif %}

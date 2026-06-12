@@ -580,13 +580,15 @@
     }
     const url = input.getAttribute('data-user-search-url');
     const tbody = document.querySelector('[data-users-table-body]');
-    if (!url || !tbody) {
+    const paginationContainer = document.querySelector('[data-users-pagination]');
+    if (!url || !tbody || !paginationContainer) {
       return;
     }
     let debounceTimer = null;
     let controller = null;
+    let currentPage = 1;
 
-    async function runSearch(value) {
+    async function runSearch(value, page) {
       if (controller) {
         controller.abort();
       }
@@ -603,6 +605,7 @@
       if (selectedOrgId) {
         params.set('selected_org_id', selectedOrgId);
       }
+      params.set('page', String(page || 1));
       try {
         const response = await fetch(
           url + (params.toString() ? '?' + params.toString() : ''),
@@ -615,8 +618,10 @@
           throw new Error('Search failed');
         }
         const data = await response.json();
-        if (data?.html) {
-          tbody.innerHTML = data.html;
+        if (data?.rows_html !== undefined) {
+          tbody.innerHTML = data.rows_html;
+          paginationContainer.innerHTML = data.pagination_html || '';
+          currentPage = page || 1;
           updateAssignButtonState();
           updateDeleteButton();
           updateDeactivateButtonState();
@@ -635,8 +640,19 @@
       const value = (event.target.value || '').trim();
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function () {
-        runSearch(value);
+        runSearch(value, 1);
       }, 250);
+    });
+
+    paginationContainer.addEventListener('click', function (event) {
+      const trigger = event.target.closest('[data-users-page-link]');
+      if (!trigger || trigger.disabled) {
+        return;
+      }
+      event.preventDefault();
+      const requestedPage = Number(trigger.getAttribute('data-page') || currentPage || 1);
+      const value = (input.value || '').trim();
+      runSearch(value, requestedPage);
     });
   }
 

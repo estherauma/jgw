@@ -38,7 +38,7 @@ from ..models import (
 )
 from ..roles import add_default_org_roles, apply_role_to_user
 from ..services.organization import OrganizationService
-from ..services.user import get_user_role_display, get_users_query
+from ..services.user import get_paginated_users_context, get_user_role_display
 from ..permissions import is_flag_active
 from ..utils import (
     get_active_role,
@@ -103,7 +103,11 @@ def user_management(request):
             selected_org_name = selected_org.name
 
     org_details = {}
-    users = get_users_query(user, selected_org)
+    users_listing = get_paginated_users_context(
+        user,
+        selected_org=selected_org,
+        page_number=request.GET.get("page"),
+    )
 
     if selected_org:
         work_codes = (
@@ -137,7 +141,7 @@ def user_management(request):
     context = {
         "organizations": organizations,
         "organization_groups": organization_groups,
-        "users": users,
+        **users_listing,
         "work_codes": work_codes,
         "work_groups": work_groups,
         "assigned_work_codes": assigned_work_codes,
@@ -185,20 +189,35 @@ def search_users(request):
             id=selected_org_id
         ).first()
 
-    users = get_users_query(user, organisation)
+    users_listing = get_paginated_users_context(
+        user,
+        selected_org=organisation,
+        query=query,
+        page_number=request.GET.get("page"),
+    )
 
-    if query:
-        users = users.filter(
-            Q(first_name__icontains=query)
-            | Q(last_name__icontains=query)
-            | Q(email__icontains=query)
-        )
-    html = render_to_string(
+    rows_html = render_to_string(
         "user-rows.html",
-        {"users": users, "selected_org_id": selected_org_id},
+        {
+            "users": users_listing["users"],
+            "users_page": users_listing["users_page"],
+            "row_start_index": users_listing["row_start_index"],
+            "selected_org_id": selected_org_id,
+        },
         request=request,
     )
-    return JsonResponse({"ok": True, "html": html})
+    pagination_html = render_to_string(
+        "partials/pagination.html",
+        users_listing["users_pagination_context"],
+        request=request,
+    )
+    return JsonResponse(
+        {
+            "ok": True,
+            "rows_html": rows_html,
+            "pagination_html": pagination_html,
+        }
+    )
 
 
 def short_link_redirect(request, code):

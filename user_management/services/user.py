@@ -1,3 +1,6 @@
+from django.core.paginator import Paginator
+from django.db.models import Q
+
 from users.models import User, UserInvitations
 from user_management.models import WorkGroup
 
@@ -72,3 +75,37 @@ def get_users_query(current_user, selected_org=None):
         ).exists()
 
     return users
+
+
+def paginate_users(queryset, page_number):
+    paginator = Paginator(queryset, 20)
+    return paginator.get_page(page_number)
+
+
+def filter_users_query(queryset, query=""):
+    query = (query or "").strip()
+    if not query:
+        return queryset
+    return queryset.filter(
+        Q(first_name__icontains=query)
+        | Q(last_name__icontains=query)
+        | Q(email__icontains=query)
+    )
+
+
+def get_paginated_users_context(current_user, selected_org=None, query="", page_number=None):
+    queryset = filter_users_query(get_users_query(current_user, selected_org), query)
+    paginator = Paginator(queryset, 20)
+    users_page = paginator.get_page(page_number)
+
+    return {
+        "users": users_page.object_list,
+        "users_page": users_page,
+        "users_pagination_context": {
+            "page_obj": users_page,
+            "item_label": "users",
+            "nav_label": "Users pagination",
+            "page_link_attr": "data-users-page-link",
+        },
+        "row_start_index": users_page.start_index() if users_page.object_list else 0,
+    }

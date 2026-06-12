@@ -252,6 +252,19 @@ thead {
     color: #d7902c !important;
     border: 1px solid #f0ad4e !important;
 }
+.pagination .page-item.active .page-link {
+    background-color: #37C1E3 !important;
+    border-color: #37C1E3 !important;
+    color: #ffffff !important;
+}
+
+.pagination .page-link:focus {
+    box-shadow: 0 0 0 0.2rem rgba(55, 193, 227, 0.2) !important;
+}
+
+.pagination .page-link {
+    color: #193560;
+}
 .um-link-pending {
     color: #f0ad4e !important;
     font-size: 12px;
