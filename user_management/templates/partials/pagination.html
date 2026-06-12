@@ -17,7 +17,12 @@
                     Previous
                 </button>
             </li>
-            {% for page_number in page_obj.paginator.page_range %}
+            {% for page_number in page_numbers|default:page_obj.paginator.page_range %}
+            {% if page_number == page_obj.paginator.ELLIPSIS %}
+            <li class="page-item disabled" aria-hidden="true">
+                <span class="page-link">…</span>
+            </li>
+            {% else %}
             <li class="page-item {% if page_obj.number == page_number %}active{% endif %}">
                 <button
                     class="page-link"
@@ -29,6 +34,7 @@
                     {{ page_number }}
                 </button>
             </li>
+            {% endif %}
             {% endfor %}
             <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
                 <button
