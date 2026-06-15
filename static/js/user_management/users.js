@@ -867,7 +867,7 @@
         confirmButtonText: 'Delete',
         confirmButtonClass: 'um-btn um-btn-danger',
         onSuccess: function () {
-          window.location.href = '/user-management/';
+          window.location.href = document.referrer || '/user-management/';
         },
       });
     });
