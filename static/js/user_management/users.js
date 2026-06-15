@@ -786,7 +786,7 @@
           'Content-Type': 'application/json',
           },
         onSuccess: function () {
-           window.location.reload();
+          window.location.reload();
         },
       });
     });
