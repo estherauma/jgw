@@ -13,7 +13,7 @@
         </td>
         <td>{{ row_start_index|add:forloop.counter0 }}</td>
         <td class="w-25">
-            <a class="um-view-details-link" href="{% url 'user_management:user_details' u.id %}{% if selected_org_id %}?selected_org_id={{ selected_org_id }}{% endif %}">
+            <a class="um-view-details-link" href="{% url 'user_management:user_details' u.id %}">
                 {% if u.first_name or u.last_name %}
                     {{ u.first_name }} {{ u.last_name }}
                 {% else %}

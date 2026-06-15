@@ -745,21 +745,6 @@
       return;
     }
 
-    function redirectAfterBulkDelete() {
-      var currentUrl = new URL(window.location.href);
-      var selectedOrgId = currentUrl.searchParams.get('selected_org_id') || '';
-
-      if (!selectedOrgId) {
-        if (window.storeSelectedOrganisation) {
-          window.storeSelectedOrganisation('', '');
-        }
-        window.location.href = '/user-management/';
-        return;
-      }
-
-      window.location.reload();
-    }
-
     deleteBtn.addEventListener('click', function () {
       const checkedBoxes = document.querySelectorAll('[data-user-select]:checked');
       
@@ -801,7 +786,7 @@
           'Content-Type': 'application/json',
           },
         onSuccess: function () {
-          redirectAfterBulkDelete();
+           window.location.reload();
         },
       });
     });
@@ -869,25 +854,6 @@
 
     deleteBtn.addEventListener('click', function () {
       const userId = deleteBtn.getAttribute('data-user-id');
-      const returnOrgId = deleteBtn.getAttribute('data-return-org-id');
-
-      function redirectAfterDelete() {
-        if (returnOrgId) {
-          if (window.storeSelectedOrganisation) {
-            const storedOrg = window.getSelectedOrgData?.() || null;
-            const orgName = (storedOrg && String(storedOrg.id) === String(returnOrgId)) ? (storedOrg.name || ''): '';
-             window.storeSelectedOrganisation(returnOrgId, orgName);
-          }
-          window.location.href =
-            '/user-management/?selected_org_id=' + encodeURIComponent(returnOrgId);
-          return;
-        }
-
-        if (window.storeSelectedOrganisation) {
-          window.storeSelectedOrganisation('', '');
-        }
-        window.location.href = '/user-management/';
-      }
 
       window.showDeleteConfirm({
         title: 'Delete User',
@@ -901,7 +867,7 @@
         confirmButtonText: 'Delete',
         confirmButtonClass: 'um-btn um-btn-danger',
         onSuccess: function () {
-          redirectAfterDelete();
+          window.location.href = document.referrer || '/user-management/';
         },
       });
     });
