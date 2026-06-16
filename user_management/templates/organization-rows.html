@@ -2,7 +2,7 @@
 {% if organizations %}
     {% for org in organizations %}
     <tr data-org-row>
-        <td>{{ forloop.counter }}</td>
+        <td>{{ row_start_index|add:forloop.counter0 }}</td>
         <td>
             <a class="text-info text-decoration-none fw-semibold" href="{% url 'user_management:home' %}?selected_org_id={{ org.id }}">
                 {{ org.name }}

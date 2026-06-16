@@ -445,13 +445,15 @@
     }
     const url = input.getAttribute('data-org-search-url');
     const tbody = document.querySelector('[data-org-table-body]');
-    if (!tbody) {
+    const paginationContainer = document.querySelector('[data-organisation-pagination]');
+    if (!tbody || !url || !paginationContainer) {
       return;
     }
     let debounceTimer = null;
     let controller = null;
+    let currentPage = 1;
 
-    function runSearch(value) {
+    async function runSearch(value, page) {
       if (controller) {
         controller.abort();
       }
@@ -460,35 +462,49 @@
       if (value) {
         params.set('q', value);
       }
-      fetch(url + (params.toString() ? '?' + params.toString() : ''), {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        signal: controller.signal,
-      })
-        .then(function (response) {
-          if (!response.ok) {
-            throw new Error('Search failed');
-          }
-          return response.json();
-        })
-        .then(function (data) {
-          if (data && data.html !== undefined) {
-            tbody.innerHTML = data.html;
-          }
-        })
-        .catch(function (error) {
-          if (error.name === 'AbortError') {
-            return;
-          }
-          console.error(error);
-        });
+      params.set('page', String(page || 1));
+      try {
+        const response = await fetch(
+          url + (params.toString() ? '?' + params.toString() : ''),
+          {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            signal: controller.signal,
+          },
+        );
+        if (!response.ok) {
+          throw new Error('Search failed');
+        }
+        const data = await response.json();
+        if (data?.rows_html !== undefined) {
+          tbody.innerHTML = data.rows_html;
+          paginationContainer.innerHTML = data.pagination_html || '';
+          currentPage = page || 1;
+        }
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          return;
+        }
+        console.error(error);
+      }
     }
 
     input.addEventListener('input', function (event) {
       const value = (event.target.value || '').trim();
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function () {
-        runSearch(value);
+        runSearch(value, 1);
       }, 250);
+    });
+
+    paginationContainer.addEventListener('click', function (event) {
+      const trigger = event.target.closest('[data-orgs-page-link]');
+      if (!trigger || trigger.disabled) {
+        return;
+      }
+      event.preventDefault();
+      const requestedPage = Number(trigger.getAttribute('data-page') || currentPage || 1);
+      const value = (input.value || '').trim();
+      runSearch(value, requestedPage);
     });
   }
 
