@@ -25,6 +25,11 @@ UM_FLAG_DEFS = [
         "condition": "58_admin",
     },
     {
+        "name": "can_edit_work_code",
+        "label": "Edit work codes",
+        "condition": "org_admin",
+    },
+    {
         "name": "can_assign_work_code",
         "label": "Assign work codes",
         "condition": "org_admin",
