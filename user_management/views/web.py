@@ -166,17 +166,27 @@ def user_management(request):
 def search_organisations(request):
     user = request.user
     query = request.GET.get("q", "").strip()
-    organisations = OrganizationService.get_allowed_orgs(user).order_by("name")
-    if query:
-        organisations = organisations.filter(
-            Q(name__icontains=query) | Q(org_code__icontains=query)
-        )
-    html = render_to_string(
+    organisations_listing = OrganizationService.get_paginated_organisations_context(
+        user,
+        query=query,
+        page_number=request.GET.get("page"),
+    )
+    rows_html = render_to_string(
         "organization-rows.html",
-        {"organizations": organisations},
+        {
+            "organizations": organisations_listing["organisations"],
+            "orgs_page": organisations_listing["orgs_page"],
+            "row_start_index": organisations_listing["row_start_index"],
+         },
         request=request,
     )
-    return JsonResponse({"ok": True, "html": html})
+    pagination_html = render_to_string(
+        "partials/pagination.html",
+        organisations_listing["orgs_pagination_context"],
+        request=request,
+    )
+    
+    return JsonResponse({"ok": True, "rows_html": rows_html, "pagination_html": pagination_html})
 
 def search_users(request):
     user = request.user
