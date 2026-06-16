@@ -1,7 +1,8 @@
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
+from django.core.paginator import Paginator
 
 from content.services.partner_configurations import FileUploadError, upload_files_to_cms
 from preference.models import (
@@ -468,3 +469,29 @@ class OrganizationService:
             created_by=user,
             updated_by=user,
         )
+
+    @staticmethod
+    def get_paginated_organisations_context(current_user, query="", page_number=None):
+        queryset = OrganizationService.get_allowed_orgs(current_user).order_by("name")
+        
+        query = (query or "").strip()
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) | Q(org_code__icontains=query)
+            )
+        
+        paginator = Paginator(queryset, 20)
+        orgs_page = paginator.get_page(page_number)
+        
+        return {
+            "organisations": orgs_page.object_list,
+            "orgs_page": orgs_page,
+            "orgs_pagination_context": {
+                "page_obj": orgs_page,
+                "page_numbers": list(orgs_page.paginator.get_elided_page_range(orgs_page.number)),
+                "item_label": "organisations",
+                "nav_label": "Organisations pagination",
+                "page_link_attr": "data-orgs-page-link",
+            },
+            "row_start_index": orgs_page.start_index() if orgs_page.object_list else 0,
+        }
