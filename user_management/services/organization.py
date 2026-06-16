@@ -16,6 +16,88 @@ from user_management.utils import is_org_admin_or_staff, is_org_group_admin, is_
 
 class OrganizationService:
     @staticmethod
+    def serialize_collection_languages(*, organisation):
+        languages = getattr(organisation, "_prefetched_objects_cache", {}).get(
+            "collection_languages"
+        )
+        if languages is None:
+            languages = organisation.collection_languages.all()
+        return [
+            {
+                "code": language.code,
+                "name": language.name,
+            }
+            for language in languages
+        ]
+
+    @staticmethod
+    def serialize_access_codes(*, organisation):
+        access_codes = getattr(organisation, "_prefetched_objects_cache", {}).get(
+            "organisation_access_codes"
+        )
+        if access_codes is None:
+            access_codes = organisation.organisation_access_codes.all()
+        return [
+            {
+                "id": access_code.id,
+                "code": access_code.code,
+                "requires_login": access_code.requires_login,
+                "expiry_date": access_code.expiry_date.isoformat()
+                if access_code.expiry_date
+                else None,
+            }
+            for access_code in access_codes
+        ]
+
+    @staticmethod
+    def serialize_user_groups(*, organisation):
+        work_groups = getattr(organisation, "_prefetched_objects_cache", {}).get(
+            "work_groups"
+        )
+        if work_groups is None:
+            work_groups = organisation.work_groups.all()
+        return [
+            {
+                "id": work_group.id,
+                "name": work_group.name,
+            }
+            for work_group in work_groups
+        ]
+
+    @staticmethod
+    def build_partner_config_payload(*, organisation):
+        return {
+            "id": organisation.id,
+            "name": organisation.name,
+            "org_code": organisation.org_code,
+            "display_name": organisation.display_name,
+            "has_custom_content": organisation.has_custom_content,
+            "theme": organisation.theme,
+            "custom_type": organisation.custom_type,
+            "work_sector": organisation.work_sector,
+            "content_collection": organisation.content_collection,
+            "default_collection_language": organisation.default_collection_language,
+            "default_feedback_emails": organisation.default_feedback_emails,
+            "default_report_issue_emails": organisation.default_report_issue_emails,
+            "cms_id": organisation.cms_id,
+            "cms_sync_status": organisation.cms_sync_status,
+            "last_cms_sync_date": organisation.last_cms_sync_date.isoformat()
+            if organisation.last_cms_sync_date
+            else None,
+            "collection_languages": OrganizationService.serialize_collection_languages(
+                organisation=organisation
+            ),
+            "access_codes": OrganizationService.serialize_access_codes(
+                organisation=organisation
+            ),
+            "user_groups": OrganizationService.serialize_user_groups(
+                organisation=organisation
+            ),
+            "big_icon_url": organisation.big_icon or "",
+            "small_icon_url": organisation.small_icon or "",
+        }
+
+    @staticmethod
     def get_access_code_record(*, access_code, include_workgroups=False):
         normalized_code = (access_code or "").strip().upper()
         if not normalized_code:
@@ -45,7 +127,7 @@ class OrganizationService:
         }
 
     @staticmethod
-    def get_access_code_details(*, access_code):
+    def get_access_code_details(*, access_code, user=None):
         work_code = OrganizationService.get_access_code_record(
             access_code=access_code,
             include_workgroups=True,
@@ -54,6 +136,26 @@ class OrganizationService:
             return None
 
         organisation = work_code.organisation
+        access_code_user_groups = list(work_code.work_groups.order_by("name"))
+        visible_user_groups = access_code_user_groups
+
+        if user is not None and getattr(user, "is_authenticated", False):
+            user_work_group_ids = set(
+                user.work_groups.filter(organisation=organisation).values_list("id", flat=True)
+            )
+            visible_user_groups = [
+                work_group
+                for work_group in access_code_user_groups
+                if work_group.id in user_work_group_ids
+            ]
+
+        serialized_access_code_user_groups = [
+            {
+                "id": work_group.id,
+                "name": work_group.name,
+            }
+            for work_group in visible_user_groups
+        ]
         return {
             "id": work_code.id,
             "code": work_code.code,
@@ -65,19 +167,34 @@ class OrganizationService:
                     "name": organisation.name,
                     "org_code": organisation.org_code,
                     "display_name": organisation.display_name,
+                    "has_custom_content": organisation.has_custom_content,
                     "theme": organisation.theme,
+                    "custom_type": organisation.custom_type,
                     "work_sector": organisation.work_sector,
                     "content_collection": organisation.content_collection,
                     "default_collection_language": organisation.default_collection_language,
+                    "default_feedback_emails": organisation.default_feedback_emails,
+                    "default_report_issue_emails": organisation.default_report_issue_emails,
+                    "collection_languages": OrganizationService.serialize_collection_languages(
+                        organisation=organisation
+                    ),
+                    "big_icon_url": organisation.big_icon or "",
+                    "small_icon_url": organisation.small_icon or "",
                 },
-            "workgroups": [
-                {
-                    "id": work_group.id,
-                    "name": work_group.name,
-                }
-                for work_group in work_code.work_groups.order_by("name")
-            ],
+            "access_code_user_groups": serialized_access_code_user_groups,
         }
+
+    @staticmethod
+    def get_partner_configs():
+        organisations = OrganisationData.objects.prefetch_related(
+            "collection_languages",
+            "organisation_access_codes",
+            "work_groups",
+        )
+        return [
+            OrganizationService.build_partner_config_payload(organisation=organisation)
+            for organisation in organisations
+        ]
 
     @staticmethod
     def get_allowed_orgs(user):

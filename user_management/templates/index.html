@@ -450,6 +450,9 @@
                         <div class="um-scrollbar-thumb um-scrollbar-thumb-x"></div>
                     </div>
                 </div>
+                <div class="mt-3" data-users-pagination>
+                    {% include "partials/pagination.html" with page_obj=users_page item_label="users" nav_label="Users pagination" page_link_attr="data-users-page-link" %}
+                </div>
             </div>
             {% endflag %}
             {% if selected_org_id %}
