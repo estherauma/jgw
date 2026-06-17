@@ -74,7 +74,7 @@ def user_management(request):
     orgs_listing = OrganizationService.get_paginated_organisations_context(
         user,
         page_number=request.GET.get("organisations_page"),
-        queryset=allowed_organizations_qs,
+        queryset= None,
     )
     paged_organizations = orgs_listing["organisations"]
     organization_groups = OrganizationGroup.objects.order_by("name")
