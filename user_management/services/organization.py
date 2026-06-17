@@ -10,6 +10,7 @@ from preference.models import (
     OrganisationData,
     SiteLanguages,
 )
+from .deep_links import DeepLinkService
 from user_management.permissions import is_flag_active
 from user_management.utils import is_org_admin_or_staff, is_org_group_admin, is_super_or_58_admin
 
@@ -253,6 +254,34 @@ class OrganizationService:
             {"ok": False, "error": "You do not have access to this organisation."},
             status=403,
         )
+
+    @staticmethod
+    def create_login_deep_link(*, user, request, work_code_id):
+        if not work_code_id:
+            raise ValueError("Work code is required.")
+
+        allowed_orgs = OrganizationService.get_allowed_orgs(user)
+        work_code = (
+            OrganisationAccessCode.objects.select_related("organisation")
+            .filter(
+                id=work_code_id,
+                organisation__in=allowed_orgs,
+            )
+            .first()
+        )
+
+        if not work_code:
+            raise ValueError("Work code not found.")
+
+        if not OrganizationService.has_org_access(
+            user,
+            work_code.organisation,
+            request=request,
+            flag_name="can_edit_work_code",
+        ):
+            raise PermissionError("You do not have access to this organisation.")
+
+        return DeepLinkService.get_or_create_login__deep_link(work_code=work_code)
 
     @staticmethod
     def get_ungrouped_organizations(user):

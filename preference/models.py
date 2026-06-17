@@ -164,6 +164,7 @@ class Age(models.Model):
 
 class OrganisationAccessCode(AuditFieldsMixin):
     code = models.CharField(max_length=255, unique=True)
+    deep_link = models.URLField(null=True, blank=True)
     requires_login = models.BooleanField(default=False)
     organisation = models.ForeignKey(
         "OrganisationData",
