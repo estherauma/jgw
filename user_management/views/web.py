@@ -70,12 +70,12 @@ def user_management(request):
     selected_org = None
     selected_org_id = None
     selected_org_name = None
-    allowed_organizations = OrganizationService.get_allowed_orgs(user).order_by("name")
+    allowed_organizations_qs = OrganizationService.get_allowed_orgs(user).order_by("name")
     orgs_listing = OrganizationService.get_paginated_organisations_context(
         user,
         page_number=request.GET.get("organisations_page"),
     )
-    organizations = orgs_listing["organisations"]
+    paged_organizations = orgs_listing["organisations"]
     organization_groups = OrganizationGroup.objects.order_by("name")
 
     work_codes = []
@@ -96,13 +96,13 @@ def user_management(request):
             )
 
     if requested_org_id:
-        selected_org = allowed_organizations.filter(id=requested_org_id).first()
+        selected_org = allowed_organizations_qs.filter(id=requested_org_id).first()
         if selected_org:
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
 
     if user_role in {"org_admin", "org_staff"}:
-        selected_org = allowed_organizations.first()
+        selected_org = allowed_organizations_qs.first()
         if selected_org:
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
@@ -144,7 +144,8 @@ def user_management(request):
         org_languages = SiteLanguages.objects.none()
 
     context = {
-        "organizations": organizations,
+        "organizations": paged_organizations,
+        "organization_options": allowed_organizations_qs,
         "organisations_page": orgs_listing["orgs_page"],
         "row_start_index": orgs_listing["row_start_index"],
         "organization_groups": organization_groups,
@@ -162,7 +163,7 @@ def user_management(request):
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
-        "dashboard_user_form": DashboardUserForm(orgs_qs=allowed_organizations),
+        "dashboard_user_form": DashboardUserForm(orgs_qs=allowed_organizations_qs),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
         "roles": roles,
         "role_form": OrganisationRoleForm(organisation=selected_org, current_user=user),
