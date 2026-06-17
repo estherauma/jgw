@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # installed packages (3rd party)
+    "corsheaders",
     "rest_framework",
     "drf_spectacular",
     "crispy_forms",
@@ -96,6 +97,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -113,6 +115,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "jgwpandas.urls"
 MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
