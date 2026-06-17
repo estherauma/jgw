@@ -111,7 +111,7 @@
                     </div>
                 </div>
                 <div class="mt-3" data-organisation-pagination>
-                    {% include "partials/pagination.html" with page_obj=organisations_page item_label="organisations" nav_label="Organisations pagination" page_link_attr="data-orgs-page-link" %}
+                    {% include "partials/pagination.html" with page_obj=organisations_page page_numbers=organisations_page_numbers item_label="organisations" nav_label="Organisations pagination" page_link_attr="data-orgs-page-link" %}
                 </div>
             </div>
             {% endif %}

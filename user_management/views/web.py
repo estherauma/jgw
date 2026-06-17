@@ -148,6 +148,7 @@ def user_management(request):
         "organizations": paged_organizations,
         "organization_options": allowed_organizations_qs,
         "organisations_page": orgs_listing["orgs_page"],
+        "organisations_page_numbers": orgs_listing["orgs_pagination_context"]["page_numbers"],
         "row_start_index": orgs_listing["row_start_index"],
         "organization_groups": organization_groups,
         **users_listing,
