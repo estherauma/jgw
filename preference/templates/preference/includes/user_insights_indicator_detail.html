@@ -29,7 +29,7 @@
             </div>
             <div class="col-lg-5">
                 <div class="user-insights-drilldown-side">
-                    <div class="user-insights-date-filter-card">
+                    <div class="user-insights-date-filter-card user-insights-drilldown-detail d-none" data-drilldown-detail aria-live="polite">
                         <div class="user-insights-date-filter" data-user-insights-date-filter>
                             <button
                                 type="button"
@@ -38,44 +38,42 @@
                             >
                                 <i class="mdi mdi-calendar-month-outline" aria-hidden="true"></i>
                             </button>
-                            <label class="user-insights-date-field">
-                                <span class="user-insights-date-label">{% translate "userInsightsDateFrom" %}</span>
-                                <input
-                                    type="text"
-                                    class="user-insights-date-input"
-                                    data-date-role="from"
-                                    value="{{ detail.date_from_display }}"
-                                    data-default-date="{{ detail.date_from }}"
-                                    autocomplete="off"
-                                    aria-label="{% translate 'userInsightsDateFromAria' %}"
-                                />
-                            </label>
-                            <label class="user-insights-date-field">
-                                <span class="user-insights-date-label">{% translate "userInsightsDateTo" %}</span>
-                                <input
-                                    type="text"
-                                    class="user-insights-date-input"
-                                    data-date-role="to"
-                                    value="{{ detail.date_to_display }}"
-                                    data-default-date="{{ detail.date_to }}"
-                                    autocomplete="off"
-                                    aria-label="{% translate 'userInsightsDateToAria' %}"
-                                />
-                            </label>
-                        </div>
-                    </div>
-                    <div class="user-insights-drilldown-detail d-none" data-drilldown-detail aria-live="polite">
-                        <div class="user-insights-breadcrumb" data-breadcrumb-root></div>
-                        <div class="user-insights-side-view user-insights-side-view--chart d-none" data-side-view="chart">
-                            <div class="user-insights-sunburst-wrap">
-                                <div
-                                    class="user-insights-sunburst-host echarts-host"
-                                    id="{{ detail.panel_dom_id }}-sunburst"
-                                    role="img"
-                                    aria-label="{% translate 'userInsightsSunburstAria' %}"
-                                ></div>
+                            <div class="user-insights-date-filter-fields">
+                                <label class="user-insights-date-field">
+                                    <span class="user-insights-date-label">{% translate "userInsightsDateFrom" %}</span>
+                                    <input
+                                        type="text"
+                                        class="user-insights-date-input"
+                                        data-date-role="from"
+                                        value="{{ detail.date_from_display }}"
+                                        data-default-date="{{ detail.date_from }}"
+                                        autocomplete="off"
+                                        aria-label="{% translate 'userInsightsDateFromAria' %}"
+                                    />
+                                </label>
+                                <label class="user-insights-date-field">
+                                    <span class="user-insights-date-label">{% translate "userInsightsDateTo" %}</span>
+                                    <input
+                                        type="text"
+                                        class="user-insights-date-input"
+                                        data-date-role="to"
+                                        value="{{ detail.date_to_display }}"
+                                        data-default-date="{{ detail.date_to }}"
+                                        autocomplete="off"
+                                        aria-label="{% translate 'userInsightsDateToAria' %}"
+                                    />
+                                </label>
                             </div>
                         </div>
+                    
+                        <div class="user-insights-breadcrumb" data-breadcrumb-root></div>
+                        <div
+                            class="user-insights-sunburst-host echarts-host user-insights-side-view user-insights-side-view--chart d-none"
+                            data-side-view="chart"
+                            id="{{ detail.panel_dom_id }}-sunburst"
+                            role="img"
+                            aria-label="{% translate 'userInsightsSunburstAria' %}"
+                        ></div>
                         <div class="user-insights-side-view user-insights-side-view--text d-none" data-side-view="text">
                             {% for question in detail.lead_questions %}
                             {% if question.response_type == "open_text" %}

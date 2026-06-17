@@ -2,6 +2,7 @@
 <div
     class="user-insights-lead-card{% if question.expanded %} is-expanded{% endif %}{% if question.active %} is-active{% endif %}"
     data-lead-id="{{ question.id }}"
+    data-lead-code="{{ question.code }}"
     data-response-type="{{ question.response_type|default:'choice' }}"
 >
     <button
@@ -12,7 +13,7 @@
         aria-expanded="{% if question.expanded %}true{% else %}false{% endif %}"
         aria-controls="user-insights-lead-{{ panel_id }}-{{ question.id }}"
     >
-        <span class="user-insights-lead-code">Q{{ question.number }}</span>
+        <span class="user-insights-lead-code">{{ question.code }}</span>
         <span class="user-insights-lead-text">{{ question.text }}</span>
         <span class="user-insights-lead-chevron" aria-hidden="true"><i class="mdi mdi-chevron-down"></i></span>
     </button>
