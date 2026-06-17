@@ -158,6 +158,38 @@
         updateBreadcrumb(panelEl, []);
     }
 
+    function collapseLeadQuestions(panelEl) {
+        if (!panelEl) {
+            return;
+        }
+        panelEl.querySelectorAll(".user-insights-answer-bar.is-selected").forEach(function (bar) {
+            bar.classList.remove("is-selected");
+        });
+        panelEl.querySelectorAll(".user-insights-option-row.is-selected").forEach(function (row) {
+            row.classList.remove("is-selected");
+        });
+        panelEl.querySelectorAll(".user-insights-lead-follow-up-root").forEach(function (root) {
+            root.classList.add("d-none");
+        });
+        panelEl.querySelectorAll(".user-insights-follow-up-branch").forEach(function (branch) {
+            branch.classList.add("d-none");
+        });
+        panelEl.querySelectorAll(".user-insights-lead-body.show").forEach(function (body) {
+            if (typeof bootstrap !== "undefined" && bootstrap.Collapse) {
+                bootstrap.Collapse.getOrCreateInstance(body, { toggle: false }).hide();
+            } else {
+                body.classList.remove("show");
+            }
+        });
+        panelEl.querySelectorAll(".user-insights-lead-card").forEach(function (card) {
+            card.classList.remove("is-active", "is-expanded");
+            var btn = card.querySelector(".user-insights-lead-header");
+            if (btn) {
+                btn.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+
     function activateOpenTextQuestion(panelEl, detail, lead) {
         panelEl.setAttribute("data-active-lead-id", lead.id);
         setActiveLeadCard(panelEl, lead.id);
@@ -485,4 +517,6 @@
     });
 
     window.initUserInsightsDrilldownPanel = initDrilldownPanel;
+    window.clearUserInsightsDrilldownDetail = clearDrilldownDetail;
+    window.collapseUserInsightsLeadQuestions = collapseLeadQuestions;
 })();
