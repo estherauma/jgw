@@ -3,7 +3,7 @@ from django import forms
 from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
 from common.helpers.model_helpers.preference import get_countries_without_excluded_names
 
-from preference.models import CountryState, ImmigrationStatus, OriginalSectorOfWork
+from preference.models import ImmigrationStatus, OriginalSectorOfWork
 from django.utils.translation import gettext_lazy as _
 from users.utils import (
     get_user_factories,
@@ -75,26 +75,12 @@ class GenericFilterForm(forms.Form):
             self.fields["end_date"].widget.attrs["max"] = user_end_date
 
     def get_countries(self, countries_filter):
-        countries = []
-        countries_to_get_states_from = []
-
         if countries_filter.get("is_destination"):
-            countries_to_get_states_from = get_user_destinations(self.request.user)
+            countries = get_user_destinations(self.request.user)
         else:
-            countries_to_get_states_from = get_countries_without_excluded_names(filter=countries_filter)
+            countries = get_countries_without_excluded_names(filter=countries_filter)
 
-        for country in countries_to_get_states_from:
-            country_states = CountryState.objects.filter(country=country)
-            states_list = [(state.name, state.full_name.capitalize()) for state in country_states]
-            states_list.append((country.name, country.name.capitalize()))
-
-            countries.append(
-                (
-                    country.name.capitalize(),
-                    states_list if len(states_list) > 0 else [(country.name, country.name.capitalize())],
-                )
-            )
-        return countries
+        return [(country.name, country.name.capitalize()) for country in countries]
 
     start_date = forms.DateField(
         label=_("genericFilterFormStartDate"),
