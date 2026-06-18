@@ -35,6 +35,11 @@ UM_FLAG_DEFS = [
         "condition": "org_admin",
     },
     {
+        "name": "can_create_login_qr_code",
+        "label": "Create login QR codes",
+        "condition": "org_admin",
+    },
+    {
         "name": "can_edit_organizations",
         "label": "Edit organisations",
         "condition": "58_admin",

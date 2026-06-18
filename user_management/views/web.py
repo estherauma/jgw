@@ -1508,7 +1508,8 @@ class DeleteWorkCodeView(View):
 
         messages.success(request, f'Work code "{code}" deleted successfully.')
         return JsonResponse({"ok": True, "warning": warning_message})
-    
+
+
 class EditWorkCodeView(View):
     def post(self, request, work_code_id):
         org_id = request.POST.get("selected_org_id")
@@ -1961,3 +1962,55 @@ def user_activity_details(request, activity_id):
         "before": before_formatted,
         "after": after_formatted,
     })
+
+
+class CreateDeepLinkView(View):
+    def post(self, request):
+        try:
+            payload = json.loads(request.body.decode("utf-8") or "{}")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse(
+                {"ok": False, "error": "Invalid JSON payload."},
+                status=400,
+            )
+
+        work_code_id = payload.get("work_code_id")
+        deep_link_type = (payload.get("type") or "").strip().lower()
+        type_handlers = {
+            "login": OrganizationService.create_login_deep_link,
+        }
+        type_handler = type_handlers.get(deep_link_type)
+
+        if not type_handler:
+            return JsonResponse(
+                {"ok": False, "error": "Unsupported deep link type."},
+                status=400,
+            )
+
+        try:
+            branch_data = type_handler(
+                user=request.user,
+                request=request,
+                work_code_id=work_code_id,
+            )
+        except ValueError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except PermissionError:
+            return OrganizationService.org_access_denied()
+        except Exception:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while generating the deep link. Please try again.",
+                },
+                status=500,
+            )
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "url": branch_data.get("url"),
+                "qr_code_url": branch_data.get("qr_code_url"),
+                "data": branch_data,
+            }
+        )
