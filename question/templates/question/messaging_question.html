@@ -42,11 +42,15 @@
                 </a>
                 {% endflag %}
                 <div class="dropdown-menu" aria-labelledby="export-menu">
-                    {% flag 'can_view_messaging_question_report_export_button' %}
-                        <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">{% translate "messagingQuestionsExportMessagingQuestionDataReport" %}</a>
-                        <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">{% translate "messagingQuestionsExportMessagingPushedDataReport" %}</a>
+                    {% flag 'can_download_messaging_questions_data_report' %}
+                    <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">{% translate "messagingQuestionsExportMessagingQuestionDataReport" %}</a>
                     {% endflag %}
+                    {% flag 'can_download_messaging_questions_pushed_data_report' %}
+                    <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">{% translate "messagingQuestionsExportMessagingPushedDataReport" %}</a>
+                    {% endflag %}
+                    {% flag 'can_download_messaging_questions_statistics_report' %}
                     <button  class="dropdown-item" id="export-messaging-question-to-excel">{% translate "messagingQuestionsExportMessagingQuestionStatistics" %}</button>
+                    {% endflag %}
                 </div>
         </div>
     </div>

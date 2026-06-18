@@ -160,9 +160,15 @@
                     </a>
                 {% endflag %}
                 <div class="dropdown-menu" aria-labelledby="export-menu">
+                    {% flag 'can_download_inline_questions_data_report' %}
                     <a class="dropdown-item" href="{% url 'question:export_inline_question_data' %}?export=true">{% translate "inlineQuestionsExportDataReport" %} </a>
+                    {% endflag %}
+                    {% flag 'can_download_inline_questions_statistics_report' %}
                     <button  class="dropdown-item" id="export-inline-question-to-excel">{% translate "inlineQuestionsExportStatistics" %} </button>
+                    {% endflag %}
+                    {% flag 'can_download_lead_questions_with_followups_report' %}
                     <a class="dropdown-item" href="{% url 'question:export_lead_questions_with_followups' %}">Export Lead Questions with Follow-ups to Excel</a>
+                    {% endflag %}
                 </div>
             </div>
         {% else %}

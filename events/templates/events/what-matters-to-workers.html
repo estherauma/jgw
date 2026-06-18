@@ -67,10 +67,18 @@
                 </a>
               {% endflag %}
               <div class="dropdown-menu" aria-labelledby="export-menu">
+                {% flag 'can_download_telephone_clicks_data_report' %}
                 <a class="dropdown-item" href="{% url 'events:export_telephone_clicks_data' %}?export=true">{% translate "whatMattersExportTelephoneClicksDataReport" %} </a>
+                {% endflag %}
+                {% flag 'can_download_link_clicks_data_report' %}
                 <a class="dropdown-item" href="{% url 'events:export_link_clicks_data' %}?export=true">{% translate "whatMattersExportLinkClicksDataReport" %} </a>
+                {% endflag %}
+                {% flag 'can_download_report_issue_data_report' %}
                 <a class="dropdown-item" href="{% url 'events:export_report_issue_data' %}?export=true">{% translate "whatMattersExportReportIssueData" %} </a>
+                {% endflag %}
+                {% flag 'can_download_worker_insights_statistics_report' %}
                 <button class="dropdown-item" id="export-what-matters-to-workers-to-excel">{% translate "whatMattersExportEventsDataStatistics" %} </button>
+                {% endflag %}
               </div>
             </div>
           {% else %}
