@@ -32,29 +32,22 @@
     <div class="col-md-9">
         <header class="user-overview-header">Messaging Questions Responses</header>
     </div>
-    <div class="col-3 user-overview-actions">     
-        <div class="col-md-6 button-margin">
-            <div class="dropdown w-100">
-                {% flag 'can_download_messaging_questions_excel_reports' %}
-                    <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
-                        id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {% translate "messagingQuestionsExport" %}
-                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                    </a>
+    <div class="col-3 user-overview-actions">
+        <div class="dropdown text-end">
+            {% flag 'can_download_messaging_questions_excel_reports' %}
+                <a class="btn btn-primary w-50 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                    id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {% translate "messagingQuestionsExport" %}
+                    <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                </a>
+                {% endflag %}
+                <div class="dropdown-menu" aria-labelledby="export-menu">
+                    {% flag 'can_view_messaging_question_report_export_button' %}
+                        <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">{% translate "messagingQuestionsExportMessagingQuestionDataReport" %}</a>
+                        <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">{% translate "messagingQuestionsExportMessagingPushedDataReport" %}</a>
                     {% endflag %}
-                    <div class="dropdown-menu" aria-labelledby="export-menu">
-                        {% flag 'can_view_messaging_question_report_export_button' %}
-                            <a class="dropdown-item" href="{% url 'question:export_messaging_question_data' %}?export=true">{% translate "messagingQuestionsExportMessagingQuestionDataReport" %}</a>
-                            <a class="dropdown-item" href="{% url 'question:export_message_sent_data' %}?export=true">{% translate "messagingQuestionsExportMessagingPushedDataReport" %}</a>
-                        {% endflag %}
-                        <button  class="dropdown-item" id="export-messaging-question-to-excel">{% translate "messagingQuestionsExportMessagingQuestionStatistics" %}</button>
-                    </div>                                    
+                    <button  class="dropdown-item" id="export-messaging-question-to-excel">{% translate "messagingQuestionsExportMessagingQuestionStatistics" %}</button>
                 </div>
-            </div>
-            <div class="col-md-6 button-margin">
-                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "messagingQuestionsExportFilterButton" %}</button>
-            </div>
         </div>
     </div>
 </div>
