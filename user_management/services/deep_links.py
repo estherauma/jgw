@@ -10,6 +10,20 @@ from django.utils.text import slugify
 class DeepLinkService:
     endpoint = "https://api2.branch.io/v1/url"
 
+    @staticmethod
+    def get_conflicting_branch_url(*, response_data):
+        error_data = response_data.get("error")
+        if not isinstance(error_data, dict):
+            return None
+
+        message = (error_data.get("message") or "").strip()
+        conflict_prefix = "Link alias conflict:"
+        if not message.startswith(conflict_prefix):
+            return None
+
+        conflict_url = message[len(conflict_prefix) :].strip()
+        return conflict_url or None
+
     @classmethod
     def create_branch_deep_link(cls, *, payload):
         branch_key = getattr(settings, "BRANCH_KEY", "").strip()
@@ -36,6 +50,11 @@ class DeepLinkService:
             raise ValueError(f"Could not reach Branch: {exc}") from exc
 
         if not response.ok:
+            conflicting_branch_url = cls.get_conflicting_branch_url(
+                response_data=response_data
+            )
+            if conflicting_branch_url:
+                return conflicting_branch_url
             raise ValueError(
                 response.text or f"Branch returned HTTP {response.status_code}."
             )

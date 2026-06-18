@@ -138,10 +138,10 @@
                             <thead>
                                 <tr>
                                     <th>Work code</th>
-                                    <th class="text-center">Requires authentication</th>
+                                    <th class="text-center">Auth Required</th>
                                     <th class="text-center">Expiry Date</th>
-                                    <th class="text-center">Assigned user groups</th>
-                                    <th></th>
+                                    <th class="text-center">User groups</th>
+                                    <th class="text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -160,64 +160,98 @@
                                         {% endif %}
                                     </td>
                                     <td class="text-center">{{ code.work_groups.count }}</td>
-                                    <td>
-                                        <div class="um-action">
-                                            <!-- <button class="um-btn um-btn-outline">Edit</button> -->
-                                            {% flag 'can_assign_work_code' %}
+                                    <td class="text-right">
+                                        <div class="dropdown um-actions">
                                             <button
-                                                class="um-btn um-btn-outline"
+                                                class="um-actions-trigger dropdown-toggle"
                                                 type="button"
-                                                data-toggle="modal"
-                                                data-target="#assign-workcode-modal"
-                                                data-workcode-assign
-                                                data-workcode-id="{{ code.id }}"
-                                                data-workcode-code="{{ code.code }}"
-                                                data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                                data-toggle="dropdown"
+                                                data-display="static"
+                                                aria-haspopup="true"
+                                                aria-expanded="false"
+                                                aria-label="Open actions for {{ code.code }}"
                                             >
-                                                Assign
+                                                <span class="sr-only">Open actions for {{ code.code }}</span>
+                                                <span class="um-actions-icon" aria-hidden="true">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </span>
                                             </button>
-                                            {% if code.work_groups.count %}
-                                            <button
-                                                class="um-btn um-btn-outline-black"
-                                                type="button"
-                                                data-toggle="modal"
-                                                data-target="#unassign-workcode-modal"
-                                                data-workcode-unassign
-                                                data-workcode-id="{{ code.id }}"
-                                                data-workcode-code="{{ code.code }}"
-                                                data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                            >
-                                                Unassign
-                                            </button>
-                                            {% endif %}
-                                            {% endflag %}
-                                            {% flag 'can_delete_work_code' %}
-                                            <button class="um-btn um-btn-outline-black um-navy"
-                                            data-workcode-id="{{ code.id }}"
-                                            data-workcode-code="{{ code.code }}"
-                                            data-delete-workcode-btn>
-                                                Delete
-                                            </button>
-                                            {% endflag %}
-                                            <!-- Edit button -->
-                                            {% flag 'can_edit_work_code' %}
-                                            <button
-                                                data-edit-code-btn
-                                                class="um-btn um-btn-outline"
-                                                type="button"
-                                                data-toggle="modal"
-                                                data-target="#edit-workcode-modal"
-                                                data-workcode-edit
-                                                data-workcode-id="{{ code.id }}"
-                                                data-workcode-code="{{ code.code }}"
-                                                data-workcode-requires-login="{{ code.requires_login }}"
-                                                data-workcode-expiry-date="{% if code.expiry_date %}{{ code.expiry_date|date:'Y-m-d' }}{% endif %}"
-                                                data-workcode-org-name="{{ selected_org_name }}"
-                                                data-workcode-org-id="{{ selected_org_id }}">
-                                                Edit
-                                            </button>
-                                            {% endflag %}
-                                                
+                                            <div class="dropdown-menu dropdown-menu-right um-actions-menu">
+                                                {% flag 'can_assign_work_code' %}
+                                                <button
+                                                    class="dropdown-item um-actions-item"
+                                                    type="button"
+                                                    data-toggle="modal"
+                                                    data-target="#assign-workcode-modal"
+                                                    data-workcode-assign
+                                                    data-workcode-id="{{ code.id }}"
+                                                    data-workcode-code="{{ code.code }}"
+                                                    data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                                >
+                                                    Assign
+                                                </button>
+                                                {% if code.work_groups.count %}
+                                                <button
+                                                    class="dropdown-item um-actions-item"
+                                                    type="button"
+                                                    data-toggle="modal"
+                                                    data-target="#unassign-workcode-modal"
+                                                    data-workcode-unassign
+                                                    data-workcode-id="{{ code.id }}"
+                                                    data-workcode-code="{{ code.code }}"
+                                                    data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                                >
+                                                    Unassign
+                                                </button>
+                                                {% endif %}
+                                                {% endflag %}
+                                                {% flag 'can_create_login_qr_code' %}
+                                                   <button
+                                                    class="dropdown-item um-actions-item"
+                                                    type="button"
+                                                    data-generate-workcode-link
+                                                    data-qr-code-title="QR code for {{ code.code }}"
+                                                    data-workcode-id="{{ code.id }}"
+                                                    data-workcode-code="{{ code.code }}"
+                                                >
+                                                    QR code
+                                                </button>
+                                                {% endflag %}
+                                                {% flag 'can_delete_work_code' %}
+                                                <button
+                                                    class="dropdown-item um-actions-item"
+                                                    type="button"
+                                                    data-workcode-id="{{ code.id }}"
+                                                    data-workcode-code="{{ code.code }}"
+                                                    data-delete-workcode-btn
+                                                >
+                                                    Delete
+                                                </button>
+
+                                                {% endflag %}
+
+
+                                                {% flag 'can_edit_work_code' %}
+                                                <button
+                                                    class="dropdown-item um-actions-item"
+                                                    type="button"
+                                                    data-toggle="modal"
+                                                    data-target="#edit-workcode-modal"
+                                                    data-workcode-edit
+                                                    data-workcode-id="{{ code.id }}"
+                                                    data-workcode-code="{{ code.code }}"
+                                                    data-workcode-requires-login="{{ code.requires_login }}"
+                                                    data-workcode-expiry-date="{% if code.expiry_date %}{{ code.expiry_date|date:'Y-m-d' }}{% endif %}"
+                                                    data-workcode-org-name="{{ selected_org_name }}"
+                                                    data-workcode-org-id="{{ selected_org_id }}"
+                                                    data-edit-code-btn
+                                                >
+                                                    Edit
+                                                </button>
+                                                {% endflag %}
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -500,6 +534,7 @@
 
 {% include 'create-org-modal.html' with action_type='edit' modal_title='Edit organisation' submit_label='Save changes' form=create_org_form form_action="" org_details=org_details %}
 {% include 'confirm-modal.html' %}
+{% include 'qr-code-modal.html' %}
 <div id="um-fullscreen-loader" class="um-fullscreen-loader d-none">
     <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
         <span class="sr-only">Loading...</span>
@@ -510,7 +545,9 @@
 <script src="{% static 'js/user_management/common.js' %}"></script>
 <script src="{% static 'js/user_management/image-picker.js' %}"></script>
 <script src="{% static 'js/user_management/select-dropdown.js' %}"></script>
+<script src="{% static 'js/user_management/actions-menu.js' %}"></script>
 <script src="{% static 'js/user_management/organization.js' %}"></script>
+<script src="{% static 'js/user_management/deep-linking.js' %}"></script>
 <script src="{% static 'js/user_management/role-group-selector.js' %}"></script>
 <script src="{% static 'js/user_management/users.js' %}"></script>
 <script src="{% static 'js/user_management/roles.js' %}"></script>
