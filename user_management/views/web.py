@@ -12,7 +12,13 @@ from django.utils import timezone
 from django.views import View
 import phonenumbers
 import json
-from preference.models import OrganizationGroup, OrganisationAccessCode, OrganisationData, SiteLanguages
+from preference.models import (
+    OrganizationGroup,
+    OrganisationAccessCode,
+    OrganisationData,
+    OrganisationDeepLink,
+    SiteLanguages,
+)
 
 from ..forms import (
     AddWorkCodeForm,
@@ -22,6 +28,7 @@ from ..forms import (
     CreateOrganisationForm,
     DashboardUserForm,
     EditOrganizationGroupForm,
+    OrganisationDeepLinkForm,
     OrganisationRoleForm,
     WorkCodeAssignForm,
     WorkGroupForm,
@@ -77,6 +84,7 @@ def user_management(request):
     work_groups = WorkGroup.objects.none()
     assigned_work_codes = []
     roles = OrganisationRole.objects.none()
+    deep_links = OrganisationDeepLink.objects.none()
 
     selected_org = None
     selected_org_id = None
@@ -124,6 +132,9 @@ def user_management(request):
         roles = OrganisationRole.objects.filter(organisation=selected_org).prefetch_related(
             "role_permissions"
         ).order_by("name")
+        deep_links = OrganisationDeepLink.objects.filter(
+            organisation_data=selected_org
+        ).order_by("created_at")
         org_details = OrganizationService.build_organisation_form_payload(
             organisation=selected_org,
         )
@@ -158,6 +169,8 @@ def user_management(request):
         "dashboard_user_form": DashboardUserForm(orgs_qs=organizations),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
         "roles": roles,
+        "deep_links": deep_links,
+        "deep_link_form": OrganisationDeepLinkForm(organisation=selected_org),
         "role_form": OrganisationRoleForm(organisation=selected_org, current_user=user),
     }
     return render(request, "index.html", context=context)
@@ -1978,6 +1991,7 @@ class CreateDeepLinkView(View):
         deep_link_type = (payload.get("type") or "").strip().lower()
         type_handlers = {
             "login": OrganizationService.create_login_deep_link,
+            "onboarding": OrganizationService.create_onboarding_deep_link,
         }
         type_handler = type_handlers.get(deep_link_type)
 
@@ -1992,7 +2006,12 @@ class CreateDeepLinkView(View):
                 user=request.user,
                 request=request,
                 work_code_id=work_code_id,
+                payload=payload,
             )
+        except ValidationError as exc:
+            if hasattr(exc, "message_dict"):
+                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
         except ValueError as exc:
             return JsonResponse({"ok": False, "error": str(exc)}, status=400)
         except PermissionError:
@@ -2004,6 +2023,12 @@ class CreateDeepLinkView(View):
                     "error": "An error occurred while generating the deep link. Please try again.",
                 },
                 status=500,
+            )
+
+        if deep_link_type == "onboarding":
+            messages.success(
+                request,
+                f'Deep link "{branch_data["title"]}" created successfully.',
             )
 
         return JsonResponse(

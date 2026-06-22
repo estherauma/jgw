@@ -90,13 +90,28 @@
 
   window.syncSelectedOrganization = syncSelectedOrganization;
 
-  async function postFormJson(form) {
+  async function postFormJson(form, options) {
+    options = options || {};
+    var headers = {
+      'X-Requested-With': 'XMLHttpRequest',
+    };
+    var body = null;
+
+    if (options.asJson) {
+      headers['X-CSRFToken'] =
+        document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(
+        options.buildPayload ? options.buildPayload(form) : {},
+      );
+    } else {
+      body = new FormData(form);
+    }
+
     var response = await fetch(form.action, {
       method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-      body: new FormData(form),
+      headers: headers,
+      body: body,
     });
     var data = await response.json();
     if (!response.ok) {

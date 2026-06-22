@@ -1,0 +1,51 @@
+{% load um_waffle_flags %}
+<div class="um-card um-navy mt-3" data-org-dependent>
+    <div class="um-row">
+        <div class="um-card-title um-navy">Organisation QR cODE</div>
+        <div class="um-action">
+            {% flag 'can_edit_organization_details' %}
+            <button class="um-btn" type="button" data-toggle="modal" data-target="#add-organisation-deep-link-modal">
+                Create link
+            </button>
+            {% endflag %}
+        </div>
+    </div>
+    <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm">
+        <div class="um-scrollbar">
+            <div class="um-scrollbar-thumb"></div>
+        </div>
+        <div class="um-table-scroll">
+            <table class="um-table um-navy">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Link type</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for deep_link in deep_links %}
+                    <tr>
+                        <td>{{ deep_link.title|default:"-" }}</td>
+                        <td>{{ deep_link.link_type }}</td>
+                        <td>
+                            <a
+                                class="text-info text-decoration-none"
+                                href="{{ deep_link.link }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {{ deep_link.link }}
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">No organisation deep links yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

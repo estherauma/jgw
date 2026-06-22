@@ -90,6 +90,40 @@ class DeepLinkService:
         }
 
     @classmethod
+    def create_onboarding_deep_link(
+        cls,
+        *,
+        organisation,
+        link_data,
+    ):
+        title = link_data["title"]
+        link_type = link_data["link_type"]
+        destination = link_data["destination"]
+        access_code = link_data.get("access_code")
+        sector = link_data.get("sector")
+        immigration_status = link_data.get("immigration_status")
+
+        payload = {
+            "feature": link_type,
+            "campaign": "user_management",
+            "tags": [organisation.name, link_type],
+            "data": {
+                "$marketing_title": title,
+                "type": link_type,
+                "destination": (destination.code or "").upper(),
+                "organisationAccessCode": access_code.code if access_code else "",
+                "sectors": sector.slug if sector else "",
+                "immigrationStatus": immigration_status.value if immigration_status else "",
+            },
+        }
+
+        branch_url = cls.create_branch_deep_link(payload=payload)
+        return {
+            "url": branch_url,
+            "data": payload["data"],
+        }
+
+    @classmethod
     def create_qr_code(cls, *, deep_link):
         qr_code = segno.make(deep_link)
         qr_buffer = io.BytesIO()

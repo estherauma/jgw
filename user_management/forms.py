@@ -9,6 +9,7 @@ from preference.models import (
     OrganizationGroup,
     OrganisationAccessCode,
     OrganisationData,
+    OrganisationDeepLink,
     Country,
     ImmigrationStatus,
     FactoryFarm,
@@ -825,6 +826,121 @@ class OrganisationRoleForm(forms.ModelForm):
         if new_permissions:
             OrganisationRolePermission.objects.bulk_create(new_permissions)
         return role
+
+
+class OrganisationDeepLinkForm(forms.ModelForm):
+    destination = forms.ModelChoiceField(
+        queryset=Country.objects.none(),
+        required=True,
+        empty_label="Select destination",
+        widget=forms.Select(attrs={"class": "form-select um-input"}),
+    )
+    access_code = forms.ModelChoiceField(
+        queryset=OrganisationAccessCode.objects.none(),
+        required=False,
+        empty_label="Select access code",
+        widget=forms.Select(attrs={"class": "form-select um-input"}),
+    )
+    sectors = forms.ModelChoiceField(
+        queryset=WorkSector.objects.none(),
+        required=False,
+        empty_label="Select sector",
+        widget=forms.Select(attrs={"class": "form-select um-input"}),
+        to_field_name="slug",
+    )
+    immigration_status = forms.ModelChoiceField(
+        queryset=ImmigrationStatus.objects.none(),
+        required=False,
+        empty_label="Select immigration status",
+        widget=forms.Select(attrs={"class": "form-select um-input"}),
+    )
+
+    class Meta:
+        model = OrganisationDeepLink
+        fields = ["title", "link_type"]
+
+    def __init__(self, *args, **kwargs):
+        self.organisation = kwargs.pop("organisation", None)
+        super().__init__(*args, **kwargs)
+        self.fields["title"].required = True
+        self.fields["link_type"].required = True
+        self.fields["destination"].required = True
+        self.fields["access_code"].required = False
+        self.fields["sectors"].required = False
+        self.fields["immigration_status"].required = False
+        self.fields["title"].widget.attrs.update(
+            {"class": "form-control um-input", "placeholder": "Link title"}
+        )
+        self.fields["link_type"].widget.attrs.update(
+            {
+                "class": "form-control um-input",
+                "placeholder": "Link type",
+                "readonly": "readonly",
+            }
+        )
+        self.fields["link_type"].initial = (
+            self.initial.get("link_type")
+            or getattr(self.instance, "link_type", None)
+            or "onboarding"
+        )
+        self.fields["link_type"].disabled = True
+        self.fields["destination"].queryset = Country.objects.filter(
+            is_destination=True
+        ).order_by("name")
+        self.fields["access_code"].queryset = (
+            OrganisationAccessCode.objects.filter(organisation=self.organisation)
+            .prefetch_related("work_groups")
+            .order_by("code")
+            if self.organisation
+            else OrganisationAccessCode.objects.none()
+        )
+        self.fields["sectors"].queryset = WorkSector.objects.order_by(
+            "display_name"
+        )
+        self.fields["immigration_status"].queryset = ImmigrationStatus.objects.order_by(
+            "name"
+        )
+        self.fields["access_code"].label_from_instance = self.get_access_code_label
+        self.fields["sectors"].label_from_instance = lambda sector: sector.display_name
+        self.fields["destination"].label_from_instance = lambda destination: destination.name
+        self.fields["immigration_status"].label_from_instance = (
+            lambda status: status.name
+        )
+
+    @staticmethod
+    def get_access_code_label(access_code):
+        group_names = sorted(group.name for group in access_code.work_groups.all())
+        group_label = ", ".join(group_names) if group_names else "All users"
+        return f"{access_code.code} ({group_label})"
+
+    def clean_title(self):
+        title = (self.cleaned_data.get("title") or "").strip()
+        if not title:
+            raise forms.ValidationError("Title is required.")
+        return title
+
+    def clean_link_type(self):
+        link_type = (
+            (self.cleaned_data.get("link_type") or "")
+            or self.fields["link_type"].initial
+            or "onboarding"
+        )
+        link_type = str(link_type).strip().lower()
+        if not link_type:
+            raise forms.ValidationError("Link type is required.")
+        return link_type
+
+    def save(self, commit=True, generated_link=None):
+        deep_link = super().save(commit=False)
+        if self.organisation:
+            deep_link.organisation_data = self.organisation
+        if generated_link is not None:
+            deep_link.link = generated_link
+        if commit:
+            if not deep_link.link:
+                raise ValidationError("Generated link is required.")
+            deep_link.save()
+        return deep_link
 
 
 class WorkCodeAssignForm(forms.Form):
