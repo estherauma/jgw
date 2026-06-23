@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.db import models
 from django.forms.models import model_to_dict
 from user_management.models import UserActivity
+from django.core.paginator import Paginator
 
 logger = logging.getLogger(__name__)
 
@@ -181,3 +182,18 @@ class UserActivityService:
             message=f'Deleted organisation "{organisation_name}"',
             changes={"before": before_state or {}, "after": {}},
         )
+        
+    @classmethod
+    def get_paginated_activities(cls, queryset, page_number=None):
+        paginator = Paginator(queryset.order_by("-created_at"), 20)
+        activities_page = paginator.get_page(page_number)
+
+        return {
+            "activities": activities_page.object_list,
+            "activities_page": activities_page,
+            "activities_pagination_context": {
+                "page_obj": activities_page,
+                "page_numbers": list(activities_page.paginator.get_elided_page_range(activities_page.number)),
+                "item_label": "activities",
+            },
+        }
