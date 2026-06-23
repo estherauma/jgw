@@ -475,17 +475,15 @@ class OrganizationService:
         current_user,
         query="",
         page_number=None,
-        queryset=None,
     ):
-        if queryset is None:
-            queryset = OrganizationService.get_allowed_orgs(current_user).order_by("name")
-        
+        queryset = OrganizationService.get_allowed_orgs(current_user).order_by("name")
+
         query = (query or "").strip()
         if query:
             queryset = queryset.filter(
                 Q(name__icontains=query) | Q(org_code__icontains=query)
             )
-        
+
         paginator = Paginator(queryset, 20)
         orgs_page = paginator.get_page(page_number)
         

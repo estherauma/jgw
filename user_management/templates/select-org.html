@@ -4,7 +4,7 @@
   <div class="um-card-title">Selected organisation</div>
   <div class="um-row">
     <div class="input-group">
-      <div class="um-select" data-org-select>
+      <div class="um-select" data-org-select data-org-options-url="{% url 'user_management:search_organisations' %}" data-org-selected-id="{{ selected_id|default:'' }}">
         <button class="um-select-toggle rounded-pill fw-bold text-start" type="button" data-org-toggle>
           <span data-org-selected-label>
             {% if selected %}{{ selected }}{% else %}Select organisation{% endif %}
@@ -19,7 +19,7 @@
             aria-label="Search organisation"
             data-org-filter
           />
-          <div class="um-select-options">
+          <div class="um-select-options" data-org-options>
             {% for org in options %}
             <button
               class="um-select-option"
@@ -38,7 +38,7 @@
             {% endfor %}
           </div>
         </div>
-        <input type="hidden" name="selected_org" data-org-hidden />
+        <input type="hidden" name="selected_org" data-org-hidden value="{{ selected_id|default:'' }}" />
       </div>
     </div>
     <div class="d-inline-flex align-items-center gap-5" >
@@ -70,21 +70,19 @@
     var filterInput = wrapper.querySelector('[data-org-filter]');
     var hiddenInput = wrapper.querySelector('[data-org-hidden]');
     var selectedLabel = wrapper.querySelector('[data-org-selected-label]');
-    var options = Array.prototype.slice.call(
-      wrapper.querySelectorAll('[data-org-option]'),
-    );
+    var optionsContainer = wrapper.querySelector('[data-org-options]');
+    var optionsUrl = wrapper.getAttribute('data-org-options-url');
+    var selectedId = wrapper.getAttribute('data-org-selected-id') || '';
+    var debounceTimer = null;
+    var controller = null;
 
-    if (!toggle || !menu || !selectedLabel || options.length === 0) {
+    if (!toggle || !menu || !selectedLabel || !optionsContainer || !optionsUrl) {
       return;
     }
 
     function closeMenu() {
       wrapper.classList.remove('is-open');
       menu.classList.remove('is-open');
-      if (filterInput) {
-        filterInput.value = '';
-        filterOptions('');
-      }
     }
 
       function setSelected(option) {
@@ -102,7 +100,7 @@
         if (hiddenInput) {
           hiddenInput.value = value;
         }
-        options.forEach(function (item) {
+        wrapper.querySelectorAll('[data-org-option]').forEach(function (item) {
           item.classList.remove('is-selected');
         });
         option.classList.add('is-selected');
@@ -192,16 +190,47 @@
         });
       }
 
-      function filterOptions() {
-        var query = (filterInput && filterInput.value) || '';
-        var normalized = query.toLowerCase().trim();
-        options.forEach(function (option) {
-          var text = option.getAttribute('data-org-label') || '';
-          var matches =
-            normalized.length === 0 ||
-            text.toLowerCase().indexOf(normalized) !== -1;
-          option.hidden = !matches;
+      function renderOptions(organisations) {
+        optionsContainer.innerHTML = '';
+        organisations.forEach(function (org) {
+          var option = document.createElement('button');
+          option.type = 'button';
+          option.className = 'um-select-option';
+          option.setAttribute('data-org-option', '');
+          option.setAttribute('data-org-value', org.id);
+          option.setAttribute('data-org-label', org.name);
+          option.textContent = org.name;
+          optionsContainer.appendChild(option);
         });
+      }
+
+      function loadOptions(query) {
+        if (controller) {
+          controller.abort();
+        }
+        controller = new AbortController();
+        var params = new URLSearchParams();
+        if (query) {
+          params.set('q', query);
+        }
+        fetch(optionsUrl + (params.toString() ? '?' + params.toString() : ''), {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          signal: controller.signal,
+        })
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error('Failed to load organisations');
+            }
+            return response.json();
+          })
+          .then(function (data) {
+            renderOptions(data.organisations || []);
+          })
+          .catch(function (error) {
+            if (error.name !== 'AbortError') {
+              console.error(error);
+            }
+          });
       }
 
       toggle.addEventListener('click', function () {
@@ -220,19 +249,35 @@
         }
       });
 
-      options.forEach(function (option) {
-        option.addEventListener('click', function () {
+      optionsContainer.addEventListener('click', function (event) {
+        var option = event.target.closest('[data-org-option]');
+        if (option) {
           setSelected(option);
-        });
+        }
       });
 
       if (filterInput) {
-        filterInput.addEventListener('input', filterOptions);
+        filterInput.addEventListener('input', function () {
+          var value = (filterInput.value || '').trim();
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function () {
+            loadOptions(value);
+          }, 250);
+        });
       }
 
-      var initial = wrapper.querySelector('[data-org-selected="true"]');
-      if (initial) {
-        setSelected(initial);
+      if (selectedId) {
+        if (window.storeSelectedOrganisation) {
+          window.storeSelectedOrganisation(
+            selectedId,
+            (selectedLabel.textContent || '').trim(),
+          );
+        }
+        if (hiddenInput) {
+          hiddenInput.value = selectedId;
+        }
+        toggleDependents(true);
+        filterWorkCodes(selectedId);
       } else {
         toggleDependents(false);
         filterWorkCodes('');
@@ -245,7 +290,7 @@
           if (hiddenInput) {
             hiddenInput.value = '';
           }
-          options.forEach(function (item) {
+          wrapper.querySelectorAll('[data-org-option]').forEach(function (item) {
             item.classList.remove('is-selected');
           });
           resetDetails();

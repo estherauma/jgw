@@ -74,7 +74,6 @@ def user_management(request):
     orgs_listing = OrganizationService.get_paginated_organisations_context(
         user,
         page_number=request.GET.get("organisations_page"),
-        queryset= None,
     )
     paged_organizations = orgs_listing["organisations"]
     organization_groups = OrganizationGroup.objects.order_by("name")
@@ -146,7 +145,6 @@ def user_management(request):
 
     context = {
         "organizations": paged_organizations,
-        "organization_options": allowed_organizations_qs,
         "organisations_page": orgs_listing["orgs_page"],
         "organisations_page_numbers": orgs_listing["orgs_pagination_context"]["page_numbers"],
         "row_start_index": orgs_listing["row_start_index"],
@@ -195,7 +193,18 @@ def search_organisations(request):
         request=request,
     )
     
-    return JsonResponse({"ok": True, "rows_html": rows_html, "pagination_html": pagination_html})
+    return JsonResponse(
+        {
+            "ok": True,
+            "rows_html": rows_html,
+            "pagination_html": pagination_html,
+            "organisations": [
+                {"id": org.id, "name": org.name}
+                for org in organisations_listing["organisations"]
+            ],
+        }
+    )
+
 
 def search_users(request):
     user = request.user
