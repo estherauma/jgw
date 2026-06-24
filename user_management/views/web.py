@@ -132,9 +132,9 @@ def user_management(request):
         roles = OrganisationRole.objects.filter(organisation=selected_org).prefetch_related(
             "role_permissions"
         ).order_by("name")
-        deep_links = OrganisationDeepLink.objects.filter(
-            organisation_data=selected_org
-        ).order_by("created_at")
+        deep_links = OrganizationService.get_organisation_deep_links(
+            organisation=selected_org
+        )
         org_details = OrganizationService.build_organisation_form_payload(
             organisation=selected_org,
         )
@@ -1988,26 +1988,36 @@ class CreateDeepLinkView(View):
             )
 
         work_code_id = payload.get("work_code_id")
-        deep_link_type = (payload.get("type") or "").strip().lower()
+        deep_link_type = (payload.get("link_type") or "").strip().lower()
         type_handlers = {
-            "login": OrganizationService.create_login_deep_link,
-            "onboarding": OrganizationService.create_onboarding_deep_link,
+            "login": (
+                OrganizationService.create_login_deep_link,
+                {
+                    "user": request.user,
+                    "request": request,
+                    "work_code_id": work_code_id,
+                    "payload": payload,
+                },
+            ),
+            "onboarding": (
+                OrganizationService.create_onboarding_deep_link,
+                {
+                    "payload": payload,
+                },
+            ),
         }
-        type_handler = type_handlers.get(deep_link_type)
+        handler_config = type_handlers.get(deep_link_type)
 
-        if not type_handler:
+        if not handler_config:
             return JsonResponse(
                 {"ok": False, "error": "Unsupported deep link type."},
                 status=400,
             )
 
+        type_handler, handler_kwargs = handler_config
+
         try:
-            branch_data = type_handler(
-                user=request.user,
-                request=request,
-                work_code_id=work_code_id,
-                payload=payload,
-            )
+            branch_data = type_handler(**handler_kwargs)
         except ValidationError as exc:
             if hasattr(exc, "message_dict"):
                 return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
@@ -2016,7 +2026,8 @@ class CreateDeepLinkView(View):
             return JsonResponse({"ok": False, "error": str(exc)}, status=400)
         except PermissionError:
             return OrganizationService.org_access_denied()
-        except Exception:
+        except Exception as exc:
+            print(f"Error generating deep link: {exc}")
             return JsonResponse(
                 {
                     "ok": False,

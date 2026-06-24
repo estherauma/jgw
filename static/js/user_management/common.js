@@ -101,9 +101,7 @@
       headers['X-CSRFToken'] =
         document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
       headers['Content-Type'] = 'application/json';
-      body = JSON.stringify(
-        options.buildPayload ? options.buildPayload(form) : {},
-      );
+      body = JSON.stringify(options.payload || {});
     } else {
       body = new FormData(form);
     }

@@ -1,10 +1,12 @@
 import base64
 import io
-import json
+import logging
 import segno
 import requests
 from django.conf import settings
 from django.utils.text import slugify
+
+logger = logging.getLogger(__name__)
 
 
 class DeepLinkService:
@@ -46,7 +48,8 @@ class DeepLinkService:
                 timeout=30,
             )
             response_data = response.json()
-        except requests.RequestException as exc:
+        except Exception as exc:
+            logger.error(f"Error creating Branch deep link: {exc}", exc_info=True)
             raise ValueError(f"Could not reach Branch: {exc}") from exc
 
         if not response.ok:

@@ -288,8 +288,6 @@ class OrganizationService:
     @staticmethod
     def create_onboarding_deep_link(
         *,
-        user,
-        request,
         payload=None,
     ):
         payload = payload or {}
@@ -357,6 +355,19 @@ class OrganizationService:
             )
             .filter(has_access_code=True, has_collection_language=True)
         )
+
+    @staticmethod
+    def get_organisation_deep_links(*, organisation):
+        deep_links = OrganisationDeepLink.objects.filter(
+            organisation_data=organisation
+        ).order_by("created_at")
+        for deep_link in deep_links:
+            deep_link.qr_code_url = (
+                DeepLinkService.create_qr_code(deep_link=deep_link.link)
+                if deep_link.link
+                else ""
+            )
+        return deep_links
 
     @staticmethod
     def build_organisation_form_payload(*, organisation):

@@ -263,9 +263,28 @@
         requestUrl: '/user-management/deep-links/create/',
         requestBody: {
           work_code_id: $(this).data('workcode-id'),
-          type: 'login',
+          link_type: 'login',
         },
       });
+    });
+  }
+
+  function initOrganisationDeepLinkQrView() {
+    const modal = document.getElementById('workcode-link-modal');
+    const modalController = createQrCodeModalController(modal);
+
+    if (!modalController) {
+      return;
+    }
+
+    $(document).on('click', '[data-view-deep-link-qr]', function (event) {
+      event.preventDefault();
+      modalController.showSuccess({
+        title: this.dataset.qrCodeTitle || DEFAULT_MODAL_TITLE,
+        url: this.dataset.qrCodeLink || '',
+        qrCodeUrl: this.dataset.qrCodeUrl || '',
+      });
+      $(modal).modal('show');
     });
   }
 
@@ -354,21 +373,21 @@
         try {
           const data = await window.postFormJson(form, {
             asJson: true,
-            buildPayload: (currentForm) => ({
+            payload: {
               selected_org_id:
-                currentForm.querySelector('[name="selected_org_id"]')?.value || '',
-              title: currentForm.querySelector('[name="title"]')?.value || '',
+                form.querySelector('[name="selected_org_id"]')?.value || '',
+              title: form.querySelector('[name="title"]')?.value || '',
               link_type:
-                currentForm.querySelector('[name="link_type"]')?.value || '',
+                form.querySelector('[name="link_type"]')?.value || '',
               destination:
-                currentForm.querySelector('[name="destination"]')?.value || '',
+                form.querySelector('[name="destination"]')?.value || '',
               access_code:
-                currentForm.querySelector('[name="access_code"]')?.value || '',
+                form.querySelector('[name="access_code"]')?.value || '',
               sectors:
-                currentForm.querySelector('[name="sectors"]')?.value || '',
+                form.querySelector('[name="sectors"]')?.value || '',
               immigration_status:
-                currentForm.querySelector('[name="immigration_status"]')?.value || '',
-            }),
+                form.querySelector('[name="immigration_status"]')?.value || '',
+            },
           });
           if (data && data.org_id) {
             const homeUrl = window.location.pathname;
@@ -403,6 +422,7 @@
 
   window.addEventListener('load', function () {
     initGenerateWorkCodeLink();
+    initOrganisationDeepLinkQrView();
     initOrganisationDeepLinkForm();
   });
 })();

@@ -512,7 +512,7 @@
 {% url 'user_management:assign_work_code' as assign_work_code_url %}
 {% url 'user_management:assign_users_work_groups' as assign_users_work_groups_url %}
 {% url 'user_management:create_role' as create_role_url %}
-{% url 'user_management:create_organisation_deep_link' as create_organisation_deep_link_url %}
+{% url 'user_management:create_deep_link' as create_organisation_deep_link_url %}
 <!-- include create organisation modal -->
 {% include 'create-organization-group-modal.html' with modal_title='Create new organisation group' submit_label='Save' form_action=create_organization_group_url form=create_organization_group_form %}
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form org_details=blank_org_details %}

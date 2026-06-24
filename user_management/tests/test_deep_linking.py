@@ -165,7 +165,7 @@ class CreateDeepLinkViewTests(TestCase):
     def test_returns_400_for_unsupported_deep_link_type(self):
         response = self.client.post(
             self.url,
-            data='{"work_code_id": 1, "type": "invite"}',
+            data='{"work_code_id": 1, "link_type": "invite"}',
             content_type="application/json",
         )
 
@@ -184,7 +184,7 @@ class CreateDeepLinkViewTests(TestCase):
 
         response = self.client.post(
             self.url,
-            data='{"work_code_id": 7, "type": "login"}',
+            data='{"work_code_id": 7, "link_type": "login"}',
             content_type="application/json",
         )
 
@@ -209,7 +209,7 @@ class CreateDeepLinkViewTests(TestCase):
 
         response = self.client.post(
             self.url,
-            data='{"type": "login"}',
+            data='{"link_type": "login"}',
             content_type="application/json",
         )
 
