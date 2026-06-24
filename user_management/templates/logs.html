@@ -26,7 +26,7 @@
         </div>
         <div class="um-section-divider my-3"></div>
         <div class="table-responsive">
-            <table id="um-logs-table">
+            <table id="um-logs-table" class="table w-100 table-hover mt-3">
                 <thead>
                     <tr class="um-navy">
                         <th class="um-time-col fw-semibold">Time</th>
@@ -55,11 +55,10 @@
                     </tr>
                     {% endfor %}
                 </tbody>
-            </table>
-            <div class="mt-4" data-activity-pagination>
+            </table>     
+        </div>
+        <div class="mt-4" data-activity-pagination>
                 {% include "partials/pagination.html" with page_obj=activities_page page_numbers=activities_pagination_context.page_numbers item_label=activities_pagination_context.item_label nav_label=activities_pagination_context.nav_label page_link_attr=activities_pagination_context.page_link_attr %}
-            </div>
-                
         </div>
     </div>
 </div>
