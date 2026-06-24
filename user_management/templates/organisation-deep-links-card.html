@@ -1,9 +1,9 @@
 {% load um_waffle_flags %}
 <div class="um-card um-navy mt-3" data-org-dependent>
     <div class="um-row">
-        <div class="um-card-title um-navy">Organisation QR cODE</div>
+        <div class="um-card-title um-navy">Organisation QR Codes</div>
         <div class="um-action">
-            {% flag 'can_edit_organization_details' %}
+            {% flag 'can_create_login_qr_code' %}
             <button class="um-btn" type="button" data-toggle="modal" data-target="#add-organisation-deep-link-modal">
                 Create link
             </button>
@@ -20,7 +20,7 @@
                     <tr>
                         <th>Title</th>
                         <th>Link type</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>

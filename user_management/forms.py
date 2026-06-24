@@ -902,7 +902,9 @@ class OrganisationDeepLinkForm(forms.ModelForm):
         )
         self.fields["access_code"].label_from_instance = self.get_access_code_label
         self.fields["sectors"].label_from_instance = lambda sector: sector.display_name
-        self.fields["destination"].label_from_instance = lambda destination: destination.name
+        self.fields["destination"].label_from_instance = (
+            self.get_destination_label
+        )
         self.fields["immigration_status"].label_from_instance = (
             lambda status: status.name
         )
@@ -912,6 +914,13 @@ class OrganisationDeepLinkForm(forms.ModelForm):
         group_names = sorted(group.name for group in access_code.work_groups.all())
         group_label = ", ".join(group_names) if group_names else "All users"
         return f"{access_code.code} ({group_label})"
+
+    @staticmethod
+    def get_destination_label(destination):
+        name = destination.name or ""
+        if not name:
+            return ""
+        return name[:1].upper() + name[1:]
 
     def clean_title(self):
         title = (self.cleaned_data.get("title") or "").strip()
