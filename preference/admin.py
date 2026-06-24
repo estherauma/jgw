@@ -236,9 +236,9 @@ class OrganisationDataAdmin(admin.ModelAdmin):
 
 @admin.register(OrganisationDeepLink)
 class OrganisationDeepLinkAdmin(admin.ModelAdmin):
-    search_fields = ["title", "link", "link_type", "organisation_data__name", "organisation_data__org_code"]
-    list_display = ["title", "link_type", "link", "organisation_data", "created_at", "updated_at"]
-    list_select_related = ["organisation_data"]
+    search_fields = ["title", "link", "link_type", "organisation__name", "organisation__org_code"]
+    list_display = ["title", "link_type", "link", "organisation", "created_at", "updated_at"]
+    list_select_related = ["organisation"]
 
 
 @admin.register(OrganizationGroup)

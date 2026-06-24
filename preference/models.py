@@ -251,7 +251,7 @@ class OrganisationData(AuditFieldsMixin):
 
 
 class OrganisationDeepLink(AuditFieldsMixin):
-    organisation_data = models.ForeignKey(
+    organisation = models.ForeignKey(
         "OrganisationData",
         on_delete=models.CASCADE,
         related_name="deep_links",
@@ -261,7 +261,7 @@ class OrganisationDeepLink(AuditFieldsMixin):
     title = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.title} ({self.organisation_data})"
+        return f"{self.title} ({self.organisation})"
 
     class Meta(AuditFieldsMixin.Meta):
         indexes = [

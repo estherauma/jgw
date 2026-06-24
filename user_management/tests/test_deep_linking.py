@@ -374,7 +374,7 @@ class CreateDeepLinkViewTests(TestCase):
         )
 
         deep_link = OrganisationDeepLink.objects.get()
-        self.assertEqual(deep_link.organisation_data, self.organisation)
+        self.assertEqual(deep_link.organisation, self.organisation)
         self.assertEqual(deep_link.title, "New starter flow")
         self.assertEqual(deep_link.link_type, "onboarding")
         self.assertEqual(deep_link.link, "https://branch.example/onboarding")

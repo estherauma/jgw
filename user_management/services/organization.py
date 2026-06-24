@@ -370,7 +370,7 @@ class OrganizationService:
     @staticmethod
     def get_organisation_deep_links(*, organisation):
         deep_links = OrganisationDeepLink.objects.filter(
-            organisation_data=organisation
+            organisation=organisation
         ).order_by("created_at")
         for deep_link in deep_links:
             deep_link.qr_code_url = (

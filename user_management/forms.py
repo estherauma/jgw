@@ -942,7 +942,7 @@ class OrganisationDeepLinkForm(forms.ModelForm):
     def save(self, commit=True, generated_link=None):
         deep_link = super().save(commit=False)
         if self.organisation:
-            deep_link.organisation_data = self.organisation
+            deep_link.organisation = self.organisation
         if generated_link is not None:
             deep_link.link = generated_link
         if commit:
