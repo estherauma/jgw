@@ -1897,6 +1897,12 @@ def user_details(request, user_id):
     )
     
     dashboard_preferences = getattr(user, "dashboard_prefs", None)
+    page_number = request.GET.get("page", 1)
+
+    pagination_data = UserActivityService.get_paginated_activities(
+        activities,
+        page_number,
+    )
 
     context = {
         "user": user,
@@ -1911,6 +1917,7 @@ def user_details(request, user_id):
             ).order_by("name")
         ),
         "activities": activities,
+        **pagination_data,
     }
     return render(request, "user-details.html", context)
 
@@ -1965,6 +1972,7 @@ def user_activity_details(request, activity_id):
         "action": activity.action,
         "before": before_formatted,
         "after": after_formatted,
+        
     })
 
 
