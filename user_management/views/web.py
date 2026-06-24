@@ -1,4 +1,5 @@
 from datetime import timedelta
+import logging
 
 from django.contrib import messages
 from django.conf import settings
@@ -68,6 +69,8 @@ from content.services.partner_configurations import (
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
 )
+
+logger = logging.getLogger(__name__)
 
 @group_required("user_management")
 def user_management(request):
@@ -1989,19 +1992,36 @@ class CreateDeepLinkView(View):
 
         work_code_id = payload.get("work_code_id")
         deep_link_type = (payload.get("link_type") or "").strip().lower()
+        organisation = None
+        selected_org_id = payload.get("selected_org_id")
+        organisation = (
+                OrganisationData.objects.filter(id=selected_org_id).first()
+                if selected_org_id
+                else None
+            )
+
+        if organisation and not OrganizationService.has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_login_qr_code",
+        ):
+            return OrganizationService.org_access_denied()
+
         type_handlers = {
             "login": (
                 OrganizationService.create_login_deep_link,
                 {
                     "user": request.user,
                     "request": request,
+                    "organisation": organisation,
                     "work_code_id": work_code_id,
-                    "payload": payload,
                 },
             ),
             "onboarding": (
                 OrganizationService.create_onboarding_deep_link,
                 {
+                    "organisation": organisation,
                     "payload": payload,
                 },
             ),
@@ -2027,7 +2047,7 @@ class CreateDeepLinkView(View):
         except PermissionError:
             return OrganizationService.org_access_denied()
         except Exception as exc:
-            print(f"Error generating deep link: {exc}")
+            logger.error("Error creating deep link: %s", exc, exc_info=True)
             return JsonResponse(
                 {
                     "ok": False,

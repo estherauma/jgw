@@ -98,8 +98,11 @@
     var body = null;
 
     if (options.asJson) {
-      headers['X-CSRFToken'] =
-        document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+      var csrfToken =
+        form?.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+        document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+        '';
+      headers['X-CSRFToken'] = csrfToken;
       headers['Content-Type'] = 'application/json';
       body = JSON.stringify(options.payload || {});
     } else {

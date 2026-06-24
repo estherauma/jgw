@@ -258,17 +258,27 @@ class OrganizationService:
         )
 
     @staticmethod
-    def create_login_deep_link(*, user, request, work_code_id=None, payload=None):
+    def create_login_deep_link(
+        *,
+        user,
+        request,
+        organisation=None,
+        work_code_id=None,
+    ):
         if not work_code_id:
             raise ValueError("Work code is required.")
 
         allowed_orgs = OrganizationService.get_allowed_orgs(user)
+        work_code_filters = {
+            "id": work_code_id,
+            "organisation__in": allowed_orgs,
+        }
+        if organisation:
+            work_code_filters["organisation"] = organisation
+
         work_code = (
             OrganisationAccessCode.objects.select_related("organisation")
-            .filter(
-                id=work_code_id,
-                organisation__in=allowed_orgs,
-            )
+            .filter(**work_code_filters)
             .first()
         )
 
@@ -277,7 +287,7 @@ class OrganizationService:
 
         if not OrganizationService.has_org_access(
             user,
-            work_code.organisation,
+            organisation or work_code.organisation,
             request=request,
             flag_name="can_edit_work_code",
         ):
@@ -288,13 +298,14 @@ class OrganizationService:
     @staticmethod
     def create_onboarding_deep_link(
         *,
+        organisation=None,
         payload=None,
     ):
         payload = payload or {}
-        org_id = payload.get("selected_org_id")
-        organisation = None
-        if org_id:
-            organisation = OrganisationData.objects.filter(id=org_id).first()
+        if not organisation:
+            org_id = payload.get("selected_org_id")
+            if org_id:
+                organisation = OrganisationData.objects.filter(id=org_id).first()
         if not organisation:
             raise ValidationError(
                 {"organisation": ["Select an organisation first."]}

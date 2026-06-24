@@ -263,6 +263,7 @@
         requestUrl: '/user-management/deep-links/create/',
         requestBody: {
           work_code_id: $(this).data('workcode-id'),
+          selected_org_id: $(this).data('workcode-org-id'),
           link_type: 'login',
         },
       });
