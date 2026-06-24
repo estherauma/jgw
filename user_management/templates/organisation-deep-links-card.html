@@ -29,16 +29,7 @@
                         <td>{{ deep_link.title|default:"-" }}</td>
                         <td>{{ deep_link.link_type }}</td>
                         <td>
-                            <a
-                                href="#"
-                                class="text-info text-decoration-none"
-                                data-view-deep-link-qr
-                                data-qr-code-title="{{ deep_link.title|default:'Organisation link' }}"
-                                data-qr-code-link="{{ deep_link.link }}"
-                                data-qr-code-url="{{ deep_link.qr_code_url }}"
-                            >
-                                QR code
-                            </a>
+                            {% include "components/ellipsis-icon.html" with aria_label="Open actions" menu_template="organisation-deep-link-actions-menu.html" %}
                         </td>
                     </tr>
                     {% empty %}
