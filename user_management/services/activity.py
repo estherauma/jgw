@@ -195,5 +195,7 @@ class UserActivityService:
                 "page_obj": activities_page,
                 "page_numbers": list(activities_page.paginator.get_elided_page_range(activities_page.number)),
                 "item_label": "activities",
+                "nav_label": "Activity logs pagination",
+                "page_link_attr": "data-activity-page-link",
             },
         }

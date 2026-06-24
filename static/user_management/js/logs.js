@@ -1,21 +1,4 @@
 $(document).ready(function () {
-  const $logsTable = $("#um-logs-table");
-  if ($logsTable.length && typeof $.fn.DataTable !== 'undefined') {
-    if (!$.fn.dataTable.isDataTable('#um-logs-table')) {
-      $logsTable.DataTable({
-        order: [[0, "desc"]],
-        pageLength: 10,
-        lengthMenu: [10, 25, 50, 100],
-        language: {
-          search: "Search Logs:",
-          emptyTable: "No activity logs found.",
-          info: "_START_-_END_ of _TOTAL_ row(s) shown.",
-          infoEmpty: "0 of 0 row(s) shown.",
-        },
-      });
-    }
-  }
-
   $("#um-logs-table").on("click", ".um-log-details-btn", function () {
     const logId = $(this).data("log-id");
     const containerBefore = $("#log-before-fields").empty();
@@ -77,4 +60,24 @@ $(document).ready(function () {
     $("#log-before-fields").empty();
     $("#log-after-fields").empty();
   });
+  const paginationContainer = document.querySelector("[data-activity-pagination]");
+
+  if (paginationContainer) {
+    paginationContainer.addEventListener("click", function (event) {
+      const trigger = event.target.closest("[data-activity-page-link]");
+
+      if (!trigger || trigger.disabled) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const page = trigger.getAttribute("data-page");
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("page", page);
+
+      window.location.href = url.toString();
+    });
+  }
 });

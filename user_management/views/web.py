@@ -61,6 +61,7 @@ from content.services.partner_configurations import (
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
 )
+from user_management.services.activity import UserActivityService
 
 @group_required("user_management")
 def user_management(request):
@@ -1827,7 +1828,7 @@ def user_activity_list(request):
     ).filter(created_at__gte=thirty_days_ago)
 
     if user.is_superuser:
-        return render(request,"logs.html",{"logs": activities})
+        pass
         
     elif is_58_admin(user):
         activities = activities.exclude(actor__is_superuser=True)
@@ -1841,12 +1842,15 @@ def user_activity_list(request):
         activities = activities.filter(actor=user)
     else:
         activities = activities.none()
+    
+    page_number = request.GET.get("page", 1)
 
-    return render(
-        request,
-        "logs.html",
-        {"logs": activities},
+    pagination_data = UserActivityService.get_paginated_activities(
+        activities,
+        page_number,
     )
+
+    return render(request, "logs.html", pagination_data)
 
 
 @group_required("user_management")

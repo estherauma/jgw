@@ -6,7 +6,6 @@
 
 {% block styles %}
 @import url("{% static 'user_management/css/common.css' %}");
-@import url("https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css");
 {% endblock %}
 
 {% block content %}
@@ -37,7 +36,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for activity in logs %}
+                    {% for activity in activities %}
                     <tr class="border-top">
                         <td class="um-time-col" data-order="{{ activity.created_at|date:'U' }}">{{ activity.created_at|date:"M d, H:i" }}</td>
                         <td>{{ activity.actor }}</td>
@@ -57,6 +56,10 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div class="mt-4" data-activity-pagination>
+                {% include "partials/pagination.html" with page_obj=activities_page page_numbers=activities_pagination_context.page_numbers item_label=activities_pagination_context.item_label nav_label=activities_pagination_context.nav_label page_link_attr=activities_pagination_context.page_link_attr %}
+            </div>
+                
         </div>
     </div>
 </div>
@@ -64,10 +67,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="{% static 'user_management/js/logs.js' %}"></script>
 {% endblock %}
