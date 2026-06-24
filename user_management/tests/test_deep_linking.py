@@ -227,7 +227,7 @@ class CreateDeepLinkViewTests(TestCase):
 
         response = self.client.post(
             self.url,
-            data='{"work_code_id": 7, "type": "login"}',
+            data='{"work_code_id": 7, "link_type": "login"}',
             content_type="application/json",
         )
 
@@ -243,7 +243,7 @@ class CreateDeepLinkViewTests(TestCase):
 
         response = self.client.post(
             self.url,
-            data='{"work_code_id": 7, "type": "login"}',
+            data='{"work_code_id": 7, "link_type": "login"}',
             content_type="application/json",
         )
 
