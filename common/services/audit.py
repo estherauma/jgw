@@ -9,6 +9,7 @@ from django.forms.models import model_to_dict
 from preference.models import OrganisationData, OrganizationGroup
 from user_management.models import UserActivity
 from users.models import User, UserInvitations
+from django.core.paginator import Paginator
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,7 @@ class AuditService:
         "preference.organisationdata",
         "preference.organizationgroup",
         "preference.organisationaccesscode",
+        "preference.organisationdeeplink",
         "user_management.workgroup",
         "user_management.organisationrole",
         "user_management.organisationrolepermission",
@@ -431,3 +433,19 @@ class AuditService:
                 instance.pk,
             )
             return None
+    @classmethod
+    def get_paginated_activities(cls, queryset, page_number=None):
+        paginator = Paginator(queryset.order_by("-created_at"), 20)
+        activities_page = paginator.get_page(page_number)
+
+        return {
+            "activities": activities_page.object_list,
+            "activities_page": activities_page,
+            "activities_pagination_context": {
+                "page_obj": activities_page,
+                "page_numbers": list(activities_page.paginator.get_elided_page_range(activities_page.number)),
+                "item_label": "activities",
+                "nav_label": "Activity logs pagination",
+                "page_link_attr": "data-activity-page-link",
+            },
+        }

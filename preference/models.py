@@ -164,6 +164,7 @@ class Age(models.Model):
 
 class OrganisationAccessCode(AuditFieldsMixin):
     code = models.CharField(max_length=255, unique=True)
+    deep_link = models.URLField(null=True, blank=True)
     requires_login = models.BooleanField(default=False)
     organisation = models.ForeignKey(
         "OrganisationData",
@@ -246,6 +247,25 @@ class OrganisationData(AuditFieldsMixin):
     class Meta(AuditFieldsMixin.Meta):
         indexes = [
             models.Index(fields=['name']),
+        ]
+
+
+class OrganisationDeepLink(AuditFieldsMixin):
+    organisation = models.ForeignKey(
+        "OrganisationData",
+        on_delete=models.CASCADE,
+        related_name="deep_links",
+    )
+    link = models.URLField()
+    link_type = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.title} ({self.organisation})"
+
+    class Meta(AuditFieldsMixin.Meta):
+        indexes = [
+            models.Index(fields=["link_type"]),
         ]
 
 

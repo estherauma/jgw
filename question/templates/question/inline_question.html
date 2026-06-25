@@ -151,26 +151,24 @@
     </div>
     <div class="col-3 user-overview-actions">
         {% if user.is_authenticated %}
-            <div class="row">
-                <div class="col-md-6 button-margin">
-                    <div class="dropdown w-100">
-                        {% flag 'can_download_inline_questions_excel_reports' %}
-                            <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
-                                id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                               {% translate "inlineQuestionsExportButton" %} 
-                                <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
-                            </a>
-                        {% endflag %}
-                        <div class="dropdown-menu" aria-labelledby="export-menu">
-                            <a class="dropdown-item" href="{% url 'question:export_inline_question_data' %}?export=true">{% translate "inlineQuestionsExportDataReport" %} </a>
-                            <button  class="dropdown-item" id="export-inline-question-to-excel">{% translate "inlineQuestionsExportStatistics" %} </button>
-                            <a class="dropdown-item" href="{% url 'question:export_lead_questions_with_followups' %}">Export Lead Questions with Follow-ups to Excel</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 button-margin">
-                    <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                    role="button" class="btn w-100 btn-primary waves-effect text-center bg-jgw-deep-blue">{% translate "inlineQuestionsFilterButton" %}</button>
+            <div class="dropdown w-100">
+                {% flag 'can_download_inline_questions_excel_reports' %}
+                    <a class="btn btn-primary w-100 dropdown-toggle waves-effect text-center bg-jgw-deep-blue" href="#" role="button"
+                        id="export-menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       {% translate "inlineQuestionsExportButton" %} 
+                        <i class="mdi mdi:arrow-down-drop-circle-outline"></i>
+                    </a>
+                {% endflag %}
+                <div class="dropdown-menu" aria-labelledby="export-menu">
+                    {% flag 'can_download_inline_questions_data_report' %}
+                    <a class="dropdown-item" href="{% url 'question:export_inline_question_data' %}?export=true">{% translate "inlineQuestionsExportDataReport" %} </a>
+                    {% endflag %}
+                    {% flag 'can_download_inline_questions_statistics_report' %}
+                    <button  class="dropdown-item" id="export-inline-question-to-excel">{% translate "inlineQuestionsExportStatistics" %} </button>
+                    {% endflag %}
+                    {% flag 'can_download_lead_questions_with_followups_report' %}
+                    <a class="dropdown-item" href="{% url 'question:export_lead_questions_with_followups' %}">Export Lead Questions with Follow-ups to Excel</a>
+                    {% endflag %}
                 </div>
             </div>
         {% else %}

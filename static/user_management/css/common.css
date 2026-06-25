@@ -180,7 +180,7 @@ a.um-view-details-link:focus {
     margin-top: 14px;
 }
 .um-card-title {
-    font-size: 12px;
+    font-size: 13px;
     letter-spacing: 0.4px;
     text-transform: uppercase;
     margin: 0 0 8px 0;
@@ -288,6 +288,35 @@ a.um-view-details-link:focus {
     color: #d7902c !important;
     border: 1px solid #f0ad4e !important;
 }
+.um-qr-code-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: #f5f8fc;
+    border: 1px solid #d9e4f2;
+    border-radius: 16px;
+}
+
+.um-qr-code-image {
+    width: 220px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.um-qr-code-modal-body {
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.um-qr-code-state {
+    width: 100%;
+}
 .pagination .page-item.active .page-link {
     background-color: #37C1E3 !important;
     border-color: #37C1E3 !important;
@@ -312,6 +341,31 @@ a.um-view-details-link:focus {
 .um-link-pending:focus {
     color: #d7902c !important;
     text-decoration: underline;
+}
+.um-link-button {
+    background: #e8f7fd;
+    border: 1px solid #bfe7f7;
+    border-radius: 999px;
+    padding: 6px 12px;
+    color: #24AACC;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-decoration: none;
+    cursor: pointer;
+}
+.um-link-button:hover,
+.um-link-button:focus {
+    color: #24AACC;
+    background: #d8f1fb;
+    text-decoration: none;
+    outline: none;
+}
+.um-readonly-input[readonly] {
+    background: #f2f4f7;
+    border-color: #d9e4f2;
+    color: #61738f;
+    cursor: default;
 }
 /* Modal styles */
 .um-modal-divider {
@@ -651,6 +705,98 @@ body .modal-backdrop.show {
 .um-action .um-btn {
     padding: 4px 10px;
     font-size: 11px;
+}
+.um-actions,
+.ellipsis-icon {
+    display: inline-flex;
+    justify-content: flex-end;
+}
+.um-actions.dropup .um-actions-menu,
+.ellipsis-icon.dropup .ellipsis-icon-menu {
+    top: auto !important;
+    bottom: calc(100% + 8px) !important;
+    left: auto !important;
+    right: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    transform: none !important;
+    inset: auto 0 calc(100% + 8px) auto;
+}
+.um-actions-trigger,
+.ellipsis-icon-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid #d9e4f2;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #193560;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.um-actions-trigger:hover,
+.um-actions-trigger:focus,
+.ellipsis-icon-trigger:hover,
+.ellipsis-icon-trigger:focus {
+    border-color: #37C1E3;
+    background: #f5fbfe;
+    box-shadow: 0 0 0 3px rgba(55, 193, 227, 0.16);
+    outline: none;
+}
+.um-actions-trigger.dropdown-toggle::after {
+    display: none;
+}
+.um-actions-icon,
+.ellipsis-icon-glyph {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+.um-actions-icon span,
+.ellipsis-icon-glyph span {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+}
+.um-actions-menu,
+.ellipsis-icon-menu {
+    display: none;
+    min-width: 170px;
+    padding: 6px;
+    background: #ffffff;
+    border: 1px solid #d9e4f2;
+    border-radius: 12px;
+    box-shadow: 0 14px 28px rgba(25, 53, 96, 0.12);
+    z-index: 1080;
+    overscroll-behavior: contain;
+}
+.um-actions-menu.is-open,
+.ellipsis-icon-menu.is-open {
+    display: block;
+}
+.um-actions-item {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #193560;
+    text-align: left;
+    white-space: nowrap;
+}
+.um-actions-item:hover,
+.um-actions-item:focus {
+    background: #f5fbfe;
+    color: #193560;
 }
 .um-list {
     display: flex;

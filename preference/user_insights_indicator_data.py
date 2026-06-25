@@ -30,7 +30,7 @@ QUESTION_TEXT_STOP_WORDS = frozenset({
     "when", "where", "who", "you", "your",
 })
 SUNBURST_COLOR_YES = "#9e1b32"
-SUNBURST_COLOR_NO = "#c5d0dc"
+SUNBURST_COLOR_NO = "#5a6a7d"
 SUNBURST_FOLLOW_UP_COLORS = ("#7a1530", "#a82845", "#b8324f", "#c43d59", "#d04863")
 SUNBURST_FOLLOW_UP_FF_COLORS = ("#e8a4b8", "#f0c4d0", "#f5d5de", "#f8dee6")
 
@@ -425,10 +425,12 @@ def _lead_question_from_rows(
     expanded=False,
 ):
     open_text = rows and all(_is_open_text_row(row) for row in rows)
+    question_code = f"Q{number:02d}"
     if open_text:
         lead = {
             "id": question_id,
             "number": number,
+            "code": question_code,
             "text": question_text,
             "total": len(rows),
             "expanded": expanded,
@@ -439,7 +441,7 @@ def _lead_question_from_rows(
         lead["text_detail"] = _text_detail_for_rows(
             rows,
             channel,
-            f"Q{number}",
+            question_code,
             indicator_name,
             na_label,
         )
@@ -449,6 +451,7 @@ def _lead_question_from_rows(
     return {
         "id": question_id,
         "number": number,
+        "code": question_code,
         "text": question_text,
         "total": total,
         "expanded": expanded,
@@ -695,9 +698,11 @@ def build_indicator_detail(indicator, *, na_label=None, current_user=None, filte
     if expanded_question:
         expanded_question["expanded"] = True
         if expanded_question.get("response_type") == "choice":
-            choice_breadcrumb = _apply_default_drilldown_selection(
+            answer_crumbs = _apply_default_drilldown_selection(
                 expanded_question.get("responses", [])
             )
+            if answer_crumbs:
+                choice_breadcrumb = [expanded_question.get("code") or f"Q{expanded_question['number']:02d}"] + answer_crumbs
             sunburst = _build_sunburst_from_responses(
                 expanded_question["text"],
                 expanded_question.get("responses", []),

@@ -148,16 +148,47 @@
         return selected;
     }
 
+    function resetIndicatorPanelSelection(block) {
+        if (!block) {
+            return;
+        }
+        var indicatorPanel = block.querySelector(".user-insights-indicator-panel");
+        if (indicatorPanel) {
+            if (typeof window.collapseUserInsightsLeadQuestions === "function") {
+                window.collapseUserInsightsLeadQuestions(indicatorPanel);
+            }
+            if (typeof window.clearUserInsightsDrilldownDetail === "function") {
+                window.clearUserInsightsDrilldownDetail(indicatorPanel);
+            }
+        }
+        block.classList.remove("is-donut-selected");
+        var rowBtn = block.querySelector(".user-insights-indicator-row");
+        var icon = rowBtn && rowBtn.querySelector(".expand-icon");
+        if (rowBtn) {
+            rowBtn.setAttribute("aria-expanded", "false");
+        }
+        if (icon) {
+            icon.textContent = "+";
+        }
+    }
+
     function showIndicatorFilterForReport(reportId) {
         document.querySelectorAll(".user-insights-indicator-filter-wrap").forEach(function (wrap) {
             var match = wrap.getAttribute("data-indicator-filter-for") === reportId;
             wrap.classList.toggle("d-none", !match);
         });
         var select = getActiveIndicatorFilterSelect();
-        if (select && window.jQuery) {
+        if (!select) {
+            return;
+        }
+        Array.from(select.options).forEach(function (opt) {
+            opt.selected = true;
+        });
+        if (window.jQuery) {
             var $select = jQuery(select);
             if ($select.data("multiselect")) {
-                $select.multiselect("deselectAll", false);
+                $select.multiselect("selectAll", false);
+                $select.multiselect("refresh");
             }
         }
     }
@@ -194,11 +225,12 @@
                 var donutSlot = parseInt(block.getAttribute("data-donut-slot"), 10);
                 var visible = showAll || selectedSet.has(donutSlot);
                 block.classList.toggle("indicator-filter-hidden", !visible);
-                if (!visible && typeof bootstrap !== "undefined") {
+                if (!visible) {
                     var panel = block.querySelector(".user-insights-indicator-detail");
-                    if (panel && panel.classList.contains("show")) {
+                    if (panel && panel.classList.contains("show") && typeof bootstrap !== "undefined") {
                         bootstrap.Collapse.getOrCreateInstance(panel, { toggle: false }).hide();
                     }
+                    resetIndicatorPanelSelection(block);
                 }
             });
         }
@@ -240,6 +272,8 @@
                 buttonWidth: "100%",
                 buttonClass: "btn user-insights-indicator-filter-btn",
             });
+            $select.multiselect("selectAll", false);
+            $select.multiselect("refresh");
             $select.on("change", function () {
                 var reportId = select.getAttribute("data-report-id");
                 if (reportId !== activeReportId) {

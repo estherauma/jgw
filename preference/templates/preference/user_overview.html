@@ -432,16 +432,20 @@
                 </a>
                 {% endflag %}
                 <div class="dropdown-menu" aria-labelledby="export-menu">
+                    {% flag 'can_download_preferences_data_report' %}
                     <a class="dropdown-item" href="{% url 'preference:export_preferences' %}?export=true">{% translate "userOverviewExportPreferencesDataReport" %}</a>
+                    {% endflag %}
+                    {% flag 'can_download_help_contacts_data_report' %}
                     <a class="dropdown-item" href="{% url 'preference:export_help_contacts' %}?export=true">{% translate "userOverviewExportHelpContactsDataReport" %}</a>
+                    {% endflag %}
+                    {% flag 'can_download_preferences_statistics_report' %}
                     <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">{% translate "userOverviewExportPreferencesStatistics" %}</a>
+                    {% endflag %}
+                    {% flag 'can_download_pay_calculator_statistics_report' %}
                     <a class="dropdown-item" href="{% url 'preference:export_pay_calculator_statistics' %}?export=true">Export Pay Calculator Statistics</a>
+                    {% endflag %}
                 </div>
                 </div>
-                <button data-bs-toggle="modal" data-bs-target="#messaging-question-filter-modal"
-                role="button" class="btn btn-primary waves-effect text-center bg-jgw-deep-blue">
-                {% translate "userOverviewFilterButton" %}
-                </button>
                 <button id="customize-dashboard-btn" class="btn btn-primary waves-effect text-center bg-jgw-deep-blue">
                     <i class="fe-settings"></i> Customize Dashboard
                 </button>

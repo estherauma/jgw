@@ -1,4 +1,5 @@
 from datetime import timedelta
+import logging
 
 from django.contrib import messages
 from django.conf import settings
@@ -12,7 +13,13 @@ from django.utils import timezone
 from django.views import View
 import phonenumbers
 import json
-from preference.models import OrganizationGroup, OrganisationAccessCode, OrganisationData, SiteLanguages
+from preference.models import (
+    OrganizationGroup,
+    OrganisationAccessCode,
+    OrganisationData,
+    OrganisationDeepLink,
+    SiteLanguages,
+)
 
 from ..forms import (
     AddWorkCodeForm,
@@ -22,6 +29,7 @@ from ..forms import (
     CreateOrganisationForm,
     DashboardUserForm,
     EditOrganizationGroupForm,
+    OrganisationDeepLinkForm,
     OrganisationRoleForm,
     WorkCodeAssignForm,
     WorkGroupForm,
@@ -61,6 +69,9 @@ from content.services.partner_configurations import (
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
 )
+from common.services.audit import AuditService
+
+logger = logging.getLogger(__name__)
 
 @group_required("user_management")
 def user_management(request):
@@ -82,6 +93,7 @@ def user_management(request):
     work_groups = WorkGroup.objects.none()
     assigned_work_codes = []
     roles = OrganisationRole.objects.none()
+    deep_links = OrganisationDeepLink.objects.none()
 
     selected_org = None
     selected_org_id = None
@@ -129,6 +141,9 @@ def user_management(request):
         roles = OrganisationRole.objects.filter(organisation=selected_org).prefetch_related(
             "role_permissions"
         ).order_by("name")
+        deep_links = OrganizationService.get_organisation_deep_links(
+            organisation=selected_org
+        )
         org_details = OrganizationService.build_organisation_form_payload(
             organisation=selected_org,
         )
@@ -166,6 +181,8 @@ def user_management(request):
         "dashboard_user_form": DashboardUserForm(orgs_qs=allowed_organizations_qs),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
         "roles": roles,
+        "deep_links": deep_links,
+        "deep_link_form": OrganisationDeepLinkForm(organisation=selected_org),
         "role_form": OrganisationRoleForm(organisation=selected_org, current_user=user),
     }
     return render(request, "index.html", context=context)
@@ -1536,7 +1553,8 @@ class DeleteWorkCodeView(View):
 
         messages.success(request, f'Work code "{code}" deleted successfully.')
         return JsonResponse({"ok": True, "warning": warning_message})
-    
+
+
 class EditWorkCodeView(View):
     def post(self, request, work_code_id):
         org_id = request.POST.get("selected_org_id")
@@ -1853,27 +1871,28 @@ def user_activity_list(request):
         "actor", "organisation"
     ).filter(created_at__gte=thirty_days_ago)
 
-    if user.is_superuser:
-        return render(request,"logs.html",{"logs": activities})
-        
-    elif is_58_admin(user):
-        activities = activities.exclude(actor__is_superuser=True)
-    elif is_org_admin(user):
-        user_org = user.organisation_data.first()
-        activities = activities.filter(organisation=user_org)
-    elif is_org_group_admin(user):
-        user_orgs = user.organisation_data.all()
-        activities = activities.filter(organisation__in=user_orgs)
-    elif is_org_staff(user):
-        activities = activities.filter(actor=user)
-    else:
-        activities = activities.none()
+    if not user.is_superuser:
+        if is_58_admin(user):
+            activities = activities.exclude(actor__is_superuser=True)
+        elif is_org_admin(user):
+            user_org = user.organisation_data.first()
+            activities = activities.filter(organisation=user_org)
+        elif is_org_group_admin(user):
+            user_orgs = user.organisation_data.all()
+            activities = activities.filter(organisation__in=user_orgs)
+        elif is_org_staff(user):
+            activities = activities.filter(actor=user)
+        else:
+            activities = activities.none()
+    
+    page_number = request.GET.get("page", 1)
 
-    return render(
-        request,
-        "logs.html",
-        {"logs": activities},
+    pagination_data = AuditService.get_paginated_activities(
+        activities,
+        page_number,
     )
+
+    return render(request, "logs.html", pagination_data)
 
 
 @group_required("user_management")
@@ -1920,6 +1939,12 @@ def user_details(request, user_id):
     )
     
     dashboard_preferences = getattr(user, "dashboard_prefs", None)
+    page_number = request.GET.get("page", 1)
+
+    pagination_data = AuditService.get_paginated_activities(
+        activities,
+        page_number,
+    )
 
     context = {
         "user": user,
@@ -1934,6 +1959,7 @@ def user_details(request, user_id):
             ).order_by("name")
         ),
         "activities": activities,
+        **pagination_data,
     }
     return render(request, "user-details.html", context)
 
@@ -1988,4 +2014,97 @@ def user_activity_details(request, activity_id):
         "action": activity.action,
         "before": before_formatted,
         "after": after_formatted,
+        
     })
+
+
+class CreateDeepLinkView(View):
+    def post(self, request):
+        try:
+            payload = json.loads(request.body.decode("utf-8") or "{}")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse(
+                {"ok": False, "error": "Invalid JSON payload."},
+                status=400,
+            )
+
+        work_code_id = payload.get("work_code_id")
+        deep_link_type = (payload.get("link_type") or "").strip().lower()
+        organisation = None
+        selected_org_id = payload.get("selected_org_id")
+        organisation = (
+                OrganisationData.objects.filter(id=selected_org_id).first()
+                if selected_org_id
+                else None
+            )
+
+        if organisation and not OrganizationService.has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_login_qr_code",
+        ):
+            return OrganizationService.org_access_denied()
+
+        type_handlers = {
+            "login": (
+                OrganizationService.create_login_deep_link,
+                {
+                    "user": request.user,
+                    "request": request,
+                    "organisation": organisation,
+                    "work_code_id": work_code_id,
+                },
+            ),
+            "onboarding": (
+                OrganizationService.create_onboarding_deep_link,
+                {
+                    "organisation": organisation,
+                    "payload": payload,
+                },
+            ),
+        }
+        handler_config = type_handlers.get(deep_link_type)
+
+        if not handler_config:
+            return JsonResponse(
+                {"ok": False, "error": "Unsupported deep link type."},
+                status=400,
+            )
+
+        type_handler, handler_kwargs = handler_config
+
+        try:
+            branch_data = type_handler(**handler_kwargs)
+        except ValidationError as exc:
+            if hasattr(exc, "message_dict"):
+                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except ValueError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except PermissionError:
+            return OrganizationService.org_access_denied()
+        except Exception as exc:
+            logger.error("Error creating deep link: %s", exc, exc_info=True)
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while generating the deep link. Please try again.",
+                },
+                status=500,
+            )
+
+        if deep_link_type == "onboarding":
+            messages.success(
+                request,
+                f'Deep link "{branch_data["title"]}" created successfully.',
+            )
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "url": branch_data.get("url"),
+                "qr_code_url": branch_data.get("qr_code_url"),
+                "data": branch_data,
+            }
+        )

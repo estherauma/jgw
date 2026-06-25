@@ -52,6 +52,8 @@ POSTHOG_SKIP_LOCALHOST = os.getenv("POSTHOG_SKIP_LOCALHOST", "False").lower() ==
 STRAPI_WEBHOOK_SECRET = os.getenv("STRAPI_WEBHOOK_SECRET")
 SKIP_CMS_SYNC = os.getenv("SKIP_CMS_SYNC", "False").lower() == "true"
 EXTERNAL_API_KEY = (os.getenv("EXTERNAL_API_KEY") or "").strip()
+BRANCH_KEY = (os.getenv("BRANCH_KEY") or "").strip()
+BRANCH_LINK_DOMAIN = (os.getenv("BRANCH_LINK_DOMAIN") or "").strip()
 
 
 PUBLIC_DEMO_EMAIL = os.getenv("PUBLIC_DEMO_EMAIL", "demo@fiftyeight.io").strip().lower()
@@ -67,6 +69,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # installed packages (3rd party)
+    "corsheaders",
     "rest_framework",
     "drf_spectacular",
     "crispy_forms",
@@ -96,6 +99,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -113,6 +117,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "jgwpandas.urls"
 MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

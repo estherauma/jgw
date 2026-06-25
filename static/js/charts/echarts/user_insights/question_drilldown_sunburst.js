@@ -159,7 +159,7 @@ function formatUserInsightsSunburstTooltip(containerId, params) {
         if (meta.question) {
             layers.push(
                 '<div class="user-insights-sunburst-tip-layer">' +
-                '<div class="user-insights-sunburst-tip-question">' +
+                '<div class="user-insights-sunburst-tip-question" style="white-space:normal;word-wrap:break-word;overflow-wrap:break-word;">' +
                 escapeSunburstTooltipText(meta.question) +
                 "</div>" +
                 '<div class="user-insights-sunburst-tip-response">' +
@@ -198,6 +198,8 @@ function buildUserInsightsSunburstOption(sunburstData, highlightName, containerI
         tooltip: {
             trigger: "item",
             confine: true,
+            renderMode: "html",
+            className: "user-insights-sunburst-echarts-tooltip",
             backgroundColor: "#fff",
             borderColor: "#dce4ee",
             borderWidth: 1,
@@ -208,7 +210,7 @@ function buildUserInsightsSunburstOption(sunburstData, highlightName, containerI
                 lineHeight: 20,
             },
             extraCssText:
-                "box-shadow: 0 8px 24px rgba(25, 53, 96, 0.15); border-radius: 8px; max-width: 320px;",
+                "box-shadow: 0 8px 24px rgba(25, 53, 96, 0.15); border-radius: 8px; max-width: 300px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word;",
             formatter: function (params) {
                 return formatUserInsightsSunburstTooltip(containerId, params);
             },

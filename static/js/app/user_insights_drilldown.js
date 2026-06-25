@@ -127,11 +127,42 @@
         return card ? card.getAttribute("data-lead-id") : null;
     }
 
+    function getLeadQuestionCode(panelEl, leadId, detail) {
+        var leadRoot = panelEl.querySelector('.user-insights-lead-card[data-lead-id="' + leadId + '"]');
+        if (leadRoot) {
+            var fromData = leadRoot.getAttribute("data-lead-code");
+            if (fromData) {
+                return fromData;
+            }
+            var codeEl = leadRoot.querySelector(".user-insights-lead-code");
+            if (codeEl && codeEl.textContent.trim()) {
+                return codeEl.textContent.trim();
+            }
+        }
+        var lead = getLeadById(detail, leadId);
+        if (lead && lead.code) {
+            return lead.code;
+        }
+        if (lead && lead.number != null) {
+            var padded = String(lead.number);
+            if (padded.length < 2) {
+                padded = "0" + padded;
+            }
+            return "Q" + padded;
+        }
+        return "";
+    }
+
     function buildChoiceBreadcrumb(panelEl, leadId) {
+        var detail = getDrilldownFromPanel(panelEl);
         var crumbs = [];
         var leadRoot = panelEl.querySelector('.user-insights-lead-card[data-lead-id="' + leadId + '"]');
         if (!leadRoot) {
             return crumbs;
+        }
+        var leadCode = getLeadQuestionCode(panelEl, leadId, detail);
+        if (leadCode) {
+            crumbs.push(leadCode);
         }
         leadRoot.querySelectorAll(".user-insights-answer-bar.is-selected").forEach(function (bar) {
             crumbs.push(bar.getAttribute("data-response-label"));
@@ -156,6 +187,38 @@
         hideAllSideViews(panelEl);
         showDrilldownDetail(panelEl, false);
         updateBreadcrumb(panelEl, []);
+    }
+
+    function collapseLeadQuestions(panelEl) {
+        if (!panelEl) {
+            return;
+        }
+        panelEl.querySelectorAll(".user-insights-answer-bar.is-selected").forEach(function (bar) {
+            bar.classList.remove("is-selected");
+        });
+        panelEl.querySelectorAll(".user-insights-option-row.is-selected").forEach(function (row) {
+            row.classList.remove("is-selected");
+        });
+        panelEl.querySelectorAll(".user-insights-lead-follow-up-root").forEach(function (root) {
+            root.classList.add("d-none");
+        });
+        panelEl.querySelectorAll(".user-insights-follow-up-branch").forEach(function (branch) {
+            branch.classList.add("d-none");
+        });
+        panelEl.querySelectorAll(".user-insights-lead-body.show").forEach(function (body) {
+            if (typeof bootstrap !== "undefined" && bootstrap.Collapse) {
+                bootstrap.Collapse.getOrCreateInstance(body, { toggle: false }).hide();
+            } else {
+                body.classList.remove("show");
+            }
+        });
+        panelEl.querySelectorAll(".user-insights-lead-card").forEach(function (card) {
+            card.classList.remove("is-active", "is-expanded");
+            var btn = card.querySelector(".user-insights-lead-header");
+            if (btn) {
+                btn.setAttribute("aria-expanded", "false");
+            }
+        });
     }
 
     function activateOpenTextQuestion(panelEl, detail, lead) {
@@ -400,7 +463,7 @@
                 root.classList.toggle("d-none", !show);
             });
             activateLead(panelEl, leadId);
-            updateBreadcrumb(panelEl, [bar.getAttribute("data-response-label")]);
+            updateBreadcrumb(panelEl, buildChoiceBreadcrumb(panelEl, leadId));
             if (isIndicatorPanelVisible(panelEl)) {
                 refreshSunburstChart(panelEl);
             }
@@ -485,4 +548,6 @@
     });
 
     window.initUserInsightsDrilldownPanel = initDrilldownPanel;
+    window.clearUserInsightsDrilldownDetail = clearDrilldownDetail;
+    window.collapseUserInsightsLeadQuestions = collapseLeadQuestions;
 })();

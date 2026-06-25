@@ -1,0 +1,78 @@
+<div class="modal fade um-modal" id="workcode-link-modal" tabindex="-1" role="dialog" aria-labelledby="workcode-link-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5
+                    class="um-modal-title um-navy"
+                    id="workcode-link-title"
+                    data-qr-code-modal-title
+                    data-default-title="Generated QR Code"
+                >
+                    Generated QR Code
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="um-modal-divider"></div>
+            <div class="modal-body text-center um-qr-code-modal-body">
+                <div class="um-qr-code-state" data-workcode-link-loading>
+                    <div class="spinner-border text-info mb-3" role="status" aria-hidden="true"></div>
+                    <p class="um-navy mb-0">
+                        Generating QR code ...
+                    </p>
+                </div>
+
+                <div class="um-qr-code-state d-none" data-workcode-link-error>
+                    <div class="alert alert-danger text-start mb-0" data-workcode-link-error-text></div>
+                </div>
+
+                <div class="um-qr-code-state d-none" data-workcode-link-success>
+                    <div class="um-qr-code-wrap mb-3">
+                        <img
+                            src=""
+                            alt="Generated QR code"
+                            class="um-qr-code-image"
+                            data-workcode-link-qr
+                        />
+                    </div>
+                    <label class="form-label um-navy fw-semibold text-start d-block" for="workcode-link-output">
+                        Link
+                    </label>
+                    <div class="input-group">
+                        <input
+                            id="workcode-link-output"
+                            type="text"
+                            class="form-control um-readonly-input"
+                            readonly
+                            data-workcode-link-output
+                        />
+                        <button
+                            type="button"
+                            class="um-link-button"
+                            data-copy-workcode-link
+                        >
+                            Copy
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
+                        <button
+                            type="button"
+                            class="um-btn um-btn-outline"
+                            data-download-workcode-link-svg
+                        >
+                            Download SVG
+                        </button>
+                        <button
+                            type="button"
+                            class="um-btn um-btn-outline"
+                            data-download-workcode-link-png
+                        >
+                            Download PNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

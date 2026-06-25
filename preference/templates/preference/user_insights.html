@@ -11,11 +11,11 @@
 {% endblock main_base_head %}
 
 {% block content %}
-<div class="modal fade" id="user-insights-filter-modal" tabindex="-1" role="dialog" aria-labelledby="user-insights-filter-modal-label">
+<div class="modal fade" id="messaging-question-filter-modal" tabindex="-1" role="dialog" aria-labelledby="filter-modal-area-label">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="user-insights-filter-modal-label">{% translate "inlineQuestionsFilters" %}</h4>
+                <h4 class="modal-title" id="filter-modal-area-label">{% translate "inlineQuestionsFilters" %}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -32,20 +32,8 @@
 
 <div class="user-insights-page">
     <div class="row user-overview-header-row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <header class="user-insights-title">{% translate "userInsightsPageTitle" %}</header>
-        </div>
-        <div class="col-md-6 text-end">
-            <div class="user-overview-actions">
-                <button
-                    data-bs-toggle="modal"
-                    data-bs-target="#user-insights-filter-modal"
-                    role="button"
-                    class="btn btn-primary waves-effect text-center bg-jgw-deep-blue"
-                >
-                    {% translate "inlineQuestionsFilters" %}
-                </button>
-            </div>
         </div>
     </div>
 
@@ -101,6 +89,7 @@
                                 <option
                                     value="{{ opt.donut_slot }}"
                                     data-breakdown-index="{{ opt.breakdown_index }}"
+                                    selected
                                 >{{ opt.name }}</option>
                                 {% endfor %}
                             </select>

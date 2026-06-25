@@ -9,10 +9,13 @@ from preference.models import (
     OrganizationGroup,
     OrganisationAccessCode,
     OrganisationData,
+    OrganisationDeepLink,
     SiteLanguages,
 )
+from .deep_links import DeepLinkService
 from user_management.permissions import is_flag_active
 from user_management.utils import is_org_admin_or_staff, is_org_group_admin, is_super_or_58_admin
+from ..forms import OrganisationDeepLinkForm
 
 
 class OrganizationService:
@@ -256,6 +259,87 @@ class OrganizationService:
         )
 
     @staticmethod
+    def create_login_deep_link(
+        *,
+        user,
+        request,
+        organisation=None,
+        work_code_id=None,
+    ):
+        if not work_code_id:
+            raise ValueError("Work code is required.")
+
+        allowed_orgs = OrganizationService.get_allowed_orgs(user)
+        work_code_filters = {
+            "id": work_code_id,
+            "organisation__in": allowed_orgs,
+        }
+        if organisation:
+            work_code_filters["organisation"] = organisation
+
+        work_code = (
+            OrganisationAccessCode.objects.select_related("organisation")
+            .filter(**work_code_filters)
+            .first()
+        )
+
+        if not work_code:
+            raise ValueError("Work code not found.")
+
+        if not OrganizationService.has_org_access(
+            user,
+            organisation or work_code.organisation,
+            request=request,
+            flag_name="can_edit_work_code",
+        ):
+            raise PermissionError("You do not have access to this organisation.")
+
+        return DeepLinkService.get_or_create_login__deep_link(work_code=work_code)
+
+    @staticmethod
+    def create_onboarding_deep_link(
+        *,
+        organisation=None,
+        payload=None,
+    ):
+        payload = payload or {}
+        if not organisation:
+            org_id = payload.get("selected_org_id")
+            if org_id:
+                organisation = OrganisationData.objects.filter(id=org_id).first()
+        if not organisation:
+            raise ValidationError(
+                {"organisation": ["Select an organisation first."]}
+            )
+
+        form = OrganisationDeepLinkForm(payload, organisation=organisation)
+        if not form.is_valid():
+            raise ValidationError(form.errors)
+
+        link_data = {
+            "title": form.cleaned_data["title"],
+            "link_type": form.cleaned_data["link_type"],
+            "destination": form.cleaned_data["destination"],
+            "access_code": form.cleaned_data.get("access_code"),
+            "sector": form.cleaned_data.get("sectors"),
+            "immigration_status": form.cleaned_data.get("immigration_status"),
+        }
+
+        branch_data = DeepLinkService.create_onboarding_deep_link(
+            organisation=organisation,
+            link_data=link_data,
+        )
+        branch_url = branch_data["url"]
+        deep_link = form.save(generated_link=branch_url)
+        return {
+            "deep_link_id": deep_link.id,
+            "org_id": organisation.id,
+            "title": deep_link.title,
+            "url": branch_url,
+            "data": branch_data["data"],
+        }
+
+    @staticmethod
     def get_ungrouped_organizations(user):
         access_code_exists = OrganisationAccessCode.objects.filter(
             organisation_id=OuterRef("pk")
@@ -283,6 +367,19 @@ class OrganizationService:
             )
             .filter(has_access_code=True, has_collection_language=True)
         )
+
+    @staticmethod
+    def get_organisation_deep_links(*, organisation):
+        deep_links = OrganisationDeepLink.objects.filter(
+            organisation=organisation
+        ).order_by("created_at")
+        for deep_link in deep_links:
+            deep_link.qr_code_url = (
+                DeepLinkService.create_qr_code(deep_link=deep_link.link)
+                if deep_link.link
+                else ""
+            )
+        return deep_links
 
     @staticmethod
     def build_organisation_form_payload(*, organisation):

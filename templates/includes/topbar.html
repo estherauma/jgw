@@ -41,9 +41,16 @@
                 </button>
                 
                 <!-- Filter Icon -->
-                <button class="action-icon-btn" title="Filter">
+                {% if filter_form %}
+                <button
+                    class="action-icon-btn"
+                    title="{% translate 'userOverviewFilterButton' %}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#messaging-question-filter-modal"
+                >
                     <i class="fe-filter"></i>
                 </button>
+                {% endif %}
                 
                 <!-- User Profile Icon -->
                 <div class="dropdown notification-list topbar-dropdown">
