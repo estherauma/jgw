@@ -1843,21 +1843,19 @@ def user_activity_list(request):
         "actor", "organisation"
     ).filter(created_at__gte=thirty_days_ago)
 
-    if user.is_superuser:
-        pass
-        
-    elif is_58_admin(user):
-        activities = activities.exclude(actor__is_superuser=True)
-    elif is_org_admin(user):
-        user_org = user.organisation_data.first()
-        activities = activities.filter(organisation=user_org)
-    elif is_org_group_admin(user):
-        user_orgs = user.organisation_data.all()
-        activities = activities.filter(organisation__in=user_orgs)
-    elif is_org_staff(user):
-        activities = activities.filter(actor=user)
-    else:
-        activities = activities.none()
+    if not user.is_superuser:
+        if is_58_admin(user):
+            activities = activities.exclude(actor__is_superuser=True)
+        elif is_org_admin(user):
+            user_org = user.organisation_data.first()
+            activities = activities.filter(organisation=user_org)
+        elif is_org_group_admin(user):
+            user_orgs = user.organisation_data.all()
+            activities = activities.filter(organisation__in=user_orgs)
+        elif is_org_staff(user):
+            activities = activities.filter(actor=user)
+        else:
+            activities = activities.none()
     
     page_number = request.GET.get("page", 1)
 
