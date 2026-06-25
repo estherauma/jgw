@@ -449,12 +449,8 @@ class OrganizationService:
             "default_collection_language": OrganizationService.serialize_default_collection_language(
                 organisation.default_collection_language
             ),
-            "default_report_issue_emails": OrganizationService.serialize_email_list(
-                organisation.default_report_issue_emails
-            ),
-            "default_feedback_emails": OrganizationService.serialize_email_list(
-                organisation.default_feedback_emails
-            ),
+            "default_report_issue_emails": organisation.default_report_issue_emails,
+            "default_feedback_emails": organisation.default_feedback_emails,
             "cms_id": organisation.cms_id,
             "cms_sync_status": organisation.cms_sync_status,
             "last_cms_sync_date": organisation.last_cms_sync_date,
