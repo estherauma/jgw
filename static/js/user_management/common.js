@@ -110,7 +110,7 @@
     }
 
     var response = await fetch(form.action, {
-      method: 'POST',
+      method: options.method || 'POST',
       headers: headers,
       body: body,
     });

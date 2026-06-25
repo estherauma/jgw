@@ -906,7 +906,7 @@ class OrganisationDeepLinkForm(forms.ModelForm):
             self.get_destination_label
         )
         self.fields["immigration_status"].label_from_instance = (
-            lambda status: status.name
+            self.get_immigration_status_label
         )
 
     @staticmethod
@@ -921,6 +921,14 @@ class OrganisationDeepLinkForm(forms.ModelForm):
         if not name:
             return ""
         return name[:1].upper() + name[1:]
+
+    @staticmethod
+    def get_immigration_status_label(status):
+        label = (status.name or status.value or "").strip()
+        if not label:
+            return ""
+        label = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", label)
+        return label[:1].upper() + label[1:]
 
     def clean_title(self):
         title = (self.cleaned_data.get("title") or "").strip()

@@ -71,6 +71,7 @@ class DeepLinkServiceTests(TestCase):
 
     @override_settings(
         BRANCH_KEY="branch-key",
+        BRANCH_SECRET="branch-secret",
         BRANCH_LINK_DOMAIN=TEST_BRANCH_DOMAIN,
     )
     @patch("user_management.services.deep_links.requests.post")
@@ -93,6 +94,42 @@ class DeepLinkServiceTests(TestCase):
         )
 
         self.assertEqual(branch_url, f"{TEST_BRANCH_DOMAIN}/barway-132")
+
+    @override_settings(
+        BRANCH_KEY="branch-key",
+        BRANCH_SECRET="branch-secret",
+        BRANCH_LINK_DOMAIN=TEST_BRANCH_DOMAIN,
+    )
+    @patch("user_management.services.deep_links.requests.put")
+    def test_update_branch_deep_link_sends_url_as_query_param(
+        self, mock_put
+    ):
+        mock_response = Mock()
+        mock_response.ok = True
+        mock_response.json.return_value = {
+            "url": "https://branch.example/onboarding-updated",
+        }
+        mock_put.return_value = mock_response
+
+        response = DeepLinkService.update_branch_deep_link(
+            branch_url="https://branch.example/onboarding",
+            payload={"data": {"type": "onboarding"}},
+        )
+
+        self.assertEqual(
+            response,
+            {"url": "https://branch.example/onboarding-updated"},
+        )
+        mock_put.assert_called_once_with(
+            DeepLinkService.endpoint,
+            params={"url": "https://branch.example/onboarding"},
+            json={
+                "branch_secret": "branch-secret",
+                "branch_key": "branch-key",
+                "data": {"type": "onboarding"},
+            },
+            timeout=30,
+        )
 
 
     @patch("user_management.services.deep_links.DeepLinkService.create_qr_code")
@@ -414,3 +451,193 @@ class CreateDeepLinkViewTests(TestCase):
             {"ok": False, "error": "You do not have access to this organisation."},
         )
         self.assertFalse(OrganisationDeepLink.objects.exists())
+
+
+class DeepLinkDetailViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="deep-link-editor@example.com",
+            password="StrongPassword123!",
+            is_active=True,
+        )
+        self.superuser = User.objects.create_superuser(
+            email="deep-link-super@example.com",
+            password="StrongPassword123!",
+            is_active=True,
+        )
+        self.organisation = OrganisationData.objects.create(
+            name="Bar Way",
+            org_code="BARWAY",
+            display_name="Bar Way",
+            theme="default",
+            custom_type="version_1",
+            work_sector="Agriculture",
+            content_collection="bar-way",
+            default_collection_language="en",
+            default_feedback_emails="feedback@example.com",
+            default_report_issue_emails="report@example.com",
+            big_icon="https://cdn.example.com/big.png",
+            small_icon="https://cdn.example.com/small.png",
+        )
+        self.destination = Country.objects.create(
+            name="Kenya",
+            code="ke",
+            api_value="ke",
+            is_destination=True,
+        )
+        self.destination_two = Country.objects.create(
+            name="Uganda",
+            code="ug",
+            api_value="ug",
+            is_destination=True,
+        )
+        self.immigration_status = ImmigrationStatus.objects.create(
+            name="Visitor",
+            value="visitor",
+        )
+        self.immigration_status_two = ImmigrationStatus.objects.create(
+            name="Worker",
+            value="worker",
+        )
+        self.work_sector = WorkSector.objects.create(
+            slug="agriculture",
+            display_name="Agriculture",
+        )
+        self.work_sector_two = WorkSector.objects.create(
+            slug="agriculturePalmOil",
+            display_name="Agriculture - Palm Oil",
+        )
+        self.access_code = OrganisationAccessCode.objects.create(
+            code="BAR123",
+            organisation=self.organisation,
+            requires_login=True,
+        )
+        self.access_code_two = OrganisationAccessCode.objects.create(
+            code="BAR999",
+            organisation=self.organisation,
+            requires_login=True,
+        )
+        self.deep_link = OrganisationDeepLink.objects.create(
+            organisation=self.organisation,
+            title="Starter flow",
+            link_type="onboarding",
+            link="https://branch.example/onboarding",
+        )
+        self.url = reverse(
+            "user_management:deep_link_detail",
+            args=[self.deep_link.id],
+        )
+
+    @patch("user_management.services.deep_links.DeepLinkService.get_branch_deep_link")
+    def test_returns_branch_prefill_data_for_edit_modal(self, mock_get_branch_deep_link):
+        self.client.force_login(self.superuser)
+        mock_get_branch_deep_link.return_value = {
+            "data": {
+                "$marketing_title": "Starter flow",
+                "type": "onboarding",
+                "destination": "KE",
+                "organisationAccessCode": "BAR123",
+                "sectors": "agriculture",
+                "immigrationStatus": "visitor",
+            }
+        }
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "data": {
+                    "deep_link_id": self.deep_link.id,
+                    "title": "Starter flow",
+                    "link_type": "onboarding",
+                    "destination": str(self.destination.id),
+                    "access_code": str(self.access_code.id),
+                    "sectors": "agriculture",
+                    "immigration_status": str(self.immigration_status.id),
+                },
+            },
+        )
+        mock_get_branch_deep_link.assert_called_once_with(
+            branch_url="https://branch.example/onboarding"
+        )
+
+    def test_returns_403_when_user_cannot_edit_deep_link(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            response.json(),
+            {"ok": False, "error": "You do not have access to this organisation."},
+        )
+
+    @patch("user_management.services.deep_links.DeepLinkService.update_branch_deep_link")
+    def test_updates_onboarding_deep_link(self, mock_update_branch_deep_link):
+        self.client.force_login(self.superuser)
+        mock_update_branch_deep_link.return_value = {
+            "url": "https://branch.example/onboarding-updated"
+        }
+
+        response = self.client.patch(
+            self.url,
+            data=json.dumps(
+                {
+                    "selected_org_id": self.organisation.id,
+                    "title": "Updated starter flow",
+                    "link_type": "onboarding",
+                    "destination": self.destination_two.id,
+                    "access_code": self.access_code_two.id,
+                    "sectors": self.work_sector_two.slug,
+                    "immigration_status": self.immigration_status_two.id,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "url": "https://branch.example/onboarding-updated",
+                "data": {
+                    "deep_link_id": self.deep_link.id,
+                    "org_id": self.organisation.id,
+                    "title": "Updated starter flow",
+                    "url": "https://branch.example/onboarding-updated",
+                    "data": {
+                        "$marketing_title": "Updated starter flow",
+                        "type": "onboarding",
+                        "destination": "UG",
+                        "organisationAccessCode": "BAR999",
+                        "sectors": "agriculturePalmOil",
+                        "immigrationStatus": "worker",
+                    },
+                },
+            },
+        )
+
+        self.deep_link.refresh_from_db()
+        self.assertEqual(self.deep_link.title, "Updated starter flow")
+        self.assertEqual(self.deep_link.link_type, "onboarding")
+        self.assertEqual(self.deep_link.link, "https://branch.example/onboarding-updated")
+        mock_update_branch_deep_link.assert_called_once_with(
+            branch_url="https://branch.example/onboarding",
+            payload={
+                "feature": "onboarding",
+                "campaign": "user_management",
+                "tags": ["Bar Way", "onboarding"],
+                "data": {
+                    "$marketing_title": "Updated starter flow",
+                    "type": "onboarding",
+                    "destination": "UG",
+                    "organisationAccessCode": "BAR999",
+                    "sectors": "agriculturePalmOil",
+                    "immigrationStatus": "worker",
+                },
+            },
+        )

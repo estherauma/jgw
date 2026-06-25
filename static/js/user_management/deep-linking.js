@@ -292,6 +292,12 @@
   function initOrganisationDeepLinkForm() {
     const form = document.getElementById('add-organisation-deep-link-form');
     const errorBox = document.getElementById('add-organisation-deep-link-form-error');
+    const modal = document.getElementById('add-organisation-deep-link-modal');
+    const modalTitle = document.querySelector('[data-deep-link-modal-title]');
+    const submitButton = form?.querySelector('[data-deep-link-submit]');
+    const createAction = form?.dataset.createAction || form?.action || '';
+    const createTitleText = modalTitle?.textContent || 'Create link';
+    const createSubmitText = submitButton?.textContent || 'Save';
 
     function initCustomFormSelects() {
       if (form && window.initUmSelects) {
@@ -345,12 +351,66 @@
       hiddenInput.value = selectedId;
     }
 
+    function setFieldValue(name, value) {
+      const field = form?.querySelector('[name="' + name + '"]');
+      if (!field) {
+        return;
+      }
+      field.value = value || '';
+    }
+
+    function setCreateMode() {
+      if (!form) {
+        return;
+      }
+      form.action = createAction;
+      form.dataset.requestMethod = 'POST';
+      if (modalTitle) {
+        modalTitle.textContent = createTitleText;
+      }
+      if (submitButton) {
+        submitButton.textContent = createSubmitText;
+      }
+      setFieldValue('deep_link_id', '');
+    }
+
+    function setEditMode(detailUrl) {
+      if (!form) {
+        return;
+      }
+      form.action = detailUrl || createAction;
+      form.dataset.requestMethod = 'PATCH';
+      if (modalTitle) {
+        modalTitle.textContent = 'Edit link';
+      }
+      if (submitButton) {
+        submitButton.textContent = 'Save changes';
+      }
+    }
+
+    function applyPrefill(data) {
+      if (!form || !data) {
+        return;
+      }
+      setFieldValue('deep_link_id', data.deep_link_id || '');
+      setFieldValue('title', data.title || '');
+      setFieldValue('link_type', data.link_type || 'onboarding');
+      setFieldValue('destination', data.destination || '');
+      setFieldValue('access_code', data.access_code || '');
+      setFieldValue('sectors', data.sectors || '');
+      setFieldValue('immigration_status', data.immigration_status || '');
+      syncSelectedOrgId();
+      refreshCustomFormSelects();
+    }
+
     function resetForm() {
       if (!form) {
         return;
       }
       clearErrors();
       form.reset();
+      setCreateMode();
+      setFieldValue('link_type', 'onboarding');
       syncSelectedOrgId();
       refreshCustomFormSelects();
     }
@@ -389,10 +449,17 @@
               immigration_status:
                 form.querySelector('[name="immigration_status"]')?.value || '',
             },
+            method: form.dataset.requestMethod || 'POST',
           });
-          if (data && data.org_id) {
+          const orgId =
+            data?.org_id ||
+            data?.data?.org_id ||
+            form.querySelector('[name="selected_org_id"]')?.value ||
+            '';
+
+          if (orgId) {
             const homeUrl = window.location.pathname;
-            const target = homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
+            const target = homeUrl + '?selected_org_id=' + encodeURIComponent(orgId);
             window.location.href = target;
           } else {
             window.location.reload();
@@ -415,9 +482,48 @@
       });
     }
 
-    $('[data-target="#add-organisation-deep-link-modal"]').on('click', function () {
+    $('[data-create-organisation-deep-link]').on('click', function () {
       initCustomFormSelects();
       resetForm();
+      $(modal).modal('show');
+    });
+
+    $(document).on('click', '[data-edit-organisation-deep-link]', async function () {
+      const detailUrl = this.dataset.deepLinkDetailUrl || '';
+      if (!detailUrl || !form) {
+        return;
+      }
+
+      clearErrors();
+      setEditMode(detailUrl);
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
+
+      try {
+        const response = await fetch(detailUrl, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw data;
+        }
+        initCustomFormSelects();
+        form.reset();
+        applyPrefill(data.data || {});
+        $(modal).modal('show');
+      } catch (data) {
+        if (errorBox) {
+          errorBox.textContent =
+            data?.error || 'Could not load the deep link. Please try again.';
+          errorBox.classList.remove('d-none');
+        }
+        $(modal).modal('show');
+      } finally {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
+      }
     });
   }
 

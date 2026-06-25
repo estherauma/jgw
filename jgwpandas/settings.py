@@ -53,6 +53,7 @@ STRAPI_WEBHOOK_SECRET = os.getenv("STRAPI_WEBHOOK_SECRET")
 SKIP_CMS_SYNC = os.getenv("SKIP_CMS_SYNC", "False").lower() == "true"
 EXTERNAL_API_KEY = (os.getenv("EXTERNAL_API_KEY") or "").strip()
 BRANCH_KEY = (os.getenv("BRANCH_KEY") or "").strip()
+BRANCH_SECRET = (os.getenv("BRANCH_SECRET") or "").strip()
 BRANCH_LINK_DOMAIN = (os.getenv("BRANCH_LINK_DOMAIN") or "").strip()
 
 

@@ -2,6 +2,15 @@
     class="dropdown-item um-actions-item"
     type="button"
     role="menuitem"
+    data-edit-organisation-deep-link
+    data-deep-link-detail-url="{% url 'user_management:deep_link_detail' deep_link.id %}"
+>
+    Edit
+</button>
+<button
+    class="dropdown-item um-actions-item"
+    type="button"
+    role="menuitem"
     data-view-deep-link-qr
     data-qr-code-title="{{ deep_link.title|default:'Organisation link' }}"
     data-qr-code-link="{{ deep_link.link }}"
