@@ -22,6 +22,34 @@ from ..forms import OrganisationDeepLinkForm
 
 class OrganizationService:
     @staticmethod
+    def serialize_email_list(raw_value):
+        if not raw_value:
+            return []
+        return [
+            email.strip()
+            for email in str(raw_value).split(",")
+            if email and email.strip()
+        ]
+
+    @staticmethod
+    def serialize_work_sector(raw_value):
+        value = (raw_value or "").strip()
+        if not value:
+            return ""
+        if " (" in value and value.endswith(")"):
+            return value.split(" (", 1)[0].strip()
+        return value
+
+    @staticmethod
+    def serialize_default_collection_language(raw_value):
+        value = (raw_value or "").strip()
+        if not value:
+            return ""
+        if " (" in value and value.endswith(")"):
+            return value.split(" (", 1)[0].strip()
+        return value
+
+    @staticmethod
     def serialize_collection_languages(*, organisation):
         languages = getattr(organisation, "_prefetched_objects_cache", {}).get(
             "collection_languages"
@@ -80,9 +108,13 @@ class OrganizationService:
             "has_custom_content": organisation.has_custom_content,
             "theme": organisation.theme,
             "custom_type": organisation.custom_type,
-            "work_sector": organisation.work_sector,
+            "work_sector": OrganizationService.serialize_work_sector(
+                organisation.work_sector
+            ),
             "content_collection": organisation.content_collection,
-            "default_collection_language": organisation.default_collection_language,
+            "default_collection_language": OrganizationService.serialize_default_collection_language(
+                organisation.default_collection_language
+            ),
             "default_feedback_emails": organisation.default_feedback_emails,
             "default_report_issue_emails": organisation.default_report_issue_emails,
             "cms_id": organisation.cms_id,
@@ -176,11 +208,19 @@ class OrganizationService:
                     "has_custom_content": organisation.has_custom_content,
                     "theme": organisation.theme,
                     "custom_type": organisation.custom_type,
-                    "work_sector": organisation.work_sector,
+                    "work_sector": OrganizationService.serialize_work_sector(
+                        organisation.work_sector
+                    ),
                     "content_collection": organisation.content_collection,
-                    "default_collection_language": organisation.default_collection_language,
-                    "default_feedback_emails": organisation.default_feedback_emails,
-                    "default_report_issue_emails": organisation.default_report_issue_emails,
+                    "default_collection_language": OrganizationService.serialize_default_collection_language(
+                        organisation.default_collection_language
+                    ),
+                    "default_feedback_emails": OrganizationService.serialize_email_list(
+                        organisation.default_feedback_emails
+                    ),
+                    "default_report_issue_emails": OrganizationService.serialize_email_list(
+                        organisation.default_report_issue_emails
+                    ),
                     "collection_languages": OrganizationService.serialize_collection_languages(
                         organisation=organisation
                     ),
@@ -494,13 +534,17 @@ class OrganizationService:
             else "",
             "has_custom_content": organisation.has_custom_content,
             "content_collection": organisation.content_collection,
-            "work_sector": organisation.work_sector,
+            "work_sector": OrganizationService.serialize_work_sector(
+                organisation.work_sector
+            ),
             "custom_type": organisation.custom_type,
             "theme": organisation.theme,
             "collection_languages": list(
                 organisation.collection_languages.order_by("code").values_list("code", flat=True)
             ),
-            "default_collection_language": organisation.default_collection_language,
+            "default_collection_language": OrganizationService.serialize_default_collection_language(
+                organisation.default_collection_language
+            ),
             "default_report_issue_emails": organisation.default_report_issue_emails,
             "default_feedback_emails": organisation.default_feedback_emails,
             "cms_id": organisation.cms_id,

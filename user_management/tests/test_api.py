@@ -171,11 +171,11 @@ class AccessCodeDetailsApiTests(TestCase):
         self.assertEqual(response.json()["organization"]["custom_type"], "version_1")
         self.assertEqual(
             response.json()["organization"]["default_feedback_emails"],
-            "feedback@example.com",
+            ["feedback@example.com"],
         )
         self.assertEqual(
             response.json()["organization"]["default_report_issue_emails"],
-            "report@example.com",
+            ["report@example.com"],
         )
         self.assertCountEqual(
             response.json()["organization"]["collection_languages"],

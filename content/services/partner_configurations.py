@@ -844,15 +844,19 @@ def build_organisation_partner_configuration_defaults(
 ):
     big_icon = item.get("big_icon")
     small_icon = item.get("small_icon")
+    work_sector_slug, _ = _parse_work_sector(item.get("work_sector"))
+    default_collection_language = (item.get("default_collection_language") or "").strip()
+    if " (" in default_collection_language and default_collection_language.endswith(")"):
+        default_collection_language = default_collection_language.split(" (", 1)[0].strip()
 
     defaults = {
         "name": item.get("name"),
         "display_name": item.get("display_name"),
         "has_custom_content": item.get("has_custom_content", False),
         "custom_type": item.get("custom_type") or "version_1",
-        "work_sector": item.get("work_sector"),
+        "work_sector": work_sector_slug,
         "content_collection": item.get("content_collection"),
-        "default_collection_language": item.get("default_collection_language"),
+        "default_collection_language": default_collection_language,
         "default_report_issue_emails": item.get("default_report_issue_emails"),
         "default_feedback_emails": item.get("default_feedback_emails"),
         "theme": item.get("theme"),

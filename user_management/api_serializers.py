@@ -1,6 +1,10 @@
 from rest_framework import serializers
 
 
+class EmailListSerializer(serializers.ListField):
+    child = serializers.CharField()
+
+
 class AccessCodeStatusResponseSerializer(serializers.Serializer):
     code = serializers.CharField()
     requires_login = serializers.BooleanField()
@@ -22,8 +26,8 @@ class AccessCodeLookupOrganizationSerializer(serializers.Serializer):
     work_sector = serializers.CharField(allow_null=True, allow_blank=True)
     content_collection = serializers.CharField(allow_null=True, allow_blank=True)
     default_collection_language = serializers.CharField(allow_null=True, allow_blank=True)
-    default_feedback_emails = serializers.CharField(allow_null=True, allow_blank=True)
-    default_report_issue_emails = serializers.CharField(allow_null=True, allow_blank=True)
+    default_feedback_emails = EmailListSerializer()
+    default_report_issue_emails = EmailListSerializer()
     collection_languages = AccessCodeLookupCollectionLanguageSerializer(many=True)
     big_icon_url = serializers.CharField(allow_blank=True)
     small_icon_url = serializers.CharField(allow_blank=True)
