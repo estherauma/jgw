@@ -1,0 +1,28 @@
+<div
+    class="ellipsis-icon um-actions"
+    data-ellipsis-root
+>
+    <button
+        class="ellipsis-icon-trigger um-actions-trigger"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-label="{{ aria_label }}"
+        data-ellipsis-trigger
+    >
+        <span class="sr-only">{{ aria_label }}</span>
+        <span class="ellipsis-icon-glyph um-actions-icon" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+        </span>
+    </button>
+    <div
+        class="ellipsis-icon-menu um-actions-menu"
+        role="menu"
+        data-ellipsis-menu
+        data-ellipsis-align="{{ menu_align|default:'right' }}"
+    >
+        {% include menu_template %}
+    </div>
+</div>

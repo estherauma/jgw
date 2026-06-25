@@ -1,10 +1,12 @@
 import base64
 import io
-import json
+import logging
 import segno
 import requests
 from django.conf import settings
 from django.utils.text import slugify
+
+logger = logging.getLogger(__name__)
 
 
 class DeepLinkService:
@@ -46,7 +48,8 @@ class DeepLinkService:
                 timeout=30,
             )
             response_data = response.json()
-        except requests.RequestException as exc:
+        except Exception as exc:
+            logger.error(f"Error creating Branch deep link: {exc}", exc_info=True)
             raise ValueError(f"Could not reach Branch: {exc}") from exc
 
         if not response.ok:
@@ -87,6 +90,40 @@ class DeepLinkService:
         return {
             "url": branch_url,
             "qr_code_url": cls.create_qr_code(deep_link=branch_url),
+        }
+
+    @classmethod
+    def create_onboarding_deep_link(
+        cls,
+        *,
+        organisation,
+        link_data,
+    ):
+        title = link_data["title"]
+        link_type = link_data["link_type"]
+        destination = link_data["destination"]
+        access_code = link_data.get("access_code")
+        sector = link_data.get("sector")
+        immigration_status = link_data.get("immigration_status")
+
+        payload = {
+            "feature": link_type,
+            "campaign": "user_management",
+            "tags": [organisation.name, link_type],
+            "data": {
+                "$marketing_title": title,
+                "type": link_type,
+                "destination": (destination.code or "").upper(),
+                "organisationAccessCode": access_code.code if access_code else "",
+                "sectors": sector.slug if sector else "",
+                "immigrationStatus": immigration_status.value if immigration_status else "",
+            },
+        }
+
+        branch_url = cls.create_branch_deep_link(payload=payload)
+        return {
+            "url": branch_url,
+            "data": payload["data"],
         }
 
     @classmethod

@@ -46,36 +46,6 @@
             {% flag 'can_view_organizations_table' %}
             {% include "select-org.html" with options=organizations selected=selected_org_name selected_id=selected_org_id %}
             {% if not selected_org_id %}
-            {% flag 'can_add_organization_group' %}
-            <div class="um-card">
-                <div class="um-row">
-                    <div class="um-card-title um-navy">
-                        <span class="title-icon">🗂️</span>
-                        <span class="title-text">Organisation Groups:</span>
-                    </div>
-                    <button class="um-btn" type="button" data-toggle="modal" data-target="#create-organization-group-modal">Add organisation group</button>
-                </div>
-                <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm">
-                    <div class="um-scrollbar">
-                        <div class="um-scrollbar-thumb"></div>
-                    </div>
-                    <div class="um-table-scroll">
-                        <table class="um-table table table-sm um-navy">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Code</th>
-                            </tr>
-                        </thead>
-                        <tbody data-organization-group-table-body>
-                            {% include "organization-group-rows.html" %}
-                        </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            {% endflag %}
             <div class="um-card">
                 <div class="um-row">
                     <div class="um-card-title um-navy">
@@ -111,6 +81,36 @@
                     </div>
                 </div>
             </div>
+            {% flag 'can_add_organization_group' %}
+            <div class="um-card">
+                <div class="um-row">
+                    <div class="um-card-title um-navy">
+                        <span class="title-icon">🗂️</span>
+                        <span class="title-text">Organisation Groups:</span>
+                    </div>
+                    <button class="um-btn" type="button" data-toggle="modal" data-target="#create-organization-group-modal">Add organisation group</button>
+                </div>
+                <div class="um-table-scroll-wrapper um-table-scroll-wrapper-sm">
+                    <div class="um-scrollbar">
+                        <div class="um-scrollbar-thumb"></div>
+                    </div>
+                    <div class="um-table-scroll">
+                        <table class="um-table table table-sm um-navy">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Code</th>
+                            </tr>
+                        </thead>
+                        <tbody data-organization-group-table-body>
+                            {% include "organization-group-rows.html" %}
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endflag %}
             {% endif %}
             {% endflag %}
 
@@ -161,98 +161,7 @@
                                     </td>
                                     <td class="text-center">{{ code.work_groups.count }}</td>
                                     <td class="text-right">
-                                        <div class="dropdown um-actions">
-                                            <button
-                                                class="um-actions-trigger dropdown-toggle"
-                                                type="button"
-                                                data-toggle="dropdown"
-                                                data-display="static"
-                                                aria-haspopup="true"
-                                                aria-expanded="false"
-                                                aria-label="Open actions for {{ code.code }}"
-                                            >
-                                                <span class="sr-only">Open actions for {{ code.code }}</span>
-                                                <span class="um-actions-icon" aria-hidden="true">
-                                                    <span></span>
-                                                    <span></span>
-                                                    <span></span>
-                                                </span>
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-right um-actions-menu">
-                                                {% flag 'can_assign_work_code' %}
-                                                <button
-                                                    class="dropdown-item um-actions-item"
-                                                    type="button"
-                                                    data-toggle="modal"
-                                                    data-target="#assign-workcode-modal"
-                                                    data-workcode-assign
-                                                    data-workcode-id="{{ code.id }}"
-                                                    data-workcode-code="{{ code.code }}"
-                                                    data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                                >
-                                                    Assign
-                                                </button>
-                                                {% if code.work_groups.count %}
-                                                <button
-                                                    class="dropdown-item um-actions-item"
-                                                    type="button"
-                                                    data-toggle="modal"
-                                                    data-target="#unassign-workcode-modal"
-                                                    data-workcode-unassign
-                                                    data-workcode-id="{{ code.id }}"
-                                                    data-workcode-code="{{ code.code }}"
-                                                    data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                                >
-                                                    Unassign
-                                                </button>
-                                                {% endif %}
-                                                {% endflag %}
-                                                {% flag 'can_create_login_qr_code' %}
-                                                   <button
-                                                    class="dropdown-item um-actions-item"
-                                                    type="button"
-                                                    data-generate-workcode-link
-                                                    data-qr-code-title="QR code for {{ code.code }}"
-                                                    data-workcode-id="{{ code.id }}"
-                                                    data-workcode-code="{{ code.code }}"
-                                                >
-                                                    QR code
-                                                </button>
-                                                {% endflag %}
-                                                {% flag 'can_delete_work_code' %}
-                                                <button
-                                                    class="dropdown-item um-actions-item"
-                                                    type="button"
-                                                    data-workcode-id="{{ code.id }}"
-                                                    data-workcode-code="{{ code.code }}"
-                                                    data-delete-workcode-btn
-                                                >
-                                                    Delete
-                                                </button>
-
-                                                {% endflag %}
-
-
-                                                {% flag 'can_edit_work_code' %}
-                                                <button
-                                                    class="dropdown-item um-actions-item"
-                                                    type="button"
-                                                    data-toggle="modal"
-                                                    data-target="#edit-workcode-modal"
-                                                    data-workcode-edit
-                                                    data-workcode-id="{{ code.id }}"
-                                                    data-workcode-code="{{ code.code }}"
-                                                    data-workcode-requires-login="{{ code.requires_login }}"
-                                                    data-workcode-expiry-date="{% if code.expiry_date %}{{ code.expiry_date|date:'Y-m-d' }}{% endif %}"
-                                                    data-workcode-org-name="{{ selected_org_name }}"
-                                                    data-workcode-org-id="{{ selected_org_id }}"
-                                                    data-edit-code-btn
-                                                >
-                                                    Edit
-                                                </button>
-                                                {% endflag %}
-                                            </div>
-                                        </div>
+                                        {% include "components/ellipsis-icon.html" with aria_label="Open actions for "|add:code.code menu_template="work-code-actions-menu.html" %}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -493,6 +402,7 @@
             {% flag 'can_view_roles' %}
                 {% include "roles-card.html" %}
             {% endflag %}
+                {% include "organisation-deep-links-card.html" %}
             {% endif %}
         </div>
     </div>
@@ -511,6 +421,7 @@
 {% url 'user_management:assign_work_code' as assign_work_code_url %}
 {% url 'user_management:assign_users_work_groups' as assign_users_work_groups_url %}
 {% url 'user_management:create_role' as create_role_url %}
+{% url 'user_management:create_deep_link' as create_organisation_deep_link_url %}
 <!-- include create organisation modal -->
 {% include 'create-organization-group-modal.html' with modal_title='Create new organisation group' submit_label='Save' form_action=create_organization_group_url form=create_organization_group_form %}
 {% include 'create-org-modal.html' with action_type='create' modal_title='Create new organisation' submit_label='Save' form_action=create_org_url form=create_org_form org_details=blank_org_details %}
@@ -523,6 +434,7 @@
 {% include 'add-workgroup-modal.html' with action_type='edit' modal_title='Edit User Group' submit_label='Save changes' form_action='' form=work_group_form %}
 {% include 'add-role-modal.html' with action_type='add' modal_title='Add role' submit_label='Save' form_action=create_role_url form=role_form %}
 {% include 'add-role-modal.html' with action_type='edit' modal_title='Edit role' submit_label='Save changes' form_action='' form=role_form %}
+{% include 'add-organisation-deep-link-modal.html' with modal_title='Create link' submit_label='Save' form_action=create_organisation_deep_link_url form=deep_link_form %}
 {% url 'user_management:create_dashboard_user' as create_dashboard_user_url %}
 {% include 'add-dashboard-user-modal.html' with action_type='add' modal_title='Add admin user' submit_label='Save' form_action=create_dashboard_user_url form=dashboard_user_form %}
 {% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
@@ -563,4 +475,5 @@
     });
   })();
 </script>
+
 {% endblock %}

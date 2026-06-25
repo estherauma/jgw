@@ -1,10 +1,18 @@
+import json
 from unittest.mock import Mock, patch
 
 import requests
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from preference.models import OrganisationAccessCode, OrganisationData
+from content.models import WorkSector
+from preference.models import (
+    Country,
+    ImmigrationStatus,
+    OrganisationAccessCode,
+    OrganisationData,
+    OrganisationDeepLink,
+)
 from user_management.services.deep_links import DeepLinkService
 from users.models import User
 
@@ -146,8 +154,46 @@ class CreateDeepLinkViewTests(TestCase):
             password="StrongPassword123!",
             is_active=True,
         )
+        self.superuser = User.objects.create_superuser(
+            email="deep-link-admin@example.com",
+            password="StrongPassword123!",
+            is_active=True,
+        )
         self.client.force_login(self.user)
         self.url = reverse("user_management:create_deep_link")
+        self.organisation = OrganisationData.objects.create(
+            name="Bar Way",
+            org_code="BARWAY",
+            display_name="Bar Way",
+            theme="default",
+            custom_type="version_1",
+            work_sector="Agriculture",
+            content_collection="bar-way",
+            default_collection_language="en",
+            default_feedback_emails="feedback@example.com",
+            default_report_issue_emails="report@example.com",
+            big_icon="https://cdn.example.com/big.png",
+            small_icon="https://cdn.example.com/small.png",
+        )
+        self.destination = Country.objects.create(
+            name="Kenya",
+            code="ke",
+            api_value="ke",
+            is_destination=True,
+        )
+        self.immigration_status = ImmigrationStatus.objects.create(
+            name="Visitor",
+            value="visitor",
+        )
+        self.work_sector = WorkSector.objects.create(
+            slug="agriculture",
+            display_name="Agriculture",
+        )
+        self.access_code = OrganisationAccessCode.objects.create(
+            code="BAR123",
+            organisation=self.organisation,
+            requires_login=True,
+        )
 
     def test_returns_400_for_invalid_json_payload(self):
         response = self.client.post(
@@ -165,7 +211,7 @@ class CreateDeepLinkViewTests(TestCase):
     def test_returns_400_for_unsupported_deep_link_type(self):
         response = self.client.post(
             self.url,
-            data='{"work_code_id": 1, "type": "invite"}',
+            data='{"work_code_id": 1, "link_type": "invite"}',
             content_type="application/json",
         )
 
@@ -184,7 +230,7 @@ class CreateDeepLinkViewTests(TestCase):
 
         response = self.client.post(
             self.url,
-            data='{"work_code_id": 7, "type": "login"}',
+            data='{"work_code_id": 7, "link_type": "login"}',
             content_type="application/json",
         )
 
@@ -209,7 +255,7 @@ class CreateDeepLinkViewTests(TestCase):
 
         response = self.client.post(
             self.url,
-            data='{"type": "login"}',
+            data='{"link_type": "login"}',
             content_type="application/json",
         )
 
@@ -227,7 +273,7 @@ class CreateDeepLinkViewTests(TestCase):
 
         response = self.client.post(
             self.url,
-            data='{"work_code_id": 7, "type": "login"}',
+            data='{"work_code_id": 7, "link_type": "login"}',
             content_type="application/json",
         )
 
@@ -243,7 +289,7 @@ class CreateDeepLinkViewTests(TestCase):
 
         response = self.client.post(
             self.url,
-            data='{"work_code_id": 7, "type": "login"}',
+            data='{"work_code_id": 7, "link_type": "login"}',
             content_type="application/json",
         )
 
@@ -255,3 +301,116 @@ class CreateDeepLinkViewTests(TestCase):
                 "error": "An error occurred while generating the deep link. Please try again.",
             },
         )
+
+    def test_returns_400_for_invalid_onboarding_payload(self):
+        self.client.force_login(self.superuser)
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps(
+                {
+                    "selected_org_id": self.organisation.id,
+                    "link_type": "onboarding",
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": False,
+                "errors": {
+                    "title": ["This field is required."],
+                    "destination": ["This field is required."],
+                },
+            },
+        )
+
+    @patch("user_management.services.deep_links.DeepLinkService.create_branch_deep_link")
+    def test_creates_onboarding_deep_link_and_persists_it(self, mock_create_branch_deep_link):
+        self.client.force_login(self.superuser)
+        mock_create_branch_deep_link.return_value = "https://branch.example/onboarding"
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps(
+                {
+                    "selected_org_id": self.organisation.id,
+                    "title": "New starter flow",
+                    "link_type": "onboarding",
+                    "destination": self.destination.id,
+                    "access_code": self.access_code.id,
+                    "sectors": self.work_sector.slug,
+                    "immigration_status": self.immigration_status.id,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "url": "https://branch.example/onboarding",
+                "qr_code_url": None,
+                "data": {
+                    "deep_link_id": OrganisationDeepLink.objects.get().id,
+                    "org_id": self.organisation.id,
+                    "title": "New starter flow",
+                    "url": "https://branch.example/onboarding",
+                    "data": {
+                        "$marketing_title": "New starter flow",
+                        "type": "onboarding",
+                        "destination": "KE",
+                        "organisationAccessCode": "BAR123",
+                        "sectors": "agriculture",
+                        "immigrationStatus": "visitor",
+                    },
+                },
+            },
+        )
+
+        deep_link = OrganisationDeepLink.objects.get()
+        self.assertEqual(deep_link.organisation, self.organisation)
+        self.assertEqual(deep_link.title, "New starter flow")
+        self.assertEqual(deep_link.link_type, "onboarding")
+        self.assertEqual(deep_link.link, "https://branch.example/onboarding")
+        mock_create_branch_deep_link.assert_called_once_with(
+            payload={
+                "feature": "onboarding",
+                "campaign": "user_management",
+                "tags": ["Bar Way", "onboarding"],
+                "data": {
+                    "$marketing_title": "New starter flow",
+                    "type": "onboarding",
+                    "destination": "KE",
+                    "organisationAccessCode": "BAR123",
+                    "sectors": "agriculture",
+                    "immigrationStatus": "visitor",
+                },
+            }
+        )
+
+    def test_returns_403_for_onboarding_org_without_access(self):
+        response = self.client.post(
+            self.url,
+            data=json.dumps(
+                {
+                    "selected_org_id": self.organisation.id,
+                    "title": "Blocked flow",
+                    "link_type": "onboarding",
+                    "destination": self.destination.id,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            response.json(),
+            {"ok": False, "error": "You do not have access to this organisation."},
+        )
+        self.assertFalse(OrganisationDeepLink.objects.exists())
