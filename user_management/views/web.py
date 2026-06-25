@@ -69,6 +69,7 @@ from content.services.partner_configurations import (
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
 )
+from common.services.audit import AuditService
 
 logger = logging.getLogger(__name__)
 
@@ -1842,27 +1843,28 @@ def user_activity_list(request):
         "actor", "organisation"
     ).filter(created_at__gte=thirty_days_ago)
 
-    if user.is_superuser:
-        return render(request,"logs.html",{"logs": activities})
-        
-    elif is_58_admin(user):
-        activities = activities.exclude(actor__is_superuser=True)
-    elif is_org_admin(user):
-        user_org = user.organisation_data.first()
-        activities = activities.filter(organisation=user_org)
-    elif is_org_group_admin(user):
-        user_orgs = user.organisation_data.all()
-        activities = activities.filter(organisation__in=user_orgs)
-    elif is_org_staff(user):
-        activities = activities.filter(actor=user)
-    else:
-        activities = activities.none()
+    if not user.is_superuser:
+        if is_58_admin(user):
+            activities = activities.exclude(actor__is_superuser=True)
+        elif is_org_admin(user):
+            user_org = user.organisation_data.first()
+            activities = activities.filter(organisation=user_org)
+        elif is_org_group_admin(user):
+            user_orgs = user.organisation_data.all()
+            activities = activities.filter(organisation__in=user_orgs)
+        elif is_org_staff(user):
+            activities = activities.filter(actor=user)
+        else:
+            activities = activities.none()
+    
+    page_number = request.GET.get("page", 1)
 
-    return render(
-        request,
-        "logs.html",
-        {"logs": activities},
+    pagination_data = AuditService.get_paginated_activities(
+        activities,
+        page_number,
     )
+
+    return render(request, "logs.html", pagination_data)
 
 
 @group_required("user_management")
@@ -1909,6 +1911,12 @@ def user_details(request, user_id):
     )
     
     dashboard_preferences = getattr(user, "dashboard_prefs", None)
+    page_number = request.GET.get("page", 1)
+
+    pagination_data = AuditService.get_paginated_activities(
+        activities,
+        page_number,
+    )
 
     context = {
         "user": user,
@@ -1923,6 +1931,7 @@ def user_details(request, user_id):
             ).order_by("name")
         ),
         "activities": activities,
+        **pagination_data,
     }
     return render(request, "user-details.html", context)
 
@@ -1977,6 +1986,7 @@ def user_activity_details(request, activity_id):
         "action": activity.action,
         "before": before_formatted,
         "after": after_formatted,
+        
     })
 
 
