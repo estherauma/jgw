@@ -568,31 +568,41 @@ class OrganizationService:
         )
 
     @staticmethod
-    def get_paginated_organisations_context(
-        current_user,
-        query="",
-        page_number=None,
-    ):
-        queryset = OrganizationService.get_allowed_orgs(current_user).order_by("name")
-
+    def filter_organisations_query(queryset, query=""):
         query = (query or "").strip()
-        if query:
-            queryset = queryset.filter(
-                Q(name__icontains=query) | Q(org_code__icontains=query)
-            )
-
+        if not query:
+            return queryset
+        return queryset.filter(
+            Q(name__icontains=query) | Q(org_code__icontains=query)
+        )
+    
+    @staticmethod
+    def get_paginated_organisations_context(user, query="", page_number=None):
+        queryset = OrganizationService.get_allowed_orgs(user).order_by("name")
+        queryset = OrganizationService.filter_organisations_query(
+            queryset,
+            query=query,
+        )
         paginator = Paginator(queryset, 20)
-        orgs_page = paginator.get_page(page_number)
-        
+        organisations_page = paginator.get_page(page_number)
+
         return {
-            "organisations": orgs_page.object_list,
-            "orgs_page": orgs_page,
-            "orgs_pagination_context": {
-                "page_obj": orgs_page,
-                "page_numbers": list(orgs_page.paginator.get_elided_page_range(orgs_page.number)),
+            "organisations": list(organisations_page.object_list),
+            "organizations_page": organisations_page,
+            "organizations_pagination_context": {
+                "page_obj": organisations_page,
+                "page_numbers": list(
+                    organisations_page.paginator.get_elided_page_range(
+                        organisations_page.number
+                    )
+                ),
                 "item_label": "organisations",
                 "nav_label": "Organisations pagination",
-                "page_link_attr": "data-orgs-page-link",
+                "page_link_attr": "data-org-page-link",
             },
-            "row_start_index": orgs_page.start_index() if orgs_page.object_list else 0,
+            "organizations_row_start_index": (
+                organisations_page.start_index()
+                if organisations_page.object_list
+                else 0
+            ),
         }

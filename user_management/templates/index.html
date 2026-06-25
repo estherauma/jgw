@@ -75,13 +75,13 @@
                             </tr>
                         </thead>
                         <tbody data-org-table-body>
-                            {% include "organization-rows.html" %}
+                            {% include "organization-rows.html" with organizations=organisations organizations_row_start_index=organizations_row_start_index %}
                         </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="mt-3" data-organisation-pagination>
-                    {% include "partials/pagination.html" with page_obj=organisations_page page_numbers=organisations_page_numbers item_label="organisations" nav_label="Organisations pagination" page_link_attr="data-orgs-page-link" %}
+                <div class="mt-3" data-org-pagination>
+                    {% include "partials/pagination.html" with page_obj=organizations_page item_label="organisations" nav_label="Organisations pagination" page_link_attr="data-org-page-link" %}
                 </div>
             </div>
             {% flag 'can_add_organization_group' %}

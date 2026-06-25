@@ -4,7 +4,13 @@
   <div class="um-card-title">Selected organisation</div>
   <div class="um-row">
     <div class="input-group">
-      <div class="um-select" data-org-select data-org-options-url="{% url 'user_management:search_organisations' %}" data-org-selected-id="{{ selected_id|default:'' }}">
+      <div
+        class="um-select"
+        data-org-select
+        data-org-options-url="{% url 'user_management:organisation_search_options' %}"
+        {% if selected_id %}data-initial-org-id="{{ selected_id }}"{% endif %}
+        {% if selected %}data-initial-org-label="{{ selected }}"{% endif %}
+      >
         <button class="um-select-toggle rounded-pill fw-bold text-start" type="button" data-org-toggle>
           <span data-org-selected-label>
             {% if selected %}{{ selected }}{% else %}Select organisation{% endif %}
@@ -19,24 +25,7 @@
             aria-label="Search organisation"
             data-org-filter
           />
-          <div class="um-select-options" data-org-options>
-            {% for org in options %}
-            <button
-              class="um-select-option"
-              type="button"
-              id="org-option-{{ org.id }}"
-              data-org-option
-              data-org-value="{{ org.id }}"
-              data-org-label="{{ org.name }}"
-              data-org-name="{{ org.name }}"
-              data-org-code="{{ org.org_code }}"
-              data-org-created-at="{{ org.created_at|date:'M j, Y, P' }}"
-              {% if selected_id and org.id|stringformat:"s" == selected_id %}data-org-selected="true"{% endif %}
-            >
-              {{ org.name }}
-            </button>
-            {% endfor %}
-          </div>
+          <div class="um-select-options" data-org-options></div>
         </div>
         <input type="hidden" name="selected_org" data-org-hidden value="{{ selected_id|default:'' }}" />
       </div>
@@ -71,238 +60,317 @@
     var hiddenInput = wrapper.querySelector('[data-org-hidden]');
     var selectedLabel = wrapper.querySelector('[data-org-selected-label]');
     var optionsContainer = wrapper.querySelector('[data-org-options]');
-    var optionsUrl = wrapper.getAttribute('data-org-options-url');
-    var selectedId = wrapper.getAttribute('data-org-selected-id') || '';
-    var debounceTimer = null;
+    var options = [];
+    var searchUrl = wrapper.getAttribute('data-org-options-url') || '';
+    var initialOrgId = wrapper.getAttribute('data-initial-org-id') || '';
+    var initialOrgLabel = wrapper.getAttribute('data-initial-org-label') || '';
     var controller = null;
+    var currentPage = 0;
+    var currentQuery = '';
+    var hasNextPage = true;
+    var isLoading = false;
+    var debounceTimer = null;
 
-    if (!toggle || !menu || !selectedLabel || !optionsContainer || !optionsUrl) {
+    if (!toggle || !menu || !filterInput || !selectedLabel || !optionsContainer || !searchUrl) {
       return;
     }
 
     function closeMenu() {
       wrapper.classList.remove('is-open');
       menu.classList.remove('is-open');
+      filterInput.value = '';
+      currentQuery = '';
     }
 
-      function setSelected(option) {
-        var label = option.getAttribute('data-org-label') || '';
-        var value = option.getAttribute('data-org-value') || '';
-        selectedLabel.textContent = label || 'Select organisation';
-        if (window.storeSelectedOrganisation) {
-          window.storeSelectedOrganisation(value, label);
-        }
-        toggleDependents(true);
-        updateDetails(option);
-        filterWorkCodes(value);
-        var current = new URL(window.location.href).searchParams.get('selected_org_id') || '';
-        updateQueryParam(value, current !== value);
-        if (hiddenInput) {
-          hiddenInput.value = value;
-        }
-        wrapper.querySelectorAll('[data-org-option]').forEach(function (item) {
-          item.classList.remove('is-selected');
+    function renderEmptyState(message) {
+      optionsContainer.innerHTML =
+        '<div class="um-select-option text-muted" data-org-empty-state>' +
+        message +
+        '</div>';
+      options = [];
+    }
+
+    function bindOptionEvents() {
+      options = Array.prototype.slice.call(
+        wrapper.querySelectorAll('[data-org-option]'),
+      );
+      options.forEach(function (option) {
+        option.addEventListener('click', function () {
+          setSelected(option);
         });
-        option.classList.add('is-selected');
+      });
+    }
+
+    function renderOptions(items, append) {
+      if (!items.length) {
+        if (!append) {
+          renderEmptyState('No organisations found.');
+        }
+        return;
+      }
+      var html = items
+        .map(function (org) {
+          var isSelected = initialOrgId && String(org.id) === String(initialOrgId);
+          return (
+            '<button' +
+            ' class="um-select-option' + (isSelected ? ' is-selected' : '') + '"' +
+            ' type="button"' +
+            ' id="org-option-' + org.id + '"' +
+            ' data-org-option' +
+            ' data-org-value="' + org.id + '"' +
+            ' data-org-label="' + org.name + '"' +
+            ' data-org-name="' + org.name + '"' +
+            ' data-org-code="' + (org.org_code || '') + '"' +
+            ' data-org-created-at="' + (org.created_at || '') + '"' +
+            '>' +
+            org.name +
+            '</button>'
+          );
+        })
+        .join('');
+
+      if (append) {
+        var emptyState = optionsContainer.querySelector('[data-org-empty-state]');
+        if (emptyState) {
+          emptyState.remove();
+        }
+        optionsContainer.insertAdjacentHTML('beforeend', html);
+      } else {
+        optionsContainer.innerHTML = html;
+      }
+      bindOptionEvents();
+    }
+
+    function loadOptions(page, append) {
+      if (isLoading) {
+        return;
+      }
+      if (!append && controller) {
+        controller.abort();
+      }
+      controller = new AbortController();
+      isLoading = true;
+      var params = new URLSearchParams();
+      params.set('page', String(page || 1));
+      if (currentQuery) {
+        params.set('q', currentQuery);
+      }
+      fetch(searchUrl + (params.toString() ? '?' + params.toString() : ''), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        signal: controller.signal,
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error('Organisation load failed');
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          renderOptions(data?.options || [], append);
+          currentPage = page || 1;
+          hasNextPage = Boolean(data?.has_next);
+        })
+        .catch(function (error) {
+          if (error.name === 'AbortError') {
+            return;
+          }
+          console.error(error);
+          if (!append) {
+            renderEmptyState('Could not load organisations.');
+          }
+        })
+        .finally(function () {
+          isLoading = false;
+        });
+    }
+
+    function setSelected(option) {
+      var label = option.getAttribute('data-org-label') || '';
+      var value = option.getAttribute('data-org-value') || '';
+      selectedLabel.textContent = label || 'Select organisation';
+      if (window.storeSelectedOrganisation) {
+        window.storeSelectedOrganisation(value, label);
+      }
+      toggleDependents(true);
+      updateDetails(option);
+      filterWorkCodes(value);
+      syncWorkCodeForm(value);
+      var current = new URL(window.location.href).searchParams.get('selected_org_id') || '';
+      updateQueryParam(value, current !== value);
+      if (hiddenInput) {
+        hiddenInput.value = value;
+      }
+      options.forEach(function (item) {
+        item.classList.remove('is-selected');
+      });
+      option.classList.add('is-selected');
+      initialOrgId = value;
+      closeMenu();
+    }
+
+    function updateDetails(option) {
+      var detailMap = {
+        name: option.getAttribute('data-org-name'),
+        code: option.getAttribute('data-org-code'),
+        created_at: option.getAttribute('data-org-created-at'),
+      };
+      Object.keys(detailMap).forEach(function (key) {
+        var target = document.querySelector('[data-org-detail="' + key + '"]');
+        if (target && detailMap[key]) {
+          target.textContent = detailMap[key];
+        }
+      });
+    }
+
+    function resetDetails() {
+      var details = document.querySelectorAll('[data-org-detail]');
+      details.forEach(function (item) {
+        var fallback = item.getAttribute('data-org-default') || 'N/A';
+        item.textContent = fallback;
+      });
+    }
+
+    function updateQueryParam(orgId, navigate) {
+      if (!window.history || !window.history.replaceState) {
+        return;
+      }
+      var url = new URL(window.location.href);
+      if (orgId) {
+        url.searchParams.set('selected_org_id', orgId);
+      } else {
+        url.searchParams.delete('selected_org_id');
+      }
+      if (navigate) {
+        window.location.href = url.toString();
+      } else {
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
+
+    function filterWorkCodes(orgId) {
+      var items = document.querySelectorAll('[data-org-workcode]');
+      var visibleCount = 0;
+      items.forEach(function (item) {
+        var matches = item.getAttribute('data-org-id') === orgId;
+        item.hidden = !matches;
+        if (matches) {
+          visibleCount += 1;
+        }
+      });
+      var emptyState = document.querySelector('[data-org-workcode-empty]');
+      if (emptyState) {
+        emptyState.classList.toggle('d-none', visibleCount > 0);
+      }
+    }
+
+    window.updateOrgWorkCodeFilter = filterWorkCodes;
+
+    function syncWorkCodeForm(orgId) {
+      var form = document.getElementById('add-workcode-form');
+      if (!form) {
+        return;
+      }
+      var action = form.getAttribute('action');
+      if (!action) {
+        return;
+      }
+      var url = new URL(action, window.location.origin);
+      if (orgId) {
+        url.searchParams.set('selected_org_id', orgId);
+      } else {
+        url.searchParams.delete('selected_org_id');
+      }
+      form.setAttribute('action', url.toString());
+    }
+
+    function toggleDependents(show) {
+      var dependents = document.querySelectorAll('[data-org-dependent]');
+      dependents.forEach(function (el) {
+        el.hidden = !show;
+      });
+    }
+
+    toggle.addEventListener('click', function () {
+      var isOpen = !wrapper.classList.contains('is-open');
+      wrapper.classList.toggle('is-open', isOpen);
+      menu.classList.toggle('is-open', isOpen);
+      
+      if (isOpen && currentPage === 0) {
+        loadOptions(1, false);
+      }
+      if (isOpen) {
+        filterInput.focus();
+        filterInput.select();
+      }
+    });
+
+    document.addEventListener('click', function (event) {
+      if (!wrapper.contains(event.target)) {
         closeMenu();
       }
+    });
 
-      function updateDetails(option) {
-        var detailMap = {
-          name: option.getAttribute('data-org-name'),
-          code: option.getAttribute('data-org-code'),
-          created_at: option.getAttribute('data-org-created-at'),
-        };
-        Object.keys(detailMap).forEach(function (key) {
-          var target = document.querySelector('[data-org-detail="' + key + '"]');
-          if (target && detailMap[key]) {
-            target.textContent = detailMap[key];
-          }
-        });
+    optionsContainer.addEventListener('scroll', function () {
+      if (!hasNextPage || isLoading) {
+        return;
       }
-
-      function resetDetails() {
-        var details = document.querySelectorAll('[data-org-detail]');
-        details.forEach(function (item) {
-          var fallback = item.getAttribute('data-org-default') || 'N/A';
-          item.textContent = fallback;
-        });
+      var remaining =
+        optionsContainer.scrollHeight -
+        optionsContainer.scrollTop -
+        optionsContainer.clientHeight;
+      if (remaining <= 40) {
+        loadOptions(currentPage + 1, true);
       }
+    });
 
-      function updateQueryParam(orgId, navigate) {
-        if (!window.history || !window.history.replaceState) {
-          return;
-        }
-        var url = new URL(window.location.href);
-        if (orgId) {
-          url.searchParams.set('selected_org_id', orgId);
-        } else {
-          url.searchParams.delete('selected_org_id');
-        }
-        if (navigate) {
-          window.location.href = url.toString();
-        } else {
-          window.history.replaceState({}, '', url.toString());
-        }
+    filterInput.addEventListener('input', function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        currentQuery = (filterInput.value || '').trim();
+        currentPage = 0;
+        hasNextPage = true;
+        loadOptions(1, false);
+      }, 250);
+    });
+
+    if (initialOrgId) {
+      if (hiddenInput) {
+        hiddenInput.value = initialOrgId;
       }
-
-
-      function filterWorkCodes(orgId) {
-        var items = document.querySelectorAll('[data-org-workcode]');
-        var visibleCount = 0;
-        items.forEach(function (item) {
-          var matches = item.getAttribute('data-org-id') === orgId;
-          item.hidden = !matches;
-          if (matches) {
-            visibleCount += 1;
-          }
-        });
-        var emptyState = document.querySelector('[data-org-workcode-empty]');
-        if (emptyState) {
-          emptyState.classList.toggle('d-none', visibleCount > 0);
-        }
+      if (window.storeSelectedOrganisation) {
+        window.storeSelectedOrganisation(initialOrgId, initialOrgLabel);
       }
+      toggleDependents(true);
+      filterWorkCodes(initialOrgId);
+      syncWorkCodeForm(initialOrgId);
+    } else {
+      toggleDependents(false);
+      filterWorkCodes('');
+      syncWorkCodeForm('');
+    }
 
-      window.updateOrgWorkCodeFilter = filterWorkCodes;
-
-      function syncWorkCodeForm(orgId) {
-        var form = document.getElementById('add-workcode-form');
-        if (!form) {
-          return;
-        }
-        var action = form.getAttribute('action');
-        if (!action) {
-          return;
-        }
-        var url = new URL(action, window.location.origin);
-        if (orgId) {
-          url.searchParams.set('selected_org_id', orgId);
-        } else {
-          url.searchParams.delete('selected_org_id');
-        }
-        form.setAttribute('action', url.toString());
-      }
-
-      function toggleDependents(show) {
-        var dependents = document.querySelectorAll('[data-org-dependent]');
-        dependents.forEach(function (el) {
-          el.hidden = !show;
-        });
-      }
-
-      function renderOptions(organisations) {
-        optionsContainer.innerHTML = '';
-        organisations.forEach(function (org) {
-          var option = document.createElement('button');
-          option.type = 'button';
-          option.className = 'um-select-option';
-          option.setAttribute('data-org-option', '');
-          option.setAttribute('data-org-value', org.id);
-          option.setAttribute('data-org-label', org.name);
-          option.textContent = org.name;
-          optionsContainer.appendChild(option);
-        });
-      }
-
-      function loadOptions(query) {
-        if (controller) {
-          controller.abort();
-        }
-        controller = new AbortController();
-        var params = new URLSearchParams();
-        if (query) {
-          params.set('q', query);
-        }
-        fetch(optionsUrl + (params.toString() ? '?' + params.toString() : ''), {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          signal: controller.signal,
-        })
-          .then(function (response) {
-            if (!response.ok) {
-              throw new Error('Failed to load organisations');
-            }
-            return response.json();
-          })
-          .then(function (data) {
-            renderOptions(data.organisations || []);
-          })
-          .catch(function (error) {
-            if (error.name !== 'AbortError') {
-              console.error(error);
-            }
-          });
-      }
-
-      toggle.addEventListener('click', function () {
-        var isOpen = !wrapper.classList.contains('is-open');
-        wrapper.classList.toggle('is-open', isOpen);
-        menu.classList.toggle('is-open', isOpen);
-        if (isOpen && filterInput) {
-          filterInput.focus();
-          filterInput.select();
-        }
-      });
-
-      document.addEventListener('click', function (event) {
-        if (!wrapper.contains(event.target)) {
-          closeMenu();
-        }
-      });
-
-      optionsContainer.addEventListener('click', function (event) {
-        var option = event.target.closest('[data-org-option]');
-        if (option) {
-          setSelected(option);
-        }
-      });
-
-      if (filterInput) {
-        filterInput.addEventListener('input', function () {
-          var value = (filterInput.value || '').trim();
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(function () {
-            loadOptions(value);
-          }, 250);
-        });
-      }
-
-      if (selectedId) {
-        if (window.storeSelectedOrganisation) {
-          window.storeSelectedOrganisation(
-            selectedId,
-            (selectedLabel.textContent || '').trim(),
-          );
-        }
+    var clearButton = document.querySelector('[data-org-clear]');
+    if (clearButton) {
+      clearButton.addEventListener('click', function () {
+        selectedLabel.textContent = 'Select organisation';
         if (hiddenInput) {
-          hiddenInput.value = selectedId;
+          hiddenInput.value = '';
         }
-        toggleDependents(true);
-        filterWorkCodes(selectedId);
-      } else {
+        options.forEach(function (item) {
+          item.classList.remove('is-selected');
+        });
+        resetDetails();
         toggleDependents(false);
         filterWorkCodes('');
-      }
-
-      var clearButton = document.querySelector('[data-org-clear]');
-      if (clearButton) {
-        clearButton.addEventListener('click', function () {
-          selectedLabel.textContent = 'Select organisation';
-          if (hiddenInput) {
-            hiddenInput.value = '';
-          }
-          wrapper.querySelectorAll('[data-org-option]').forEach(function (item) {
-            item.classList.remove('is-selected');
-          });
-          resetDetails();
-          toggleDependents(false);
-          filterWorkCodes('');
-          if (window.storeSelectedOrganisation) {
-            window.storeSelectedOrganisation('', '');
-          }
-          updateQueryParam('', true);
-        });
-      }
+        syncWorkCodeForm('');
+        if (window.storeSelectedOrganisation) {
+          window.storeSelectedOrganisation('', '');
+          initialOrgId = '';
+        }
+        updateQueryParam('', true);
+      });
     }
+  }
 
   window.addEventListener('load', initOrgDropdown);
 })();

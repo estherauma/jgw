@@ -81,12 +81,16 @@ def user_management(request):
     selected_org = None
     selected_org_id = None
     selected_org_name = None
-    allowed_organizations_qs = OrganizationService.get_allowed_orgs(user).order_by("name")
-    orgs_listing = OrganizationService.get_paginated_organisations_context(
+    
+    # Base query stays intact for inner logic filters
+    organizations = OrganizationService.get_allowed_orgs(user).order_by("name")
+    
+    # 🟢 STEP 1: Fetch paginated organization data context from Screenshot 1
+    paginated_organisations = OrganizationService.get_paginated_organisations_context(
         user,
         page_number=request.GET.get("organisations_page"),
     )
-    paged_organizations = orgs_listing["organisations"]
+    
     organization_groups = OrganizationGroup.objects.order_by("name")
 
     work_codes = []
@@ -108,13 +112,13 @@ def user_management(request):
             )
 
     if requested_org_id:
-        selected_org = allowed_organizations_qs.filter(id=requested_org_id).first()
+        selected_org = organizations.filter(id=requested_org_id).first()
         if selected_org:
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
 
     if user_role in {"org_admin", "org_staff"}:
-        selected_org = allowed_organizations_qs.first()
+        selected_org = organizations.first()
         if selected_org:
             selected_org_id = str(selected_org.id)
             selected_org_name = selected_org.name
@@ -159,10 +163,8 @@ def user_management(request):
         org_languages = SiteLanguages.objects.none()
 
     context = {
-        "organizations": paged_organizations,
-        "organisations_page": orgs_listing["orgs_page"],
-        "organisations_page_numbers": orgs_listing["orgs_pagination_context"]["page_numbers"],
-        "row_start_index": orgs_listing["row_start_index"],
+        # 🟢 STEP 2: Unpack dynamic variables instead of raw queryset (Screenshot 1)
+        **paginated_organisations,
         "organization_groups": organization_groups,
         **users_listing,
         "work_codes": work_codes,
@@ -178,7 +180,7 @@ def user_management(request):
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
-        "dashboard_user_form": DashboardUserForm(orgs_qs=allowed_organizations_qs),
+        "dashboard_user_form": DashboardUserForm(orgs_qs=organizations),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
         "roles": roles,
         "deep_links": deep_links,
@@ -215,13 +217,40 @@ def search_organisations(request):
             "ok": True,
             "rows_html": rows_html,
             "pagination_html": pagination_html,
-            "organisations": [
-                {"id": org.id, "name": org.name}
-                for org in organisations_listing["organisations"]
-            ],
         }
     )
-
+    
+def organisation_search_options(request):
+    user = request.user
+    query = request.GET.get("q", "").strip()
+    organisations_listing = OrganizationService.get_paginated_organisations_context(
+        user,
+        query=query,
+        page_number=request.GET.get("page"),
+    )
+    organisations_page = organisations_listing["organizations_page"]
+    return JsonResponse(
+        {
+            "ok": True,
+            "options": [
+                {
+                    "id": org.id,
+                    "name": org.name,
+                    "org_code": org.org_code,
+                    "created_at": org.created_at.strftime("%b %-d, %Y, %-I:%M %p")
+                    if org.created_at
+                    else "",
+                }
+                for org in organisations_listing["organisations"]
+            ],
+            "has_next": organisations_page.has_next(),
+            "next_page": (
+                organisations_page.next_page_number()
+                if organisations_page.has_next()
+                else None
+            ),
+        }
+    )
 
 def search_users(request):
     user = request.user
