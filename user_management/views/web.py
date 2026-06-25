@@ -81,24 +81,17 @@ def user_management(request):
     selected_org = None
     selected_org_id = None
     selected_org_name = None
-    
-    # Base query stays intact for inner logic filters
     organizations = OrganizationService.get_allowed_orgs(user).order_by("name")
-    
-    # 🟢 STEP 1: Fetch paginated organization data context from Screenshot 1
     paginated_organisations = OrganizationService.get_paginated_organisations_context(
         user,
         page_number=request.GET.get("organisations_page"),
     )
-    
     organization_groups = OrganizationGroup.objects.order_by("name")
-
     work_codes = []
     work_groups = WorkGroup.objects.none()
     assigned_work_codes = []
     roles = OrganisationRole.objects.none()
     deep_links = OrganisationDeepLink.objects.none()
-
     selected_org = None
     selected_org_id = None
     selected_org_name = None
@@ -163,7 +156,6 @@ def user_management(request):
         org_languages = SiteLanguages.objects.none()
 
     context = {
-        # 🟢 STEP 2: Unpack dynamic variables instead of raw queryset (Screenshot 1)
         **paginated_organisations,
         "organization_groups": organization_groups,
         **users_listing,
