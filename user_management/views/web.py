@@ -69,7 +69,7 @@ from content.services.partner_configurations import (
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
 )
-from user_management.services.activity import UserActivityService
+from common.services.audit import AuditService
 
 logger = logging.getLogger(__name__)
 
@@ -1861,7 +1861,7 @@ def user_activity_list(request):
     
     page_number = request.GET.get("page", 1)
 
-    pagination_data = UserActivityService.get_paginated_activities(
+    pagination_data = AuditService.get_paginated_activities(
         activities,
         page_number,
     )
@@ -1915,7 +1915,7 @@ def user_details(request, user_id):
     dashboard_preferences = getattr(user, "dashboard_prefs", None)
     page_number = request.GET.get("page", 1)
 
-    pagination_data = UserActivityService.get_paginated_activities(
+    pagination_data = AuditService.get_paginated_activities(
         activities,
         page_number,
     )
