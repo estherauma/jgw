@@ -250,6 +250,25 @@ class OrganisationData(AuditFieldsMixin):
         ]
 
 
+class OrganisationDeepLink(AuditFieldsMixin):
+    organisation = models.ForeignKey(
+        "OrganisationData",
+        on_delete=models.CASCADE,
+        related_name="deep_links",
+    )
+    link = models.URLField()
+    link_type = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.title} ({self.organisation})"
+
+    class Meta(AuditFieldsMixin.Meta):
+        indexes = [
+            models.Index(fields=["link_type"]),
+        ]
+
+
 class SiteLanguages(AuditFieldsMixin):
     organisation = models.ForeignKey(
         "OrganisationData",

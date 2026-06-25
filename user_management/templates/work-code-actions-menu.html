@@ -1,0 +1,76 @@
+{% load um_waffle_flags %}
+{% flag 'can_assign_work_code' %}
+<button
+    class="dropdown-item um-actions-item"
+    type="button"
+    role="menuitem"
+    data-toggle="modal"
+    data-target="#assign-workcode-modal"
+    data-workcode-assign
+    data-workcode-id="{{ code.id }}"
+    data-workcode-code="{{ code.code }}"
+    data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+>
+    Assign
+</button>
+{% if code.work_groups.count %}
+<button
+    class="dropdown-item um-actions-item"
+    type="button"
+    role="menuitem"
+    data-toggle="modal"
+    data-target="#unassign-workcode-modal"
+    data-workcode-unassign
+    data-workcode-id="{{ code.id }}"
+    data-workcode-code="{{ code.code }}"
+    data-workcode-groups="{% for group in code.work_groups.all %}{{ group.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+>
+    Unassign
+</button>
+{% endif %}
+{% endflag %}
+{% flag 'can_create_login_qr_code' %}
+<button
+    class="dropdown-item um-actions-item"
+    type="button"
+    role="menuitem"
+    data-generate-workcode-link
+    data-qr-code-title="QR code for {{ code.code }}"
+    data-workcode-id="{{ code.id }}"
+    data-workcode-code="{{ code.code }}"
+    data-workcode-org-id="{{ selected_org_id }}"
+>
+    QR code
+</button>
+{% endflag %}
+{% flag 'can_delete_work_code' %}
+<button
+    class="dropdown-item um-actions-item"
+    type="button"
+    role="menuitem"
+    data-workcode-id="{{ code.id }}"
+    data-workcode-code="{{ code.code }}"
+    data-delete-workcode-btn
+>
+    Delete
+</button>
+{% endflag %}
+{% flag 'can_edit_work_code' %}
+<button
+    class="dropdown-item um-actions-item"
+    type="button"
+    role="menuitem"
+    data-toggle="modal"
+    data-target="#edit-workcode-modal"
+    data-workcode-edit
+    data-workcode-id="{{ code.id }}"
+    data-workcode-code="{{ code.code }}"
+    data-workcode-requires-login="{{ code.requires_login }}"
+    data-workcode-expiry-date="{% if code.expiry_date %}{{ code.expiry_date|date:'Y-m-d' }}{% endif %}"
+    data-workcode-org-name="{{ selected_org_name }}"
+    data-workcode-org-id="{{ selected_org_id }}"
+    data-edit-code-btn
+>
+    Edit
+</button>
+{% endflag %}

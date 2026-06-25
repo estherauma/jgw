@@ -263,13 +263,167 @@
         requestUrl: '/user-management/deep-links/create/',
         requestBody: {
           work_code_id: $(this).data('workcode-id'),
-          type: 'login',
+          selected_org_id: $(this).data('workcode-org-id'),
+          link_type: 'login',
         },
       });
     });
   }
 
+  function initOrganisationDeepLinkQrView() {
+    const modal = document.getElementById('workcode-link-modal');
+    const modalController = createQrCodeModalController(modal);
+
+    if (!modalController) {
+      return;
+    }
+
+    $(document).on('click', '[data-view-deep-link-qr]', function (event) {
+      event.preventDefault();
+      modalController.showSuccess({
+        title: this.dataset.qrCodeTitle || DEFAULT_MODAL_TITLE,
+        url: this.dataset.qrCodeLink || '',
+        qrCodeUrl: this.dataset.qrCodeUrl || '',
+      });
+      $(modal).modal('show');
+    });
+  }
+
+  function initOrganisationDeepLinkForm() {
+    const form = document.getElementById('add-organisation-deep-link-form');
+    const errorBox = document.getElementById('add-organisation-deep-link-form-error');
+
+    function initCustomFormSelects() {
+      if (form && window.initUmSelects) {
+        window.initUmSelects(form);
+      }
+    }
+
+    function refreshCustomFormSelects() {
+      if (!form || !window.refreshUmSelect) {
+        return;
+      }
+      form.querySelectorAll('[data-um-select]').forEach((root) => {
+        window.refreshUmSelect(root);
+      });
+    }
+
+    function clearErrors() {
+      if (window.clearFormErrors) {
+        window.clearFormErrors(form, errorBox);
+      }
+    }
+
+    function syncSelectedOrgId() {
+      if (!form) {
+        return;
+      }
+
+      const hiddenInput = form.querySelector('[data-selected-org-id]');
+      if (!hiddenInput) {
+        return;
+      }
+
+      let selectedId = '';
+      if (window.getSelectedOrgData) {
+        const storedOrg = window.getSelectedOrgData();
+        selectedId = storedOrg && storedOrg.id ? String(storedOrg.id) : '';
+      }
+
+      if (!selectedId) {
+        const selectedHidden = document.querySelector('[data-org-hidden]');
+        selectedId = selectedHidden && selectedHidden.value ? selectedHidden.value : '';
+      }
+
+      if (!selectedId) {
+        const otherSelectedInput = Array.from(
+          document.querySelectorAll('[data-selected-org-id]'),
+        ).find((input) => input !== hiddenInput && input.value);
+        selectedId = otherSelectedInput ? otherSelectedInput.value : '';
+      }
+
+      hiddenInput.value = selectedId;
+    }
+
+    function resetForm() {
+      if (!form) {
+        return;
+      }
+      clearErrors();
+      form.reset();
+      syncSelectedOrgId();
+      refreshCustomFormSelects();
+    }
+
+    initCustomFormSelects();
+
+    if (form) {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        clearErrors();
+        syncSelectedOrgId();
+
+        const submitButton = form.querySelector("button[type='submit']");
+        if (submitButton) {
+          submitButton.disabled = true;
+        }
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(true);
+        }
+
+        try {
+          const data = await window.postFormJson(form, {
+            asJson: true,
+            payload: {
+              selected_org_id:
+                form.querySelector('[name="selected_org_id"]')?.value || '',
+              title: form.querySelector('[name="title"]')?.value || '',
+              link_type:
+                form.querySelector('[name="link_type"]')?.value || '',
+              destination:
+                form.querySelector('[name="destination"]')?.value || '',
+              access_code:
+                form.querySelector('[name="access_code"]')?.value || '',
+              sectors:
+                form.querySelector('[name="sectors"]')?.value || '',
+              immigration_status:
+                form.querySelector('[name="immigration_status"]')?.value || '',
+            },
+          });
+          if (data && data.org_id) {
+            const homeUrl = window.location.pathname;
+            const target = homeUrl + '?selected_org_id=' + encodeURIComponent(data.org_id);
+            window.location.href = target;
+          } else {
+            window.location.reload();
+          }
+        } catch (data) {
+          if (window.toggleFullScreenLoader) {
+            window.toggleFullScreenLoader(false);
+          }
+          if (window.handleErrors) {
+            window.handleErrors({ form: form, errorBox: errorBox, data: data });
+          }
+        } finally {
+          if (submitButton) {
+            submitButton.disabled = false;
+          }
+          if (window.toggleFullScreenLoader) {
+            window.toggleFullScreenLoader(false);
+          }
+        }
+      });
+    }
+
+    $('[data-target="#add-organisation-deep-link-modal"]').on('click', function () {
+      initCustomFormSelects();
+      resetForm();
+    });
+  }
+
   window.addEventListener('load', function () {
     initGenerateWorkCodeLink();
+    initOrganisationDeepLinkQrView();
+    initOrganisationDeepLinkForm();
   });
 })();

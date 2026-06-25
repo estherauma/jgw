@@ -1,4 +1,5 @@
 from datetime import timedelta
+import logging
 
 from django.contrib import messages
 from django.conf import settings
@@ -12,7 +13,13 @@ from django.utils import timezone
 from django.views import View
 import phonenumbers
 import json
-from preference.models import OrganizationGroup, OrganisationAccessCode, OrganisationData, SiteLanguages
+from preference.models import (
+    OrganizationGroup,
+    OrganisationAccessCode,
+    OrganisationData,
+    OrganisationDeepLink,
+    SiteLanguages,
+)
 
 from ..forms import (
     AddWorkCodeForm,
@@ -22,6 +29,7 @@ from ..forms import (
     CreateOrganisationForm,
     DashboardUserForm,
     EditOrganizationGroupForm,
+    OrganisationDeepLinkForm,
     OrganisationRoleForm,
     WorkCodeAssignForm,
     WorkGroupForm,
@@ -62,6 +70,8 @@ from content.services.partner_configurations import (
     update_partner_configuration_work_codes_in_cms,
 )
 
+logger = logging.getLogger(__name__)
+
 @group_required("user_management")
 def user_management(request):
     user = request.user
@@ -77,6 +87,7 @@ def user_management(request):
     work_groups = WorkGroup.objects.none()
     assigned_work_codes = []
     roles = OrganisationRole.objects.none()
+    deep_links = OrganisationDeepLink.objects.none()
 
     selected_org = None
     selected_org_id = None
@@ -124,6 +135,9 @@ def user_management(request):
         roles = OrganisationRole.objects.filter(organisation=selected_org).prefetch_related(
             "role_permissions"
         ).order_by("name")
+        deep_links = OrganizationService.get_organisation_deep_links(
+            organisation=selected_org
+        )
         org_details = OrganizationService.build_organisation_form_payload(
             organisation=selected_org,
         )
@@ -158,6 +172,8 @@ def user_management(request):
         "dashboard_user_form": DashboardUserForm(orgs_qs=organizations),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
         "roles": roles,
+        "deep_links": deep_links,
+        "deep_link_form": OrganisationDeepLinkForm(organisation=selected_org),
         "role_form": OrganisationRoleForm(organisation=selected_org, current_user=user),
     }
     return render(request, "index.html", context=context)
@@ -1975,35 +1991,75 @@ class CreateDeepLinkView(View):
             )
 
         work_code_id = payload.get("work_code_id")
-        deep_link_type = (payload.get("type") or "").strip().lower()
-        type_handlers = {
-            "login": OrganizationService.create_login_deep_link,
-        }
-        type_handler = type_handlers.get(deep_link_type)
+        deep_link_type = (payload.get("link_type") or "").strip().lower()
+        organisation = None
+        selected_org_id = payload.get("selected_org_id")
+        organisation = (
+                OrganisationData.objects.filter(id=selected_org_id).first()
+                if selected_org_id
+                else None
+            )
 
-        if not type_handler:
+        if organisation and not OrganizationService.has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_login_qr_code",
+        ):
+            return OrganizationService.org_access_denied()
+
+        type_handlers = {
+            "login": (
+                OrganizationService.create_login_deep_link,
+                {
+                    "user": request.user,
+                    "request": request,
+                    "organisation": organisation,
+                    "work_code_id": work_code_id,
+                },
+            ),
+            "onboarding": (
+                OrganizationService.create_onboarding_deep_link,
+                {
+                    "organisation": organisation,
+                    "payload": payload,
+                },
+            ),
+        }
+        handler_config = type_handlers.get(deep_link_type)
+
+        if not handler_config:
             return JsonResponse(
                 {"ok": False, "error": "Unsupported deep link type."},
                 status=400,
             )
 
+        type_handler, handler_kwargs = handler_config
+
         try:
-            branch_data = type_handler(
-                user=request.user,
-                request=request,
-                work_code_id=work_code_id,
-            )
+            branch_data = type_handler(**handler_kwargs)
+        except ValidationError as exc:
+            if hasattr(exc, "message_dict"):
+                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
         except ValueError as exc:
             return JsonResponse({"ok": False, "error": str(exc)}, status=400)
         except PermissionError:
             return OrganizationService.org_access_denied()
-        except Exception:
+        except Exception as exc:
+            logger.error("Error creating deep link: %s", exc, exc_info=True)
             return JsonResponse(
                 {
                     "ok": False,
                     "error": "An error occurred while generating the deep link. Please try again.",
                 },
                 status=500,
+            )
+
+        if deep_link_type == "onboarding":
+            messages.success(
+                request,
+                f'Deep link "{branch_data["title"]}" created successfully.',
             )
 
         return JsonResponse(

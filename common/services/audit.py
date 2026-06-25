@@ -19,6 +19,7 @@ class AuditService:
         "preference.organisationdata",
         "preference.organizationgroup",
         "preference.organisationaccesscode",
+        "preference.organisationdeeplink",
         "user_management.workgroup",
         "user_management.organisationrole",
         "user_management.organisationrolepermission",
