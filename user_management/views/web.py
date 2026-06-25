@@ -2080,3 +2080,106 @@ class CreateDeepLinkView(View):
                 "data": branch_data,
             }
         )
+
+
+class DeepLinkDetailView(View):
+    def get(self, request, deep_link_id):
+        deep_link = OrganisationDeepLink.objects.select_related("organisation").filter(
+            id=deep_link_id
+        ).first()
+        if not deep_link:
+            return JsonResponse(
+                {"ok": False, "error": "Deep link not found."},
+                status=404,
+            )
+
+        organisation = deep_link.organisation
+        if not OrganizationService.has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_login_qr_code",
+        ):
+            return OrganizationService.org_access_denied()
+
+        try:
+            data = OrganizationService.get_organisation_deep_link_prefill(
+                organisation=organisation,
+                deep_link_id=deep_link_id,
+            )
+        except ValueError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except Exception as exc:
+            logger.error("Error fetching deep link details: %s", exc, exc_info=True)
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while loading the deep link. Please try again.",
+                },
+                status=500,
+            )
+
+        return JsonResponse({"ok": True, "data": data})
+
+    def patch(self, request, deep_link_id):
+        try:
+            payload = json.loads(request.body.decode("utf-8") or "{}")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse(
+                {"ok": False, "error": "Invalid JSON payload."},
+                status=400,
+            )
+
+        deep_link = OrganisationDeepLink.objects.select_related("organisation").filter(
+            id=deep_link_id
+        ).first()
+        if not deep_link:
+            return JsonResponse(
+                {"ok": False, "error": "Deep link not found."},
+                status=404,
+            )
+
+        organisation = deep_link.organisation
+        if not OrganizationService.has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_login_qr_code",
+        ):
+            return OrganizationService.org_access_denied()
+
+        try:
+            branch_data = OrganizationService.update_onboarding_deep_link(
+                organisation=organisation,
+                deep_link_id=deep_link_id,
+                payload=payload,
+            )
+        except ValidationError as exc:
+            if hasattr(exc, "message_dict"):
+                return JsonResponse({"ok": False, "errors": exc.message_dict}, status=400)
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except ValueError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except PermissionError:
+            return OrganizationService.org_access_denied()
+        except Exception as exc:
+            logger.error("Error updating deep link: %s", exc, exc_info=True)
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while updating the deep link. Please try again.",
+                },
+                status=500,
+            )
+
+        messages.success(
+            request,
+            f'Deep link "{branch_data["title"]}" updated successfully.',
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "url": branch_data.get("url"),
+                "data": branch_data,
+            }
+        )

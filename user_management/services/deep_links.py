@@ -12,6 +12,23 @@ logger = logging.getLogger(__name__)
 class DeepLinkService:
     endpoint = "https://api2.branch.io/v1/url"
 
+    @classmethod
+    def get_branch_settings(cls):
+        branch_key = getattr(settings, "BRANCH_KEY", "").strip()
+        branch_secret = getattr(settings, "BRANCH_SECRET", "").strip()
+        branch_link_domain = getattr(settings, "BRANCH_LINK_DOMAIN", "").strip()
+
+        if not branch_key:
+            raise ValueError("BRANCH_KEY is not configured.")
+        if not branch_link_domain:
+            raise ValueError("BRANCH_LINK_DOMAIN is not configured.")
+
+        return {
+            "branch_key": branch_key,
+            "branch_secret": branch_secret,
+            "branch_link_domain": branch_link_domain,
+        }
+
     @staticmethod
     def get_conflicting_branch_url(*, response_data):
         error_data = response_data.get("error")
@@ -28,13 +45,9 @@ class DeepLinkService:
 
     @classmethod
     def create_branch_deep_link(cls, *, payload):
-        branch_key = getattr(settings, "BRANCH_KEY", "").strip()
-        branch_link_domain = getattr(settings, "BRANCH_LINK_DOMAIN", "").strip()
-
-        if not branch_key:
-            raise ValueError("BRANCH_KEY is not configured.")
-        if not branch_link_domain:
-            raise ValueError("BRANCH_LINK_DOMAIN is not configured.")
+        branch_settings = cls.get_branch_settings()
+        branch_key = branch_settings["branch_key"]
+        branch_link_domain = branch_settings["branch_link_domain"]
 
         payload = {
             "branch_key": branch_key,
@@ -69,6 +82,69 @@ class DeepLinkService:
         return branch_url
 
     @classmethod
+    def get_branch_deep_link(cls, *, branch_url):
+        branch_settings = cls.get_branch_settings()
+        branch_key = branch_settings["branch_key"]
+
+        if not branch_key:
+            raise ValueError("BRANCH_KEY is not configured.")
+
+        try:
+            response = requests.get(
+                cls.endpoint,
+                params={
+                    "branch_key": branch_key,
+                    "url": branch_url,
+                },
+                timeout=30,
+            )
+            response_data = response.json()
+        except Exception as exc:
+            logger.error("Error fetching Branch deep link: %s", exc, exc_info=True)
+            raise ValueError(f"Could not reach Branch: {exc}") from exc
+
+        if not response.ok:
+            raise ValueError(
+                response.text or f"Branch returned HTTP {response.status_code}."
+            )
+
+        return response_data
+
+    @classmethod
+    def update_branch_deep_link(cls, *, branch_url, payload):
+        branch_settings = cls.get_branch_settings()
+        branch_secret = branch_settings["branch_secret"]
+        branch_key = branch_settings["branch_key"]
+
+        if not branch_secret or not branch_key:
+            raise ValueError("BRANCH_SECRET or BRANCH_KEY is not configured.")
+
+        payload = {
+            "branch_secret": branch_secret,
+            "branch_key": branch_key,
+            **payload,
+        }
+
+        try:
+            response = requests.put(
+                cls.endpoint,
+                params={"url": branch_url},
+                json=payload,
+                timeout=30,
+            )
+            response_data = response.json()
+        except Exception as exc:
+            logger.error("Error updating Branch deep link: %s", exc, exc_info=True)
+            raise ValueError(f"Could not reach Branch: {exc}") from exc
+
+        if not response.ok:
+            raise ValueError(
+                response.text or f"Branch returned HTTP {response.status_code}."
+            )
+
+        return response_data
+
+    @classmethod
     def get_or_create_login__deep_link(cls, *, work_code):
         branch_url = (work_code.deep_link or "").strip()
 
@@ -99,6 +175,24 @@ class DeepLinkService:
         organisation,
         link_data,
     ):
+        payload = cls.build_onboarding_payload(
+            organisation=organisation,
+            link_data=link_data,
+        )
+
+        branch_url = cls.create_branch_deep_link(payload=payload)
+        return {
+            "url": branch_url,
+            "data": payload["data"],
+        }
+
+    @classmethod
+    def build_onboarding_payload(
+        cls,
+        *,
+        organisation,
+        link_data,
+    ):
         title = link_data["title"]
         link_type = link_data["link_type"]
         destination = link_data["destination"]
@@ -106,7 +200,7 @@ class DeepLinkService:
         sector = link_data.get("sector")
         immigration_status = link_data.get("immigration_status")
 
-        payload = {
+        return {
             "feature": link_type,
             "campaign": "user_management",
             "tags": [organisation.name, link_type],
@@ -120,9 +214,24 @@ class DeepLinkService:
             },
         }
 
-        branch_url = cls.create_branch_deep_link(payload=payload)
+    @classmethod
+    def update_onboarding_deep_link(
+        cls,
+        *,
+        organisation,
+        deep_link,
+        link_data,
+    ):
+        payload = cls.build_onboarding_payload(
+            organisation=organisation,
+            link_data=link_data,
+        )
+        response_data = cls.update_branch_deep_link(
+            branch_url=deep_link.link,
+            payload=payload,
+        )
         return {
-            "url": branch_url,
+            "url": response_data.get("url") or deep_link.link,
             "data": payload["data"],
         }
 

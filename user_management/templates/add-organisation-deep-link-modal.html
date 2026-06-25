@@ -2,17 +2,18 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="um-modal-title um-navy" id="add-organisation-deep-link-title">{{ modal_title }}</h5>
+                <h5 class="um-modal-title um-navy" id="add-organisation-deep-link-title" data-deep-link-modal-title>{{ modal_title }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="alert alert-danger d-none" id="add-organisation-deep-link-form-error" role="alert"></div>
             <div class="um-modal-divider"></div>
-            <form id="add-organisation-deep-link-form" method="post" action="{{ form_action }}">
+            <form id="add-organisation-deep-link-form" method="post" action="{{ form_action }}" data-create-action="{{ form_action }}" data-request-method="POST">
                 {% csrf_token %}
                 <div class="modal-body">
                     <input type="hidden" name="selected_org_id" data-selected-org-id value="" />
+                    <input type="hidden" name="deep_link_id" data-deep-link-id value="" />
                     <label class="um-field form-group d-block">
                         <span>Title (Required)</span>
                         {{ form.title }}
@@ -64,7 +65,7 @@
                 </div>
                 <div class="um-modal-footer modal-footer">
                     <button type="button" class="um-btn um-btn-gray" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="um-btn um-btn-lime px-4">{{ submit_label }}</button>
+                    <button type="submit" class="um-btn um-btn-lime px-4" data-deep-link-submit>{{ submit_label }}</button>
                 </div>
             </form>
         </div>

@@ -4,7 +4,10 @@ from django.http import JsonResponse
 from django.db.models import Exists, OuterRef
 
 from content.services.partner_configurations import FileUploadError, upload_files_to_cms
+from content.models import WorkSector
 from preference.models import (
+    Country,
+    ImmigrationStatus,
     OrganizationGroup,
     OrganisationAccessCode,
     OrganisationData,
@@ -335,6 +338,99 @@ class OrganizationService:
             "org_id": organisation.id,
             "title": deep_link.title,
             "url": branch_url,
+            "data": branch_data["data"],
+        }
+
+    @staticmethod
+    def get_organisation_deep_link_prefill(*, organisation, deep_link_id):
+        deep_link = OrganisationDeepLink.objects.filter(
+            id=deep_link_id,
+            organisation=organisation,
+        ).first()
+        if not deep_link:
+            raise ValueError("Deep link not found.")
+        if not deep_link.link:
+            raise ValueError("Deep link URL not found.")
+
+        branch_data = DeepLinkService.get_branch_deep_link(branch_url=deep_link.link)
+        branch_link_data = branch_data.get("data") or {}
+        print(branch_link_data)
+
+        destination = Country.objects.filter(
+            code__iexact=(branch_link_data.get("destination") or "").strip()
+        ).first()
+        access_code = OrganisationAccessCode.objects.filter(
+            organisation=organisation,
+            code__iexact=(branch_link_data.get("organisationAccessCode") or "").strip(),
+        ).first()
+        sector = WorkSector.objects.filter(
+            slug=(branch_link_data.get("sectors") or "").strip()
+        ).first()
+        immigration_status = ImmigrationStatus.objects.filter(
+            value=(branch_link_data.get("immigrationStatus") or "").strip()
+        ).first()
+
+        return {
+            "deep_link_id": deep_link.id,
+            "title": (
+                branch_link_data.get("$marketing_title")
+                or branch_link_data.get("title")
+                or deep_link.title
+            ),
+            "link_type": (
+                branch_link_data.get("type")
+                or deep_link.link_type
+                or "onboarding"
+            ),
+            "destination": str(destination.id) if destination else "",
+            "access_code": str(access_code.id) if access_code else "",
+            "sectors": sector.slug if sector else "",
+            "immigration_status": str(immigration_status.id) if immigration_status else "",
+        }
+
+    @staticmethod
+    def update_onboarding_deep_link(
+        *,
+        organisation,
+        deep_link_id,
+        payload=None,
+    ):
+        payload = payload or {}
+        deep_link = OrganisationDeepLink.objects.filter(
+            id=deep_link_id,
+            organisation=organisation,
+        ).first()
+        if not deep_link:
+            raise ValueError("Deep link not found.")
+
+        form = OrganisationDeepLinkForm(
+            payload,
+            organisation=organisation,
+            instance=deep_link,
+        )
+        if not form.is_valid():
+            raise ValidationError(form.errors)
+
+        link_data = {
+            "title": form.cleaned_data["title"],
+            "link_type": form.cleaned_data["link_type"],
+            "destination": form.cleaned_data["destination"],
+            "access_code": form.cleaned_data.get("access_code"),
+            "sector": form.cleaned_data.get("sectors"),
+            "immigration_status": form.cleaned_data.get("immigration_status"),
+        }
+
+        branch_data = DeepLinkService.update_onboarding_deep_link(
+            organisation=organisation,
+            deep_link=deep_link,
+            link_data=link_data,
+        )
+        updated_deep_link = form.save(generated_link=branch_data["url"])
+        return {
+            "deep_link_id": updated_deep_link.id,
+            "org_id": organisation.id,
+            "title": updated_deep_link.title,
+            "url": branch_data["url"],
             "data": branch_data["data"],
         }
 
