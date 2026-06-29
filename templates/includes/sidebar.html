@@ -118,6 +118,22 @@
                                 </ul>
                             </div>
                         </li>
+                        {% if is_super_user or is_58_admin %}
+                            <li class="menu-item has-submenu">
+                                <a href="#sidebarDocs" data-bs-toggle="collapse" class="menu-link">
+                                    <i data-feather="book-open" class="menu-icon"></i>
+                                    <span class="menu-text">Documentation</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <div class="collapse" id="sidebarDocs">
+                                    <ul class="nav-second-level">
+                                        <li>
+                                            <a href="{% url 'docs:page' 'user-management' 'overview' %}">User Management</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
                 

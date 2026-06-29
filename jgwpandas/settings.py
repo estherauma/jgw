@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     "other_resource",
     "maintenance",
     'content',
+    "docs",
     'django.contrib.humanize',
     "user_management",
 ]
