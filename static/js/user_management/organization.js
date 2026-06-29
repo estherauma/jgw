@@ -445,13 +445,17 @@
     }
     const url = input.getAttribute('data-org-search-url');
     const tbody = document.querySelector('[data-org-table-body]');
-    if (!tbody) {
+    const paginationContainer = document.querySelector('[data-org-pagination]');
+    
+    if (!tbody || !paginationContainer) {
       return;
     }
+    
     let debounceTimer = null;
     let controller = null;
+    let currentPage = 1;
 
-    function runSearch(value) {
+    function runSearch(value, page) {
       if (controller) {
         controller.abort();
       }
@@ -460,6 +464,9 @@
       if (value) {
         params.set('q', value);
       }
+      
+      params.set('page', String(page || 1));
+      
       fetch(url + (params.toString() ? '?' + params.toString() : ''), {
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
         signal: controller.signal,
@@ -471,8 +478,10 @@
           return response.json();
         })
         .then(function (data) {
-          if (data && data.html !== undefined) {
-            tbody.innerHTML = data.html;
+          if (data && data.rows_html !== undefined) {
+            tbody.innerHTML = data.rows_html;
+            paginationContainer.innerHTML = data.pagination_html || '';
+            currentPage = page || 1;
           }
         })
         .catch(function (error) {
@@ -487,8 +496,23 @@
       const value = (event.target.value || '').trim();
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function () {
-        runSearch(value);
+        runSearch(value, 1);
       }, 250);
+    });
+
+    paginationContainer.addEventListener('click', function (event) {
+      const trigger = event.target.closest('[data-org-page-link]');
+      if (!trigger || trigger.disabled) {
+        return;
+      }
+      event.preventDefault();
+      
+      const requestedPage = Number(
+        trigger.getAttribute('data-page') || currentPage || 1
+      );
+      const value = (input.value || '').trim();
+      
+      runSearch(value, requestedPage);
     });
   }
 

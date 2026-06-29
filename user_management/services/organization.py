@@ -1,7 +1,8 @@
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
+from django.core.paginator import Paginator
 
 from content.services.partner_configurations import FileUploadError, upload_files_to_cms
 from content.models import WorkSector
@@ -705,3 +706,43 @@ class OrganizationService:
             created_by=user,
             updated_by=user,
         )
+
+    @staticmethod
+    def filter_organisations_query(queryset, query=""):
+        query = (query or "").strip()
+        if not query:
+            return queryset
+        return queryset.filter(
+            Q(name__icontains=query) | Q(org_code__icontains=query)
+        )
+    
+    @staticmethod
+    def get_paginated_organisations_context(user, query="", page_number=None):
+        queryset = OrganizationService.get_allowed_orgs(user).order_by("name")
+        queryset = OrganizationService.filter_organisations_query(
+            queryset,
+            query=query,
+        )
+        paginator = Paginator(queryset, 20)
+        organisations_page = paginator.get_page(page_number)
+
+        return {
+            "organisations": list(organisations_page.object_list),
+            "organizations_page": organisations_page,
+            "organizations_pagination_context": {
+                "page_obj": organisations_page,
+                "page_numbers": list(
+                    organisations_page.paginator.get_elided_page_range(
+                        organisations_page.number
+                    )
+                ),
+                "item_label": "organisations",
+                "nav_label": "Organisations pagination",
+                "page_link_attr": "data-org-page-link",
+            },
+            "organizations_row_start_index": (
+                organisations_page.start_index()
+                if organisations_page.object_list
+                else 0
+            ),
+        }

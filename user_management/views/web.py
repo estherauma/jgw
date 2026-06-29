@@ -82,14 +82,16 @@ def user_management(request):
     selected_org_id = None
     selected_org_name = None
     organizations = OrganizationService.get_allowed_orgs(user).order_by("name")
+    paginated_organisations = OrganizationService.get_paginated_organisations_context(
+        user,
+        page_number=request.GET.get("organisations_page"),
+    )
     organization_groups = OrganizationGroup.objects.order_by("name")
-
     work_codes = []
     work_groups = WorkGroup.objects.none()
     assigned_work_codes = []
     roles = OrganisationRole.objects.none()
     deep_links = OrganisationDeepLink.objects.none()
-
     selected_org = None
     selected_org_id = None
     selected_org_name = None
@@ -154,7 +156,7 @@ def user_management(request):
         org_languages = SiteLanguages.objects.none()
 
     context = {
-        "organizations": organizations,
+        **paginated_organisations,
         "organization_groups": organization_groups,
         **users_listing,
         "work_codes": work_codes,
@@ -183,17 +185,64 @@ def user_management(request):
 def search_organisations(request):
     user = request.user
     query = request.GET.get("q", "").strip()
-    organisations = OrganizationService.get_allowed_orgs(user).order_by("name")
-    if query:
-        organisations = organisations.filter(
-            Q(name__icontains=query) | Q(org_code__icontains=query)
-        )
-    html = render_to_string(
+    organisations_listing = OrganizationService.get_paginated_organisations_context(
+        user,
+        query=query,
+        page_number=request.GET.get("page"),
+    )
+    rows_html = render_to_string(
         "organization-rows.html",
-        {"organizations": organisations},
+        {
+            "organizations": organisations_listing["organisations"],
+            "row_start_index": organisations_listing["row_start_index"],
+         },
         request=request,
     )
-    return JsonResponse({"ok": True, "html": html})
+    pagination_html = render_to_string(
+        "partials/pagination.html",
+        organisations_listing["orgs_pagination_context"],
+        request=request,
+    )
+    
+    return JsonResponse(
+        {
+            "ok": True,
+            "rows_html": rows_html,
+            "pagination_html": pagination_html,
+        }
+    )
+    
+def organisation_search_options(request):
+    user = request.user
+    query = request.GET.get("q", "").strip()
+    organisations_listing = OrganizationService.get_paginated_organisations_context(
+        user,
+        query=query,
+        page_number=request.GET.get("page"),
+    )
+    organisations_page = organisations_listing["organizations_page"]
+    return JsonResponse(
+        {
+            "ok": True,
+            "options": [
+                {
+                    "id": org.id,
+                    "name": org.name,
+                    "org_code": org.org_code,
+                    "created_at": org.created_at.strftime("%b %-d, %Y, %-I:%M %p")
+                    if org.created_at
+                    else "",
+                }
+                for org in organisations_listing["organisations"]
+            ],
+            "has_next": organisations_page.has_next(),
+            "next_page": (
+                organisations_page.next_page_number()
+                if organisations_page.has_next()
+                else None
+            ),
+        }
+    )
 
 def search_users(request):
     user = request.user
