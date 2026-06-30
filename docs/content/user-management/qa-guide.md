@@ -17,9 +17,9 @@ The goal is to verify that User Management correctly supports:
 
 ### Start Here
 
-QA should start with the existing `58_admin` account.
+QA should have a `58_admin` account.
+After logging in, go to the `User Management` section.
 
-That account should be used to create the base test data for the rest of the guide.
 
 
 
@@ -327,4 +327,3 @@ At minimum, check whether create and update actions are recorded for:
 - Roles.
 - Deep links.
 - Users.
-
