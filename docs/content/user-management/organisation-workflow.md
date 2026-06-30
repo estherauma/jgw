@@ -14,6 +14,7 @@ The information and actions available in the organisation module depend on the u
 | **Organisation Group Admin** | Manages organisation group. |
 | **Organisation Admin** | Manages the organisation they are assigned to. They do not see the list of organisations and cannot switch between organisations. |
 | **Organisation Staff** | Can only view and manage the information they have permission to access within their organisation. |
+| **Worker** | Does not have access to the dashboard. They can only log into the Just Good Work mobile application. |
 
 ### Process Flow
 
