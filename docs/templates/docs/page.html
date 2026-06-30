@@ -12,19 +12,20 @@
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
-                <h4 class="page-title docs-page-title">{{ doc_section_title }}</h4>
+                <h4 class="page-title docs-page-title" data-docs-page-title>{{ doc_section_title }}</h4>
             </div>
         </div>
     </div>
 
-    <div class="docs-shell">
-        <aside class="docs-sidebar">
+    <div class="docs-shell" data-docs-shell>
+        <aside class="docs-sidebar" data-docs-sidebar>
             <div class="card-body">
                 <div class="list-group list-group-flush">
                     {% for page in docs_pages %}
                         <a
                             class="list-group-item list-group-item-action px-0 {% if active_doc.0 == page.section_slug and active_doc.1 == page.page_slug %}active{% endif %}"
                             href="{% url page.url_name page.section_slug page.page_slug %}"
+                            data-docs-nav-link
                         >
                             {{ page.title }}
                         </a>
@@ -33,11 +34,15 @@
             </div>
         </aside>
 
-        <section class="docs-content">
-            <div class="card-body docs-article">
+        <section class="docs-content" data-docs-content>
+            <div class="card-body docs-article" data-docs-article>
                 {{ doc_html }}
             </div>
         </section>
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script src="{% static 'docs/js/navigation.js' %}"></script>
+{% endblock scripts %}
