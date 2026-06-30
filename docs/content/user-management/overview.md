@@ -100,6 +100,7 @@ This section supports:
 - Generating login deep links and QR codes
 
 Important access rule:
+
 - A work code can be assigned to many user groups.
 - If a work code is not assigned to any user group, it can be accessed by all users in that organisation.
 - If a work code does not require authentication, anyone who has access to the code can use it.

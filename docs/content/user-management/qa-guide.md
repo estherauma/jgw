@@ -34,6 +34,7 @@ Confirm that the `58_admin` account can:
 - See User Activity Logs.
 
 Then select an organisation and confirm that QA can see the organisation-specific sections update to show data for that organisation, including:
+
 - Organisation-specific users.
 - Work codes.
 - User groups.
@@ -272,6 +273,7 @@ Confirm that QA can:
 - See the new deep link in the organisation deep links table.
 
 Then confirm that QA can:
+
 - Open the QR code action for a saved organisation deep link.
 - Copy the deep link URL.
 - Download the QR code if download actions are available.
