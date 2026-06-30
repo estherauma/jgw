@@ -2,11 +2,11 @@
 
 ### Purpose
 
-The Organisation workflow module manages organisations in the Just Good Work admin dashboard. It allows authorized users to create, update and manage organisations and their related information.
+The Organisation workflow module manages organisations in the Just Good Work admin dashboard. It allows authorized users to create, update and manage organisations.
 
 ### Role-Based Access
 
-The information and actions available in the Organisation module depend on the user's role.
+The information and actions available in the organisation module depend on the user's role.
 
 | Role | Access |
 |------|--------|
@@ -17,9 +17,9 @@ The information and actions available in the Organisation module depend on the u
 
 ### Process Flow
 
-1. **Login:** The user logs in to the system. Access to the Organization module depends on the user's role (Superuser, Fifty Eight Admin, Organisation Admin, Organisation Group Admin, or Organisation Staff).
+1. **Login:** The user logs in to the system. Access to the organization module depends on the user's role (Superuser, Fifty Eight Admin, Organisation Admin, Organisation Group Admin, or Organisation Staff).
 
-2. **Navigating to user management page:** The user selects **User Management** from the sidebar to open the Organisation module.
+2. **Navigating to user management page:** The user selects **User Management** from the sidebar menu to open the organisation module.
 
 3. **The user management page:** The user management page displays the following sections:
 
