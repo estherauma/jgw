@@ -42,6 +42,8 @@ The information and actions available in the organisation module depend on the u
 
 The selected organization determines the information displayed in the rest of the dashboard.
 
+Only `58_admin` users and superusers can access this section.
+
 ##### Organisation Selection Behavior
 
 1. Click the **Select organisation** dropdown.
@@ -76,6 +78,8 @@ This section displays all organisations in the system.
 
 ##### Edit Organisation
 
+Only `58_admin` users and superusers can access this section.
+
 1. Click the **Edit** button for the organisation you want to update.
 2. Update the allowed fields.
 3. Click **Save changes**.
@@ -107,3 +111,8 @@ The Create new organisation group form contains only two required fields:
 #### 4. Users
 
 This section displays users based on the selected organisation and the current user's permissions.
+
+
+### Related Docs
+
+- [User Management Overview](../overview/)
