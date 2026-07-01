@@ -26,6 +26,10 @@ DOC_PAGES = {
         "title": "QA Guide",
         "path": DOCS_ROOT / "user-management" / "qa-guide.md",
     },
+    ("user-management", "model-relationships"): {
+        "title": "Model Relationships",
+        "path": DOCS_ROOT / "user-management" / "model-relationships.md",
+    },
 }
 
 
