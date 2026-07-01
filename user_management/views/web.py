@@ -60,11 +60,14 @@ from ..utils import (
 from users.models import User, UserInvitations
 from content.services.partner_configurations import (
     add_partner_configuration_to_cms,
+    delete_partner_configuration_from_cms,
     FileUploadError,
     get_group_partner_configuration_sites_by_code,
     move_partner_configuration_to_group_in_cms,
     PartnerConfigurationSyncError,
     remove_partner_configuration_from_group_in_cms,
+    resolve_partner_configuration_cms_id,
+    sync_group_partner_configuration_to_cms,
     edit_organization_group_in_cms,
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
@@ -776,6 +779,67 @@ class EditOrganisationView(View):
             return JsonResponse({"ok": True, "warning": warning_message})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class DeleteOrganisationView(View):
+    def post(self, request, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Organisation not found."},
+                status=404,
+            )
+
+        if organisation.organisation_access_codes.exists():
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": (
+                        "You cannot delete this organisation because it still has active work codes. "
+                        "Delete the work codes first."
+                    ),
+                },
+                status=400,
+            )
+
+        if User.objects.filter(organisation_data=organisation).exists():
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": (
+                        "You cannot delete this organisation because it still has users assigned to it. "
+                        "Remove or delete the users first."
+                    ),
+                },
+                status=400,
+            )
+
+        organisation_name = organisation.name
+        organisation.soft_delete(request.user)
+
+        warning_message = None
+        try:
+            if organisation.organization_group_id:
+                sync_group_partner_configuration_to_cms(
+                    organisation,
+                    orgs_to_exclude_ids=[organisation.id],
+                )
+            else:
+                cms_id = resolve_partner_configuration_cms_id(organisation)
+                if cms_id:
+                    delete_partner_configuration_from_cms(cms_id)
+        except PartnerConfigurationSyncError as exc:
+            warning_message = str(exc)
+            messages.warning(
+                request,
+                "Organisation was deleted, but partner configuration sync to CMS failed.",
+            )
+
+        messages.success(request, f'Organisation "{organisation_name}" deleted successfully.')
+        return JsonResponse({"ok": True, "warning": warning_message})
 
 class CreateWorkGroupView(View):
     def post(self, request):

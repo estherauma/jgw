@@ -92,13 +92,12 @@ jobs:
           command: |
             . venv/bin/activate
             mkdir -p test-results
-            python manage.py test --testrunner=xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
+            coverage run manage.py test --testrunner=xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
             # Find and move XML test result files
             find . -name "TEST-*.xml" -exec mv {} test-results/ \;
             # Verify files are in test-results
             echo "Contents of test-results directory:"
             ls -la test-results/
-            coverage run manage.py test
             coverage report
             coverage xml
 

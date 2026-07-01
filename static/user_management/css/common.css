@@ -179,6 +179,15 @@ a.um-view-details-link:focus {
 .um-card + .um-card {
     margin-top: 14px;
 }
+.um-card-danger-zone {
+    background: #fff1f1;
+    border: 1px solid #f3b7b2;
+    box-shadow: 0 4px 18px rgba(172, 45, 32, 0.08);
+}
+.um-card-danger-zone .um-card-title,
+.um-card-danger-zone p {
+    color: #8f2318 !important;
+}
 .um-card-title {
     font-size: 13px;
     letter-spacing: 0.4px;
