@@ -120,7 +120,7 @@
                         </li>
                       
                     {% endif %}
-                    {% if user.is_superuser or is_58_admin %}
+                    {% if user.is_superuser or user|has_group:"58_admin" %}
                         <li class="menu-item has-submenu">
                             <a href="#sidebarDocs" data-bs-toggle="collapse" class="menu-link">
                                 <i data-feather="book-open" class="menu-icon"></i>
@@ -147,6 +147,7 @@
                     </li>
                 {% endif %}
             </ul>
+            {% endwith %}
         </div>
         <!-- End Sidebar -->
         <div class="clearfix"></div>
