@@ -197,13 +197,13 @@ def search_organisations(request):
         "organization-rows.html",
         {
             "organizations": organisations_listing["organisations"],
-            "row_start_index": organisations_listing["row_start_index"],
+            "organizations_row_start_index": organisations_listing["organizations_row_start_index"],
          },
         request=request,
     )
     pagination_html = render_to_string(
         "partials/pagination.html",
-        organisations_listing["orgs_pagination_context"],
+        organisations_listing["organizations_pagination_context"],
         request=request,
     )
     
@@ -1033,10 +1033,8 @@ class CreateDashboardUserView(View):
             user.is_active = form.cleaned_data.get("is_active", True)
             user.access_type = "dashboard"
             user.save()
+
             form.save_m2m()
-            selected_groups = form.cleaned_data.get("groups")
-            if selected_groups:
-                user.groups.add(*selected_groups)
             if form.cleaned_data.get("send_invite"):
                 invite_sent = send_invitation(request, user)
             if invite_sent:
@@ -1119,9 +1117,6 @@ class EditDashboardUserView(View):
             user.is_active = form.cleaned_data.get("is_active", True)
             user.save()
             form.save_m2m()
-            selected_groups = form.cleaned_data.get("groups")
-            if selected_groups is not None:
-                user.groups.set(selected_groups)
             return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
@@ -2016,6 +2011,13 @@ def user_details(request, user_id):
         user=user,
         status__in=["SENT", "PENDING"],
     ).exists()
+
+    if user.access_type == "dashboard":
+        edit_user_modal_target = "#edit-dashboard-user-modal"
+        if not is_super_or_58_admin(current_user):
+            edit_user_modal_target = "#edit-appuser-modal"
+    else:
+        edit_user_modal_target = "#edit-appuser-modal"
     
     work_groups_qs = (
         WorkGroup.objects.filter(organisation=target_user_org).order_by("name")
@@ -2033,6 +2035,7 @@ def user_details(request, user_id):
 
     context = {
         "user": user,
+        "edit_user_modal_target": edit_user_modal_target,
         "dashboard_preferences": dashboard_preferences,
         "app_user_form": AppUserForm(
             work_groups_qs=work_groups_qs,

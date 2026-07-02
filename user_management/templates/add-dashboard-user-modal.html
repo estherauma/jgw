@@ -92,7 +92,7 @@
                     </label>
                     <label class="um-field form-group" data-dashboard-hide-for-org-group-admin>
                         <span>Organisation (optional)</span>
-                        {% include 'components/custom-select.html' with field=form.organisation_data multiple=True placeholder='Select organisations' search_placeholder='Search organisations...' no_results_text='No organisations found.' %}
+                        {% include 'components/custom-select.html' with field=form.organisation_data multiple=True placeholder='Select organisation' search_placeholder='Search organisation...' no_results_text='No organisations found.' %}
                         <div class="text-danger small" data-error-for="organisation_data"></div>
                         {% if form.organisation_data.errors %}
                             <div class="text-danger small">{{ form.organisation_data.errors }}</div>

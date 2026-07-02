@@ -81,7 +81,7 @@
                     </div>
                 </div>
                 <div class="mt-3" data-org-pagination>
-                    {% include "partials/pagination.html" with page_obj=organizations_page item_label="organisations" nav_label="Organisations pagination" page_link_attr="data-org-page-link" %}
+                    {% include "partials/pagination.html" with page_obj=organizations_pagination_context.page_obj page_numbers=organizations_pagination_context.page_numbers item_label=organizations_pagination_context.item_label nav_label=organizations_pagination_context.nav_label page_link_attr=organizations_pagination_context.page_link_attr %}
                 </div>
             </div>
             {% flag 'can_add_organization_group' %}
