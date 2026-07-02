@@ -52,6 +52,7 @@ from ..utils import (
     get_active_role,
     is_58_admin,
     is_org_admin,
+    is_org_admin_or_staff,
     is_org_group_admin,
     is_org_or_group_admin,
     is_super_or_58_admin,
@@ -2011,6 +2012,13 @@ def user_details(request, user_id):
         user=user,
         status__in=["SENT", "PENDING"],
     ).exists()
+
+    if user.access_type == "dashboard":
+        edit_user_modal_target = "#edit-dashboard-user-modal"
+        if not is_super_or_58_admin(current_user):
+            edit_user_modal_target = "#edit-appuser-modal"
+    else:
+        edit_user_modal_target = "#edit-appuser-modal"
     
     work_groups_qs = (
         WorkGroup.objects.filter(organisation=target_user_org).order_by("name")
@@ -2028,6 +2036,7 @@ def user_details(request, user_id):
 
     context = {
         "user": user,
+        "edit_user_modal_target": edit_user_modal_target,
         "dashboard_preferences": dashboard_preferences,
         "app_user_form": AppUserForm(
             work_groups_qs=work_groups_qs,
