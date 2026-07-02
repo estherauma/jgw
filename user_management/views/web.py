@@ -197,13 +197,13 @@ def search_organisations(request):
         "organization-rows.html",
         {
             "organizations": organisations_listing["organisations"],
-            "row_start_index": organisations_listing["row_start_index"],
+            "organizations_row_start_index": organisations_listing["organizations_row_start_index"],
          },
         request=request,
     )
     pagination_html = render_to_string(
         "partials/pagination.html",
-        organisations_listing["orgs_pagination_context"],
+        organisations_listing["organizations_pagination_context"],
         request=request,
     )
     
