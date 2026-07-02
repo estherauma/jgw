@@ -1033,10 +1033,8 @@ class CreateDashboardUserView(View):
             user.is_active = form.cleaned_data.get("is_active", True)
             user.access_type = "dashboard"
             user.save()
+
             form.save_m2m()
-            selected_groups = form.cleaned_data.get("groups")
-            if selected_groups:
-                user.groups.add(*selected_groups)
             if form.cleaned_data.get("send_invite"):
                 invite_sent = send_invitation(request, user)
             if invite_sent:
@@ -1119,9 +1117,6 @@ class EditDashboardUserView(View):
             user.is_active = form.cleaned_data.get("is_active", True)
             user.save()
             form.save_m2m()
-            selected_groups = form.cleaned_data.get("groups")
-            if selected_groups is not None:
-                user.groups.set(selected_groups)
             return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
