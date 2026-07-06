@@ -14,7 +14,7 @@ celery_app.autodiscover_tasks()
 celery_app.conf.beat_schedule = {
     "fetch-API-data": {
         "task": "get_jgw_data",
-        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
+        "schedule": crontab(minute=0, hour=0),  
     },
     # "cache_bigquery_data": {
     #     "task": "cache_bigquery_data",
@@ -27,14 +27,14 @@ celery_app.conf.beat_schedule = {
     },
     "fetch-summerberry-data": {
         "task": "fetch_summerberry_data",
-        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
+        "schedule": crontab(minute=30, hour=1),  # everyday at 1:30 AM
     },
     "sync-partner-configurations": {
         "task": "sync_partner_configurations",
-        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
+        "schedule": crontab(minute=0, hour=1),  # everyday at 1:00 AM
     },
     "sync-partner-config-options": {
         "task": "sync_partner_config_options",
-        "schedule": crontab(minute=0, hour=0),  # everyday at midnight
+        "schedule": crontab(minute=0, hour=1),  # everyday at 1:00 AM
     },
 }
