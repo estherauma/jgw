@@ -8,13 +8,8 @@ The Organisation workflow module manages organisations in the Just Good Work adm
 
 The information and actions available in the organisation module depend on the user's role.
 
-| Role | Access |
-|------|--------|
-| **Superuser and Fifty Eight Admin** | Can view and manage data for all organisations. |
-| **Organisation Group Admin** | Manages organisation group. |
-| **Organisation Admin** | Manages the organisation they are assigned to. They do not see the list of organisations and cannot switch between organisations. |
-| **Organisation Staff** | Can only view and manage the information they have permission to access within their organisation. |
-| **Worker** | Does not have access to the dashboard. They can only log into the Just Good Work mobile application. |
+For a full explanation of roles and permissions, see [Roles and Permissions](../roles-and-permissions/).
+
 
 ### Process Flow
 
