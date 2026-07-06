@@ -2,7 +2,7 @@
 #### Overview
 A **model** and a **table** are related but not the same:
 
- - A **model** is the Django class for example, OrganisationData.
+   - A **model** is the Django class for example, OrganisationData.
    - A **table** is the database table created from that model for example, organisation_data.
 
 The User Management data model defines how organisations, users, roles, permissions, work groups and related information are stored in the database.
@@ -12,7 +12,7 @@ Each model is stored in a corresponding database table. These tables are connect
 The following sections describe the purpose of each model, and its relationships with other models.
 
 #### 1. OrganizationGroup (Organisation Group)
-**Database Table:** `organisation_group`
+**Database Table:** `preference_organizationgroup`
 
 The `OrganizationGroup` model represents a group of organisations. It is used to organize multiple organisations under a single group for easy management.
 
@@ -21,7 +21,7 @@ The `OrganizationGroup` model represents a group of organisations. It is used to
 - One organisation group can contain many organisations.
 
 #### 2. OrganisationData (Organisations)
-**Database Table:** `organisation_data`
+**Database Table:** `preference_organisationdata`
 
 The `OrganisationData` model represents an organisation. It is the central model in the User Management module and stores the organisation's configuration.
 
@@ -29,16 +29,16 @@ The `OrganisationData` model represents an organisation. It is the central model
 
 An organisation:
 
-- belongs to one organisation group
-- can have many work groups
-- can have many roles
-- can have many role assignments
-- can have many deep links
-- can have many activity logs
-- can have many access codes
+- may belong to one organisation group (optional).
+- can have many work groups.
+- can have many roles.
+- can have many role assignments.
+- can have many deep links.
+- can have many activity logs.
+- can have many access codes.
 
 #### 3. OrganisationAccessCode (Work Code)
-**Database Table:** `organisation_access_code`
+**Database Table:** `preference_organisationaccesscode`
 
 The `OrganisationAccessCode` model stores access codes for an organisation. These access codes allow workers to join the correct organisation.
 
@@ -46,11 +46,11 @@ The `OrganisationAccessCode` model stores access codes for an organisation. Thes
 
 Organisation access code:
 
-- belongs to one organisation.
+- may belong to one organisation (optional).
 - can be assigned to multiple work groups.
 
 #### 4. WorkGroup (User Group)
-**Database Table:** `work_group`
+**Database Table:** `user_management_workgroup`
 
 The `WorkGroup model` represents a team or department within an organisation.
 
@@ -60,10 +60,10 @@ A work group:
 
 - belongs to one organisation.
 - can have multiple access codes.
-- can have many users
+- can have many users.
 
 #### 5. OrganisationRole (Role)
-**Database Table:** `organisation_role`
+**Database Table:** `user_management_organisationrole`
 
 The `OrganisationRole` model defines a role within an organisation. Roles determine the permissions available to users.
 
@@ -76,7 +76,7 @@ An organisation role:
 - has many role assignments.
 
 #### 6. OrganisationRolePermission (Permission)
-**Database Table:** `organisation_role_permission`
+**Database Table:** `user_management_organisationrolepermissio`
 
 The `OrganisationRolePermission` model links an organisation role to a feature flag. It defines the permissions assigned to a role.
 
@@ -88,7 +88,7 @@ An organisation role permission:
 - has one feature flag.
 
 #### 7. OrganisationRoleAssignment
-**Database Table:** `organisation_role_assignment`
+**Database Table:** `user_management_organisationroleassignment`
 
 The `OrganisationRoleAssignment` model assigns an organisation role to a user within a specific organisation.
 
@@ -101,7 +101,7 @@ Organisation role assignment:
 - has one role.
 
 #### 8. OrganisationDeepLink (Organisation QR Code)
-**Database Table:** `organisation_deep_link`
+**Database Table:** `preference_organisationdeeplink`
 
 The `OrganisationDeepLink` model stores deep links for an organisation.
 
@@ -114,7 +114,7 @@ Organisation deep link:
 - has one organisation.
 
 #### 9. UserActivity (User Activity Logs)
-**Database Table:** `user_activity`
+**Database Table:** `user_management_useractivity`
 
 The `UserActivity model` records important actions performed in the User Management module.
 
@@ -127,18 +127,18 @@ User activity:
 - has one organisation.
 - has one user (actor).
 
-#### 11. User
+#### 10. User
 
 The `User` model stores information about system users.
 
 **Relationships**
 A user:
 
- - can have many activity records
- - can be assigned one or more roles within an organisation
- - can only have one organisation
+ - can have many activity records.
+ - can be assigned one or more roles within an organisation.
+ - can only have one organisation.
 
-#### 10. ShortLink
+#### 11. ShortLink
 **Database Table:** `short_link`
 
 The `ShortLink` model stores shortened URLs. It generates a unique code that redirects users to a longer target URL. Short links can optionally expire after a specified date and time.
