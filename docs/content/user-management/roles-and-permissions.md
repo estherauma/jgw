@@ -9,7 +9,6 @@ It covers:
 - dashboard groups used when adding an admin user
 - organisation roles used when adding a user inside an organisation
 - default and custom organisation roles
-- how roles map to dashboard access, app access, and Django groups
 
 ### Roles And Permissions Overview
 
