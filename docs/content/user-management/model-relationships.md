@@ -76,7 +76,7 @@ An organisation role:
 - has many role assignments.
 
 #### 6. OrganisationRolePermission (Permission)
-**Database Table:** `user_management_organisationrolepermissio`
+**Database Table:** `user_management_organisationrolepermission`
 
 The `OrganisationRolePermission` model links an organisation role to a feature flag. It defines the permissions assigned to a role.
 
