@@ -17,6 +17,10 @@ DOC_PAGES = {
         "title": "Overview",
         "path": DOCS_ROOT / "user-management" / "overview.md",
     },
+    ("user-management", "roles-and-permissions"): {
+        "title": "Roles and Permissions",
+        "path": DOCS_ROOT / "user-management" / "roles-and-permissions.md",
+    },
 
     ("user-management", "organisation-workflow"): {
         "title": "Organisation Workflow",

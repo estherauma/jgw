@@ -456,6 +456,13 @@ class WorkGroupForm(forms.ModelForm):
 
 
 class DashboardUserForm(forms.ModelForm):
+    DASHBOARD_GROUP_LABELS = {
+        "58_admin": "FiftyEight Administrator",
+        "org_group_admin": "Organisation Group Administrator",
+        "org_admin": "Organisation Administrator",
+        "user_management": "User Management Access",
+    }
+
     groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
         required=True,
@@ -527,6 +534,9 @@ class DashboardUserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         groups_qs = Group.objects.exclude(name__in=["worker", "org_staff"]).order_by("name")
         self.fields["groups"].queryset = groups_qs
+        self.fields["groups"].label_from_instance = (
+            lambda group: self.DASHBOARD_GROUP_LABELS.get(group.name, group.name)
+        )
         self.fields["email"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Email"}
         )
