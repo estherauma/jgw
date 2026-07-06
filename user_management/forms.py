@@ -645,6 +645,11 @@ class DashboardUserForm(forms.ModelForm):
                     "organisation_data",
                     "Select an organisation",
                 )
+        elif "org_admin" in selected_group_names and organisation_data.count() > 1:
+            self.add_error(
+                "organisation_data",
+                "Org admins can only be assigned to one organisation.",
+            )
         else:
             cleaned["organisation_group"] = None
 

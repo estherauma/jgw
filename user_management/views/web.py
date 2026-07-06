@@ -60,11 +60,14 @@ from ..utils import (
 from users.models import User, UserInvitations
 from content.services.partner_configurations import (
     add_partner_configuration_to_cms,
+    delete_partner_configuration_from_cms,
     FileUploadError,
     get_group_partner_configuration_sites_by_code,
     move_partner_configuration_to_group_in_cms,
     PartnerConfigurationSyncError,
     remove_partner_configuration_from_group_in_cms,
+    resolve_partner_configuration_cms_id,
+    sync_group_partner_configuration_to_cms,
     edit_organization_group_in_cms,
     update_partner_configuration_in_cms,
     update_partner_configuration_work_codes_in_cms,
@@ -194,13 +197,13 @@ def search_organisations(request):
         "organization-rows.html",
         {
             "organizations": organisations_listing["organisations"],
-            "row_start_index": organisations_listing["row_start_index"],
+            "organizations_row_start_index": organisations_listing["organizations_row_start_index"],
          },
         request=request,
     )
     pagination_html = render_to_string(
         "partials/pagination.html",
-        organisations_listing["orgs_pagination_context"],
+        organisations_listing["organizations_pagination_context"],
         request=request,
     )
     
@@ -777,6 +780,67 @@ class EditOrganisationView(View):
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
+
+class DeleteOrganisationView(View):
+    def post(self, request, organisation_id):
+        if not is_super_or_58_admin(request.user):
+            return OrganizationService.org_access_denied()
+
+        organisation = OrganisationData.objects.filter(pk=organisation_id).first()
+        if not organisation:
+            return JsonResponse(
+                {"ok": False, "error": "Organisation not found."},
+                status=404,
+            )
+
+        if organisation.organisation_access_codes.exists():
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": (
+                        "You cannot delete this organisation because it still has active work codes. "
+                        "Delete the work codes first."
+                    ),
+                },
+                status=400,
+            )
+
+        if User.objects.filter(organisation_data=organisation).exists():
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": (
+                        "You cannot delete this organisation because it still has users assigned to it. "
+                        "Remove or delete the users first."
+                    ),
+                },
+                status=400,
+            )
+
+        organisation_name = organisation.name
+        organisation.soft_delete(request.user)
+
+        warning_message = None
+        try:
+            if organisation.organization_group_id:
+                sync_group_partner_configuration_to_cms(
+                    organisation,
+                    orgs_to_exclude_ids=[organisation.id],
+                )
+            else:
+                cms_id = resolve_partner_configuration_cms_id(organisation)
+                if cms_id:
+                    delete_partner_configuration_from_cms(cms_id)
+        except PartnerConfigurationSyncError as exc:
+            warning_message = str(exc)
+            messages.warning(
+                request,
+                "Organisation was deleted, but partner configuration sync to CMS failed.",
+            )
+
+        messages.success(request, f'Organisation "{organisation_name}" deleted successfully.')
+        return JsonResponse({"ok": True, "warning": warning_message})
+
 class CreateWorkGroupView(View):
     def post(self, request):
         form = WorkGroupForm(request.POST)
@@ -969,10 +1033,8 @@ class CreateDashboardUserView(View):
             user.is_active = form.cleaned_data.get("is_active", True)
             user.access_type = "dashboard"
             user.save()
+
             form.save_m2m()
-            selected_groups = form.cleaned_data.get("groups")
-            if selected_groups:
-                user.groups.add(*selected_groups)
             if form.cleaned_data.get("send_invite"):
                 invite_sent = send_invitation(request, user)
             if invite_sent:
@@ -1055,9 +1117,6 @@ class EditDashboardUserView(View):
             user.is_active = form.cleaned_data.get("is_active", True)
             user.save()
             form.save_m2m()
-            selected_groups = form.cleaned_data.get("groups")
-            if selected_groups is not None:
-                user.groups.set(selected_groups)
             return JsonResponse({"ok": True})
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
@@ -1952,6 +2011,13 @@ def user_details(request, user_id):
         user=user,
         status__in=["SENT", "PENDING"],
     ).exists()
+
+    if user.access_type == "dashboard":
+        edit_user_modal_target = "#edit-dashboard-user-modal"
+        if not is_super_or_58_admin(current_user):
+            edit_user_modal_target = "#edit-appuser-modal"
+    else:
+        edit_user_modal_target = "#edit-appuser-modal"
     
     work_groups_qs = (
         WorkGroup.objects.filter(organisation=target_user_org).order_by("name")
@@ -1969,6 +2035,7 @@ def user_details(request, user_id):
 
     context = {
         "user": user,
+        "edit_user_modal_target": edit_user_modal_target,
         "dashboard_preferences": dashboard_preferences,
         "app_user_form": AppUserForm(
             work_groups_qs=work_groups_qs,

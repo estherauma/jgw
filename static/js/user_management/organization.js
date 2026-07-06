@@ -926,6 +926,30 @@
       }
     });
   }
+
+  function initDeleteOrganisation() {
+    $(document).on('click', '[data-delete-organisation-btn]', function() {
+      var $btn = $(this);
+      var organisationId = $btn.data('organisation-id');
+      var organisationName = $btn.data('organisation-name');
+      var redirectUrl = $btn.data('redirect-url');
+
+      if (!organisationId || !window.showDeleteConfirm) {
+        return;
+      }
+
+      window.showDeleteConfirm({
+        url: '/user-management/organisations/' + organisationId + '/delete/',
+        title: 'Delete Organisation',
+        message: 'Are you sure you want to delete the organisation "' + organisationName + '"?',
+        warning: 'This action cannot be reversed. You can only delete organisations that have no active work codes and no users.',
+        showFullScreenLoader: true,
+        onSuccess: function() {
+          window.location.href = redirectUrl || '/user-management/';
+        }
+      });
+    });
+  }
   function initEditWorkGroupForm() {
     var modal = document.getElementById('edit-workgroup-modal');
     if (!modal) return;
@@ -1455,5 +1479,6 @@
   window.addEventListener('load', ()=>{
     initEditWorkCodeForm();
     initDeleteWorkCode();
+    initDeleteOrganisation();
   });
 })();
