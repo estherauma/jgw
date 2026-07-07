@@ -23,11 +23,7 @@
         </td>
         <td>{{ u.email|default:"-" }}</td>
         <td>
-            {% if not u.is_active and u.has_pending_invitation %}
-                <span class="badge rounded-pill text-uppercase um-status-badge um-status-pending">
-                    Pending Invitation
-                </span>
-            {% elif u.is_active %}
+            {% if u.is_active %}
                 <span class="badge rounded-pill text-uppercase um-status-badge um-status-active">
                     Active
                 </span>
