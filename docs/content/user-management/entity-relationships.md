@@ -18,7 +18,7 @@ An organisation group:
 - can contain many organisations
 - can have many users
 
-#### 2. OrganisationData (Organisations)
+#### 2. OrganisationData (Organisation)
 
 **Database Table:** `preference_organisationdata`
 
@@ -95,21 +95,7 @@ An organisation role permission:
 - belongs to one organisation role
 - belongs to one feature flag
 
-#### 7. OrganisationRoleAssignment
-
-**Database Table:** `user_management_organisationroleassignment`
-
-The `OrganisationRoleAssignment` model assigns an organisation role to a user within a specific organisation.
-
-**Relationships**
-
-An organisation role assignment:
-
-- belongs to one user
-- belongs to one organisation
-- belongs to one role
-
-#### 8. OrganisationDeepLink (Organisation QR Code)
+#### 7. OrganisationDeepLink (Deep Link)
 
 **Database Table:** `preference_organisationdeeplink`
 
@@ -123,7 +109,7 @@ An organisation deep link:
 
 - belongs to one organisation
 
-#### 9. UserActivity (User Activity Logs)
+#### 8. UserActivity (User Activity Log)
 
 **Database Table:** `user_management_useractivity`
 
@@ -138,7 +124,7 @@ A user activity record:
 - may reference one organisation
 - may reference one user as the actor
 
-#### 10. User
+#### 9. User
 
 **Database Table:** `users_user`
 
@@ -157,13 +143,3 @@ A user:
 **Implementation note**
 
 Although `User.organisation_data` is a many-to-many relationship in the schema, current User Management flows only assign one organisation per organisation user at a time. That single-organisation rule is enforced in the application logic, not by the database relationship itself.
-
-#### 11. ShortLink
-
-**Database Table:** `user_management_shortlink`
-
-The `ShortLink` model stores shortened URLs. It generates a unique code that redirects users to a longer target URL. Short links can optionally expire after a specified date and time.
-
-**Relationships**
-
-- This model does not have direct relationships with the other User Management models.
