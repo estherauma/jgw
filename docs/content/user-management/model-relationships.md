@@ -70,6 +70,8 @@ A work group:
 
 The `OrganisationRole` model defines a role within an organisation. Roles determine the permissions available to users.
 
+For a fuller explanation of default roles, custom roles, and how role assignment affects user access, see [Roles and Permissions](../roles-and-permissions/).
+
 **Relationships**
 
 An organisation role:
@@ -83,6 +85,8 @@ An organisation role:
 **Database Table:** `user_management_organisationrolepermission`
 
 The `OrganisationRolePermission` model links an organisation role to a feature flag. It defines the permissions assigned to a role.
+
+For a fuller explanation of how permission flags are used by organisation roles, see [Roles and Permissions](../roles-and-permissions/).
 
 **Relationships**
 
