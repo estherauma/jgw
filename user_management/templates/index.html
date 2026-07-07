@@ -381,6 +381,63 @@
                         />
                     </div>
                 </div>
+                <div class="um-row mt-2">
+                    <div class="row w-100 g-2" data-users-filters data-selected-org-id="{{ selected_org_id|default_if_none:'' }}">
+                        {% if not selected_org_id %}
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mb-0 w-100">
+                                <span>Organisation</span>
+                                <select class="form-control um-input" data-user-filter-organisation>
+                                    <option value="">All organisations</option>
+                                    {% for org in organizations %}
+                                    <option value="{{ org.id }}">{{ org.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+                        {% endif %}
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mb-0 w-100">
+                                <span>Status</span>
+                                <select class="form-control um-input" data-user-filter-status>
+                                    <option value="">All statuses</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4 ">
+                            <label class="um-field form-group mb-0 w-100">
+                                <span>Role</span>
+                                <select class="form-control um-input" data-user-filter-role>
+                                    <option value="">All roles</option>
+                                    {% if selected_org_id %}
+                                        {% for role in roles %}
+                                        <option value="{{ role.id }}">{{ role.name }}</option>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for role in user_group_filter_options %}
+                                        <option value="{{ role.value }}">{{ role.label }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </label>
+                        </div>
+                        {% if selected_org_id %}
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mb-0 w-100">
+                                <span>User group</span>
+                                <select class="form-control um-input" data-user-filter-workgroup>
+                                    <option value="">All user groups</option>
+                                    {% for group in work_groups %}
+                                    <option value="{{ group.id }}">{{ group.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
                 <div class="um-table-scroll-wrapper um-table-scroll-wrapper-lg">
                     <div class="um-scrollbar um-scrollbar-y">
                         <div class="um-scrollbar-thumb um-scrollbar-thumb-y"></div>

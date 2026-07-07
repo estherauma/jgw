@@ -581,12 +581,32 @@
     const url = input.getAttribute('data-user-search-url');
     const tbody = document.querySelector('[data-users-table-body]');
     const paginationContainer = document.querySelector('[data-users-pagination]');
+    const filtersContainer = document.querySelector('[data-users-filters]');
     if (!url || !tbody || !paginationContainer) {
       return;
     }
+    const selectedOrgId =
+      (filtersContainer?.getAttribute('data-selected-org-id') || '').trim();
     let debounceTimer = null;
     let controller = null;
     let currentPage = 1;
+
+    function getFilterValues() {
+      const organisationFilter = document.querySelector(
+        '[data-user-filter-organisation]',
+      );
+      const statusFilter = document.querySelector('[data-user-filter-status]');
+      const roleFilter = document.querySelector('[data-user-filter-role]');
+      const workGroupFilter = document.querySelector(
+        '[data-user-filter-workgroup]',
+      );
+      return {
+        organisationId: (organisationFilter?.value || '').trim(),
+        status: (statusFilter?.value || '').trim(),
+        role: (roleFilter?.value || '').trim(),
+        workGroupId: (workGroupFilter?.value || '').trim(),
+      };
+    }
 
     async function runSearch(value, page) {
       if (controller) {
@@ -597,13 +617,22 @@
       if (value) {
         params.set('q', value);
       }
-      var storedOrg = window.getSelectedOrgData
-        ? window.getSelectedOrgData()
-        : null;
-      const selectedOrgId = storedOrg?.id ? String(storedOrg.id) : '';
- 
+      const filters = getFilterValues();
+
       if (selectedOrgId) {
         params.set('selected_org_id', selectedOrgId);
+      }
+      if (!selectedOrgId && filters.organisationId) {
+        params.set('organisation_id', filters.organisationId);
+      }
+      if (filters.status) {
+        params.set('status', filters.status);
+      }
+      if (filters.role) {
+        params.set('role', filters.role);
+      }
+      if (selectedOrgId && filters.workGroupId) {
+        params.set('work_group_id', filters.workGroupId);
       }
       params.set('page', String(page || 1));
       try {
@@ -643,6 +672,16 @@
         runSearch(value, 1);
       }, 250);
     });
+
+    if (filtersContainer) {
+      filtersContainer.addEventListener('change', function (event) {
+        if (!event.target.closest('select')) {
+          return;
+        }
+        const value = (input.value || '').trim();
+        runSearch(value, 1);
+      });
+    }
 
     paginationContainer.addEventListener('click', function (event) {
       const trigger = event.target.closest('[data-users-page-link]');
