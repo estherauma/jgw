@@ -21,10 +21,13 @@ DOC_PAGES = {
         "title": "Roles and Permissions",
         "path": DOCS_ROOT / "user-management" / "roles-and-permissions.md",
     },
-
     ("user-management", "organisation-workflow"): {
         "title": "Organisation Workflow",
         "path": DOCS_ROOT / "user-management" / "organisation-workflow.md",
+    },
+    ("user-management", "model-relationships"): {
+        "title": "Entity  Relationships",
+        "path": DOCS_ROOT / "user-management" / "model-relationships.md",
     },
     ("user-management", "qa-guide"): {
         "title": "QA Guide",
