@@ -295,6 +295,21 @@
                         <span class="title-text um-navy">Users</span>
                     </div>
                     <div class="um-action gap-3">
+                        <button
+                            class="um-btn um-btn-outline um-filter-toggle"
+                            type="button"
+                            data-users-filters-toggle
+                            aria-expanded="false"
+                            aria-controls="users-filters-panel"
+                        >
+                            <span class="um-filter-toggle-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M4 6h16M7 12h10M10 18h4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+                                </svg>
+                            </span>
+                            <span class="um-filter-toggle-label">Filters</span>
+                            <span class="um-filter-toggle-count d-none" data-users-filters-count>0</span>
+                        </button>
                         <div class="dropdown um-actions-dropdown">
                             <button
                                 class="um-btn um-btn-outline dropdown-toggle"
@@ -381,7 +396,24 @@
                         />
                     </div>
                 </div>
-                <div class="um-row mt-2">
+                <div
+                    class="um-filters-panel d-none mt-2"
+                    id="users-filters-panel"
+                    data-users-filters-panel
+                >
+                    <div class="um-filters-panel-header">
+                        <div>
+                            <h4 class="um-filters-panel-title">Filter users</h4>
+                        </div>
+                        <div class="um-filters-panel-actions">
+                            <button class="um-btn um-btn-outline um-btn-sm" type="button" data-users-filters-clear>
+                                Clear
+                            </button>
+                            <button class="um-btn um-btn-gray um-btn-sm" type="button" data-users-filters-close>
+                                Close
+                            </button>
+                        </div>
+                    </div>
                     <div class="row w-100 g-2" data-users-filters data-selected-org-id="{{ selected_org_id|default_if_none:'' }}">
                         {% if not selected_org_id %}
                         <div class="col-12 col-md-4">
