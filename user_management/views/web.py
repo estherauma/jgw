@@ -2299,3 +2299,52 @@ class DeepLinkDetailView(View):
                 "data": branch_data,
             }
         )
+
+
+class DeleteDeepLinkView(View):
+    def post(self, request, deep_link_id):
+        deep_link = OrganisationDeepLink.objects.select_related("organisation").filter(
+            id=deep_link_id
+        ).first()
+        if not deep_link:
+            return JsonResponse(
+                {"ok": False, "error": "Deep link not found."},
+                status=404,
+            )
+
+        organisation = deep_link.organisation
+        if not OrganizationService.has_org_access(
+            request.user,
+            organisation,
+            request=request,
+            flag_name="can_create_login_qr_code",
+        ):
+            return OrganizationService.org_access_denied()
+
+        try:
+            delete_result = OrganizationService.delete_organisation_deep_link(
+                organisation=organisation,
+                deep_link_id=deep_link_id,
+            )
+        except ValueError as exc:
+            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+        except Exception as exc:
+            logger.error("Error deleting deep link: %s", exc, exc_info=True)
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "An error occurred while deleting the deep link. Please try again.",
+                },
+                status=500,
+            )
+
+        messages.success(
+            request,
+            f'Deep link "{delete_result["title"]}" deleted successfully.',
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "org_id": delete_result.get("org_id") or "",
+            }
+        )

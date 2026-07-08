@@ -18,3 +18,13 @@
 >
     QR code
 </button>
+<button
+    class="dropdown-item um-actions-item text-danger"
+    type="button"
+    role="menuitem"
+    data-delete-organisation-deep-link
+    data-delete-url="{% url 'user_management:delete_deep_link' deep_link.id %}"
+    data-deep-link-title="{{ deep_link.title|default:'Organisation link' }}"
+>
+    Delete
+</button>

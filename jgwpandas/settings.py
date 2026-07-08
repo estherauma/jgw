@@ -55,6 +55,8 @@ EXTERNAL_API_KEY = (os.getenv("EXTERNAL_API_KEY") or "").strip()
 BRANCH_KEY = (os.getenv("BRANCH_KEY") or "").strip()
 BRANCH_SECRET = (os.getenv("BRANCH_SECRET") or "").strip()
 BRANCH_LINK_DOMAIN = (os.getenv("BRANCH_LINK_DOMAIN") or "").strip()
+BRANCH_APP_ID = (os.getenv("BRANCH_APP_ID") or "").strip()
+BRANCH_ACCESS_TOKEN = (os.getenv("BRANCH_ACCESS_TOKEN") or "").strip()
 
 
 PUBLIC_DEMO_EMAIL = os.getenv("PUBLIC_DEMO_EMAIL", "demo@fiftyeight.io").strip().lower()
