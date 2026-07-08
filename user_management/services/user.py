@@ -75,22 +75,11 @@ def filter_users_role(queryset, role="", selected_org=None):
         return queryset
     if selected_org:
         if not str(role).isdigit():
-            return queryset.filter(groups__name=role).distinct()
-
-        role_obj = selected_org.roles.filter(id=role).first()
-        if not role_obj:
             return queryset.none()
-
-        role_filter = Q(
+        return queryset.filter(
             org_roles__organisation=selected_org,
             org_roles__role_id=role,
-        )
-        if role_obj.is_system and role_obj.name == "Administrator":
-            role_filter |= Q(groups__name="org_admin")
-        elif role_obj.is_system and role_obj.name == "Worker":
-            role_filter |= Q(groups__name="worker")
-
-        return queryset.filter(role_filter).distinct()
+        ).distinct()
     return queryset.filter(groups__name=role).distinct()
 
 

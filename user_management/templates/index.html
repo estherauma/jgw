@@ -419,52 +419,52 @@
                         <div class="col-12 col-md-4">
                             <label class="um-field form-group mb-0 w-100">
                                 <span>Organisation</span>
-                                <select class="form-control um-input" data-user-filter-organisation>
-                                    <option value="">All organisations</option>
-                                    {% for org in organizations %}
-                                    <option value="{{ org.id }}">{{ org.name }}</option>
-                                    {% endfor %}
-                                </select>
+                                <div
+                                    class="um-select is-placeholder"
+                                    data-user-filter-organisation-select
+                                    data-org-options-url="{% url 'user_management:organisation_search_options' %}"
+                                    data-user-filter-placeholder="All organisations"
+                                >
+                                    <button
+                                        class="um-select-toggle text-start"
+                                        type="button"
+                                        data-user-filter-organisation-toggle
+                                    >
+                                        <span data-user-filter-organisation-label>All organisations</span>
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                    <div class="um-select-menu" data-user-filter-organisation-menu>
+                                        <input
+                                            class="form-control"
+                                            type="text"
+                                            placeholder="Search organisation..."
+                                            aria-label="Search organisation"
+                                            data-user-filter-organisation-search
+                                        />
+                                        <div class="um-select-options" data-user-filter-organisation-options></div>
+                                    </div>
+                                    {{ users_filter_form.organisation_id }}
+                                </div>
                             </label>
                         </div>
                         {% endif %}
                         <div class="col-12 col-md-4">
                             <label class="um-field form-group mb-0 w-100">
                                 <span>Status</span>
-                                <select class="form-control um-input" data-user-filter-status>
-                                    <option value="">All statuses</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
+                                {% include 'components/custom-select.html' with field=users_filter_form.status placeholder='All statuses' no_results_text='No statuses found.' hide_search=True %}
                             </label>
                         </div>
                         <div class="col-12 col-md-4 ">
                             <label class="um-field form-group mb-0 w-100">
                                 <span>Role</span>
-                                <select class="form-control um-input" data-user-filter-role>
-                                    <option value="">All roles</option>
-                                    {% if selected_org_id %}
-                                        {% for role in roles %}
-                                        <option value="{{ role.id }}">{{ role.name }}</option>
-                                        {% endfor %}
-                                    {% else %}
-                                        {% for role in user_group_filter_options %}
-                                        <option value="{{ role.value }}">{{ role.label }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
+                                {% include 'components/custom-select.html' with field=users_filter_form.role placeholder='All roles' search_placeholder='Search role...' no_results_text='No roles found.' %}
                             </label>
                         </div>
                         {% if selected_org_id %}
                         <div class="col-12 col-md-4">
                             <label class="um-field form-group mb-0 w-100">
                                 <span>User group</span>
-                                <select class="form-control um-input" data-user-filter-workgroup>
-                                    <option value="">All user groups</option>
-                                    {% for group in work_groups %}
-                                    <option value="{{ group.id }}">{{ group.name }}</option>
-                                    {% endfor %}
-                                </select>
+                                {% include 'components/custom-select.html' with field=users_filter_form.work_group_id placeholder='All user groups' search_placeholder='Search user group...' no_results_text='No user groups found.' %}
                             </label>
                         </div>
                         {% endif %}

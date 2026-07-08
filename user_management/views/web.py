@@ -31,6 +31,7 @@ from ..forms import (
     EditOrganizationGroupForm,
     OrganisationDeepLinkForm,
     OrganisationRoleForm,
+    UsersFilterForm,
     WorkCodeAssignForm,
     WorkGroupForm,
     UsersWorkGroupAssignForm,
@@ -182,6 +183,17 @@ def user_management(request):
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
         "dashboard_user_form": DashboardUserForm(orgs_qs=organizations),
+        "users_filter_form": UsersFilterForm(
+            role_options=(
+                [
+                    {"value": role.id, "label": role.name}
+                    for role in roles
+                ]
+                if selected_org
+                else USER_GROUP_FILTER_OPTIONS
+            ),
+            work_groups=work_groups,
+        ),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
         "roles": roles,
         "deep_links": deep_links,

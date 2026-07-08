@@ -590,6 +590,23 @@
     if (!url || !tbody || !paginationContainer) {
       return;
     }
+    if (filtersContainer && window.initUmSelects) {
+      window.initUmSelects(filtersContainer);
+    }
+    const organisationFilterController =
+      window.createAsyncOrganisationPicker &&
+      window.createAsyncOrganisationPicker(
+        document.querySelector('[data-user-filter-organisation-select]'),
+        {
+          toggleSelector: '[data-user-filter-organisation-toggle]',
+          menuSelector: '[data-user-filter-organisation-menu]',
+          searchInputSelector: '[data-user-filter-organisation-search]',
+          optionsContainerSelector: '[data-user-filter-organisation-options]',
+          hiddenInputSelector: '[data-user-filter-organisation]',
+          labelSelector: '[data-user-filter-organisation-label]',
+          placeholder: 'All organisations',
+        },
+      );
     const selectedOrgId =
       (filtersContainer?.getAttribute('data-selected-org-id') || '').trim();
     let debounceTimer = null;
@@ -597,16 +614,13 @@
     let currentPage = 1;
 
     function getFilterValues() {
-      const organisationFilter = document.querySelector(
-        '[data-user-filter-organisation]',
-      );
       const statusFilter = document.querySelector('[data-user-filter-status]');
       const roleFilter = document.querySelector('[data-user-filter-role]');
       const workGroupFilter = document.querySelector(
         '[data-user-filter-workgroup]',
       );
       return {
-        organisationId: (organisationFilter?.value || '').trim(),
+        organisationId: organisationFilterController?.getValue() || '',
         status: (statusFilter?.value || '').trim(),
         role: (roleFilter?.value || '').trim(),
         workGroupId: (workGroupFilter?.value || '').trim(),
@@ -648,8 +662,10 @@
       if (!filtersContainer) {
         return;
       }
+      organisationFilterController?.clear();
       filtersContainer.querySelectorAll('select').forEach(function (select) {
         select.value = '';
+        rebuildCustomSelectForField(select);
       });
       syncFilterUiState();
       const value = (input.value || '').trim();
@@ -724,7 +740,10 @@
 
     if (filtersContainer) {
       filtersContainer.addEventListener('change', function (event) {
-        if (!event.target.closest('select')) {
+        if (
+          !event.target.closest('select') &&
+          !event.target.matches('[data-user-filter-organisation]')
+        ) {
           return;
         }
         const value = (input.value || '').trim();
