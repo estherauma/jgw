@@ -767,8 +767,9 @@ class AppUserForm(forms.ModelForm):
 class OrganisationRoleForm(forms.ModelForm):
     permissions = forms.ModelMultipleChoiceField(
         queryset=Flag.objects.none(),
-        required=False,
+        required=True,
         widget=forms.CheckboxSelectMultiple(),
+        error_messages={"required": "Select at least one permission."},
     )
 
     class Meta:
