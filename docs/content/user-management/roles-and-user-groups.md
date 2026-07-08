@@ -1,127 +1,94 @@
-### Roles And User Groups
+## Roles and User Groups
 
-#### Purpose
+### Purpose
+This document provides a guide on managing roles, permissions, and user groups within an organisation, explaining their workflows and how they control user access in User Management.
 
-This page explains how to create and manage organisation roles, assign permissions, create work groups, assign users to work groups, and how these settings affect user access.
+### 1. Roles and Permissions Mapping
 
-#### Roles
-A role defines what actions a user is allowed to perform within an organisation. Each role is associated with one or more permissions.
+#### What is a Role?
+A role defines what actions a user is authorized to perform within an organisation. Each role is associated with a specific set of permissions.
 
-**Creating a Role**
+There are two categories of roles:
 
-To create a ne role;
+* **System Roles:** Pre-defined roles (e.g., `Administrator` and `Worker`) that cannot be edited or deleted.
+* **Custom Roles:** User-defined roles tailored to specific organisational needs that can be edited or deleted.
 
-1. Navigate to User Management
-2. Select an organisation
-3. Go to the **Roles** section
-4. Click **Add role** button to open **Add role** form
-5. In the add role form, fill in the **Name**, **Description** and select one or more permissions before saving.
-6. Save the form
+#### What are Permissions?
+Permissions determine the exact features and actions available to a role. They are mapped as a many-to-many relationship: a role can have multiple permissions, and a permission can be mapped to multiple roles.
 
-The newly added role will show in the roles table
+**Examples of Permissions:**
 
-**Validations**
+* Activate users
+* Add organization groups
+* Assign role permissions
+* Assign users to departments
 
-- A role name is required
-- Role names must be unique within an organisation
-- Selecting permission is required
+#### Workflow: Create a Custom Role
+1. Navigate to **User Management** and select the target organisation.
+2. Go to the **Roles** section.
+3. Click the **Add role** button to open the form.
+4. Fill in the **Name** and **Description**.
+5. Select one or more permissions from the checklist.
+6. Click **Save**. The new role will appear in the roles table.
 
-**Editing a role**
+##### Validations:
+* Role name is required.
+* Role names must be unique within the organisation.
+* At least one permission must be selected.
 
-Only **custom roles** can be editing, system roles(Administrator and Worker) can not be edited.
+#### Workflow: Edit a Custom Role
+1. Navigate to **User Management** and select the target organisation.
+2. Go to the **Roles** section.
+3. Locate the custom role and click the **Edit** button.
+4. Update the role details (Name, Description, or Permissions).
+5. Click **Save changes**. 
+    * *Note: Changes take effect immediately for all users assigned to this role.*
 
-To edit a role:
+#### Workflow: Delete a Custom Role
+* Only **custom roles** can be deleted.
+* A role cannot be deleted if it currently has active users assigned to it.
 
-1. Navigate to User Management
-2. Select an organisation
-3. Go to the **Roles** section
-4. Select a role and click **Edit** button
-5. Update role details(name,description or permission)
-6. Click **Save changes** button
+### 2. User Groups
 
-Changes take effect immediately for users assigned to the role.
+#### What is a User Group?
+A User Group is a functional or departmental unit used to organize users within an organisation.
 
-**Deleting a Role**
+* An organisation can have multiple user groups.
+* A user group belongs exclusively to one organisation.
+* User group names must be unique within the organisation.
 
--Only **custom roles** can be deleted
--Roles with assigned users can not be deleted
+#### Workflow: Create a User Group
+1. Navigate to **User Management** and select the target organisation.
+2. Go to the **User Groups** section.
+3. Click the **Create user group** button to open the form.
+4. Enter the user group name.
+5. Click **Save**. The group will appear in the user groups table.
 
-**Permissions Mapping**
-Permissions determine which features and actions are available to users assigned to a role.
-When creating or editing a role, permissions are displayed as a checklist.
+#### Workflow: Edit a User Group
+1. Navigate to **User Management** and select the target organisation.
+2. Go to the **User Groups** section.
+3. Locate the target user group and click the **Edit** button.
+4. Update the name and click **Save changes**.
 
-Examples of permissions include:
+### 3. User Assignment Workflow
 
-- Activate users
-- Add organization groups
-- Assign role permissions
-- Assign users to departments
+#### Assigning Users to a User Group
+1. Navigate to **User Management** and select the target organisation.
+2. Go to the **Users** section.
+3. Select one or multiple user(s) using the checkboxes.
+4. Click the **Actions** button to open the action menu.
+5. Select **Add to department** to open the **Add user to user group** form.
+6. Select the target user group(s) from the list.
+7. Click the **Add** button.
 
-A role can have multiple permissions, and a permission can belong to multiple roles.
+##### Validations:
+* The performing user must have explicit permission to assign users to groups.
 
-**Work Group (User Group)**
+### 4. System Logic: How Roles vs. Groups Affect Access
 
-- A work group is used to organise users within an organisation.
-- Each organisation can have multiple work groups.
-- Work group names must be unique within the organisation.
-- A work group belongs to only one organisation.
+Roles and User Groups serve distinct architectural purposes:
 
-**Creating a Work Group**
-
-1. Navigate to **User Management**
-2. Select an organisation
-3. Go to **User Groups** section
-4. Click  **Create user group** button to open **Add User Group** form
-5. Fill in the user group name in the form.
-6. Click **Save**
-7. Newly added user group will show in the table for user groups
-
-**Editing a Work Group**
-
-To edit a work group:
-
-1. Navigate to **User Management**
-2. Select an organisation
-3. Go to **User Groups** section
-4. Select a user group and click **Edit** button to open **Edit User Group** form
-5. Update and click **Save changes** button
-
-**Assign Users to Work Group**
-
-1. Navigate to **User Management**
-2. Select an organisation
-3. Go to **Users** section
-4. Select user(s)
-5. Click **Actions** button to open the action menu
-6. Select **Add to department** from the actions menu to open **Add users to user groups** form.
-7. In the form,select department(s)
-8. Click **Add** button
-
-**Validation**
-
-- The current user must have a permission to assign users to user groups.
-
-**How Roles and Work Groups affect Access**
-
-Roles and work groups serve different purposes.
-
-**Roles**
-
-Roles determine **what a user is allowed to do**
-
-A role contains a collection of permissions that control access to features and actions.
-
-For example, a role may allow a user to:
-
-- Create users
-- Create work codes
-- Delete users
-
-Changing the permissions assigned to a role immediately affects every user with that role.
-
-**Work Groups**
-
-- Work groups are used to organise users within an organisation.
-- A user may belong to multiple work groups.
-- Work groups themselves do not grant application permissions. Instead, they are used for grouping users and may be associated with organisation access codes where applicable.
-
+| Feature | Primary Purpose | Impact on Access / Permissions | Scalability |
+| :--- | :--- | :--- | :--- |
+| **Roles** | Dictates **what** actions a user can do. | **Directly grants functional privileges.** Controls access to specific system features. | Changes to a role immediately update permissions for all assigned users. |
+| **User Groups** | Dictates **who** belongs together structurally. | **Does not grant application permissions.** Used strictly for logical grouping, organisational structure, or mapping to organisation access/work codes. | A user can belong to multiple groups simultaneously without affecting their functional capabilities. |
