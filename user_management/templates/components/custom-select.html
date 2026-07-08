@@ -15,6 +15,7 @@
         <i class="bi bi-chevron-down"></i>
     </button>
     <div class="um-select-menu" data-um-select-menu>
+        {% if not hide_search %}
         <input
             class="form-control"
             type="text"
@@ -22,6 +23,7 @@
             aria-label="{{ search_placeholder|default:'Search...' }}"
             data-um-select-filter
         />
+        {% endif %}
         <div class="um-select-options" data-um-select-options></div>
         <div class="um-select-empty d-none" data-um-select-empty>
             {{ no_results_text|default:'No results found.' }}

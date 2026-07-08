@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 from django.db.models import Q
 
-from users.models import User, UserInvitations
+from users.models import User
 
 from user_management.services.organization import OrganizationService
 from user_management.roles import add_default_org_roles, apply_role_to_user
@@ -12,6 +12,14 @@ from user_management.utils import (
     is_org_group_admin,
     is_super_or_58_admin,
 )
+
+USER_GROUP_FILTER_OPTIONS = [
+    {"value": "58_admin", "label": "Fifty Eight Administrator"},
+    {"value": "org_group_admin", "label": "Organisation Group Administrator"},
+    {"value": "org_admin", "label": "Organisation Administrator"},
+    {"value": "org_staff", "label": "Organisation Staff"},
+    {"value": "worker", "label": "Worker"},
+]
 
 
 def assign_default_app_registration_membership(user, organisation):
@@ -52,17 +60,39 @@ def filter_users_query(queryset, query=""):
     )
 
 
+def filter_users_status(queryset, status=""):
+    if not status:
+        return queryset
+    if status == "active":
+        return queryset.filter(is_active=True)
+    if status == "inactive":
+        return queryset.filter(is_active=False)
+    return queryset
+
+
+def filter_users_role(queryset, role="", selected_org=None):
+    if not role:
+        return queryset
+    if selected_org:
+        if not str(role).isdigit():
+            return queryset.none()
+        return queryset.filter(
+            org_roles__organisation=selected_org,
+            org_roles__role_id=role,
+        ).distinct()
+    return queryset.filter(groups__name=role).distinct()
+
+
+def filter_users_work_group(queryset, work_group_id=""):
+    if not work_group_id:
+        return queryset
+    return queryset.filter(work_groups__id=work_group_id).distinct()
+
+
 def decorate_users_for_listing(users, selected_org=None):
     users = list(users)
     if not users:
         return users
-
-    pending_invitation_user_ids = set(
-        UserInvitations.objects.filter(
-            user_id__in=[user.id for user in users],
-            status__in=["SENT", "PENDING"],
-        ).values_list("user_id", flat=True)
-    )
 
     for user in users:
         user.role_display = get_user_role_display(user, selected_org=selected_org)
@@ -72,12 +102,23 @@ def decorate_users_for_listing(users, selected_org=None):
             else ", ".join(org.name for org in user.organisation_data.all()) or "—"
         )
         user.hide_organisation_information = is_super_or_58_admin(user)
-        user.has_pending_invitation = user.id in pending_invitation_user_ids
 
     return users
 
 
-def get_paginated_users_context(current_user, selected_org=None, query="", page_number=None):
+def get_paginated_users_context(
+    current_user,
+    selected_org=None,
+    query="",
+    page_number=None,
+    filters=None,
+):
+    filters = filters or {}
+    organisation_id = (filters.get("organisation_id") or "").strip()
+    status = (filters.get("status") or "").strip()
+    role = (filters.get("role") or "").strip()
+    work_group_id = (filters.get("work_group_id") or "").strip()
+
     queryset = (
         User.objects.prefetch_related(
             "groups",
@@ -91,13 +132,23 @@ def get_paginated_users_context(current_user, selected_org=None, query="", page_
         .distinct()
     )
 
-    if selected_org:
-        queryset = queryset.filter(organisation_data=selected_org)
-
+    allowed_orgs = None
     if is_org_admin_or_staff(current_user):
         allowed_orgs = OrganizationService.get_allowed_orgs(current_user)
         queryset = queryset.filter(organisation_data__in=allowed_orgs).distinct()
 
+    if selected_org:
+        queryset = queryset.filter(organisation_data=selected_org)
+    elif organisation_id:
+        if allowed_orgs is None:
+            allowed_orgs = OrganizationService.get_allowed_orgs(current_user)
+        queryset = queryset.filter(
+            organisation_data__in=allowed_orgs.filter(id=organisation_id)
+        ).distinct()
+
+    queryset = filter_users_status(queryset, status=status)
+    queryset = filter_users_role(queryset, role=role, selected_org=selected_org)
+    queryset = filter_users_work_group(queryset, work_group_id=work_group_id)
     queryset = filter_users_query(queryset, query)
     paginator = Paginator(queryset, 20)
     users_page = paginator.get_page(page_number)

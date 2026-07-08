@@ -25,9 +25,9 @@ DOC_PAGES = {
         "title": "Organisation Workflow",
         "path": DOCS_ROOT / "user-management" / "organisation-workflow.md",
     },
-    ("user-management", "model-relationships"): {
-        "title": "Entity  Relationships",
-        "path": DOCS_ROOT / "user-management" / "model-relationships.md",
+    ("user-management", "entity-relationships"): {
+        "title": "Entity Relationships",
+        "path": DOCS_ROOT / "user-management" / "entity-relationships.md",
     },
     ("user-management", "qa-guide"): {
         "title": "QA Guide",
