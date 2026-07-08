@@ -31,6 +31,7 @@ from ..forms import (
     EditOrganizationGroupForm,
     OrganisationDeepLinkForm,
     OrganisationRoleForm,
+    UsersFilterForm,
     WorkCodeAssignForm,
     WorkGroupForm,
     UsersWorkGroupAssignForm,
@@ -46,7 +47,11 @@ from ..models import (
 )
 from ..roles import add_default_org_roles, apply_role_to_user
 from ..services.organization import OrganizationService
-from ..services.user import get_paginated_users_context, get_user_role_display
+from ..services.user import (
+    USER_GROUP_FILTER_OPTIONS,
+    get_paginated_users_context,
+    get_user_role_display,
+)
 from ..permissions import is_flag_active
 from ..utils import (
     get_active_role,
@@ -57,7 +62,7 @@ from ..utils import (
     is_super_or_58_admin,
     is_org_staff,
 )
-from users.models import User, UserInvitations
+from users.models import User
 from content.services.partner_configurations import (
     add_partner_configuration_to_cms,
     delete_partner_configuration_from_cms,
@@ -167,6 +172,8 @@ def user_management(request):
         "assigned_work_codes": assigned_work_codes,
         "selected_org_id": selected_org_id,
         "selected_org_name": selected_org_name,
+        "organizations": organizations,
+        "user_group_filter_options": USER_GROUP_FILTER_OPTIONS,
         "allowed_organization_group": allowed_group,
         "org_details": org_details,
         "org_languages": org_languages,
@@ -176,6 +183,17 @@ def user_management(request):
         "work_group_form": WorkGroupForm(),
         "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
         "dashboard_user_form": DashboardUserForm(orgs_qs=organizations),
+        "users_filter_form": UsersFilterForm(
+            role_options=(
+                [
+                    {"value": role.id, "label": role.name}
+                    for role in roles
+                ]
+                if selected_org
+                else USER_GROUP_FILTER_OPTIONS
+            ),
+            work_groups=work_groups,
+        ),
         "assign_work_code_form": WorkCodeAssignForm(work_groups_qs=work_groups),
         "roles": roles,
         "deep_links": deep_links,
@@ -251,6 +269,12 @@ def search_users(request):
     user = request.user
     query = request.GET.get("q", "").strip()
     selected_org_id = request.GET.get("selected_org_id")
+    filters = {
+        "organisation_id": request.GET.get("organisation_id", "").strip(),
+        "status": request.GET.get("status", "").strip(),
+        "role": request.GET.get("role", "").strip(),
+        "work_group_id": request.GET.get("work_group_id", "").strip(),
+    }
     organisation = None
 
     if selected_org_id:
@@ -263,6 +287,7 @@ def search_users(request):
         selected_org=organisation,
         query=query,
         page_number=request.GET.get("page"),
+        filters=filters,
     )
 
     rows_html = render_to_string(
@@ -2007,11 +2032,6 @@ def user_details(request, user_id):
         
     user.role_display = get_user_role_display(user, selected_org=target_user_org)
     user.hide_organisation_information = is_super_or_58_admin(user)
-    user.has_pending_invitation = UserInvitations.objects.filter(
-        user=user,
-        status__in=["SENT", "PENDING"],
-    ).exists()
-
     if user.access_type == "dashboard":
         edit_user_modal_target = "#edit-dashboard-user-modal"
         if not is_super_or_58_admin(current_user):

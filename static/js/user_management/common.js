@@ -44,6 +44,288 @@
   window.storeSelectedOrganisation = storeSelectedOrganisation;
   window.getSelectedOrgData = getSelectedOrgData;
 
+  function createAsyncOrganisationPicker(root, config) {
+    config = config || {};
+    if (!root) {
+      return null;
+    }
+
+    const toggle = root.querySelector(config.toggleSelector);
+    const menu = root.querySelector(config.menuSelector);
+    const searchInput = root.querySelector(config.searchInputSelector);
+    const optionsContainer = root.querySelector(config.optionsContainerSelector);
+    const hiddenInput = root.querySelector(config.hiddenInputSelector);
+    const label = root.querySelector(config.labelSelector);
+    const searchUrl = root.getAttribute(config.urlAttribute || 'data-org-options-url') || '';
+    const placeholder =
+      root.getAttribute(config.placeholderAttribute || 'data-org-placeholder') ||
+      config.placeholder ||
+      'Select organisation';
+    const noResultsMessage = config.noResultsMessage || 'No organisations found.';
+    const loadErrorMessage = config.loadErrorMessage || 'Could not load organisations.';
+    const optionValueAttr = config.optionValueAttribute || 'data-async-org-value';
+    const optionLabelAttr = config.optionLabelAttribute || 'data-async-org-label';
+    const optionNameAttr = config.optionNameAttribute || 'data-async-org-name';
+    const optionCodeAttr = config.optionCodeAttribute || 'data-async-org-code';
+    const optionCreatedAtAttr =
+      config.optionCreatedAtAttribute || 'data-async-org-created-at';
+    const optionSelector = config.optionSelector || '[data-async-org-option]';
+    const emptyStateAttr = config.emptyStateAttribute || 'data-async-org-empty-state';
+    let controller = null;
+    let debounceTimer = null;
+    let hasLoaded = false;
+    let currentPage = 0;
+    let hasNextPage = true;
+    let isLoading = false;
+    let currentQuery = '';
+    let selectedId = root.getAttribute(config.initialIdAttribute || 'data-initial-org-id') || '';
+    let selectedLabel =
+      root.getAttribute(config.initialLabelAttribute || 'data-initial-org-label') || '';
+
+    if (
+      !toggle ||
+      !menu ||
+      !searchInput ||
+      !optionsContainer ||
+      !hiddenInput ||
+      !label ||
+      !searchUrl
+    ) {
+      return null;
+    }
+
+    function updateLabel(text) {
+      const displayText = text || placeholder;
+      label.textContent = displayText;
+      root.classList.toggle('is-placeholder', !text);
+    }
+
+    function closeMenu() {
+      root.classList.remove('is-open');
+      menu.classList.remove('is-open');
+      if (currentQuery) {
+        currentQuery = '';
+        currentPage = 0;
+        hasNextPage = true;
+        hasLoaded = false;
+      }
+      searchInput.value = '';
+    }
+
+    function renderEmptyState(message) {
+      optionsContainer.innerHTML =
+        '<div class="um-select-option text-muted" ' +
+        emptyStateAttr +
+        '>' +
+        message +
+        '</div>';
+    }
+
+    function getSelectedValue() {
+      return (hiddenInput.value || '').trim();
+    }
+
+    function syncSelectedState() {
+      const currentSelected = getSelectedValue();
+      optionsContainer.querySelectorAll(optionSelector).forEach(function (option) {
+        const isSelected = option.getAttribute(optionValueAttr) === currentSelected;
+        option.classList.toggle('is-selected', isSelected);
+      });
+    }
+
+    function buildOptionData(option) {
+      return {
+        id: option.getAttribute(optionValueAttr) || '',
+        label: option.getAttribute(optionLabelAttr) || '',
+        name: option.getAttribute(optionNameAttr) || '',
+        code: option.getAttribute(optionCodeAttr) || '',
+        created_at: option.getAttribute(optionCreatedAtAttr) || '',
+      };
+    }
+
+    function setValue(value, text, suppressChange) {
+      hiddenInput.value = value || '';
+      selectedId = value || '';
+      selectedLabel = text || '';
+      updateLabel(text || '');
+      syncSelectedState();
+      if (!suppressChange) {
+        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+
+    function handleSelection(option) {
+      const data = buildOptionData(option);
+      setValue(data.id, data.label, false);
+      if (config.onSelect) {
+        config.onSelect(data, api);
+      }
+      closeMenu();
+    }
+
+    function createOptionElement(org) {
+      const option = document.createElement('button');
+      const isSelected = selectedId && String(org.id) === String(selectedId);
+      option.type = 'button';
+      option.className = 'um-select-option' + (isSelected ? ' is-selected' : '');
+      option.setAttribute('data-async-org-option', '');
+      option.setAttribute(optionValueAttr, String(org.id));
+      option.setAttribute(optionLabelAttr, org.name || '');
+      option.setAttribute(optionNameAttr, org.name || '');
+      option.setAttribute(optionCodeAttr, org.org_code || '');
+      option.setAttribute(optionCreatedAtAttr, org.created_at || '');
+      option.textContent = org.name || '';
+      return option;
+    }
+
+    function renderOptions(items, append) {
+      if (!items.length) {
+        if (!append) {
+          renderEmptyState(noResultsMessage);
+        }
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      items.forEach(function (org) {
+        fragment.appendChild(createOptionElement(org));
+      });
+
+      if (append) {
+        const emptyState = optionsContainer.querySelector('[' + emptyStateAttr + ']');
+        if (emptyState) {
+          emptyState.remove();
+        }
+        optionsContainer.appendChild(fragment);
+      } else {
+        optionsContainer.innerHTML = '';
+        optionsContainer.appendChild(fragment);
+      }
+
+      syncSelectedState();
+    }
+
+    function loadOptions(page, append, query) {
+      currentQuery = query || '';
+      if (isLoading) {
+        return;
+      }
+      if (!append && controller) {
+        controller.abort();
+      }
+      controller = new AbortController();
+      isLoading = true;
+      const params = new URLSearchParams();
+      params.set('page', String(page || 1));
+      if (currentQuery) {
+        params.set('q', currentQuery);
+      }
+
+      fetch(searchUrl + '?' + params.toString(), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        signal: controller.signal,
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error('Organisation load failed');
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          renderOptions(data?.options || [], append);
+          currentPage = page || 1;
+          hasNextPage = Boolean(data?.has_next);
+          hasLoaded = true;
+        })
+        .catch(function (error) {
+          if (error.name === 'AbortError') {
+            return;
+          }
+          console.error(error);
+          if (!append) {
+            renderEmptyState(loadErrorMessage);
+          }
+        })
+        .finally(function () {
+          isLoading = false;
+        });
+    }
+
+    const api = {
+      getValue: getSelectedValue,
+      setValue: function (value, text, suppressChange) {
+        setValue(value, text, suppressChange);
+      },
+      clear: function (suppressChange) {
+        setValue('', '', suppressChange);
+        if (config.onClear) {
+          config.onClear(api);
+        }
+      },
+      close: closeMenu,
+      loadOptions: loadOptions,
+      root: root,
+      hiddenInput: hiddenInput,
+    };
+
+    toggle.addEventListener('click', function () {
+      const isOpen = !root.classList.contains('is-open');
+      root.classList.toggle('is-open', isOpen);
+      menu.classList.toggle('is-open', isOpen);
+
+        if (isOpen) {
+          searchInput.focus();
+          searchInput.select();
+          if (!hasLoaded) {
+            loadOptions(1, false, currentQuery);
+          }
+        } else {
+          searchInput.value = '';
+      }
+    });
+
+    searchInput.addEventListener('input', function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        currentPage = 0;
+        hasNextPage = true;
+        loadOptions(1, false, (searchInput.value || '').trim());
+      }, 250);
+    });
+
+    optionsContainer.addEventListener('scroll', function () {
+      if (!hasNextPage || isLoading) {
+        return;
+      }
+      const remaining =
+        optionsContainer.scrollHeight -
+        optionsContainer.scrollTop -
+        optionsContainer.clientHeight;
+      if (remaining <= 40) {
+        loadOptions(currentPage + 1, true, currentQuery);
+      }
+    });
+
+    optionsContainer.addEventListener('click', function (event) {
+      const option = event.target.closest(optionSelector);
+      if (!option || !optionsContainer.contains(option)) {
+        return;
+      }
+      handleSelection(option);
+    });
+
+    document.addEventListener('click', function (event) {
+      if (!root.contains(event.target)) {
+        closeMenu();
+      }
+    });
+
+    setValue(selectedId, selectedLabel, true);
+    return api;
+  }
+
+  window.createAsyncOrganisationPicker = createAsyncOrganisationPicker;
+
   function syncSelectedOrganization(formId, labelSelector) {
     if (window.isOrgAdminOrStaff) {
       return;

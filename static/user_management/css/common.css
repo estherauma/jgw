@@ -204,6 +204,79 @@ a.um-view-details-link:focus {
     gap: 10px;
     margin-bottom: 8px;
 }
+.um-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.um-filter-toggle.is-open,
+.um-filter-toggle.is-applied {
+    border-color: #24AACC !important;
+    color: #193560 !important;
+    background: #eef8fb !important;
+}
+.um-filter-toggle.is-applied:not(.is-open) {
+    box-shadow: 0 0 0 3px rgba(36, 170, 204, 0.12);
+}
+.um-filter-toggle-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.um-filter-toggle-icon svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+.um-filter-toggle-label {
+    line-height: 1;
+}
+.um-filter-toggle-count {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #24AACC;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.um-filters-panel {
+    border: 1px solid #d9e4f2;
+    background: linear-gradient(180deg, #f9fbfe 0%, #f4f8fc 100%);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 18px;
+}
+.um-filters-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+.um-filters-panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #193560;
+}
+
+.um-filters-panel-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.um-filters-panel-actions .um-btn {
+    min-width: auto;
+}
 .um-search {
     display: flex;
     align-items: center;
@@ -244,6 +317,18 @@ a.um-view-details-link:focus {
     border-color: #D7DEE8;
     color: #7A8799;
     cursor: not-allowed;
+}
+@media (max-width: 768px) {
+    .um-filters-panel-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .um-filters-panel-actions {
+        width: 100%;
+    }
+    .um-filters-panel-actions .um-btn {
+        flex: 1 1 auto;
+    }
 }
 .phone-field {
     display: flex;

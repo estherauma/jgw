@@ -581,12 +581,96 @@
     const url = input.getAttribute('data-user-search-url');
     const tbody = document.querySelector('[data-users-table-body]');
     const paginationContainer = document.querySelector('[data-users-pagination]');
+    const filtersContainer = document.querySelector('[data-users-filters]');
+    const filtersPanel = document.querySelector('[data-users-filters-panel]');
+    const filtersToggle = document.querySelector('[data-users-filters-toggle]');
+    const filtersClearButton = document.querySelector('[data-users-filters-clear]');
+    const filtersCloseButton = document.querySelector('[data-users-filters-close]');
+    const filtersCount = document.querySelector('[data-users-filters-count]');
     if (!url || !tbody || !paginationContainer) {
       return;
     }
+    if (filtersContainer && window.initUmSelects) {
+      window.initUmSelects(filtersContainer);
+    }
+    const organisationFilterController =
+      window.createAsyncOrganisationPicker &&
+      window.createAsyncOrganisationPicker(
+        document.querySelector('[data-user-filter-organisation-select]'),
+        {
+          toggleSelector: '[data-user-filter-organisation-toggle]',
+          menuSelector: '[data-user-filter-organisation-menu]',
+          searchInputSelector: '[data-user-filter-organisation-search]',
+          optionsContainerSelector: '[data-user-filter-organisation-options]',
+          hiddenInputSelector: '[data-user-filter-organisation]',
+          labelSelector: '[data-user-filter-organisation-label]',
+          placeholder: 'All organisations',
+        },
+      );
+    const selectedOrgId =
+      (filtersContainer?.getAttribute('data-selected-org-id') || '').trim();
     let debounceTimer = null;
     let controller = null;
     let currentPage = 1;
+
+    function getFilterValues() {
+      const statusFilter = document.querySelector('[data-user-filter-status]');
+      const roleFilter = document.querySelector('[data-user-filter-role]');
+      const workGroupFilter = document.querySelector(
+        '[data-user-filter-workgroup]',
+      );
+      return {
+        organisationId: organisationFilterController?.getValue() || '',
+        status: (statusFilter?.value || '').trim(),
+        role: (roleFilter?.value || '').trim(),
+        workGroupId: (workGroupFilter?.value || '').trim(),
+      };
+    }
+
+    function getAppliedFilterCount() {
+      const filters = getFilterValues();
+      return Object.values(filters).filter(Boolean).length;
+    }
+
+    function syncFilterUiState() {
+      const appliedCount = getAppliedFilterCount();
+      const panelIsOpen = !!filtersPanel && !filtersPanel.classList.contains('d-none');
+
+      if (filtersToggle) {
+        filtersToggle.setAttribute('aria-expanded', panelIsOpen ? 'true' : 'false');
+        filtersToggle.classList.toggle('is-open', panelIsOpen);
+        filtersToggle.classList.toggle('is-applied', appliedCount > 0);
+      }
+      if (filtersCount) {
+        filtersCount.textContent = String(appliedCount);
+        filtersCount.classList.toggle('d-none', appliedCount === 0);
+      }
+      if (filtersClearButton) {
+        filtersClearButton.disabled = appliedCount === 0;
+      }
+    }
+
+    function setFiltersPanelOpen(open) {
+      if (!filtersPanel) {
+        return;
+      }
+      filtersPanel.classList.toggle('d-none', !open);
+      syncFilterUiState();
+    }
+
+    function clearFilters() {
+      if (!filtersContainer) {
+        return;
+      }
+      organisationFilterController?.clear();
+      filtersContainer.querySelectorAll('select').forEach(function (select) {
+        select.value = '';
+        rebuildCustomSelectForField(select);
+      });
+      syncFilterUiState();
+      const value = (input.value || '').trim();
+      runSearch(value, 1);
+    }
 
     async function runSearch(value, page) {
       if (controller) {
@@ -597,13 +681,22 @@
       if (value) {
         params.set('q', value);
       }
-      var storedOrg = window.getSelectedOrgData
-        ? window.getSelectedOrgData()
-        : null;
-      const selectedOrgId = storedOrg?.id ? String(storedOrg.id) : '';
- 
+      const filters = getFilterValues();
+
       if (selectedOrgId) {
         params.set('selected_org_id', selectedOrgId);
+      }
+      if (!selectedOrgId && filters.organisationId) {
+        params.set('organisation_id', filters.organisationId);
+      }
+      if (filters.status) {
+        params.set('status', filters.status);
+      }
+      if (filters.role) {
+        params.set('role', filters.role);
+      }
+      if (selectedOrgId && filters.workGroupId) {
+        params.set('work_group_id', filters.workGroupId);
       }
       params.set('page', String(page || 1));
       try {
@@ -627,6 +720,7 @@
           updateDeactivateButtonState();
           updateActivateButtonState();
           updateInviteButtonState();
+          syncFilterUiState();
         }
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -644,6 +738,39 @@
       }, 250);
     });
 
+    if (filtersContainer) {
+      filtersContainer.addEventListener('change', function (event) {
+        if (
+          !event.target.closest('select') &&
+          !event.target.matches('[data-user-filter-organisation]')
+        ) {
+          return;
+        }
+        const value = (input.value || '').trim();
+        syncFilterUiState();
+        runSearch(value, 1);
+      });
+    }
+
+    if (filtersToggle) {
+      filtersToggle.addEventListener('click', function () {
+        const isOpen = !!filtersPanel && !filtersPanel.classList.contains('d-none');
+        setFiltersPanelOpen(!isOpen);
+      });
+    }
+
+    if (filtersCloseButton) {
+      filtersCloseButton.addEventListener('click', function () {
+        setFiltersPanelOpen(false);
+      });
+    }
+
+    if (filtersClearButton) {
+      filtersClearButton.addEventListener('click', function () {
+        clearFilters();
+      });
+    }
+
     paginationContainer.addEventListener('click', function (event) {
       const trigger = event.target.closest('[data-users-page-link]');
       if (!trigger || trigger.disabled) {
@@ -654,6 +781,8 @@
       const value = (input.value || '').trim();
       runSearch(value, requestedPage);
     });
+
+    syncFilterUiState();
   }
 
   function updateDeleteButton() {

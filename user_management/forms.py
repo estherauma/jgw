@@ -679,6 +679,56 @@ class DashboardUserForm(forms.ModelForm):
         return user
 
 
+class UsersFilterForm(forms.Form):
+    STATUS_CHOICES = [
+        ("", "All statuses"),
+        ("active", "Active"),
+        ("inactive", "Inactive"),
+    ]
+
+    organisation_id = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(
+            attrs={"data-user-filter-organisation": ""}
+        ),
+    )
+    status = forms.ChoiceField(
+        required=False,
+        choices=STATUS_CHOICES,
+        widget=forms.Select(
+            attrs={"class": "form-control um-input", "data-user-filter-status": ""}
+        ),
+    )
+    role = forms.ChoiceField(
+        required=False,
+        choices=[("", "All roles")],
+        widget=forms.Select(
+            attrs={"class": "form-control um-input", "data-user-filter-role": ""}
+        ),
+    )
+    work_group_id = forms.ChoiceField(
+        required=False,
+        choices=[("", "All user groups")],
+        widget=forms.Select(
+            attrs={"class": "form-control um-input", "data-user-filter-workgroup": ""}
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        role_options = kwargs.pop("role_options", None) or []
+        work_groups = kwargs.pop("work_groups", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["role"].choices = [("", "All roles")] + [
+            (str(option["value"]), option["label"]) for option in role_options
+        ]
+        self.fields["work_group_id"].choices = [("", "All user groups")]
+        if work_groups is not None:
+            self.fields["work_group_id"].choices += [
+                (str(group.id), group.name) for group in work_groups
+            ]
+
+
 class AppUserForm(forms.ModelForm):
     role = forms.ModelChoiceField(queryset=OrganisationRole.objects.none(), required=True)
     password = forms.CharField(widget=forms.PasswordInput, required=False)

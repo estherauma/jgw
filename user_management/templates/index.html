@@ -295,6 +295,21 @@
                         <span class="title-text um-navy">Users</span>
                     </div>
                     <div class="um-action gap-3">
+                        <button
+                            class="um-btn um-btn-outline um-filter-toggle"
+                            type="button"
+                            data-users-filters-toggle
+                            aria-expanded="false"
+                            aria-controls="users-filters-panel"
+                        >
+                            <span class="um-filter-toggle-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M4 6h16M7 12h10M10 18h4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+                                </svg>
+                            </span>
+                            <span class="um-filter-toggle-label">Filters</span>
+                            <span class="um-filter-toggle-count d-none" data-users-filters-count>0</span>
+                        </button>
                         <div class="dropdown um-actions-dropdown">
                             <button
                                 class="um-btn um-btn-outline dropdown-toggle"
@@ -379,6 +394,80 @@
                             data-user-search
                             data-user-search-url="{% url 'user_management:search_users' %}"
                         />
+                    </div>
+                </div>
+                <div
+                    class="um-filters-panel d-none mt-2"
+                    id="users-filters-panel"
+                    data-users-filters-panel
+                >
+                    <div class="um-filters-panel-header">
+                        <div>
+                            <h4 class="um-filters-panel-title">Filter users</h4>
+                        </div>
+                        <div class="um-filters-panel-actions">
+                            <button class="um-btn um-btn-outline um-btn-sm" type="button" data-users-filters-clear>
+                                Clear
+                            </button>
+                            <button class="um-btn um-btn-gray um-btn-sm" type="button" data-users-filters-close>
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row w-100 g-2" data-users-filters data-selected-org-id="{{ selected_org_id|default_if_none:'' }}">
+                        {% if not selected_org_id %}
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mb-0 w-100">
+                                <span>Organisation</span>
+                                <div
+                                    class="um-select is-placeholder"
+                                    data-user-filter-organisation-select
+                                    data-org-options-url="{% url 'user_management:organisation_search_options' %}"
+                                    data-user-filter-placeholder="All organisations"
+                                >
+                                    <button
+                                        class="um-select-toggle text-start"
+                                        type="button"
+                                        data-user-filter-organisation-toggle
+                                    >
+                                        <span data-user-filter-organisation-label>All organisations</span>
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                    <div class="um-select-menu" data-user-filter-organisation-menu>
+                                        <input
+                                            class="form-control"
+                                            type="text"
+                                            placeholder="Search organisation..."
+                                            aria-label="Search organisation"
+                                            data-user-filter-organisation-search
+                                        />
+                                        <div class="um-select-options" data-user-filter-organisation-options></div>
+                                    </div>
+                                    {{ users_filter_form.organisation_id }}
+                                </div>
+                            </label>
+                        </div>
+                        {% endif %}
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mb-0 w-100">
+                                <span>Status</span>
+                                {% include 'components/custom-select.html' with field=users_filter_form.status placeholder='All statuses' no_results_text='No statuses found.' hide_search=True %}
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-4 ">
+                            <label class="um-field form-group mb-0 w-100">
+                                <span>Role</span>
+                                {% include 'components/custom-select.html' with field=users_filter_form.role placeholder='All roles' search_placeholder='Search role...' no_results_text='No roles found.' %}
+                            </label>
+                        </div>
+                        {% if selected_org_id %}
+                        <div class="col-12 col-md-4">
+                            <label class="um-field form-group mb-0 w-100">
+                                <span>User group</span>
+                                {% include 'components/custom-select.html' with field=users_filter_form.work_group_id placeholder='All user groups' search_placeholder='Search user group...' no_results_text='No user groups found.' %}
+                            </label>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="um-table-scroll-wrapper um-table-scroll-wrapper-lg">
