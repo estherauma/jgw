@@ -306,7 +306,10 @@ def export_inline_question_data(request):
     user_orgs = get_user_organisations(request.user)
     organisations = [getattr(org, "name") for org in user_orgs]
 
-    apply_cc_rules = any(org_name in CC_INLINE_EXPORT_ORG_NAMES for org_name in organisations)
+    apply_cc_rules = (
+        not request.user.is_superuser
+        and any(org_name in CC_INLINE_EXPORT_ORG_NAMES for org_name in organisations)
+    )
     include_question_key = not apply_cc_rules
 
     if apply_cc_rules:
