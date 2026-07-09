@@ -320,3 +320,9 @@ MESSAGING_QUESTION_TEST_IDS = frozenset(
         "accessTrainingtest",
     }
 )
+
+CC_INLINE_EXPORT_ORG_NAMES = {
+    "CC-Flinders Lane",
+    "CC-Marina Bay Sands",
+    "CC-TW SKM Taipei",
+}

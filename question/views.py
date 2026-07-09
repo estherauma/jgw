@@ -10,7 +10,7 @@ import io
 import csv
 import json
 from openpyxl.styles import Alignment, Font, PatternFill
-from common.const.value_const import APPLICATION_POSSIBLE_START_DATE
+from common.const.value_const import APPLICATION_POSSIBLE_START_DATE, CC_INLINE_EXPORT_ORG_NAMES
 from common.utils.preferences import get_date_13_months_ago
 from common.utils.request import get_form_filter_params
 from core.filters import generic_filter_form_parser
@@ -258,12 +258,59 @@ def export_messaging_question_data(request):
     return response
 
 
+# Organisations that require the special inline export rules:
+# drop the "Question Key" column and keep only the most recent same-day response.
+
+def _dedupe_inline_responses_same_day(inline_data):
+    """
+    Remove duplicate inline question responses that happened on the same day,
+    keeping only the most recent response for each (device, question) per day.
+
+    Recency is determined by ``updated_at`` and falls back to ``created_at``.
+    """
+    def response_recency(record):
+        return record.get("updated_at") or record.get("created_at")
+
+    deduped = {}
+    for record in inline_data:
+        created_at = record.get("created_at")
+        if created_at and timezone.is_aware(created_at):
+            response_day = timezone.localtime(created_at).date()
+        elif created_at:
+            response_day = created_at.date()
+        else:
+            response_day = None
+
+        key = (record.get("device_id"), record.get("question_key"), response_day)
+
+        existing = deduped.get(key)
+        if existing is None:
+            deduped[key] = record
+            continue
+
+        new_ts = response_recency(record)
+        existing_ts = response_recency(existing)
+        if existing_ts is None or (new_ts is not None and new_ts > existing_ts):
+            deduped[key] = record
+
+    return list(deduped.values())
+
+
 def export_inline_question_data(request):
     form_filter_params = get_form_filter_params(request=request, form_class=InlineQuestionFilterForm)
     filters = form_filter_params["filters"]
     start_date = filters.get("start_date")
     end_date = filters.get("end_date")
     inline_data = get_all_inline_question_responses_data(**filters, current_user=request.user)
+
+    user_orgs = get_user_organisations(request.user)
+    organisations = [getattr(org, "name") for org in user_orgs]
+
+    apply_cc_rules = any(org_name in CC_INLINE_EXPORT_ORG_NAMES for org_name in organisations)
+    include_question_key = not apply_cc_rules
+
+    if apply_cc_rules:
+        inline_data = _dedupe_inline_responses_same_day(inline_data)
 
     wb = Workbook()
     ws = wb.active
@@ -284,10 +331,10 @@ def export_inline_question_data(request):
         "Organisation Sector",
         "Organisation",
         "Route",
-        "Question Key",
-        "Question",
-        "Response",
     ]
+    if include_question_key:
+        headers.append("Question Key")
+    headers.extend(["Question", "Response"])
 
     for idx, header in enumerate(headers, start=1):
         ws.cell(row=4, column=idx, value=header)
@@ -310,18 +357,23 @@ def export_inline_question_data(request):
         organisation_sector_value = data["organisation_sector"] if data["organisation_sector"] else None
         organisation_value = data["organisation"] if data["organisation"] else None
 
-        ws.cell(row=idx, column=1, value=created_at)
-        ws.cell(row=idx, column=2, value=updated_at)
-        ws.cell(row=idx, column=3, value=data["device_id"])
-        ws.cell(row=idx, column=4, value=language_value)
-        ws.cell(row=idx, column=5, value=origin_value)
-        ws.cell(row=idx, column=6, value=destination_value)
-        ws.cell(row=idx, column=7, value=organisation_sector_value)
-        ws.cell(row=idx, column=8, value=organisation_value)
-        ws.cell(row=idx, column=9, value=route_value)
-        ws.cell(row=idx, column=10, value=data["question_key"])
-        ws.cell(row=idx, column=11, value=data["title_text"])
-        ws.cell(row=idx, column=12, value=data["response"])
+        row_values = [
+            created_at,
+            updated_at,
+            data["device_id"],
+            language_value,
+            origin_value,
+            destination_value,
+            organisation_sector_value,
+            organisation_value,
+            route_value,
+        ]
+        if include_question_key:
+            row_values.append(data["question_key"])
+        row_values.extend([data["title_text"], data["response"]])
+
+        for col_idx, value in enumerate(row_values, start=1):
+            ws.cell(row=idx, column=col_idx, value=value)
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = "attachment; filename=inline_question_data.xlsx"
