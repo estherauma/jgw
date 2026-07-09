@@ -3,7 +3,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="um-modal-title um-navy" id="add-organisation-deep-link-title" data-deep-link-modal-title>{{ modal_title }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    data-bs-dismiss="modal"
+                    data-deep-link-close
+                    aria-label="Close"
+                >
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -64,7 +71,15 @@
                     </label>
                 </div>
                 <div class="um-modal-footer modal-footer">
-                    <button type="button" class="um-btn um-btn-gray" data-dismiss="modal">Cancel</button>
+                    <button
+                        type="button"
+                        class="um-btn um-btn-gray"
+                        data-dismiss="modal"
+                        data-bs-dismiss="modal"
+                        data-deep-link-close
+                    >
+                        Cancel
+                    </button>
                     <button type="submit" class="um-btn um-btn-lime px-4" data-deep-link-submit>{{ submit_label }}</button>
                 </div>
             </form>
