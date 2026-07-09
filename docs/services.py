@@ -33,9 +33,9 @@ DOC_PAGES = {
         "title": "QA Guide",
         "path": DOCS_ROOT / "user-management" / "qa-guide.md",
     },
-    ("user-management", "roles-and-user-groups"): {
-        "title": "Roles and User Groups",
-        "path": DOCS_ROOT / "user-management" / "roles-and-user-groups.md",
+    ("user-management", "user-groups"): {
+        "title": "User Groups",
+        "path": DOCS_ROOT / "user-management" / "user-groups.md",
     },
 }
 
