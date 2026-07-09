@@ -527,9 +527,41 @@
     });
   }
 
+  function initDeleteOrganisationDeepLink() {
+    $(document).on('click', '[data-delete-organisation-deep-link]', function () {
+      const deleteUrl = this.dataset.deleteUrl || '';
+      const title = this.dataset.deepLinkTitle || 'Organisation link';
+
+      if (!deleteUrl || !window.showDeleteConfirm) {
+        return;
+      }
+
+      window.showDeleteConfirm({
+        title: 'Delete link',
+        message:
+          'Are you sure you want to delete <strong>' + title + '</strong>?',
+        warning: 'This action can not be reversed.',
+        url: deleteUrl,
+        method: 'POST',
+        showFullScreenLoader: true,
+        onSuccess: function (data) {
+          const orgId = data?.org_id || '';
+          if (orgId) {
+            const homeUrl = window.location.pathname;
+            window.location.href =
+              homeUrl + '?selected_org_id=' + encodeURIComponent(orgId);
+            return;
+          }
+          window.location.reload();
+        },
+      });
+    });
+  }
+
   window.addEventListener('load', function () {
     initGenerateWorkCodeLink();
     initOrganisationDeepLinkQrView();
     initOrganisationDeepLinkForm();
+    initDeleteOrganisationDeepLink();
   });
 })();

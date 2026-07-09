@@ -476,6 +476,25 @@ class OrganizationService:
         }
 
     @staticmethod
+    def delete_organisation_deep_link(*, organisation, deep_link_id):
+        deep_link = OrganisationDeepLink.objects.filter(
+            id=deep_link_id,
+            organisation=organisation,
+        ).first()
+        if not deep_link:
+            raise ValueError("Deep link not found.")
+
+        if deep_link.link:
+            DeepLinkService.delete_branch_deep_link(branch_url=deep_link.link)
+
+        deep_link_title = deep_link.title
+        deep_link.delete()
+        return {
+            "org_id": organisation.id,
+            "title": deep_link_title,
+        }
+
+    @staticmethod
     def get_ungrouped_organizations(user):
         access_code_exists = OrganisationAccessCode.objects.filter(
             organisation_id=OuterRef("pk")
