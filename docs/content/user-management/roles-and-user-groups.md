@@ -46,7 +46,7 @@ Permissions determine the exact features and actions available to a role. They a
 
 #### Workflow: Delete a Custom Role
 * Only **custom roles** can be deleted.
-* A role cannot be deleted if it currently has active users assigned to it.
+* A role cannot be deleted if it currently has users assigned to it.
 
 ### 2. User Groups
 
@@ -77,12 +77,12 @@ A User Group is a functional or departmental unit used to organize users within 
 2. Go to the **Users** section.
 3. Select one or multiple user(s) using the checkboxes.
 4. Click the **Actions** button to open the action menu.
-5. Select **Add to department** to open the **Add user to user group** form.
+5. Select **Add to department** to open the **Add users to user group** form.
 6. Select the target user group(s) from the list.
 7. Click the **Add** button.
 
 ##### Validations:
-* The performing user must have explicit permission to assign users to groups.
+* The performing user must have the **Assign users to departments** permission to assign users to user groups.
 
 ### 4. System Logic: How Roles vs. Groups Affect Access
 
