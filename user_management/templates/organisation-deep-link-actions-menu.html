@@ -1,3 +1,5 @@
+{% load um_waffle_flags %}
+{% flag 'can_create_login_qr_code' %}
 <button
     class="dropdown-item um-actions-item"
     type="button"
@@ -7,6 +9,7 @@
 >
     Edit
 </button>
+{% endflag %}
 <button
     class="dropdown-item um-actions-item"
     type="button"
@@ -18,6 +21,7 @@
 >
     QR code
 </button>
+{% flag 'can_create_login_qr_code' %}
 <button
     class="dropdown-item um-actions-item text-danger"
     type="button"
@@ -28,3 +32,4 @@
 >
     Delete
 </button>
+{% endflag %}
