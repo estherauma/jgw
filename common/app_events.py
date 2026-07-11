@@ -106,6 +106,7 @@ class AppEvents(BaseAnalytics):
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'deviceId') AS deviceId,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'appId') AS appId,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'organisation') AS organisation,
+                (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'organisationCode') AS organisationCode,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'locale') AS locale,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destinationState') AS destinationState,
                 (SELECT value.string_value FROM UNNEST(event_params) AS param WHERE param.key = 'destination') AS destination,
