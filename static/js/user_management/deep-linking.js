@@ -482,6 +482,13 @@
       });
     }
 
+    $(document).on('click', '[data-deep-link-close]', function () {
+      if (!modal) {
+        return;
+      }
+      $(modal).modal('hide');
+    });
+
     $('[data-create-organisation-deep-link]').on('click', function () {
       initCustomFormSelects();
       resetForm();

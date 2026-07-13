@@ -71,6 +71,8 @@ This section displays all organisations in the system.
 3. Click **Save**.
 4. The new organization is added to the Organisations table.
 
+For the organisation data structure behind this flow, see [Entity Relationships](../entity-relationships/).
+
 ##### Edit Organisation
 
 Only `58_admin` users and superusers can access this section.
@@ -111,3 +113,7 @@ This section displays users based on the selected organisation and the current u
 ### Related Docs
 
 - [User Management Overview](../overview/)
+- [Roles and Permissions](../roles-and-permissions/)
+- [Entity Relationships](../entity-relationships/)
+- [QR Codes](../qr-codes/)
+- [QA Guide](../qa-guide/)

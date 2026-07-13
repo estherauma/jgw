@@ -65,6 +65,8 @@ Important implementation detail:
 
 - When an organisation is created, it is synced to the Strapi CMS partner configuration data.
 
+For the full organisation page flow, see [Organisation Workflow](../organisation-workflow/).
+
 #### Organisation Groups
 
 Organisation groups are used to manage collections of organisations together.
@@ -77,6 +79,8 @@ This section is used to:
 - Remove organisations from a group
 
 Organisation groups are especially important where administration happens across multiple organisations instead of only one.
+
+For the data relationships behind organisation grouping, see [Entity Relationships](../entity-relationships/).
 
 #### Selected Organisation
 
@@ -134,6 +138,8 @@ This section supports:
 
 These permissions are then used by the application to determine which actions a user can perform.
 
+For the full roles and permissions model, see [Roles and Permissions](../roles-and-permissions/).
+
 #### Organisation Deep Links
 
 Organisation deep links are onboarding links created for an organisation.
@@ -145,6 +151,8 @@ This section supports:
 - Creating onboarding deep links
 - Editing existing deep links
 - Viewing a QR code for a saved deep link
+
+For more details about QR-code creation and storage, see [QR Codes](../qr-codes/).
 
 
 #### Users
@@ -167,3 +175,13 @@ At a high level:
 - Superusers and `58_admin` users have the broadest visibility
 - Organisation admins and organisation staff are restricted to the organisations they can access
 - Certain actions are protected by specific permission flags
+
+For the detailed permission model, see [Roles and Permissions](../roles-and-permissions/).
+
+### Related Docs
+
+- [Organisation Workflow](../organisation-workflow/)
+- [Roles and Permissions](../roles-and-permissions/)
+- [Entity Relationships](../entity-relationships/)
+- [QR Codes](../qr-codes/)
+- [QA Guide](../qa-guide/)
