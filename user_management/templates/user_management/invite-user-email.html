@@ -9,9 +9,18 @@
     {% if organisation_name %}
     <p>You have been added to {{ organisation_name }}.</p>
     {% endif %}
+    {% if temporary_password %}
+    <p>Use this temporary password to sign in to the Just Good Work mobile app:</p>
+    <p><strong>{{ temporary_password }}</strong></p>
+    <p>
+      It expires in {{ temporary_password_expiry_days }} days.
+    </p>
+    <p>You will be asked to change this password the first time you sign in.</p>
+    {% else %}
     <p>Use this link to set your password and finish setup:</p>
     <p><a href="{{ reset_link }}">Set your password</a></p>
     <p>This link expires in 3 days.</p>
+    {% endif %}
     <p>Thanks,</p>
     <p>JGW team</p>
     <hr />

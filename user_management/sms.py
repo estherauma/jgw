@@ -40,9 +40,12 @@ def send_sms_invitation(user, context, days_to_expiry=3):
             else ""
         )
         message = (
-            f"{org_text} Click the link to set your password and finish setup: {context['short_link']} "
-            f"This link expires in {days_to_expiry} days."
+            f"Just Good Work: {org_text}Use this temporary password to sign in to the Just Good Work app: "
+            f"{context['temporary_password']}. It expires in "
+            f"{context['temporary_password_expiry_days']} days. "
+            f"You must change it the first time you sign in."
         )
+ 
         logger.info("Sending SMS to %s: %s", user.phone_number, message)
         return send_sms(user.phone_number, message)
     except Exception as exc:

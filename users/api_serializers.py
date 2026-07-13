@@ -43,8 +43,11 @@ class LoginRequestSerializer(serializers.Serializer):
 
 class LoginResponseSerializer(serializers.Serializer):
     ok = serializers.BooleanField(default=True)
-    access_token = serializers.CharField()
-    refresh_token = serializers.CharField()
+    access_token = serializers.CharField(required=False, allow_blank=True)
+    refresh_token = serializers.CharField(required=False, allow_blank=True)
+    requires_password_reset = serializers.BooleanField(required=False, default=False)
+    has_expired_temporary_password = serializers.BooleanField(required=False, default=False)
+    password_reset_token = serializers.CharField(required=False, allow_blank=True)
 
 
 class RefreshTokenRequestSerializer(serializers.Serializer):
@@ -94,6 +97,17 @@ class PasswordResetResetRequestSerializer(serializers.Serializer):
 class PasswordResetResetResponseSerializer(serializers.Serializer):
     ok = serializers.BooleanField(default=True)
     user_id = serializers.IntegerField()
+
+
+class PasswordResetTokenResetRequestSerializer(serializers.Serializer):
+    password_reset_token = serializers.CharField()
+    password = serializers.CharField()
+
+
+class PasswordResetTokenResetResponseSerializer(serializers.Serializer):
+    ok = serializers.BooleanField(default=True)
+    access_token = serializers.CharField()
+    refresh_token = serializers.CharField()
 
 
 class AccessCodeSummarySerializer(serializers.Serializer):

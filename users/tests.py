@@ -645,7 +645,7 @@ class RegistrationApiTests(TestCase):
         self.assertEqual(response.json()["phone_country_iso"], "UG")
         send_sms_mock.assert_called_once_with(
             user,
-            "Your Just Good Work verification code is ZX12CV. It expires in 15 minutes.",
+            "Just Good Work: Your verification code is ZX12CV. It expires in 15 minutes.",
         )
 
     def test_resend_registration_code_requires_identifier(self):
@@ -754,6 +754,101 @@ class LoginApiTests(AuthTests):
         self.assertTrue(response.json()["refresh_token"])
         phone_user.refresh_from_db()
         self.assertIsNotNone(phone_user.last_login)
+
+    def test_login_api_returns_password_reset_token_for_temporary_password_user(self):
+        app_user = User.objects.create_user(
+            email="temp-user@example.com",
+            password="TempPassword123!",
+            is_active=True,
+            access_type="app",
+            has_temporary_password=True,
+            temporary_password_expires_at=datetime.now(tz=timezone.utc) + timedelta(days=7),
+        )
+
+        response = self.client.post(
+            reverse("users_api:login_api"),
+            data={
+                "email": "temp-user@example.com",
+                "password": "TempPassword123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "requires_password_reset": True,
+                "password_reset_token": response.json()["password_reset_token"],
+            },
+        )
+        self.assertTrue(response.json()["password_reset_token"])
+        app_user.refresh_from_db()
+        self.assertIsNone(app_user.last_login)
+
+    def test_login_api_returns_expired_temporary_password_flag(self):
+        app_user = User.objects.create_user(
+            email="expired-temp-user@example.com",
+            password="TempPassword123!",
+            is_active=True,
+            access_type="app",
+            has_temporary_password=True,
+            temporary_password_expires_at=datetime.now(tz=timezone.utc) - timedelta(days=1),
+        )
+
+        response = self.client.post(
+            reverse("users_api:login_api"),
+            data={
+                "email": "expired-temp-user@example.com",
+                "password": "TempPassword123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "ok": True,
+                "has_expired_temporary_password": True,
+            },
+        )
+        app_user.refresh_from_db()
+        self.assertIsNone(app_user.last_login)
+
+    def test_password_reset_token_api_sets_password_and_returns_tokens(self):
+        app_user = User.objects.create_user(
+            email="temp-reset@example.com",
+            password="TempPassword123!",
+            is_active=True,
+            access_type="app",
+            has_temporary_password=True,
+            temporary_password_expires_at=datetime.now(tz=timezone.utc) + timedelta(days=7),
+        )
+        login_response = self.client.post(
+            reverse("users_api:login_api"),
+            data={
+                "email": "temp-reset@example.com",
+                "password": "TempPassword123!",
+            },
+        )
+
+        response = self.client.post(
+            reverse("users_api:password_reset_token_reset_api"),
+            data={
+                "password_reset_token": login_response.json()["password_reset_token"],
+                "password": "NewStrongPassword123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["ok"], True)
+        self.assertTrue(response.json()["access_token"])
+        self.assertTrue(response.json()["refresh_token"])
+        app_user.refresh_from_db()
+        self.assertFalse(app_user.has_temporary_password)
+        self.assertIsNone(app_user.temporary_password_expires_at)
+        self.assertTrue(app_user.check_password("NewStrongPassword123!"))
+        self.assertIsNotNone(app_user.last_login)
 
     def test_get_current_user_requires_authentication(self):
         response = self.client.get(
@@ -940,6 +1035,9 @@ class LoginApiTests(AuthTests):
         send_email_mock.assert_not_called()
 
     def test_password_reset_reset_api_resets_password(self):
+        self.user.has_temporary_password = True
+        self.user.temporary_password_expires_at = datetime.now(tz=timezone.utc) + timedelta(days=3)
+        self.user.save(update_fields=["has_temporary_password", "temporary_password_expires_at"])
         _, verification_code = create_user_verification_code(
             self.user,
             PASSWORD_RESET_VERIFICATION_PURPOSE,
@@ -958,6 +1056,8 @@ class LoginApiTests(AuthTests):
         self.assertEqual(response.json(), {"ok": True, "user_id": self.user.id})
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("NewStrongPassword123!"))
+        self.assertFalse(self.user.has_temporary_password)
+        self.assertIsNone(self.user.temporary_password_expires_at)
         self.assertFalse(
             UserVerificationCode.objects.filter(
                 user=self.user,
@@ -1101,6 +1201,9 @@ class LoginApiTests(AuthTests):
         send_email_mock.assert_not_called()
 
     def test_set_password_OK(self):
+        self.test_user.has_temporary_password = True
+        self.test_user.temporary_password_expires_at = datetime.now(tz=timezone.utc) + timedelta(days=3)
+        self.test_user.save(update_fields=["has_temporary_password", "temporary_password_expires_at"])
         response = self.client.post(
             reverse("users:set_password", args=(self.pword_reset_token,)),
             {
@@ -1110,6 +1213,9 @@ class LoginApiTests(AuthTests):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/email_sent.html")
+        self.test_user.refresh_from_db()
+        self.assertFalse(self.test_user.has_temporary_password)
+        self.assertIsNone(self.test_user.temporary_password_expires_at)
 
     @patch("users.tasks.send_email_notification.delay")
     def test_request_password_reset_OK(self, mock_send_email):
