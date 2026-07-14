@@ -1,12 +1,12 @@
 ## Work Codes Management Guide
 
 ### Purpose
-This page explains how to manage Work Codes within User Management, covering;
+This page explains how to manage Work Codes within User Management, covering:
 
-- Creation of work code, 
-- Assignment of work code, 
-- Un assignment of work code, 
-- Login QR code/deep link generation, 
+- Creation of work code
+- Assignment of work code
+- Unassignment of work code
+- Login QR code/deep link generation
 - Relationships.
 
 
@@ -37,7 +37,7 @@ This page explains how to manage Work Codes within User Management, covering;
 #### Generate a Login QR Code
 It's used to authenticate and log into the mobile application:
 
-1. Under the **Work Codes** section of of the selected organization, locate the target work code and click **Actions**.
+1. Under the **Work Codes** section of the selected organization, locate the target work code and click **Actions**.
 2. Select **QR code**. From here, you can scan the code, copy the login link, or download the QR code.
 
 #### Generate an Onboarding QR Code (Deep Links)
@@ -46,7 +46,7 @@ It's used to route users to specific onboarding flows:
 1. Go to the **Organisation QR Codes** section.
 2. Click **Create link**.
 3. Fill in the required fields and click **Save**.
-    * *Note: You can edit, download, or delete existing links directly from the actions menu in the table.*
+    - *Note: You can edit, download, or delete existing links directly from the actions menu in the table.*
 
 
 ### 3. Relationships
