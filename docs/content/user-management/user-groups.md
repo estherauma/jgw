@@ -65,12 +65,13 @@ The new user group is added to the user groups table.
 
 #### How User Groups Affect Access
 
-User groups are used only to organize users within an organisation. They do not grant permissions or control what users can do in the application.
+User groups are used to organise users within an organisation and to associate users with work codes. They do not grant dashboard access. However, because work codes can be assigned to user groups, group membership can affect which content a user can access in the mobile app.
 
-A user can belong to multiple user groups at the same time because user groups do not affect application permissions.
+#### Work Codes Integration
+User Groups are connected directly to **Work Codes** via a many-to-many relationship. This means a single user group can be linked to multiple work codes, and a work code can be shared across multiple user groups.
 
 ##### Permissions
 
-- To create a user group, the user performing the action must have the **Create departments** permission.
+- All organization administrators and organization staff who have the required permission can create a user group.
 - To assign users to user groups, the user performing the action must have the **Assign users to departments** permission.
 - To delete a user group, the user performing the action must have the **Delete departments** permission.
