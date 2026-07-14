@@ -4,11 +4,12 @@ import jwt
 from unittest.mock import patch
 from django.conf import settings
 from django.contrib.auth.models import Group
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from dashboard.models import Factory, Scheme
 from preference.models import OrganisationAccessCode, OrganisationData
+from user_management.invitations import send_invitation
 from user_management.models import WorkGroup
 from users.services.authentication import (
     PASSWORD_RESET_VERIFICATION_PURPOSE,
@@ -963,7 +964,6 @@ class LoginApiTests(AuthTests):
         self.assertEqual(refresh_response.json()["ok"], True)
         self.assertIn("access_token", refresh_response.json())
         self.assertIn("refresh_token", refresh_response.json())
-        self.assertEqual(refresh_response.json()["user_id"], self.user.id)
 
     def test_refresh_token_api_rejects_invalid_token(self):
         response = self.client.post(
@@ -1216,6 +1216,36 @@ class LoginApiTests(AuthTests):
         self.test_user.refresh_from_db()
         self.assertFalse(self.test_user.has_temporary_password)
         self.assertIsNone(self.test_user.temporary_password_expires_at)
+
+    @patch("user_management.invitations.send_email_notification")
+    @patch(
+        "user_management.invitations.generate_temporary_password",
+        return_value=("TempPass123", datetime.now(tz=timezone.utc) + timedelta(days=3)),
+    )
+    def test_send_invitation_generates_temp_password_when_missing(self, _temp_password_mock, send_email_mock):
+        request = RequestFactory().get("/")
+        organisation = OrganisationData.objects.create(
+            name="Invite Org",
+            org_code="INVORG",
+            display_name="Invite Org",
+        )
+        user = User.objects.create(
+            email="bulk-invite@example.com",
+            access_type="app",
+        )
+        user.organisation_data.add(organisation)
+
+        invited = send_invitation(request, user)
+
+        self.assertTrue(invited)
+        user.refresh_from_db()
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.has_temporary_password)
+        self.assertTrue(user.check_password("TempPass123"))
+        self.assertIsNotNone(user.temporary_password_expires_at)
+        html_message = send_email_mock.call_args.kwargs["html_message"]
+        self.assertIn("TempPass123", html_message)
+        self.assertNotIn(">None<", html_message)
 
     @patch("users.tasks.send_email_notification.delay")
     def test_request_password_reset_OK(self, mock_send_email):

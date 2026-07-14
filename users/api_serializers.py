@@ -58,7 +58,6 @@ class RefreshTokenResponseSerializer(serializers.Serializer):
     ok = serializers.BooleanField(default=True)
     access_token = serializers.CharField()
     refresh_token = serializers.CharField()
-    user_id = serializers.IntegerField()
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):

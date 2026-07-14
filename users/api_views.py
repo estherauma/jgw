@@ -319,7 +319,6 @@ class LoginApiView(APIView):
                 "ok": True,
                 "access_token": tokens["access_token"],
                 "refresh_token": tokens["refresh_token"],
-                "user_id": result["user"].id,
             },
             status=status.HTTP_200_OK,
         )
@@ -372,7 +371,6 @@ class RefreshTokenApiView(APIView):
                 "ok": True,
                 "access_token": tokens["access_token"],
                 "refresh_token": tokens["refresh_token"],
-                "user_id": user.id,
             },
             status=status.HTTP_200_OK,
         )

@@ -13,6 +13,7 @@ from django.utils.html import strip_tags
 from users.tasks import send_email_notification
 from users.services.authentication import (
     TEMPORARY_PASSWORD_EXPIRY_DAYS,
+    generate_temporary_password,
 )
 from .sms import send_sms_invitation
 
@@ -56,7 +57,10 @@ def build_invitation_context(
     )
 
     if user.access_type == "app":
-        temporary_password_expires_at = user.temporary_password_expires_at
+        if temporary_password is None:
+            temporary_password, temporary_password_expires_at = generate_temporary_password()
+        else:
+            temporary_password_expires_at = user.temporary_password_expires_at
         user.set_password(temporary_password)
         user.has_temporary_password = True
         user.is_active = True
