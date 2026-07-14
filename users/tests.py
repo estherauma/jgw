@@ -15,6 +15,7 @@ from users.services.authentication import (
     PASSWORD_RESET_VERIFICATION_PURPOSE,
     REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
     create_user_verification_code,
+    generate_temporary_password,
 )
 
 from .forms import (
@@ -67,6 +68,12 @@ class AuthTests(TestCase):
         response = self.client.get(reverse("dashboard:inline"))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, "/accounts/login/?next=/inline")
+
+    def test_generate_temporary_password_defaults_to_8_characters(self):
+        temporary_password, expires_at = generate_temporary_password()
+
+        self.assertEqual(len(temporary_password), 8)
+        self.assertIsNotNone(expires_at)
 
     def test_signup_OK(self):
         response = self.client.post(

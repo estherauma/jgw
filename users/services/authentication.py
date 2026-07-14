@@ -41,7 +41,7 @@ def generate_registration_verification_code(length=6):
     )
 
 
-def generate_temporary_password(length=12):
+def generate_temporary_password(length=8):
     temporary_password = "".join(
         secrets.choice(NON_AMBIGUOUS_ALPHANUMERIC_ALPHABET) for _ in range(length)
     )
