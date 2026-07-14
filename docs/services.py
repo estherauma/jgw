@@ -41,6 +41,9 @@ DOC_PAGES = {
     ("user-management", "work-codes"): {
         "title": "Work Codes",
         "path": DOCS_ROOT / "user-management" / "work-codes.md",
+    ("user-management", "user-groups"): {
+        "title": "User Groups",
+        "path": DOCS_ROOT / "user-management" / "user-groups.md",
     },
 }
 
