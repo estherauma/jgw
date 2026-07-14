@@ -131,6 +131,38 @@ class DeepLinkServiceTests(TestCase):
             timeout=30,
         )
 
+    @override_settings(
+        BRANCH_KEY="branch-key",
+        BRANCH_SECRET="branch-secret",
+        BRANCH_LINK_DOMAIN=TEST_BRANCH_DOMAIN,
+        BRANCH_APP_ID="branch-app-id",
+        BRANCH_ACCESS_TOKEN="branch-access-token",
+    )
+    @patch("user_management.services.deep_links.requests.delete")
+    def test_delete_branch_deep_link_sends_url_as_query_param(
+        self, mock_delete
+    ):
+        mock_response = Mock()
+        mock_response.ok = True
+        mock_response.content = b'{}'
+        mock_response.json.return_value = {}
+        mock_delete.return_value = mock_response
+
+        response = DeepLinkService.delete_branch_deep_link(
+            branch_url="https://branch.example/onboarding",
+        )
+
+        self.assertEqual(response, {})
+        mock_delete.assert_called_once_with(
+            DeepLinkService.endpoint,
+            params={
+                "url": "https://branch.example/onboarding",
+                "app_id": "branch-app-id",
+            },
+            headers={"Access-Token": "branch-access-token"},
+            timeout=30,
+        )
+
 
     @patch("user_management.services.deep_links.DeepLinkService.create_qr_code")
     @patch("user_management.services.deep_links.DeepLinkService.create_branch_deep_link")
@@ -640,4 +672,74 @@ class DeepLinkDetailViewTests(TestCase):
                     "immigrationStatus": "worker",
                 },
             },
+        )
+
+
+class DeleteDeepLinkViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="deep-link-delete-user@example.com",
+            password="StrongPassword123!",
+            is_active=True,
+        )
+        self.superuser = User.objects.create_superuser(
+            email="deep-link-delete-admin@example.com",
+            password="StrongPassword123!",
+            is_active=True,
+        )
+        self.organisation = OrganisationData.objects.create(
+            name="Bar Way",
+            org_code="BARWAY",
+            display_name="Bar Way",
+            theme="default",
+            custom_type="version_1",
+            work_sector="Agriculture",
+            content_collection="bar-way",
+            default_collection_language="en",
+            default_feedback_emails="feedback@example.com",
+            default_report_issue_emails="report@example.com",
+            big_icon="https://cdn.example.com/big.png",
+            small_icon="https://cdn.example.com/small.png",
+        )
+        self.deep_link = OrganisationDeepLink.objects.create(
+            organisation=self.organisation,
+            title="Starter flow",
+            link_type="onboarding",
+            link="https://branch.example/onboarding",
+        )
+        self.url = reverse(
+            "user_management:delete_deep_link",
+            args=[self.deep_link.id],
+        )
+
+    @patch("user_management.services.deep_links.DeepLinkService.delete_branch_deep_link")
+    def test_deletes_branch_link_and_hard_deletes_local_record(
+        self, mock_delete_branch_deep_link
+    ):
+        self.client.force_login(self.superuser)
+        mock_delete_branch_deep_link.return_value = {}
+
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {"ok": True, "org_id": self.organisation.id},
+        )
+        self.assertFalse(
+            OrganisationDeepLink.all_objects.filter(id=self.deep_link.id).exists()
+        )
+        mock_delete_branch_deep_link.assert_called_once_with(
+            branch_url="https://branch.example/onboarding"
+        )
+
+    def test_returns_403_when_user_cannot_delete_deep_link(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            response.json(),
+            {"ok": False, "error": "You do not have access to this organisation."},
         )

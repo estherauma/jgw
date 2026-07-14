@@ -42,4 +42,5 @@ Admins can also create additional custom organisation roles.
 
 - [User Management Overview](../overview/)
 - [Organisation Workflow](../organisation-workflow/)
+- [QR Codes](../qr-codes/)
 - [QA Guide](../qa-guide/)

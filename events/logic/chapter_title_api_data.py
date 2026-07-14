@@ -120,7 +120,7 @@ def update_chapter_titles():
 
 
 def fetch_and_update_all_destiantion_chapter_titles():
-    destination_codes = ["JOR", "MYS", "MUS", "POL", "QAT", "ROU", "SAU", "ARE", "GBR", "ESP","MEX","JEY"]
+    destination_codes = ["JOR", "MYS", "MUS", "POL", "QAT", "ROU", "SAU", "ARE", "GBR", "ESP","MEX","JEY","USA","AUS","TWN","SGP"]
     api_data = fetch_data_from_api(destination_codes)
     if api_data:
         chapters_list = extract_relevant_data(api_data)
