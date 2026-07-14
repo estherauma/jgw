@@ -1,3 +1,5 @@
+{% load um_waffle_flags %}
+{% flag 'can_create_login_qr_code' %}
 <button
     class="dropdown-item um-actions-item"
     type="button"
@@ -7,6 +9,7 @@
 >
     Edit
 </button>
+{% endflag %}
 <button
     class="dropdown-item um-actions-item"
     type="button"
@@ -18,3 +21,15 @@
 >
     QR code
 </button>
+{% flag 'can_create_login_qr_code' %}
+<button
+    class="dropdown-item um-actions-item text-danger"
+    type="button"
+    role="menuitem"
+    data-delete-organisation-deep-link
+    data-delete-url="{% url 'user_management:delete_deep_link' deep_link.id %}"
+    data-deep-link-title="{{ deep_link.title|default:'Organisation link' }}"
+>
+    Delete
+</button>
+{% endflag %}

@@ -17,6 +17,8 @@ class DeepLinkService:
         branch_key = getattr(settings, "BRANCH_KEY", "").strip()
         branch_secret = getattr(settings, "BRANCH_SECRET", "").strip()
         branch_link_domain = getattr(settings, "BRANCH_LINK_DOMAIN", "").strip()
+        branch_app_id = getattr(settings, "BRANCH_APP_ID", "").strip()
+        branch_access_token = getattr(settings, "BRANCH_ACCESS_TOKEN", "").strip()
 
         if not branch_key:
             raise ValueError("BRANCH_KEY is not configured.")
@@ -27,6 +29,8 @@ class DeepLinkService:
             "branch_key": branch_key,
             "branch_secret": branch_secret,
             "branch_link_domain": branch_link_domain,
+            "branch_app_id": branch_app_id,
+            "branch_access_token": branch_access_token,
         }
 
     @staticmethod
@@ -135,6 +139,39 @@ class DeepLinkService:
             response_data = response.json()
         except Exception as exc:
             logger.error("Error updating Branch deep link: %s", exc, exc_info=True)
+            raise ValueError(f"Could not reach Branch: {exc}") from exc
+
+        if not response.ok:
+            raise ValueError(
+                response.text or f"Branch returned HTTP {response.status_code}."
+            )
+
+        return response_data
+
+    @classmethod
+    def delete_branch_deep_link(cls, *, branch_url):
+        branch_settings = cls.get_branch_settings()
+        branch_app_id = branch_settings["branch_app_id"]
+        branch_access_token = branch_settings["branch_access_token"]
+
+        if not branch_access_token or not branch_app_id:
+            raise ValueError("BRANCH_ACCESS_TOKEN or BRANCH_APP_ID is not configured.")
+
+        try:
+            response = requests.delete(
+                cls.endpoint,
+                params={
+                    "url": branch_url,
+                    "app_id": branch_app_id,
+                },
+                headers={
+                    "Access-Token": branch_access_token,
+                },
+                timeout=30,
+            )
+            response_data = response.json() if response.content else {}
+        except Exception as exc:
+            logger.error("Error deleting Branch deep link: %s", exc, exc_info=True)
             raise ValueError(f"Could not reach Branch: {exc}") from exc
 
         if not response.ok:
