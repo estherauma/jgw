@@ -22,7 +22,7 @@ from users.models import User, UserVerificationCode
 from users.tasks import send_email_notification
 
 
-ACCESS_TOKEN_MINUTES = 480
+ACCESS_TOKEN_MINUTES = 60
 REFRESH_TOKEN_DAYS = 30
 PASSWORD_RESET_VERIFICATION_PURPOSE = "password_reset"
 PASSWORD_RESET_GENERIC_MESSAGE = (
