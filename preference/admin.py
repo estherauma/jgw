@@ -218,6 +218,7 @@ class OrganisationDataAdmin(admin.ModelAdmin):
         "org_code",
         "display_name",
         "organization_group",
+        "is_deleted",
         "has_custom_content",
         "custom_type",
         "theme",
@@ -232,6 +233,17 @@ class OrganisationDataAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     ]
+    list_filter = [
+        "is_deleted",
+        "organization_group",
+        "has_custom_content",
+        "custom_type",
+        "theme",
+        "cms_sync_status",
+    ]
+
+    def get_queryset(self, request):
+        return OrganisationData.all_objects.all()
 
 
 @admin.register(OrganisationDeepLink)
