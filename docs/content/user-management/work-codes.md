@@ -1,73 +1,91 @@
 ## Work Codes Management Guide
 
 ### Purpose
-This page explains how to manage Work Codes within User Management, covering:
 
-- Creation of work code
-- Assignment of work code
-- Unassignment of work code
-- Login QR code/deep link generation
-- Relationships.
+This guide explains how to manage work codes in User Management, including:
 
+- Work code relationships
+- Creating work codes
+- Assigning work codes to user groups
+- Unassigning work codes
+- How work codes are used in the mobile app
 
-### 1. Managing Work Codes
+### What is a Work Code?
 
-#### Create a Work Code
-1. Navigate to **User Management** and select an organization. 
-    - *Note: Organization administrators are permanently attached to a single organization and do not need to select one*.
-2. Under the **Work Codes** section, click **Create work code**.
-3. Fill in the **Work code** and optional **Expiry date** fields.
-4. Click **Save**. The new code will appear in the work codes table.
+A work code is a unique code that allows mobile app users to join an organisation's workspace.
 
-#### Assign a Work Code to a User Group
-1. Navigate to **User Management** and select an organization.
-2. Under the **Work Codes** section, select the target work code.
-3. Click **Actions** and select **Assign** to open the assignment form.
-4. Select the target user groups and click **Assign**.
+### Who Can Create Work Codes?
 
-#### Unassign a Work Code
-1. Navigate to **User Management** and select an organization.
-2. Under the **Work Codes** section, select the target work code.
-3. Click **Actions** and select **Unassign**.
-4. Click **Save changes** on the confirmation modal.
+- Superusers
+- Fifty Eight administrators
+- Organisation administrators
+- Organisation group administrators
+- Organisation staff with the permission to create work codes
 
+### Work Code Relationships
 
-### 2. QR Codes and Deep Links
+#### Organisations
 
-#### Generate a Login QR Code
-It's used to authenticate and log into the mobile application:
-
-1. Under the **Work Codes** section of the selected organization, locate the target work code and click **Actions**.
-2. Select **QR code**. From here, you can scan the code, copy the login link, or download the QR code.
-
-#### Generate an Onboarding QR Code (Deep Links)
-It's used to route users to specific onboarding flows:
-
-1. Go to the **Organisation QR Codes** section.
-2. Click **Create link**.
-3. Fill in the required fields and click **Save**.
-    - *Note: You can edit, download, or delete existing links directly from the actions menu in the table.*
-
-
-### 3. Relationships
-
-#### Organisation to Work Codes
-
-**Relationship:** Each work code belongs to a single organisation.
-
-**What it means:**
-
-- A work code can only exist within one organisation.
-- Work codes cannot be shared or used across different organisations.
+- A work code belongs to only one organisation.
 - An organisation can have multiple work codes.
 
-#### User Groups to Work Codes
+#### User Groups
 
-**Relationship:** User groups and work codes have a many-to-many relationship.
-
-**What it means:**
+User groups and work codes have a many-to-many relationship.
 
 - A user group can be assigned multiple work codes.
 - A work code can be assigned to multiple user groups.
-- Assigning a work code to a user group grants all users in that group access to the associated organisation.
-- Removing a work code from a user group removes that organisation access for all users in the group. The user group and work code remain unchanged.
+- Assigning a work code to a user group gives all users in that group access to the associated organisation.
+- Removing a work code from a user group removes the group's access to that organisation. The user group and work code are not deleted.
+
+### Managing Work Codes
+
+#### Create a Work Code
+
+1. Go to **User Management**.
+2. Select an organisation.
+   - **Note:** Organisation administrators are permanently assigned to a single organisation and do not need to select one.
+3. In the **Work Codes** section, click **Create Work Code**.
+4. Enter the **Work Code**.
+5. (Optional) Select an **Expiry Date**.
+6. Click **Save**.
+
+The new work code appears in the **Work Codes** table.
+
+#### Assign a Work Code to a User Group
+
+1. Go to **User Management**.
+2. Select an organisation.
+3. In the **Work Codes** section, select the work code.
+4. Click **Actions** > **Assign**.
+5. Select one or more user groups.
+6. Click **Assign**.
+
+The selected user groups can now use the work code to access the organisation.
+
+#### Unassign a Work Code from a User Group
+
+1. Go to **User Management**.
+2. Select an organisation.
+3. In the **Work Codes** section, select the work code.
+4. Click **Actions** > **Unassign**.
+5. Click **Save Changes** to confirm.
+
+The selected user groups will no longer have access to the organisation through that work code.
+
+### Work Codes in the Mobile App
+
+Work codes allow mobile app users to join an organisation's workspace.
+
+Users can:
+
+- Enter a work code manually.
+- Scan the QR code generated for the work code.
+
+After entering or scanning a valid work code, users can access the organisation.
+
+### Related Documentation
+
+- [Entity Relationships](../entity-relationships)
+- [User Groups](../user-groups)
+- [QA Guide](../qa-guide)

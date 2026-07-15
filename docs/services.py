@@ -30,6 +30,10 @@ DOC_PAGES = {
         "title": "Entity Relationships",
         "path": DOCS_ROOT / "user-management" / "entity-relationships.md",
     },
+    ("user-management", "work-codes"): {
+        "title": "Work Codes",
+        "path": DOCS_ROOT / "user-management" / "work-codes.md",
+    },
     ("user-management", "qr-codes"): {
         "title": "QR Codes / Deep links",
         "path": DOCS_ROOT / "user-management" / "qr-codes.md",
@@ -37,10 +41,6 @@ DOC_PAGES = {
     ("user-management", "qa-guide"): {
         "title": "QA Guide",
         "path": DOCS_ROOT / "user-management" / "qa-guide.md",
-    },
-    ("user-management", "work-codes"): {
-        "title": "Work Codes",
-        "path": DOCS_ROOT / "user-management" / "work-codes.md",
     },
     ("user-management", "user-groups"): {
         "title": "User Groups",
