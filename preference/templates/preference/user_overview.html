@@ -441,9 +441,11 @@
                     {% flag 'can_download_preferences_statistics_report' %}
                     <a class="dropdown-item" href="{% url 'preference:export_preference_stats' %}?export=true">{% translate "userOverviewExportPreferencesStatistics" %}</a>
                     {% endflag %}
+                    {% if user.is_superuser %}
                     {% flag 'can_download_pay_calculator_statistics_report' %}
                     <a class="dropdown-item" href="{% url 'preference:export_pay_calculator_statistics' %}?export=true">Export Pay Calculator Statistics</a>
                     {% endflag %}
+                    {% endif %}
                 </div>
                 </div>
                 <button id="customize-dashboard-btn" class="btn btn-primary waves-effect text-center bg-jgw-deep-blue">

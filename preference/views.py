@@ -7,7 +7,7 @@ from openpyxl.styles import Alignment, Font
 
 import openpyxl
 from openpyxl.utils import get_column_letter
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 
 from core.forms import GenericFilterForm, DateRangeForm
 from core.logic.file_export import generate_and_export_excel
@@ -534,6 +534,9 @@ def export_preferences_data(request):
 
 def export_pay_calculator_statistics(request):
     """Export PayCalculator statistics grouped by origin, Organisation, and Organisation Access Code"""
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return HttpResponseForbidden("You are not authorized to access this page.")
+
     form_filter_params = get_form_filter_params(request=request, form_class=GenericFilterForm)
     filters = form_filter_params["filters"]
     start_date = filters.get("start_date")
