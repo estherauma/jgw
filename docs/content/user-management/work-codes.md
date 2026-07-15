@@ -29,6 +29,8 @@ A work code is a unique code that allows mobile app users to join an organisatio
 - A work code belongs to only one organisation.
 - An organisation can have multiple work codes.
 
+For more information about organisations, see [organisation workflow](../organisation-workflow) document.
+
 #### User Groups
 
 User groups and work codes have a many-to-many relationship.
@@ -37,6 +39,8 @@ User groups and work codes have a many-to-many relationship.
 - A work code can be assigned to multiple user groups.
 - Assigning a work code to a user group gives all users in that group access to the associated organisation.
 - Removing a work code from a user group removes the group's access to that organisation. The user group and work code are not deleted.
+
+For more information about user groups, see [user groups](../user-groups) document.
 
 ### Managing Work Codes
 
@@ -84,8 +88,8 @@ Users can:
 
 After entering or scanning a valid work code, users can access the organisation.
 
-### Related Documentation
+### Related Docs
 
 - [Entity Relationships](../entity-relationships)
-- [User Groups](../user-groups)
 - [QA Guide](../qa-guide)
+- [QR Codes](../qr-codes)

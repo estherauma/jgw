@@ -75,3 +75,7 @@ User Groups are connected directly to **Work Codes** via a many-to-many relation
 - All organization administrators and organization staff who have the required permission can create a user group.
 - To assign users to user groups, the user performing the action must have the **Assign users to departments** permission.
 - To delete a user group, the user performing the action must have the **Delete departments** permission.
+
+### Related Docs
+
+- [Work Codes](../work-codes)
