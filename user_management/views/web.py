@@ -78,6 +78,7 @@ from content.services.partner_configurations import (
     update_partner_configuration_work_codes_in_cms,
 )
 from common.services.audit import AuditService
+from users.services.authentication import generate_temporary_password
 
 logger = logging.getLogger(__name__)
 
@@ -996,21 +997,24 @@ class CreateAppUserView(View):
                     user = form.save(commit=False)
                     user.created_by = request.user
                     user.updated_by = request.user
-                    password = form.cleaned_data.get("password")
                     role = form.cleaned_data.get("role")
                     invite_sent = False
-
-                    if password:
-                        user.set_password(password)
-                    else:
-                        user.set_unusable_password()
+                    temporary_password, temporary_password_expires_at = generate_temporary_password()
+                    user.set_password(temporary_password)
+                    user.has_temporary_password = True
+                    user.is_active = True
+                    user.temporary_password_expires_at = temporary_password_expires_at
 
                     user.save()
                     form.save_m2m()
                     apply_role_to_user(user, organisation, role)
                     user.organisation_data.add(organisation)
                     if form.cleaned_data.get("send_invite"):
-                        invite_sent = send_invitation(request, user)
+                        invite_sent = send_invitation(
+                            request,
+                            user,
+                            temporary_password=temporary_password,
+                        )
                         if invite_sent:
                             messages.success(request, f"An invitation was sent to {user.email or user.phone_number} successfully.")
                         else:

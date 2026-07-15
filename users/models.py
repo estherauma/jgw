@@ -87,6 +87,15 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         default=False,
         help_text="Designates whether this user should be treated as active.\nUnselect this instead of deleting accounts.",
     )
+    has_temporary_password = models.BooleanField(
+        default=False,
+        help_text="Marks that the user is currently using a temporary password flow.",
+    )
+    temporary_password_expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Expiration timestamp for one-time temporary passwords.",
+    )
     receive_marketing_emails = models.BooleanField(
         default=False, help_text="Designates whether this user should receive marketing emails."
     )

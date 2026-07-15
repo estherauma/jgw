@@ -12,19 +12,23 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 
 from common.const.value_const import (
+    NON_AMBIGUOUS_ALPHANUMERIC_ALPHABET,
     REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
     REGISTRATION_VERIFICATION_CODE_ALPHABET,
 )
 from common.services.audit import AuditService
 from user_management.sms import send_sms
 from user_management.utils import normalize_phone_number_for_lookup
-from users.models import User, UserVerificationCode
+from users.models import User, UserInvitations, UserVerificationCode
 from users.tasks import send_email_notification
 
 
 ACCESS_TOKEN_MINUTES = 480
 REFRESH_TOKEN_DAYS = 30
 PASSWORD_RESET_VERIFICATION_PURPOSE = "password_reset"
+PASSWORD_SETUP_TOKEN_TYPE = "password_setup"
+PASSWORD_SETUP_TOKEN_MINUTES = 30
+TEMPORARY_PASSWORD_EXPIRY_DAYS = 3
 PASSWORD_RESET_GENERIC_MESSAGE = (
     "If an account exists for the provided contact details, a password reset code has been sent."
 )
@@ -35,6 +39,14 @@ def generate_registration_verification_code(length=6):
         secrets.choice(REGISTRATION_VERIFICATION_CODE_ALPHABET)
         for _ in range(length)
     )
+
+
+def generate_temporary_password(length=8):
+    temporary_password = "".join(
+        secrets.choice(NON_AMBIGUOUS_ALPHANUMERIC_ALPHABET) for _ in range(length)
+    )
+    expires_at = timezone.now() + timedelta(days=TEMPORARY_PASSWORD_EXPIRY_DAYS)
+    return temporary_password, expires_at
 
 
 def create_user_verification_code(
@@ -86,6 +98,17 @@ def send_code_sms(
     if not user.phone_number:
         return False
     return send_sms(user.phone_number, message)
+
+
+def mark_latest_pending_invitation_as_accepted(user):
+    invitation = (
+        UserInvitations.objects.filter(user=user, status="SENT")
+        .order_by("-created_at")
+        .first()
+    )
+    if invitation:
+        invitation.status = "ACCEPTED"
+        invitation.save(update_fields=["status"])
 
 
 def get_user_by_contact(email=None, phone_number=None, phone_country_iso=None, user_id=None):
@@ -212,7 +235,7 @@ def resend_registration_verification_code(email=None, phone_number=None, phone_c
     else:
         sms_sent = send_code_sms(
             user,
-            f"Your Just Good Work verification code is {verification_code}. "
+            f"Just Good Work: Your verification code is {verification_code}. "
             f"It expires in 15 minutes.",
         )
         if not sms_sent:
@@ -266,7 +289,7 @@ def request_password_reset_code(email=None, phone_number=None, phone_country_iso
     else:
         sms_sent = send_code_sms(
             user,
-            f"Your Just Good Work password reset code is {verification_code}. "
+            f"Just Good Work: Your password reset code is {verification_code}. "
             f"It expires in 15 minutes.",
         )
         if not sms_sent:
@@ -405,10 +428,76 @@ def reset_password_with_code(code, password, email=None, phone_number=None, phon
             used_at__isnull=True,
         ).exclude(pk=verification.pk).delete()
         user.set_password(password)
-        user.save()
+        user.has_temporary_password = False
+        user.temporary_password_expires_at = None
+        user.save(
+            update_fields=[
+                "password",
+                "has_temporary_password",
+                "temporary_password_expires_at",
+            ]
+        )
+        mark_latest_pending_invitation_as_accepted(user)
         AuditService.log_action(instance=user, action="password_reset")
 
     return {"ok": True, "user": user}
+
+
+def reset_password_with_token(password_reset_token, password):
+    raw_token = (password_reset_token or "").strip()
+    if not raw_token:
+        return {"ok": False, "error": "Password reset token is required."}
+
+    if not password:
+        return {"ok": False, "error": "Password is required."}
+
+    try:
+        payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        return {"ok": False, "error": "Password reset token has expired."}
+    except jwt.InvalidTokenError:
+        return {"ok": False, "error": "Invalid password reset token."}
+
+    if payload.get("token_type") != PASSWORD_SETUP_TOKEN_TYPE:
+        return {"ok": False, "error": "Invalid password reset token."}
+
+    user = User.objects.filter(id=payload.get("user_id"), is_deleted=False).first()
+    if not user or not user.is_active:
+        return {"ok": False, "error": "Invalid password reset token."}
+    if not user.has_temporary_password:
+        return {"ok": False, "error": "Password reset is not required for this account."}
+
+    try:
+        validate_password(password, user=user)
+    except DjangoValidationError as exc:
+        return {"ok": False, "error": exc.messages[0]}
+
+    with transaction.atomic():
+        UserVerificationCode.objects.filter(
+            user=user,
+            purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+            used_at__isnull=True,
+        ).delete()
+        user.set_password(password)
+        user.has_temporary_password = False
+        user.temporary_password_expires_at = None
+        user.last_login = timezone.now()
+        user.save(
+            update_fields=[
+                "password",
+                "has_temporary_password",
+                "temporary_password_expires_at",
+                "last_login",
+            ]
+        )
+        mark_latest_pending_invitation_as_accepted(user)
+        AuditService.log_action(instance=user, action="password_reset")
+
+    return {
+        "ok": True,
+        "user": user,
+        "tokens": issue_auth_tokens(user),
+    }
 
 
 def build_auth_token(user, token_type, expires_at):
@@ -419,6 +508,11 @@ def build_auth_token(user, token_type, expires_at):
         "iat": timezone.now(),
     }
     return jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
+
+
+def build_password_setup_token(user):
+    expires_at = timezone.now() + timedelta(minutes=PASSWORD_SETUP_TOKEN_MINUTES)
+    return build_auth_token(user, PASSWORD_SETUP_TOKEN_TYPE, expires_at)
 
 
 def issue_auth_tokens(user):
@@ -476,6 +570,23 @@ def login_api_user(email=None, phone_number=None, phone_country_iso=None, passwo
         return {
             "ok": False,
             "error": "Account is not active.",
+        }
+
+    if user.has_temporary_password:
+        if (
+            user.temporary_password_expires_at
+            and user.temporary_password_expires_at <= timezone.now()
+        ):
+            return {
+                "ok": True,
+                "user": user,
+                "has_expired_temporary_password": True,
+            }
+        return {
+            "ok": True,
+            "user": user,
+            "requires_password_reset": True,
+            "password_reset_token": build_password_setup_token(user),
         }
 
     user.last_login = timezone.now()
