@@ -130,6 +130,11 @@ class CurrentUserResponseSerializer(serializers.Serializer):
     organisation = OrganizationSummarySerializer(allow_null=True)
 
 
+class DeleteAccountResponseSerializer(serializers.Serializer):
+    ok = serializers.BooleanField(default=True)
+    user_id = serializers.IntegerField()
+
+
 class VerifyRegistrationCodeRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True)
     phone_number = serializers.CharField(required=False, allow_blank=True)

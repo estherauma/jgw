@@ -763,6 +763,88 @@ class LoginApiTests(AuthTests):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
 
+    def test_delete_account_api_requires_authentication(self):
+        response = self.client.post(
+            reverse("users_api:delete_account_api"),
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
+
+    def test_delete_account_api_anonymizes_and_soft_deletes_current_user(self):
+        today = datetime.now(tz=timezone.utc).date()
+        self.user.first_name = "Jane"
+        self.user.last_name = "Doe"
+        self.user.phone_number = "+256700000000"
+        self.user.phone_country_iso = "UG"
+        self.user.start_date = today
+        self.user.end_date = today
+        self.user.receive_marketing_emails = True
+        self.user.dashboard_preferences = {"theme": "custom"}
+        self.user.save()
+        UserVerificationCode.objects.create(
+            user=self.user,
+            purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+            code_hash="hashed-code",
+            expires_at=datetime.now(tz=timezone.utc) + timedelta(minutes=15),
+        )
+        login_response = self.client.post(
+            reverse("users_api:login_api"),
+            data={
+                "email": "login@example.com",
+                "password": self.password,
+            },
+        )
+        refresh_token = login_response.json()["refresh_token"]
+
+        response = self.client.post(
+            reverse("users_api:delete_account_api"),
+            HTTP_AUTHORIZATION=f"Bearer {login_response.json()['access_token']}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"ok": True, "user_id": self.user.id})
+
+        deleted_user = User.all_objects.get(id=self.user.id)
+        self.assertTrue(deleted_user.is_deleted)
+        self.assertFalse(deleted_user.is_active)
+        self.assertEqual(deleted_user.deleted_by_id, self.user.id)
+        self.assertEqual(deleted_user.email, f"deleted-{self.user.id}@deleted.local")
+        self.assertEqual(deleted_user.first_name, "")
+        self.assertEqual(deleted_user.last_name, "")
+        self.assertIsNone(deleted_user.phone_number)
+        self.assertIsNone(deleted_user.phone_country_iso)
+        self.assertIsNone(deleted_user.start_date)
+        self.assertIsNone(deleted_user.end_date)
+        self.assertFalse(deleted_user.receive_marketing_emails)
+        self.assertEqual(deleted_user.dashboard_preferences, {})
+        self.assertFalse(deleted_user.has_usable_password())
+        self.assertFalse(
+            UserVerificationCode.objects.filter(
+                user=self.user,
+                purpose=PASSWORD_RESET_VERIFICATION_PURPOSE,
+            ).exists()
+        )
+
+        login_after_delete = self.client.post(
+            reverse("users_api:login_api"),
+            data={
+                "email": "login@example.com",
+                "password": self.password,
+            },
+        )
+        self.assertEqual(login_after_delete.status_code, 400)
+        self.assertEqual(login_after_delete.json()["ok"], False)
+        self.assertEqual(login_after_delete.json()["error"], "Invalid login credentials.")
+
+        refresh_after_delete = self.client.post(
+            reverse("users_api:refresh_token_api"),
+            data={"refresh_token": refresh_token},
+        )
+        self.assertEqual(refresh_after_delete.status_code, 400)
+        self.assertEqual(refresh_after_delete.json()["ok"], False)
+        self.assertEqual(refresh_after_delete.json()["error"], "Invalid refresh token.")
+
     def test_get_current_user_returns_authenticated_user(self):
         self.user.first_name = "John"
         self.user.last_name = "Doe"

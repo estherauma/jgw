@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 
 from users.api_serializers import (
     CurrentUserResponseSerializer,
+    DeleteAccountResponseSerializer,
     ErrorResponseSerializer,
     FormErrorResponseSerializer,
     LoginRequestSerializer,
@@ -27,6 +28,7 @@ from users.api_serializers import (
     VerifyRegistrationCodeResponseSerializer,
 )
 from users.forms import APIAppUserForm, APIDashboardUserForm
+from users.services.account_deletion import anonymize_and_soft_delete_user
 from users.services.authentication import (
     REGISTRATION_EMAIL_VERIFICATION_PURPOSE,
     create_user_verification_code,
@@ -104,6 +106,44 @@ class CurrentUserApiView(APIView):
     )
     def get(self, request):
         return Response(get_current_user_payload(request.user), status=status.HTTP_200_OK)
+
+
+class DeleteCurrentUserAccountApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Delete current user account",
+        description=(
+            "Soft deletes the authenticated user account and anonymizes direct personal "
+            "fields on the user record. Existing dashboard/admin delete behavior is unchanged."
+        ),
+        request=None,
+        responses={
+            200: DeleteAccountResponseSerializer,
+            401: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+    )
+    def post(self, request):
+        try:
+            anonymize_and_soft_delete_user(request.user)
+        except Exception:
+            return Response(
+                {
+                    "ok": False,
+                    "error": "Could not delete account. Please try again.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {
+                "ok": True,
+                "user_id": request.user.id,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class RegisterUserApiView(APIView):
