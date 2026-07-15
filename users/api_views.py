@@ -15,6 +15,8 @@ from users.api_serializers import (
     PasswordResetRequestSerializer,
     PasswordResetResetRequestSerializer,
     PasswordResetResetResponseSerializer,
+    PasswordResetTokenResetRequestSerializer,
+    PasswordResetTokenResetResponseSerializer,
     PasswordResetVerifyCodeRequestSerializer,
     PasswordResetVerifyCodeResponseSerializer,
     RefreshTokenRequestSerializer,
@@ -33,6 +35,7 @@ from users.services.authentication import (
     login_api_user,
     request_password_reset_code,
     reset_password_with_code,
+    reset_password_with_token,
     refresh_api_access_token,
     resend_registration_verification_code,
     send_code_email,
@@ -291,13 +294,31 @@ class LoginApiView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if result.get("has_expired_temporary_password"):
+            return Response(
+                {
+                    "ok": True,
+                    "has_expired_temporary_password": True,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        if result.get("requires_password_reset"):
+            return Response(
+                {
+                    "ok": True,
+                    "requires_password_reset": True,
+                    "password_reset_token": result["password_reset_token"],
+                },
+                status=status.HTTP_200_OK,
+            )
+
         tokens = result["tokens"]
         return Response(
             {
                 "ok": True,
                 "access_token": tokens["access_token"],
                 "refresh_token": tokens["refresh_token"],
-                
             },
             status=status.HTTP_200_OK,
         )
@@ -350,7 +371,6 @@ class RefreshTokenApiView(APIView):
                 "ok": True,
                 "access_token": tokens["access_token"],
                 "refresh_token": tokens["refresh_token"],
-                "user_id": user.id,
             },
             status=status.HTTP_200_OK,
         )
@@ -566,6 +586,55 @@ class PasswordResetResetApiView(APIView):
             )
 
         return Response({"ok": True, "user_id": result["user"].id}, status=status.HTTP_200_OK)
+
+
+class PasswordResetTokenResetApiView(APIView):
+    authentication_classes = []
+
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Reset temporary password",
+        description=(
+            "Resets the password for users who signed in with a one-time temporary password, "
+            "then returns normal API tokens."
+        ),
+        request=PasswordResetTokenResetRequestSerializer,
+        responses={
+            200: PasswordResetTokenResetResponseSerializer,
+            400: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+    )
+    def post(self, request):
+        try:
+            result = reset_password_with_token(
+                password_reset_token=request.data.get("password_reset_token"),
+                password=request.data.get("password"),
+            )
+        except Exception:
+            return Response(
+                {
+                    "ok": False,
+                    "error": "Could not reset the password. Please try again.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        if not result["ok"]:
+            return Response(
+                {"ok": False, "error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        tokens = result["tokens"]
+        return Response(
+            {
+                "ok": True,
+                "access_token": tokens["access_token"],
+                "refresh_token": tokens["refresh_token"],
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class VerifyRegistrationCodeApiView(APIView):

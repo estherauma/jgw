@@ -11,6 +11,10 @@ from user_management.models import ShortLink
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from users.tasks import send_email_notification
+from users.services.authentication import (
+    TEMPORARY_PASSWORD_EXPIRY_DAYS,
+    generate_temporary_password,
+)
 from .sms import send_sms_invitation
 
 logger = getLogger("djangoDebug")
@@ -36,7 +40,13 @@ def build_short_link(request, reset_link, days_to_expiry):
         return reset_link
 
 
-def build_invitation_context(request, user, days_to_expiry=3, include_short_link=False):
+def build_invitation_context(
+    request,
+    user,
+    days_to_expiry=3,
+    include_short_link=False,
+    temporary_password=None,
+):
     organisation = user.organisation_data.order_by("created_at").first()
     invite = UserInvitations.objects.create(
         user=user,
@@ -45,6 +55,32 @@ def build_invitation_context(request, user, days_to_expiry=3, include_short_link
         phone_number=user.phone_number,
         status="SENT",
     )
+
+    if user.access_type == "app":
+        if temporary_password is None:
+            temporary_password, temporary_password_expires_at = generate_temporary_password()
+        else:
+            temporary_password_expires_at = user.temporary_password_expires_at
+        user.set_password(temporary_password)
+        user.has_temporary_password = True
+        user.is_active = True
+        user.temporary_password_expires_at = temporary_password_expires_at
+        user.save(
+            update_fields=[
+                "password",
+                "has_temporary_password",
+                "is_active",
+                "temporary_password_expires_at",
+            ]
+        )
+        return {
+            "organisation": organisation,
+            "invite": invite,
+            "temporary_password": temporary_password,
+            "temporary_password_expires_at": temporary_password_expires_at,
+            "temporary_password_expiry_days": TEMPORARY_PASSWORD_EXPIRY_DAYS,
+        }
+    
     token = generate_token(user, invite, days_to_expiry)
     reset_link = request.build_absolute_uri(reverse("users:set_password", args=(token,)))
     short_link = (
@@ -60,44 +96,68 @@ def build_invitation_context(request, user, days_to_expiry=3, include_short_link
     }
 
 
-def send_invitation(request, user, days_to_expiry=3):
+def send_invitation(request, user, days_to_expiry=3, temporary_password=None):
     if not user or (not user.email and not user.phone_number):
         return False
  
-    try:    
-        if user.email:
-            context = build_invitation_context(
-                    request,
-                    user,
-                    days_to_expiry=days_to_expiry,
-                )
-
-            html_content = render_to_string(
-                "user_management/invite-user-email.html",
-                {
-                    "reset_link": context["reset_link"],
-                    "organisation_name": context["organisation"].name if context["organisation"] else None,
-                },
-            )
-            message = strip_tags(html_content)
-            send_email_notification(
-                subject="Set up your account - Just Good Work",
-                message=message,
-                recipients=[user.email],
-                attachment_path=None,
-                html_message=html_content,
-                inline_images=None,
-            )
-
-        else:
+    try:
+        if user.access_type == "app":
             context = build_invitation_context(
                 request,
                 user,
                 days_to_expiry=days_to_expiry,
-                include_short_link=True,
+                temporary_password=temporary_password,
             )
+
+            if user.email:
+                html_content = render_to_string(
+                    "user_management/invite-user-email.html",
+                    {
+                        "temporary_password": context["temporary_password"],
+                        "temporary_password_expires_at": context["temporary_password_expires_at"],
+                        "temporary_password_expiry_days": context["temporary_password_expiry_days"],
+                        "organisation_name": context["organisation"].name if context["organisation"] else None,
+                    },
+                )
+                message = strip_tags(html_content)
+                send_email_notification(
+                    subject="Your temporary password - Just Good Work",
+                    message=message,
+                    recipients=[user.email],
+                    attachment_path=None,
+                    html_message=html_content,
+                    inline_images=None,
+                )
+                return True
+
             return send_sms_invitation(user, context, days_to_expiry=days_to_expiry)
+
+        if not user.email:
+            return False
         
+        context = build_invitation_context(
+                request,
+                user,
+                days_to_expiry=days_to_expiry,
+            )
+
+        html_content = render_to_string(
+            "user_management/invite-user-email.html",
+            {
+                "reset_link": context["reset_link"],
+                "organisation_name": context["organisation"].name if context["organisation"] else None,
+            },
+        )
+        message = strip_tags(html_content)
+        send_email_notification(
+            subject="Set up your account - Just Good Work",
+            message=message,
+            recipients=[user.email],
+            attachment_path=None,
+            html_message=html_content,
+            inline_images=None,
+        )
+    
         return True
     except Exception as exc:
         logger.error("send_invitation failed for %s: %s", getattr(user, "email", "unknown"), exc)

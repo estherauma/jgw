@@ -5,22 +5,27 @@ from twilio.rest import Client
 
 logger = getLogger("djangoDebug")
 
+
 def send_sms(to_number, message):
     account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", None)
     auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
-    from_number = getattr(settings, "TWILIO_FROM_NUMBER", None)
-    if not account_sid or not auth_token or not from_number:
-        logger.error("Twilio credentials are not configured.")
+    messaging_service_sid = getattr(settings, "TWILIO_MESSAGING_SERVICE_SID", None)
+    if not account_sid or not auth_token or not messaging_service_sid:
+        logger.error("Twilio credentials or messaging service SID are not configured.")
         return False
     try:
         client = Client(account_sid, auth_token)
-        params = {"body": message, "to": to_number, "from_": from_number} 
+        params = {
+            "body": message,
+            "to": to_number,
+            "messaging_service_sid": messaging_service_sid,
+        }
         client.messages.create(**params)
         return True
     except Exception as exc:
         logger.exception("send_sms failed for %s: %s", to_number, exc)
         return False
-    
+
 
 def send_sms_invitation(user, context, days_to_expiry=3):
     if not getattr(settings, "VERIFY_PHONE_NUMBER", False):
@@ -35,9 +40,12 @@ def send_sms_invitation(user, context, days_to_expiry=3):
             else ""
         )
         message = (
-            f"{org_text} Click the link to set your password and finish setup: {context['short_link']} "
-            f"This link expires in {days_to_expiry} days."
+            f"Just Good Work: {org_text}Use this temporary password to sign in to the Just Good Work app: "
+            f"{context['temporary_password']}. It expires in "
+            f"{context['temporary_password_expiry_days']} days. "
+            f"You must change it the first time you sign in."
         )
+ 
         logger.info("Sending SMS to %s: %s", user.phone_number, message)
         return send_sms(user.phone_number, message)
     except Exception as exc:

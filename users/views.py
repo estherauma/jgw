@@ -604,7 +604,15 @@ def set_password(request, token):
                 if user_id:
                     user = User.objects.get(id=user_id)
                     user.set_password(password)
-                    user.save()
+                    user.has_temporary_password = False
+                    user.temporary_password_expires_at = None
+                    user.save(
+                        update_fields=[
+                            "password",
+                            "has_temporary_password",
+                            "temporary_password_expires_at",
+                        ]
+                    )
                     access_type = user.access_type
                 else:
                     user_obj = {"email": invite.email, "role": invite.scheme_id}
