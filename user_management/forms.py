@@ -34,7 +34,7 @@ from .utils import (
 
 
 class CreateOrganisationForm(forms.ModelForm):
-    ACCESS_CODE_PATTERN = re.compile(r"^\s*[A-Za-z0-9]+(\s*,\s*[A-Za-z0-9]+)*\s*$")
+    ACCESS_CODE_PATTERN = re.compile(r"^[A-Za-z0-9]+$")
     GENERIC_CUSTOM_CONTENT_COLLECTION_NAME = "Custom-Content-Generic"
 
     access_code = forms.CharField(
@@ -249,7 +249,7 @@ class CreateOrganisationForm(forms.ModelForm):
         org_code = self.cleaned_data.get("org_code", "").strip().upper()
         if org_code and not self.ACCESS_CODE_PATTERN.fullmatch(org_code):
             raise forms.ValidationError(
-                "Organisation code must contain only letters and numbers, optionally separated by commas."
+                "Organisation code must contain only letters and numbers."
             )
         qs = OrganisationData.objects.filter(org_code__iexact=org_code)
         if self.instance and self.instance.pk:
@@ -262,7 +262,7 @@ class CreateOrganisationForm(forms.ModelForm):
         access_code = self.cleaned_data.get("access_code", "").strip().upper()
         if access_code and not self.ACCESS_CODE_PATTERN.fullmatch(access_code):
             raise forms.ValidationError(
-                "Access code must contain only letters and numbers, optionally separated by commas."
+                "Access code must contain only letters and numbers."
             )
         qs = OrganisationAccessCode.objects.filter(code__iexact=access_code)
         if self.instance and self.instance.pk:
