@@ -6,8 +6,8 @@ from import_export.admin import ExportActionModelAdmin
 
 class UserAdmin(ExportActionModelAdmin, admin.ModelAdmin):
     form = UserAdminForm
-    list_display = ['email', 'first_name', 'last_name', 'role', 'organization_group', 'is_active', 'is_staff']
-    list_filter = ['role', 'organization_group', 'is_active', 'is_staff']
+    list_display = ['email', 'first_name', 'last_name', 'role', 'organization_group', 'is_active', 'is_deleted', 'is_staff']
+    list_filter = ['role', 'organization_group', 'is_active', 'is_deleted', 'is_staff']
     search_fields = ['email', 'first_name', 'last_name', 'phone_number']
     readonly_fields = ('created_at_display', 'updated_at_display', 'total_logged_hours', 'deleted_at', 'deleted_by')
     fieldsets = (
@@ -42,6 +42,9 @@ class UserAdmin(ExportActionModelAdmin, admin.ModelAdmin):
     @admin.display(description='Updated at')
     def updated_at_display(self, obj):
         return obj.updated_at
+
+    def get_queryset(self, request):
+        return User.all_objects.all()
 
 admin.site.register(User, UserAdmin)
 

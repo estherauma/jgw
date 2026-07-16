@@ -2,6 +2,7 @@ from django.urls import path
 
 from .api_views import (
     CurrentUserApiView,
+    DeleteCurrentUserAccountApiView,
     LoginApiView,
     PasswordResetRequestApiView,
     PasswordResetResetApiView,
@@ -18,6 +19,7 @@ app_name = "users_api"
 
 urlpatterns = [
     path("me/", CurrentUserApiView.as_view(), name="me_api"),
+    path("delete-account/", DeleteCurrentUserAccountApiView.as_view(), name="delete_account_api"),
     path("login/", LoginApiView.as_view(), name="login_api"),
     path("password-reset/request/", PasswordResetRequestApiView.as_view(), name="password_reset_request_api"),
     path("password-reset/verify-code/", PasswordResetVerifyCodeApiView.as_view(), name="password_reset_verify_code_api"),
