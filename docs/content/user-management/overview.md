@@ -185,3 +185,4 @@ For the detailed permission model, see [Roles and Permissions](../roles-and-perm
 - [Entity Relationships](../entity-relationships/)
 - [QR Codes](../qr-codes/)
 - [QA Guide](../qa-guide/)
+- [Work Codes](../work-codes)
