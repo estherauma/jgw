@@ -12,7 +12,7 @@ This guide explains how to manage work codes in User Management, including:
 
 ### What is a Work Code?
 
-A work code is a unique code that allows mobile app users to join an organisation's workspace.
+A work code is a unique code that controls which organisation content a user can access in the mobile app.
 
 ### Who Can Create Work Codes?
 
@@ -37,10 +37,16 @@ User groups and work codes have a many-to-many relationship.
 
 - A user group can be assigned multiple work codes.
 - A work code can be assigned to multiple user groups.
-- Assigning a work code to a user group gives all users in that group access to the associated organisation.
-- Removing a work code from a user group removes the group's access to that organisation. The user group and work code are not deleted.
+- Assigning a work code to a user group gives all users in that group the ability to see content for the organisation linked to that work code.
+- If a work code is not assigned to any user group, then all users in that organisation can see the content linked to that work code.
 
 For more information about user groups, see [user groups](../user-groups) document.
+
+### Work Codes in the Mobile App
+
+- Work codes allow mobile app users to get access to the organisation content linked to work codes.
+- Users scan the QR code generated for a work code.
+- After scanning the QR code, users can access the organisation content linked to the work code.
 
 ### Managing Work Codes
 
@@ -65,7 +71,7 @@ The new work code appears in the **Work Codes** table.
 5. Select one or more user groups.
 6. Click **Assign**.
 
-The selected user groups can now use the work code to access the organisation.
+The selected user groups can now use the work code to access the organisation data linked to the work code.
 
 #### Unassign a Work Code from a User Group
 
@@ -75,18 +81,7 @@ The selected user groups can now use the work code to access the organisation.
 4. Click **Actions** > **Unassign**.
 5. Click **Save Changes** to confirm.
 
-The selected user groups will no longer have access to the organisation through that work code.
-
-### Work Codes in the Mobile App
-
-Work codes allow mobile app users to join an organisation's workspace.
-
-Users can:
-
-- Enter a work code manually.
-- Scan the QR code generated for the work code.
-
-After entering or scanning a valid work code, users can access the organisation.
+All users in the organisation will then be able to see data for the organisation linked to that work code.
 
 ### Related Docs
 
