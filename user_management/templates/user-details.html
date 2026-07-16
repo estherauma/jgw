@@ -156,7 +156,7 @@
                             <span class="text-muted small">Phone number</span>
                             <span class="fw-semibold text-dark">
                                 {% if user.phone_number %}
-                                    +({{ user.phone_country_iso }}) {{ user.phone_number }}
+                                    {{ user.phone_number }}
                                 {% else %}
                                     Not provided
                                 {% endif %}
