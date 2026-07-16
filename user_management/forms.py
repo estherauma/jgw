@@ -247,6 +247,10 @@ class CreateOrganisationForm(forms.ModelForm):
 
     def clean_org_code(self):
         org_code = self.cleaned_data.get("org_code", "").strip().upper()
+        if org_code and not self.ACCESS_CODE_PATTERN.fullmatch(org_code):
+            raise forms.ValidationError(
+                "Organisation code must contain only letters and numbers, optionally separated by commas."
+            )
         qs = OrganisationData.objects.filter(org_code__iexact=org_code)
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
