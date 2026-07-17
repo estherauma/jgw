@@ -13,6 +13,7 @@ from preference.models import (
     Country,
     ImmigrationStatus,
     FactoryFarm,
+    Language,
 )
 from dashboard.models import Scheme
 from users.models import User
@@ -740,7 +741,7 @@ class AppUserForm(forms.ModelForm):
     phone_country_iso = forms.ChoiceField(required=False)
     send_invite = forms.BooleanField(required=False, initial=True)
     user_languages = forms.ModelMultipleChoiceField(
-        queryset=Locale.objects.none(),
+        queryset=Language.objects.none(),
         required=False,
         widget=forms.SelectMultiple(),
     )
@@ -754,6 +755,7 @@ class AppUserForm(forms.ModelForm):
             "phone_number",
             "phone_country_iso",
             "work_groups",
+            "user_languages",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -795,7 +797,7 @@ class AppUserForm(forms.ModelForm):
         self.fields["send_invite"].widget = forms.CheckboxInput(
             attrs={"class": "form-check-input"}
         )
-        self.fields["user_languages"].queryset = Locale.objects.all().order_by("name")
+        self.fields["user_languages"].queryset = Language.objects.all().order_by("name")
         if organisation:
             self.fields["role"].queryset = OrganisationRole.objects.filter(
                 organisation=organisation
