@@ -91,6 +91,14 @@
                             <div class="text-danger small">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </label>
+                    <label class="um-field form-group">
+                        <span>User languages (optional)</span>
+                        {% include 'components/custom-select.html' with field=form.user_languages multiple=True placeholder='Select user languages' search_placeholder='Search languages...' no_results_text='No languages found.' %}
+                        <div class="text-danger small" data-error-for="user_languages"></div>
+                        {% if form.user_languages.errors %}
+                            <div class="text-danger small">{{ form.user_languages.errors }}</div>
+                        {% endif %}
+                    </label>
                     <div class="um-field form-group">
                         <span>User groups (optional)</span>
                         <div data-work-groups-container>
