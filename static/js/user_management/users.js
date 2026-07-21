@@ -336,6 +336,18 @@
       }
     }
 
+    function renderUserLanguages(selectedIds) {
+      var languagesField = form.querySelector('[name="user_languages"]');
+      if (!languagesField) {
+        return;
+      }
+      var valueSet = new Set((selectedIds || []).map(String));
+      Array.from(languagesField.options).forEach(function (option) {
+        option.selected = valueSet.has(String(option.value));
+      });
+      rebuildCustomSelectForField(languagesField);
+    }
+
     function setSingleValue(name, value) {
       var input = form.querySelector('[name="' + name + '"]');
       if (input) {
@@ -418,6 +430,7 @@
         if (dashboardRoleBehavior) {
           dashboardRoleBehavior.refresh();
         }
+        renderUserLanguages(user.user_languages);
         rebuildCustomFormSelects(form);
         refreshCustomFormSelects(form);
       } catch (err) {
