@@ -47,7 +47,10 @@ from question.repository.messaging_questions_standard import (
 from users.utils import get_user_organisations
 import pandas as pd
 from io import BytesIO
-from question.filters import lead_inline_question_response_filtered_queryset
+from question.filters import (
+    _lead_response_filter_date_range,
+    lead_inline_question_response_filtered_queryset,
+)
 from .models import (
     InlineQuestionStandard,
     InlineQuestionAndKeysMatch,
@@ -747,17 +750,16 @@ def export_lead_questions_with_followups(request):
     """
     form_filter_params = get_form_filter_params(request=request, form_class=InlineQuestionFilterForm)
     filters = form_filter_params["filters"]
-    start_date = filters.get("start_date")
-    end_date = filters.get("end_date")
+    start_date, end_date = _lead_response_filter_date_range(
+        request.user,
+        filters.get("start_date"),
+        filters.get("end_date"),
+    )
 
     wb = Workbook()
     ws = wb.active
 
     heading = f"Lead Questions with Follow-up Chain Report from {start_date} to {end_date}"
-    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=16)
-    heading_cell = ws.cell(row=2, column=1, value=heading)
-    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
-    heading_cell.font = Font(bold=True)
 
     lead_headers = [
         "Lead Question Details",
@@ -778,26 +780,14 @@ def export_lead_questions_with_followups(request):
         "Value Option",
     ]
 
-    followup_headers = [
-        "Follow-up Question Details",
-        "Question Key",
-        "Question Text",
-        "Value Key",
-        "Value Option",
-    ]
-
-    followup_followup_headers = [
-        "Follow-up-to-Follow-up Question Details",
-        "Question Key",
-        "Question Text",
-        "Value Key",
-        "Value Option",
-    ]
-
-    ws.append([None] * 16)  
-    ws.append([heading] + [None] * 15)  
-    ws.append([None] * 16)  
-    ws.append(lead_headers)  
+    ws.append([None] * 16)
+    ws.append([heading] + [None] * 15)
+    ws.append([None] * 16)
+    ws.append(lead_headers)
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=16)
+    heading_cell = ws.cell(row=2, column=1)
+    heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+    heading_cell.font = Font(bold=True)
     for idx in range(1, 17):
         ws.cell(row=4, column=idx).font = Font(bold=True)
 
