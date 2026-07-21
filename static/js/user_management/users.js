@@ -467,6 +467,20 @@
       }
     }
 
+    function renderUserLanguages(selectedIds) {
+      var languagesField = form.querySelector('[name="user_languages"]');
+      if (!languagesField) {
+        return;
+      }
+      var valueSet = new Set((selectedIds || []).map(String));
+      
+      Array.from(languagesField.options).forEach(function (option) {
+        option.selected = valueSet.has(String(option.value));
+      });
+      
+      rebuildCustomSelectForField(languagesField);
+    }
+
     function renderWorkGroups(workGroups, selectedIds, workGroupsContainer) {
       var workGroupsField = form.querySelector('[name="work_groups"]');
       if (!workGroupsField) {
@@ -537,6 +551,7 @@
           }
 
           renderWorkGroups(data.work_groups, user.work_group_ids,workGroupsContainer);
+          renderUserLanguages(user.user_language_ids);
           rebuildCustomFormSelects(form);
           refreshCustomFormSelects(form);
         }

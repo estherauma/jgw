@@ -1156,7 +1156,7 @@ class EditAppUserView(View):
     def get(self, request, user_id):
         user = (
             User.objects.filter(id=user_id)
-            .prefetch_related("organisation_data", "work_groups", "groups")
+            .prefetch_related("organisation_data", "work_groups", "groups", "user_languages")
             .first()
         )
         if not user:
@@ -1210,6 +1210,9 @@ class EditAppUserView(View):
                     "organisation_name": organisation.name,
                     "work_group_ids": list(
                         user.work_groups.values_list("id", flat=True)
+                    ),
+                    "user_language_ids": list(
+                        user.user_languages.values_list("id", flat=True)
                     ),
                     "role_id": role_id,
                 },
