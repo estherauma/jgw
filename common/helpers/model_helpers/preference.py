@@ -170,7 +170,8 @@ def get_unique_langaues_list():
         .order_by("new_translated_name")
     )
     for language in language_list:
-        lang = Language.objects.filter(translated_name=language).first()
+        lookup_name = "burma" if language == "burmese" else language
+        lang = Language.objects.filter(translated_name=lookup_name).first()
         lang_list.append(lang)
     return lang_list
 
@@ -193,7 +194,8 @@ def make_language_queryset_list_unique(language_list):
     )
 
     for language in new_language_list:
-        lang = Language.objects.filter(translated_name=language).first()
+        lookup_name = "burma" if language == "burmese" else language
+        lang = Language.objects.filter(translated_name=lookup_name).first()
         lang_list.append(lang)
     return lang_list
 

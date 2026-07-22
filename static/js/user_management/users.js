@@ -336,6 +336,18 @@
       }
     }
 
+    function renderUserLanguages(selectedIds) {
+      var languagesField = form.querySelector('[name="user_languages"]');
+      if (!languagesField) {
+        return;
+      }
+      var valueSet = new Set((selectedIds || []).map(String));
+      Array.from(languagesField.options).forEach(function (option) {
+        option.selected = valueSet.has(String(option.value));
+      });
+      rebuildCustomSelectForField(languagesField);
+    }
+
     function setSingleValue(name, value) {
       var input = form.querySelector('[name="' + name + '"]');
       if (input) {
@@ -418,6 +430,7 @@
         if (dashboardRoleBehavior) {
           dashboardRoleBehavior.refresh();
         }
+        renderUserLanguages(user.user_languages);
         rebuildCustomFormSelects(form);
         refreshCustomFormSelects(form);
       } catch (err) {
@@ -467,6 +480,26 @@
       }
     }
 
+    function renderLanguageOptions(languageOptions, selectedIds) {
+      var languagesField = form.querySelector('[name="user_languages"]');
+      if (!languagesField) {
+        return;
+      }
+
+      var valueSet = new Set((selectedIds || []).map(String));
+      languagesField.innerHTML = '';
+
+      (languageOptions || []).forEach(function (language) {
+        var option = document.createElement('option');
+        option.value = language.id;
+        option.text = language.name;
+        option.selected = valueSet.has(String(language.id));
+        languagesField.appendChild(option);
+      });
+
+      rebuildCustomSelectForField(languagesField);
+    }
+
     function renderWorkGroups(workGroups, selectedIds, workGroupsContainer) {
       var workGroupsField = form.querySelector('[name="work_groups"]');
       if (!workGroupsField) {
@@ -510,6 +543,9 @@
       var editUrl = '/user-management/app-users/' + userId + '/edit/';
       
       form.action = editUrl;
+      form.reset();
+      rebuildCustomFormSelects(form);
+      refreshCustomFormSelects(form);
       clearErrors();
       var workGroupsContainer = form.querySelector('[data-work-groups-container]');
 
@@ -537,6 +573,7 @@
           }
 
           renderWorkGroups(data.work_groups, user.work_group_ids,workGroupsContainer);
+          renderLanguageOptions(data.language_options, user.user_language_ids);
           rebuildCustomFormSelects(form);
           refreshCustomFormSelects(form);
         }

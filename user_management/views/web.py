@@ -56,6 +56,7 @@ from ..permissions import is_flag_active
 from ..utils import (
     get_active_role,
     is_58_admin,
+    get_locale_backed_language_options,
     is_org_admin,
     is_org_group_admin,
     is_org_or_group_admin,
@@ -1091,6 +1092,7 @@ class EditDashboardUserView(View):
         if not is_super_or_58_admin(request.user):
             return OrganizationService.org_access_denied()
 
+        language_options = get_locale_backed_language_options()
         return JsonResponse(
             {
                 "ok": True,
@@ -1113,7 +1115,7 @@ class EditDashboardUserView(View):
                     "factories": list(user.factories.values_list("id", flat=True)),
                     "destinations": list(user.destinations.values_list("id", flat=True)),
                     "user_languages": list(
-                        user.user_languages.values_list("id", flat=True)
+                        user.user_languages.filter(id__in=language_options["language_ids"]).values_list("id", flat=True)
                     ),
                     "excluded_origin_countries": list(
                         user.excluded_origin_countries.values_list("id", flat=True)
@@ -1156,7 +1158,7 @@ class EditAppUserView(View):
     def get(self, request, user_id):
         user = (
             User.objects.filter(id=user_id)
-            .prefetch_related("organisation_data", "work_groups", "groups")
+            .prefetch_related("organisation_data", "work_groups", "groups", "user_languages")
             .first()
         )
         if not user:
@@ -1196,6 +1198,7 @@ class EditAppUserView(View):
                 grants_dashboard_access=user.access_type == "dashboard",
             ).order_by("name").first()
             role_id = fallback_role.id if fallback_role else ""
+        language_options = get_locale_backed_language_options()
         return JsonResponse(
             {
                 "ok": True,
@@ -1211,8 +1214,15 @@ class EditAppUserView(View):
                     "work_group_ids": list(
                         user.work_groups.values_list("id", flat=True)
                     ),
+                    "user_language_ids": list(
+                        user.user_languages.filter(id__in=language_options["language_ids"]).values_list("id", flat=True)
+                    ),
                     "role_id": role_id,
                 },
+                "language_options": [
+                    {"id": value, "name": label}
+                    for value, label in language_options["choices"]
+                ],
                 "work_groups": [
                     {"id": work_group.id, "name": work_group.name}
                     for work_group in work_groups_qs
@@ -2051,6 +2061,11 @@ def user_details(request, user_id):
     
     dashboard_preferences = getattr(user, "dashboard_prefs", None)
     page_number = request.GET.get("page", 1)
+    language_options = get_locale_backed_language_options()
+    user_language_ids = set(user.user_languages.values_list("id", flat=True))
+    user_languages = [
+        language for language in language_options["languages"] if language.id in user_language_ids
+    ]
 
     pagination_data = AuditService.get_paginated_activities(
         activities,
@@ -2070,6 +2085,7 @@ def user_details(request, user_id):
                 current_user
             ).order_by("name")
         ),
+        "user_languages": user_languages,
         "activities": activities,
         **pagination_data,
     }
