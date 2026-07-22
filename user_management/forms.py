@@ -545,6 +545,7 @@ class DashboardUserForm(forms.ModelForm):
         self.fields["email"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Email"}
         )
+        self.fields["first_name"].required = True
         self.fields["first_name"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "First name"}
         )
@@ -772,6 +773,7 @@ class AppUserForm(forms.ModelForm):
         self.fields["email"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "Email"}
         )
+        self.fields["first_name"].required = True
         self.fields["first_name"].widget.attrs.update(
             {"class": "form-control um-input", "placeholder": "First name"}
         )
