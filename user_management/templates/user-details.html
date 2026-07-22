@@ -173,8 +173,8 @@
                         <div class="d-grid gap-1">
                             <span class="text-muted small">User languages</span>
                             <span class="fw-semibold text-dark text-break">
-                                {% for language in user.user_languages.all %}
-                                    {{ language.name }}{% if not forloop.last %}, {% endif %}
+                                {% for language in user_languages %}
+                                    {{ language.display_name }}{% if not forloop.last %}, {% endif %}
                                 {% empty %}
                                     Not set
                                 {% endfor %}

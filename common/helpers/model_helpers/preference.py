@@ -158,10 +158,10 @@ def get_unique_langaues_list():
         Language.objects.annotate(
             new_translated_name=Case(
                 When(
-                    name="burma",
+                    translated_name="burma",
                     then=Value("burmese"),
                 ),
-                default=F("name"),
+                default=F("translated_name"),
                 output_field=CharField(),
             )
         )
@@ -171,9 +171,8 @@ def get_unique_langaues_list():
     )
     for language in language_list:
         lookup_name = "burma" if language == "burmese" else language
-        lang = Language.objects.filter(name=lookup_name).first()
-        if lang:
-            lang_list.append(lang)
+        lang = Language.objects.filter(translated_name=lookup_name).first()
+        lang_list.append(lang)
     return lang_list
 
 
@@ -183,10 +182,10 @@ def make_language_queryset_list_unique(language_list):
         language_list.annotate(
             new_translated_name=Case(
                 When(
-                    name="burma",
+                    translated_name="burma",
                     then=Value("burmese"),
                 ),
-                default=F("name"),
+                default=F("translated_name"),
                 output_field=CharField(),
             )
         )
@@ -196,9 +195,8 @@ def make_language_queryset_list_unique(language_list):
 
     for language in new_language_list:
         lookup_name = "burma" if language == "burmese" else language
-        lang = Language.objects.filter(name=lookup_name).first()
-        if lang:
-            lang_list.append(lang)
+        lang = Language.objects.filter(translated_name=lookup_name).first()
+        lang_list.append(lang)
     return lang_list
 
 

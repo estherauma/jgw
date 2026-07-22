@@ -2,6 +2,8 @@ import phonenumbers
 import pycountry
 from django.core.exceptions import ValidationError
 
+from preference.models import Language
+from content.models import Locale
 from users.models import User
 
 
@@ -13,6 +15,36 @@ ROLE_PRECEDENCE = (
     ("org_staff", "org_staff"),
 )
 
+
+def _normalize_language_code(code):
+    return (code or "").strip().lower()
+
+
+def get_locale_backed_language_options():
+    languages_by_code = {}
+    language_ids = []
+    choices = []
+
+    for locale in Locale.objects.order_by("name", "id"):
+        code = _normalize_language_code(locale.code)
+        if not code or code in languages_by_code:
+            continue
+
+        language = Language.objects.filter(code__iexact=code).order_by("id").first()
+        if not language:
+            continue
+
+        language.display_name = locale.name
+        languages_by_code[code] = language
+        language_ids.append(language.id)
+        choices.append((language.id, language.display_name))
+
+    languages = list(languages_by_code.values())
+    return {
+        "languages": languages,
+        "language_ids": language_ids,
+        "choices": choices,
+    }
 def is_super_user(user):
     return not user.is_anonymous and user.is_superuser
 

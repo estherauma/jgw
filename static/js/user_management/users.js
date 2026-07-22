@@ -480,17 +480,23 @@
       }
     }
 
-    function renderUserLanguages(selectedIds) {
+    function renderLanguageOptions(languageOptions, selectedIds) {
       var languagesField = form.querySelector('[name="user_languages"]');
       if (!languagesField) {
         return;
       }
+
       var valueSet = new Set((selectedIds || []).map(String));
-      
-      Array.from(languagesField.options).forEach(function (option) {
-        option.selected = valueSet.has(String(option.value));
+      languagesField.innerHTML = '';
+
+      (languageOptions || []).forEach(function (language) {
+        var option = document.createElement('option');
+        option.value = language.id;
+        option.text = language.name;
+        option.selected = valueSet.has(String(language.id));
+        languagesField.appendChild(option);
       });
-      
+
       rebuildCustomSelectForField(languagesField);
     }
 
@@ -537,6 +543,9 @@
       var editUrl = '/user-management/app-users/' + userId + '/edit/';
       
       form.action = editUrl;
+      form.reset();
+      rebuildCustomFormSelects(form);
+      refreshCustomFormSelects(form);
       clearErrors();
       var workGroupsContainer = form.querySelector('[data-work-groups-container]');
 
@@ -564,7 +573,7 @@
           }
 
           renderWorkGroups(data.work_groups, user.work_group_ids,workGroupsContainer);
-          renderUserLanguages(user.user_language_ids);
+          renderLanguageOptions(data.language_options, user.user_language_ids);
           rebuildCustomFormSelects(form);
           refreshCustomFormSelects(form);
         }

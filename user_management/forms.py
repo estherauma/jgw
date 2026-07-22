@@ -28,6 +28,7 @@ from .flags import UM_FLAG_DEFS
 from .utils import (
     clean_user_email,
     get_country_code_choices,
+    get_locale_backed_language_options,
     is_org_admin_or_staff,
     validate_password_confirmation,
     validate_user_phone_number,
@@ -459,7 +460,6 @@ class WorkGroupForm(forms.ModelForm):
         name = self.cleaned_data.get("name", "").strip()
         return name
 
-
 class DashboardUserForm(forms.ModelForm):
     DASHBOARD_GROUP_LABELS = {
         "58_admin": "FiftyEight Administrator",
@@ -495,7 +495,7 @@ class DashboardUserForm(forms.ModelForm):
         widget=forms.SelectMultiple(),
     )
     user_languages = forms.ModelMultipleChoiceField(
-        queryset=Locale.objects.none(),
+        queryset=Language.objects.none(),
         required=False,
         widget=forms.SelectMultiple(),
     )
@@ -597,13 +597,20 @@ class DashboardUserForm(forms.ModelForm):
         self.fields["destinations"].queryset = Country.objects.filter(
             is_destination=True
         ).order_by("name")
-        self.fields["user_languages"].queryset = Locale.objects.all().order_by("name")
+        language_options = get_locale_backed_language_options()
+        self.fields["user_languages"].queryset = Language.objects.filter(
+            id__in=language_options["language_ids"]
+        )
+        self.fields["user_languages"].choices = language_options["choices"]
         self.fields["excluded_origin_countries"].queryset = Country.objects.filter(
             is_origin=True
         ).order_by("name")
         self.fields["immigration_status"].queryset = ImmigrationStatus.objects.all().order_by("name")
         if self.instance and self.instance.pk:
             self.initial["organisation_group"] = self.instance.organization_group_id
+            self.initial["user_languages"] = list(
+                self.instance.user_languages.filter(id__in=language_options["language_ids"]).values_list("id", flat=True)
+            )
 
     def clean_email(self):
         return clean_user_email(
@@ -631,7 +638,7 @@ class DashboardUserForm(forms.ModelForm):
             cleaned["end_date"] = None
             cleaned["factories"] = FactoryFarm.objects.none()
             cleaned["destinations"] = Country.objects.none()
-            cleaned["user_languages"] = Locale.objects.none()
+            cleaned["user_languages"] = Language.objects.none()
             cleaned["excluded_origin_countries"] = Country.objects.none()
             cleaned["immigration_status"] = ImmigrationStatus.objects.none()
         elif is_org_group_admin:
@@ -646,7 +653,7 @@ class DashboardUserForm(forms.ModelForm):
             cleaned["end_date"] = None
             cleaned["factories"] = FactoryFarm.objects.none()
             cleaned["destinations"] = Country.objects.none()
-            cleaned["user_languages"] = Locale.objects.none()
+            cleaned["user_languages"] = Language.objects.none()
             cleaned["excluded_origin_countries"] = Country.objects.none()
             cleaned["immigration_status"] = ImmigrationStatus.objects.none()
         elif admin_groups and not organisation_data:
@@ -682,7 +689,6 @@ class DashboardUserForm(forms.ModelForm):
             user.save()
             self.save_m2m()
         return user
-
 
 class UsersFilterForm(forms.Form):
     STATUS_CHOICES = [
@@ -741,7 +747,7 @@ class AppUserForm(forms.ModelForm):
     phone_country_iso = forms.ChoiceField(required=False)
     send_invite = forms.BooleanField(required=False, initial=True)
     user_languages = forms.ModelMultipleChoiceField(
-        queryset=Locale.objects.none(),
+        queryset=Language.objects.none(),
         required=False,
         widget=forms.SelectMultiple(),
     )
@@ -797,7 +803,11 @@ class AppUserForm(forms.ModelForm):
         self.fields["send_invite"].widget = forms.CheckboxInput(
             attrs={"class": "form-check-input"}
         )
-        self.fields["user_languages"].queryset = Locale.objects.all().order_by("name")
+        language_options = get_locale_backed_language_options()
+        self.fields["user_languages"].queryset = Language.objects.filter(
+            id__in=language_options["language_ids"]
+        )
+        self.fields["user_languages"].choices = language_options["choices"]
         if organisation:
             self.fields["role"].queryset = OrganisationRole.objects.filter(
                 organisation=organisation
@@ -805,6 +815,10 @@ class AppUserForm(forms.ModelForm):
 
         if work_groups_qs is not None:
             self.fields["work_groups"].queryset = work_groups_qs
+        if self.instance and self.instance.pk:
+            self.initial["user_languages"] = list(
+                self.instance.user_languages.filter(id__in=language_options["language_ids"]).values_list("id", flat=True)
+            )
 
     def clean_email(self):
         return clean_user_email(self.cleaned_data.get("email"), instance=self.instance)
@@ -824,7 +838,6 @@ class AppUserForm(forms.ModelForm):
             self.add_error("email", "Email is required for dashboard users.")
         validate_user_phone_number(self, cleaned)
         return cleaned
-
 
 class OrganisationRoleForm(forms.ModelForm):
     permissions = forms.ModelMultipleChoiceField(

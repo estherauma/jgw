@@ -4,9 +4,8 @@ from django.utils import timezone
 from django.conf import settings
 from common.models import AuditFieldsMixin
 from django.db import models
-from preference.models import Country, FactoryFarm, ImmigrationStatus, Organisation, OrganisationData
+from preference.models import Country, FactoryFarm, ImmigrationStatus, Language, Organisation, OrganisationData
 from decimal import Decimal
-from content.models import Locale
 
 ROLES = ["SCHEME", "FACTORY", "STAFF", "ADMIN"]
 USER_TYPE_CHOICES = [
@@ -77,7 +76,7 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
     )
     work_groups = models.ManyToManyField("user_management.WorkGroup", blank=True, related_name="users")
     destinations = models.ManyToManyField(Country, blank=True)
-    user_languages = models.ManyToManyField(Locale, blank=True)
+    user_languages = models.ManyToManyField(Language, blank=True)
     excluded_origin_countries = models.ManyToManyField(Country, blank=True, related_name="excluded_origins")
 
     is_staff = models.BooleanField(
