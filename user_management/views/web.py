@@ -38,6 +38,7 @@ from ..forms import (
 )
 from ..invitations import send_invitation
 from ..decorators import group_required
+from users.services.account_deletion import anonymize_and_soft_delete_user
 from ..models import (
     OrganisationRole,
     OrganisationRoleAssignment,
@@ -1777,7 +1778,10 @@ class BulkDeleteUsersView(View):
                         if getattr(user, 'created_by_id', None) != current_user.id and is_58_admin(user):
                             failed_count += 1
                             continue
-                    user.soft_delete(deleted_by=current_user)
+                    anonymize_and_soft_delete_user(
+                        user,
+                        deleted_by=current_user,
+                    )
                     deletion_count += 1
 
             if failed_count and not deletion_count:
