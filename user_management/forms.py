@@ -842,6 +842,8 @@ class AppUserForm(forms.ModelForm):
         return cleaned
 
 class OrganisationRoleForm(forms.ModelForm):
+    RESERVED_ROLE_PERMISSION_CONDITIONS = {"58_admin", "superuser"}
+
     permissions = forms.ModelMultipleChoiceField(
         queryset=Flag.objects.none(),
         required=True,
@@ -865,9 +867,13 @@ class OrganisationRoleForm(forms.ModelForm):
             {"class": "form-control um-input", "placeholder": "Role description"}
         )
         self.fields.pop("grants_dashboard_access", None)
-        um_flags = UM_FLAG_DEFS
+        um_flags = [
+            flag
+            for flag in UM_FLAG_DEFS
+            if flag.get("condition") not in self.RESERVED_ROLE_PERMISSION_CONDITIONS
+        ]
         if self.current_user and is_org_admin_or_staff(self.current_user):
-            um_flags = [flag for flag in UM_FLAG_DEFS if flag.get("condition") == "org_admin"]
+            um_flags = [flag for flag in um_flags if flag.get("condition") == "org_admin"]
         um_flag_names = [flag["name"] for flag in um_flags]
         self.fields["permissions"].queryset = Flag.objects.filter(
             name__in=um_flag_names
