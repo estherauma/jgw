@@ -52,9 +52,10 @@ def send_sms_invitation(user, context, days_to_expiry=3):
             f"{context['temporary_password_expiry_days']} days. "
             f"Log in using your phone number."
         )
- 
-        logger.info("Sending SMS to %s: %s", user.phone_number, message)
+
+        last_3 = (user.phone_number or "")[-3:]
+        logger.info("Sending SMS to number ending in %s", last_3)
         return send_sms(user.phone_number, message)
     except Exception as exc:
-        logger.exception("send_sms_invitation failed for %s: %s", user.phone_number, exc)
+        logger.exception("send_sms_invitation failed for number ending with %s: %s", last_3, exc)
         return False
