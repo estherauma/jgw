@@ -176,7 +176,21 @@
       return;
     }
     var errorBox = document.getElementById('add-appuser-form-error');
+    var phoneInput = form.querySelector('[name="phone_number"]');
+    var smsConsentWrapper = form.querySelector('[data-phone-sms-consent-wrapper]');
+    var smsConsentInput = form.querySelector('[name="sms_consent_confirmation"]');
     initCustomFormSelects(form);
+
+    function syncSmsConsentVisibility() {
+      if (!smsConsentWrapper || !phoneInput) {
+        return;
+      }
+      var hasPhoneNumber = Boolean((phoneInput.value || '').trim());
+      smsConsentWrapper.classList.toggle('d-none', !hasPhoneNumber);
+      if (!hasPhoneNumber && smsConsentInput) {
+        smsConsentInput.checked = false;
+      }
+    }
 
     function clearErrors() {
       if (window.clearFormErrors) {
@@ -187,15 +201,22 @@
     function resetAppUserForm() {
       clearErrors();
       form.reset();
+      syncSmsConsentVisibility();
       refreshCustomFormSelects(form);
       if (window.syncSelectedOrganization) {
         window.syncSelectedOrganization('add-appuser-form', '[data-appuser-org-label]');
       }
     }
 
+    if (phoneInput) {
+      phoneInput.addEventListener('input', syncSmsConsentVisibility);
+      phoneInput.addEventListener('change', syncSmsConsentVisibility);
+    }
+
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
       clearErrors();
+      syncSmsConsentVisibility();
       if (window.syncSelectedOrganization) {
         window.syncSelectedOrganization('add-appuser-form', '[data-appuser-org-label]');
       }
@@ -246,6 +267,7 @@
     $('[data-target="#add-appuser-modal"]').on('click', function () {
       resetAppUserForm();
     });
+    syncSmsConsentVisibility();
   }
 
   function initDashboardUserForm() {
