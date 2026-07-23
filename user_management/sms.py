@@ -4,6 +4,13 @@ from django.conf import settings
 from twilio.rest import Client
 
 logger = getLogger("djangoDebug")
+SMS_OPT_OUT_TEXT = "Reply STOP to opt out."
+
+
+def build_sms_body(message):
+    if message.endswith(SMS_OPT_OUT_TEXT):
+        return message
+    return f"{message} {SMS_OPT_OUT_TEXT}"
 
 
 def send_sms(to_number, message):
@@ -16,7 +23,7 @@ def send_sms(to_number, message):
     try:
         client = Client(account_sid, auth_token)
         params = {
-            "body": message,
+            "body": build_sms_body(message),
             "to": to_number,
             "messaging_service_sid": messaging_service_sid,
         }
@@ -35,15 +42,15 @@ def send_sms_invitation(user, context, days_to_expiry=3):
 
     try:
         org_text = (
-            f"You have been added to {context['organisation'].name}. "
+            f"Your organization {context['organisation'].name} has created an account for you. "
             if context["organisation"]
-            else ""
+            else "An account has been created for you. "
         )
         message = (
-            f"Just Good Work: {org_text}Use this temporary password to sign in to the Just Good Work app: "
+            f"Just Good Work: {org_text}Your temporary password is "
             f"{context['temporary_password']}. It expires in "
             f"{context['temporary_password_expiry_days']} days. "
-            f"You must change it the first time you sign in."
+            f"Log in using your phone number."
         )
  
         logger.info("Sending SMS to %s: %s", user.phone_number, message)
