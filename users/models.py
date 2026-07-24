@@ -61,6 +61,14 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
     email = models.EmailField(null=True, blank=True, max_length=128, unique=True)
     phone_number = models.CharField(blank=True, null=True, max_length=32)
     phone_country_iso = models.CharField(blank=True, null=True, max_length=2)
+    sms_consent_confirmed_at = models.DateTimeField(null=True, blank=True)
+    sms_consent_confirmed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sms_consent_confirmed_users",
+    )
 
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
@@ -128,12 +136,16 @@ class User(AbstractBaseUser, PermissionsMixin, AuditFieldsMixin):
         self.is_active = False
         super().soft_delete(deleted_by)
 
+    def record_sms_consent(self, confirmed_by):
+        self.sms_consent_confirmed_at = timezone.now()
+        self.sms_consent_confirmed_by = confirmed_by
+
 
 class UserInvitations(AuditFieldsMixin):
     STATUS = models.TextChoices("Status", " ".join(STATUS))
     user = models.ForeignKey(
         User,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name="invitations",

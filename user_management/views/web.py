@@ -38,6 +38,7 @@ from ..forms import (
 )
 from ..invitations import send_invitation
 from ..decorators import group_required
+from users.services.account_deletion import anonymize_and_soft_delete_user
 from ..models import (
     OrganisationRole,
     OrganisationRoleAssignment,
@@ -183,7 +184,11 @@ def user_management(request):
         "create_organization_group_form": CreateOrganizationGroupForm(),
         "add_work_code_form": AddWorkCodeForm(),
         "work_group_form": WorkGroupForm(),
-        "app_user_form": AppUserForm(work_groups_qs=work_groups, organisation=selected_org),
+        "app_user_form": AppUserForm(
+            work_groups_qs=work_groups,
+            organisation=selected_org,
+            require_sms_consent=True,
+        ),
         "dashboard_user_form": DashboardUserForm(orgs_qs=organizations),
         "users_filter_form": UsersFilterForm(
             role_options=(
@@ -991,6 +996,7 @@ class CreateAppUserView(View):
             request.POST,
             work_groups_qs=work_groups_qs,
             organisation=organisation,
+            require_sms_consent=True,
         )
         if form.is_valid():
             try:
@@ -1005,6 +1011,8 @@ class CreateAppUserView(View):
                     user.has_temporary_password = True
                     user.is_active = True
                     user.temporary_password_expires_at = temporary_password_expires_at
+                    if user.phone_number:
+                        user.record_sms_consent(request.user)
 
                     user.save()
                     form.save_m2m()
@@ -1770,7 +1778,10 @@ class BulkDeleteUsersView(View):
                         if getattr(user, 'created_by_id', None) != current_user.id and is_58_admin(user):
                             failed_count += 1
                             continue
-                    user.soft_delete(deleted_by=current_user)
+                    anonymize_and_soft_delete_user(
+                        user,
+                        deleted_by=current_user,
+                    )
                     deletion_count += 1
 
             if failed_count and not deletion_count:

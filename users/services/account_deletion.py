@@ -4,7 +4,7 @@ from users.models import UserVerificationCode
 
 
 @transaction.atomic
-def anonymize_and_soft_delete_user(user):
+def anonymize_and_soft_delete_user(user, deleted_by=None):
     user.email = f"deleted-{user.id}@deleted.local"
     user.first_name = ""
     user.last_name = ""
@@ -15,7 +15,7 @@ def anonymize_and_soft_delete_user(user):
     user.receive_marketing_emails = False
     user.dashboard_preferences = {}
     user.set_unusable_password()
-    user.soft_delete(deleted_by=user)
+    user.soft_delete(deleted_by=deleted_by or user)
 
     UserVerificationCode.objects.filter(user=user).delete()
 

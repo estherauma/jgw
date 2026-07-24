@@ -742,11 +742,18 @@ class UsersFilterForm(forms.Form):
 
 
 class AppUserForm(forms.ModelForm):
+    SMS_CONSENT_LABEL = (
+        "I confirm that my organization has authorization to provide this user's mobile "
+        "number and that the user has agreed to receive account related SMS messages "
+        "required to access Just Good Work."
+    )
+
     role = forms.ModelChoiceField(queryset=OrganisationRole.objects.none(), required=True)
     password = forms.CharField(widget=forms.PasswordInput, required=False)
     password_confirm = forms.CharField(widget=forms.PasswordInput, required=False)
     phone_country_iso = forms.ChoiceField(required=False)
     send_invite = forms.BooleanField(required=False, initial=True)
+    sms_consent_confirmation = forms.BooleanField(required=False)
     user_languages = forms.ModelMultipleChoiceField(
         queryset=Language.objects.none(),
         required=False,
@@ -768,6 +775,7 @@ class AppUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         work_groups_qs = kwargs.pop("work_groups_qs", None)
         organisation = kwargs.pop("organisation", None)
+        self.require_sms_consent = kwargs.pop("require_sms_consent", False)
         super().__init__(*args, **kwargs)
 
         self.fields["email"].widget.attrs.update(
@@ -805,6 +813,10 @@ class AppUserForm(forms.ModelForm):
         self.fields["send_invite"].widget = forms.CheckboxInput(
             attrs={"class": "form-check-input"}
         )
+        self.fields["sms_consent_confirmation"].label = self.SMS_CONSENT_LABEL
+        self.fields["sms_consent_confirmation"].widget = forms.CheckboxInput(
+            attrs={"class": "form-check-input"}
+        )
         language_options = get_locale_backed_language_options()
         self.fields["user_languages"].queryset = Language.objects.filter(
             id__in=language_options["language_ids"]
@@ -839,6 +851,17 @@ class AppUserForm(forms.ModelForm):
         if role and role.grants_dashboard_access and not email:
             self.add_error("email", "Email is required for dashboard users.")
         validate_user_phone_number(self, cleaned)
+        if (
+            self.require_sms_consent
+            and phone_number
+            and not self.has_error("phone_number")
+            and not self.has_error("phone_country_iso")
+            and not cleaned.get("sms_consent_confirmation")
+        ):
+            self.add_error(
+                "sms_consent_confirmation",
+                "Confirm SMS consent before saving a user with a phone number.",
+            )
         return cleaned
 
 class OrganisationRoleForm(forms.ModelForm):

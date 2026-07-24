@@ -75,6 +75,18 @@
                             </div>
                         </div>
                     </div>
+                    {% if action_type == 'add' %}
+                    <label class="um-field form-group um-field-full d-none" data-phone-sms-consent-wrapper>
+                        <span class="d-flex align-items-start">
+                            {{ form.sms_consent_confirmation }}
+                            <span class="ml-2">{{ form.sms_consent_confirmation.label }}</span>
+                        </span>
+                        <div class="text-danger small" data-error-for="sms_consent_confirmation"></div>
+                        {% if form.sms_consent_confirmation.errors %}
+                            <div class="text-danger small">{{ form.sms_consent_confirmation.errors }}</div>
+                        {% endif %}
+                    </label>
+                    {% endif %}
                     <label class="um-field form-group">
                         <span>First name</span>
                         {{ form.first_name }}

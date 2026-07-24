@@ -512,6 +512,37 @@ a.um-view-details-link:focus {
 .um-field-inline .text-danger {
     margin-left: auto;
 }
+[data-phone-sms-consent-wrapper] > span {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid #c9dc8b;
+    border-radius: 12px;
+    background: #f5f9e8;
+}
+[data-phone-sms-consent-wrapper] > span > span:last-child {
+    margin-left: 0 !important;
+    color: #486118;
+    font-weight: 600;
+    line-height: 1.45;
+}
+[data-phone-sms-consent-wrapper] .form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    border: 2px solid #7c9c2f;
+    background-color: #ffffff;
+}
+[data-phone-sms-consent-wrapper] .form-check-input:checked {
+    background-color: #9dbe3b;
+    border-color: #9dbe3b;
+}
+[data-phone-sms-consent-wrapper] .form-check-input:focus {
+    border-color: #9dbe3b;
+    box-shadow: 0 0 0 0.2rem rgba(157, 190, 59, 0.25);
+}
 .um-modal-footer {
     display: flex;
     justify-content: space-between;
