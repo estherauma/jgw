@@ -842,7 +842,7 @@ class AppUserForm(forms.ModelForm):
         return cleaned
 
 class OrganisationRoleForm(forms.ModelForm):
-    RESERVED_ROLE_PERMISSION_CONDITIONS = {"58_admin", "superuser"}
+    RESERVED_ROLE_PERMISSION_CONDITIONS = frozenset({"58_admin"})
 
     permissions = forms.ModelMultipleChoiceField(
         queryset=Flag.objects.none(),
