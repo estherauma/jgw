@@ -92,7 +92,7 @@ UM_FLAG_DEFS = [
     {
         "name": "can_edit_organization_details",
         "label": "Edit organisation details",
-        "condition": "org_admin",
+        "condition": "58_admin",
     },
     {
         "name": "can_select_organization",
