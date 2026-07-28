@@ -1238,12 +1238,19 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+
+      if (typeof window.toggleFullScreenLoader === 'function'){
+        window.toggleFullScreenLoader(true);
+      }
       try {
         if (window.postFormJson) {
-          await window.postFormJson(form, {showFullScreenLoader: true});
+          await window.postFormJson(form);
         }
         window.location.reload();
       } catch (data) {
+        if (typeof window.toggleFullScreenLoader === 'function'){
+          window.toggleFullScreenLoader(false)
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
