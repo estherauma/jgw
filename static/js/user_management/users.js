@@ -973,6 +973,7 @@
         headers: {
           'Content-Type': 'application/json',
           },
+        showFullScreenLoader: true,
         onSuccess: function () {
           window.location.reload();
         },
