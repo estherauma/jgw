@@ -1206,10 +1206,6 @@
       return;
     }
 
-    if (!modal || !form) {
-      return;
-    }
-
     $('[data-target="#assign-users-workgroup-modal"]').on('click', function () {
       if (window.clearFormErrors) {
         window.clearFormErrors(form, errorBox);
@@ -1244,7 +1240,7 @@
       }
       try {
         if (window.postFormJson) {
-          await window.postFormJson(form);
+          await window.postFormJson(form, {showFullScreenLoader: true});
         }
         window.location.reload();
       } catch (data) {
