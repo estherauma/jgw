@@ -218,8 +218,10 @@
     width: 250px;
 }
 
+.enhanced-sidebar [data-simplebar],
 .enhanced-sidebar .h-100 {
     padding: 20px 0;
+    height: 100%;
 }
 
 .enhanced-sidebar #sidebar-menu {
@@ -238,65 +240,76 @@
     position: relative;
 }
 
-.enhanced-sidebar .menu-link {
+.enhanced-sidebar #sidebar-menu > ul > li > a.menu-link {
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
+    gap: 0;
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 12px 20px;
+    min-height: 48px;
+    box-sizing: border-box;
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-right: 10px;
     position: relative;
     overflow: hidden;
     background: transparent;
 }
 
-.enhanced-sidebar .menu-link:hover {
+.enhanced-sidebar #sidebar-menu > ul > li > a.menu-link:hover {
     color: white;
     background: rgba(255, 255, 255, 0.05);
 }
 
-.enhanced-sidebar .menu-link.active {
+.enhanced-sidebar #sidebar-menu > ul > li > a.menu-link.active {
     background: rgba(255, 255, 255, 0.25) !important;
     color: white !important;
 }
 
-.enhanced-sidebar .menu-link.active:hover {
+.enhanced-sidebar #sidebar-menu > ul > li > a.menu-link.active:hover {
     background: rgba(255, 255, 255, 0.3) !important;
 }
 
-.enhanced-sidebar .menu-icon {
+.enhanced-sidebar #sidebar-menu > ul > li > a .menu-icon,
+.enhanced-sidebar #sidebar-menu > ul > li > a svg.menu-icon {
     width: 22px;
     height: 22px;
-    margin-right: 15px;
+    margin: 0 15px 0 0;
     flex-shrink: 0;
     color: rgba(255, 255, 255, 0.9);
 }
 
+/* Reveal labels via sidebar width clip + opacity — no max-width
+   reflow that would change vertical menu spacing on hover */
 .enhanced-sidebar .menu-text {
     color: white;
     white-space: nowrap;
     font-weight: 400;
     font-size: 14px;
     opacity: 0;
-    transform: translateX(-10px);
-    transition: all 0.3s ease;
-    max-width: 0;
-    overflow: hidden;
+    transition: opacity 0.3s ease;
+    flex-shrink: 0;
 }
 
-.enhanced-sidebar:hover .menu-text {
+.enhanced-sidebar:hover .menu-text,
+.enhanced-sidebar.sidebar-expanded .menu-text {
     opacity: 1;
-    transform: translateX(0);
-    max-width: 180px;
 }
 
 .enhanced-sidebar .menu-arrow {
     color: white !important;
     margin-left: auto;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
     position: static;
     flex-shrink: 0;
+    opacity: 0;
+}
+
+.enhanced-sidebar:hover .menu-arrow,
+.enhanced-sidebar.sidebar-expanded .menu-arrow {
+    opacity: 1;
 }
 
 .enhanced-sidebar .has-submenu .menu-link[aria-expanded="true"] .menu-arrow {
@@ -329,11 +342,11 @@
     padding-top: 15px;
 }
 
-.enhanced-sidebar .logout-item .menu-link {
+.enhanced-sidebar #sidebar-menu > ul > li.logout-item > a.menu-link {
     color: rgba(255, 255, 255, 0.6);
 }
 
-.enhanced-sidebar .logout-item .menu-link:hover {
+.enhanced-sidebar #sidebar-menu > ul > li.logout-item > a.menu-link:hover {
     color: #ff6b6b;
     background: rgba(255, 107, 107, 0.1);
 }
