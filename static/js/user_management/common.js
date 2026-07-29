@@ -517,9 +517,6 @@
         });
       } finally {
         confirmBtn.disabled = false;
-        if (options.showFullScreenLoader && loader) {
-          loader.classList.add('d-none');
-        }
       }
     };
   }
