@@ -5,6 +5,41 @@ from preference.models import Preference, OrganisationData, PreferenceHistory
 from common.const.value_const import org_info_list
 
 
+def _normalize_org_name(name):
+    """Lowercase, treat commas as spaces, and collapse whitespace for comparison."""
+    if not name:
+        return ""
+    return " ".join(name.lower().replace(",", " ").split())
+
+
+def _build_organisation_data_name_lookup():
+    """
+    Map exact (lower) and normalized names to OrganisationData instances.
+    Built once per run to avoid repeated table scans.
+    """
+    exact_lookup = {}
+    normalized_lookup = {}
+    for org_data in OrganisationData.objects.all().only("id", "name", "org_code"):
+        exact_lookup[org_data.name.lower().strip()] = org_data
+        normalized = _normalize_org_name(org_data.name)
+        if normalized and normalized not in normalized_lookup:
+            normalized_lookup[normalized] = org_data
+    return exact_lookup, normalized_lookup
+
+
+def _find_organisation_data_by_name(org_name, exact_lookup, normalized_lookup):
+    """Match OrganisationData by exact then normalized name."""
+    stripped = org_name.strip()
+    org_data = exact_lookup.get(stripped.lower())
+    if org_data:
+        return org_data
+
+    normalized = _normalize_org_name(stripped)
+    if not normalized:
+        return None
+    return normalized_lookup.get(normalized)
+
+
 def update_preferences_org_info_from_organisation():
     """
     Update preference org_info with the matching OrganisationData instance.
@@ -12,10 +47,13 @@ def update_preferences_org_info_from_organisation():
 
     Resolution order:
     1. If preference.org_code is set, look up OrganisationData by org_code and set org_info.
-    2. Otherwise, match by organisation name against org_info_list and set org_info from that.
+    2. If unresolved, match by organisation name against OrganisationData.name
+       and set that OrganisationData instance as org_info.
+    3. Otherwise, match by organisation name against org_info_list and set org_info from that.
     """
     kunfu_panda_logger = KunfuPandaLogger()
     update_count = 0
+    exact_lookup, normalized_lookup = _build_organisation_data_name_lookup()
 
     with transaction.atomic():
         preferences_to_update = Preference.objects.filter(
@@ -29,9 +67,10 @@ def update_preferences_org_info_from_organisation():
         for preference in preferences_to_update:
             org_data = None
             source = None
+            has_org_code = bool(preference.org_code and preference.org_code.strip())
 
             # 1. Prefer org_code if set: look up OrganisationData by code
-            if preference.org_code and preference.org_code.strip():
+            if has_org_code:
                 try:
                     org_data = OrganisationData.objects.get(
                         org_code=preference.org_code.strip()
@@ -42,12 +81,27 @@ def update_preferences_org_info_from_organisation():
                         f"No OrganisationData found for org_code: {preference.org_code!r}"
                     )
 
-            # 2. Fallback: match by organisation name via org_info_list
+            # 2. Fallback: match by organisation name against OrganisationData.name
             if org_data is None and preference.organisation:
-                org_name = preference.organisation.name.lower().strip()
+                org_data = _find_organisation_data_by_name(
+                    preference.organisation.name,
+                    exact_lookup,
+                    normalized_lookup,
+                )
+                if org_data:
+                    source = "organisation_name"
+                else:
+                    kunfu_panda_logger.warning(
+                        f"No OrganisationData found for name: {preference.organisation.name!r}"
+                    )
+
+            # 3. Fallback: match by organisation name via org_info_list
+            if org_data is None and preference.organisation:
+                org_name = preference.organisation.name
+                normalized_org_name = _normalize_org_name(org_name)
                 matching_org = next(
                     (org for org in org_info_list
-                     if org["name"].lower().strip() == org_name),
+                     if _normalize_org_name(org["name"]) == normalized_org_name),
                     None
                 )
                 if matching_org:
@@ -55,7 +109,7 @@ def update_preferences_org_info_from_organisation():
                         org_data = OrganisationData.objects.get(
                             org_code=matching_org["org_code"]
                         )
-                        source = "organisation_name"
+                        source = "org_info_list"
                     except OrganisationData.DoesNotExist:
                         kunfu_panda_logger.warning(
                             f"No OrganisationData found for org_code: {matching_org['org_code']}"
