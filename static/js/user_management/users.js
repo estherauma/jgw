@@ -1062,6 +1062,7 @@
         },
         confirmButtonText: 'Delete',
         confirmButtonClass: 'um-btn um-btn-danger',
+        showFullScreenLoader: true,
         onSuccess: function () {
           window.location.href = document.referrer || '/user-management/';
         },
@@ -1297,6 +1298,7 @@
         },
         confirmButtonText: isDeactivateAction ? 'Deactivate' : 'Activate',
         confirmButtonClass: isDeactivateAction ? 'um-btn um-btn-danger' : 'um-btn um-btn-lime',
+        showFullScreenLoader: true,
         onSuccess: function () {
           window.location.reload();
         },
