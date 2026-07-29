@@ -118,7 +118,6 @@ class DeepLinkService:
     @classmethod
     def update_branch_deep_link(cls, *, branch_url, payload):
         branch_settings = cls.get_branch_settings()
-        print(branch_settings)
 
         branch_secret = branch_settings["branch_secret"]
         branch_key = branch_settings["branch_key"]
