@@ -615,8 +615,8 @@
       var submitButton = form.querySelector("button[type='submit']");
       if (submitButton) submitButton.disabled = true;
 
-      if (window.toggleFullScreenLoader){
-        window.toggleFullScreenLoader(true)
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
       }
 
       try {
@@ -625,8 +625,8 @@
         }
         window.location.reload();
       } catch (data) {
-        if (window.toggleFullScreenLoader){
-          window.toggleFullScreenLoader(false)
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
         }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
@@ -1247,7 +1247,7 @@
         submitButton.disabled = true;
       }
 
-      if (window.toggleFullScreenLoader){
+      if (window.toggleFullScreenLoader) {
         window.toggleFullScreenLoader(true);
       }
       try {
@@ -1256,8 +1256,8 @@
         }
         window.location.reload();
       } catch (data) {
-        if (window.toggleFullScreenLoader){
-          window.toggleFullScreenLoader(false)
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
         }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
