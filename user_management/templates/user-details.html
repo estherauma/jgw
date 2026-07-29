@@ -328,6 +328,10 @@
             {% endif %}
         </div>
     </div>
+    <div class="um-fullscreen-loader d-none">
+        <div class="um-loader-spinner" role="status" aria-live="polite" aria-label="Loading"></div>
+        <span class="um-loader-text">Please wait...</span>
+    </div>
 </div>
 
 {% include 'add-dashboard-user-modal.html' with action_type='edit' modal_title='Edit admin user' submit_label='Save changes' form_action='' form=dashboard_user_form %}
