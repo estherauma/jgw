@@ -124,6 +124,7 @@ class Command(BaseCommand):
             "58_admin": ["58_admin"],  # 58_admin permissions only
             "user_management": ["user_management", "58_admin"],
         }
+        EXCLUDED_58_ADMIN_FLAGS = {}  # to add any flags that should not be assigned to 58_admin group
   
         for flag in flags_list:
             created_flag, created = WaffleFlag.objects.get_or_create(name=flag["tag"], superusers=True)
@@ -133,6 +134,9 @@ class Command(BaseCommand):
                 for group_name in ROLE_INHERITANCE[flag["condition"]]:
                     group, _ = Group.objects.get_or_create(name=group_name)
                     created_flag.groups.add(group)
+            if flag["tag"] not in EXCLUDED_58_ADMIN_FLAGS:
+                admin_58_group, _ = Group.objects.get_or_create(name="58_admin")
+                created_flag.groups.add(admin_58_group)
             if flag["condition"] == "everyone":
                 created_flag.everyone = True
                 created_flag.save()
