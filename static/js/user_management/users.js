@@ -70,12 +70,12 @@
     var groupsField = form.querySelector('select[name="groups"]');
     if (groupsField) {
       return Array.from(groupsField.selectedOptions).map(function (option) {
-        return (option.text || '').trim();
+        return String(option.value || '').trim();
       });
     }
     return Array.from(form.querySelectorAll('input[name="groups"]:checked')).map(
       function (input) {
-        return input.value;
+        return String(input.value || '').trim();
       },
     );
   }

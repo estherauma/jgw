@@ -481,6 +481,7 @@ class DashboardUserForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
         required=True,
+        to_field_name="name",
         widget=forms.SelectMultiple(),
     )
     organisation_group = forms.ModelChoiceField(
@@ -549,6 +550,7 @@ class DashboardUserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         groups_qs = Group.objects.exclude(name__in=["worker", "org_staff"]).order_by("name")
         self.fields["groups"].queryset = groups_qs
+        self.fields["groups"].to_field_name = "name"
         self.fields["groups"].label_from_instance = (
             lambda group: self.DASHBOARD_GROUP_LABELS.get(group.name, group.name)
         )
