@@ -262,10 +262,20 @@ class CreateOrganisationForm(forms.ModelForm):
 
     def clean_access_code(self):
         access_code = self.cleaned_data.get("access_code", "").strip().upper()
-        if access_code and not self.ACCESS_CODE_PATTERN.fullmatch(access_code):
-            raise forms.ValidationError(
-                "Access code must contain only letters and numbers."
-            )
+        if access_code:
+            access_codes = [code.strip() for code in access_code.split(",") if code.strip()]
+
+            if (
+                len(access_codes) > 1
+                and self.instance
+                and self.instance.pk
+            ):
+                pass  # because edit access code is disabled
+
+            elif not self.ACCESS_CODE_PATTERN.fullmatch(access_code):
+                raise forms.ValidationError(
+                    "Access code must contain only letters and numbers."
+                )
         qs = OrganisationAccessCode.objects.filter(code__iexact=access_code)
         if self.instance and self.instance.pk:
             qs = qs.exclude(organisation=self.instance)
