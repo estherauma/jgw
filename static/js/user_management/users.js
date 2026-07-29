@@ -1239,7 +1239,7 @@
         submitButton.disabled = true;
       }
 
-      if (typeof window.toggleFullScreenLoader === 'function'){
+      if (window.toggleFullScreenLoader){
         window.toggleFullScreenLoader(true);
       }
       try {
@@ -1248,7 +1248,7 @@
         }
         window.location.reload();
       } catch (data) {
-        if (typeof window.toggleFullScreenLoader === 'function'){
+        if (window.toggleFullScreenLoader){
           window.toggleFullScreenLoader(false)
         }
         if (window.handleErrors) {
