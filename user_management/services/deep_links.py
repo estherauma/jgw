@@ -88,6 +88,7 @@ class DeepLinkService:
     @classmethod
     def get_branch_deep_link(cls, *, branch_url):
         branch_settings = cls.get_branch_settings()
+
         branch_key = branch_settings["branch_key"]
 
         if not branch_key:
@@ -117,6 +118,8 @@ class DeepLinkService:
     @classmethod
     def update_branch_deep_link(cls, *, branch_url, payload):
         branch_settings = cls.get_branch_settings()
+        print(branch_settings)
+
         branch_secret = branch_settings["branch_secret"]
         branch_key = branch_settings["branch_key"]
 
@@ -232,6 +235,7 @@ class DeepLinkService:
     ):
         title = link_data["title"]
         link_type = link_data["link_type"]
+        country_of_origin = link_data.get("country_of_origin")
         destination = link_data["destination"]
         access_code = link_data.get("access_code")
         sector = link_data.get("sector")
@@ -244,6 +248,9 @@ class DeepLinkService:
             "data": {
                 "$marketing_title": title,
                 "type": link_type,
+                "countryOfOrigin": (country_of_origin.code or "").upper()
+                if country_of_origin
+                else "",
                 "destination": (destination.code or "").upper(),
                 "organisationAccessCode": access_code.code if access_code else "",
                 "sectors": sector.slug if sector else "",

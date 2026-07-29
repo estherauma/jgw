@@ -2195,7 +2195,7 @@ class CreateDeepLinkView(View):
                     "work_code_id": work_code_id,
                 },
             ),
-            "onboarding": (
+            "onboard": (
                 OrganizationService.create_onboarding_deep_link,
                 {
                     "organisation": organisation,
@@ -2233,7 +2233,7 @@ class CreateDeepLinkView(View):
                 status=500,
             )
 
-        if deep_link_type == "onboarding":
+        if deep_link_type == "onboard":
             messages.success(
                 request,
                 f'Deep link "{branch_data["title"]}" created successfully.',

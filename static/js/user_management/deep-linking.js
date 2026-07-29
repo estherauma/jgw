@@ -3,6 +3,7 @@
   const DEFAULT_COPY_LABEL = 'Copy';
   const DEFAULT_COPIED_LABEL = 'Copied';
   const DEFAULT_ERROR_MESSAGE = 'Could not generate the deep link. Please try again.';
+  const DEFAULT_QR_FILENAME = 'qr-code';
 
   const getCsrfToken = () =>
     document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
@@ -51,6 +52,16 @@
 
     await navigator.clipboard.writeText(text);
     return true;
+  };
+
+  const getTimestampedQrFilename = (extension) => {
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[-:]/g, '')
+      .replace(/\.\d+Z$/, '')
+      .replace('T', '-');
+
+    return `${DEFAULT_QR_FILENAME}-${timestamp}.${extension}`;
   };
 
   const createQrCodeModalController = (modal) => {
@@ -177,12 +188,12 @@
     bindDownloadAction({
       button: downloadSvgButton,
       format: 'svg',
-      getFilename: (extension) => `work-code-qr.${extension}`,
+      getFilename: getTimestampedQrFilename,
     });
     bindDownloadAction({
       button: downloadPngButton,
       format: 'png',
-      getFilename: (extension) => `work-code-qr.${extension}`,
+      getFilename: getTimestampedQrFilename,
     });
 
     return {
@@ -394,7 +405,8 @@
       }
       setFieldValue('deep_link_id', data.deep_link_id || '');
       setFieldValue('title', data.title || '');
-      setFieldValue('link_type', data.link_type || 'onboarding');
+      setFieldValue('link_type', data.link_type || 'onboard');
+      setFieldValue('country_of_origin', data.country_of_origin || '');
       setFieldValue('destination', data.destination || '');
       setFieldValue('access_code', data.access_code || '');
       setFieldValue('sectors', data.sectors || '');
@@ -410,7 +422,7 @@
       clearErrors();
       form.reset();
       setCreateMode();
-      setFieldValue('link_type', 'onboarding');
+      setFieldValue('link_type', 'onboard');
       syncSelectedOrgId();
       refreshCustomFormSelects();
     }
@@ -440,6 +452,8 @@
               title: form.querySelector('[name="title"]')?.value || '',
               link_type:
                 form.querySelector('[name="link_type"]')?.value || '',
+              country_of_origin:
+                form.querySelector('[name="country_of_origin"]')?.value || '',
               destination:
                 form.querySelector('[name="destination"]')?.value || '',
               access_code:
