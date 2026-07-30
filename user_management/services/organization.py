@@ -362,6 +362,7 @@ class OrganizationService:
         link_data = {
             "title": form.cleaned_data["title"],
             "link_type": form.cleaned_data["link_type"],
+            "country_of_origin": form.cleaned_data.get("country_of_origin"),
             "destination": form.cleaned_data["destination"],
             "access_code": form.cleaned_data.get("access_code"),
             "sector": form.cleaned_data.get("sectors"),
@@ -395,8 +396,10 @@ class OrganizationService:
 
         branch_data = DeepLinkService.get_branch_deep_link(branch_url=deep_link.link)
         branch_link_data = branch_data.get("data") or {}
-        print(branch_link_data)
 
+        country_of_origin = Country.objects.filter(
+            code__iexact=(branch_link_data.get("countryOfOrigin") or "").strip()
+        ).first()
         destination = Country.objects.filter(
             code__iexact=(branch_link_data.get("destination") or "").strip()
         ).first()
@@ -421,8 +424,9 @@ class OrganizationService:
             "link_type": (
                 branch_link_data.get("type")
                 or deep_link.link_type
-                or "onboarding"
+                or "onboard"
             ),
+            "country_of_origin": str(country_of_origin.id) if country_of_origin else "",
             "destination": str(destination.id) if destination else "",
             "access_code": str(access_code.id) if access_code else "",
             "sectors": sector.slug if sector else "",
@@ -455,6 +459,7 @@ class OrganizationService:
         link_data = {
             "title": form.cleaned_data["title"],
             "link_type": form.cleaned_data["link_type"],
+            "country_of_origin": form.cleaned_data.get("country_of_origin"),
             "destination": form.cleaned_data["destination"],
             "access_code": form.cleaned_data.get("access_code"),
             "sector": form.cleaned_data.get("sectors"),

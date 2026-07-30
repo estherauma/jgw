@@ -25,15 +25,11 @@
   }
 
   function getCheckboxGroupName(input) {
-    var label = input.closest('label');
-    if (!label) {
-      return input.value;
-    }
-    return label.textContent.trim();
+    return String(input.value || '').trim();
   }
 
   function getOptionGroupName(option) {
-    return (option.text || option.value || '').trim();
+    return String(option.value || '').trim();
   }
 
 

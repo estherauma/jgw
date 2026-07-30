@@ -46,6 +46,14 @@
                         {% endif %}
                     </label>
                     <label class="um-field form-group d-block">
+                        <span>Country of origin (Optional)</span>
+                        {% include 'components/custom-select.html' with field=form.country_of_origin placeholder='Select country of origin' search_placeholder='Search country of origin...' no_results_text='No origin countries found.' %}
+                        <div class="text-danger small" data-error-for="country_of_origin"></div>
+                        {% if form.country_of_origin.errors %}
+                            <div class="text-danger small">{{ form.country_of_origin.errors }}</div>
+                        {% endif %}
+                    </label>
+                    <label class="um-field form-group d-block">
                         <span>Access code (Optional)</span>
                         {% include 'components/custom-select.html' with field=form.access_code placeholder='Select access code' search_placeholder='Search access code...' no_results_text='No access codes found.' %}
                         <div class="text-danger small" data-error-for="access_code"></div>

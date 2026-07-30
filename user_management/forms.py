@@ -481,6 +481,7 @@ class DashboardUserForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
         required=True,
+        to_field_name="name",
         widget=forms.SelectMultiple(),
     )
     organisation_group = forms.ModelChoiceField(
@@ -549,6 +550,7 @@ class DashboardUserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         groups_qs = Group.objects.exclude(name__in=["worker", "org_staff"]).order_by("name")
         self.fields["groups"].queryset = groups_qs
+        self.fields["groups"].to_field_name = "name"
         self.fields["groups"].label_from_instance = (
             lambda group: self.DASHBOARD_GROUP_LABELS.get(group.name, group.name)
         )
@@ -959,6 +961,14 @@ class OrganisationRoleForm(forms.ModelForm):
 
 
 class OrganisationDeepLinkForm(forms.ModelForm):
+    DEFAULT_LINK_TYPE = "onboard"
+
+    country_of_origin = forms.ModelChoiceField(
+        queryset=Country.objects.none(),
+        required=False,
+        empty_label="Select country of origin",
+        widget=forms.Select(attrs={"class": "form-select um-input"}),
+    )
     destination = forms.ModelChoiceField(
         queryset=Country.objects.none(),
         required=True,
@@ -994,6 +1004,7 @@ class OrganisationDeepLinkForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["title"].required = True
         self.fields["link_type"].required = True
+        self.fields["country_of_origin"].required = False
         self.fields["destination"].required = True
         self.fields["access_code"].required = False
         self.fields["sectors"].required = False
@@ -1011,9 +1022,12 @@ class OrganisationDeepLinkForm(forms.ModelForm):
         self.fields["link_type"].initial = (
             self.initial.get("link_type")
             or getattr(self.instance, "link_type", None)
-            or "onboarding"
+            or self.DEFAULT_LINK_TYPE
         )
         self.fields["link_type"].disabled = True
+        self.fields["country_of_origin"].queryset = Country.objects.filter(
+            is_origin=True
+        ).order_by("name")
         self.fields["destination"].queryset = Country.objects.filter(
             is_destination=True
         ).order_by("name")
@@ -1032,6 +1046,9 @@ class OrganisationDeepLinkForm(forms.ModelForm):
         )
         self.fields["access_code"].label_from_instance = self.get_access_code_label
         self.fields["sectors"].label_from_instance = lambda sector: sector.display_name
+        self.fields["country_of_origin"].label_from_instance = (
+            self.get_destination_label
+        )
         self.fields["destination"].label_from_instance = (
             self.get_destination_label
         )
@@ -1070,7 +1087,7 @@ class OrganisationDeepLinkForm(forms.ModelForm):
         link_type = (
             (self.cleaned_data.get("link_type") or "")
             or self.fields["link_type"].initial
-            or "onboarding"
+            or self.DEFAULT_LINK_TYPE
         )
         link_type = str(link_type).strip().lower()
         if not link_type:

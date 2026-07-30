@@ -113,7 +113,7 @@ class DeepLinkServiceTests(TestCase):
 
         response = DeepLinkService.update_branch_deep_link(
             branch_url="https://branch.example/onboarding",
-            payload={"data": {"type": "onboarding"}},
+            payload={"data": {"type": "onboard"}},
         )
 
         self.assertEqual(
@@ -126,7 +126,7 @@ class DeepLinkServiceTests(TestCase):
             json={
                 "branch_secret": "branch-secret",
                 "branch_key": "branch-key",
-                "data": {"type": "onboarding"},
+                "data": {"type": "onboard"},
             },
             timeout=30,
         )
@@ -249,6 +249,12 @@ class CreateDeepLinkViewTests(TestCase):
             code="ke",
             api_value="ke",
             is_destination=True,
+        )
+        self.country_of_origin = Country.objects.create(
+            name="Ghana",
+            code="gh",
+            api_value="gh",
+            is_origin=True,
         )
         self.immigration_status = ImmigrationStatus.objects.create(
             name="Visitor",
@@ -379,7 +385,7 @@ class CreateDeepLinkViewTests(TestCase):
             data=json.dumps(
                 {
                     "selected_org_id": self.organisation.id,
-                    "link_type": "onboarding",
+                    "link_type": "onboard",
                 }
             ),
             content_type="application/json",
@@ -408,7 +414,8 @@ class CreateDeepLinkViewTests(TestCase):
                 {
                     "selected_org_id": self.organisation.id,
                     "title": "New starter flow",
-                    "link_type": "onboarding",
+                    "link_type": "onboard",
+                    "country_of_origin": self.country_of_origin.id,
                     "destination": self.destination.id,
                     "access_code": self.access_code.id,
                     "sectors": self.work_sector.slug,
@@ -432,7 +439,8 @@ class CreateDeepLinkViewTests(TestCase):
                     "url": "https://branch.example/onboarding",
                     "data": {
                         "$marketing_title": "New starter flow",
-                        "type": "onboarding",
+                        "type": "onboard",
+                        "countryOfOrigin": "GH",
                         "destination": "KE",
                         "organisationAccessCode": "BAR123",
                         "sectors": "agriculture",
@@ -445,16 +453,17 @@ class CreateDeepLinkViewTests(TestCase):
         deep_link = OrganisationDeepLink.objects.get()
         self.assertEqual(deep_link.organisation, self.organisation)
         self.assertEqual(deep_link.title, "New starter flow")
-        self.assertEqual(deep_link.link_type, "onboarding")
+        self.assertEqual(deep_link.link_type, "onboard")
         self.assertEqual(deep_link.link, "https://branch.example/onboarding")
         mock_create_branch_deep_link.assert_called_once_with(
             payload={
-                "feature": "onboarding",
+                "feature": "onboard",
                 "campaign": "user_management",
-                "tags": ["Bar Way", "onboarding"],
+                "tags": ["Bar Way", "onboard"],
                 "data": {
                     "$marketing_title": "New starter flow",
-                    "type": "onboarding",
+                    "type": "onboard",
+                    "countryOfOrigin": "GH",
                     "destination": "KE",
                     "organisationAccessCode": "BAR123",
                     "sectors": "agriculture",
@@ -470,7 +479,7 @@ class CreateDeepLinkViewTests(TestCase):
                 {
                     "selected_org_id": self.organisation.id,
                     "title": "Blocked flow",
-                    "link_type": "onboarding",
+                    "link_type": "onboard",
                     "destination": self.destination.id,
                 }
             ),
@@ -517,11 +526,23 @@ class DeepLinkDetailViewTests(TestCase):
             api_value="ke",
             is_destination=True,
         )
+        self.country_of_origin = Country.objects.create(
+            name="Ghana",
+            code="gh",
+            api_value="gh",
+            is_origin=True,
+        )
         self.destination_two = Country.objects.create(
             name="Uganda",
             code="ug",
             api_value="ug",
             is_destination=True,
+        )
+        self.country_of_origin_two = Country.objects.create(
+            name="Nigeria",
+            code="ng",
+            api_value="ng",
+            is_origin=True,
         )
         self.immigration_status = ImmigrationStatus.objects.create(
             name="Visitor",
@@ -552,7 +573,7 @@ class DeepLinkDetailViewTests(TestCase):
         self.deep_link = OrganisationDeepLink.objects.create(
             organisation=self.organisation,
             title="Starter flow",
-            link_type="onboarding",
+            link_type="onboard",
             link="https://branch.example/onboarding",
         )
         self.url = reverse(
@@ -566,7 +587,8 @@ class DeepLinkDetailViewTests(TestCase):
         mock_get_branch_deep_link.return_value = {
             "data": {
                 "$marketing_title": "Starter flow",
-                "type": "onboarding",
+                "type": "onboard",
+                "countryOfOrigin": "GH",
                 "destination": "KE",
                 "organisationAccessCode": "BAR123",
                 "sectors": "agriculture",
@@ -584,7 +606,8 @@ class DeepLinkDetailViewTests(TestCase):
                 "data": {
                     "deep_link_id": self.deep_link.id,
                     "title": "Starter flow",
-                    "link_type": "onboarding",
+                    "link_type": "onboard",
+                    "country_of_origin": str(self.country_of_origin.id),
                     "destination": str(self.destination.id),
                     "access_code": str(self.access_code.id),
                     "sectors": "agriculture",
@@ -620,7 +643,8 @@ class DeepLinkDetailViewTests(TestCase):
                 {
                     "selected_org_id": self.organisation.id,
                     "title": "Updated starter flow",
-                    "link_type": "onboarding",
+                    "link_type": "onboard",
+                    "country_of_origin": self.country_of_origin_two.id,
                     "destination": self.destination_two.id,
                     "access_code": self.access_code_two.id,
                     "sectors": self.work_sector_two.slug,
@@ -643,7 +667,8 @@ class DeepLinkDetailViewTests(TestCase):
                     "url": "https://branch.example/onboarding-updated",
                     "data": {
                         "$marketing_title": "Updated starter flow",
-                        "type": "onboarding",
+                        "type": "onboard",
+                        "countryOfOrigin": "NG",
                         "destination": "UG",
                         "organisationAccessCode": "BAR999",
                         "sectors": "agriculturePalmOil",
@@ -655,17 +680,18 @@ class DeepLinkDetailViewTests(TestCase):
 
         self.deep_link.refresh_from_db()
         self.assertEqual(self.deep_link.title, "Updated starter flow")
-        self.assertEqual(self.deep_link.link_type, "onboarding")
+        self.assertEqual(self.deep_link.link_type, "onboard")
         self.assertEqual(self.deep_link.link, "https://branch.example/onboarding-updated")
         mock_update_branch_deep_link.assert_called_once_with(
             branch_url="https://branch.example/onboarding",
             payload={
-                "feature": "onboarding",
+                "feature": "onboard",
                 "campaign": "user_management",
-                "tags": ["Bar Way", "onboarding"],
+                "tags": ["Bar Way", "onboard"],
                 "data": {
                     "$marketing_title": "Updated starter flow",
-                    "type": "onboarding",
+                    "type": "onboard",
+                    "countryOfOrigin": "NG",
                     "destination": "UG",
                     "organisationAccessCode": "BAR999",
                     "sectors": "agriculturePalmOil",
@@ -704,7 +730,7 @@ class DeleteDeepLinkViewTests(TestCase):
         self.deep_link = OrganisationDeepLink.objects.create(
             organisation=self.organisation,
             title="Starter flow",
-            link_type="onboarding",
+            link_type="onboard",
             link="https://branch.example/onboarding",
         )
         self.url = reverse(

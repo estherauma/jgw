@@ -1115,7 +1115,7 @@ class EditDashboardUserView(View):
                     if user.start_date
                     else "",
                     "end_date": user.end_date.isoformat() if user.end_date else "",
-                    "groups": list(user.groups.values_list("id", flat=True)),
+                    "groups": list(user.groups.values_list("name", flat=True)),
                     "organisation_group_id": user.organization_group_id,
                     "organisation_data": list(
                         user.organisation_data.values_list("id", flat=True)
@@ -2195,7 +2195,7 @@ class CreateDeepLinkView(View):
                     "work_code_id": work_code_id,
                 },
             ),
-            "onboarding": (
+            "onboard": (
                 OrganizationService.create_onboarding_deep_link,
                 {
                     "organisation": organisation,
@@ -2233,7 +2233,7 @@ class CreateDeepLinkView(View):
                 status=500,
             )
 
-        if deep_link_type == "onboarding":
+        if deep_link_type == "onboard":
             messages.success(
                 request,
                 f'Deep link "{branch_data["title"]}" created successfully.',
