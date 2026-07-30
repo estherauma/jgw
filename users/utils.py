@@ -17,14 +17,19 @@ ALL_GROUPS = [
 
 
 def get_user_factories(user):
-    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser or user.groups.filter(name="58_admin").exists():
         return FactoryFarm.objects.all()
     return user.factories.all()
 
 
 def get_user_organisations(user):
-    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser or user.groups.filter(name="58_admin").exists():
         return OrganisationData.objects.all()
+    if user.groups.filter(name="org_group_admin").exists():
+        organization_group_id = getattr(user, "organization_group_id", None)
+        if not organization_group_id:
+            return OrganisationData.objects.none()
+        return OrganisationData.objects.filter(organization_group_id=organization_group_id)
     return user.organisation_data.all()
 
 
@@ -33,13 +38,13 @@ def get_user_destinations(user):
     for country_name in ["test-state", "tstd", "tstl", "viet nam"]:
         exclude_query |= Q(name=country_name)
 
-    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser or user.groups.filter(name="58_admin").exists():
         return Country.objects.filter(is_destination=True).exclude(exclude_query)
     return user.destinations.all()
 
 
 def get_user_languages(user):
-    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser or user.groups.filter(name="58_admin").exists():
         return []
 
     user_languages_list = user.user_languages.all()
@@ -47,7 +52,7 @@ def get_user_languages(user):
 
 
 def get_user_excluded_origin_countries(user):
-    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser or user.groups.filter(name="58_admin").exists():
         return []
 
     user_excluded_origin_countries = user.excluded_origin_countries.all()
@@ -55,13 +60,13 @@ def get_user_excluded_origin_countries(user):
 
 
 def get_user_start_date(user):
-    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser or user.groups.filter(name="58_admin").exists():
         return None
     return user.start_date
 
 
 def get_user_end_date(user):
-    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser:
+    if user.is_anonymous or user.role == "ADMIN" or user.is_superuser or user.groups.filter(name="58_admin").exists():
         return None
     return user.end_date
 
