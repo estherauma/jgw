@@ -1416,6 +1416,10 @@
   
       var submitButton = form.querySelector("button[type='submit']");
       if (submitButton) submitButton.disabled = true;
+
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
   
       try {
         if (window.postFormJson) {
@@ -1423,6 +1427,9 @@
         }
         window.location.reload();
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }

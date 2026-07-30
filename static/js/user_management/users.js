@@ -615,12 +615,19 @@
       var submitButton = form.querySelector("button[type='submit']");
       if (submitButton) submitButton.disabled = true;
 
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
+
       try {
         if (window.postFormJson) {
           await window.postFormJson(form);
         }
         window.location.reload();
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
@@ -973,6 +980,7 @@
         headers: {
           'Content-Type': 'application/json',
           },
+        showFullScreenLoader: true,
         onSuccess: function () {
           window.location.reload();
         },
@@ -1054,6 +1062,7 @@
         },
         confirmButtonText: 'Delete',
         confirmButtonClass: 'um-btn um-btn-danger',
+        showFullScreenLoader: true,
         onSuccess: function () {
           window.location.href = document.referrer || '/user-management/';
         },
@@ -1205,10 +1214,6 @@
       return;
     }
 
-    if (!modal || !form) {
-      return;
-    }
-
     $('[data-target="#assign-users-workgroup-modal"]').on('click', function () {
       if (window.clearFormErrors) {
         window.clearFormErrors(form, errorBox);
@@ -1241,12 +1246,19 @@
       if (submitButton) {
         submitButton.disabled = true;
       }
+
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
       try {
         if (window.postFormJson) {
           await window.postFormJson(form);
         }
         window.location.reload();
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: form, errorBox: errorBox, data: data });
         }
@@ -1286,6 +1298,7 @@
         },
         confirmButtonText: isDeactivateAction ? 'Deactivate' : 'Activate',
         confirmButtonClass: isDeactivateAction ? 'um-btn um-btn-danger' : 'um-btn um-btn-lime',
+        showFullScreenLoader: true,
         onSuccess: function () {
           window.location.reload();
         },

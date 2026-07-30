@@ -54,12 +54,19 @@
       var submitButton = editForm.querySelector("button[type='submit']");
       if (submitButton) submitButton.disabled = true;
 
+      if (window.toggleFullScreenLoader) {
+        window.toggleFullScreenLoader(true);
+      }
+
       try {
         if (window.postFormJson) {
           await window.postFormJson(editForm);
         }
         window.location.reload();
       } catch (data) {
+        if (window.toggleFullScreenLoader) {
+          window.toggleFullScreenLoader(false);
+        }
         if (window.handleErrors) {
           window.handleErrors({ form: editForm, errorBox: editErrorBox, data: data });
         }
