@@ -13,8 +13,12 @@ from .models import (
 
 @admin.register(WorkGroup)
 class WorkGroupAdmin(admin.ModelAdmin):
-    list_display = ("name", "organisation")
+    list_display = ("name", "organisation", "is_deleted")
+    list_filter = ("is_deleted",)
     list_select_related = ("organisation",)
+
+    def get_queryset(self, request):
+        return WorkGroup.all_objects.all()
 
 
 @admin.register(OrganisationRole)
