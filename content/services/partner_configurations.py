@@ -790,7 +790,7 @@ def sync_organisation_user_groups(organisation, user_groups):
 
         synced_access_codes = []
         for access_code_value in access_codes:
-            access_code, _ = OrganisationAccessCode.objects.update_or_create(
+            access_code, _ = OrganisationAccessCode.all_objects.update_or_create(
                 code=access_code_value,
                 defaults={"organisation": organisation},
             )
@@ -826,7 +826,7 @@ def sync_organisation_partner_configuration_item(*, org_code, defaults, item):
         code.strip() for code in access_codes_raw.split(",") if code and code.strip()
     ]
     for code in access_codes:
-        OrganisationAccessCode.objects.update_or_create(
+        OrganisationAccessCode.all_objects.update_or_create(
             code=code,
             defaults={"organisation": organisation},
         )

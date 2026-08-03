@@ -180,7 +180,12 @@ class AgeAdmin(admin.ModelAdmin):
 @admin.register(OrganisationAccessCode)
 class OrganisationAccessCodeAdmin(admin.ModelAdmin):
     search_fields = ["code"]
-    list_display = ["code", "organisation", "created_at", "updated_at"]
+    list_display = ["code", "organisation", "is_deleted", "created_at", "updated_at"]
+    list_filter = ["is_deleted"]
+    list_select_related = ["organisation"]
+
+    def get_queryset(self, request):
+        return OrganisationAccessCode.all_objects.all()
 
 
 @admin.register(ImmigrationStatus)
